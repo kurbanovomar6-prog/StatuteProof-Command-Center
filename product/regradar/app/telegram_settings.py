@@ -1,19 +1,20 @@
 """
 RegRadar Telegram settings store (MVP).
 
-Stores configuration in telegram_settings.json (gitignored).
-Falls back to .env values so the CLI keeps working with the
-existing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID variables.
+Stores non-secret configuration in telegram_settings.json (enabled flag, chat_id).
+The bot token is NEVER written to the JSON file — it must be set via the
+TELEGRAM_BOT_TOKEN environment variable only.
 
 Security contract
 -----------------
-- get_token() is for **internal server-side use only**.
+- get_token() reads exclusively from TELEGRAM_BOT_TOKEN env var.
 - load() returns a public-safe dict that never contains the token.
-- The token is never written to logs by this module.
+- The token is never written to logs or disk by this module.
 """
 
 import json
 import logging
+import os
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -35,13 +36,11 @@ def _env_defaults() -> dict:
     """Read .env fallbacks without importing config at module level."""
     from app.config import (
         ENABLE_TELEGRAM_ALERTS,
-        TELEGRAM_BOT_TOKEN,
         TELEGRAM_CHAT_ID,
     )
     return {
-        "enabled":   ENABLE_TELEGRAM_ALERTS,
-        "chat_id":   TELEGRAM_CHAT_ID,
-        "bot_token": TELEGRAM_BOT_TOKEN,
+        "enabled": ENABLE_TELEGRAM_ALERTS,
+        "chat_id": TELEGRAM_CHAT_ID,
     }
 
 
@@ -60,9 +59,8 @@ def load() -> dict:
     raw = _load_raw()
     env = _env_defaults()
 
-    bot_token = (raw.get("bot_token") or "").strip() or env["bot_token"]
-    chat_id   = (raw.get("chat_id")   or "").strip() or env["chat_id"]
-    # enabled: prefer JSON file value if it exists; fall back to .env
+    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id   = (raw.get("chat_id") or "").strip() or env["chat_id"]
     if "enabled" in raw:
         enabled = bool(raw["enabled"])
     else:
@@ -81,28 +79,24 @@ def load() -> dict:
 def get_token() -> str:
     """
     Return the bot token for **server-side use only**.
+    Reads exclusively from TELEGRAM_BOT_TOKEN environment variable.
     Never pass this value to an API response.
     """
-    raw = _load_raw()
-    token = (raw.get("bot_token") or "").strip()
-    if not token:
-        from app.config import TELEGRAM_BOT_TOKEN
-        token = TELEGRAM_BOT_TOKEN
-    return token
+    return os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 
 
-def save(*, enabled: bool, chat_id: str, bot_token: str | None) -> None:
+def save(*, enabled: bool, chat_id: str, bot_token: str | None = None) -> None:
     """
-    Persist settings to telegram_settings.json.
+    Persist non-secret settings to telegram_settings.json (enabled flag and chat_id only).
 
-    If bot_token is None or empty the existing stored token is kept,
-    allowing the frontend to save enabled/chat_id without re-submitting
-    the token every time.
+    The bot_token parameter is accepted for API compatibility but is intentionally
+    ignored — the token must be set via TELEGRAM_BOT_TOKEN environment variable only
+    and is never written to disk.
     """
     raw = _load_raw()
-    raw["enabled"]  = bool(enabled)
-    raw["chat_id"]  = str(chat_id).strip()
-    if bot_token and str(bot_token).strip():
-        raw["bot_token"] = str(bot_token).strip()
+    raw["enabled"] = bool(enabled)
+    raw["chat_id"] = str(chat_id).strip()
+    # Explicitly remove any previously stored token from disk (migration safety).
+    raw.pop("bot_token", None)
     _SETTINGS_FILE.write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")
-    logger.info("Telegram settings saved (bot_token_changed=%s)", bool(bot_token))
+    logger.info("Telegram settings saved (enabled=%s, chat_id_set=%s)", enabled, bool(chat_id))

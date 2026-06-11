@@ -21,7 +21,7 @@ from app.db import _connect, ensure_auth_tables
 SESSION_COOKIE_NAME = "statuteproof_session"
 SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60
 _PBKDF2_ALGORITHM = "pbkdf2_sha256"
-_PBKDF2_ITERATIONS = 300_000
+_PBKDF2_ITERATIONS = 600_000
 _SALT_BYTES = 16
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 

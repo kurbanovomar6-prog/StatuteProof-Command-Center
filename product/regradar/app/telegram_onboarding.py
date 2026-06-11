@@ -25,6 +25,7 @@ Security contract
 from __future__ import annotations
 
 import logging
+import os
 import time
 
 import requests
@@ -32,6 +33,10 @@ import requests
 from app.telegram_pairing import consume_pairing_code, ensure_telegram_pairing_tables
 
 logger = logging.getLogger(__name__)
+
+_ADMIN_CHAT_IDS: frozenset[str] = frozenset(
+    filter(None, os.environ.get("TELEGRAM_ADMIN_CHAT_IDS", "").split(","))
+)
 
 _TIMEOUT_S = 10
 _POLL_TIMEOUT_S = 30   # long-poll window for getUpdates
@@ -158,6 +163,9 @@ def handle_update(update: dict, bot_token: str) -> None:
     elif cmd == "/start":
         reply = _build_start(chat_id)
     elif cmd == "/id":
+        if _ADMIN_CHAT_IDS and str(chat_id) not in _ADMIN_CHAT_IDS:
+            send_reply(chat_id, "Unauthorized.", bot_token)
+            return
         reply = _build_id(chat_id)
     elif cmd == "/connect":
         reply = _build_connect(chat_id)

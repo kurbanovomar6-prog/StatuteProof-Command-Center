@@ -13,8 +13,10 @@ Start with:
   python run.py api --port 8080
 """
 
+import hashlib
 import json
 import logging
+import os
 import re
 import threading
 import time
@@ -67,17 +69,18 @@ logger = logging.getLogger(__name__)
 _TELEGRAM_TIMEOUT_S = 10
 _CONTACT_QUEUE = BASE_DIR / "data" / "contact_requests.jsonl"
 
-# Vite dev server origin — allowed during development.
-# In production, serve the built frontend from the same origin as the API,
-# so CORS headers are not needed at all.
-_ALLOWED_ORIGIN = "http://localhost:5173"
+# CORS_ALLOWED_ORIGIN env var controls which origin is permitted.
+# Leave unset in production (same-origin deployment) — no CORS headers will be sent.
+# Set to http://localhost:5173 for local development against the Vite dev server.
+_ALLOWED_ORIGIN = os.environ.get("CORS_ALLOWED_ORIGIN", "")
 
-_CORS = {
-    "Access-Control-Allow-Origin":  _ALLOWED_ORIGIN,
+_CORS: dict[str, str] = {
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Credentials": "true",
 }
+if _ALLOWED_ORIGIN:
+    _CORS["Access-Control-Allow-Origin"] = _ALLOWED_ORIGIN
 
 
 class _RateLimiter:
@@ -164,7 +167,7 @@ class _Handler(BaseHTTPRequestHandler):
         cookie[SESSION_COOKIE_NAME]["samesite"] = "Strict"
         cookie[SESSION_COOKIE_NAME]["path"] = "/"
         cookie[SESSION_COOKIE_NAME]["max-age"] = str(SESSION_MAX_AGE_SECONDS)
-        # TODO: Add Secure flag in production if same-origin HTTPS is guaranteed.
+        cookie[SESSION_COOKIE_NAME]["secure"] = True
         return cookie.output(header="").strip()
 
     def _clear_session_cookie_header(self) -> str:
@@ -177,6 +180,9 @@ class _Handler(BaseHTTPRequestHandler):
         return cookie.output(header="").strip()
 
     def _client_ip(self) -> str:
+        xff = self.headers.get("X-Forwarded-For", "")
+        if xff:
+            return str(xff.split(",")[0].strip() or "unknown")
         try:
             return str(self.client_address[0] or "unknown")
         except Exception:
@@ -332,7 +338,7 @@ class _Handler(BaseHTTPRequestHandler):
                 [("Set-Cookie", self._session_cookie_header(session_id))],
             )
         except Exception:
-            logger.error("Auth login failed for email=%s", email)
+            logger.error("Auth login failed for email_hash=%s", hashlib.sha256(email.encode()).hexdigest()[:12])
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_auth_logout(self) -> None:
@@ -823,6 +829,10 @@ class _Handler(BaseHTTPRequestHandler):
         Uses existing test_source_url logic (SSRF-safe, no AI, no Telegram).
         Returns a standardised result for the frontend testing UI.
         """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
         if self._rate_limited(_SOURCE_TEST_LIMITER, "source_test"):
             return
 

@@ -74,9 +74,12 @@ def _path_from_rel(path: str | None) -> Path | None:
     if not path:
         return None
     candidate = Path(path)
-    if candidate.is_absolute():
-        return candidate
-    return _BASE_DIR / candidate
+    resolved = candidate if candidate.is_absolute() else _BASE_DIR / candidate
+    try:
+        resolved.relative_to(_BASE_DIR)
+    except ValueError:
+        return None
+    return resolved
 
 
 def _snapshot_paths(timestamp_utc: str, market: str, source_id: str, run_id: str) -> Path:

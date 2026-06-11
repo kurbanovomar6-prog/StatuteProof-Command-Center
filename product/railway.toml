@@ -1,3 +1,7 @@
+# IMPORTANT: Mount a persistent volume at /app/data before deploying to production.
+# Without a volume, SQLite database and user sessions are wiped on every redeploy.
+# In Railway dashboard: New Volume → Mount Path: /app/data
+
 # =============================================================================
 # railway.toml — конфигурация деплоя RegRadar на Railway
 # =============================================================================

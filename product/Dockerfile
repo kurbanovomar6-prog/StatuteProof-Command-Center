@@ -24,7 +24,7 @@
 
 
 # ── Stage 1: dependency compiler ─────────────────────────────────────────────
-FROM python:3.12-slim-bookworm AS builder
+FROM python:3.12.10-slim-bookworm AS builder
 
 LABEL stage="builder"
 
@@ -53,7 +53,7 @@ RUN pip install --upgrade pip wheel setuptools --quiet && \
 
 
 # ── Stage 2: production runtime ───────────────────────────────────────────────
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.12.10-slim-bookworm AS runtime
 
 LABEL org.opencontainers.image.title="RegRadar Enterprise" \
       org.opencontainers.image.description="Autonomous Regulatory Intelligence Platform" \
