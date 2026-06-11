@@ -1640,7 +1640,7 @@ def _cmd_ai_health() -> None:
             max_tokens = 16,
             messages   = [{"role": "user", "content": "Reply with the word: ok"}],
         )
-        reply = msg.content[0].text.strip().lower()
+        reply = getattr(msg.content[0], "text", str(msg.content[0])).strip().lower()
         if "ok" in reply:
             print(f"  {_GREEN}✓  API connectivity OK — model responded correctly.{_R}")
         else:
@@ -2364,6 +2364,26 @@ def main() -> None:
             print("source_runs.jsonl updated with new artifact paths.")
         sys.exit(0)
 
+    elif cmd == "alert-queue":
+        # List pending alerts awaiting human review
+        from app.source_runs import list_alert_queue
+        status_filter = args[1] if len(args) > 1 else "PENDING_REVIEW"
+        alerts = list_alert_queue(status=status_filter if status_filter != "all" else None)
+        if not alerts:
+            print(f"No alerts found (status={status_filter})")
+        else:
+            print(f"Alert queue ({len(alerts)} items, status={status_filter}):")
+            for a in alerts:
+                print(f"  {a['_filename']}: {a.get('source_id')} @ {a.get('run_at')} [{a.get('status')}]")
+
+    elif cmd == "weekly-status":
+        # Build a weekly summary of all monitoring activity
+        from app.source_runs import build_weekly_status_summary
+        days = int(args[1]) if len(args) > 1 else 7
+        summary = build_weekly_status_summary(days=days)
+        import json as _json
+        print(_json.dumps(summary, indent=2))
+
     elif cmd == "source-diff":
         market = "AE"
         source = None
@@ -2667,7 +2687,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | backfill-artifacts",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
             file=sys.stderr,
         )
         sys.exit(2)

@@ -41,7 +41,7 @@ Note: Standard tier requires additional sources to complete baseline runs. Sourc
 
 For compliance programs with broader UAE source coverage requirements.
 
-- Full UAE monitoring scope (subject to confirmed source readiness at time of agreement)
+- Expanded UAE official-source monitoring scope (subject to confirmed source readiness at time of agreement)
 - Priority human review turnaround
 - Defined SLA and dedicated support
 

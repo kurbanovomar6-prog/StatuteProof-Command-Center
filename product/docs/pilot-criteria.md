@@ -4,7 +4,7 @@ _Last updated: 2026-06-12_
 
 ## What is monitored
 
-The following 9 sources have completed baseline runs and are active in the monitoring pipeline. These are the only sources covered in the pilot.
+The following 13 sources have completed baseline runs and are active in the monitoring pipeline. These are the only sources covered in the pilot.
 
 | Regulator | Jurisdiction | Source |
 |---|---|---|
@@ -17,20 +17,20 @@ The following 9 sources have completed baseline runs and are active in the monit
 | UAE Ministry of Economy | UAE Federal | Ministry of Economy official site |
 | UAE Legislation Portal | UAE Federal | UAE Legislation Portal homepage |
 | UAE Financial Intelligence Unit (UAEFIU) | UAE Federal | UAEFIU homepage |
+| VARA | Dubai | VARA enforcement notices |
+| CBUAE | UAE Federal | CBUAE regulations sub-page |
+| DFSA | DIFC | DFSA notices and public registers |
+| UAE FIU | UAE Federal | UAEFIU circulars and publications |
 
-Champion demo source: CBUAE homepage (AE-cbuae-homepage). A CHANGED event was detected on 2026-05-30 with a stored SHA-256 snapshot record.
+Champion demo source: CBUAE homepage (AE-central-bank-of-the-uae). A CHANGED event was detected on 2026-05-30 with a stored SHA-256 snapshot record.
 
 ## What is NOT covered in this pilot
 
-The following 7 sources are registered in the system but have not completed a baseline run. They are NOT monitored in the pilot. No change detection can run on a source without a baseline.
+The following 3 sources are registered in the system but could not complete a baseline run. They are NOT monitored in the pilot. No change detection can run on a source without a baseline.
 
-- VARA enforcement notices
-- CBUAE regulations detail page
-- DFSA notices
-- ADGM FSRA rules
-- DIFC legislation
-- UAEFIU circulars
-- SCA decisions (Securities and Commodities Authority — also low priority for VASP compliance)
+- ADGM FSRA rules (network access limitation as of 2026-06-12)
+- DIFC legislation portal (JavaScript SPA — requires adapter)
+- SCA decisions (JavaScript SPA — requires adapter; also low priority for VASP compliance)
 
 Additional known limitations:
 
@@ -45,7 +45,7 @@ StatuteProof fetches each monitored source URL on the configured schedule and no
 
 ## Delivery format
 
-- Weekly monitoring digest per pilot customer, covering the 9 READY sources
+- Weekly monitoring digest per pilot customer, covering the 13 READY sources
 - Delivered by email
 - Each digest includes: regulator name, source URL, last checked timestamp (UTC), event type (CHANGED or NO CHANGE), and the SHA-256 snapshot hash for that run
 - A SAMPLE / FAKE brief template is available on request for preview before the pilot starts
@@ -59,7 +59,7 @@ All briefs require human sign-off before delivery to the pilot customer. Statute
 
 - **Entry — $199/month:** 1 regulator, weekly monitoring digest, email delivery. Covers one selected regulator from the READY source list.
 - **Standard — $599/month:** Up to 5 regulators, daily monitoring, email and Telegram delivery. Standard tier requires additional sources to have completed baseline runs. Not available until confirmed.
-- **Enterprise — Custom pricing:** Full UAE source coverage (subject to source readiness), priority support, defined SLA. Contact for scope and pricing.
+- **Enterprise — Custom pricing:** Expanded UAE official-source monitoring scope (subject to confirmed source readiness and availability), priority support, defined SLA. Contact for scope and pricing.
 
 Pilot offer: 1 free week at Entry tier for qualified UAE VASP compliance teams. No card required during the pilot week.
 

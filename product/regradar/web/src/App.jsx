@@ -24,7 +24,7 @@ import AppShell from './components/app/AppShell'
 
 const SAMPLE_RECORD = {
   _label: 'SAMPLE / FAKE',
-  source_id: 'AE-cbuae-homepage',
+  source_id: 'AE-central-bank-of-the-uae',
   regulator: 'CBUAE',
   jurisdiction: 'UAE',
   run_at: '2026-05-30T11:56:00Z',

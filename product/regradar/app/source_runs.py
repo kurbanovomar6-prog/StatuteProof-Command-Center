@@ -261,6 +261,8 @@ def append_run(record: dict) -> dict:
             fcntl.flock(fh, fcntl.LOCK_UN)
     global _CACHE_VALID
     _CACHE_VALID = False
+    if record.get("change_status") == "CHANGED":
+        queue_changed_alert(record)  # type: ignore[reportUndefinedVariable]
     return record
 
 
@@ -495,6 +497,115 @@ def _quality_from_chars(chars: int) -> str:
     if chars > 0:
         return "THIN"
     return "FAILED"
+
+
+def queue_changed_alert(record: dict) -> Path:
+    """Write a CHANGED run record to the alert queue for human review.
+
+    Returns the path to the queued alert file.
+    """
+    queue_dir = _BASE_DIR / "data" / "alert_queue"
+    queue_dir.mkdir(parents=True, exist_ok=True)
+
+    source_id = str(record.get("source_id") or "unknown")
+    run_id = str(record.get("run_id") or "unknown")
+    import uuid as _uuid
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    filename = f"{ts}-{source_id}-{run_id[:8]}-{_uuid.uuid4().hex[:4]}.json"
+
+    alert = {
+        "queued_at": now_utc(),
+        "status": "PENDING_REVIEW",
+        "source_id": source_id,
+        "run_id": run_id,
+        "change_status": record.get("change_status"),
+        "run_at": record.get("run_at") or record.get("timestamp_utc"),
+        "normalized_hash": record.get("normalized_hash"),
+        "diff_json_path": record.get("diff_json_path"),
+        "proof_block_path": record.get("proof_block_path"),
+        "human_reviewed": False,
+        "reviewer": None,
+        "reviewed_at": None,
+        "delivery_approved": False,
+        "notes": "",
+    }
+
+    out = queue_dir / filename
+    out.write_text(json.dumps(alert, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    return out
+
+
+def list_alert_queue(status: str | None = None) -> list[dict]:
+    """Return all alerts in the queue, optionally filtered by status."""
+    queue_dir = _BASE_DIR / "data" / "alert_queue"
+    if not queue_dir.exists():
+        return []
+    alerts = []
+    for f in sorted(queue_dir.glob("*.json")):
+        try:
+            alert = json.loads(f.read_text(encoding="utf-8"))
+            alert["_filename"] = f.name
+            if status is None or alert.get("status") == status:
+                alerts.append(alert)
+        except (json.JSONDecodeError, OSError):
+            continue
+    return alerts
+
+
+def build_weekly_status_summary(days: int = 7) -> dict:
+    """Build a summary of all source runs in the last N days.
+
+    Returns a dict with:
+    - total_sources: int
+    - changed_count: int
+    - no_change_count: int
+    - failed_count: int
+    - first_seen_count: int
+    - sources_with_changes: list[str]
+    - sources_with_failures: list[str]
+    - zero_change_sources: list[str]
+    - period_days: int
+    - generated_at: str
+    """
+    from datetime import timedelta
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    rows = _read_runs()
+
+    in_period = [r for r in rows if str(r.get("run_at") or r.get("timestamp_utc") or "") >= cutoff]
+
+    seen_sources: set[str] = set()
+    changed: list[str] = []
+    failed: list[str] = []
+    first_seen: list[str] = []
+    no_change: list[str] = []
+
+    for r in in_period:
+        sid = str(r.get("source_id") or "")
+        seen_sources.add(sid)
+        status = r.get("change_status")
+        if status == "CHANGED" and sid not in changed:
+            changed.append(sid)
+        elif status == "FAILED" and sid not in failed:
+            failed.append(sid)
+        elif status == "FIRST_SEEN" and sid not in first_seen:
+            first_seen.append(sid)
+        elif status == "NO_CHANGE" and sid not in no_change:
+            no_change.append(sid)
+
+    zero_change = [s for s in seen_sources if s not in changed and s not in failed]
+
+    return {
+        "period_days": days,
+        "generated_at": now_utc(),
+        "total_sources_active": len(seen_sources),
+        "changed_count": len(changed),
+        "no_change_count": len(no_change),
+        "first_seen_count": len(first_seen),
+        "failed_count": len(failed),
+        "sources_with_changes": sorted(changed),
+        "sources_with_failures": sorted(failed),
+        "zero_change_sources": sorted(zero_change),
+    }
 
 
 def backfill_run_artifacts(*, dry_run: bool = False) -> list[dict]:
