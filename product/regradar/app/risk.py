@@ -20,6 +20,10 @@ Scoring rules (evaluated in order — first match wins):
 
 from __future__ import annotations
 
+import re
+
+_ARABIC_RE = re.compile(r"[؀-ۿ]")
+
 _HIGH_KEYWORDS: tuple[str, ...] = (
     "ban",
     "restriction",
@@ -88,10 +92,21 @@ def analyze_risk(diff_result: dict) -> dict:
     if not diff_result.get("has_changes"):
         return {"risk_level": "LOW", "reason": "No changes detected"}
 
-    all_text = " ".join(
+    combined_text = " ".join(
         diff_result.get("added",   []) +
         diff_result.get("removed", [])
-    ).lower()
+    )
+
+    if _ARABIC_RE.search(combined_text):
+        return {
+            "risk_level": "MEDIUM",
+            "reason": (
+                "Arabic regulatory content detected. Rule-based keyword matching "
+                "is English-only — manual review required to assess risk."
+            ),
+        }
+
+    all_text = combined_text.lower()
 
     matched_high    = [kw for kw in _HIGH_KEYWORDS      if kw in all_text]
     matched_context = [cw for cw in _HIGH_CONTEXT_WORDS if cw in all_text]

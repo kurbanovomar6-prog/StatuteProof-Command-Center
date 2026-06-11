@@ -385,6 +385,10 @@ def generate_ai_brief(
             system     = _SYSTEM,
             messages   = [{"role": "user", "content": user_prompt}],
         )
+        if message.stop_reason == "max_tokens":
+            logger.warning("ai_brief: response truncated (max_tokens) — falling back")
+            return _fallback_brief(truncated, metadata, "AI response truncated at max_tokens")
+
         raw    = message.content[0].text
         parsed = _parse_ai_response(raw)
 

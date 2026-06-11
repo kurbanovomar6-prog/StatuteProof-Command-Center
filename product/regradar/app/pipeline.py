@@ -79,13 +79,9 @@ from app.diff import get_diff
 from app.extractors import extract_best_text
 from app.risk import analyze_risk
 from app.scraper import fetch_page
-from app.source_runs import stable_content_hash
+from app.text_normalization import stable_content_hash
 
 logger = logging.getLogger(__name__)
-
-# Initialise DB schema once per process on module import rather than once per
-# run_pipeline() call, which caused 50+ redundant schema checks in batch runs.
-init_db()
 
 _ALERT_THRESHOLD = {"MEDIUM", "HIGH"}
 _RISK_ORDER: dict[str, int] = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
@@ -93,6 +89,22 @@ _RISK_ORDER: dict[str, int] = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
 # Per-run AI call budget.  Initialised at module load; reset by
 # reset_ai_call_counter() before each batch (monitor_all_sources / watch loop).
 _AI_RUN_BUDGET: dict = {"count": 0, "limit": AI_MAX_CALLS_PER_RUN}
+
+_DB_READY: bool = False
+
+
+def init_pipeline(ai_limit: int | None = None) -> None:
+    """
+    Initialise DB schema and reset AI budget for a new batch run.
+
+    Call once before monitor_all_sources() or any batch of run_pipeline()
+    calls.  Safe to call multiple times — init_db() is idempotent.
+    """
+    global _DB_READY
+    if not _DB_READY:
+        init_db()
+        _DB_READY = True
+    reset_ai_call_counter(ai_limit)
 
 
 def reset_ai_call_counter(limit: int | None = None) -> None:

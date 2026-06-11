@@ -107,7 +107,7 @@ def _is_volatile_line(line: str) -> bool:
     return False
 
 
-def _is_boilerplate_line(line: str, seen_count: int) -> bool:
+def _is_boilerplate_line(line: str, _seen_count: int) -> bool:
     lower = line.lower().strip(" .:-|")
     if line.startswith("حساب حكومة الإمارات"):
         return True
@@ -118,8 +118,6 @@ def _is_boilerplate_line(line: str, seen_count: int) -> bool:
     if len(lower) <= 3 and not lower.isdigit():
         return True
     if len(lower) <= 24 and any(phrase in lower for phrase in _BOILERPLATE_PHRASES):
-        return True
-    if seen_count > 0 and len(lower) <= 40 and not _DATE_WORD_RE.search(lower):
         return True
     return False
 
@@ -182,6 +180,25 @@ def _merge_wrapped_lines(lines: list[str]) -> list[str]:
         else:
             merged.append(line)
     return merged
+
+
+def stable_content_hash(text: str) -> str | None:
+    """
+    Return SHA-256 of whitespace-normalised text for change detection.
+
+    Uses minimal normalisation (collapse whitespace only) so the hash is
+    stable across minor formatting changes while remaining sensitive to any
+    actual text change.  Returns None for empty/blank input.
+
+    This is the canonical hash used by both pipeline.py (comparison) and
+    db.save_document() (storage) — they must always call the same function.
+    """
+    if not text:
+        return None
+    normalized = re.sub(r"\s+", " ", text).strip()
+    if not normalized:
+        return None
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
 def stable_normalized_hash(text: str) -> str:

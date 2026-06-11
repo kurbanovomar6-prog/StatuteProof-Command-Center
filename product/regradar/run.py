@@ -27,7 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from app.pipeline import run_pipeline
+from app.pipeline import init_pipeline, run_pipeline
 
 # ── logging (quiet by default; set LOG_LEVEL=DEBUG to see internals) ──────────
 
@@ -434,6 +434,7 @@ def _run_single_url(url: str) -> None:
         sys.exit(2)
 
     _print_header(url)
+    init_pipeline()
 
     try:
         result = run_pipeline(url)

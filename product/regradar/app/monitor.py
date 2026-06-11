@@ -26,7 +26,7 @@ Each item in the returned list is either:
 import logging
 
 from app.config import AI_MAX_CALLS_PER_RUN
-from app.pipeline import reset_ai_call_counter, run_pipeline_for_source
+from app.pipeline import init_pipeline, run_pipeline_for_source
 from app.sources import get_enabled_sources
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def monitor_all_sources(
     """
     sources = get_enabled_sources()
     total   = len(sources)
-    reset_ai_call_counter(AI_MAX_CALLS_PER_RUN)
+    init_pipeline(AI_MAX_CALLS_PER_RUN)
 
     if total == 0:
         logger.warning("No enabled sources found in sources.json")

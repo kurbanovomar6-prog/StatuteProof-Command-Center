@@ -31,13 +31,15 @@ Block / low-content detection heuristics:
   - Visible extracted text shorter than MIN_EXTRACTED_TEXT_CHARS (500)
 """
 
+import atexit
 import logging
 import re
 import sys
+import threading
 
 import requests
 from bs4 import BeautifulSoup
-from playwright.sync_api import TimeoutError as PWTimeout, sync_playwright
+from playwright.sync_api import Browser as PWBrowser, TimeoutError as PWTimeout, sync_playwright
 
 from app.config import HTTP_TIMEOUT_S, PAGE_TIMEOUT_MS, REQUESTS_UA
 
@@ -82,6 +84,48 @@ _CONTENT_TAGS = [
 ]
 
 _WS_RE = re.compile(r"[\s\xa0]+")
+
+# ── Playwright browser pool ───────────────────────────────────────────────────
+# One shared browser instance per process; each call gets its own context/page.
+# Threading lock guards initialisation only — contexts are isolated per call.
+
+_PW_INSTANCE: object | None = None   # SyncPlaywright — keeps the subprocess alive
+_PW_BROWSER: PWBrowser | None = None
+_PW_BROWSER_LOCK = threading.Lock()
+
+
+def _teardown_playwright() -> None:
+    global _PW_INSTANCE, _PW_BROWSER
+    if _PW_BROWSER is not None:
+        try:
+            _PW_BROWSER.close()
+        except Exception:
+            pass
+        _PW_BROWSER = None
+    if _PW_INSTANCE is not None:
+        try:
+            _PW_INSTANCE.stop()   # type: ignore[attr-defined]
+        except Exception:
+            pass
+        _PW_INSTANCE = None
+
+
+def _get_shared_browser() -> PWBrowser:
+    global _PW_INSTANCE, _PW_BROWSER
+    with _PW_BROWSER_LOCK:
+        if _PW_BROWSER is None or not _PW_BROWSER.is_connected():
+            _teardown_playwright()
+            _PW_INSTANCE = sync_playwright().start()
+            _PW_BROWSER = _PW_INSTANCE.chromium.launch(   # type: ignore[attr-defined]
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-blink-features=AutomationControlled",
+                ],
+            )
+            atexit.register(_teardown_playwright)
+    return _PW_BROWSER
 
 
 # ── content quality check ─────────────────────────────────────────────────────
@@ -201,59 +245,51 @@ def _fetch_via_playwright(url: str) -> str:
     print(f"  Playwright fallback triggered — {url}", file=sys.stderr, flush=True)
     logger.info("Tier 2 (Playwright) starting for %s", url)
 
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled",
-            ],
-        )
-        context = browser.new_context(
-            user_agent=REQUESTS_UA,
-            locale="ru-RU",
-            viewport={"width": 1280, "height": 900},
-        )
-        page = context.new_page()
+    browser = _get_shared_browser()
+    context = browser.new_context(
+        user_agent=REQUESTS_UA,
+        locale="ru-RU",
+        viewport={"width": 1280, "height": 900},
+    )
+    page = context.new_page()
 
+    try:
+        networkidle_ok = False
         try:
-            networkidle_ok = False
-            try:
-                page.goto(url, timeout=PAGE_TIMEOUT_MS, wait_until="networkidle")
-                networkidle_ok = True
-                logger.debug("Playwright: networkidle achieved for %s", url)
-            except PWTimeout:
-                # Network never went fully idle (analytics, long-poll, etc.).
-                # The DOM and XHR data-fetching are typically done by now.
-                # Wait a bit more before capturing — do NOT navigate again.
-                logger.info(
-                    "Playwright: networkidle timed out — "
-                    "waiting %d ms more for JS rendering at %s",
-                    _PW_IDLE_EXTRA_MS, url,
-                )
-                print(
-                    f"  Playwright: networkidle timeout — "
-                    f"waiting {_PW_IDLE_EXTRA_MS // 1000} s more for JS rendering",
-                    file=sys.stderr, flush=True,
-                )
-                page.wait_for_timeout(_PW_IDLE_EXTRA_MS)
+            page.goto(url, timeout=PAGE_TIMEOUT_MS, wait_until="networkidle")
+            networkidle_ok = True
+            logger.debug("Playwright: networkidle achieved for %s", url)
+        except PWTimeout:
+            # Network never went fully idle (analytics, long-poll, etc.).
+            # The DOM and XHR data-fetching are typically done by now.
+            # Wait a bit more before capturing — do NOT navigate again.
+            logger.info(
+                "Playwright: networkidle timed out — "
+                "waiting %d ms more for JS rendering at %s",
+                _PW_IDLE_EXTRA_MS, url,
+            )
+            print(
+                f"  Playwright: networkidle timeout — "
+                f"waiting {_PW_IDLE_EXTRA_MS // 1000} s more for JS rendering",
+                file=sys.stderr, flush=True,
+            )
+            page.wait_for_timeout(_PW_IDLE_EXTRA_MS)
 
-            if networkidle_ok:
-                # Give any post-idle JS rendering a moment to finish
-                page.wait_for_timeout(_PW_JS_SETTLE_MS)
+        if networkidle_ok:
+            # Give any post-idle JS rendering a moment to finish
+            page.wait_for_timeout(_PW_JS_SETTLE_MS)
 
-            html = page.content()
+        html = page.content()
 
-        except PWTimeout as exc:
-            raise TimeoutError(
-                f"Playwright: navigation failed within "
-                f"{PAGE_TIMEOUT_MS // 1000} s — {url}"
-            ) from exc
+    except PWTimeout as exc:
+        raise TimeoutError(
+            f"Playwright: navigation failed within "
+            f"{PAGE_TIMEOUT_MS // 1000} s — {url}"
+        ) from exc
 
-        finally:
-            context.close()
-            browser.close()
+    finally:
+        context.close()
+        # context closed; browser reused — do not call browser.close() here
 
     if not html or len(html) < 200:
         raise ValueError(f"Playwright returned empty HTML for {url}")

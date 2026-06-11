@@ -27,6 +27,7 @@ import sqlite3
 from datetime import datetime
 
 from app.config import DB_PATH
+from app.text_normalization import stable_content_hash
 
 logger = logging.getLogger(__name__)
 
@@ -242,7 +243,10 @@ def save_document(
     Every call creates a new row — full audit trail preserved.
     SHA-256 is computed internally.
     """
-    content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    content_hash = (
+        stable_content_hash(content)
+        or hashlib.sha256(content.encode("utf-8")).hexdigest()
+    )
     now          = datetime.utcnow().isoformat()
     conn         = _connect()
     try:

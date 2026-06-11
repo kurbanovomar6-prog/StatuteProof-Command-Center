@@ -8,6 +8,7 @@ migration.
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import re
@@ -17,7 +18,7 @@ from typing import Any
 
 from app.chunk_diff import build_chunk_diff, build_incomplete_diff, render_diff_markdown, utc_now
 from app.proof import build_source_proof
-from app.text_normalization import normalize_for_change_hash, stable_normalized_hash
+from app.text_normalization import normalize_for_change_hash, stable_content_hash, stable_normalized_hash
 
 
 _BASE_DIR = Path(__file__).parent.parent
@@ -52,15 +53,6 @@ def make_source_id(source: dict) -> str:
 
 def now_utc() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-
-def stable_content_hash(text: str) -> str | None:
-    if not text:
-        return None
-    normalized = re.sub(r"\s+", " ", text).strip()
-    if not normalized:
-        return None
-    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
 def _raw_hash(text: str) -> str | None:
@@ -225,7 +217,7 @@ def classify_change(current: dict, previous: dict | None) -> str:
         return "QUALITY_DROP"
     if normalized_chars and normalized_chars < _MIN_NORMALIZED_CHARS:
         return "QUALITY_DROP"
-    if prev_norm_chars > 0 and normalized_chars and normalized_chars < prev_norm_chars * 0.4:
+    if prev_norm_chars > 0 and normalized_chars and normalized_chars < prev_norm_chars * 0.7:
         return "QUALITY_DROP"
 
     if previous.get("normalized_hash"):
@@ -260,7 +252,11 @@ def append_run(record: dict) -> dict:
             diff_artifact = _write_diff_artifacts(record, prev, snapshot_base)
         _write_proof_artifact(record, diff_artifact, snapshot_base)
     with _RUN_FILE.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
     global _CACHE_VALID
     _CACHE_VALID = False
     return record
