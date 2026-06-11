@@ -199,6 +199,67 @@ Enable the source only after PASS.
 
 ---
 
+---
+
+## Phase 3 Expansion — 2026-06-11
+
+### Additional Repos Inspected
+
+| Repo | Author | License | Purpose |
+|------|--------|---------|---------|
+| [emilkowalski/skill](https://github.com/emilkowalski/skill) | Emil Kowalski | MIT | Design-read pattern, specificity-first feedback format |
+| [impeccable](https://github.com/pbakaus/impeccable) | pbakaus | Apache 2.0 | Brand/product register, AI slop detection methodology |
+| [taste-skill](https://github.com/leonxlnx/taste-skill) | leonxlnx | MIT | Three-dial system, trust-first preset for regulated industries |
+| [ruflo](https://github.com/ruvnet/ruflo) | rUv | MIT | Sequential-challenge philosophy (inspiration only — no runtime) |
+
+Reference notes in `references/` (8 files total, all repos documented).
+
+### New Skills Added
+
+| Skill | Adapted From |
+|-------|-------------|
+| `skills/design-taste-review/SKILL.md` | emilkowalski/skill + impeccable + taste-skill |
+| `skills/landing-page-conversion-review/SKILL.md` | marketingskills CRO framework |
+| `skills/agent-council-review/SKILL.md` | Ruflo sequential-challenge concept (docs only) |
+
+### New Docs Added
+
+| File | Purpose |
+|------|---------|
+| `docs/design-quality-system.md` | Two registers, trust-first dial preset, absolute ban table |
+| `docs/anti-slop-writing-system.md` | Writing standards for all StatuteProof output |
+| `docs/agent-council-decision-system.md` | When/how to run the agent council |
+
+### New Prompts Added
+
+- `prompts/agent-council-prompt.md` — 7-stage council review trigger
+- `prompts/landing-page-conversion-prompt.md` — Landing page conversion review
+
+### New Workflows, Checklists, Examples
+
+- `workflows/07-agent-council-review.md`
+- `checklists/before-agent-council-decision.md`
+- `examples/sample-agent-council-decision.md` (SAMPLE/FAKE labeled)
+
+### Updated Files
+
+| File | What Changed |
+|------|-------------|
+| `CLAUDE.md` | Added skills table, Agent Council section, Ruflo Rule |
+| `TOOL_ROUTER.md` | Added routing for 3 new skills + agent-council in both tables |
+| `START_HERE.md` | Added step 6 (workflow 07 for high-stakes), two new "stuck on" rows |
+| `tools/validate_workspace.py` | Added 3 new skill dirs, 3 new docs, 2 new prompts, 1 new workflow, 1 new checklist; added max-10-agents check; added Ruflo-runtime-in-non-reference check |
+
+### Phase 3 Validation
+
+```
+Validation PASSED — workspace is clean.
+```
+
+23 files changed, 1580 insertions in commit `1a707b4`.
+
+---
+
 ## Workspace Is Not Complete Until:
 
 - [ ] At least 3 official UAE source URLs are verified by hand
