@@ -1,0 +1,24 @@
+{
+  "_label": "SAMPLE / FAKE — for demonstration only. Not a real regulatory change. Real hash values shown are from a real monitoring run.",
+  "source_id": "AE-cbuae-homepage",
+  "jurisdiction": "UAE",
+  "regulator": "Central Bank of UAE (CBUAE)",
+  "source_url": "https://www.centralbank.ae/",
+  "run_at": "2026-05-30T11:56:26+00:00",
+  "change_status": "CHANGED",
+  "extraction_quality": "GOOD",
+  "normalized_chars": 51148,
+  "normalized_hash": "f917743b598585232146a4b9b56799799eb6e644db02bbbf2350f320cbfa889e",
+  "previous_hash": null,
+  "diff_char_count": 13771,
+  "diff_excerpt": "[SAMPLE] Real change detected in CBUAE source. Diff excerpt shown for demonstration — content may have been a minor HTML/navigation update rather than a regulatory text change. Human review required. Observed removed content includes Arabic text referencing the CBUAE 2024 Annual Report and related Board statements. Nature of change (regulatory update vs. website content rotation) requires human review.",
+  "snapshot_path": "data/source_snapshots/2026-05-30/AE/AE-central-bank-of-the-uae/AE-20260530T115601Z-066f4527/normalized.txt",
+  "proof_chain": {
+    "snapshot_hash": "f917743b598585232146a4b9b56799799eb6e644db02bbbf2350f320cbfa889e",
+    "proof_json_path": "data/source_snapshots/2026-05-30/AE/AE-central-bank-of-the-uae/AE-20260530T115601Z-066f4527/proof.json",
+    "chain_verified": false,
+    "chain_notes": "normalized.txt SHA256 matches run record normalized_hash (hash-to-file verified). proof.json was NOT generated for this CHANGED run — proof.json artifacts exist only for later UNCHANGED runs. diff.json and diff.md artifacts absent. previous_hash field not stored in run records for this source. Chain is PARTIAL: snapshot file and hash are verifiable; formal proof block and diff artifacts are missing for this run."
+  },
+  "evidence_record_status": "PARTIAL",
+  "_caveat": "evidence_record_status set to PARTIAL because proof.json, diff.json, and diff.md are absent from the CHANGED run directory. The snapshot file exists and its SHA256 matches the run record. Full COMPLETE status requires proof.json co-located with snapshot and diff artifacts present."
+}

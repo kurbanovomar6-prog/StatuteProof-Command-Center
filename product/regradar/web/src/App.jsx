@@ -14,10 +14,29 @@ import TrustLayer from './components/TrustLayer'
 import Pricing from './components/Pricing'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import EvidenceCard from './components/EvidenceCard'
+import SourceCoverageTable from './components/SourceCoverageTable'
+import DiffViewer from './components/DiffViewer'
 import LoginPage from './components/auth/LoginPage'
 import RegisterPage from './components/auth/RegisterPage'
 import OnboardingPage from './components/app/OnboardingPage'
 import AppShell from './components/app/AppShell'
+
+const SAMPLE_RECORD = {
+  _label: 'SAMPLE / FAKE',
+  source_id: 'AE-cbuae-homepage',
+  regulator: 'CBUAE',
+  jurisdiction: 'UAE',
+  run_at: '2026-05-30T11:56:00Z',
+  change_status: 'CHANGED',
+  extraction_quality: 'GOOD',
+  normalized_chars: 43717,
+  normalized_hash: 'sha256:94d020105d4d...',
+  diff_excerpt: '[SAMPLE] Content change detected in CBUAE official source. Nature of change requires human review before any compliance action.',
+  proof_chain: { chain_verified: false },
+};
+
+const SAMPLE_DIFF = `- [previous content snapshot — 2026-05-29]\n+ [updated content snapshot — 2026-05-30]\n  [SAMPLE content — not a real regulatory change]\n  Human review required before any compliance action.`;
 
 function syncProfileToLocalStorage(profileData) {
   const industries = Array.isArray(profileData?.industries) ? profileData.industries : []
@@ -196,6 +215,28 @@ export default function App() {
         <BuyerSourcePacks onCreateWorkspace={() => setView('register')} />
         <ConfiguredMonitoring />
         <TrustLayer />
+        {/* Evidence Demo Section — SAMPLE / FAKE */}
+        <section className="py-16 px-4 bg-slate-50">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">SAMPLE / FAKE — demonstration only</p>
+              <h2 className="text-2xl font-bold text-slate-900 mb-3">Evidence-backed monitoring</h2>
+              <p className="text-slate-600 max-w-xl mx-auto text-sm">
+                Detected changes are cryptographically hashed, timestamped, and stored for human review.
+                Not legal advice. For monitoring information only.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <EvidenceCard record={SAMPLE_RECORD} />
+              <SourceCoverageTable />
+            </div>
+            <DiffViewer
+              diffText={SAMPLE_DIFF}
+              sourceId="AE-cbuae-homepage"
+              detectedAt="2026-05-30"
+            />
+          </div>
+        </section>
         <DashboardPreview />
         <Pricing onCreateWorkspace={() => setView('register')} />
         <Contact
