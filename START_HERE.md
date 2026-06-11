@@ -20,13 +20,17 @@
    Use `prompts/sample-brief-prompt.md` and `workflows/04-monitoring-to-brief.md`.
    Label it SAMPLE / FAKE. Run it through `skills/risk-brief-review/` before sharing.
 
-6. Do not improve this workspace endlessly.
+6. Before any high-stakes irreversible action, run `workflows/07-agent-council-review.md`.
+   High-stakes means: first real customer delivery, activating a new source, pricing change, anything you cannot undo.
+   Use `checklists/before-agent-council-decision.md` to decide if a council review is warranted.
+
+7. Do not improve this workspace endlessly.
    If the folder exists but no evidence record exists, the workspace is not working yet.
 
-7. Do not build or update the dashboard before the evidence dry run is complete.
+8. Do not build or update the dashboard before the evidence dry run is complete.
    Mock data on a live product page is a legal and trust risk.
 
-8. Do not automate with n8n, Zapier, or any external pipeline before you have done it manually at least once.
+9. Do not automate with n8n, Zapier, or any external pipeline before you have done it manually at least once.
    Manual proof comes before automation.
 
 ---
@@ -41,6 +45,8 @@
 | Score assigned without evidence | Stop. Evidence first. See `workflows/03-evidence-dry-run.md` |
 | Customer-facing copy | `docs/legal-safety-system.md` + Legal Language Agent |
 | Outreach message | `skills/anti-slop-writing-review/SKILL.md` + `skills/marketing-outreach-review/SKILL.md` |
+| Design looks like AI template | `skills/design-taste-review/SKILL.md` — slop test first |
+| High-stakes or irreversible decision | `workflows/07-agent-council-review.md` + `checklists/before-agent-council-decision.md` |
 
 ---
 

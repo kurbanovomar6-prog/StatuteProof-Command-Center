@@ -17,7 +17,10 @@ Use this file to decide which agent, skill, or workflow to invoke for any task.
 | Legal-safe copy rewrite | `prompts/legal-safe-copy-review-prompt.md` | Legal Language Agent | — |
 | QA / final gate | QA / Critic Agent | `#risk-brief-review` (for briefs) | — |
 | Landing page review | `#ui-ux-review` skill | `docs/landing-page-review.md` | `workflows/06-landing-page-review.md` |
+| Landing page conversion | `#landing-page-conversion-review` | `#ui-ux-review` | — |
 | Dashboard UX review | `#ui-ux-review` skill | Product Manager Agent | `workflows/06-landing-page-review.md` |
+| Design taste / AI slop check | `#design-taste-review` | `#design-polish` | — |
+| High-stakes decision | `#agent-council-review` | Chief of Staff Agent | `workflows/07-agent-council-review.md` |
 | Outreach message | Outreach Writer Agent | `#marketing-outreach-review` | `workflows/05-brief-to-outreach.md` |
 | Outreach QA | `#anti-slop-writing-review` | `#marketing-outreach-review` | `workflows/05-brief-to-outreach.md` |
 | Outreach review prompt | `prompts/outreach-review-prompt.md` | Outreach Writer Agent | — |
@@ -35,6 +38,8 @@ Use this file to decide which agent, skill, or workflow to invoke for any task.
 | Is this outreach message safe to send? | `checklists/before-outreach.md` + `#anti-slop-writing-review` |
 | Is this website copy legal-safe? | `checklists/before-website-copy.md` + Legal Language Agent |
 | Is this ready to push to GitHub? | `checklists/before-github-push.md` |
+| Is this decision high-stakes / irreversible? | `checklists/before-agent-council-decision.md` + `workflows/07-agent-council-review.md` |
+| Does this design look like AI slop? | `#design-taste-review` (slop test runs first) |
 | Which agent handles this? | `AGENTS.md` → routing rules |
 
 ## Decision Tree for Briefs
@@ -69,3 +74,6 @@ QA / Critic approved?
 | `#marketing-outreach-review` | Type `#marketing-outreach-review` | draft message, lead context |
 | `#anti-slop-writing-review` | Type `#anti-slop-writing-review` | any prose to review |
 | `#ui-ux-review` | Type `#ui-ux-review` | page URL or screenshot, target audience |
+| `#design-taste-review` | Type `#design-taste-review` | component or page, register (brand/product), specific concern |
+| `#landing-page-conversion-review` | Type `#landing-page-conversion-review` | landing page URL or screenshot |
+| `#agent-council-review` | Type `#agent-council-review` | decision statement, options A/B/C, stakes description |

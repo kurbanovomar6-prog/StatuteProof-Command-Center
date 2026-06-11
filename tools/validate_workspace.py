@@ -48,6 +48,9 @@ REQUIRED_DIRS = [
     'skills/anti-slop-writing-review',
     'skills/ui-ux-review',
     'skills/design-polish',
+    'skills/design-taste-review',
+    'skills/landing-page-conversion-review',
+    'skills/agent-council-review',
     'docs',
     'prompts',
     'workflows',
@@ -104,6 +107,9 @@ REQUIRED_SKILLS = [
     'skills/anti-slop-writing-review/SKILL.md',
     'skills/ui-ux-review/SKILL.md',
     'skills/design-polish/SKILL.md',
+    'skills/design-taste-review/SKILL.md',
+    'skills/landing-page-conversion-review/SKILL.md',
+    'skills/agent-council-review/SKILL.md',
 ]
 
 for s in REQUIRED_SKILLS:
@@ -121,6 +127,9 @@ REQUIRED_DOCS = [
     'docs/outreach-strategy.md',
     'docs/landing-page-review.md',
     'docs/github-workflow.md',
+    'docs/design-quality-system.md',
+    'docs/anti-slop-writing-system.md',
+    'docs/agent-council-decision-system.md',
 ]
 
 for d in REQUIRED_DOCS:
@@ -135,6 +144,8 @@ REQUIRED_PROMPTS = [
     'prompts/legal-safe-copy-review-prompt.md',
     'prompts/outreach-review-prompt.md',
     'prompts/ui-review-prompt.md',
+    'prompts/agent-council-prompt.md',
+    'prompts/landing-page-conversion-prompt.md',
 ]
 
 for p in REQUIRED_PROMPTS:
@@ -149,6 +160,7 @@ REQUIRED_WORKFLOWS = [
     'workflows/04-monitoring-to-brief.md',
     'workflows/05-brief-to-outreach.md',
     'workflows/06-landing-page-review.md',
+    'workflows/07-agent-council-review.md',
 ]
 
 for w in REQUIRED_WORKFLOWS:
@@ -162,10 +174,54 @@ REQUIRED_CHECKLISTS = [
     'checklists/before-outreach.md',
     'checklists/before-website-copy.md',
     'checklists/before-github-push.md',
+    'checklists/before-agent-council-decision.md',
 ]
 
 for c in REQUIRED_CHECKLISTS:
     check(file_exists(c), f'MISSING CHECKLIST: {c}')
+
+# ── Max 10 active agents check ───────────────────────────────────────────────
+
+agents_dir = root / '.claude' / 'agents'
+if agents_dir.is_dir():
+    agent_files = [f for f in agents_dir.iterdir() if f.is_file() and f.suffix == '.md']
+    check(len(agent_files) <= 10, f'Too many agents: {len(agent_files)} found in .claude/agents/ — max is 10')
+
+# ── No Ruflo runtime in non-reference files ───────────────────────────────────
+
+RUFLO_RUNTIME_PATTERNS = [
+    r'npx ruflo',
+    r'npx claude-flow',
+    r'ruflo daemon',
+    r'ruflo swarm',
+    r'mcp__ruflo',
+    r'ruv-swarm',
+    r'swarm_init\(',
+    r'ruflo mcp',
+]
+
+for path in root.rglob('*.md'):
+    rel = path.relative_to(root)
+    parts = rel.parts
+    if 'references' in parts:
+        continue
+    if '.reference_tmp' in str(path):
+        continue
+    # CLAUDE.md lists what NOT to use — skip runtime check for it
+    if rel == Path('CLAUDE.md'):
+        continue
+    try:
+        text = path.read_text(errors='ignore')
+    except Exception:
+        continue
+    for pat in RUFLO_RUNTIME_PATTERNS:
+        m = re.search(pat, text)
+        if m:
+            start = m.start()
+            surrounding = text[max(0, start - 150):start + 150].lower()
+            is_prohibition = any(w in surrounding for w in ['never', 'do not', "don't", 'inspiration only', 'rejected', 'not relevant'])
+            if not is_prohibition:
+                errors.append(f'Ruflo runtime reference in non-reference file {rel}: matches "{pat}" — Ruflo is inspiration only')
 
 # ── Secret scan ───────────────────────────────────────────────────────────────
 
