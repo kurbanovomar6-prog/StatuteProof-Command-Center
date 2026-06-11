@@ -28,6 +28,9 @@ _SNAPSHOT_DIR = _BASE_DIR / "data" / "source_snapshots"
 _GOOD_ORDER = {"FAILED": 0, "THIN": 1, "MEDIUM": 2, "GOOD": 3}
 _MIN_NORMALIZED_CHARS = 500
 
+_RUNS_CACHE: list[dict] | None = None
+_CACHE_VALID: bool = False
+
 
 def source_run_path() -> Path:
     return _RUN_FILE
@@ -126,8 +129,13 @@ def _write_snapshots(
 
 
 def _read_runs() -> list[dict]:
+    global _RUNS_CACHE, _CACHE_VALID
+    if _CACHE_VALID and _RUNS_CACHE is not None:
+        return _RUNS_CACHE
     if not _RUN_FILE.exists():
-        return []
+        _RUNS_CACHE = []
+        _CACHE_VALID = True
+        return _RUNS_CACHE
     rows: list[dict] = []
     try:
         for line in _RUN_FILE.read_text(encoding="utf-8").splitlines():
@@ -138,8 +146,10 @@ def _read_runs() -> list[dict]:
             except json.JSONDecodeError:
                 continue
     except FileNotFoundError:
-        return []
-    return rows
+        rows = []
+    _RUNS_CACHE = rows
+    _CACHE_VALID = True
+    return _RUNS_CACHE
 
 
 def latest_runs(
@@ -251,6 +261,8 @@ def append_run(record: dict) -> dict:
         _write_proof_artifact(record, diff_artifact, snapshot_base)
     with _RUN_FILE.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+    global _CACHE_VALID
+    _CACHE_VALID = False
     return record
 
 
@@ -407,6 +419,8 @@ def record_from_source_result(
         "publication_date": result.get("publication_date"),
         "limitations_notes": "; ".join(n for n in notes if n),
         "error": result.get("error") or (result.get("reason") if result.get("status") != "ok" else None),
+        "pipeline_version": "4.2",
+        "normalization_version": "1.0",
     }
 
 
@@ -464,6 +478,8 @@ def restricted_record(
         "publication_date": None,
         "limitations_notes": "; ".join(limitations_notes),
         "error": "Source is marked restricted/blocked in sources.json.",
+        "pipeline_version": "4.2",
+        "normalization_version": "1.0",
     }
 
 

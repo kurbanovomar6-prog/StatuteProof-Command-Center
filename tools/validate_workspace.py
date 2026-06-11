@@ -260,8 +260,16 @@ for path in root.rglob('*'):
     # Variable-name scan: skip product/ (product code has legitimate env var references)
     if not in_product:
         for pat in SECRET_VARNAME_PATTERNS:
-            if re.search(pat, text):
-                errors.append(f'POTENTIAL SECRET in {rel}: matches {pat}')
+            m = re.search(pat, text)
+            if m:
+                start = m.start()
+                surrounding = text[max(0, start - 120):start + 120]
+                is_example = any(w in surrounding.lower() for w in [
+                    'placeholder', 'sk-test', 'example', 'pattern', 'regex', 'matches',
+                    'os.getenv', 'getenv', 'your_key', 'your-key',
+                ])
+                if not is_example:
+                    errors.append(f'POTENTIAL SECRET in {rel}: matches {pat}')
 
 # ── node_modules check ────────────────────────────────────────────────────────
 

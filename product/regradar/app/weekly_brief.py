@@ -21,8 +21,20 @@ from app.alert_review import (
     list_alert_drafts,
 )
 from app.client_profiles import load_client_profile, score_alert_relevance, source_metadata_for_alert
-from app.proof import DISCLAIMER
-
+from app.sources import load_sources
+_FULL_BRIEF_DISCLAIMER = (
+    "StatuteProof reports are generated from monitored official-source records and are provided "
+    "for information and compliance review support only. StatuteProof reports do not constitute "
+    "legal advice, regulatory advice, compliance certification, or a legal opinion. StatuteProof "
+    "does not replace qualified legal counsel, compliance professionals, MLROs, or other "
+    "professional advisers. StatuteProof does not guarantee compliance, prevent fines, or certify "
+    "that all regulatory updates have been captured. Source monitoring may be affected by "
+    "publication delays, website changes, PDF formatting, access limits, or source structure "
+    "changes. Users should verify official source material directly and review evidence records, "
+    "hashes, timestamps, and diffs before relying on a report. Users should consult qualified "
+    "legal or compliance professionals before making regulatory, filing, operational, or customer "
+    "decisions based on a report."
+)
 
 _BASE_DIR = Path(__file__).parent.parent
 _OUTPUT_DIR = _BASE_DIR / "reports" / "weekly_briefs"
@@ -123,6 +135,11 @@ def build_weekly_brief(
     urgent = [item for item in alerts if item.get("_effective_send_decision") == DECISION_URGENT]
     weekly = [item for item in alerts if item.get("_effective_send_decision") == DECISION_WEEKLY]
     limitations = _collect_limitations(alerts)
+    all_sources = load_sources()
+    sources_checked = sum(
+        1 for s in all_sources
+        if s.get("enabled") and str(s.get("jurisdiction") or "").upper() == market.upper()
+    )
     return {
         "title": "StatuteProof Weekly Regulatory Brief",
         "client_id": client_profile.get("client_id"),
@@ -137,7 +154,7 @@ def build_weekly_brief(
             "reviewed_alerts_included": len(alerts),
             "urgent_ready_items": len(urgent),
             "weekly_only_items": len(weekly),
-            "sources_checked": None,
+            "sources_checked": sources_checked or None,
         },
         "alerts": alerts,
         "limitations": limitations,
@@ -198,11 +215,11 @@ def render_weekly_brief_markdown(brief: dict[str, Any]) -> str:
             lines.append(f"- {alert.get('source_name')}: {activity}")
     sources_checked = summary.get("sources_checked")
     if sources_checked is None:
-        lines.append("- Remaining monitored sources showed no material change this period.")
+        lines.append("- Remaining monitored sources showed no detected change based on monitoring this period.")
     else:
         remaining = max(0, int(sources_checked) - len(brief.get("alerts") or []))
         suffix = "source" if remaining == 1 else "sources"
-        lines.append(f"- {remaining} additional monitored {suffix} showed no material change this period.")
+        lines.append(f"- {remaining} additional monitored {suffix} showed no detected change based on monitoring this period.")
     lines.append("")
     lines.append("## Reviewed Regulatory Updates")
     if brief.get("empty"):
@@ -253,7 +270,7 @@ def render_weekly_brief_markdown(brief: dict[str, Any]) -> str:
         "This brief includes only human-reviewed items approved for this client profile.",
         "",
         "## Disclaimer",
-        DISCLAIMER,
+        _FULL_BRIEF_DISCLAIMER,
         "Final compliance decisions require qualified legal review.",
         "",
     ])

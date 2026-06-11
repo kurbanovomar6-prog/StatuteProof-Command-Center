@@ -24,9 +24,16 @@ _HIGH_KEYWORDS: tuple[str, ...] = (
     "ban",
     "restriction",
     "license",
-    "rate",
     "penalty",
     "sanction",
+    "circular",
+    "vasp",
+    "virtual asset",
+    "revoke",
+    "revocation",
+    "cease",
+    "suspend",
+    "enforcement action",
 )
 
 # Words that amplify a single HIGH keyword into a confirmed HIGH signal.
@@ -49,6 +56,14 @@ _MEDIUM_KEYWORDS: tuple[str, ...] = (
     "update",
     "change",
     "amendment",
+    "guidance",
+    "guideline",
+    "notice",
+    "consultation",
+    "aml",
+    "cft",
+    "fit and proper",
+    "prudential",
 )
 
 

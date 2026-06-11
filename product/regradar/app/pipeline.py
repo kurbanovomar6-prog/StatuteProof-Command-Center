@@ -83,6 +83,10 @@ from app.source_runs import stable_content_hash
 
 logger = logging.getLogger(__name__)
 
+# Initialise DB schema once per process on module import rather than once per
+# run_pipeline() call, which caused 50+ redundant schema checks in batch runs.
+init_db()
+
 _ALERT_THRESHOLD = {"MEDIUM", "HIGH"}
 _RISK_ORDER: dict[str, int] = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
 
@@ -123,8 +127,6 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     TimeoutError  — propagated from scraper on page-load timeout.
     ValueError    — propagated from scraper on empty HTML.
     """
-    init_db()
-
     # ── Step 0: Source-specific adapter (optional) ────────────────────
     # Adapters provide richer content for sites the generic scraper cannot
     # handle well (JS-rendered pages, XHR-loaded document lists).

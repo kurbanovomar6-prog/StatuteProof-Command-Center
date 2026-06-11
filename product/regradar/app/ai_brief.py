@@ -206,10 +206,20 @@ def _fallback_brief(change_text: str, metadata: dict, error: str) -> dict:
 
     urgency_raw = {"HIGH": "high", "MEDIUM": "medium", "LOW": "low"}.get(risk_level, "low")
 
+    source_name = metadata.get("source_name") or metadata.get("url") or "the monitored source"
+    excerpt = change_text[:300].strip()
+    if len(change_text) > 300:
+        excerpt += "..."
+    exec_summary = (
+        f"Change detected on {source_name}. "
+        f"Risk level: {risk_level}. "
+        f"{excerpt}"
+    )
+
     return {
         "risk_level":               risk_level,
-        "executive_summary":        "Regulatory change detected. AI analysis unavailable — rule-based assessment applied.",
-        "business_action_required": "Review the source text manually and assess compliance impact.",
+        "executive_summary":        exec_summary,
+        "business_action_required": "Review the detected change against current compliance policies and escalate to legal if required.",
         "reason":                   risk_reason,
         "affected_entities":        [],
         "urgency":                  _URGENCY_MAP.get(urgency_raw, "unclear"),
@@ -371,7 +381,7 @@ def generate_ai_brief(
         client  = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
         message = client.messages.create(
             model      = _MODEL,
-            max_tokens = 900,
+            max_tokens = 1400,
             system     = _SYSTEM,
             messages   = [{"role": "user", "content": user_prompt}],
         )
