@@ -1,0 +1,47 @@
+{
+  "schema_version": "2.0",
+  "record_id": "evr_sample_fake_001",
+  "record_status": "complete",
+  "sample_notice": "SAMPLE / FAKE DATA - not a real regulatory record",
+  "source": {
+    "source_id": "sample-vara",
+    "regulator": "VARA",
+    "official_url": "https://example.invalid/sample-official-source",
+    "source_name": "SAMPLE / FAKE official source"
+  },
+  "run": {
+    "run_id": "run_sample_fake_001",
+    "timestamp": "2026-06-11T00:00:00Z",
+    "status": "CHANGED"
+  },
+  "content": {
+    "previous_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "current_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "raw_content_path": "examples/sample/raw.html",
+    "normalized_current_path": "examples/sample/current.txt",
+    "normalized_previous_path": "examples/sample/previous.txt"
+  },
+  "change": {
+    "diff_path": "examples/sample/diff.txt",
+    "summary": "SAMPLE / FAKE change for schema demonstration only.",
+    "lines_added": 2,
+    "lines_removed": 0
+  },
+  "files": {
+    "snapshot_path": "examples/sample/snapshot.html",
+    "raw_path": "examples/sample/raw.html",
+    "normalized_path": "examples/sample/current.txt",
+    "previous_path": "examples/sample/previous.txt",
+    "diff_path": "examples/sample/diff.txt"
+  },
+  "integrity": {
+    "hash_verified": true,
+    "integrity_status": "VERIFIED",
+    "verified_at": "2026-06-11T00:00:00Z"
+  },
+  "review": {
+    "human_review_required": true,
+    "review_status": "pending",
+    "review_reason": "SAMPLE / FAKE example."
+  }
+}

@@ -1,0 +1,24 @@
+# Secrets
+.env
+.env.*
+
+# Reference clones
+.reference_tmp/
+references/full-repos/
+
+# macOS
+.DS_Store
+__MACOSX/
+
+# Build artifacts
+dist/
+node_modules/
+
+# Archives
+*.zip
+
+# Backups
+*_BACKUP_*
+
+# Local planning reports
+planning-reports/
