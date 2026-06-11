@@ -168,10 +168,6 @@ export default function Hero({ onCreateWorkspace, onSignIn }) {
             backgroundPosition: 'center center',
           }}
         />
-        {/* Cyan glow top-right */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-cyan-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
-        {/* Blue glow bottom-left */}
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4" />
       </div>
 
       {/* Hero copy */}
@@ -220,6 +216,9 @@ export default function Hero({ onCreateWorkspace, onSignIn }) {
           </button>
         </div>
         <p className="text-xs text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+          Monitoring information only. Not legal advice and not a guarantee of compliance.
+        </p>
+        <p className="text-xs text-slate-700 mt-2 max-w-3xl mx-auto leading-relaxed">
           FTA, e-Laws, Official Gazette, and Capital Market Authority / former SCA have documented
           access limitations — disclosed before any pilot begins.
         </p>

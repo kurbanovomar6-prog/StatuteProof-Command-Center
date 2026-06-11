@@ -9,7 +9,6 @@ import Coverage from './components/Coverage'
 import SourceTransparencyMatrix from './components/SourceTransparencyMatrix'
 import BuyerSourcePacks from './components/BuyerSourcePacks'
 import ConfiguredMonitoring from './components/ConfiguredMonitoring'
-import HowItWorks from './components/HowItWorks'
 import SampleBrief from './components/SampleBrief'
 import TrustLayer from './components/TrustLayer'
 import Pricing from './components/Pricing'
@@ -191,7 +190,6 @@ export default function App() {
         />
         <Problem />
         <WithoutWith />
-        <HowItWorks />
         <SampleBrief />
         <Coverage onCreateWorkspace={() => setView('register')} />
         <SourceTransparencyMatrix onCreateWorkspace={() => setView('register')} />
