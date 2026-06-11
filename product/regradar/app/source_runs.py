@@ -14,7 +14,6 @@ import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 from app.chunk_diff import build_chunk_diff, build_incomplete_diff, render_diff_markdown, utc_now
 from app.proof import build_source_proof
@@ -496,6 +495,99 @@ def _quality_from_chars(chars: int) -> str:
     if chars > 0:
         return "THIN"
     return "FAILED"
+
+
+def backfill_run_artifacts(*, dry_run: bool = False) -> list[dict]:
+    """
+    Retroactively generate proof.json and diff.json for CHANGED run records
+    that are missing these artifacts (e.g. runs made before the proof-writing
+    code was in place).
+
+    Rewrites source_runs.jsonl in-place with updated path fields.
+    Safe to run multiple times — skips records that already have both artifacts,
+    and does not overwrite files that already exist on disk.
+
+    Returns a list of result dicts: {source_id, run_id, action, detail}.
+    action is one of: "skipped", "backfilled", "no_snapshot", "dry_run".
+    """
+    rows = _read_runs()
+    results: list[dict] = []
+    changed = False
+
+    for i, record in enumerate(rows):
+        source_id = str(record.get("source_id") or "")
+        run_id = str(record.get("run_id") or "")
+
+        if record.get("change_status") != "CHANGED":
+            continue
+
+        has_proof = bool(record.get("proof_block_path"))
+        has_diff = bool(record.get("diff_json_path"))
+        if has_proof and has_diff:
+            results.append({"source_id": source_id, "run_id": run_id, "action": "skipped", "detail": "already has both artifacts"})
+            continue
+
+        snapshot_base = _snapshot_base_from_record(record)
+        if snapshot_base is None:
+            results.append({"source_id": source_id, "run_id": run_id, "action": "no_snapshot", "detail": "cannot resolve snapshot base path"})
+            continue
+
+        if dry_run:
+            results.append({"source_id": source_id, "run_id": run_id, "action": "dry_run", "detail": f"would backfill: proof={not has_proof} diff={not has_diff}"})
+            continue
+
+        # Find the previous run for this source (all records before index i)
+        prior = [r for r in rows[:i] if r.get("source_id") == source_id]
+        prev = prior[-1] if prior else None
+
+        # Diff artifact — write only if file missing from disk
+        diff_artifact = None
+        if not has_diff:
+            diff_json_path = snapshot_base / "diff.json"
+            diff_md_path = snapshot_base / "diff.md"
+            if diff_json_path.exists():
+                # File exists but path not recorded — just wire up the record
+                _loaded: dict = json.loads(diff_json_path.read_text(encoding="utf-8"))
+                diff_artifact = _loaded
+                record["diff_json_path"] = _rel(diff_json_path)
+                record["diff_md_path"] = _rel(diff_md_path) if diff_md_path.exists() else None
+                record["meaningful_change_detected"] = _loaded.get("meaningful_change_detected")
+                record["diff_quality"] = _loaded.get("diff_quality")
+            else:
+                diff_artifact = _write_diff_artifacts(record, prev, snapshot_base)
+            changed = True
+
+        # Proof artifact — write only if file missing from disk
+        if not has_proof:
+            proof_json_path = snapshot_base / "proof.json"
+            if proof_json_path.exists():
+                record["proof_block_path"] = _rel(proof_json_path)
+            else:
+                _write_proof_artifact(record, diff_artifact, snapshot_base)
+            changed = True
+
+        results.append({
+            "source_id": source_id,
+            "run_id": run_id,
+            "action": "backfilled",
+            "detail": f"proof={not has_proof} diff={not has_diff}",
+        })
+
+    if changed and not dry_run:
+        # Rewrite JSONL with updated path fields (atomic via rename)
+        tmp = _RUN_FILE.with_suffix(".jsonl.tmp")
+        with tmp.open("w", encoding="utf-8") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            try:
+                for row in rows:
+                    fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            finally:
+                fcntl.flock(fh, fcntl.LOCK_UN)
+        tmp.replace(_RUN_FILE)
+        global _CACHE_VALID
+        _CACHE_VALID = False
+
+    return results
 
 
 def deduplicate_alerts(

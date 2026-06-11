@@ -2347,6 +2347,23 @@ def main() -> None:
                 sys.exit(2)
         _cmd_source_history(market=market, source=source, limit=limit)
 
+    elif cmd == "backfill-artifacts":
+        dry_run = "--dry-run" in args
+        from app.source_runs import backfill_run_artifacts
+        print(f"\nBackfilling proof.json + diff.json for CHANGED runs{' (dry-run)' if dry_run else ''}…\n")
+        results = backfill_run_artifacts(dry_run=dry_run)
+        backfilled = [r for r in results if r["action"] == "backfilled"]
+        skipped = [r for r in results if r["action"] == "skipped"]
+        no_snap = [r for r in results if r["action"] == "no_snapshot"]
+        dry = [r for r in results if r["action"] == "dry_run"]
+        for r in results:
+            icon = {"backfilled": "✓", "skipped": "·", "no_snapshot": "✗", "dry_run": "?"}.get(r["action"], "?")
+            print(f"  {icon} {r['action']:<12} {r['source_id']} / {r['run_id']}  — {r['detail']}")
+        print(f"\nBackfilled: {len(backfilled)}  Skipped: {len(skipped)}  No-snapshot: {len(no_snap)}{f'  Dry-run: {len(dry)}' if dry_run else ''}")
+        if backfilled and not dry_run:
+            print("source_runs.jsonl updated with new artifact paths.")
+        sys.exit(0)
+
     elif cmd == "source-diff":
         market = "AE"
         source = None
@@ -2650,7 +2667,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | backfill-artifacts",
             file=sys.stderr,
         )
         sys.exit(2)
