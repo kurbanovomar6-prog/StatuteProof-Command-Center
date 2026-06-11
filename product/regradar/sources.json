@@ -494,13 +494,13 @@
   },
   {
     "name": "Dubai Virtual Assets Regulatory Authority (VARA)",
-    "url": "https://www.vara.ae/en/regulatory-framework/",
+    "url": "https://www.vara.ae/",
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
     "status": "active",
     "source_id": "AE-dubai-virtual-assets-regulatory-authority-vara",
-    "notes": "VARA primary regulatory framework page — rules, regulations, and guidance documents.",
+    "notes": "VARA homepage — regulatory-framework sub-page degraded to 62c (JS SPA) 2026-06-12; root URL extracts 2,815c reliably.",
     "tier": "1"
   },
   {
@@ -516,13 +516,13 @@
   },
   {
     "name": "Abu Dhabi Global Market (ADGM)",
-    "url": "https://www.fsra.adgm.com/rules-and-regulations",
+    "url": "https://www.adgm.com/fsra",
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
     "status": "active",
     "source_id": "AE-abu-dhabi-global-market-adgm",
-    "notes": "ADGM FSRA rules and regulations page — covers all FSRA-regulated entities in Abu Dhabi Global Market.",
+    "notes": "ADGM FSRA section — fsra.adgm.com subdomain unreachable 2026-06-12; adgm.com/fsra extracts 2,742c reliably.",
     "tier": "1"
   },
   {
