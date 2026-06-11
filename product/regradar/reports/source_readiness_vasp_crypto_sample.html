@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StatuteProof — Source Readiness Review</title>
+<style>
+  :root {
+    --bg: #07111F;
+    --surface: #0A1628;
+    --surface2: #0D1B2E;
+    --accent: #16D9F5;
+    --text: #c8d8e8;
+    --muted: #6a8aaa;
+    --border: #1e3040;
+    --active: #34d399;
+    --validation: #fbbf24;
+    --limited: #fb7185;
+    --mapped: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); word-break: break-word; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 34px 22px 48px; }
+  .hero {
+    border: 1px solid rgba(22, 217, 245, 0.18);
+    background: linear-gradient(135deg, rgba(10, 22, 40, 0.98), rgba(13, 27, 46, 0.92));
+    border-radius: 18px;
+    padding: 28px;
+  }
+  .brand { color: var(--accent); font-size: 15px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+  h1 { margin: 12px 0 14px; color: #fff; font-size: 34px; line-height: 1.15; }
+  h2 { margin: 0 0 14px; color: #fff; font-size: 22px; line-height: 1.25; }
+  h3 { margin: 0 0 8px; color: #fff; font-size: 16px; }
+  p { margin: 0 0 12px; }
+  .meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+  .meta-item, .card, .section, .panel {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 12px;
+  }
+  .meta-item { padding: 12px; }
+  .label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .value { margin-top: 3px; color: #fff; font-weight: 700; }
+  .stamp {
+    margin-top: 18px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    background: rgba(251, 191, 36, 0.08);
+    color: #fde68a;
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 700;
+  }
+  .section { margin-top: 18px; padding: 22px; }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .stat { padding: 16px; border: 1px solid var(--border); background: var(--surface2); border-radius: 12px; }
+  .stat-number { color: var(--accent); font-size: 30px; font-weight: 800; line-height: 1; }
+  .stat-label { margin-top: 7px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; overflow: hidden; }
+  th {
+    background: rgba(13, 27, 46, 0.95);
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 10px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+  td { border-top: 1px solid var(--border); padding: 11px 10px; vertical-align: top; }
+  .table-wrap { overflow-x: auto; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .table-wrap table { min-width: 980px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .status-active { border-color: rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.10); color: var(--active); }
+  .status-validation { border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.10); color: var(--validation); }
+  .status-limited { border-color: rgba(251, 113, 133, 0.35); background: rgba(251, 113, 133, 0.10); color: var(--limited); }
+  .status-mapped { border-color: rgba(148, 163, 184, 0.35); background: rgba(148, 163, 184, 0.10); color: var(--mapped); }
+  .detail-list { display: grid; gap: 12px; }
+  .detail { border: 1px solid var(--border); background: var(--surface2); border-radius: 12px; padding: 15px; }
+  .muted { color: var(--muted); }
+  .sample {
+    border: 1px solid rgba(22, 217, 245, 0.25);
+    background: rgba(22, 217, 245, 0.06);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .sample-warning {
+    display: inline-flex;
+    margin: 0 8px 10px 0;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    background: rgba(251, 191, 36, 0.12);
+    color: #fde68a;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 900;
+  }
+  ul { margin: 8px 0 0 20px; padding: 0; }
+  li { margin: 5px 0; }
+  footer { margin-top: 20px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 16px; font-size: 12px; }
+  @media (max-width: 900px) {
+    .meta, .grid { grid-template-columns: 1fr; }
+    .page { padding: 18px 12px 34px; }
+    .hero, .section { padding: 18px; border-radius: 14px; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 19px; }
+    .table-wrap { margin-left: -6px; margin-right: -6px; border-radius: 10px; }
+    th, td { padding: 9px 8px; }
+  }
+  @media (max-width: 520px) {
+    body { font-size: 13px; }
+    .page { padding: 12px 8px 28px; }
+    .hero, .section { padding: 14px; }
+    h1 { font-size: 24px; }
+    .stat-number { font-size: 24px; }
+  }
+  @media print {
+    body { background: #fff; color: #111; }
+    .no-print { display: none; }
+    .page { max-width: none; padding: 0; }
+    a { color: #111; }
+    table { border-collapse: collapse; }
+    td, th { border: 1px solid #ccc; color: #111; }
+    .card, .panel, .section, .hero, .meta-item, .stat, .detail, .sample {
+      background: #fff !important;
+      color: #111 !important;
+      border-color: #ccc !important;
+      box-shadow: none !important;
+    }
+    h1, h2, h3, .value, .brand { color: #111 !important; }
+    .muted, .label, footer { color: #444 !important; }
+    .badge, .sample-warning, .stamp { border-color: #888 !important; background: #fff !important; color: #111 !important; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="brand">StatuteProof</div>
+      <h1>Source Readiness Review</h1>
+      <p class="muted">Broad source map. Strict activation standard. Mapped does not mean active.</p>
+      <div class="meta">
+        <div class="meta-item"><div class="label">Company</div><div class="value">Test Corp</div></div>
+        <div class="meta-item"><div class="label">Contact</div><div class="value">Test Contact</div></div>
+        <div class="meta-item"><div class="label">Buyer profile</div><div class="value">VASP / Crypto</div></div>
+        <div class="meta-item"><div class="label">Date generated</div><div class="value">2026-06-02</div></div>
+      </div>
+      <div class="stamp">
+        Not legal advice. Source statuses reflect current technical validation state and may change.
+        Limitations are documented in full in this report.
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>Profile Summary</h2>
+      <p>This review maps official UAE source layers relevant to VASP / Crypto compliance teams.</p>
+    </section>
+
+    <section class="section">
+      <h2>Executive Summary</h2>
+      <div class="grid">
+        <div class="stat"><div class="stat-number">3</div><div class="stat-label">Active in monitoring</div></div>
+        <div class="stat"><div class="stat-number">2</div><div class="stat-label">Under validation / needs adapter</div></div>
+        <div class="stat"><div class="stat-number">0</div><div class="stat-label">Access-limited / deferred</div></div>
+        <div class="stat"><div class="stat-number">5</div><div class="stat-label">Relevant source layers reviewed</div></div>
+      </div>
+      <p style="margin-top:14px">For this profile, StatuteProof identified 5 relevant UAE source layers. 3 are active in monitoring, 2 are under validation or need adapters, and 0 have access limitations or are deferred. This is not a coverage guarantee.</p>
+    </section>
+
+    <section class="section">
+      <h2>Source Readiness Table</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Source layer</th>
+              <th>Authority</th>
+              <th>Client-facing status</th>
+              <th>Extraction method</th>
+              <th>Why it matters</th>
+              <th>Limitation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>CBUAE main regulatory publications</strong><br><a href="https://www.centralbank.ae/">https://www.centralbank.ae/</a></td><td>Central Bank of the UAE</td><td><span class="badge status-active">Active in monitoring</span><br><span class="muted">Change detection is operational against this source. Item-level indexing may still be under refinement.</span></td><td>js_rendered</td><td>CBUAE is the primary UAE financial regulator for banks, payment firms, stored value providers, and many fintechs.</td><td>Root is already monitored, but precise circular/publication item extraction still needs validation.</td></tr>
+<tr><td><strong>UAE FIU publications and typologies</strong><br><a href="https://www.uaefiu.gov.ae/">https://www.uaefiu.gov.ae/</a></td><td>UAE Financial Intelligence Unit</td><td><span class="badge status-active">Active in monitoring</span><br><span class="muted">Change detection is operational against this source. Item-level indexing may still be under refinement.</span></td><td>js_rendered</td><td>FIU publications and typologies are core AML/CFT signals for regulated firms.</td><td>Root is active, but publication/typology item extraction needs validation.</td></tr>
+<tr><td><strong>VARA main publications</strong><br><a href="https://www.vara.ae/">https://www.vara.ae/</a></td><td>Virtual Assets Regulatory Authority</td><td><span class="badge status-active">Active in monitoring</span><br><span class="muted">Change detection is operational against this source. Item-level indexing may still be under refinement.</span></td><td>html_plus_pdf</td><td>VARA is the core Dubai virtual assets regulator for VASP licensing, conduct, and compliance obligations.</td><td>Root is already monitored, but item-level publications need validation before customer-ready alerts.</td></tr>
+<tr><td><strong>UAE Legislation Portal federal laws and decrees</strong><br><a href="https://uaelegislation.gov.ae/">https://uaelegislation.gov.ae/</a></td><td>UAE Legislation Portal</td><td><span class="badge status-validation">Needs extraction adapter</span><br><span class="muted">A source-specific adapter is required before monitoring can be enabled.</span></td><td>js_rendered</td><td>Federal laws and decrees affect every UAE regulatory profile.</td><td>Already active at aggregate level, but broad homepage aggregate changes are not customer-ready alerts. High-value UAE federal legislation source. Access and item-level monitoring require continued validation due to WAF/access constraints and aggregate-page change noise.</td></tr>
+<tr><td><strong>VARA rulebooks</strong><br><a href="https://www.vara.ae/">https://www.vara.ae/</a></td><td>Virtual Assets Regulatory Authority</td><td><span class="badge status-validation">Needs extraction adapter</span><br><span class="muted">A source-specific adapter is required before monitoring can be enabled.</span></td><td>html_plus_pdf</td><td>Rulebook updates are the most commercially sensitive source layer for VASP clients.</td><td>Rulebook pages or PDFs may require source-specific item mapping.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Active Sources — Detail</h2>
+      <div class="detail-list"><article class="detail"><h3>CBUAE main regulatory publications</h3><p><span class="badge status-active">Active in monitoring</span></p><p><strong>URL:</strong> <a href="https://www.centralbank.ae/">https://www.centralbank.ae/</a></p><p><strong>What is monitored:</strong> CBUAE is the primary UAE financial regulator for banks, payment firms, stored value providers, and many fintechs.</p><p><strong>Limitation:</strong> Root is already monitored, but precise circular/publication item extraction still needs validation.</p><p class="muted">Active monitoring does not guarantee item-level detection of every publication.</p></article>
+<article class="detail"><h3>UAE FIU publications and typologies</h3><p><span class="badge status-active">Active in monitoring</span></p><p><strong>URL:</strong> <a href="https://www.uaefiu.gov.ae/">https://www.uaefiu.gov.ae/</a></p><p><strong>What is monitored:</strong> FIU publications and typologies are core AML/CFT signals for regulated firms.</p><p><strong>Limitation:</strong> Root is active, but publication/typology item extraction needs validation.</p><p class="muted">Active monitoring does not guarantee item-level detection of every publication.</p></article>
+<article class="detail"><h3>VARA main publications</h3><p><span class="badge status-active">Active in monitoring</span></p><p><strong>URL:</strong> <a href="https://www.vara.ae/">https://www.vara.ae/</a></p><p><strong>What is monitored:</strong> VARA is the core Dubai virtual assets regulator for VASP licensing, conduct, and compliance obligations.</p><p><strong>Limitation:</strong> Root is already monitored, but item-level publications need validation before customer-ready alerts.</p><p class="muted">Active monitoring does not guarantee item-level detection of every publication.</p></article></div>
+    </section>
+
+    <section class="section">
+      <h2>Under-Validation Sources</h2>
+      <p class="muted">These source layers require additional item-level mapping, repeated-run stability checks, PDF/document parsing, WAF/access validation, or adapter work before production monitoring scope is confirmed.</p>
+      <div class="detail-list"><article class="detail"><h3>UAE Legislation Portal federal laws and decrees</h3><p><span class="badge status-validation">Needs extraction adapter</span></p><p><strong>URL:</strong> <a href="https://uaelegislation.gov.ae/">https://uaelegislation.gov.ae/</a></p><p><strong>What remains:</strong> Federal laws and decrees affect every UAE regulatory profile.</p><p><strong>Limitation:</strong> Already active at aggregate level, but broad homepage aggregate changes are not customer-ready alerts. High-value UAE federal legislation source. Access and item-level monitoring require continued validation due to WAF/access constraints and aggregate-page change noise.</p><p class="muted">Required work: source-specific adapter design, publication-level extraction, repeated-run stability, and proof/diff validation.</p></article>
+<article class="detail"><h3>VARA rulebooks</h3><p><span class="badge status-validation">Needs extraction adapter</span></p><p><strong>URL:</strong> <a href="https://www.vara.ae/">https://www.vara.ae/</a></p><p><strong>What remains:</strong> Rulebook updates are the most commercially sensitive source layer for VASP clients.</p><p><strong>Limitation:</strong> Rulebook pages or PDFs may require source-specific item mapping.</p><p class="muted">Required work: source-specific adapter design, publication-level extraction, repeated-run stability, and proof/diff validation.</p></article></div>
+    </section>
+
+    <section class="section">
+      <h2>Access-Limited / Deferred Sources</h2>
+      <p class="muted">These source layers are not active for this pilot scope unless access and extraction limitations are resolved and documented.</p>
+      <div class="detail-list"><p class="muted">No access-limited or deferred source layers are included for this profile.</p></div>
+    </section>
+
+    <section class="section">
+      <h2>Recommended Monitoring Profile</h2>
+      <h3>Recommended pilot scope as of 2026-06-02</h3>
+      <div class="detail-list"><article class="detail"><h3>CBUAE main regulatory publications</h3><p><span class="badge status-active">Active in monitoring</span></p><p><strong>URL:</strong> <a href="https://www.centralbank.ae/">https://www.centralbank.ae/</a></p><p><strong>What is monitored:</strong> CBUAE is the primary UAE financial regulator for banks, payment firms, stored value providers, and many fintechs.</p><p><strong>Limitation:</strong> Root is already monitored, but precise circular/publication item extraction still needs validation.</p><p class="muted">Active monitoring does not guarantee item-level detection of every publication.</p></article>
+<article class="detail"><h3>UAE FIU publications and typologies</h3><p><span class="badge status-active">Active in monitoring</span></p><p><strong>URL:</strong> <a href="https://www.uaefiu.gov.ae/">https://www.uaefiu.gov.ae/</a></p><p><strong>What is monitored:</strong> FIU publications and typologies are core AML/CFT signals for regulated firms.</p><p><strong>Limitation:</strong> Root is active, but publication/typology item extraction needs validation.</p><p class="muted">Active monitoring does not guarantee item-level detection of every publication.</p></article>
+<article class="detail"><h3>VARA main publications</h3><p><span class="badge status-active">Active in monitoring</span></p><p><strong>URL:</strong> <a href="https://www.vara.ae/">https://www.vara.ae/</a></p><p><strong>What is monitored:</strong> VARA is the core Dubai virtual assets regulator for VASP licensing, conduct, and compliance obligations.</p><p><strong>Limitation:</strong> Root is already monitored, but item-level publications need validation before customer-ready alerts.</p><p class="muted">Active monitoring does not guarantee item-level detection of every publication.</p></article></div>
+      <p class="muted" style="margin-top:12px">Not a guarantee of full source coverage. Pilot scope must be confirmed in writing before commercial monitoring.</p>
+    </section>
+
+    <section class="section">
+      <h2>Sample Brief</h2>
+      <div class="sample">
+        <div class="sample-warning">SAMPLE — ILLUSTRATIVE ONLY</div>
+        <div class="sample-warning">NOT REAL DATA — NOT A REAL REGULATORY CHANGE</div>
+        <h3>VARA — VASP Licensing Framework Update (SAMPLE)</h3>
+<h3>What Changed</h3>
+<p>This illustrative sample shows how a reviewed StatuteProof brief would describe a regulatory update format. It is not real data and does not represent a real regulatory change.</p>
+<h3>Who Is Affected</h3>
+<p>Illustrative affected teams may include compliance, legal, MLRO, licensing and operations stakeholders for this buyer profile. This is sample text only.</p>
+<h3>Why It Matters</h3>
+<p>This illustrative section explains the business relevance a human reviewer would validate before any client delivery. It is not a live assessment.</p>
+<h3>Suggested Action</h3>
+<p>Illustrative action: review the official source, assess internal policy impact, and consult qualified counsel before taking compliance action.</p>
+<h3>Source Proof</h3>
+<p>Official source URL selected during pilot setup. A real brief includes official source proof and reviewed limitations.</p>
+<h3>Limitation Note</h3>
+<p>This sample is illustrative only. Real briefs include only human-reviewed changes from validated source layers.</p>
+<h3>Not Legal Advice</h3>
+<p>This sample brief does not constitute legal advice and should not be relied upon for compliance decisions.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Pilot Scope and Limitations</h2>
+      <ul>
+        <li>Source statuses change as official sites, access controls and publication structures change.</li>
+        <li>Item-level extraction may remain under validation even when a regulator root page is reachable.</li>
+        <li>Access-limited sources are not monitored until access and extraction are reliable.</li>
+        <li>Blocked sources are outside current monitoring scope.</li>
+        <li>This report is not an SLA.</li>
+        <li>Monitoring is not legal advice.</li>
+        <li>Operator review is required before sending this report to a prospect.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Next Steps</h2>
+      <p>To proceed, StatuteProof confirms the pilot source scope in writing, enables only validated sources, and documents limitations before monitoring begins.</p>
+    </section>
+
+    <footer>
+      StatuteProof provides regulatory monitoring intelligence for informational purposes only. This report does not constitute legal advice and should not be relied upon as a substitute for qualified legal counsel. Source statuses are as of 2026-06-02 and may change. StatuteProof does not guarantee detection of all regulatory changes. Always verify regulatory changes against official sources before taking compliance action.
+    </footer>
+  </main>
+</body>
+</html>

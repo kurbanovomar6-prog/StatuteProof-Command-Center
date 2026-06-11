@@ -1,0 +1,44 @@
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!--
+  CONCEPT A — "Regulatory Source Record R"
+
+  The R is solid white, positioned right.
+  To its left: 5 short horizontal bars of varying widths — regulatory
+  source records being monitored. One bar highlighted cyan = the one
+  detected regulatory change that RegRadar surfaced.
+
+  Story: [regulatory sources] → RegRadar R → [output]
+  The composition reads left-to-right: source data → intelligence engine.
+-->
+<defs>
+  <radialGradient id="bg-a" cx="35%" cy="28%" r="80%">
+    <stop offset="0"    stop-color="#14243C"/>
+    <stop offset="0.55" stop-color="#0A1526"/>
+    <stop offset="1"    stop-color="#060B14"/>
+  </radialGradient>
+</defs>
+
+<!-- Background -->
+<rect x="4" y="4" width="56" height="56" rx="14" fill="url(#bg-a)"/>
+
+<!-- Regulatory source record bars (5 bars, varying widths, NOT a uniform grid) -->
+<!-- Each bar = a monitored official regulatory source line -->
+<rect x="8" y="12"   width="12" height="2.5" fill="white"   opacity="0.32"/>
+<rect x="8" y="16.5" width="9"  height="2.5" fill="white"   opacity="0.28"/>
+<rect x="8" y="21"   width="12" height="2.5" fill="#00C4FF"/><!-- ONE DETECTED CHANGE -->
+<rect x="8" y="25.5" width="7"  height="2.5" fill="white"   opacity="0.22"/>
+<rect x="8" y="30"   width="10" height="2.5" fill="white"   opacity="0.17"/>
+
+<!-- R letterform (shifted right to clear source bars) -->
+<!-- Stem -->
+<rect x="22" y="9"  width="9"  height="47" fill="white"/>
+<!-- Top crossbar -->
+<rect x="31" y="9"  width="22" height="7"  fill="white"/>
+<!-- Bowl right wall -->
+<rect x="47" y="9"  width="7"  height="22" fill="white"/>
+<!-- Shoulder / bowl bottom -->
+<rect x="31" y="24" width="23" height="7"  fill="white"/>
+<!-- Leg (parallelogram) — direction implies output signal -->
+<path d="M 22 31 L 31 31 L 54 56 L 45 56 Z" fill="white"/>
+
+</svg>

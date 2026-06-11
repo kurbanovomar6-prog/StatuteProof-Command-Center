@@ -1,0 +1,288 @@
+# =============================================================================
+# docker-compose.yml — RegRadar Enterprise Production Stack
+# =============================================================================
+#
+# Сервисы:
+#   redis-cache    — Redis 7 с AOF-персистентностью; брокер Celery + rate limiter
+#   web-api        — NiceGUI + FastAPI приложение (main.py)
+#   celery-worker  — Celery worker: scraping, OCR, AI-анализ, отчёты
+#   celery-beat    — Celery beat: планировщик периодических задач (crontab)
+#   flower         — Мониторинг Celery задач через веб-интерфейс (опционально)
+#
+# Запуск:
+#   docker compose up -d
+#   docker compose logs -f web-api celery-worker
+#
+# Остановка:
+#   docker compose down
+#
+# Полная переборка (после изменений кода):
+#   docker compose up -d --build
+#
+# Засев демо-данных (после первого запуска):
+#   docker compose exec web-api python scripts/seed_demo_data.py
+# =============================================================================
+
+version: "3.9"
+
+# ── Общие переменные окружения для всех Python-сервисов ───────────────────────
+# YAML-якорь; используется в web-api, celery-worker, celery-beat.
+# Все секретные значения берутся из файла .env (никогда не комитьте .env в git).
+x-app-env: &app-env
+  env_file: .env
+  environment:
+    # Адрес Redis внутри docker-сети (имя сервиса = DNS-имя)
+    REDIS_URL:              "redis://redis-cache:6379/0"
+    CELERY_RESULT_BACKEND:  "redis://redis-cache:6379/1"
+    # SQLite БД монтируется как volume (абсолютный путь внутри контейнера)
+    DATABASE_URL:           "sqlite:////app/data/regrada.db"
+    PYTHONPATH:             /app
+    PYTHONUNBUFFERED:       "1"
+
+# ── Базовая конфигурация Celery-сервисов (worker + beat) ─────────────────────
+# Оба сервиса используют один образ, но разные команды.
+x-celery-base: &celery-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: runtime
+  <<: *app-env
+  volumes:
+    # SQLite БД разделяется между web-api и celery через именованный volume.
+    # В production рекомендуется переключиться на PostgreSQL.
+    - db_data:/app/data
+    - reports_data:/app/reports
+    - snapshots_data:/app/snapshots
+    - logs_data:/app/logs
+  depends_on:
+    redis-cache:
+      condition: service_healthy
+  restart: unless-stopped
+  networks:
+    - regrada_net
+
+# =============================================================================
+# Сервисы
+# =============================================================================
+
+services:
+
+  # ── Redis: брокер Celery и хранилище token-bucket rate limiter ───────────────
+  redis-cache:
+    image: redis:7.2-alpine
+    container_name: regrada_redis
+    restart: unless-stopped
+    # Конфигурация Redis:
+    #   maxmemory 256mb          — лимит памяти (LRU eviction при достижении)
+    #   appendonly yes           — AOF персистентность (каждая запись → диск)
+    #   appendfsync everysec     — fsync раз в секунду (баланс надёжности/скорости)
+    #   save 900 1               — RDB snapshot: если ≥1 изменение за 15 минут
+    #   save 300 10              — RDB snapshot: если ≥10 изменений за 5 минут
+    #   loglevel warning         — минимизируем шум в docker logs
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfilename "appendonly.aof"
+      --appendfsync everysec
+      --save 900 1
+      --save 300 10
+      --loglevel warning
+      --protected-mode no
+    volumes:
+      # Персистентный том для AOF/RDB файлов Redis
+      - redis_data:/data
+    ports:
+      # Привязываем только к localhost — Redis не должен быть доступен из интернета
+      - "127.0.0.1:6379:6379"
+    networks:
+      - regrada_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: "0.5"
+        reservations:
+          memory: 128M
+
+  # ── Web API: NiceGUI + FastAPI приложение ─────────────────────────────────────
+  web-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: regrada_api
+    <<: *app-env
+    ports:
+      # Порт приложения: переопределяется через APP_PORT в .env
+      # В production рекомендуется nginx/traefik как reverse proxy перед этим портом
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      # SQLite: персистентный том (данные не теряются при пересборке образа)
+      - db_data:/app/data
+      # Сгенерированные CEO-отчёты (PDF, HTML, Markdown)
+      - reports_data:/app/reports
+      # YTD-снэпшоты
+      - snapshots_data:/app/snapshots
+      # API-ключи и TLS-сертификаты
+      - keys_data:/app/keys
+      # Логи приложения
+      - logs_data:/app/logs
+    depends_on:
+      redis-cache:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - regrada_net
+    healthcheck:
+      # /api/v1/health — публичный endpoint, не требует JWT
+      test: ["CMD", "curl", "--silent", "--fail", "--max-time", "8",
+             "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          # NiceGUI + SQLAlchemy + AI libs требуют достаточно памяти
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 256M
+
+  # ── Celery Worker: асинхронная обработка задач ────────────────────────────────
+  celery-worker:
+    <<: *celery-base
+    container_name: regrada_worker
+    # Запускаем Celery worker с тремя очередями:
+    #   scraping — скрапинг регуляторов (CPU-bound, OCR, Playwright)
+    #   reports  — генерация PDF/HTML/MD отчётов, email/telegram-дайджесты
+    #   default  — watchdog, dead-link checker, YTD-снэпшоты
+    #
+    # --concurrency=4        — 4 параллельных subprocess-воркера
+    # --max-tasks-per-child  — рестарт воркера после N задач (защита от memory leak)
+    command: >
+      celery -A celery_app worker
+      --loglevel=INFO
+      --concurrency=4
+      --queues=scraping,reports,default
+      --hostname=worker@%h
+      --max-tasks-per-child=100
+      --time-limit=1200
+      --soft-time-limit=1080
+    deploy:
+      resources:
+        limits:
+          # OCR (Tesseract) и Playwright Chromium требуют больше памяти
+          memory: 2G
+          cpus: "2.0"
+        reservations:
+          memory: 512M
+    healthcheck:
+      # celery inspect ping — проверяет что worker активен и отвечает на RPC
+      test: ["CMD", "celery", "-A", "celery_app", "inspect", "ping",
+             "--destination", "worker@*", "--timeout", "5"]
+      interval: 60s
+      timeout: 15s
+      start_period: 30s
+      retries: 3
+
+  # ── Celery Beat: планировщик периодических задач ──────────────────────────────
+  celery-beat:
+    <<: *celery-base
+    container_name: regrada_beat
+    # PersistentScheduler сохраняет состояние расписания в файл на диске.
+    # Это позволяет beat корректно возобновлять задачи после перезапуска.
+    # --schedule: путь к файлу состояния внутри смонтированного volume.
+    command: >
+      celery -A celery_app beat
+      --loglevel=INFO
+      --scheduler celery.beat:PersistentScheduler
+      --schedule /app/data/celerybeat-schedule
+    deploy:
+      resources:
+        limits:
+          # Beat только планирует — не выполняет тяжёлые задачи
+          memory: 128M
+          cpus: "0.25"
+        reservations:
+          memory: 64M
+
+  # ── Flower: веб-монитор Celery задач (опционально, отключить в prod) ──────────
+  # Flower предоставляет real-time дашборд очередей, воркеров и задач.
+  # ВНИМАНИЕ: защитите Flower Basic Auth перед выставлением наружу.
+  flower:
+    image: mher/flower:2.0
+    container_name: regrada_flower
+    restart: unless-stopped
+    environment:
+      CELERY_BROKER_URL:  "redis://redis-cache:6379/0"
+      FLOWER_PORT:        "5555"
+      # Логин и пароль задаются в .env (FLOWER_USER, FLOWER_PASSWORD)
+      FLOWER_BASIC_AUTH:  "${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-regrada2026!}"
+      # URL-prefix если Flower стоит за reverse proxy (например /flower)
+      FLOWER_URL_PREFIX:  "${FLOWER_URL_PREFIX:-}"
+    ports:
+      # Flower доступен только с localhost по умолчанию
+      - "127.0.0.1:${FLOWER_PORT:-5555}:5555"
+    depends_on:
+      redis-cache:
+        condition: service_healthy
+    networks:
+      - regrada_net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+# =============================================================================
+# Сети
+# =============================================================================
+
+networks:
+  regrada_net:
+    driver: bridge
+    # Изолированная подсеть для всех сервисов RegRadar.
+    # Сервисы общаются по именам (redis-cache, web-api и т.д.), а не IP.
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.21.0.0/24"
+
+# =============================================================================
+# Именованные тома (персистентное хранилище)
+# =============================================================================
+
+volumes:
+  # Redis AOF/RDB файлы
+  redis_data:
+    driver: local
+
+  # SQLite БД и celerybeat-schedule (разделяется между web-api и celery)
+  db_data:
+    driver: local
+
+  # Сгенерированные отчёты (PDF, HTML, Markdown)
+  reports_data:
+    driver: local
+
+  # YTD-снэпшоты
+  snapshots_data:
+    driver: local
+
+  # API-ключи, TLS-сертификаты (если используются)
+  keys_data:
+    driver: local
+
+  # Loguru логи приложения
+  logs_data:
+    driver: local

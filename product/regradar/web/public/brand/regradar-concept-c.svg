@@ -1,0 +1,48 @@
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!--
+  CONCEPT C — "Jurisdiction Engine R"
+
+  The R's bowl right-wall is divided into 3 jurisdiction segments
+  separated by precise 2.5px gaps. Each segment = a regulatory
+  jurisdiction/domain being monitored.
+
+  ONE segment is highlighted cyan = one active regulatory jurisdiction
+  where a compliance change has been detected.
+
+  The rest of the R (stem, top bar, shoulder, leg) is solid white.
+  The segmented right wall is the only structural complexity.
+
+  At small sizes: reads as a clean white R with a cyan accent.
+  At full size: the jurisdiction-module structure is visible.
+-->
+<defs>
+  <radialGradient id="bg-c" cx="35%" cy="28%" r="80%">
+    <stop offset="0"    stop-color="#14243C"/>
+    <stop offset="0.55" stop-color="#0A1526"/>
+    <stop offset="1"    stop-color="#060B14"/>
+  </radialGradient>
+</defs>
+
+<!-- Background -->
+<rect x="4" y="4" width="56" height="56" rx="14" fill="url(#bg-c)"/>
+
+<!-- R structure -->
+<!-- Stem (full height) -->
+<rect x="10" y="8" width="9" height="48" fill="white"/>
+<!-- Top crossbar -->
+<rect x="19" y="8" width="24" height="7" fill="white"/>
+<!-- Bowl right wall: 3 segments with 2.5px gaps between them -->
+<!-- Segment 1: top jurisdiction -->
+<rect x="43" y="8"    width="7" height="8"   fill="white"/>
+<!-- gap: y=16–18.5 -->
+<!-- Segment 2: ACTIVE JURISDICTION — detected regulatory change -->
+<rect x="43" y="18.5" width="7" height="7"   fill="#00C4FF"/>
+<!-- gap: y=25.5–27 -->
+<!-- Segment 3: bottom jurisdiction -->
+<rect x="43" y="27"   width="7" height="4.5" fill="white"/>
+<!-- Shoulder -->
+<rect x="19" y="25"   width="31" height="6"  fill="white"/>
+<!-- Leg -->
+<path d="M 19 31 L 27 31 L 52 56 L 44 56 Z" fill="white"/>
+
+</svg>

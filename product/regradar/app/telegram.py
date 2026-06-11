@@ -1,0 +1,227 @@
+"""
+Telegram alert dispatcher — v5.
+
+Sends a formatted alert to a Telegram chat/channel when a MEDIUM or HIGH
+risk regulatory change is detected.
+
+Fallback contract:
+  - Returns False on any failure (missing credentials, network error, API error).
+  - Never raises.  Never blocks or crashes the pipeline.
+  - Baseline (first-run) alerts are suppressed by the caller — this module
+    does not enforce that rule; it just sends what it receives.
+
+Message limits:
+  - Telegram enforces a 4 096-character limit per message.
+  - Summaries and actions are truncated before assembly to stay safe.
+"""
+
+import logging
+
+import requests
+
+from app.config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from app import telegram_settings as _ts
+
+logger = logging.getLogger(__name__)
+
+_ALERT_THRESHOLD = {"MEDIUM", "HIGH"}
+_TELEGRAM_TIMEOUT_S = 10
+_MAX_SUMMARY_LEN    = 600
+_MAX_ACTION_LEN     = 400
+_MAX_REASON_LEN     = 200
+
+_RISK_ICON = {"HIGH": "🔴", "MEDIUM": "🟡", "LOW": "🟢"}
+
+_JURISDICTION_FLAG = {
+    "RU": "🇷🇺",
+    "KZ": "🇰🇿",
+    "AZ": "🇦🇿",
+    "BY": "🇧🇾",
+    "UZ": "🇺🇿",
+    "TR": "🇹🇷",
+    "AE": "🇦🇪",
+    "SA": "🇸🇦",
+    "GE": "🇬🇪",
+    "AM": "🇦🇲",
+}
+
+_URGENCY_LABEL = {
+    "routine":   "Routine",
+    "soon":      "Soon",
+    "immediate": "Immediate ⚠️",
+}
+
+_MATERIALITY_LABEL = {
+    "informational": "Informational",
+    "important":     "Important",
+    "critical":      "Critical 🔴",
+}
+
+
+def send_telegram_message(chat_id: str, text: str) -> bool:
+    """Send a plain account-scoped Telegram message to the provided chat_id."""
+    token = _ts.get_token()
+    if not token or not str(chat_id).strip():
+        logger.warning("Telegram message skipped — bot token or target chat_id missing")
+        return False
+    try:
+        resp = requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={
+                "chat_id": str(chat_id).strip(),
+                "text": str(text),
+                "disable_web_page_preview": True,
+            },
+            timeout=_TELEGRAM_TIMEOUT_S,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        if data.get("ok"):
+            logger.info("Account Telegram test message sent")
+            return True
+        logger.warning("Telegram message API error: %s", data.get("description"))
+        return False
+    except requests.Timeout:
+        logger.warning("Telegram message timed out after %ds", _TELEGRAM_TIMEOUT_S)
+        return False
+    except requests.HTTPError as exc:
+        logger.warning("Telegram message HTTP error: %s", exc)
+        return False
+    except Exception as exc:
+        logger.warning("Telegram message failed (%s: %s)", type(exc).__name__, exc)
+        return False
+
+
+def _safe(text: str, max_len: int) -> str:
+    """
+    Truncate text to `max_len` characters and strip characters that break
+    Telegram Markdown v1 parsing (*bold*, _italic_, `code`).
+
+    We strip formatting markers from dynamic content so the fixed structural
+    markers in the message template always render correctly.
+    """
+    cleaned = (
+        str(text)
+        .replace("*", "")
+        .replace("_", "")
+        .replace("`", "")
+        .replace("[", "")
+        .replace("]", "")
+    )
+    if len(cleaned) > max_len:
+        return cleaned[:max_len] + "…"
+    return cleaned
+
+
+def send_telegram_alert(result: dict) -> bool:
+    """
+    Send a Markdown-formatted alert for MEDIUM or HIGH risk results.
+
+    Parameters
+    ----------
+    result : dict
+        The structured result dict from ``pipeline.run_pipeline()``.
+
+    Returns
+    -------
+    bool
+        True if the message was delivered, False otherwise.
+    """
+    risk = result.get("risk_level", "LOW")
+
+    if risk not in _ALERT_THRESHOLD:
+        logger.debug("Telegram alert skipped — risk=%s below threshold", risk)
+        return False
+
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        logger.warning(
+            "Telegram alert skipped — TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set"
+        )
+        return False
+
+    icon    = _RISK_ICON.get(risk, "")
+    url     = result.get("url", "unknown")
+    summary = _safe(result.get("executive_summary", result.get("reason", "No summary")), _MAX_SUMMARY_LEN)
+    action  = _safe(result.get("business_action_required", "Review manually"),           _MAX_ACTION_LEN)
+
+    source_name  = result.get("source_name", "")
+    jurisdiction = result.get("jurisdiction", "")
+
+    flag        = _JURISDICTION_FLAG.get(jurisdiction, "")
+    market_str  = f"{flag} {jurisdiction}".strip() if jurisdiction else "—"
+    source_line = _safe(source_name, 100) if source_name else _safe(url, 100)
+
+    affected  = result.get("affected_entities", [])
+    deadline  = result.get("deadline")
+    rev_req   = result.get("review_required", False)
+    rev_rsn   = result.get("review_reason", "")
+
+    # Urgency: prefer standardised brief field, fall back to raw value
+    urgency_std = result.get("urgency", "")
+    urgency_label = _URGENCY_LABEL.get(urgency_std, urgency_std.capitalize() if urgency_std else "—")
+
+    # Materiality: prefer standardised brief field from ai_brief layer
+    materiality_std = result.get("materiality", "")
+    if not materiality_std:
+        # derive from semantic_findings for pipeline results that skip ai_brief
+        sf_mat = result.get("semantic_findings", {}).get("materiality", "")
+        from app.ai_brief import _MATERIALITY_MAP
+        materiality_std = _MATERIALITY_MAP.get(sf_mat, "")
+    materiality_label = _MATERIALITY_LABEL.get(materiality_std, materiality_std.capitalize() if materiality_std else "—")
+
+    ai_badge = "✅ AI" if result.get("ai_used") else "📏 Rule-based"
+
+    lines: list[str] = [
+        f"🚨 *StatuteProof Alert* — {icon} {risk}",
+        "",
+        f"*Market:* {market_str}",
+        f"*Source:* {source_line}",
+        f"*Analysis:* {ai_badge}",
+    ]
+
+    if affected:
+        entities_str = ", ".join(str(e) for e in affected[:4])
+        lines.append(f"*Affected:* {_safe(entities_str, 120)}")
+    else:
+        lines.append("*Affected:* Not specified")
+
+    lines.append(f"*Urgency:* {urgency_label or 'Not specified'}")
+    lines.append(f"*Deadline:* {_safe(str(deadline), 60) if deadline else 'Not specified'}")
+    lines.append(f"*Materiality:* {materiality_label or 'Not specified'}")
+    lines.append("")
+    lines.append(f"*Summary:*\n{summary}")
+    lines.append("")
+    lines.append(f"*Action required:*\n{action}")
+
+    if rev_req:
+        rev_text = _safe(rev_rsn, 200) if rev_rsn else "Yes"
+        lines.append(f"\n⚠️ *Legal review required:* {rev_text}")
+
+    lines.append(f"\n🔗 {url}")
+
+    message = "\n".join(lines)
+
+    try:
+        resp = requests.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={
+                "chat_id":                  TELEGRAM_CHAT_ID,
+                "text":                     message,
+                "parse_mode":               "Markdown",
+                "disable_web_page_preview": True,
+            },
+            timeout=_TELEGRAM_TIMEOUT_S,
+        )
+        resp.raise_for_status()
+        logger.info("Telegram alert sent — risk=%s url=%s", risk, url)
+        return True
+
+    except requests.Timeout:
+        logger.warning("Telegram alert timed out after %ds", _TELEGRAM_TIMEOUT_S)
+        return False
+    except requests.HTTPError as exc:
+        logger.warning("Telegram API error: %s", exc)
+        return False
+    except Exception as exc:
+        logger.warning("Telegram alert failed (%s: %s)", type(exc).__name__, exc)
+        return False

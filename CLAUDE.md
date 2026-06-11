@@ -106,9 +106,27 @@ Never use in StatuteProof:
 
 The concept extracted from Ruflo — sequential challenge before execution — lives in `skills/agent-council-review/SKILL.md` as a pure document workflow with no dependencies.
 
+## Product Code Location
+
+The actual StatuteProof product code (Python pipeline, frontend, deployment config) is in:
+
+```
+product/
+```
+
+When doing implementation work:
+- Inspect `product/regradar/app/` for the relevant module before writing anything
+- Use the Source Monitor Agent for monitoring code and source configurations
+- Use the Evidence Trail Agent for evidence files and run records
+- Use the Risk + Brief Pipeline Agent for brief generation and risk scoring logic
+- Use the Legal Language Agent and QA / Critic for any customer-facing text
+- Do not edit Command Center docs (agents/, skills/, workflows/, docs/) unless asked
+
+See `docs/product-integration.md` for the full agent-to-code mapping and Week 1 path.
+
 ## File Organization
 
-- Source code: `../regradar/` (separate repo, not this folder)
+- Product code: `product/` (the actual running application)
 - Agents: `.claude/agents/` (Claude Code subagents) and `agents/` (docs)
 - Skills: `.claude/skills/` (Claude Code skills) and `skills/` (docs)
 - Docs: `docs/`

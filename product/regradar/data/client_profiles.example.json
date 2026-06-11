@@ -1,0 +1,72 @@
+{
+  "uae_payments_demo": {
+    "client_id": "uae_payments_demo",
+    "company_name": "UAE Payments Demo",
+    "market_focus": "UAE-first",
+    "jurisdictions": ["UAE / federal", "UAE / mainland"],
+    "regulated_activities": ["payments", "stored_value", "aml_cft"],
+    "topics_in_scope": ["payments", "stored_value", "licensing", "aml_cft", "reporting"],
+    "sources_in_scope": ["CBUAE", "UAE FIU", "Ministry of Finance", "UAE Legislation Portal"],
+    "sources_excluded": ["DFSA", "DIFC Laws", "ADGM/FSRA"],
+    "alert_threshold": "MEDIUM",
+    "delivery_channels": ["review_queue"],
+    "manual_review_required": true,
+    "notes": "Demo profile for mainland/federal payment service providers."
+  },
+  "uae_vasp_demo": {
+    "client_id": "uae_vasp_demo",
+    "company_name": "UAE VASP Demo",
+    "market_focus": "UAE-first",
+    "jurisdictions": ["UAE / Dubai", "UAE / federal"],
+    "regulated_activities": ["crypto_vasp", "custody", "exchange", "aml_cft", "licensing"],
+    "topics_in_scope": ["crypto_vasp", "custody", "exchange", "brokerage", "licensing", "aml_cft", "enforcement"],
+    "sources_in_scope": ["VARA", "UAE FIU", "CBUAE", "UAE Legislation Portal", "Capital Market Authority / former SCA"],
+    "sources_excluded": ["DFSA", "DIFC Laws", "ADGM/FSRA"],
+    "alert_threshold": "MEDIUM",
+    "delivery_channels": ["review_queue"],
+    "manual_review_required": true,
+    "notes": "Demo profile for Dubai VASP and crypto custody/exchange monitoring."
+  },
+  "difc_financial_demo": {
+    "client_id": "difc_financial_demo",
+    "company_name": "DIFC Financial Demo",
+    "market_focus": "UAE-first",
+    "jurisdictions": ["DIFC"],
+    "regulated_activities": ["financial_services", "funds", "securities", "aml_cft", "data_protection"],
+    "topics_in_scope": ["financial_services", "securities", "funds", "aml_cft", "data_protection", "consultations"],
+    "sources_in_scope": ["DFSA", "DIFC Laws", "UAE FIU"],
+    "sources_excluded": ["VARA", "ADGM/FSRA"],
+    "alert_threshold": "MEDIUM",
+    "delivery_channels": ["review_queue"],
+    "manual_review_required": true,
+    "notes": "Demo profile for DIFC-regulated financial services firms."
+  },
+  "adgm_financial_demo": {
+    "client_id": "adgm_financial_demo",
+    "company_name": "ADGM Financial Demo",
+    "market_focus": "UAE-first",
+    "jurisdictions": ["ADGM", "UAE / federal"],
+    "regulated_activities": ["financial_services", "funds", "securities", "aml_cft"],
+    "topics_in_scope": ["financial_services", "securities", "funds", "aml_cft", "consultations"],
+    "sources_in_scope": ["ADGM/FSRA", "UAE FIU", "UAE Legislation Portal"],
+    "sources_excluded": ["VARA", "DFSA", "DIFC Laws"],
+    "alert_threshold": "MEDIUM",
+    "delivery_channels": ["review_queue"],
+    "manual_review_required": true,
+    "notes": "Demo profile for ADGM/FSRA-regulated financial services firms."
+  },
+  "uae_tax_demo": {
+    "client_id": "uae_tax_demo",
+    "company_name": "UAE Tax Demo",
+    "market_focus": "UAE-first",
+    "jurisdictions": ["UAE / federal"],
+    "regulated_activities": ["tax", "finance", "corporate_tax", "vat"],
+    "topics_in_scope": ["tax", "vat", "corporate_tax", "excise", "reporting", "deadlines"],
+    "sources_in_scope": ["Federal Tax Authority", "Ministry of Finance", "UAE Legislation Portal"],
+    "sources_excluded": ["VARA", "DFSA", "DIFC Laws", "ADGM/FSRA"],
+    "alert_threshold": "MEDIUM",
+    "delivery_channels": ["review_queue"],
+    "manual_review_required": true,
+    "notes": "Demo profile for UAE federal tax and fiscal monitoring."
+  }
+}

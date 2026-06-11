@@ -1,0 +1,42 @@
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!--
+  CONCEPT B — "Signal Extraction R"
+
+  The R is a clean, premium white geometric letterform.
+  The ONLY cyan element is the leg — the diagonal stroke that makes
+  an R distinct from a P.
+
+  Story: the R processes regulatory information (white body = all the
+  data). From that complexity, ONE clear signal emerges: the leg.
+  The cyan leg = the detected regulatory change. Minimal, precise.
+
+  The 1px gap between shoulder and leg makes the signal visually
+  "emerge" from the core — a detail that reads at full size.
+-->
+<defs>
+  <radialGradient id="bg-b" cx="35%" cy="28%" r="80%">
+    <stop offset="0"    stop-color="#14243C"/>
+    <stop offset="0.55" stop-color="#0A1526"/>
+    <stop offset="1"    stop-color="#060B14"/>
+  </radialGradient>
+</defs>
+
+<!-- Background -->
+<rect x="4" y="4" width="56" height="56" rx="14" fill="url(#bg-b)"/>
+
+<!-- R — white body: stem + bowl + shoulder -->
+<!-- Stem -->
+<rect x="10" y="8" width="9" height="48" fill="white"/>
+<!-- Top crossbar -->
+<rect x="19" y="8" width="25" height="7" fill="white"/>
+<!-- Bowl right wall -->
+<rect x="41" y="8" width="7"  height="23" fill="white"/>
+<!-- Shoulder (bowl bottom / junction — 1px gap before leg) -->
+<rect x="19" y="24" width="29" height="6" fill="white"/>
+
+<!-- 1px breathing gap at y=30–31 between shoulder and leg -->
+
+<!-- Leg — the ONE detected signal, the only cyan element -->
+<path d="M 19 31 L 27 31 L 52 56 L 44 56 Z" fill="#00C4FF"/>
+
+</svg>

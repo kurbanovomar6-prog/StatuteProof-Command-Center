@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CBUAE Rulebook Proof/Diff Showcase</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #111821;
+      --panel-2: #151f2b;
+      --text: #edf3f8;
+      --muted: #a8b3bf;
+      --line: #293544;
+      --accent: #6ee7b7;
+      --warn: #fbbf24;
+      --blue: #93c5fd;
+      --red: #fca5a5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    .page { max-width: 1120px; margin: 0 auto; padding: 36px 24px 56px; }
+    header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 24px; }
+    .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 700; }
+    h1 { font-size: 34px; line-height: 1.1; margin: 10px 0 14px; }
+    h2 { font-size: 20px; margin: 0 0 14px; }
+    p { margin: 0 0 12px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .badge { border: 1px solid var(--line); background: var(--panel-2); border-radius: 999px; padding: 7px 11px; font-size: 13px; color: var(--muted); }
+    .badge.status { color: #052e1f; background: var(--accent); border-color: var(--accent); font-weight: 800; }
+    .badge.warn { color: #3f2f02; background: var(--warn); border-color: var(--warn); font-weight: 800; }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 22px 0; }
+    .metric { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-height: 112px; }
+    .metric .value { font-size: 32px; font-weight: 800; color: var(--text); }
+    .metric .label { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    section { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin: 16px 0; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .kv { display: grid; grid-template-columns: 180px 1fr; gap: 8px 12px; font-size: 14px; }
+    .kv .k { color: var(--muted); }
+    .path, .url { word-break: break-all; color: var(--blue); }
+    .rows { display: grid; gap: 12px; }
+    .row-card { background: #0d131b; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+    .row-title { font-weight: 750; margin-bottom: 6px; }
+    .row-meta { color: var(--muted); font-size: 13px; }
+    .row-url { color: var(--blue); font-size: 12px; margin-top: 7px; word-break: break-all; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 7px 0; }
+    .safe { color: var(--accent); font-weight: 700; }
+    .caution { color: var(--warn); font-weight: 700; }
+    footer { color: var(--muted); font-size: 12px; margin-top: 22px; }
+    @media (max-width: 820px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .kv { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: white; color: #111827; }
+      .page { padding: 18px; max-width: none; }
+      section, .metric, .row-card { background: white; border-color: #d1d5db; }
+      .badge { border-color: #d1d5db; }
+      .path, .url, .row-url { color: #1d4ed8; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">StatuteProof source validation</div>
+      <h1>CBUAE Rulebook Proof/Diff Showcase</h1>
+      <p>CBUAE Rulebook proof/diff is under validation. This artifact explains a manually callable proof pipeline, not live production coverage.</p>
+      <div class="badges">
+        <span class="badge status">Under validation</span>
+        <span class="badge warn">Not active monitoring yet</span>
+        <span class="badge">No Telegram delivery</span>
+        <span class="badge">Human review required before activation</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="metric"><div class="value">10</div><div class="label">Extracted rows</div></div>
+      <div class="metric"><div class="value">Yes</div><div class="label">Same-run stability passed</div></div>
+      <div class="metric"><div class="value">0/0/0</div><div class="label">Added / removed / changed rows</div></div>
+      <div class="metric"><div class="value">No</div><div class="label">Alert draft created</div></div>
+    </div>
+
+    <section>
+      <h2>1. Executive summary</h2>
+      <p><span class="safe">Same-run stability passed.</span> The CBUAE Rulebook adapter extracted structured rows from the official Rulebook revision updates page and produced stable output across repeated extraction in the same run.</p>
+      <p>No row changes were detected in this run. No alert draft was created because no row changes were found.</p>
+      <p><span class="caution">Activation requires scheduled repeated validation and human-reviewed alert flow.</span></p>
+    </section>
+
+    <section>
+      <h2>2. Official source</h2>
+      <div class="kv">
+        <div class="k">Source ID</div><div>ae-cbuae-rulebook-aml-payments</div>
+        <div class="k">Source name</div><div>CBUAE Rulebook revision updates</div>
+        <div class="k">Official URL</div><div class="url">https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&amp;changed=-365%20day</div>
+        <div class="k">Recommended status</div><div>under_validation</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Extraction result</h2>
+      <div class="split">
+        <div class="kv">
+          <div class="k">First run status</div><div>ok</div>
+          <div class="k">First HTTP status</div><div>200</div>
+          <div class="k">First item count</div><div>10</div>
+        </div>
+        <div class="kv">
+          <div class="k">Second run status</div><div>ok</div>
+          <div class="k">Second HTTP status</div><div>200</div>
+          <div class="k">Second item count</div><div>10</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. Snapshot result</h2>
+      <div class="kv">
+        <div class="k">Current snapshot</div><div class="path">data/source_snapshots/cbuae_rulebook_proof/cbuae_rulebook_snapshot_20260604T141855Z.json</div>
+        <div class="k">Previous snapshot</div><div class="path">data/source_snapshots/cbuae_rulebook_proof/cbuae_rulebook_snapshot_20260604T141825Z.json</div>
+        <div class="k">Row count</div><div>10</div>
+        <div class="k">Row hash</div><div class="path">140348762b51d30509c53ab0011d6aca0ea5bf873f57c19ae8f64cc7046ddc4d</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>5. Diff result</h2>
+      <div class="kv">
+        <div class="k">Baseline created</div><div></div>
+        <div class="k">Added rows</div><div>0</div>
+        <div class="k">Removed rows</div><div>0</div>
+        <div class="k">Changed rows</div><div>0</div>
+        <div class="k">Summary</div><div>No row changes detected</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>6. Sample extracted rows</h2>
+      <div class="rows">
+
+        <article class="row-card">
+          <div class="row-title">Cabinet Resolution No. (134) of 2025 Regarding the Executive Regulations of Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing</div>
+          <div class="row-meta">Date: 14 December 2025</div>
+          <div class="row-url">https://rulebook.centralbank.ae/en/rulebook/cabinet-resolution-no-134-2025-regarding-executive-regulations-federal-decree-law-no-10</div>
+        </article>
+
+        <article class="row-card">
+          <div class="row-title">Exchange Business Regulation</div>
+          <div class="row-meta">Date: 26 June 2025</div>
+          <div class="row-url">https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation</div>
+        </article>
+
+        <article class="row-card">
+          <div class="row-title">Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing</div>
+          <div class="row-meta">Date: 14 October 2025</div>
+          <div class="row-url">https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-10-2025-regarding-anti-money-laundering-and-combating-financing</div>
+        </article>
+
+        <article class="row-card">
+          <div class="row-title">Federal Decree-Law No. (6) of 2025 Regarding the Central Bank, Regulation of Financial Institutions and Activities, and Insurance Business</div>
+          <div class="row-meta">Date: 16 September 2025</div>
+          <div class="row-url">https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and</div>
+        </article>
+
+        <article class="row-card">
+          <div class="row-title">Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance</div>
+          <div class="row-meta">Date: 07 November 2025</div>
+          <div class="row-url">https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance</div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>7. What this proves</h2>
+      <ul>
+        <li>Official source row extraction works for the tested CBUAE Rulebook revision updates page.</li>
+        <li>Rows are normalized into a repeatable snapshot structure.</li>
+        <li>Snapshots can be compared by stable row identity and row hashes.</li>
+        <li>No row changes means no alert draft is created in this validation flow.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>8. What this does not prove yet</h2>
+      <ul>
+        <li>It does not activate CBUAE as a monitored production source.</li>
+        <li>It does not prove scheduled operation over time.</li>
+        <li>It does not prove jurisdiction-wide regulator coverage.</li>
+        <li>It does not send or approve client alerts.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>9. Next validation action</h2>
+      <p>Run scheduled repeated proof/diff validation, review any future draft candidates manually, and validate the human-reviewed alert flow before considering activation.</p>
+    </section>
+
+    <section>
+      <h2>10. Not legal advice / limitations</h2>
+      <ul>
+        <li>This is a technical source validation artifact, not legal advice.</li>
+        <li>CBUAE Rulebook proof/diff is under validation.</li>
+        <li>No delivery, approval, or production source activation was performed.</li>
+      </ul>
+    </section>
+
+    <footer>Generated from reports/cbuae_rulebook_proof/cbuae_rulebook_diff_2026-06-04.json. Static report: no external CSS, no JavaScript.</footer>
+  </main>
+</body>
+</html>

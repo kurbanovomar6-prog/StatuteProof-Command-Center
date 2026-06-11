@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RegRadar — Source Readiness AE</title>
+<style>
+  :root {
+    --bg:    #07111F;
+    --bg2:   #0d1e2e;
+    --bg3:   #122030;
+    --cyan:  #16D9F5;
+    --text:  #c8d8e8;
+    --dim:   #6a8aaa;
+    --border:#1e3040;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',Arial,sans-serif;
+         font-size:14px; line-height:1.6; padding:32px 24px; }
+  header { border-bottom:1px solid var(--border); padding-bottom:16px; margin-bottom:24px; }
+  .brand { color:var(--cyan); font-size:1.5em; font-weight:700; letter-spacing:1px; }
+  .subtitle { color:var(--dim); font-size:0.9em; margin-top:4px; }
+  h2 { color:var(--cyan); font-size:1em; text-transform:uppercase;
+        letter-spacing:1px; margin:24px 0 8px; }
+  .verdict { font-size:1.2em; font-weight:700; color:#16D9F5; margin:8px 0; }
+  .pilot-note { background:var(--bg2); border:1px solid var(--border);
+                 border-left:3px solid #16D9F5; padding:12px 16px;
+                 border-radius:4px; margin:12px 0 20px; color:var(--text); }
+  .stats { display:flex; gap:24px; margin-bottom:20px; }
+  .stat { background:var(--bg2); border:1px solid var(--border);
+           border-radius:6px; padding:12px 20px; min-width:140px; }
+  .stat-num { font-size:2em; font-weight:700; color:var(--cyan); }
+  .stat-label { color:var(--dim); font-size:0.82em; }
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; }
+  th { background:var(--bg3); color:var(--cyan); text-align:left;
+        padding:8px 10px; font-size:0.82em; text-transform:uppercase;
+        letter-spacing:0.5px; border-bottom:1px solid var(--border); }
+  td { padding:8px 10px; border-bottom:1px solid var(--border);
+        vertical-align:top; }
+  tr:hover td { background:var(--bg2); }
+  code { background:var(--bg3); padding:1px 5px; border-radius:3px;
+          font-size:0.82em; color:#9dbfe0; }
+  ul { padding-left:20px; }
+  li { margin-bottom:4px; color:var(--dim); }
+  .disclaimer { margin-top:32px; padding:12px 16px; background:var(--bg2);
+                 border:1px solid var(--border); border-radius:4px;
+                 color:var(--dim); font-size:0.82em; }
+  footer { margin-top:32px; color:var(--dim); font-size:0.78em;
+            border-top:1px solid var(--border); padding-top:12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">RegRadar</div>
+  <div class="subtitle">
+    Source Readiness Report &mdash; AE (fintech)
+    &nbsp;&bull;&nbsp; Generated: 2026-05-29T20:42:17+00:00
+  </div>
+</header>
+
+<h2>Executive Summary</h2>
+<div class="verdict">FREE CHECK READY</div>
+<div class="pilot-note">Core regulatory sources (AE) are extracting cleanly. A free source check can be offered to prospects immediately: 3-5 sources tested, readiness snapshot, limitations disclosed.</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">9</div>
+    <div class="stat-label">Active Sources</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">3</div>
+    <div class="stat-label">Blocked / Restricted</div>
+  </div>
+</div>
+
+<h2>Source Readiness Table</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Priority</th>
+      <th>Status</th>
+      <th>Quality</th>
+      <th style="text-align:right">Chars</th>
+      <th>Limitations</th>
+    </tr>
+  </thead>
+  <tbody>
+<tr><td>Central Bank of the UAE</td><td><code>central_bank</code></td><td>P0</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>26,804</td><td style='color:#8bb'>—</td></tr>
+<tr><td>Dubai Virtual Assets Regulatory Authority (VARA)</td><td><code>financial_regulator</code></td><td>P0</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>2,705</td><td style='color:#8bb'>—</td></tr>
+<tr><td>Dubai Financial Services Authority (DFSA)</td><td><code>financial_regulator</code></td><td>P0</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>5,627</td><td style='color:#8bb'>—</td></tr>
+<tr><td>Abu Dhabi Global Market (ADGM)</td><td><code>financial_regulator</code></td><td>P0</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>2,135</td><td style='color:#8bb'>—</td></tr>
+<tr><td>UAE Financial Intelligence Unit (UAEFIU)</td><td><code>aml</code></td><td>P0</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>2,026</td><td style='color:#8bb'>—</td></tr>
+<tr><td>UAE Ministry of Finance</td><td><code>finance_ministry</code></td><td>P1</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>13,340</td><td style='color:#8bb'>—</td></tr>
+<tr><td>UAE Legislation Portal</td><td><code>legal_acts</code></td><td>P1</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>15,644</td><td style='color:#8bb'>—</td></tr>
+<tr><td>DIFC Laws and Regulations</td><td><code>legal_database</code></td><td>P1</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>9,150</td><td style='color:#8bb'>—</td></tr>
+<tr><td>UAE Ministry of Economy</td><td><code>company_registry</code></td><td>P2</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d4a7a;color:#b0d8ff">✔ Active</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>14,646</td><td style='color:#8bb'>—</td></tr>
+<tr><td>UAE Securities and Commodities Authority (SCA)</td><td><code>financial_regulator</code></td><td>Blocked</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#7a0000;color:#ffd0d0">❌ Blocked</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#7a5f00;color:#fff3b0">⚡ Medium</span></td><td style='text-align:right'>944</td><td style='color:#8bb'>Navigation-only SPA — content not extractable without a custom adapter.</td></tr>
+<tr><td>UAE Federal Tax Authority (FTA)</td><td><code>tax</code></td><td>Blocked</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#7a0000;color:#ffd0d0">❌ Blocked</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#7a0000;color:#ffd0d0">❌ Failed</span></td><td style='text-align:right'>0</td><td style='color:#8bb'>Geo-blocked or JS SPA — requires dedicated adapter or alternative source.</td></tr>
+<tr><td>UAE e-Laws Portal (Ministry of Justice)</td><td><code>legal_acts</code></td><td>Blocked</td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#7a0000;color:#ffd0d0">❌ Blocked</span></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#7a0000;color:#ffd0d0">❌ Failed</span></td><td style='text-align:right'>0</td><td style='color:#8bb'>Geo-blocked or JS SPA — requires dedicated adapter or alternative source.</td></tr>
+  </tbody>
+</table>
+
+<h2>Pilot Source Set — AE Fintech (P0)</h2>
+<p style="color:var(--dim);margin-bottom:12px">
+  P0 sources are the minimum viable monitoring set for a paid pilot.
+  They cover central banking, AML/CFT, and financial regulation.
+</p>
+<table>
+  <thead>
+    <tr><th>Name</th><th>Category</th><th>Quality</th><th>Chars</th></tr>
+  </thead>
+  <tbody>
+<tr><td>Central Bank of the UAE</td><td><code>central_bank</code></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>26,804</td></tr><tr><td>Dubai Virtual Assets Regulatory Authority (VARA)</td><td><code>financial_regulator</code></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>2,705</td></tr><tr><td>Dubai Financial Services Authority (DFSA)</td><td><code>financial_regulator</code></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>5,627</td></tr><tr><td>Abu Dhabi Global Market (ADGM)</td><td><code>financial_regulator</code></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>2,135</td></tr><tr><td>UAE Financial Intelligence Unit (UAEFIU)</td><td><code>aml</code></td><td><span style="padding:2px 8px;border-radius:4px;font-size:0.82em;background:#0d7a4e;color:#d4fce8">✅ Good</span></td><td style='text-align:right'>2,026</td></tr>
+  </tbody>
+</table>
+
+<h2>Known Limitations</h2>
+<ul><li>UAE Securities and Commodities Authority (SCA): Navigation-only SPA — content not extractable without a custom adapter.</li><li>UAE Federal Tax Authority (FTA): Geo-blocked or JS SPA — requires dedicated adapter or alternative source.</li><li>UAE e-Laws Portal (Ministry of Justice): Geo-blocked or JS SPA — requires dedicated adapter or alternative source.</li></ul>
+
+<h2>Pilot Recommendation</h2>
+<div class="pilot-note">
+  <strong>Verdict:</strong> FREE CHECK READY<br>
+  Core regulatory sources (AE) are extracting cleanly. A free source check can be offered to prospects immediately: 3-5 sources tested, readiness snapshot, limitations disclosed.
+</div>
+
+<div class="disclaimer">
+  &#9888; <strong>Not legal advice.</strong>
+  This report reflects automated extraction quality testing only.
+  Source availability and content may change without notice.
+  This document is for internal RegRadar use and prospect evaluation only.
+  It does not constitute legal, regulatory, or compliance advice.
+</div>
+
+<footer>
+  RegRadar &mdash; Regulatory Intelligence Platform &mdash; 2026-05-29T20:42:17+00:00
+</footer>
+</body>
+</html>

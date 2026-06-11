@@ -1,0 +1,18 @@
+# Procfile — RegRadar process types for Railway / Heroku-compatible platforms
+#
+# Railway usage:
+#   "web"    → create as the primary Railway service (auto-detects $PORT)
+#   "worker" → create as a second Railway service with startCommand override
+#
+# Celery flags:
+#   --queues scraping,reports,default  consume all three queues in one worker
+#   --concurrency 2                    safe for Railway's 512 MB starter tier;
+#                                      raise to 4 on the $10/mo plan
+#   --without-gossip --without-mingle  disable inter-worker handshake traffic
+#                                      (unnecessary when only one worker replica)
+#   --max-tasks-per-child 50           recycle the worker process every 50 tasks
+#                                      to prevent memory leaks from Playwright
+
+web:    bash entrypoint.sh web
+
+worker: bash entrypoint.sh worker

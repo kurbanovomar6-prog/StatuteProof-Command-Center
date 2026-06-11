@@ -22,3 +22,53 @@ node_modules/
 
 # Local planning reports
 planning-reports/
+
+# Obsidian app config (if this folder is opened as a vault)
+.obsidian/
+StatuteProof/
+
+# Product secrets and runtime data
+product/.env
+product/.env.*
+product/keys/
+product/*.pem
+product/*.key
+product/*.p12
+product/*.pfx
+product/node_modules/
+product/dist/
+product/build/
+product/.next/
+product/.venv/
+product/venv/
+product/__pycache__/
+product/.git/
+product/regrada.db
+product/regrada.db-wal
+product/regrada.db-shm
+product/ruvector.db
+product/agentdb.rvf
+product/agentdb.rvf.lock
+product/logs/
+product/regradar/.env
+product/regradar/.env.*
+product/regradar/data/telegram_clients.json
+
+# Python cache anywhere in product
+product/**/__pycache__/
+product/**/.pytest_cache/
+product/**/.mypy_cache/
+product/**/.ruff_cache/
+
+# Product runtime data (not source code)
+product/.cache/
+product/.claude-flow/
+product/.swarm/
+product/regradar/.claude/
+product/regradar/data/source_runs/*.jsonl
+product/regradar/data/source_snapshots/
+product/regradar/data/alert_reviews/
+product/regradar/data/diagnostics/
+
+# Office temp files
+product/**/*~$*

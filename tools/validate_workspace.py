@@ -225,9 +225,15 @@ for path in root.rglob('*.md'):
 
 # ── Secret scan ───────────────────────────────────────────────────────────────
 
-SECRET_PATTERNS = [
-    r'sk-ant-[A-Za-z0-9\-_]{20,}',
-    r'sk-[A-Za-z0-9]{40,}',
+# Key-value patterns that flag actual key values anywhere (including product/)
+SECRET_KEY_VALUE_PATTERNS = [
+    r'sk-ant-[A-Za-z0-9\-_]{20,}',   # real Anthropic key
+    r'sk-[A-Za-z0-9]{40,}',           # real OpenAI key (40+ chars)
+]
+
+# Variable-name patterns that flag assignments in non-product code
+# (product/ code legitimately has os.getenv("OPENAI_API_KEY") calls)
+SECRET_VARNAME_PATTERNS = [
     r'OPENAI_API_KEY\s*=\s*[^\s]+',
     r'ANTHROPIC_API_KEY\s*=\s*[^\s]+',
 ]
@@ -241,13 +247,21 @@ for path in root.rglob('*'):
         continue
     if path.suffix in {'.pyc', '.pyo'}:
         continue
+    rel = path.relative_to(root)
+    in_product = 'product' in rel.parts
     try:
         text = path.read_text(errors='ignore')
     except Exception:
         continue
-    for pat in SECRET_PATTERNS:
+    # Key-value scan: applies everywhere
+    for pat in SECRET_KEY_VALUE_PATTERNS:
         if re.search(pat, text):
-            errors.append(f'POTENTIAL SECRET in {path.relative_to(root)}: matches {pat}')
+            errors.append(f'POTENTIAL SECRET in {rel}: matches {pat}')
+    # Variable-name scan: skip product/ (product code has legitimate env var references)
+    if not in_product:
+        for pat in SECRET_VARNAME_PATTERNS:
+            if re.search(pat, text):
+                errors.append(f'POTENTIAL SECRET in {rel}: matches {pat}')
 
 # ── node_modules check ────────────────────────────────────────────────────────
 

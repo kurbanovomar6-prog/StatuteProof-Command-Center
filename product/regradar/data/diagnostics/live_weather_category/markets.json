@@ -1,0 +1,18 @@
+[
+  {
+    "id": "M2",
+    "question": "Will weather be mentioned in a debate?",
+    "description": "",
+    "active": true,
+    "closed": false,
+    "outcomes": "[\"Yes\",\"No\"]",
+    "outcomePrices": "[\"0.5\",\"0.5\"]",
+    "clobTokenIds": "[\"YES\",\"NO\"]",
+    "event_id": "EVT2",
+    "event_slug": "weather-mentioned-in-debate",
+    "event_title": "Will weather be mentioned in a debate?",
+    "event_description": "",
+    "event_category": null,
+    "event_tags": null
+  }
+]

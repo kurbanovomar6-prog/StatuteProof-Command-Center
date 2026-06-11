@@ -1,0 +1,12 @@
+[Unit]
+Description=StatuteProof CBUAE Rulebook proof/diff watcher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=regradar
+Group=regradar
+WorkingDirectory=/srv/regradar
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/regradar/.venv/bin/python scripts/run_cbuae_rulebook_watch.py

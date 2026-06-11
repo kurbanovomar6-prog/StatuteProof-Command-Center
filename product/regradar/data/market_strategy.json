@@ -1,0 +1,588 @@
+{
+  "version": "1.0",
+  "generated_for": "RegRadar",
+  "default_language": "en",
+  "last_updated": "2026-05-26",
+  "positioning": {
+    "primary": "AI-powered regulatory monitoring for undercovered and fast-changing markets.",
+    "secondary": "RegRadar tracks official regulators across Central Asia, Caucasus, Turkey and GCC — turning regulatory changes into action-ready AI compliance briefs for fintech, payments, crypto and legal teams.",
+    "not": [
+      "Global RegTech covering all countries",
+      "Legal advice or compliance guarantee",
+      "Russia-first product"
+    ],
+    "best_tagline": "RegRadar monitors regulatory changes across undercovered and fast-changing markets: Central Asia, Caucasus, Turkey, and GCC."
+  },
+  "tiers": {
+    "tier_1": ["AE", "TR", "SA", "KZ"],
+    "tier_2": ["UZ", "GE", "AZ", "BH", "QA", "MY"],
+    "tier_3": ["SG", "HK", "PH", "ID", "MD", "KG"],
+    "tier_4": ["OM", "KW", "BY", "AM"]
+  },
+  "markets": {
+    "AE": {
+      "country_name": "United Arab Emirates",
+      "region": "GCC",
+      "tier": 1,
+      "priority_label": "highest_priority",
+      "commercial_potential": "high",
+      "sales_difficulty": "medium",
+      "technical_readiness": "usable",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 300,
+        "typical": 800,
+        "high": 2000
+      },
+      "best_customer_types": [
+        "fintech companies",
+        "payment providers",
+        "crypto and VASP firms",
+        "legal and compliance consultants",
+        "free zone businesses with multi-regulator exposure"
+      ],
+      "why_it_matters": "UAE is the leading crypto and VASP regulatory market in the GCC. VARA, CBUAE, DFSA and ADGM FSRA all issue frequent guidance. Clients operating across DIFC, ADGM and UAE mainland face complex multi-regulator compliance requirements. Significant international buyer base with English-language expectations.",
+      "main_risks": [
+        "High trust expectations from sophisticated international clients",
+        "Requires polished English-language demo and sample briefs",
+        "Some official portals have geo-restrictions or require SPA adapters"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": 100,
+      "recommended_next_action": "Expand to DFSA, ADGM FSRA and UAE Legislation Portal. Prepare an English demo brief using VARA or CBUAE example content."
+    },
+    "TR": {
+      "country_name": "Turkey",
+      "region": "Caucasus / MENA crossover",
+      "tier": 1,
+      "priority_label": "highest_priority",
+      "commercial_potential": "high",
+      "sales_difficulty": "low",
+      "technical_readiness": "strong",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 150,
+        "typical": 500,
+        "high": 1500
+      },
+      "best_customer_types": [
+        "payment institutions",
+        "banks with cross-border operations",
+        "fintech companies",
+        "AML compliance teams",
+        "legal advisors covering Turkish regulatory law"
+      ],
+      "why_it_matters": "Turkey has one of the most active regulatory environments in the region. TCMB, BDDK, SPK and MASAK all publish frequent updates. Payment and fintech regulation is evolving rapidly. Strong cross-border relevance for EU, CIS and Middle East-facing businesses. RegRadar already has strong Turkey coverage.",
+      "main_risks": [
+        "Turkish-language primary sources require multilingual extraction and brief generation",
+        "Rapid regulatory changes demand high source reliability"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": 100,
+      "recommended_next_action": "Turkey coverage is strong. Focus on creating English demo materials targeting Turkish compliance teams and international firms with Turkey exposure. Turkey is a natural first-contact market."
+    },
+    "SA": {
+      "country_name": "Saudi Arabia",
+      "region": "GCC",
+      "tier": 1,
+      "priority_label": "highest_priority",
+      "commercial_potential": "high",
+      "sales_difficulty": "high",
+      "technical_readiness": "in_progress",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 500,
+        "typical": 1200,
+        "high": 3000
+      },
+      "best_customer_types": [
+        "fintech companies operating under SAMA FinTech framework",
+        "payment providers",
+        "banks with KSA operations",
+        "legal firms advising on KSA financial regulation",
+        "crypto and VASP firms monitoring CMA and SAMA"
+      ],
+      "why_it_matters": "Saudi Arabia is the largest GCC economy. Vision 2030 is driving significant financial regulatory reform. SAMA, CMA and ZATCA all publish frequent updates. High budget potential from the Saudi fintech, banking and legal sectors. Under-served by existing RegTech tools for international buyers.",
+      "main_risks": [
+        "High trust bar — clients expect enterprise-grade, polished product",
+        "Some official portals have geo-restrictions",
+        "Longer sales cycle requiring local trust-building or partnership",
+        "Arabic-language primary sources require multilingual extraction"
+      ],
+      "coverage_status": "in_progress",
+      "current_coverage_score": null,
+      "recommended_next_action": "Complete Saudi Arabia source pack. Prioritize SAMA, CMA and ZATCA extraction. Prepare an English sample brief for KSA fintech or VASP context. Do not approach KSA clients without a working demo."
+    },
+    "KZ": {
+      "country_name": "Kazakhstan",
+      "region": "Central Asia",
+      "tier": 1,
+      "priority_label": "highest_priority",
+      "commercial_potential": "medium",
+      "sales_difficulty": "low",
+      "technical_readiness": "strong",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 150,
+        "typical": 400,
+        "high": 1000
+      },
+      "best_customer_types": [
+        "banks and microfinance institutions",
+        "payment companies",
+        "fintech startups",
+        "AIFC-licensed international firms",
+        "legal consultants covering Kazakh regulatory law"
+      ],
+      "why_it_matters": "Kazakhstan has a structured regulatory apparatus: ARDFM, National Bank and AIFC. Requirements for banks, MFOs and payment companies are changing frequently. AIFC creates demand from English-speaking international firms. RegRadar already has strong Kazakhstan coverage.",
+      "main_risks": [
+        "Client budgets are lower than GCC markets",
+        "Some official portals are in Kazakh or Russian requiring multilingual extraction"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": 93,
+      "recommended_next_action": "Kazakhstan coverage is strong (score 93). Create English-language demo materials for the AIFC and fintech audience. Target international legal firms with Kazakhstan exposure as first contacts."
+    },
+    "UZ": {
+      "country_name": "Uzbekistan",
+      "region": "Central Asia",
+      "tier": 2,
+      "priority_label": "regional_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "low",
+      "technical_readiness": "usable",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 50,
+        "typical": 200,
+        "high": 700
+      },
+      "best_customer_types": [
+        "payment companies expanding in Uzbekistan",
+        "banks and microfinance institutions",
+        "fintech startups",
+        "legal consultants covering Central Asia"
+      ],
+      "why_it_matters": "Uzbekistan is actively liberalizing its financial system. New regulations for crypto, payments and digital banking are emerging. Lex.uz provides a structured legal source. Limited existing RegTech coverage creates an advantage for early entrants.",
+      "main_risks": [
+        "Lower client budgets",
+        "Uzbek and Russian language primary sources",
+        "Less mature compliance culture means slower enterprise sales"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": null,
+      "recommended_next_action": "Include in Central Asia bundle with KZ. Good coverage foundation exists. Bundle pricing improves commercial viability."
+    },
+    "GE": {
+      "country_name": "Georgia",
+      "region": "Caucasus",
+      "tier": 2,
+      "priority_label": "regional_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "low",
+      "technical_readiness": "strong",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 100,
+        "typical": 300,
+        "high": 800
+      },
+      "best_customer_types": [
+        "payment companies",
+        "fintech firms",
+        "crypto businesses registered in Georgia",
+        "international companies using Georgia as a regional base",
+        "legal consultants covering the Caucasus"
+      ],
+      "why_it_matters": "Georgia has an active National Bank and a relatively transparent regulatory framework. Many international businesses use Georgia as a base for CIS operations. Strong regulatory transparency makes monitoring practical. RegRadar already has strong Georgia coverage.",
+      "main_risks": [
+        "Small standalone market size",
+        "Best sold as part of a Caucasus or CIS bundle"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": null,
+      "recommended_next_action": "Include in Caucasus bundle with AZ. Target companies registered in Georgia with cross-border payment or crypto activities."
+    },
+    "AZ": {
+      "country_name": "Azerbaijan",
+      "region": "Caucasus",
+      "tier": 2,
+      "priority_label": "regional_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "low",
+      "technical_readiness": "usable",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 50,
+        "typical": 200,
+        "high": 600
+      },
+      "best_customer_types": [
+        "banks",
+        "payment companies",
+        "fintech startups",
+        "legal consultants covering Caucasus markets"
+      ],
+      "why_it_matters": "Azerbaijan's Central Bank (CBAR) is the primary financial regulator. Useful for Caucasus coverage bundle. Growing fintech and payment market.",
+      "main_risks": [
+        "Small market — difficult to sell as standalone",
+        "Some official portals have access or extraction issues",
+        "Note: founder is based in Azerbaijan — avoid artificially inflating commercial priority relative to other markets"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": null,
+      "recommended_next_action": "Include in Caucasus bundle with GE. Do not prioritize over higher-revenue Tier 1 markets."
+    },
+    "BH": {
+      "country_name": "Bahrain",
+      "region": "GCC",
+      "tier": 2,
+      "priority_label": "regional_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "medium",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 200,
+        "typical": 600,
+        "high": 2000
+      },
+      "best_customer_types": [
+        "fintech companies with Bahrain presence",
+        "CBB-regulated entities",
+        "payment companies",
+        "crypto and digital asset firms"
+      ],
+      "why_it_matters": "Bahrain has a progressive financial regulatory framework under the Central Bank of Bahrain. FinTech Bay and the CBB sandbox attract international fintech firms. Smaller than UAE and KSA but high compliance awareness.",
+      "main_risks": [
+        "Smaller market size",
+        "Compliance demand often part of a wider GCC requirement rather than standalone"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "Add to GCC bundle with AE and QA. Validate CBB source extraction before enabling. Do not activate until tested."
+    },
+    "QA": {
+      "country_name": "Qatar",
+      "region": "GCC",
+      "tier": 2,
+      "priority_label": "regional_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "medium",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 200,
+        "typical": 700,
+        "high": 2000
+      },
+      "best_customer_types": [
+        "QFC-licensed international firms",
+        "banks with Qatar operations",
+        "fintech companies",
+        "legal advisors"
+      ],
+      "why_it_matters": "Qatar Central Bank and QFCRA are active regulators. QFC provides a separate framework for international firms. High-budget market aligned with GCC client expectations.",
+      "main_risks": [
+        "Some official portals may have access or geo-restriction issues",
+        "Smaller compliance buyer pool than UAE"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "Bundle with GCC coverage. Validate QCB and QFCRA source extraction. Do not activate until tested."
+    },
+    "MY": {
+      "country_name": "Malaysia",
+      "region": "Southeast Asia",
+      "tier": 2,
+      "priority_label": "regional_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "medium",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 200,
+        "typical": 600,
+        "high": 1500
+      },
+      "best_customer_types": [
+        "payment companies",
+        "Islamic finance firms",
+        "fintech companies",
+        "banks with ASEAN operations"
+      ],
+      "why_it_matters": "Malaysia is a leading Islamic finance hub with an active regulatory framework from Bank Negara Malaysia and the Securities Commission. Good English-language official documentation. Growing digital finance regulatory activity.",
+      "main_risks": [
+        "More competitive market — established RegTech tools already serve Malaysia",
+        "Requires understanding of Islamic finance regulatory context",
+        "Lower undercovered-market advantage than Central Asia or GCC"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "Bundle with APAC expansion plan. Not an immediate priority unless a client explicitly requests it."
+    },
+    "SG": {
+      "country_name": "Singapore",
+      "region": "Southeast Asia",
+      "tier": 3,
+      "priority_label": "future_expansion",
+      "commercial_potential": "high",
+      "sales_difficulty": "high",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 500,
+        "typical": 1200,
+        "high": 3000
+      },
+      "best_customer_types": [
+        "MAS-licensed payment and token firms",
+        "crypto companies",
+        "compliance consultants"
+      ],
+      "why_it_matters": "Singapore is a global fintech hub with MAS issuing frequent regulatory guidance. Good English-language source availability. However, the mature RegTech market means strong competition from established tools.",
+      "main_risks": [
+        "Very competitive RegTech market",
+        "Requires enterprise-grade polished product to compete",
+        "High trust bar from sophisticated Singapore clients"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": 100,
+      "recommended_next_action": "Singapore has 8 active sources, score 100. Expand candidate sources (additional MAS pages, MAS Guidelines, AGC Legislation Portal). Position as an available add-on market for international clients."
+    },
+    "HK": {
+      "country_name": "Hong Kong",
+      "region": "East Asia",
+      "tier": 3,
+      "priority_label": "future_expansion",
+      "commercial_potential": "high",
+      "sales_difficulty": "high",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 500,
+        "typical": 1200,
+        "high": 3000
+      },
+      "best_customer_types": [
+        "crypto and virtual asset firms under SFC",
+        "banks",
+        "compliance consultants"
+      ],
+      "why_it_matters": "Hong Kong is expanding its virtual asset regulatory framework under SFC and HKMA. Active regulatory environment with international buyer base.",
+      "main_risks": [
+        "Geopolitical complexity affects client confidence",
+        "Highly competitive market",
+        "High trust bar"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "TODO: Evaluate after Tier 2 markets are fully validated and a track record is built."
+    },
+    "PH": {
+      "country_name": "Philippines",
+      "region": "Southeast Asia",
+      "tier": 3,
+      "priority_label": "future_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "medium",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 150,
+        "typical": 400,
+        "high": 1000
+      },
+      "best_customer_types": [
+        "payment companies",
+        "remittance operators",
+        "fintech startups",
+        "crypto companies under BSP"
+      ],
+      "why_it_matters": "BSP is active in payments and digital finance regulation. Large remittance market creates compliance monitoring demand.",
+      "main_risks": [
+        "Lower client budgets relative to GCC",
+        "Complex multi-regulator landscape"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "TODO: Include in APAC expansion plan. Validate BSP source extraction."
+    },
+    "ID": {
+      "country_name": "Indonesia",
+      "region": "Southeast Asia",
+      "tier": 3,
+      "priority_label": "future_expansion",
+      "commercial_potential": "medium",
+      "sales_difficulty": "medium",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 150,
+        "typical": 400,
+        "high": 1000
+      },
+      "best_customer_types": [
+        "payment companies",
+        "fintech companies under OJK",
+        "crypto companies under Bappebti",
+        "banks"
+      ],
+      "why_it_matters": "Indonesia has Bank Indonesia and OJK as highly active regulators. Large and growing fintech market. Bappebti is active in crypto regulation.",
+      "main_risks": [
+        "Indonesian-language primary sources require translation capability",
+        "Complex multi-regulator environment"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "TODO: Include in APAC expansion plan."
+    },
+    "MD": {
+      "country_name": "Moldova",
+      "region": "Eastern Europe",
+      "tier": 3,
+      "priority_label": "future_expansion",
+      "commercial_potential": "low",
+      "sales_difficulty": "low",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 50,
+        "typical": 150,
+        "high": 500
+      },
+      "best_customer_types": [
+        "payment companies with Moldova operations",
+        "compliance consultants covering Eastern Europe"
+      ],
+      "why_it_matters": "National Bank of Moldova and the National Commission for Financial Markets are the key regulators. Useful for Eastern European coverage completeness.",
+      "main_risks": [
+        "Very low budget market",
+        "Limited standalone commercial opportunity"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "TODO: Add to Eastern Europe bundle only on client request."
+    },
+    "KG": {
+      "country_name": "Kyrgyzstan",
+      "region": "Central Asia",
+      "tier": 3,
+      "priority_label": "future_expansion",
+      "commercial_potential": "low",
+      "sales_difficulty": "low",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 50,
+        "typical": 100,
+        "high": 400
+      },
+      "best_customer_types": [
+        "payment companies with Kyrgyzstan operations",
+        "regional compliance consultants"
+      ],
+      "why_it_matters": "National Bank of Kyrgyzstan is the main financial regulator. Useful for Central Asia bundle completeness.",
+      "main_risks": [
+        "Very small market size and budget",
+        "Limited compliance buyer pool"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "TODO: Include only as part of Central Asia bundle on client request."
+    },
+    "OM": {
+      "country_name": "Oman",
+      "region": "GCC",
+      "tier": 4,
+      "priority_label": "later_addition",
+      "commercial_potential": "low",
+      "sales_difficulty": "medium",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 150,
+        "typical": 400,
+        "high": 1200
+      },
+      "best_customer_types": [
+        "banks",
+        "financial institutions with GCC-wide operations"
+      ],
+      "why_it_matters": "Central Bank of Oman is an active regulator. Smaller market than UAE or KSA. Useful for GCC bundle completeness.",
+      "main_risks": [
+        "Small market relative to UAE and KSA",
+        "Lower immediate sales priority"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "TODO: Add to GCC bundle on client request."
+    },
+    "KW": {
+      "country_name": "Kuwait",
+      "region": "GCC",
+      "tier": 4,
+      "priority_label": "later_addition",
+      "commercial_potential": "low",
+      "sales_difficulty": "medium",
+      "technical_readiness": "candidate",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 150,
+        "typical": 400,
+        "high": 1200
+      },
+      "best_customer_types": [
+        "banks",
+        "payment companies",
+        "compliance consultants covering GCC"
+      ],
+      "why_it_matters": "Central Bank of Kuwait is the main financial regulator. Part of GCC coverage completeness for clients with pan-GCC operations.",
+      "main_risks": [
+        "Lower compliance innovation rate than UAE or Bahrain",
+        "Lower immediate sales priority"
+      ],
+      "coverage_status": "candidate",
+      "current_coverage_score": null,
+      "recommended_next_action": "TODO: Add to GCC bundle on client request."
+    },
+    "BY": {
+      "country_name": "Belarus",
+      "region": "Eastern Europe / CIS",
+      "tier": 4,
+      "priority_label": "later_addition",
+      "commercial_potential": "low",
+      "sales_difficulty": "high",
+      "technical_readiness": "limited",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 50,
+        "typical": 150,
+        "high": 400
+      },
+      "best_customer_types": [
+        "compliance teams monitoring CIS regulatory changes for internal purposes",
+        "legal advisors serving clients with Belarus exposure"
+      ],
+      "why_it_matters": "Belarus has a National Bank and an active legislative environment. Useful for CIS coverage completeness. RegRadar has existing coverage.",
+      "main_risks": [
+        "CAUTION: Treat with care due to geopolitical context and international sanctions landscape",
+        "Low commercial opportunity due to payment and banking restrictions",
+        "Selling services to Belarus-based clients requires careful legal and compliance review",
+        "Do not feature Belarus prominently in sales materials without explicit legal guidance"
+      ],
+      "coverage_status": "active",
+      "current_coverage_score": null,
+      "recommended_next_action": "Maintain existing technical coverage. Do not actively promote or use in outreach. Do not expand until geopolitical risk assessment is complete."
+    },
+    "AM": {
+      "country_name": "Armenia",
+      "region": "Caucasus",
+      "tier": 4,
+      "priority_label": "later_addition",
+      "commercial_potential": "low",
+      "sales_difficulty": "medium",
+      "technical_readiness": "limited",
+      "estimated_mvp_price_usd_monthly": {
+        "low": 50,
+        "typical": 150,
+        "high": 400
+      },
+      "best_customer_types": [
+        "payment companies with Armenia operations",
+        "crypto companies registered in Armenia",
+        "Caucasus-focused legal consultants"
+      ],
+      "why_it_matters": "Armenia has ARLIS as its legal information portal and the Central Bank of Armenia as the main financial regulator. Several official sites have geo-blocking and timeout issues.",
+      "main_risks": [
+        "Technical access issues — geo-blocking and timeouts on several official sites",
+        "Low standalone commercial opportunity",
+        "Best included only as part of a Caucasus bundle"
+      ],
+      "coverage_status": "limited",
+      "current_coverage_score": null,
+      "recommended_next_action": "Include in Caucasus bundle only. Do not promote as a standalone market. Resolve geo-blocking adapter issues before promoting coverage."
+    }
+  }
+}

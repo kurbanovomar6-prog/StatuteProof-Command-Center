@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sample Source Readiness Snapshot - UAE Fintech | StatuteProof</title>
+    <link rel="icon" type="image/png" href="/brand/regradar-favicon-512.png" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07111f;
+        --panel: #0d1b2e;
+        --panel-soft: #10233a;
+        --line: #1e334e;
+        --text: #e5edf8;
+        --muted: #94a3b8;
+        --faint: #64748b;
+        --cyan: #16d9f5;
+        --green: #34d399;
+        --amber: #fbbf24;
+        --red: #fb7185;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(22, 217, 245, 0.12), transparent 34rem),
+          linear-gradient(180deg, #07111f 0%, #09182b 52%, #07111f 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      a { color: inherit; }
+
+      .shell {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      header {
+        padding: 28px 0 18px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #fff;
+        font-weight: 800;
+        font-size: 22px;
+        text-decoration: none;
+      }
+
+      .brand img {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+      }
+
+      .accent { color: var(--cyan); }
+
+      .hero {
+        padding: 52px 0 34px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+        gap: 36px;
+        align-items: start;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border: 1px solid rgba(22, 217, 245, 0.35);
+        border-radius: 999px;
+        color: var(--cyan);
+        background: rgba(22, 217, 245, 0.08);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 20px 0 14px;
+        font-size: clamp(34px, 5vw, 58px);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: 24px;
+        line-height: 1.25;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+      }
+
+      p { margin: 0; }
+
+      .lead {
+        color: #b8c5d8;
+        font-size: 18px;
+        max-width: 720px;
+      }
+
+      .notice {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 16px;
+        max-width: 720px;
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 24px;
+        padding: 12px 18px;
+        border-radius: 10px;
+        background: var(--cyan);
+        color: #07111f;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .summary-card,
+      section {
+        background: rgba(13, 27, 46, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+      }
+
+      .summary-card {
+        padding: 22px;
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        font-size: 14px;
+      }
+
+      .summary-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .label { color: var(--muted); }
+      .value { color: #fff; font-weight: 700; text-align: right; }
+
+      main {
+        display: grid;
+        gap: 22px;
+        padding: 10px 0 52px;
+      }
+
+      section {
+        padding: 26px;
+      }
+
+      .section-kicker {
+        color: var(--cyan);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .muted { color: var(--muted); }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 12px;
+        margin-top: 18px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 780px;
+      }
+
+      th, td {
+        padding: 13px 14px;
+        text-align: left;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        vertical-align: top;
+        font-size: 14px;
+      }
+
+      th {
+        color: #b8c5d8;
+        background: rgba(16, 35, 58, 0.9);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td { border-bottom: 0; }
+
+      .pill {
+        display: inline-flex;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .pill.green { color: #052e1b; background: var(--green); }
+      .pill.amber { color: #3d2700; background: var(--amber); }
+      .pill.red { color: #3a0711; background: var(--red); }
+      .pill.blue { color: #06202a; background: var(--cyan); }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .mini-card {
+        background: rgba(16, 35, 58, 0.68);
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .brief {
+        display: grid;
+        gap: 12px;
+      }
+
+      .brief-row {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        gap: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      }
+
+      .brief-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .proof {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: #cfe8f2;
+        background: rgba(7, 17, 31, 0.72);
+        border: 1px solid rgba(22, 217, 245, 0.18);
+        border-radius: 12px;
+        padding: 16px;
+        overflow-x: auto;
+        font-size: 13px;
+      }
+
+      ul {
+        margin: 12px 0 0;
+        padding-left: 20px;
+        color: #cbd5e1;
+      }
+
+      footer {
+        padding: 30px 0 48px;
+        color: var(--faint);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      @media (max-width: 840px) {
+        .hero,
+        .grid,
+        .brief-row {
+          grid-template-columns: 1fr;
+        }
+
+        .summary-item {
+          display: grid;
+        }
+
+        .value {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="shell">
+        <a class="brand" href="/">
+          <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" />
+          <span>Statute<span class="accent">Proof</span></span>
+        </a>
+      </div>
+    </header>
+
+    <div class="shell hero">
+      <div>
+        <span class="eyebrow">Sample output - demo data</span>
+        <h1>Sample Source Readiness Snapshot - UAE Fintech</h1>
+        <p class="lead">
+          Example output for a payments or fintech company evaluating UAE regulatory monitoring.
+          This sample shows the kind of source readiness review, evidence trail and pilot recommendation
+          a prospect may receive from a Source Readiness Review.
+        </p>
+        <p class="notice">
+          This is a sample artifact. It is not a claim of exhaustive UAE coverage, not a live regulatory alert,
+          and not legal advice. A real source review depends on the selected regulators and access conditions.
+        </p>
+        <a class="cta" href="/#contact">Request a source readiness review</a>
+      </div>
+
+      <aside class="summary-card">
+        <h2>Snapshot summary</h2>
+        <div class="summary-list">
+          <div class="summary-item"><span class="label">Client profile</span><span class="value">Payments / fintech</span></div>
+          <div class="summary-item"><span class="label">Market</span><span class="value">United Arab Emirates</span></div>
+          <div class="summary-item"><span class="label">Reviewed sources</span><span class="value">6 official sources</span></div>
+          <div class="summary-item"><span class="label">Output type</span><span class="value">Source readiness review</span></div>
+          <div class="summary-item"><span class="label">Recommended next step</span><span class="value">Founding Pilot</span></div>
+        </div>
+      </aside>
+    </div>
+
+    <main class="shell">
+      <section>
+        <div class="section-kicker">1. Overview</div>
+        <h2>What this sample covers</h2>
+        <p class="muted">
+          StatuteProof checks whether official regulatory sources can be monitored reliably, what extraction method
+          is likely to work, and where access or source complexity may limit source monitoring. For a UAE fintech
+          profile, the first source set usually focuses on banking and payments supervision, securities or virtual
+          asset perimeter questions, AML/CFT, business regulation and tax updates.
+        </p>
+      </section>
+
+      <section>
+        <div class="section-kicker">2. Source readiness table</div>
+        <h2>Example reviewed sources</h2>
+        <p class="muted">
+          These rows are illustrative. A real Source Readiness Review validates the exact source URLs and topics requested by the prospect.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Category</th>
+                <th>Monitoring status</th>
+                <th>Extraction quality</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Central Bank of the UAE</td>
+                <td>Central bank / banking / payments</td>
+                <td><span class="pill green">Active</span></td>
+                <td>Good</td>
+                <td>Official source for financial-sector updates. Some pages may require fallback extraction depending on page template.</td>
+              </tr>
+              <tr>
+                <td>Capital Market Authority / former SCA</td>
+                <td>Securities / markets</td>
+                <td><span class="pill amber">Needs validation</span></td>
+                <td>Medium</td>
+                <td>Relevant if the client monitors securities, investment products or market-facing activity. Validate exact announcement path before pilot.</td>
+              </tr>
+              <tr>
+                <td>UAE Financial Intelligence Unit</td>
+                <td>AML/CFT</td>
+                <td><span class="pill green">Active</span></td>
+                <td>Good</td>
+                <td>Useful for AML/CFT notices and institutional guidance. Monitor alongside sector regulator updates.</td>
+              </tr>
+              <tr>
+                <td>Ministry of Economy</td>
+                <td>Business regulation / company activity</td>
+                <td><span class="pill green">Active</span></td>
+                <td>Good</td>
+                <td>Useful for business, corporate and commercial-regulation monitoring. Topic filters should be configured for relevance.</td>
+              </tr>
+              <tr>
+                <td>Federal Tax Authority</td>
+                <td>Tax / reporting</td>
+                <td><span class="pill amber">Limited</span></td>
+                <td>Limited</td>
+                <td>Some public paths may be difficult to extract consistently. Pilot should confirm exact tax publications and fallback approach.</td>
+              </tr>
+              <tr>
+                <td>Virtual Assets Regulatory Authority</td>
+                <td>Crypto / VASP</td>
+                <td><span class="pill green">Active</span></td>
+                <td>Good</td>
+                <td>Relevant only if the client includes crypto, VASP, token, custody or exchange activity in scope.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-kicker">3. Example regulatory alert</div>
+        <h2>Demo alert format</h2>
+        <p class="muted">
+          The alert below is sample/demo content for format demonstration only. It is not a real regulatory change.
+        </p>
+        <div class="grid">
+          <div class="mini-card">
+            <h3>Alert summary</h3>
+            <div class="brief">
+              <div class="brief-row"><span class="label">Risk level</span><span><span class="pill amber">Medium</span></span></div>
+              <div class="brief-row"><span class="label">What changed</span><span>Example: an official source published updated guidance affecting payment service provider reporting expectations.</span></div>
+              <div class="brief-row"><span class="label">Who may be affected</span><span>Licensed payments firms, fintech operators, compliance teams and outsourced reporting functions.</span></div>
+              <div class="brief-row"><span class="label">Why it matters</span><span>The update may require teams to review internal reporting calendars, control ownership and customer-notification procedures.</span></div>
+              <div class="brief-row"><span class="label">Suggested action</span><span>Assign a compliance owner, compare the official source against current policy, and confirm whether existing reporting procedures need an update.</span></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <h3>Source proof fields</h3>
+            <ul>
+              <li>Official source name and category</li>
+              <li>Source URL and publication path</li>
+              <li>Detected change type</li>
+              <li>Extraction method and status</li>
+              <li>Risk rationale and review status</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-kicker">4. Evidence trail</div>
+        <h2>Proof trail example</h2>
+        <div class="proof">
+Source URL placeholder: [official source URL selected during source review]
+Last checked: [timestamp generated during monitoring run]
+Extraction status: HTML/PDF extraction available; source content parsed successfully
+Risk rationale: Medium - reporting/process impact possible; no immediate licensing deadline shown in sample text
+Review note: Demo evidence trail. Verify against the official source before making compliance decisions.
+Disclaimer: StatuteProof provides early-warning regulatory intelligence, not legal advice.
+        </div>
+      </section>
+
+      <section>
+        <div class="section-kicker">5. Pilot recommendation</div>
+        <h2>Recommended Founding Pilot scope</h2>
+        <p class="muted">
+          For a payments or fintech team, a Founding Pilot would usually begin with one regulatory profile and a focused official-source set,
+          then expand only after the source profile and alert workflow prove useful.
+        </p>
+        <div class="grid">
+          <div class="mini-card">
+            <h3>Founding Pilot would monitor</h3>
+            <ul>
+              <li>1 regulatory profile</li>
+              <li>5-8 validated official sources</li>
+              <li>Weekly regulatory brief</li>
+              <li>Email or Telegram alerts</li>
+              <li>Source proof links</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <h3>Known limitations to confirm</h3>
+            <ul>
+              <li>Exact source paths and publication pages</li>
+              <li>Restricted or low-content pages</li>
+              <li>PDF-heavy source behavior</li>
+              <li>Topic filters for payments, AML/CFT, tax or VASP scope</li>
+              <li>Client review workflow and alert frequency</li>
+            </ul>
+          </div>
+        </div>
+        <a class="cta" href="/#contact">Request a source readiness review</a>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">
+        Sample/demo artifact. StatuteProof monitors publicly available official sources and highlights changes that may require compliance review.
+        It is not a legal service, and coverage quality varies by source and jurisdiction.
+      </div>
+    </footer>
+  </body>
+</html>

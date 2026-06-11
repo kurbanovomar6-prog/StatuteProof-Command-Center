@@ -1,0 +1,1003 @@
+{
+  "generated_at": "2026-06-02T21:42:29.880556+00:00",
+  "verdict": "No source was activated. All recommendations require further proof/diff validation.",
+  "sources": [
+    {
+      "source_id": "ae-vara-rulebooks",
+      "official_name": "VARA Rulebooks / Rulebook Updates",
+      "official_url": "https://rulebooks.vara.ae/",
+      "final_url": "https://rulebooks.vara.ae/",
+      "category": "virtual_assets",
+      "buyer_profiles": [
+        "vasp",
+        "crypto",
+        "virtual_assets",
+        "aml_compliance"
+      ],
+      "official_url_verification": {
+        "official_domain": "rulebooks.vara.ae",
+        "http_reachable": true,
+        "registry_status": null,
+        "candidate_present": true
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "extracted_chars": 2325,
+      "extractor_method": "beautifulsoup",
+      "item_count": 8,
+      "sample_items": [
+        {
+          "title": "Regulations & Guidelines",
+          "date": null,
+          "url": "https://rulebooks.vara.ae/",
+          "document_url": null,
+          "raw_text_snippet": "Regulations & Guidelines Regulatory Notices"
+        },
+        {
+          "title": "Regulatory Notices",
+          "date": null,
+          "url": "https://www.vara.ae/en/regulations/regulatory-notices/",
+          "document_url": null,
+          "raw_text_snippet": "Regulations & Guidelines Regulatory Notices"
+        },
+        {
+          "title": "Regulatory Framework",
+          "date": null,
+          "url": "https://rulebooks.vara.ae/",
+          "document_url": null,
+          "raw_text_snippet": "Regulatory Framework"
+        }
+      ],
+      "extraction_method": "table/list-based HTML",
+      "limitations": [
+        "VARA official portal is the validation target; rulebook/update item paths require separate discovery and adapter validation before activation.",
+        "Candidate data note: Rulebook pages or PDFs may require source-specific item mapping."
+      ],
+      "recommended_status": "under_validation",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Run repeated extraction and map item-level titles, dates, and source proof URLs."
+    },
+    {
+      "source_id": "ae-adgm-fsra-circulars",
+      "official_name": "ADGM FSRA Circulars / Publications",
+      "official_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+      "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+      "category": "financial_services",
+      "buyer_profiles": [
+        "adgm",
+        "fsra",
+        "fintech",
+        "payments",
+        "vasp"
+      ],
+      "official_url_verification": {
+        "official_domain": "adgm.com",
+        "http_reachable": true,
+        "registry_status": null,
+        "candidate_present": false
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "extracted_chars": 1593,
+      "extractor_method": "beautifulsoup",
+      "item_count": 1,
+      "sample_items": [
+        {
+          "title": "ADGM Brand Book",
+          "date": null,
+          "url": "https://assets.adgm.com/download/assets/ADGM+Brand+Book_2025.pdf/8dcd54d6356111f0aef28a0f7419fcea",
+          "document_url": null,
+          "raw_text_snippet": "Overview Jurisdiction Authorities Initiatives ADGM Academy Dispute Resolution Careers A platform that offers limitless opportunities and paves the way for a brighter future Abu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destination. Its exceptional qualities make it an ideal location to live, work, and conduct business. Read about Abu Dhabi’s life style Latest Initiatives ADFW 2025 Delivers its Most Successful Edition, Showcas..."
+        }
+      ],
+      "extraction_method": "HTML extractable",
+      "limitations": [
+        "FSRA circulars prototype did not isolate enough circular rows; source remains adapter/proof target work, not active."
+      ],
+      "recommended_status": "under_validation",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": true,
+      "next_action": "Repeat FSRA row extraction over scheduled runs and validate true proof/diff before activation."
+    },
+    {
+      "source_id": "ae-cbuae-rulebook-aml-payments",
+      "official_name": "CBUAE Rulebook / AML-CFT / Payments",
+      "official_url": "https://rulebook.centralbank.ae/",
+      "final_url": "https://rulebook.centralbank.ae/en",
+      "category": "banking_payments",
+      "buyer_profiles": [
+        "payments",
+        "fintech",
+        "aml",
+        "banking"
+      ],
+      "official_url_verification": {
+        "official_domain": "rulebook.centralbank.ae",
+        "http_reachable": true,
+        "registry_status": null,
+        "candidate_present": true
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "extracted_chars": 2504,
+      "extractor_method": "beautifulsoup",
+      "item_count": 10,
+      "sample_items": [
+        {
+          "title": "Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance",
+          "date": "07 November 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "6 . Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance (07 November 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "b3519c5a815e3267"
+        },
+        {
+          "title": "Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment",
+          "date": "07 November 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%E2%80%9Ctbml%E2%80%9D",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "7 . Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment (07 November 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "1c920849c65164a9"
+        },
+        {
+          "title": "Small to Medium Sized Enterprises (SME) - Customer Protection Regulation",
+          "date": "13 September 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "1 . Small to Medium Sized Enterprises (SME) - Customer Protection Regulation (13 September 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "2ccd0ae265d0edef"
+        }
+      ],
+      "extraction_method": "table/list-based HTML",
+      "limitations": [
+        "Reachable and itemized, but not active until repeated proof/diff validation passes.",
+        "CBUAE AML/CFT and payments pages require item-level publication mapping.",
+        "Candidate data note: Rulebook structure and stable section identifiers need confirmation before monitoring."
+      ],
+      "recommended_status": "active_candidate",
+      "proof_target_boolean": true,
+      "adapter_created_boolean": true,
+      "next_action": "Run repeated proof/diff validation before considering activation."
+    },
+    {
+      "source_id": "ae-fiu-publications",
+      "official_name": "UAE FIU Publications / Typologies",
+      "official_url": "https://www.uaefiu.gov.ae/en/publications/",
+      "final_url": "https://uaefiu.gov.ae/en/publications/",
+      "category": "aml_fiu",
+      "buyer_profiles": [
+        "aml",
+        "fiu",
+        "mlro",
+        "vasp",
+        "payments"
+      ],
+      "official_url_verification": {
+        "official_domain": "uaefiu.gov.ae",
+        "http_reachable": false,
+        "registry_status": null,
+        "candidate_present": false
+      },
+      "http_status": 403,
+      "content_type": "text/html; charset=UTF-8",
+      "extracted_chars": 0,
+      "extractor_method": "beautifulsoup",
+      "item_count": 0,
+      "sample_items": [],
+      "extraction_method": "navigation-only or JS-rendered",
+      "limitations": [
+        "HTTP 403 indicates access limitation or blocking.",
+        "No reliable item-level rows or document links were isolated by generic extraction.",
+        "Extracted text is below the content-rich threshold for monitoring readiness."
+      ],
+      "recommended_status": "access_limited",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Defer activation; test approved access strategy without bypassing WAF/CAPTCHA."
+    },
+    {
+      "source_id": "ae-dfsa-consultations-notices",
+      "official_name": "DFSA Consultations / Notices / Rulebook Updates",
+      "official_url": "https://www.dfsa.ae/rules-and-guidance",
+      "final_url": "https://www.dfsa.ae/rules-and-guidance",
+      "category": "difc_dfsa",
+      "buyer_profiles": [
+        "difc",
+        "dfsa",
+        "financial_services",
+        "legal"
+      ],
+      "official_url_verification": {
+        "official_domain": "dfsa.ae",
+        "http_reachable": false,
+        "registry_status": null,
+        "candidate_present": false
+      },
+      "http_status": 404,
+      "content_type": "text/html; charset=UTF-8",
+      "extracted_chars": 4381,
+      "extractor_method": "beautifulsoup",
+      "item_count": 30,
+      "sample_items": [
+        {
+          "title": "AML, CTF & Sanctions Compliance",
+          "date": null,
+          "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary",
+          "document_url": null,
+          "raw_text_snippet": "AML, CTF & Sanctions Compliance Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Setters / International Organisations Followed Financial Crime Prevention Notices and MLRO Letters"
+        },
+        {
+          "title": "Regulatory Framework",
+          "date": null,
+          "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/regulatory-framework",
+          "document_url": null,
+          "raw_text_snippet": "Regulatory Framework"
+        },
+        {
+          "title": "Supervisory Methodology",
+          "date": null,
+          "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/supervisory-methodology",
+          "document_url": null,
+          "raw_text_snippet": "Supervisory Methodology"
+        }
+      ],
+      "extraction_method": "table/list-based HTML",
+      "limitations": [
+        "DFSA pages may return WAF/access limitation from current infrastructure; do not activate without a reliable official item source."
+      ],
+      "recommended_status": "blocked_deferred",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Defer activation; test approved access strategy without bypassing WAF/CAPTCHA."
+    },
+    {
+      "source_id": "ae-difc-laws-data-protection",
+      "official_name": "DIFC Laws / DIFC Data Protection",
+      "official_url": "https://www.difc.com/business/laws-and-regulations/",
+      "final_url": "https://www.difc.com/business/laws-and-regulations",
+      "category": "difc_laws",
+      "buyer_profiles": [
+        "difc",
+        "dfsa",
+        "data_protection",
+        "legal"
+      ],
+      "official_url_verification": {
+        "official_domain": "difc.com",
+        "http_reachable": true,
+        "registry_status": "enabled_in_existing_registry",
+        "candidate_present": true
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "extracted_chars": 9150,
+      "extractor_method": "beautifulsoup",
+      "item_count": 6,
+      "sample_items": [
+        {
+          "title": "Legal Database",
+          "date": null,
+          "url": "https://www.difc.com/business/laws-and-regulations/legal-database",
+          "document_url": null,
+          "raw_text_snippet": "Public Register Legal Database Handbooks & Fees Templates & Downloads"
+        },
+        {
+          "title": "DIFC Publications",
+          "date": null,
+          "url": "https://www.difc.com/media/publications",
+          "document_url": null,
+          "raw_text_snippet": "News Insights Events Podcasts DIFC Publications"
+        },
+        {
+          "title": "Federal Decree No. 35 of 2004",
+          "date": null,
+          "url": "https://edge.sitecorecloud.io/dubaiintern0078-difcexperie96c5-production-3253/media/project/difcexperiences/difc/difcwebsite/documents/difc_docs/federal_decree_no_35_for_the_year_2004_english.pdf",
+          "document_url": "https://edge.sitecorecloud.io/dubaiintern0078-difcexperie96c5-production-3253/media/project/difcexperiences/difc/difcwebsite/documents/difc_docs/federal_decree_no_35_for_the_year_2004_english.pdf",
+          "raw_text_snippet": "Laws and Regulations in Dubai International Financial Centre (DIFC) DIFC’s unique legal and regulatory framework is based on international standards and principles of common law that is tailored to the region's unique needs, creating the optimal environment for financial services and related industries and services to grow. The Dubai International Financial Centre (\"DIFC\") was launched in accordance with United Arab Emirates (UAE) Federal Decree No. 35 of 2004 as a part of Dubai's strategic vis..."
+        }
+      ],
+      "extraction_method": "table/list-based HTML",
+      "limitations": [
+        "Reachable and itemized, but not active until repeated proof/diff validation passes.",
+        "Candidate data note: Digital asset materials may be distributed across DIFC/DFSA pages."
+      ],
+      "recommended_status": "active_candidate",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Run repeated proof/diff validation before considering activation."
+    },
+    {
+      "source_id": "ae-adgm-data-protection",
+      "official_name": "ADGM Office of Data Protection Guidance",
+      "official_url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection",
+      "final_url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection",
+      "category": "data_protection",
+      "buyer_profiles": [
+        "adgm",
+        "data_protection",
+        "privacy",
+        "dpo"
+      ],
+      "official_url_verification": {
+        "official_domain": "adgm.com",
+        "http_reachable": true,
+        "registry_status": null,
+        "candidate_present": true
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "extracted_chars": 1804,
+      "extractor_method": "beautifulsoup",
+      "item_count": 1,
+      "sample_items": [
+        {
+          "title": "ADGM Brand Book",
+          "date": null,
+          "url": "https://assets.adgm.com/download/assets/ADGM+Brand+Book_2025.pdf/8dcd54d6356111f0aef28a0f7419fcea",
+          "document_url": null,
+          "raw_text_snippet": "Overview Jurisdiction Authorities Initiatives ADGM Academy Dispute Resolution Careers A platform that offers limitless opportunities and paves the way for a brighter future Abu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destination. Its exceptional qualities make it an ideal location to live, work, and conduct business. Read about Abu Dhabi’s life style Latest Initiatives ADFW 2025 Delivers its Most Successful Edition, Showcas..."
+        }
+      ],
+      "extraction_method": "HTML extractable",
+      "limitations": [
+        "Limitations require operator review before pilot activation.",
+        "Candidate data note: URL may require adjustment; ADGM site structure has changed historically."
+      ],
+      "recommended_status": "under_validation",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Run repeated extraction and map item-level titles, dates, and source proof URLs."
+    },
+    {
+      "source_id": "ae-fta-tax-guides",
+      "official_name": "FTA Public Clarifications / Tax Guides",
+      "official_url": "https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.guides.references.aspx",
+      "final_url": "https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.guides.references.aspx",
+      "category": "tax",
+      "buyer_profiles": [
+        "tax",
+        "corporate",
+        "corporate_tax"
+      ],
+      "official_url_verification": {
+        "official_domain": "tax.gov.ae",
+        "http_reachable": true,
+        "registry_status": null,
+        "candidate_present": true
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "extracted_chars": 0,
+      "extractor_method": "beautifulsoup",
+      "item_count": 6,
+      "sample_items": [
+        {
+          "title": "Guides, References & Public Clarifications",
+          "date": null,
+          "url": "https://tax.gov.ae/en/taxes/Vat/guides.references.aspx",
+          "document_url": null,
+          "raw_text_snippet": "Guides, References & Public Clarifications"
+        },
+        {
+          "title": "Guides, References & Public Clarifications",
+          "date": null,
+          "url": "https://tax.gov.ae/en/taxes/excise.tax/guides.listing.aspx",
+          "document_url": null,
+          "raw_text_snippet": "Guides, References & Public Clarifications"
+        },
+        {
+          "title": "Guides, References & Public Clarifications",
+          "date": null,
+          "url": "https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.guides.references.aspx",
+          "document_url": null,
+          "raw_text_snippet": "Guides, References & Public Clarifications"
+        }
+      ],
+      "extraction_method": "table/list-based HTML",
+      "limitations": [
+        "Extracted text is below the content-rich threshold for monitoring readiness.",
+        "FTA/tax.gov.ae may require access and repeated-run validation from deployment infrastructure.",
+        "Candidate data note: Likely portal access restriction; PDF guide discovery must be validated."
+      ],
+      "recommended_status": "under_validation",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Run repeated extraction and map item-level titles, dates, and source proof URLs."
+    },
+    {
+      "source_id": "ae-uaeiec-sanctions-tfs",
+      "official_name": "Executive Office / UAEIEC Sanctions / TFS",
+      "official_url": "https://www.uaeiec.gov.ae/en-us/un-page",
+      "final_url": "https://www.uaeiec.gov.ae/en-us/un-page",
+      "category": "sanctions_tfs",
+      "buyer_profiles": [
+        "aml",
+        "sanctions",
+        "fiu",
+        "mlro",
+        "vasp",
+        "payments"
+      ],
+      "official_url_verification": {
+        "official_domain": "uaeiec.gov.ae",
+        "http_reachable": true,
+        "registry_status": null,
+        "candidate_present": false
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "extracted_chars": 54422,
+      "extractor_method": "beautifulsoup",
+      "item_count": 30,
+      "sample_items": [
+        {
+          "title": "Targeted Financial Sanctions",
+          "date": null,
+          "url": "https://www.uaeiec.gov.ae/en-us/un-page",
+          "document_url": null,
+          "raw_text_snippet": "Targeted Financial Sanctions"
+        },
+        {
+          "title": "Legislation",
+          "date": null,
+          "url": "https://www.uaeiec.gov.ae/en-us/laws-regulations-listing",
+          "document_url": null,
+          "raw_text_snippet": "Legislation"
+        },
+        {
+          "title": "Sanctions Implementation",
+          "date": null,
+          "url": "https://www.uaeiec.gov.ae/en-us/un-page?p=2",
+          "document_url": null,
+          "raw_text_snippet": "Sanctions Implementation"
+        }
+      ],
+      "extraction_method": "table/list-based HTML",
+      "limitations": [
+        "Reachable and itemized, but not active until repeated proof/diff validation passes."
+      ],
+      "recommended_status": "active_candidate",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Run repeated proof/diff validation before considering activation."
+    },
+    {
+      "source_id": "ae-moet-aml-dnfbp",
+      "official_name": "Ministry of Economy AML / TFS / DNFBP",
+      "official_url": "https://www.moet.gov.ae/en/aml",
+      "final_url": "https://www.moet.gov.ae/en/aml",
+      "category": "aml_dnfbp",
+      "buyer_profiles": [
+        "aml",
+        "dnfbp",
+        "mlro",
+        "corporate"
+      ],
+      "official_url_verification": {
+        "official_domain": "moet.gov.ae",
+        "http_reachable": true,
+        "registry_status": "enabled_in_existing_registry",
+        "candidate_present": true
+      },
+      "http_status": 200,
+      "content_type": "text/html;charset=UTF-8",
+      "extracted_chars": 49615,
+      "extractor_method": "beautifulsoup",
+      "item_count": 30,
+      "sample_items": [
+        {
+          "title": "Investment Publications",
+          "date": null,
+          "url": "https://www.moet.gov.ae/en/investmentpublications",
+          "document_url": null,
+          "raw_text_snippet": "Investment Publications"
+        },
+        {
+          "title": "Regulation of competition legislations",
+          "date": null,
+          "url": "https://www.moet.gov.ae/en/regulation-of-competition-legislations",
+          "document_url": null,
+          "raw_text_snippet": "Regulation of competition legislations"
+        },
+        {
+          "title": "Regulation of Business",
+          "date": null,
+          "url": "https://www.moet.gov.ae/en/regulation-of-business",
+          "document_url": null,
+          "raw_text_snippet": "Regulation of Business Cooperative Associations Combatting Money Laundering & Terrorism Financing Targeted Financial Sanctions Register in goAML Anti-Injurious Economic Practices Anti-Injurious Practices Complaints Protecting UAE Exports Economic Substance Regulations Companies Registrars Common Contracts Regulation of Competition Family Business"
+        }
+      ],
+      "extraction_method": "table/list-based HTML",
+      "limitations": [
+        "Reachable and itemized, but not active until repeated proof/diff validation passes.",
+        "Candidate data note: URL was corrected in Sprint 3A; PDF-heavy guidance requires fresh validation."
+      ],
+      "recommended_status": "active_candidate",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Run repeated proof/diff validation before considering activation."
+    },
+    {
+      "source_id": "ae-legislation-portal",
+      "official_name": "UAE Legislation Portal item-level laws/decrees",
+      "official_url": "https://uaelegislation.gov.ae/en",
+      "final_url": "https://uaelegislation.gov.ae/en",
+      "category": "legislation",
+      "buyer_profiles": [
+        "legal",
+        "compliance",
+        "tax",
+        "data_protection",
+        "financial_services"
+      ],
+      "official_url_verification": {
+        "official_domain": "uaelegislation.gov.ae",
+        "http_reachable": false,
+        "registry_status": "enabled_in_existing_registry",
+        "candidate_present": false
+      },
+      "http_status": 403,
+      "content_type": "text/html; charset=UTF-8",
+      "extracted_chars": 0,
+      "extractor_method": "beautifulsoup",
+      "item_count": 0,
+      "sample_items": [],
+      "extraction_method": "navigation-only or JS-rendered",
+      "limitations": [
+        "HTTP 403 indicates access limitation or blocking.",
+        "No reliable item-level rows or document links were isolated by generic extraction.",
+        "Extracted text is below the content-rich threshold for monitoring readiness.",
+        "Root portal validation is insufficient; item-level laws/decrees must be tested separately."
+      ],
+      "recommended_status": "access_limited",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Defer activation; test approved access strategy without bypassing WAF/CAPTCHA."
+    },
+    {
+      "source_id": "ae-dubai-official-gazette",
+      "official_name": "Dubai Official Gazette",
+      "official_url": "https://dlp.dubai.gov.ae/",
+      "final_url": "https://dlp.dubai.gov.ae/ar/Pages/Default.aspx",
+      "category": "gazette",
+      "buyer_profiles": [
+        "legal",
+        "compliance",
+        "corporate"
+      ],
+      "official_url_verification": {
+        "official_domain": "dlp.dubai.gov.ae",
+        "http_reachable": true,
+        "registry_status": null,
+        "candidate_present": true
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "extracted_chars": 0,
+      "extractor_method": "beautifulsoup",
+      "item_count": 2,
+      "sample_items": [
+        {
+          "title": "اعرف المزيد",
+          "date": null,
+          "url": "https://dlp.dubai.gov.ae/ar/Pages/OfficialGazette.aspx",
+          "document_url": null,
+          "raw_text_snippet": "متصفح الجريدة الرسمية يتيح متصفح الجريدة الرسمية الاطلاع على جميع الأعداد الأصلية إلكترونيا منذ أول إصدار لها عام 1961 وحتى الآن وفق التسلسل الزمني. اعرف المزيد"
+        },
+        {
+          "title": "​​إرشادات الوصول للمحتوى",
+          "date": null,
+          "url": "https://dlp.dubai.gov.ae/ar/Pages/AccessibilityGuidelines.aspx",
+          "document_url": null,
+          "raw_text_snippet": "الشروط والأحكام سياسة الخصوصية خارطة الموقع اتصل بنا ​​إرشادات الوصول للمحتوى"
+        }
+      ],
+      "extraction_method": "navigation-only or JS-rendered",
+      "limitations": [
+        "Extracted text is below the content-rich threshold for monitoring readiness.",
+        "Dubai legislation portal root is not enough; official gazette issue/year/PDF item paths must be isolated before activation.",
+        "Candidate data note: Official portal appears relevant, but access and item-level structure require validation."
+      ],
+      "recommended_status": "under_validation",
+      "proof_target_boolean": false,
+      "adapter_created_boolean": false,
+      "next_action": "Run repeated extraction and map item-level titles, dates, and source proof URLs."
+    }
+  ],
+  "status_counts": {
+    "under_validation": 5,
+    "active_candidate": 4,
+    "access_limited": 2,
+    "blocked_deferred": 1
+  },
+  "proof_target": {
+    "proof_target": "ae-cbuae-rulebook-aml-payments",
+    "proof_label": "CBUAE Rulebook revision updates",
+    "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+    "first_run": {
+      "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+      "http_status": 200,
+      "item_count": 10,
+      "items": [
+        {
+          "title": "Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance",
+          "date": "07 November 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "6 . Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance (07 November 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "b3519c5a815e3267"
+        },
+        {
+          "title": "Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment",
+          "date": "07 November 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%E2%80%9Ctbml%E2%80%9D",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "7 . Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment (07 November 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "1c920849c65164a9"
+        },
+        {
+          "title": "Small to Medium Sized Enterprises (SME) - Customer Protection Regulation",
+          "date": "13 September 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "1 . Small to Medium Sized Enterprises (SME) - Customer Protection Regulation (13 September 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "2ccd0ae265d0edef"
+        },
+        {
+          "title": "Remuneration Regulation for Banks and Insurance Companies",
+          "date": "14 April 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "2 . Remuneration Regulation for Banks and Insurance Companies (14 April 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "c27bc46e7f2c5ff1"
+        },
+        {
+          "title": "Remuneration Regulation for Banks and Insurance Companies",
+          "date": "14 April 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies-0",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "3 . Remuneration Regulation for Banks and Insurance Companies (14 April 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "b3c70272aafb0546"
+        },
+        {
+          "title": "Cabinet Resolution No. (134) of 2025 Regarding the Executive Regulations of Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing",
+          "date": "14 December 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/cabinet-resolution-no-134-2025-regarding-executive-regulations-federal-decree-law-no-10",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "5 . Cabinet Resolution No. (134) of 2025 Regarding the Executive Regulations of Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing (14 December 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "b94fc9830871cb29"
+        },
+        {
+          "title": "Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing",
+          "date": "14 October 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-10-2025-regarding-anti-money-laundering-and-combating-financing",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "8 . Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing (14 October 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "1cd05599820c7633"
+        },
+        {
+          "title": "Federal Decree-Law No. (6) of 2025 Regarding the Central Bank, Regulation of Financial Institutions and Activities, and Insurance Business",
+          "date": "16 September 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "9 . Federal Decree-Law No. (6) of 2025 Regarding the Central Bank, Regulation of Financial Institutions and Activities, and Insurance Business (16 September 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "632b1bad47e71212"
+        },
+        {
+          "title": "Exchange Business Regulation",
+          "date": "26 June 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "10 . Exchange Business Regulation (26 June 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "38935605950ecf90"
+        },
+        {
+          "title": "Telemarketing Regulation",
+          "date": "31 March 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/telemarketing-regulation",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "4 . Telemarketing Regulation (31 March 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "9eeb8fab8b44a6fa"
+        }
+      ],
+      "extraction_status": "ok",
+      "limitation_notes": [
+        "This adapter is not wired into production monitoring.",
+        "Same-run stability is not a true change-diff; scheduled comparison is still required."
+      ]
+    },
+    "second_run": {
+      "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+      "http_status": 200,
+      "item_count": 10,
+      "items": [
+        {
+          "title": "Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance",
+          "date": "07 November 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "6 . Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance (07 November 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "b3519c5a815e3267"
+        },
+        {
+          "title": "Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment",
+          "date": "07 November 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%E2%80%9Ctbml%E2%80%9D",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "7 . Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment (07 November 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "1c920849c65164a9"
+        },
+        {
+          "title": "Small to Medium Sized Enterprises (SME) - Customer Protection Regulation",
+          "date": "13 September 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "1 . Small to Medium Sized Enterprises (SME) - Customer Protection Regulation (13 September 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "2ccd0ae265d0edef"
+        },
+        {
+          "title": "Remuneration Regulation for Banks and Insurance Companies",
+          "date": "14 April 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "2 . Remuneration Regulation for Banks and Insurance Companies (14 April 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "c27bc46e7f2c5ff1"
+        },
+        {
+          "title": "Remuneration Regulation for Banks and Insurance Companies",
+          "date": "14 April 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies-0",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "3 . Remuneration Regulation for Banks and Insurance Companies (14 April 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "b3c70272aafb0546"
+        },
+        {
+          "title": "Cabinet Resolution No. (134) of 2025 Regarding the Executive Regulations of Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing",
+          "date": "14 December 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/cabinet-resolution-no-134-2025-regarding-executive-regulations-federal-decree-law-no-10",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "5 . Cabinet Resolution No. (134) of 2025 Regarding the Executive Regulations of Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing (14 December 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "b94fc9830871cb29"
+        },
+        {
+          "title": "Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing",
+          "date": "14 October 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-10-2025-regarding-anti-money-laundering-and-combating-financing",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "8 . Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing (14 October 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "1cd05599820c7633"
+        },
+        {
+          "title": "Federal Decree-Law No. (6) of 2025 Regarding the Central Bank, Regulation of Financial Institutions and Activities, and Insurance Business",
+          "date": "16 September 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "9 . Federal Decree-Law No. (6) of 2025 Regarding the Central Bank, Regulation of Financial Institutions and Activities, and Insurance Business (16 September 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "632b1bad47e71212"
+        },
+        {
+          "title": "Exchange Business Regulation",
+          "date": "26 June 2025",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "10 . Exchange Business Regulation (26 June 2025)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "38935605950ecf90"
+        },
+        {
+          "title": "Telemarketing Regulation",
+          "date": "31 March 2026",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/telemarketing-regulation",
+          "document_url": null,
+          "pdf_url": null,
+          "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+          "raw_text_snippet": "4 . Telemarketing Regulation (31 March 2026)",
+          "extraction_status": "row_candidate",
+          "limitation_notes": [
+            "Prototype extraction from CBUAE Rulebook revision/update HTML; repeated proof/diff required before activation."
+          ],
+          "row_hash": "9eeb8fab8b44a6fa"
+        }
+      ],
+      "extraction_status": "ok",
+      "limitation_notes": [
+        "This adapter is not wired into production monitoring.",
+        "Same-run stability is not a true change-diff; scheduled comparison is still required."
+      ]
+    },
+    "same_run_stability": {
+      "item_count_stable": true,
+      "first_3_titles_stable": true,
+      "first_3_urls_stable": true,
+      "row_hash_stable": true,
+      "first_run_hash": "4e5a26aec53ad75b308638bf9e4e9e36f2d2766bbe4b5518a172bd6b93ead416",
+      "second_run_hash": "4e5a26aec53ad75b308638bf9e4e9e36f2d2766bbe4b5518a172bd6b93ead416"
+    },
+    "limitation_notes": [
+      "Same-run stability confirms deterministic extraction only.",
+      "True change-diff still requires future scheduled comparison over time.",
+      "The adapter/proof extraction is a prototype and is not wired into production monitoring."
+    ],
+    "recommended_status": "active_candidate",
+    "next_validation_action": "Run scheduled proof/diff validation on CBUAE revision rows before activation.",
+    "selected": true,
+    "selection_reason": "Preferred FSRA circulars target did not produce enough item rows; CBUAE Rulebook revision updates produced the strongest high-value row extraction candidate.",
+    "fsra_attempt": {
+      "proof_target": "ae-adgm-fsra-circulars",
+      "proof_label": "ADGM FSRA Circulars",
+      "source_page_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+      "first_run": {
+        "source_page_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+        "http_status": 200,
+        "item_count": 0,
+        "items": [],
+        "extraction_status": "empty",
+        "limitation_notes": [
+          "This adapter is not wired into production monitoring.",
+          "Same-run stability is not a true change-diff; scheduled comparison is still required.",
+          "No circular rows were isolated from the current HTML response."
+        ]
+      },
+      "second_run": {
+        "source_page_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+        "http_status": 200,
+        "item_count": 0,
+        "items": [],
+        "extraction_status": "empty",
+        "limitation_notes": [
+          "This adapter is not wired into production monitoring.",
+          "Same-run stability is not a true change-diff; scheduled comparison is still required.",
+          "No circular rows were isolated from the current HTML response."
+        ]
+      },
+      "same_run_stability": {
+        "item_count_stable": true,
+        "first_3_titles_stable": true,
+        "first_3_urls_stable": true,
+        "row_hash_stable": true,
+        "first_run_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "second_run_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "limitation_notes": [
+        "Same-run stability confirms deterministic extraction only.",
+        "True change-diff still requires future scheduled comparison over time.",
+        "The adapter/proof extraction is a prototype and is not wired into production monitoring."
+      ],
+      "recommended_status": "needs_adapter",
+      "next_validation_action": "Create a stronger FSRA circular row adapter or isolate a publication endpoint before activation.",
+      "selected": false
+    }
+  }
+}

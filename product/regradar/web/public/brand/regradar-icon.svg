@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+<defs>
+  <radialGradient id="bgRad" cx="35%" cy="28%" r="80%">
+    <stop offset="0"    stop-color="#14243C"/>
+    <stop offset="0.55" stop-color="#0A1526"/>
+    <stop offset="1"    stop-color="#060B14"/>
+  </radialGradient>
+  <linearGradient id="sig" x1="34" y1="30" x2="46" y2="18" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#1E50C8"/>
+    <stop offset="1" stop-color="#00C4FF"/>
+  </linearGradient>
+</defs>
+
+<!-- Background -->
+<rect x="4" y="4" width="56" height="56" rx="14" fill="url(#bgRad)"/>
+
+<!-- Three monitoring rings — graduated opacity, precision instrument feel -->
+<circle cx="32" cy="32" r="20"  fill="none" stroke="#1E3350" stroke-width="0.8"/>
+<circle cx="32" cy="32" r="13"  fill="none" stroke="#2B4060" stroke-width="0.75"/>
+<circle cx="32" cy="32" r="6.5" fill="none" stroke="#C4D4E8" stroke-opacity="0.36" stroke-width="1.1"/>
+
+<!-- Cardinal precision ticks — N S E W, inward from outer ring -->
+<line x1="32" y1="12"  x2="32" y2="15"  stroke="#3D5878" stroke-width="0.8" stroke-linecap="round" opacity="0.55"/>
+<line x1="32" y1="52"  x2="32" y2="49"  stroke="#3D5878" stroke-width="0.8" stroke-linecap="round" opacity="0.55"/>
+<line x1="52" y1="32"  x2="49" y2="32"  stroke="#3D5878" stroke-width="0.8" stroke-linecap="round" opacity="0.55"/>
+<line x1="12" y1="32"  x2="15" y2="32"  stroke="#3D5878" stroke-width="0.8" stroke-linecap="round" opacity="0.55"/>
+
+<!-- Detection vector — thin, directional, gradient -->
+<line x1="33.8" y1="30.2" x2="45.4" y2="18.6" stroke="url(#sig)" stroke-width="1.6" stroke-linecap="round"/>
+
+<!-- Center intelligence core -->
+<circle cx="32" cy="32" r="2.0" fill="#00C4FF"/>
+
+<!-- Active detected signal — on the monitoring perimeter, small and precise -->
+<circle cx="46.1" cy="17.9" r="3.5"  fill="none" stroke="#00C4FF" stroke-width="0.9" opacity="0.18"/>
+<circle cx="46.1" cy="17.9" r="1.9"  fill="#00C4FF"/>
+
+</svg>

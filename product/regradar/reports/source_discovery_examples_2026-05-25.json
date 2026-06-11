@@ -1,0 +1,227 @@
+{
+  "generatedAt": "2026-05-25",
+  "totalExamples": 5,
+  "examples": [
+    {
+      "submittedUrl": "https://iras.gov.sg/news-events/newsroom",
+      "bestMonitoringUrl": "https://iras.gov.sg/news-events/newsroom",
+      "sourceName": "strong_source",
+      "jurisdiction": "SG",
+      "category": "tax",
+      "recommendedStatus": "active",
+      "connectionMethod": "static_html",
+      "qualityScore": 60,
+      "qualityLabel": "acceptable",
+      "extractedChars": 6986,
+      "documentsFound": 0,
+      "rssFeedsFound": 0,
+      "sitemapsFound": 0,
+      "apiEndpointsFound": 0,
+      "language": "Unknown",
+      "limitations": [
+        "No RSS feed or sitemap found for structured monitoring"
+      ],
+      "testedMethods": [
+        "static_html",
+        "sitemap_discovery",
+        "rss_discovery",
+        "document_discovery",
+        "deep_url_discovery",
+        "language_fallback",
+        "api_discovery"
+      ],
+      "deepUrlCandidates": [],
+      "languageVersions": [],
+      "apiEndpoints": [],
+      "verdict": "can_monitor",
+      "reason": "Static HTML extraction succeeded (6,986 chars via beautifulsoup). Ready for generic HTML monitoring.",
+      "summary": "Source monitorable with limitations. 6,986 chars extracted. Quality score: 60/100.",
+      "nextSteps": [
+        "Activate for pilot monitoring and review extraction quality periodically."
+      ],
+      "generatedAt": "2026-05-25",
+      "exampleType": "strong_source"
+    },
+    {
+      "submittedUrl": "https://arlis.am",
+      "bestMonitoringUrl": "https://arlis.am/en/",
+      "sourceName": "weak_source",
+      "jurisdiction": "AM",
+      "category": "legal_acts",
+      "recommendedStatus": "limited",
+      "connectionMethod": "deep_url",
+      "qualityScore": 45,
+      "qualityLabel": "weak",
+      "extractedChars": 1169,
+      "documentsFound": 1,
+      "rssFeedsFound": 0,
+      "sitemapsFound": 0,
+      "apiEndpointsFound": 0,
+      "language": "English",
+      "limitations": [
+        "Requires Playwright rendering (JS-rendered site)",
+        "No RSS feed or sitemap found for structured monitoring"
+      ],
+      "testedMethods": [
+        "static_html",
+        "playwright",
+        "sitemap_discovery",
+        "rss_discovery",
+        "document_discovery",
+        "deep_url_discovery",
+        "language_fallback",
+        "api_discovery"
+      ],
+      "deepUrlCandidates": [],
+      "languageVersions": [
+        {
+          "url": "https://arlis.am/en/",
+          "language": "English",
+          "chars": 1169,
+          "quality": "good"
+        }
+      ],
+      "apiEndpoints": [],
+      "verdict": "can_monitor",
+      "reason": "Better monitoring URL found: https://arlis.am/en/",
+      "summary": "Source monitorable with limitations. 1,169 chars extracted. Quality score: 45/100.",
+      "nextSteps": [
+        "Activate for pilot monitoring and review extraction quality periodically."
+      ],
+      "generatedAt": "2026-05-25",
+      "exampleType": "weak_source"
+    },
+    {
+      "submittedUrl": "https://acra.gov.sg",
+      "bestMonitoringUrl": "https://acra.gov.sg",
+      "sourceName": "good_source",
+      "jurisdiction": "SG",
+      "category": "company_regulator",
+      "recommendedStatus": "active",
+      "connectionMethod": "static_html",
+      "qualityScore": 60,
+      "qualityLabel": "acceptable",
+      "extractedChars": 3497,
+      "documentsFound": 0,
+      "rssFeedsFound": 0,
+      "sitemapsFound": 2,
+      "apiEndpointsFound": 0,
+      "language": "Unknown",
+      "limitations": [],
+      "testedMethods": [
+        "static_html",
+        "sitemap_discovery",
+        "rss_discovery",
+        "document_discovery",
+        "deep_url_discovery",
+        "language_fallback",
+        "api_discovery"
+      ],
+      "deepUrlCandidates": [
+        {
+          "url": "https://acra.gov.sg/regulations",
+          "chars": 1300,
+          "quality": "good",
+          "regulatory_score": 6,
+          "method": "beautifulsoup"
+        }
+      ],
+      "languageVersions": [],
+      "apiEndpoints": [],
+      "verdict": "can_monitor",
+      "reason": "Static HTML extraction succeeded (3,497 chars via beautifulsoup). Ready for generic HTML monitoring.",
+      "summary": "Source monitorable with limitations. 3,497 chars extracted. Quality score: 60/100.",
+      "nextSteps": [
+        "Activate for pilot monitoring and review extraction quality periodically."
+      ],
+      "generatedAt": "2026-05-25",
+      "exampleType": "good_source"
+    },
+    {
+      "submittedUrl": "https://www.iosco.org/publications/",
+      "bestMonitoringUrl": "https://www.iosco.org/publications/",
+      "sourceName": "document_heavy",
+      "jurisdiction": "INT",
+      "category": "securities",
+      "recommendedStatus": "limited",
+      "connectionMethod": "static_html",
+      "qualityScore": 50,
+      "qualityLabel": "acceptable",
+      "extractedChars": 3766,
+      "documentsFound": 0,
+      "rssFeedsFound": 0,
+      "sitemapsFound": 0,
+      "apiEndpointsFound": 0,
+      "language": "Unknown",
+      "limitations": [
+        "No RSS feed or sitemap found for structured monitoring"
+      ],
+      "testedMethods": [
+        "static_html",
+        "sitemap_discovery",
+        "rss_discovery",
+        "document_discovery",
+        "deep_url_discovery",
+        "language_fallback",
+        "api_discovery"
+      ],
+      "deepUrlCandidates": [
+        {
+          "url": "https://www.iosco.org/publications",
+          "chars": 3766,
+          "quality": "good",
+          "regulatory_score": 5,
+          "method": "beautifulsoup"
+        }
+      ],
+      "languageVersions": [],
+      "apiEndpoints": [],
+      "verdict": "can_monitor",
+      "reason": "Static HTML extraction succeeded (3,766 chars via beautifulsoup). Ready for generic HTML monitoring.",
+      "summary": "Source monitorable with limitations. 3,766 chars extracted. Quality score: 50/100.",
+      "nextSteps": [
+        "Activate for pilot monitoring and review extraction quality periodically."
+      ],
+      "generatedAt": "2026-05-25",
+      "exampleType": "document_heavy"
+    },
+    {
+      "submittedUrl": "https://cccs.gov.sg",
+      "bestMonitoringUrl": "https://cccs.gov.sg",
+      "sourceName": "spa_site",
+      "jurisdiction": "SG",
+      "category": "competition",
+      "recommendedStatus": "active",
+      "connectionMethod": "static_html",
+      "qualityScore": 60,
+      "qualityLabel": "acceptable",
+      "extractedChars": 4268,
+      "documentsFound": 0,
+      "rssFeedsFound": 0,
+      "sitemapsFound": 2,
+      "apiEndpointsFound": 0,
+      "language": "Unknown",
+      "limitations": [],
+      "testedMethods": [
+        "static_html",
+        "sitemap_discovery",
+        "rss_discovery",
+        "document_discovery",
+        "deep_url_discovery",
+        "language_fallback",
+        "api_discovery"
+      ],
+      "deepUrlCandidates": [],
+      "languageVersions": [],
+      "apiEndpoints": [],
+      "verdict": "can_monitor",
+      "reason": "Static HTML extraction succeeded (4,268 chars via beautifulsoup). Ready for generic HTML monitoring.",
+      "summary": "Source monitorable with limitations. 4,268 chars extracted. Quality score: 60/100.",
+      "nextSteps": [
+        "Activate for pilot monitoring and review extraction quality periodically."
+      ],
+      "generatedAt": "2026-05-25",
+      "exampleType": "spa_site"
+    }
+  ]
+}

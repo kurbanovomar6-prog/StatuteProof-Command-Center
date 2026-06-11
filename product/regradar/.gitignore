@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# Database & runtime artefacts
+*.db
+*.db-shm
+*.db-wal
+
+# Generated validation reports (discover-source, coverage runs, health outputs)
+reports/discover_source_*.json
+reports/coverage_*.json
+reports/coverage_*.html
+reports/coverage_plan_*.json
+reports/coverage_plan_*.html
+reports/source_audit_*.json
+reports/weekly_briefs/
+
+# Node / frontend
+node_modules/
+web/dist/
+web/.env
+web/.env.local
+
+# Telegram settings stored by the frontend
+telegram_settings.json
+
+# Telegram client storage (may contain real chat IDs)
+data/telegram_clients.json
+
+# Contact form queue (contains prospect details)
+data/contact_requests.jsonl
+
+# Source run history (runtime monitoring evidence)
+data/source_runs/*.jsonl
+data/source_snapshots/
+data/alert_reviews/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+reports/statuteproof_product_quality_roadmap.md
+reports/statuteproof_uae_website_value_pass_plan.md

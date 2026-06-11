@@ -1,0 +1,414 @@
+"""
+RegRadar — document extraction engine.
+
+Discovers PDF/DOC/DOCX links on regulatory pages, safely downloads and
+extracts text.  All functions fail gracefully — no crash, no mandatory
+dependencies beyond requests + BeautifulSoup (already required by the
+project).
+
+PDF extraction requires:  pip install pypdf
+DOCX extraction requires: pip install python-docx   (listed, not extracted yet)
+
+Public API
+----------
+find_document_links(html, base_url)                          → dict
+fetch_document(url, timeout, max_bytes)                      → dict
+extract_pdf_text(file_bytes)                                 → dict
+extract_documents_from_page(html, base_url, max_docs=3)      → dict
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from urllib.parse import urljoin, urlparse
+
+import requests
+from bs4 import BeautifulSoup
+
+from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
+
+logger = logging.getLogger(__name__)
+
+# ── Quality thresholds ────────────────────────────────────────────────────────
+
+_GOOD_CHARS = 1_000
+_LOW_CHARS  =   100
+
+# ── Document extension sets ───────────────────────────────────────────────────
+
+_PDF_EXTS  = frozenset({".pdf"})
+_DOC_EXTS  = frozenset({".doc"})
+_DOCX_EXTS = frozenset({".docx"})
+_XLSX_EXTS = frozenset({".xlsx", ".xls"})
+_ALL_EXTS  = _PDF_EXTS | _DOC_EXTS | _DOCX_EXTS | _XLSX_EXTS
+
+_MAX_BYTES_DEFAULT = 10_000_000   # 10 MB
+
+
+def _quality(chars: int) -> str:
+    if chars >= _GOOD_CHARS:
+        return "good"
+    if chars >= _LOW_CHARS:
+        return "low_content"
+    return "failed"
+
+
+def _doc_ext(url: str) -> str:
+    path = urlparse(url).path.lower()
+    for ext in _ALL_EXTS:
+        if path.endswith(ext):
+            return ext
+    return ""
+
+
+def _normalise_text(text: str) -> str:
+    """Normalise whitespace and collapse repeated blank lines."""
+    if not text:
+        return ""
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    lines = [ln.rstrip() for ln in text.split("\n")]
+    return "\n".join(lines).strip()
+
+
+# ── Link discovery ─────────────────────────────────────────────────────────────
+
+def find_document_links(html: str, base_url: str) -> dict:
+    """
+    Parse HTML and return categorised document link lists.
+
+    Returns
+    -------
+    {
+      "pdf_links":          [...],   # up to 20
+      "doc_links":          [...],   # up to 20
+      "docx_links":         [...],   # up to 20
+      "xlsx_links":         [...],   # up to 20
+      "all_document_links": [...]    # union, up to 60
+    }
+    All entries are deduplicated absolute http/https URLs.
+    """
+    empty = {
+        "pdf_links": [], "doc_links": [], "docx_links": [],
+        "xlsx_links": [], "all_document_links": [],
+    }
+    if not html:
+        return empty
+
+    soup = BeautifulSoup(html, "html.parser")
+    seen:  set[str]  = set()
+    pdfs:  list[str] = []
+    docs:  list[str] = []
+    docxs: list[str] = []
+    xlsxs: list[str] = []
+
+    for tag in soup.find_all("a", href=True):
+        href = tag["href"].strip()
+        if not href or href.startswith(("#", "javascript:", "mailto:", "tel:", "data:")):
+            continue
+        try:
+            full = urljoin(base_url, href)
+            p    = urlparse(full)
+            if p.scheme not in ("http", "https") or not p.netloc:
+                continue
+            if full in seen:
+                continue
+            ext = _doc_ext(full)
+            if not ext:
+                continue
+            seen.add(full)
+            if ext in _PDF_EXTS:
+                pdfs.append(full)
+            elif ext in _DOC_EXTS:
+                docs.append(full)
+            elif ext in _DOCX_EXTS:
+                docxs.append(full)
+            elif ext in _XLSX_EXTS:
+                xlsxs.append(full)
+        except Exception:
+            continue
+
+    all_docs = pdfs + docs + docxs + xlsxs
+    return {
+        "pdf_links":          pdfs[:20],
+        "doc_links":          docs[:20],
+        "docx_links":         docxs[:20],
+        "xlsx_links":         xlsxs[:20],
+        "all_document_links": all_docs[:60],
+    }
+
+
+# ── Safe document fetch ───────────────────────────────────────────────────────
+
+def fetch_document(
+    url:       str,
+    timeout:   int = 20,
+    max_bytes: int = _MAX_BYTES_DEFAULT,
+) -> dict:
+    """
+    Download a document URL safely with size limit and streaming.
+
+    Returns
+    -------
+    {
+      "url":          url,
+      "status":       "ok" | "failed" | "skipped",
+      "http_status":  int | None,
+      "content_type": str,
+      "bytes":        int,
+      "data":         bytes,
+      "error":        str
+    }
+    """
+    result: dict = {
+        "url":          url,
+        "status":       "failed",
+        "http_status":  None,
+        "content_type": "",
+        "bytes":        0,
+        "data":         b"",
+        "error":        "",
+    }
+
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        result["status"] = "skipped"
+        result["error"]  = f"Unsupported scheme: {parsed.scheme!r}"
+        return result
+
+    try:
+        resp = requests.get(
+            url,
+            headers={
+                "User-Agent":      REQUESTS_UA,
+                "Accept":          "application/pdf,application/octet-stream,*/*",
+                "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+            },
+            timeout=timeout,
+            stream=True,
+            allow_redirects=True,
+        )
+        result["http_status"]  = resp.status_code
+        result["content_type"] = resp.headers.get("content-type", "").split(";")[0].strip()
+
+        if not resp.ok:
+            result["error"] = f"HTTP {resp.status_code}"
+            return result
+
+        # Content-Length guard (skip before streaming)
+        cl = resp.headers.get("content-length")
+        if cl:
+            try:
+                if int(cl) > max_bytes:
+                    result["status"] = "skipped"
+                    result["error"]  = (
+                        f"File too large: Content-Length {int(cl):,} > "
+                        f"limit {max_bytes:,} bytes"
+                    )
+                    return result
+            except ValueError:
+                pass
+
+        # Stream with running size cap
+        chunks: list[bytes] = []
+        total = 0
+        for chunk in resp.iter_content(chunk_size=65_536):
+            if chunk:
+                total += len(chunk)
+                if total > max_bytes:
+                    result["status"] = "skipped"
+                    result["error"]  = (
+                        f"File too large: stopped at {total:,} bytes "
+                        f"(limit {max_bytes:,})"
+                    )
+                    return result
+                chunks.append(chunk)
+
+        result["data"]   = b"".join(chunks)
+        result["bytes"]  = len(result["data"])
+        result["status"] = "ok"
+
+    except requests.Timeout:
+        result["error"] = f"Timeout after {timeout}s"
+    except requests.RequestException as exc:
+        result["error"] = str(exc)[:200]
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+
+    return result
+
+
+# ── PDF text extraction ───────────────────────────────────────────────────────
+
+def extract_pdf_text(file_bytes: bytes) -> dict:
+    """
+    Extract text from PDF bytes.  Tries pypdf first, pdfplumber as fallback.
+
+    Returns
+    -------
+    {
+      "text":    str,
+      "chars":   int,
+      "quality": "good" | "low_content" | "failed",
+      "method":  "pypdf" | "pdfplumber" | "none",
+      "error":   str
+    }
+    Never raises.
+    """
+    result: dict = {
+        "text":    "",
+        "chars":   0,
+        "quality": "failed",
+        "method":  "none",
+        "error":   "",
+    }
+
+    if not file_bytes:
+        result["error"] = "empty input"
+        return result
+
+    # ── pypdf ───────────────────────────────────────────────────────────────
+    try:
+        import pypdf       # type: ignore[import-untyped]
+        import io as _io
+
+        reader = pypdf.PdfReader(_io.BytesIO(file_bytes))
+        parts: list[str] = []
+        for page in reader.pages:
+            t = page.extract_text()
+            if t and t.strip():
+                parts.append(t.strip())
+        text = _normalise_text("\n\n".join(parts))
+        if text and len(text) >= _LOW_CHARS:
+            result.update(
+                text=text, chars=len(text),
+                quality=_quality(len(text)), method="pypdf",
+            )
+            return result
+        # pypdf gave something too short — still record method, try fallback
+        if text:
+            result.update(
+                text=text, chars=len(text),
+                quality=_quality(len(text)), method="pypdf",
+            )
+    except ImportError:
+        logger.debug("document_extractor: pypdf not installed")
+    except Exception as exc:
+        result["error"] = f"pypdf: {str(exc)[:120]}"
+        logger.debug("document_extractor: pypdf failed: %s", exc)
+
+    # ── pdfplumber fallback ─────────────────────────────────────────────────
+    try:
+        import pdfplumber  # type: ignore[import-untyped]
+        import io as _io
+
+        with pdfplumber.open(_io.BytesIO(file_bytes)) as pdf:
+            parts = []
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t and t.strip():
+                    parts.append(t.strip())
+        text = _normalise_text("\n\n".join(parts))
+        if text:
+            result.update(
+                text=text, chars=len(text),
+                quality=_quality(len(text)), method="pdfplumber", error="",
+            )
+            return result
+    except ImportError:
+        logger.debug("document_extractor: pdfplumber not installed")
+    except Exception as exc:
+        prev = result["error"]
+        result["error"] = (prev + " | " if prev else "") + f"pdfplumber: {str(exc)[:120]}"
+        logger.debug("document_extractor: pdfplumber failed: %s", exc)
+
+    # ── Both unavailable/failed ─────────────────────────────────────────────
+    if result["method"] == "none" and not result["error"]:
+        result["error"] = "no PDF library available — install pypdf"
+
+    return result
+
+
+# ── Page-level extraction ─────────────────────────────────────────────────────
+
+def extract_documents_from_page(
+    html:     str,
+    base_url: str,
+    max_docs: int = 3,
+) -> dict:
+    """
+    Discover document links in HTML and extract text from up to max_docs PDFs.
+
+    DOC/DOCX/XLSX links are discovered and counted but not yet extracted.
+
+    Returns
+    -------
+    {
+      "documents_found":     int,    # total doc links on page
+      "documents_processed": int,    # PDFs attempted
+      "pdf_processed":       int,    # PDFs attempted
+      "doc_links":           int,    # .doc count
+      "docx_links":          int,    # .docx count
+      "combined_text":       str,
+      "combined_chars":      int,
+      "quality":             str,
+      "items":               list[dict]
+    }
+    Never raises.
+    """
+    links = find_document_links(html, base_url)
+    pdfs  = links["pdf_links"]
+    docs  = links["doc_links"]
+    docxs = links["docx_links"]
+
+    items:       list[dict] = []
+    text_blocks: list[str]  = []
+
+    for pdf_url in pdfs[:max_docs]:
+        item: dict = {
+            "url":     pdf_url,
+            "type":    "pdf",
+            "chars":   0,
+            "quality": "failed",
+            "method":  "none",
+            "error":   "",
+        }
+
+        fetch = fetch_document(pdf_url)
+        if fetch["status"] == "ok" and fetch["data"]:
+            extr = extract_pdf_text(fetch["data"])
+            item.update(
+                chars=extr["chars"],
+                quality=extr["quality"],
+                method=extr["method"],
+                error=extr["error"],
+            )
+            if extr["text"]:
+                text_blocks.append(
+                    f"[Document: {pdf_url}]\n{extr['text']}"
+                )
+        else:
+            item["error"] = fetch.get("error", "download failed")
+            logger.debug(
+                "document_extractor: fetch failed for %s: %s",
+                pdf_url, item["error"],
+            )
+
+        items.append(item)
+
+    combined       = "\n\n".join(text_blocks)
+    combined_chars = len(combined)
+
+    return {
+        "documents_found":     len(links["all_document_links"]),
+        "documents_processed": len(items),
+        "pdf_links_count":     len(pdfs),
+        "pdf_processed":       len(items),
+        "doc_links":           len(docs),
+        "docx_links":          len(docxs),
+        "combined_text":       combined,
+        "combined_chars":      combined_chars,
+        "quality":             _quality(combined_chars),
+        "items":               items,
+    }

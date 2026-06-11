@@ -1,0 +1,19 @@
+[
+  {
+    "id": "EVT2",
+    "slug": "weather-mentioned-in-debate",
+    "title": "Will weather be mentioned in a debate?",
+    "markets": [
+      {
+        "id": "M2",
+        "question": "Will weather be mentioned in a debate?",
+        "description": "",
+        "active": true,
+        "closed": false,
+        "outcomes": "[\"Yes\",\"No\"]",
+        "outcomePrices": "[\"0.5\",\"0.5\"]",
+        "clobTokenIds": "[\"YES\",\"NO\"]"
+      }
+    ]
+  }
+]

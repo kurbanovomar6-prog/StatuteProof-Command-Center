@@ -1,0 +1,1235 @@
+{
+  "version": "1.0",
+  "generated_for": "RegRadar",
+  "last_updated": "2026-05-26",
+  "description": "Regulatory source candidate registry by market. Planning and research use only. Sources must be validated with test-source before enabling in sources.json.",
+  "validation_rules": [
+    "Run: python run.py test-source <url> before enabling any candidate.",
+    "Only move to sources.json after extraction quality is confirmed.",
+    "Secondary intelligence sources must be clearly labeled as non-official.",
+    "Never enable sources with status=blocked or status=auth_required without an adapter."
+  ],
+  "markets": {
+    "AE": {
+      "official_candidates": [
+        {
+          "name": "Virtual Assets Regulatory Authority",
+          "slug": "vara",
+          "category": "crypto_vasp",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://www.vara.ae/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Primary Dubai VASP regulator. High-value source. Validate HTML and PDF extraction before enabling."
+        },
+        {
+          "name": "Central Bank of the UAE",
+          "slug": "cbuae",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://www.centralbank.ae/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Main UAE financial regulator. Critical source for banking and payment regulation. Test HTML and publication PDF extraction."
+        },
+        {
+          "name": "Securities and Commodities Authority",
+          "slug": "sca",
+          "category": "securities_regulator",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://www.sca.gov.ae/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "needs_adapter",
+          "enabled": false,
+          "notes": "UAE federal securities regulator. Portal has JavaScript-heavy sections. Adapter may be needed for reliable extraction."
+        },
+        {
+          "name": "Dubai Financial Services Authority",
+          "slug": "dfsa",
+          "category": "financial_free_zone",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://www.dfsa.ae/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Regulates DIFC-based financial services. English-language portal. High priority for international clients."
+        },
+        {
+          "name": "ADGM Financial Services Regulatory Authority",
+          "slug": "fsra_adgm",
+          "category": "financial_free_zone",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://www.fsra.adgm.com/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Regulates ADGM-based financial services and digital assets. English-language. Validate extraction."
+        },
+        {
+          "name": "UAE Ministry of Finance",
+          "slug": "uae_mof",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://www.mof.gov.ae/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "UAE federal Ministry of Finance. Relevant for VAT, corporate tax and fiscal regulation. Validate bilingual extraction."
+        },
+        {
+          "name": "Federal Tax Authority",
+          "slug": "fta_uae",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://tax.gov.ae/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "UAE Federal Tax Authority. Key source for corporate tax and VAT compliance updates."
+        },
+        {
+          "name": "UAE Legislation Portal",
+          "slug": "uaelegislation",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://uaelegislation.gov.ae/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official UAE federal legislation database. Validate Arabic and English content extraction."
+        },
+        {
+          "name": "DIFC Laws and Regulations",
+          "slug": "difc_laws",
+          "category": "financial_free_zone",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://www.difc.ae/business/laws-regulations/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "DIFC legal and regulatory publications. English-language. Validate PDF and HTML extraction."
+        },
+        {
+          "name": "UAE Telecommunications and Digital Government Regulatory Authority",
+          "slug": "tdra",
+          "category": "telecom_digital",
+          "trust_level": "official",
+          "jurisdiction": "AE",
+          "url": "https://tdra.gov.ae/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "needs_adapter",
+          "enabled": false,
+          "notes": "Regulates digital services and telecom. Some sections require authentication. Adapter needed for reliable monitoring."
+        }
+      ],
+      "secondary_intelligence": [
+        {
+          "name": "Clifford Chance UAE Regulatory Insights",
+          "slug": "cc_uae",
+          "category": "legal_analysis",
+          "trust_level": "authoritative_secondary",
+          "jurisdiction": "AE",
+          "url": "https://www.cliffordchance.com/locations/middle-east/dubai.html",
+          "language": "en",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "High-quality regulatory analysis from a top-tier law firm. Must be labeled as secondary intelligence, not official source."
+        },
+        {
+          "name": "DLA Piper Middle East Regulatory Updates",
+          "slug": "dla_mena",
+          "category": "legal_analysis",
+          "trust_level": "authoritative_secondary",
+          "jurisdiction": "AE",
+          "url": null,
+          "language": "en",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Confirm specific regulatory updates page URL before adding. Label as secondary intelligence only."
+        }
+      ],
+      "needs_adapter": [
+        "SCA portal — JavaScript SPA, full content not accessible via simple HTTP fetch",
+        "TDRA — selected sections require authentication before content is visible"
+      ],
+      "missing_categories": [
+        "competition_authority — UAE competition regulation handled by Ministry of Economy, no dedicated extraction-ready portal confirmed",
+        "official_gazette — UAE Official Gazette content not available in a structured extractable format",
+        "data_protection — UAE Data Office extraction not yet validated"
+      ]
+    },
+    "TR": {
+      "official_candidates": [
+        {
+          "name": "Central Bank of the Republic of Turkey",
+          "slug": "tcmb",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.tcmb.gov.tr/",
+          "language": "tr_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Primary monetary authority. Turkish and English content. Validate extraction of press releases and regulatory circulars."
+        },
+        {
+          "name": "Banking Regulation and Supervision Agency",
+          "slug": "bddk",
+          "category": "banking_regulator",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.bddk.org.tr/",
+          "language": "tr_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "BRSA/BDDK — main banking supervisor. Critical source for Turkish banking compliance. Test PDF extraction."
+        },
+        {
+          "name": "Capital Markets Board of Turkey",
+          "slug": "spk",
+          "category": "securities_regulator",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.spk.gov.tr/",
+          "language": "tr_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "CMB/SPK — capital markets and crypto regulation. High importance for VASP and investment firms."
+        },
+        {
+          "name": "Financial Crimes Investigation Board",
+          "slug": "masak",
+          "category": "aml_fiu",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.masak.gov.tr/",
+          "language": "tr",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Turkish AML/CFT authority. Primary Turkish-language source. Test multilingual extraction."
+        },
+        {
+          "name": "Revenue Administration of Turkey",
+          "slug": "gib",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.gib.gov.tr/",
+          "language": "tr_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Turkish Revenue Administration. Relevant for tax and crypto tax regulation."
+        },
+        {
+          "name": "Official Gazette of Turkey",
+          "slug": "resmi_gazete",
+          "category": "official_gazette",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.resmigazete.gov.tr/",
+          "language": "tr",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official legislative record. Turkish-language. Critical for catching new regulations at point of publication."
+        },
+        {
+          "name": "Ministry of Treasury and Finance",
+          "slug": "hmb",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.hmb.gov.tr/",
+          "language": "tr_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Turkish Treasury and Finance Ministry. Relevant for financial regulation and policy announcements."
+        },
+        {
+          "name": "Personal Data Protection Authority",
+          "slug": "kvkk",
+          "category": "data_protection",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.kvkk.gov.tr/",
+          "language": "tr",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Turkish GDPR-equivalent authority. Relevant for fintech and payment companies with user data processing."
+        },
+        {
+          "name": "Competition Authority of Turkey",
+          "slug": "rekabet",
+          "category": "competition",
+          "trust_level": "official",
+          "jurisdiction": "TR",
+          "url": "https://www.rekabet.gov.tr/",
+          "language": "tr_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Turkish competition regulator. Relevant for payment market and digital platform compliance."
+        }
+      ],
+      "secondary_intelligence": [
+        {
+          "name": "Clifford Chance Turkey Regulatory Updates",
+          "slug": "cc_turkey",
+          "category": "legal_analysis",
+          "trust_level": "authoritative_secondary",
+          "jurisdiction": "TR",
+          "url": "https://www.cliffordchance.com/locations/europe/istanbul.html",
+          "language": "en",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "High-quality English-language Turkish regulatory commentary. Label as secondary intelligence."
+        }
+      ],
+      "needs_adapter": [
+        "Some MASAK sections require session-based navigation — validate with test-source",
+        "Resmi Gazete PDF extraction may require custom PDF parser for regulatory identification"
+      ],
+      "missing_categories": [
+        "draft_regulation — Turkey public consultation portal not centralized in a single extractable source",
+        "telecom_digital — BTK monitoring not yet validated"
+      ]
+    },
+    "SA": {
+      "official_candidates": [
+        {
+          "name": "Saudi Central Bank",
+          "slug": "sama",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "SA",
+          "url": "https://www.sama.gov.sa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Primary Saudi financial regulator. SAMA is critical for banking, payment and fintech compliance. Validate bilingual extraction."
+        },
+        {
+          "name": "Capital Market Authority",
+          "slug": "cma_sa",
+          "category": "securities_regulator",
+          "trust_level": "official",
+          "jurisdiction": "SA",
+          "url": "https://www.cma.org.sa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "needs_adapter",
+          "enabled": false,
+          "notes": "Saudi securities and capital markets regulator. Portal has JS-heavy sections. Adapter may be required. Validate with test-source."
+        },
+        {
+          "name": "Zakat, Tax and Customs Authority",
+          "slug": "zatca",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "SA",
+          "url": "https://www.zatca.gov.sa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Saudi tax and customs authority. Key for VAT, zakat and corporate tax compliance. Test extraction quality."
+        },
+        {
+          "name": "Saudi Ministry of Finance",
+          "slug": "mof_sa",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "SA",
+          "url": "https://www.mof.gov.sa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Saudi fiscal and financial policy. Relevant for budget and regulatory announcements."
+        },
+        {
+          "name": "Bureau of Experts at the Council of Ministers",
+          "slug": "boe_sa",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "SA",
+          "url": "https://www.boe.gov.sa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official Saudi legislation and regulatory texts portal. Critical for catching new laws and regulations."
+        },
+        {
+          "name": "Saudi Data and AI Authority",
+          "slug": "sdaia",
+          "category": "data_protection",
+          "trust_level": "official",
+          "jurisdiction": "SA",
+          "url": "https://sdaia.gov.sa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Data protection and AI regulation authority. Important for fintech and digital services compliance."
+        },
+        {
+          "name": "Communications, Space and Technology Commission",
+          "slug": "cst_sa",
+          "category": "telecom_digital",
+          "trust_level": "official",
+          "jurisdiction": "SA",
+          "url": "https://www.cst.gov.sa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Telecom and digital services regulator. Relevant for digital payment and fintech infrastructure."
+        }
+      ],
+      "secondary_intelligence": [
+        {
+          "name": "Clifford Chance Saudi Arabia Regulatory",
+          "slug": "cc_ksa",
+          "category": "legal_analysis",
+          "trust_level": "authoritative_secondary",
+          "jurisdiction": "SA",
+          "url": null,
+          "language": "en",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Confirm specific KSA regulatory updates URL before adding. Label as secondary intelligence only."
+        }
+      ],
+      "needs_adapter": [
+        "CMA portal — JavaScript-heavy sections require SPA adapter for reliable extraction",
+        "Some SAMA portal sections may have geo-restrictions — validate from neutral IP"
+      ],
+      "missing_categories": [
+        "official_gazette — Umm Al-Qura Gazette extraction not yet validated",
+        "competition — General Authority for Competition portal extraction not tested",
+        "draft_regulation — public consultation portal not identified as single extractable source"
+      ]
+    },
+    "KZ": {
+      "official_candidates": [
+        {
+          "name": "National Bank of Kazakhstan",
+          "slug": "nbk",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "KZ",
+          "url": "https://www.nationalbank.kz/",
+          "language": "kk_ru_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Primary monetary authority. Trilingual content. Already part of existing Kazakhstan source pack."
+        },
+        {
+          "name": "Agency for Regulation and Development of Financial Market",
+          "slug": "ardfm",
+          "category": "banking_regulator",
+          "trust_level": "official",
+          "jurisdiction": "KZ",
+          "url": "https://www.ardfm.gov.kz/",
+          "language": "kk_ru_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Main financial market regulator. Already in source pack. Validate regularly."
+        },
+        {
+          "name": "Ministry of Finance of Kazakhstan",
+          "slug": "minfin_kz",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "KZ",
+          "url": "https://www.minfin.gov.kz/",
+          "language": "kk_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Fiscal policy and tax regulation. Kazakh and Russian language primary content."
+        },
+        {
+          "name": "State Revenue Committee",
+          "slug": "kgd_kz",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "KZ",
+          "url": "https://www.kgd.gov.kz/",
+          "language": "kk_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Kazakhstan tax authority. Relevant for VAT, corporate tax and digital asset tax updates."
+        },
+        {
+          "name": "Adilet Legal Portal",
+          "slug": "adilet",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "KZ",
+          "url": "https://adilet.zan.kz/",
+          "language": "kk_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official Kazakh legal information system. Key source for new laws and regulatory acts."
+        },
+        {
+          "name": "Agency for Financial Monitoring",
+          "slug": "afm_kz",
+          "category": "aml_fiu",
+          "trust_level": "official",
+          "jurisdiction": "KZ",
+          "url": "https://afm.gov.kz/",
+          "language": "kk_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Kazakhstan AML and financial intelligence authority."
+        },
+        {
+          "name": "Astana International Financial Centre",
+          "slug": "aifc",
+          "category": "financial_free_zone",
+          "trust_level": "official",
+          "jurisdiction": "KZ",
+          "url": "https://www.aifc.kz/",
+          "language": "en_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "English-language regulatory framework for AIFC-licensed entities. High value for international clients."
+        }
+      ],
+      "secondary_intelligence": [
+        {
+          "name": "Dentons Kazakhstan Regulatory Insights",
+          "slug": "dentons_kz",
+          "category": "legal_analysis",
+          "trust_level": "authoritative_secondary",
+          "jurisdiction": "KZ",
+          "url": null,
+          "language": "en",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Confirm specific KZ regulatory insights URL before adding. Label as secondary intelligence only."
+        },
+        {
+          "name": "Grata International Kazakhstan",
+          "slug": "grata_kz",
+          "category": "legal_analysis",
+          "trust_level": "authoritative_secondary",
+          "jurisdiction": "KZ",
+          "url": null,
+          "language": "en_ru",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Regional law firm with strong Kazakhstan regulatory practice. Confirm URL before adding."
+        }
+      ],
+      "needs_adapter": [
+        "Some Adilet sections require pagination handling for comprehensive regulatory act extraction",
+        "ARDFM PDF publications need reliable filename-pattern detection"
+      ],
+      "missing_categories": [
+        "competition_authority — Agency for Protection and Development of Competition portal not yet validated",
+        "draft_regulation — regulation.gov.kz validation pending"
+      ]
+    },
+    "UZ": {
+      "official_candidates": [
+        {
+          "name": "Central Bank of Uzbekistan",
+          "slug": "cbu",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "UZ",
+          "url": "https://www.cbu.uz/",
+          "language": "uz_ru_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Primary monetary authority. Available in Uzbek, Russian and partial English. Already in Uzbekistan source pack."
+        },
+        {
+          "name": "Lex.uz — Legal Information Portal",
+          "slug": "lex_uz",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "UZ",
+          "url": "https://lex.uz/",
+          "language": "uz_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official Uzbek legislation portal. Key source for new laws. Already in source pack."
+        },
+        {
+          "name": "Public Services Agency — regulation.gov.uz",
+          "slug": "regulation_uz",
+          "category": "draft_regulation",
+          "trust_level": "official",
+          "jurisdiction": "UZ",
+          "url": "https://regulation.gov.uz/",
+          "language": "uz_ru",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Draft regulation and public consultation portal. Useful for early regulatory signal detection."
+        },
+        {
+          "name": "State Tax Committee",
+          "slug": "soliq_uz",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "UZ",
+          "url": "https://soliq.uz/",
+          "language": "uz_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Uzbek tax authority. Relevant for corporate and digital asset tax updates."
+        },
+        {
+          "name": "Ministry of Economy and Finance",
+          "slug": "mf_uz",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "UZ",
+          "url": "https://mf.uz/",
+          "language": "uz_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Fiscal policy and economic regulation. Validate extraction before enabling."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [
+        "Some Lex.uz search and filter sections require session navigation"
+      ],
+      "missing_categories": [
+        "aml_fiu — Financial Intelligence Unit of Uzbekistan portal not yet identified and validated",
+        "securities_regulator — Capital Markets Development Agency portal extraction not tested"
+      ]
+    },
+    "GE": {
+      "official_candidates": [
+        {
+          "name": "National Bank of Georgia",
+          "slug": "nbg",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "GE",
+          "url": "https://nbg.gov.ge/",
+          "language": "ka_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Primary financial regulator. Georgian and English. Already in source pack."
+        },
+        {
+          "name": "Revenue Service of Georgia",
+          "slug": "rs_ge",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "GE",
+          "url": "https://rs.ge/",
+          "language": "ka_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Georgian tax authority. Already in source pack."
+        },
+        {
+          "name": "Matsne — Legislative Herald of Georgia",
+          "slug": "matsne",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "GE",
+          "url": "https://matsne.gov.ge/",
+          "language": "ka_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official Georgian legislation portal. English available. Already in source pack."
+        },
+        {
+          "name": "Ministry of Finance of Georgia",
+          "slug": "mof_ge",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "GE",
+          "url": "https://mof.ge/",
+          "language": "ka_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Fiscal and financial policy. Test extraction of Georgian and English content."
+        },
+        {
+          "name": "Financial Monitoring Service of Georgia",
+          "slug": "fmsb_ge",
+          "category": "aml_fiu",
+          "trust_level": "official",
+          "jurisdiction": "GE",
+          "url": "https://fmsb.gov.ge/",
+          "language": "ka_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Georgian AML and financial intelligence. Validate extraction before enabling."
+        },
+        {
+          "name": "Personal Data Protection Service",
+          "slug": "pdps_ge",
+          "category": "data_protection",
+          "trust_level": "official",
+          "jurisdiction": "GE",
+          "url": "https://personaldata.ge/",
+          "language": "ka_en",
+          "extraction_method": "html",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Data protection authority. Relevant for fintech and payment companies with user data obligations."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": [
+        "competition — Georgian Competition Agency portal not yet validated for extraction",
+        "telecom — Georgian National Communications Commission validation pending"
+      ]
+    },
+    "AZ": {
+      "official_candidates": [
+        {
+          "name": "Central Bank of the Republic of Azerbaijan",
+          "slug": "cbar",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "AZ",
+          "url": "https://www.cbar.az/",
+          "language": "az_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Primary financial regulator. Azerbaijani and English. Already in source pack."
+        },
+        {
+          "name": "Ministry of Finance of Azerbaijan",
+          "slug": "mof_az",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "AZ",
+          "url": "https://maliyye.gov.az/",
+          "language": "az_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Fiscal policy and budget. Azerbaijani and Russian language content."
+        },
+        {
+          "name": "State Tax Service of Azerbaijan",
+          "slug": "taxes_az",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "AZ",
+          "url": "https://www.taxes.gov.az/",
+          "language": "az_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Tax authority. Validate extraction of English sections."
+        },
+        {
+          "name": "E-Qanun — Legal Acts of Azerbaijan",
+          "slug": "e_qanun_az",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "AZ",
+          "url": "https://e-qanun.az/",
+          "language": "az",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official legislative database. Primary Azerbaijani language. Test extraction."
+        },
+        {
+          "name": "Financial Monitoring Service of Azerbaijan",
+          "slug": "fms_az",
+          "category": "aml_fiu",
+          "trust_level": "official",
+          "jurisdiction": "AZ",
+          "url": "https://fms.gov.az/",
+          "language": "az_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "AML and financial intelligence. Validate extraction before enabling."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [
+        "E-Qanun may require navigation handling for document search — test with test-source"
+      ],
+      "missing_categories": [
+        "securities_regulator — Azerbaijan State Securities Committee portal not yet validated",
+        "data_protection — digital authority portal not confirmed extractable"
+      ]
+    },
+    "BH": {
+      "official_candidates": [
+        {
+          "name": "Central Bank of Bahrain",
+          "slug": "cbb",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "BH",
+          "url": "https://www.cbb.gov.bh/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Progressive financial regulator with English-language portal. Validate extraction before enabling."
+        },
+        {
+          "name": "Ministry of Finance and National Economy",
+          "slug": "mof_bh",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "BH",
+          "url": "https://www.mof.gov.bh/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Fiscal and economic policy. Test extraction."
+        },
+        {
+          "name": "National Bureau for Revenue",
+          "slug": "nbr_bh",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "BH",
+          "url": "https://www.nbr.gov.bh/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Bahrain VAT and tax authority. Test extraction."
+        },
+        {
+          "name": "Financial Intelligence Directorate",
+          "slug": "fid_bh",
+          "category": "aml_fiu",
+          "trust_level": "official",
+          "jurisdiction": "BH",
+          "url": "https://www.fid.gov.bh/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "AML and financial intelligence authority. Validate before enabling."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": [
+        "legal_portal — official Bahrain legislation portal extraction not confirmed",
+        "data_protection — Personal Data Protection Authority portal not yet validated"
+      ]
+    },
+    "QA": {
+      "official_candidates": [
+        {
+          "name": "Qatar Central Bank",
+          "slug": "qcb",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "QA",
+          "url": "https://www.qcb.gov.qa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Main monetary authority. English sections available. Validate before enabling."
+        },
+        {
+          "name": "Qatar Financial Centre Regulatory Authority",
+          "slug": "qfcra",
+          "category": "financial_free_zone",
+          "trust_level": "official",
+          "jurisdiction": "QA",
+          "url": "https://www.qfcra.com/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "QFC regulator — English-language portal. High value for international clients in Qatar."
+        },
+        {
+          "name": "Ministry of Finance — Qatar",
+          "slug": "mof_qa",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "QA",
+          "url": "https://www.mof.gov.qa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Fiscal policy and budget. Test extraction."
+        },
+        {
+          "name": "General Tax Authority — Qatar",
+          "slug": "gta_qa",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "QA",
+          "url": "https://www.gta.gov.qa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Qatar tax authority. Validate extraction before enabling."
+        },
+        {
+          "name": "Al-Meezan — Qatar Legal Portal",
+          "slug": "almeezan_qa",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "QA",
+          "url": "https://www.almeezan.qa/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official Qatar legislation portal. Arabic primary, some English. Validate extraction."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": [
+        "aml_fiu — Qatar FIU portal URL not confirmed; research required",
+        "data_protection — NCSA data protection portal extraction not validated"
+      ]
+    },
+    "MY": {
+      "official_candidates": [
+        {
+          "name": "Bank Negara Malaysia",
+          "slug": "bnm",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "MY",
+          "url": "https://www.bnm.gov.my/",
+          "language": "en_ms",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Central bank with good English documentation. Validate extraction before enabling."
+        },
+        {
+          "name": "Securities Commission Malaysia",
+          "slug": "sc_my",
+          "category": "securities_regulator",
+          "trust_level": "official",
+          "jurisdiction": "MY",
+          "url": "https://www.sc.com.my/",
+          "language": "en_ms",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Capital markets and crypto regulation. English portal. Validate extraction."
+        },
+        {
+          "name": "Ministry of Finance — Malaysia",
+          "slug": "mof_my",
+          "category": "ministry_finance",
+          "trust_level": "official",
+          "jurisdiction": "MY",
+          "url": "https://www.treasury.gov.my/",
+          "language": "en_ms",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Fiscal policy. Test extraction."
+        },
+        {
+          "name": "Inland Revenue Board of Malaysia",
+          "slug": "lhdn_my",
+          "category": "tax",
+          "trust_level": "official",
+          "jurisdiction": "MY",
+          "url": "https://www.hasil.gov.my/",
+          "language": "en_ms",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Malaysian tax authority. Validate extraction before enabling."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": [
+        "aml_fiu — AMLA authority portal extraction not validated",
+        "data_protection — PDPA authority portal extraction not validated"
+      ]
+    },
+    "SG": {
+      "official_candidates": [
+        {
+          "name": "Monetary Authority of Singapore",
+          "slug": "mas",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "SG",
+          "url": "https://www.mas.gov.sg/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction quality. High-quality English portal. Competitive market — confirm client demand before prioritizing."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending priority decision"]
+    },
+    "HK": {
+      "official_candidates": [
+        {
+          "name": "Hong Kong Monetary Authority",
+          "slug": "hkma",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "HK",
+          "url": "https://www.hkma.gov.hk/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction. Confirm client demand before prioritizing."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending priority decision"]
+    },
+    "PH": {
+      "official_candidates": [
+        {
+          "name": "Bangko Sentral ng Pilipinas",
+          "slug": "bsp",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "PH",
+          "url": "https://www.bsp.gov.ph/",
+          "language": "en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction. Include in APAC expansion plan."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending priority decision"]
+    },
+    "ID": {
+      "official_candidates": [
+        {
+          "name": "Otoritas Jasa Keuangan",
+          "slug": "ojk",
+          "category": "financial_regulator",
+          "trust_level": "official",
+          "jurisdiction": "ID",
+          "url": "https://www.ojk.go.id/",
+          "language": "id_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction. Indonesian-language primary source. Include in APAC expansion plan."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending priority decision"]
+    },
+    "MD": {
+      "official_candidates": [
+        {
+          "name": "National Bank of Moldova",
+          "slug": "bnm_md",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "MD",
+          "url": "https://www.bnm.md/",
+          "language": "ro_ru_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction. Add on client request only."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending client request"]
+    },
+    "KG": {
+      "official_candidates": [
+        {
+          "name": "National Bank of the Kyrgyz Republic",
+          "slug": "nbkr",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "KG",
+          "url": "https://www.nbkr.kg/",
+          "language": "ky_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction. Include in Central Asia bundle on client request."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending client request"]
+    },
+    "OM": {
+      "official_candidates": [
+        {
+          "name": "Central Bank of Oman",
+          "slug": "cbo",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "OM",
+          "url": "https://www.cbo.gov.om/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction. Add to GCC bundle on client request."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending client request"]
+    },
+    "KW": {
+      "official_candidates": [
+        {
+          "name": "Central Bank of Kuwait",
+          "slug": "cbk",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "KW",
+          "url": "https://www.cbk.gov.kw/",
+          "language": "ar_en",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "TODO: Validate extraction. Add to GCC bundle on client request."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["TODO: Full category mapping pending client request"]
+    },
+    "BY": {
+      "official_candidates": [
+        {
+          "name": "National Bank of the Republic of Belarus",
+          "slug": "nbrb",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "BY",
+          "url": "https://www.nbrb.by/",
+          "language": "ru_be",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "CAUTION: Geopolitical and sanctions context — see market_strategy.json for BY. Maintain existing coverage, do not expand without legal review."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [],
+      "missing_categories": ["Full category mapping deferred pending geopolitical risk assessment"]
+    },
+    "AM": {
+      "official_candidates": [
+        {
+          "name": "ARLIS — Armenian Legal Information System",
+          "slug": "arlis",
+          "category": "legal_portal",
+          "trust_level": "official",
+          "jurisdiction": "AM",
+          "url": "https://www.arlis.am/",
+          "language": "hy_ru",
+          "extraction_method": "html_or_pdf",
+          "status": "candidate",
+          "enabled": false,
+          "notes": "Official Armenian legislation portal. Known geo-blocking issues on some sections. Validate access before enabling."
+        },
+        {
+          "name": "Central Bank of Armenia",
+          "slug": "cba",
+          "category": "central_bank",
+          "trust_level": "official",
+          "jurisdiction": "AM",
+          "url": "https://www.cba.am/",
+          "language": "hy_en",
+          "extraction_method": "html_or_pdf",
+          "status": "needs_adapter",
+          "enabled": false,
+          "notes": "Technical access issues — geo-blocking and timeouts documented. Adapter required before enabling."
+        }
+      ],
+      "secondary_intelligence": [],
+      "needs_adapter": [
+        "CBA Armenia — geo-blocking and timeout issues require adapter and reliable extraction path"
+      ],
+      "missing_categories": ["Full category mapping deferred pending technical access resolution"]
+    }
+  }
+}

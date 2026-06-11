@@ -1,0 +1,204 @@
+{
+  "alert_draft_candidate": null,
+  "alert_draft_candidate_path": null,
+  "current_snapshot": {
+    "adapter": {
+      "extraction_status": "ok",
+      "http_status": 200,
+      "limitation_notes": [
+        "This adapter is not wired into production monitoring.",
+        "Same-run stability is not a true change-diff; scheduled comparison is still required."
+      ]
+    },
+    "extracted_at": "2026-06-04T14:31:30+00:00",
+    "row_count": 10,
+    "row_hash": "140348762b51d30509c53ab0011d6aca0ea5bf873f57c19ae8f64cc7046ddc4d",
+    "rows": [
+      {
+        "date": "14 December 2025",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/cabinet-resolution-no-134-2025-regarding-executive-regulations-federal-decree-law-no-10",
+        "pdf_url": null,
+        "raw_text_snippet": "5 . Cabinet Resolution No. (134) of 2025 Regarding the Executive Regulations of Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing (14 December 2025)",
+        "row_hash": "4a5779feea114a8353db49da98d1be4ca7d4fcab5c78c42dbb88bb7492e73830",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Cabinet Resolution No. (134) of 2025 Regarding the Executive Regulations of Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/cabinet-resolution-no-134-2025-regarding-executive-regulations-federal-decree-law-no-10"
+      },
+      {
+        "date": "26 June 2025",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation",
+        "pdf_url": null,
+        "raw_text_snippet": "10 . Exchange Business Regulation (26 June 2025)",
+        "row_hash": "7b448d98d9b65d5015cf9e9aeb603b79b8021875be26bf9be2e653b2c6e54b69",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Exchange Business Regulation",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation"
+      },
+      {
+        "date": "14 October 2025",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-10-2025-regarding-anti-money-laundering-and-combating-financing",
+        "pdf_url": null,
+        "raw_text_snippet": "8 . Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing (14 October 2025)",
+        "row_hash": "888d1c97fd11240e706902a284121cf68d2f6bc33ae2a901e1e46a29d3028e90",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-10-2025-regarding-anti-money-laundering-and-combating-financing"
+      },
+      {
+        "date": "16 September 2025",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and",
+        "pdf_url": null,
+        "raw_text_snippet": "9 . Federal Decree-Law No. (6) of 2025 Regarding the Central Bank, Regulation of Financial Institutions and Activities, and Insurance Business (16 September 2025)",
+        "row_hash": "115b997bbcd70d39a8e101b63a666e7e16af70d5406281941b1a906884e769de",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Federal Decree-Law No. (6) of 2025 Regarding the Central Bank, Regulation of Financial Institutions and Activities, and Insurance Business",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and"
+      },
+      {
+        "date": "07 November 2025",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance",
+        "pdf_url": null,
+        "raw_text_snippet": "6 . Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance (07 November 2025)",
+        "row_hash": "9ed5d97002175707bfdc813c21b44f79c9d23df1555a3de82c47453bc2addb25",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Guidance for Licensed Financial Institutions on Risks Related to Proliferation Finance",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance"
+      },
+      {
+        "date": "07 November 2025",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%e2%80%9ctbml%e2%80%9d",
+        "pdf_url": null,
+        "raw_text_snippet": "7 . Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment (07 November 2025)",
+        "row_hash": "4c32a1f0eb32c8014791cf5d8182bc94a1345d101cab2c7efaffde25e56c6b57",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Guidance for Licensed Financial Institutions on Risks Related to Trade-Based Money Laundering (“TBML”) and Transshipment",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%E2%80%9Ctbml%E2%80%9D"
+      },
+      {
+        "date": "14 April 2026",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies",
+        "pdf_url": null,
+        "raw_text_snippet": "2 . Remuneration Regulation for Banks and Insurance Companies (14 April 2026)",
+        "row_hash": "86a48f28cf145bc184fc490ded58ab121a9108480376d6b09b916cbe095622a8",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Remuneration Regulation for Banks and Insurance Companies",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies"
+      },
+      {
+        "date": "14 April 2026",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies-0",
+        "pdf_url": null,
+        "raw_text_snippet": "3 . Remuneration Regulation for Banks and Insurance Companies (14 April 2026)",
+        "row_hash": "eca8b31f61de76bfad8bb09c790512c45684b4a827c2eefab07d8d60e96dc6c5",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Remuneration Regulation for Banks and Insurance Companies",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/remuneration-regulation-banks-and-insurance-companies-0"
+      },
+      {
+        "date": "13 September 2026",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation",
+        "pdf_url": null,
+        "raw_text_snippet": "1 . Small to Medium Sized Enterprises (SME) - Customer Protection Regulation (13 September 2026)",
+        "row_hash": "23d4ae1ace53a8ec6d7023a03aed41b7342dbbe92af49b0cf6cd3dd6c2aaab0a",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Small to Medium Sized Enterprises (SME) - Customer Protection Regulation",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation"
+      },
+      {
+        "date": "31 March 2026",
+        "document_url": null,
+        "extraction_status": "row_candidate",
+        "identity": "url:https://rulebook.centralbank.ae/en/rulebook/telemarketing-regulation",
+        "pdf_url": null,
+        "raw_text_snippet": "4 . Telemarketing Regulation (31 March 2026)",
+        "row_hash": "1122f081a4d75a21e7cfd597b5c322491224e01419519e2c78d880107b8b1cc7",
+        "source_page_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+        "title": "Telemarketing Regulation",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/telemarketing-regulation"
+      }
+    ],
+    "source_id": "ae-cbuae-rulebook-aml-payments",
+    "source_name": "CBUAE Rulebook revision updates",
+    "source_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day"
+  },
+  "diff": {
+    "added": [],
+    "added_count": 0,
+    "baseline_created": false,
+    "changed": [],
+    "changed_count": 0,
+    "current_row_count": 10,
+    "current_row_hash": "140348762b51d30509c53ab0011d6aca0ea5bf873f57c19ae8f64cc7046ddc4d",
+    "meaningful_change_detected": false,
+    "previous_extracted_at": "2026-06-04T14:18:55+00:00",
+    "previous_row_count": 10,
+    "previous_row_hash": "140348762b51d30509c53ab0011d6aca0ea5bf873f57c19ae8f64cc7046ddc4d",
+    "previous_snapshot_path": "data/source_snapshots/cbuae_rulebook_proof/cbuae_rulebook_snapshot_20260604T141855Z.json",
+    "removed": [],
+    "removed_count": 0,
+    "summary": "No row changes detected"
+  },
+  "first_adapter_result": {
+    "extraction_status": "ok",
+    "http_status": 200,
+    "item_count": 10,
+    "limitation_notes": [
+      "This adapter is not wired into production monitoring.",
+      "Same-run stability is not a true change-diff; scheduled comparison is still required."
+    ]
+  },
+  "generated_at": "2026-06-04T14:31:30+00:00",
+  "mode": "same-run",
+  "previous_snapshot_path": "data/source_snapshots/cbuae_rulebook_proof/cbuae_rulebook_snapshot_20260604T141855Z.json",
+  "recommended_status": "under_validation",
+  "report_json_path": "reports/cbuae_rulebook_proof/cbuae_rulebook_diff_2026-06-04.json",
+  "report_md_path": "reports/cbuae_rulebook_proof/cbuae_rulebook_diff_2026-06-04.md",
+  "safety": {
+    "production_alert_review_written": false,
+    "production_monitoring_activated": false,
+    "sources_json_modified": false,
+    "telegram_sent": false
+  },
+  "same_run_stability": {
+    "first_3_titles_stable": true,
+    "first_3_urls_stable": true,
+    "first_row_count": 10,
+    "first_row_hash": "140348762b51d30509c53ab0011d6aca0ea5bf873f57c19ae8f64cc7046ddc4d",
+    "item_count_stable": true,
+    "row_hash_stable": true,
+    "second_row_count": 10,
+    "second_row_hash": "140348762b51d30509c53ab0011d6aca0ea5bf873f57c19ae8f64cc7046ddc4d"
+  },
+  "second_adapter_result": {
+    "extraction_status": "ok",
+    "http_status": 200,
+    "item_count": 10,
+    "limitation_notes": [
+      "This adapter is not wired into production monitoring.",
+      "Same-run stability is not a true change-diff; scheduled comparison is still required."
+    ]
+  },
+  "snapshot_path": "data/source_snapshots/cbuae_rulebook_proof/cbuae_rulebook_snapshot_20260604T143130Z.json",
+  "source_id": "ae-cbuae-rulebook-aml-payments",
+  "source_name": "CBUAE Rulebook revision updates",
+  "source_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+  "verdict": "PASS: row snapshot compared with previous snapshot; no row changes detected."
+}

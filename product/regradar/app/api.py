@@ -1,0 +1,900 @@
+"""
+RegRadar minimal API server (MVP).
+
+Provides 3 endpoints for Telegram settings management:
+  GET  /api/settings/telegram         — load public-safe settings
+  POST /api/settings/telegram         — save settings
+  POST /api/settings/telegram/test    — send test alert (server-side)
+
+Uses only Python's built-in http.server — no extra dependencies.
+
+Start with:
+  python run.py api                   (default: 127.0.0.1:5001)
+  python run.py api --port 8080
+"""
+
+import json
+import logging
+import re
+import threading
+import time
+from collections import defaultdict
+from http.cookies import SimpleCookie
+from datetime import datetime, timezone
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs, urlparse
+
+import requests as _req
+
+from app.auth import (
+    SESSION_COOKIE_NAME,
+    SESSION_MAX_AGE_SECONDS,
+    DuplicateEmailError,
+    create_session,
+    create_user,
+    delete_session,
+    get_user_by_email,
+    make_public_user,
+    normalize_email,
+    parse_session_cookie,
+    require_auth,
+    validate_email,
+    validate_password,
+    verify_password,
+)
+from app import telegram_settings as _ts
+from app.config import (
+    BASE_DIR,
+    CONTACT_DELIVERY_DISABLED,
+    TELEGRAM_BOT_USERNAME,
+    TELEGRAM_BOT_TOKEN,
+    TELEGRAM_CHAT_ID,
+)
+from app.profile import get_or_create_profile, update_profile
+from app.telegram import send_telegram_message
+from app.telegram_pairing import (
+    create_pairing_code,
+    get_pairing_status,
+    get_telegram_link,
+    touch_telegram_test_sent,
+    unlink_telegram,
+)
+from app.user_delivery import get_user_delivery_logs, send_sample_brief_to_user
+from app.alert_routing import build_routing_preview_for_user, send_preview_alert_to_user
+
+logger = logging.getLogger(__name__)
+
+_TELEGRAM_TIMEOUT_S = 10
+_CONTACT_QUEUE = BASE_DIR / "data" / "contact_requests.jsonl"
+
+# Vite dev server origin — allowed during development.
+# In production, serve the built frontend from the same origin as the API,
+# so CORS headers are not needed at all.
+_ALLOWED_ORIGIN = "http://localhost:5173"
+
+_CORS = {
+    "Access-Control-Allow-Origin":  _ALLOWED_ORIGIN,
+    "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Credentials": "true",
+}
+
+
+class _RateLimiter:
+    """Small in-memory fixed-window limiter for MVP endpoint hardening."""
+
+    def __init__(self, limit: int, window_seconds: int):
+        self.limit = int(limit)
+        self.window_seconds = int(window_seconds)
+        self._hits = defaultdict(list)
+        self._lock = threading.Lock()
+
+    def is_allowed(self, key: str) -> bool:
+        now = time.monotonic()
+        cutoff = now - self.window_seconds
+        with self._lock:
+            hits = [ts for ts in self._hits[key] if ts > cutoff]
+            if len(hits) >= self.limit:
+                self._hits[key] = hits
+                return False
+            hits.append(now)
+            self._hits[key] = hits
+            return True
+
+
+_REGISTER_LIMITER = _RateLimiter(5, 3600)
+_LOGIN_LIMITER = _RateLimiter(10, 3600)
+_CONTACT_LIMITER = _RateLimiter(3, 3600)
+_SOURCE_TEST_LIMITER = _RateLimiter(10, 3600)
+_PAIR_GENERATE_LIMITER = _RateLimiter(10, 3600)
+_TELEGRAM_TEST_LIMITER = _RateLimiter(5, 3600)
+_DELIVERY_TEST_BRIEF_LIMITER = _RateLimiter(5, 3600)
+_DELIVERY_SEND_PREVIEW_LIMITER = _RateLimiter(10, 3600)
+
+
+class _Handler(BaseHTTPRequestHandler):
+
+    def log_message(self, fmt, *args):  # silence default stderr logging
+        logger.debug("API %s %s", self.command, self.path)
+
+    # ── helpers ────────────────────────────────────────────────────────────────
+
+    def _send_json(
+        self,
+        data: dict,
+        status: int = 200,
+        extra_headers: list[tuple[str, str]] | None = None,
+    ) -> None:
+        body = json.dumps(data, ensure_ascii=False).encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        for k, v in _CORS.items():
+            self.send_header(k, v)
+        for k, v in extra_headers or []:
+            self.send_header(k, v)
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _read_json(self) -> dict:
+        length = int(self.headers.get("Content-Length", 0))
+        if not length:
+            return {}
+        try:
+            return json.loads(self.rfile.read(length))
+        except (json.JSONDecodeError, ValueError):
+            return {}
+
+    def _read_json_strict(self) -> tuple[dict | None, str | None]:
+        length = int(self.headers.get("Content-Length", 0))
+        if not length:
+            return {}, None
+        try:
+            data = json.loads(self.rfile.read(length))
+        except (json.JSONDecodeError, ValueError):
+            return None, "Invalid JSON."
+        if not isinstance(data, dict):
+            return None, "JSON body must be an object."
+        return data, None
+
+    def _session_cookie_header(self, session_id: str) -> str:
+        cookie = SimpleCookie()
+        cookie[SESSION_COOKIE_NAME] = session_id
+        cookie[SESSION_COOKIE_NAME]["httponly"] = True
+        cookie[SESSION_COOKIE_NAME]["samesite"] = "Strict"
+        cookie[SESSION_COOKIE_NAME]["path"] = "/"
+        cookie[SESSION_COOKIE_NAME]["max-age"] = str(SESSION_MAX_AGE_SECONDS)
+        # TODO: Add Secure flag in production if same-origin HTTPS is guaranteed.
+        return cookie.output(header="").strip()
+
+    def _clear_session_cookie_header(self) -> str:
+        cookie = SimpleCookie()
+        cookie[SESSION_COOKIE_NAME] = ""
+        cookie[SESSION_COOKIE_NAME]["httponly"] = True
+        cookie[SESSION_COOKIE_NAME]["samesite"] = "Strict"
+        cookie[SESSION_COOKIE_NAME]["path"] = "/"
+        cookie[SESSION_COOKIE_NAME]["max-age"] = "0"
+        return cookie.output(header="").strip()
+
+    def _client_ip(self) -> str:
+        try:
+            return str(self.client_address[0] or "unknown")
+        except Exception:
+            return "unknown"
+
+    def _rate_limited(self, limiter: _RateLimiter, label: str) -> bool:
+        key = f"{self._client_ip()}:{label}"
+        if limiter.is_allowed(key):
+            return False
+        self._send_json(
+            {"ok": False, "message": "Too many requests. Please wait before trying again."},
+            429,
+        )
+        return True
+
+    def _disabled_endpoint(self) -> None:
+        self._send_json({"ok": False, "message": "This endpoint is not available."}, 403)
+
+    def _truncate(self, value, limit: int) -> str:
+        return str(value or "").strip()[:limit]
+
+    # ── CORS preflight ─────────────────────────────────────────────────────────
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        for k, v in _CORS.items():
+            self.send_header(k, v)
+        self.end_headers()
+
+    # ── GET /api/settings/telegram ─────────────────────────────────────────────
+
+    def do_GET(self):
+        path = urlparse(self.path).path
+        if path == "/api/auth/me":
+            self._handle_auth_me()
+        elif path == "/api/profile":
+            self._handle_profile_get()
+        elif path == "/api/telegram/pair/status":
+            self._handle_telegram_pair_status()
+        elif path == "/api/delivery/logs":
+            self._handle_delivery_logs()
+        elif path == "/api/delivery/preview":
+            self._handle_delivery_preview()
+        elif path == "/api/settings/telegram":
+            self._disabled_endpoint()
+        elif path in ("/api/health", "/api/"):
+            self._send_json({"status": "ok", "service": "StatuteProof API"})
+        else:
+            self._send_json({"error": "not found"}, 404)
+
+    def do_PUT(self):
+        path = urlparse(self.path).path
+        if path == "/api/profile":
+            self._handle_profile_update()
+        else:
+            self._send_json({"error": "not found"}, 404)
+
+    # ── POST endpoints ─────────────────────────────────────────────────────────
+
+    def do_POST(self):
+        if self.path == "/api/auth/register":
+            self._handle_auth_register()
+        elif self.path == "/api/auth/login":
+            self._handle_auth_login()
+        elif self.path == "/api/auth/logout":
+            self._handle_auth_logout()
+        elif self.path == "/api/telegram/pair/generate":
+            self._handle_telegram_pair_generate()
+        elif self.path == "/api/telegram/pair/unlink":
+            self._handle_telegram_pair_unlink()
+        elif self.path == "/api/telegram/test":
+            self._handle_telegram_account_test()
+        elif self.path == "/api/delivery/test-brief":
+            self._handle_delivery_test_brief()
+        elif self.path == "/api/delivery/send-preview-alert":
+            self._handle_delivery_send_preview_alert()
+        elif self.path == "/api/settings/telegram":
+            self._disabled_endpoint()
+        elif self.path == "/api/settings/telegram/test":
+            self._disabled_endpoint()
+        elif self.path == "/api/contact":
+            self._handle_contact()
+        elif self.path == "/api/source-test":
+            self._handle_source_test()
+        else:
+            self._send_json({"error": "not found"}, 404)
+
+    def _handle_auth_register(self) -> None:
+        if self._rate_limited(_REGISTER_LIMITER, "auth_register"):
+            return
+
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+
+        email = normalize_email(body.get("email", ""))
+        password = str(body.get("password", ""))
+        full_name = body.get("full_name") or body.get("fullName") or body.get("name")
+        company_name = str(body.get("company_name", "")).strip()
+        industry = str(body.get("industry", "")).strip()
+
+        if not validate_email(email):
+            self._send_json({"ok": False, "message": "Enter a valid email address."}, 400)
+            return
+
+        password_ok, password_msg = validate_password(password)
+        if not password_ok:
+            self._send_json({"ok": False, "message": password_msg}, 400)
+            return
+
+        try:
+            user = create_user(
+                email=email,
+                password=password,
+                full_name=full_name,
+                company_name=company_name,
+                industry=industry,
+            )
+            session_id = create_session(int(user["id"]))
+            self._send_json(
+                {"ok": True, "user": make_public_user(user)},
+                201,
+                [("Set-Cookie", self._session_cookie_header(session_id))],
+            )
+        except DuplicateEmailError:
+            self._send_json({"ok": False, "message": "Email is already registered."}, 409)
+        except Exception as exc:
+            logger.error("Auth register failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_auth_login(self) -> None:
+        if self._rate_limited(_LOGIN_LIMITER, "auth_login"):
+            return
+
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+
+        email = normalize_email(body.get("email", ""))
+        password = str(body.get("password", ""))
+        user = get_user_by_email(email) if validate_email(email) else None
+        if not user or not user.get("is_active") or not verify_password(password, user.get("password_hash", "")):
+            self._send_json({"ok": False, "message": "Invalid email or password."}, 401)
+            return
+
+        try:
+            session_id = create_session(int(user["id"]))
+            self._send_json(
+                {"ok": True, "user": make_public_user(user)},
+                200,
+                [("Set-Cookie", self._session_cookie_header(session_id))],
+            )
+        except Exception:
+            logger.error("Auth login failed for email=%s", email)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_auth_logout(self) -> None:
+        session_id = parse_session_cookie(self.headers.get("Cookie", ""))
+        if session_id:
+            delete_session(session_id)
+        self._send_json(
+            {"ok": True},
+            200,
+            [("Set-Cookie", self._clear_session_cookie_header())],
+        )
+
+    def _handle_auth_me(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        self._send_json({"ok": True, "user": make_public_user(user)})
+
+    def _handle_profile_get(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            profile = get_or_create_profile(
+                int(user["id"]),
+                seed={
+                    "company_name": user.get("company_name"),
+                    "industry": user.get("industry"),
+                },
+            )
+            self._send_json({"ok": True, "profile": profile})
+        except Exception as exc:
+            logger.error("Profile load failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_profile_update(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+
+        try:
+            profile = update_profile(int(user["id"]), body)
+            self._send_json({"ok": True, "profile": profile})
+        except ValueError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+        except Exception as exc:
+            logger.error("Profile update failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _telegram_instructions(self, code: str) -> str:
+        if TELEGRAM_BOT_USERNAME:
+            return f"Send /start {code} to @{TELEGRAM_BOT_USERNAME} in Telegram."
+        return f"Send /start {code} to our Telegram bot."
+
+    def _handle_telegram_pair_generate(self) -> None:
+        if self._rate_limited(_PAIR_GENERATE_LIMITER, "telegram_pair_generate"):
+            return
+
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            result = create_pairing_code(int(user["id"]))
+            self._send_json({
+                "ok": True,
+                "code": result["code"],
+                "expires_at": result["expires_at"],
+                "bot_username": TELEGRAM_BOT_USERNAME or "",
+                "instructions": self._telegram_instructions(result["code"]),
+            })
+        except Exception as exc:
+            logger.error("Telegram pair generate failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_telegram_pair_status(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            status = get_pairing_status(int(user["id"]))
+            self._send_json({"ok": True, **status})
+        except Exception as exc:
+            logger.error("Telegram pair status failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_telegram_pair_unlink(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            unlink_telegram(int(user["id"]))
+            self._send_json({"ok": True})
+        except Exception as exc:
+            logger.error("Telegram pair unlink failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_telegram_account_test(self) -> None:
+        if self._rate_limited(_TELEGRAM_TEST_LIMITER, "telegram_account_test"):
+            return
+
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            link = get_telegram_link(int(user["id"]))
+            chat_id = link.get("telegram_chat_id")
+            if not chat_id:
+                self._send_json({
+                    "ok": False,
+                    "message": "Telegram is not connected. Generate a pairing code first.",
+                }, 400)
+                return
+
+            ok = send_telegram_message(
+                str(chat_id),
+                "✅ StatuteProof Telegram test message delivered to your connected account.",
+            )
+            if ok:
+                touch_telegram_test_sent(int(user["id"]))
+                self._send_json({"ok": True, "message": "Test message sent to your Telegram."})
+            else:
+                self._send_json({
+                    "ok": False,
+                    "message": "Could not send Telegram test message. Check bot configuration.",
+                }, 502)
+        except Exception as exc:
+            logger.error("Account Telegram test failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_delivery_test_brief(self) -> None:
+        if self._rate_limited(_DELIVERY_TEST_BRIEF_LIMITER, "delivery_test_brief"):
+            return
+
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            result = send_sample_brief_to_user(int(user["id"]))
+            if result.get("ok"):
+                self._send_json({
+                    "ok": True,
+                    "message": result.get("message", "Sample brief sent to your Telegram."),
+                    "log_id": result.get("log_id"),
+                })
+                return
+
+            reason = result.get("reason", "Delivery failed.")
+            if reason == "Sample brief already sent today.":
+                self._send_json(
+                    {"ok": False, "message": reason, "reason": "already_sent_today"},
+                    429,
+                )
+            elif reason == "Telegram not connected.":
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": "Telegram not connected. Pair your account first.",
+                        "reason": "no_telegram",
+                    },
+                    400,
+                )
+            elif reason == "Telegram alerts are disabled.":
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": "Telegram alerts are disabled. Enable Telegram alerts in Settings.",
+                        "reason": "telegram_disabled",
+                    },
+                    400,
+                )
+            elif reason == "Onboarding is not complete.":
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": "Complete onboarding before sending a sample brief.",
+                        "reason": "onboarding_incomplete",
+                    },
+                    400,
+                )
+            else:
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": reason,
+                        "reason": "delivery_failed",
+                    },
+                    502,
+                )
+        except Exception as exc:
+            logger.error("Sample brief delivery failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_delivery_logs(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            params = parse_qs(urlparse(self.path).query)
+            try:
+                limit = int((params.get("limit") or ["20"])[0])
+            except (TypeError, ValueError):
+                limit = 20
+            logs = get_user_delivery_logs(int(user["id"]), limit=max(1, min(limit, 50)))
+            self._send_json({"ok": True, "logs": logs})
+        except Exception as exc:
+            logger.error("Delivery logs load failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_delivery_preview(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            params = parse_qs(urlparse(self.path).query)
+            try:
+                days = int((params.get("days") or ["14"])[0])
+            except (TypeError, ValueError):
+                days = 14
+            preview = build_routing_preview_for_user(int(user["id"]), days=max(1, min(days, 60)))
+            self._send_json({"ok": True, "preview": preview})
+        except Exception as exc:
+            logger.error("Delivery preview failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_delivery_send_preview_alert(self) -> None:
+        if self._rate_limited(_DELIVERY_SEND_PREVIEW_LIMITER, "delivery_send_preview_alert"):
+            return
+
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+
+        alert_id = str(body.get("alert_id", "")).strip()
+        if not re.match(r"^[a-zA-Z0-9_-]{1,200}$", alert_id):
+            self._send_json({"ok": False, "message": "Invalid alert_id."}, 400)
+            return
+
+        try:
+            result = send_preview_alert_to_user(int(user["id"]), alert_id)
+            if result.get("ok"):
+                self._send_json({
+                    "ok": True,
+                    "message": result.get("message", "Preview alert sent to your Telegram."),
+                    "log_id": result.get("log_id"),
+                })
+                return
+
+            code = result.get("code")
+            payload = {
+                "ok": False,
+                "message": result.get("reason", "Delivery failed."),
+                "reason": code or "delivery_failed",
+            }
+            if result.get("details"):
+                payload["details"] = result["details"]
+            if code == "duplicate":
+                self._send_json(payload, 409)
+            elif code == "not_found":
+                self._send_json(payload, 404)
+            elif code == "not_ready":
+                self._send_json(payload, 400)
+            elif code == "telegram_failed":
+                self._send_json(payload, 502)
+            else:
+                self._send_json(payload, 400)
+        except Exception as exc:
+            logger.error("Preview alert delivery failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_save(self) -> None:
+        body = self._read_json()
+        try:
+            _ts.save(
+                enabled=bool(body.get("enabled", False)),
+                chat_id=str(body.get("chat_id", "")),
+                bot_token=body.get("bot_token") or None,
+            )
+            self._send_json(_ts.load())
+        except Exception as exc:
+            logger.error("Failed to save Telegram settings: %s", exc)
+            self._send_json({"error": "Не удалось сохранить настройки."}, 500)
+
+    def _handle_test(self) -> None:
+        """Send a test message via Telegram. Token stays on server."""
+        token   = _ts.get_token()
+        chat_id = _ts.load()["chat_id"]
+
+        if not token or not chat_id:
+            self._send_json(
+                {"ok": False, "message": "Токен или Chat ID не настроены."},
+                400,
+            )
+            return
+
+        try:
+            resp = _req.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                json={
+                    "chat_id":    chat_id,
+                    "text":       "✅ *StatuteProof* — test connection successful. Alerts will be delivered to this chat.",
+                    "parse_mode": "Markdown",
+                },
+                timeout=_TELEGRAM_TIMEOUT_S,
+            )
+            data = resp.json()
+            if data.get("ok"):
+                self._send_json({"ok": True, "message": "Test alert sent successfully."})
+            else:
+                description = data.get("description", "Telegram API error")
+                self._send_json({"ok": False, "message": description}, 502)
+
+        except _req.Timeout:
+            self._send_json({"ok": False, "message": f"Timeout — Telegram did not respond within {_TELEGRAM_TIMEOUT_S}s."}, 502)
+        except _req.ConnectionError:
+            self._send_json({"ok": False, "message": "No connection to Telegram."}, 502)
+        except Exception as exc:
+            logger.error("Telegram test failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+
+    def _handle_contact(self) -> None:
+        """Forward a demo/contact request to the admin Telegram chat."""
+        if self._rate_limited(_CONTACT_LIMITER, "contact"):
+            return
+
+        body     = self._read_json()
+        name     = self._truncate(body.get("name",     ""), 120)
+        email    = self._truncate(body.get("email",    ""), 200)
+        company  = self._truncate(body.get("company",  ""), 160)
+        industry = self._truncate(body.get("industry", ""), 160)
+        message  = self._truncate(body.get("message",  ""), 1000)
+        markets  = self._truncate(body.get("markets",  ""), 500)
+        watchlist = body.get("watchlistContext")
+        safe_watchlist = None
+        if isinstance(watchlist, dict):
+            safe_watchlist = {}
+            for key in ("companyType", "markets", "topics", "delivery"):
+                value = watchlist.get(key)
+                if isinstance(value, list):
+                    value = ", ".join(str(v) for v in value if v)
+                if value:
+                    safe_watchlist[key] = self._truncate(value, 500)
+
+        if not name or not email:
+            self._send_json({"ok": False, "message": "Name and email are required."}, 400)
+            return
+
+        queued_body = dict(body)
+        queued_body.update({
+            "name": name,
+            "email": email,
+            "company": company,
+            "industry": industry,
+            "message": message,
+            "markets": markets,
+        })
+        if safe_watchlist is not None:
+            queued_body["watchlistContext"] = safe_watchlist
+        queued = self._queue_contact_request(queued_body)
+
+        lines = [
+            "New StatuteProof demo request",
+            "",
+            f"Name: {name}",
+            f"Email: {email}",
+        ]
+        if company:
+            lines.append(f"Company: {company}")
+        if industry:
+            lines.append(f"Industry: {industry}")
+        if markets:
+            lines.append(f"Markets: {markets}")
+        if isinstance(safe_watchlist, dict):
+            lines.append("")
+            lines.append("Watchlist context:")
+            for label, value in (
+                ("Company type", safe_watchlist.get("companyType")),
+                ("Markets", safe_watchlist.get("markets")),
+                ("Topics", safe_watchlist.get("topics")),
+                ("Delivery", safe_watchlist.get("delivery")),
+            ):
+                if value:
+                    lines.append(f"{label}: {value}")
+        if message:
+            lines += ["", f"Target markets / notes:\n{message}"]
+        lines += ["", "Source: Website contact form"]
+
+        if CONTACT_DELIVERY_DISABLED:
+            logger.info("Contact form delivery disabled — queued=%s from=%s", queued, email)
+            if queued:
+                self._send_json({
+                    "ok": True,
+                    "queued": True,
+                    "delivered": False,
+                    "message": "Request received and queued.",
+                })
+            else:
+                self._send_json({"ok": False, "message": "Queue write failed."}, 500)
+            return
+
+        if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+            logger.error("Contact form: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set")
+            if queued:
+                self._send_json({"ok": True, "queued": True, "delivered": False})
+            else:
+                self._send_json({"ok": False, "message": "Delivery not configured on server."}, 500)
+            return
+
+        try:
+            resp = _req.post(
+                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+                json={
+                    "chat_id":    TELEGRAM_CHAT_ID,
+                    "text":       "\n".join(lines),
+                    "disable_web_page_preview": True,
+                },
+                timeout=_TELEGRAM_TIMEOUT_S,
+            )
+            data = resp.json()
+            if data.get("ok"):
+                logger.info("Contact form delivered — from=%s", email)
+                self._send_json({"ok": True, "queued": queued, "delivered": True})
+            else:
+                description = data.get("description", "Telegram API error")
+                logger.error("Contact form Telegram error: %s", description)
+                if queued:
+                    self._send_json({"ok": True, "queued": True, "delivered": False})
+                else:
+                    self._send_json({"ok": False, "message": description}, 502)
+        except _req.Timeout:
+            if queued:
+                self._send_json({"ok": True, "queued": True, "delivered": False})
+            else:
+                self._send_json({"ok": False, "message": "Delivery timed out."}, 502)
+        except _req.ConnectionError:
+            if queued:
+                self._send_json({"ok": True, "queued": True, "delivered": False})
+            else:
+                self._send_json({"ok": False, "message": "No connection to delivery service."}, 502)
+        except Exception as exc:
+            logger.error("Contact form delivery failed: %s", type(exc).__name__)
+            if queued:
+                self._send_json({"ok": True, "queued": True, "delivered": False})
+            else:
+                self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _queue_contact_request(self, body: dict) -> bool:
+        """Persist contact submissions before external delivery."""
+        try:
+            _CONTACT_QUEUE.parent.mkdir(parents=True, exist_ok=True)
+            entry = {
+                "received_at": datetime.now(timezone.utc).isoformat(),
+                "body": body,
+            }
+            with _CONTACT_QUEUE.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            return True
+        except Exception as exc:
+            logger.error("Contact form queue write failed: %s", type(exc).__name__)
+            return False
+
+
+    def _handle_source_test(self) -> None:
+        """
+        Run a source compatibility check on a user-supplied URL.
+
+        Uses existing test_source_url logic (SSRF-safe, no AI, no Telegram).
+        Returns a standardised result for the frontend testing UI.
+        """
+        if self._rate_limited(_SOURCE_TEST_LIMITER, "source_test"):
+            return
+
+        from app.source_tester import test_source_url, validate_public_url
+
+        body     = self._read_json()
+        url      = str(body.get("url",      "")).strip()
+        market   = str(body.get("market",   "")).strip()
+        category = str(body.get("category", "")).strip()
+
+        if not url:
+            self._send_json({"ok": False, "message": "URL is required."}, 400)
+            return
+
+        # Quick safety check before any network call
+        safe, safety_msg = validate_public_url(url)
+        if not safe:
+            self._send_json({
+                "ok":             False,
+                "status":         "FAILED",
+                "message":        f"URL failed safety check: {safety_msg}",
+                "recommendation": "This URL cannot be used.",
+                "extraction":     [],
+                "chars":          0,
+            }, 400)
+            return
+
+        try:
+            result = test_source_url(url)
+        except Exception as exc:
+            logger.error("source-test error: %s: %s", type(exc).__name__, exc)
+            self._send_json({"ok": False, "message": "Source test failed internally."}, 500)
+            return
+
+        verdict = result.get("verdict", "cannot_monitor")
+        chars   = result.get("extracted_chars", 0)
+        method  = result.get("recommended_method", "")
+        reason  = result.get("reason", "")
+
+        if verdict == "can_monitor":
+            status         = "PASS"
+            extraction     = ["HTML", "JS"] if "playwright" in method else ["HTML"]
+            recommendation = "Can be monitored automatically."
+        elif verdict == "needs_adapter":
+            status         = "NEEDS_ADAPTER"
+            extraction     = ["Limited"]
+            recommendation = "Needs custom adapter for reliable extraction."
+        else:
+            status         = "FAILED"
+            extraction     = []
+            recommendation = "Not enough content to monitor reliably."
+
+        self._send_json({
+            "ok":             True,
+            "status":         status,
+            "extraction":     extraction,
+            "chars":          chars,
+            "message":        reason,
+            "recommendation": recommendation,
+        })
+
+
+def run_server(host: str = "127.0.0.1", port: int = 5001) -> None:
+    """Start the blocking HTTP server. Stops cleanly on Ctrl-C."""
+    server = HTTPServer((host, port), _Handler)
+    print(f"StatuteProof API listening on  http://{host}:{port}/api/")
+    print(f"Vite dev proxy expects it at  http://localhost:5173/api/ → http://{host}:{port}/api/")
+    print("Press Ctrl-C to stop.\n")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+        print("\nAPI server stopped.")

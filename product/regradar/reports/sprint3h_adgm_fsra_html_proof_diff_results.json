@@ -1,0 +1,5242 @@
+{
+  "announcement_only_candidates": [
+    {
+      "average_response_time_ms": 371,
+      "content_type": "text/html",
+      "extracted_text_chars": 5357,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "consultation_announcement",
+      "label": "AML Framework consultation announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 4585,
+      "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:17+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 4585,
+        "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+        "official_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:15+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5357,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4585,
+          "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93917,
+          "response_time_ms": 397,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:17+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5357,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4585,
+          "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93917,
+          "response_time_ms": 345,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+      "waf_or_blocked_signals": false
+    },
+    {
+      "average_response_time_ms": 673,
+      "content_type": "text/html",
+      "extracted_text_chars": 5174,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "regulatory_framework_announcement",
+      "label": "Staking of Virtual Assets final framework announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 4339,
+      "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:19+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 4339,
+        "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+        "official_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:17+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5174,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4339,
+          "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93256,
+          "response_time_ms": 367,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:19+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5174,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4339,
+          "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93256,
+          "response_time_ms": 979,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+      "waf_or_blocked_signals": false
+    },
+    {
+      "average_response_time_ms": 406,
+      "content_type": "text/html",
+      "extracted_text_chars": 6239,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "guidance_announcement",
+      "label": "Cyber Risk Management framework announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 5452,
+      "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:20+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 5452,
+        "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+        "official_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:19+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 6239,
+          "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 5452,
+          "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 94423,
+          "response_time_ms": 354,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:20+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 6239,
+          "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 5452,
+          "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 94423,
+          "response_time_ms": 459,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+      "waf_or_blocked_signals": false
+    }
+  ],
+  "listing_candidates_needing_row_extraction": [
+    {
+      "average_response_time_ms": 490,
+      "content_type": "text/html",
+      "extracted_text_chars": 5244,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "circular_listing",
+      "label": "FSRA Circulars listing page",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Listing page requires row-level extraction before monitoring design."
+      ],
+      "monitoring_suitability": "suitable_listing_needs_row_extraction",
+      "normalized_text_chars": 4584,
+      "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "FSRA Circulars",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:22+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Listing page requires row-level extraction before monitoring design."
+        ],
+        "normalized_text_chars": 4584,
+        "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+        "official_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Run HTML-only row-extraction validation to isolate dated circular items before any activation decision.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:21+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5244,
+          "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4584,
+          "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "FSRA Circulars",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 96741,
+          "response_time_ms": 551,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:22+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5244,
+          "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4584,
+          "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "FSRA Circulars",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 96741,
+          "response_time_ms": 430,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+      "waf_or_blocked_signals": false
+    }
+  ],
+  "pdf_deferred_links_summary": [
+    {
+      "label": "AML Framework consultation announcement",
+      "links": [],
+      "pdf_link_count": 1,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework"
+    },
+    {
+      "label": "Staking of Virtual Assets final framework announcement",
+      "links": [],
+      "pdf_link_count": 1,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets"
+    },
+    {
+      "label": "Cyber Risk Management framework announcement",
+      "links": [],
+      "pdf_link_count": 1,
+      "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework"
+    },
+    {
+      "label": "FSRA Circulars listing page",
+      "links": [],
+      "pdf_link_count": 1,
+      "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars"
+    }
+  ],
+  "recommended_next_sprint": "Sprint 3I should validate FSRA circular listing row extraction, HTML-only. Do not activate the source until row extraction, proof/diff output, and limitation notes are tested.",
+  "results": [
+    {
+      "average_response_time_ms": 371,
+      "content_type": "text/html",
+      "extracted_text_chars": 5357,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "consultation_announcement",
+      "label": "AML Framework consultation announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 4585,
+      "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:17+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 4585,
+        "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+        "official_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:15+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5357,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4585,
+          "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93917,
+          "response_time_ms": 397,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:17+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5357,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4585,
+          "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93917,
+          "response_time_ms": 345,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+      "waf_or_blocked_signals": false
+    },
+    {
+      "average_response_time_ms": 673,
+      "content_type": "text/html",
+      "extracted_text_chars": 5174,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "regulatory_framework_announcement",
+      "label": "Staking of Virtual Assets final framework announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 4339,
+      "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:19+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 4339,
+        "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+        "official_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:17+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5174,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4339,
+          "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93256,
+          "response_time_ms": 367,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:19+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5174,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4339,
+          "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93256,
+          "response_time_ms": 979,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+      "waf_or_blocked_signals": false
+    },
+    {
+      "average_response_time_ms": 406,
+      "content_type": "text/html",
+      "extracted_text_chars": 6239,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "guidance_announcement",
+      "label": "Cyber Risk Management framework announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 5452,
+      "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:20+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 5452,
+        "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+        "official_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:19+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 6239,
+          "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 5452,
+          "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 94423,
+          "response_time_ms": 354,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:20+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 6239,
+          "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 5452,
+          "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 94423,
+          "response_time_ms": 459,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+      "waf_or_blocked_signals": false
+    },
+    {
+      "average_response_time_ms": 490,
+      "content_type": "text/html",
+      "extracted_text_chars": 5244,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "circular_listing",
+      "label": "FSRA Circulars listing page",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Listing page requires row-level extraction before monitoring design."
+      ],
+      "monitoring_suitability": "suitable_listing_needs_row_extraction",
+      "normalized_text_chars": 4584,
+      "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "FSRA Circulars",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:22+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Listing page requires row-level extraction before monitoring design."
+        ],
+        "normalized_text_chars": 4584,
+        "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+        "official_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Run HTML-only row-extraction validation to isolate dated circular items before any activation decision.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:21+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5244,
+          "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4584,
+          "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "FSRA Circulars",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 96741,
+          "response_time_ms": 551,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:22+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5244,
+          "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4584,
+          "normalized_text_signature": "3b7a402d585ef2428f1acfcf43cf726ea45cab920d574795d23f8fc4751a7f7e",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "FSRA Circulars",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 96741,
+          "response_time_ms": 430,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+      "waf_or_blocked_signals": false
+    }
+  ],
+  "run_timestamp_utc": "2026-05-31T19:36:22+00:00",
+  "stable_html_candidates": [
+    {
+      "average_response_time_ms": 371,
+      "content_type": "text/html",
+      "extracted_text_chars": 5357,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "consultation_announcement",
+      "label": "AML Framework consultation announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 4585,
+      "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:17+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 4585,
+        "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+        "official_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:15+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5357,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4585,
+          "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93917,
+          "response_time_ms": 397,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:17+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5357,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4585,
+          "normalized_text_signature": "723d52f3739838bae951268ac9353b1e9dd2bab715060a7d4d08bae139a05b0f",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Launches Consultation on Enhancements to its Anti-Money Laundering Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93917,
+          "response_time_ms": 345,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+      "waf_or_blocked_signals": false
+    },
+    {
+      "average_response_time_ms": 673,
+      "content_type": "text/html",
+      "extracted_text_chars": 5174,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "regulatory_framework_announcement",
+      "label": "Staking of Virtual Assets final framework announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 4339,
+      "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:19+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 4339,
+        "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+        "official_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:17+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5174,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4339,
+          "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93256,
+          "response_time_ms": 367,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:19+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 5174,
+          "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 4339,
+          "normalized_text_signature": "3e5ca6ec2a8d8e3cbf77e08815f7625c6dd6fb9d2d9d5f1e97eacbf7d830017b",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM FSRA Finalises Regulatory Framework for the Staking of Virtual Assets",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 93256,
+          "response_time_ms": 979,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgm-fsra-finalises-regulatory-framework-for-the-staking-of-virtual-assets",
+      "waf_or_blocked_signals": false
+    },
+    {
+      "average_response_time_ms": 406,
+      "content_type": "text/html",
+      "extracted_text_chars": 6239,
+      "has_pdf_links": true,
+      "http_status": 200,
+      "item_type_guess": "guidance_announcement",
+      "label": "Cyber Risk Management framework announcement",
+      "limitation_notes": [
+        "HTML-only validation; full HTML body was not stored.",
+        "PDF links were counted but not downloaded or parsed.",
+        "Linked PDF/document content is deferred for later validation.",
+        "Media announcement pages are not ideal primary monitoring sources."
+      ],
+      "monitoring_suitability": "announcement_only_not_primary_source",
+      "normalized_text_chars": 5452,
+      "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+      "outbound_official_document_links": [
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/about"
+        },
+        {
+          "is_pdf": false,
+          "text": "Jurisdiction",
+          "url": "https://www.adgm.com/about/jurisdiction"
+        },
+        {
+          "is_pdf": false,
+          "text": "Authorities",
+          "url": "https://www.adgm.com/about/authorities"
+        },
+        {
+          "is_pdf": false,
+          "text": "Initiatives",
+          "url": "https://www.adgm.com/initiatives"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM Academy",
+          "url": "https://academy.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Dispute Resolution",
+          "url": "https://disputeresolution.adgm.com"
+        },
+        {
+          "is_pdf": false,
+          "text": "Careers",
+          "url": "https://www.adgm.com/careers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Overview",
+          "url": "https://www.adgm.com/business"
+        },
+        {
+          "is_pdf": false,
+          "text": "Business Areas",
+          "url": "https://www.adgm.com/business-areas"
+        },
+        {
+          "is_pdf": false,
+          "text": "Setting up",
+          "url": "https://www.adgm.com/setting-up"
+        },
+        {
+          "is_pdf": false,
+          "text": "Operating in",
+          "url": "https://www.adgm.com/operating-in-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Public Registers",
+          "url": "https://www.adgm.com/public-registers"
+        },
+        {
+          "is_pdf": false,
+          "text": "Legal Framework",
+          "url": "https://www.adgm.com/legal-framework"
+        },
+        {
+          "is_pdf": false,
+          "text": "AccessRP",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+        },
+        {
+          "is_pdf": false,
+          "text": "ACCESSADGM",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+        },
+        {
+          "is_pdf": false,
+          "text": "Online Registry Solution",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+        },
+        {
+          "is_pdf": false,
+          "text": "Electronic Prudential Reporting",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+        },
+        {
+          "is_pdf": false,
+          "text": "FSRA Connect",
+          "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+        },
+        {
+          "is_pdf": false,
+          "text": "ADGM eCourts Platform",
+          "url": "https://www.adgm.com/adgm-courts/digital-approach"
+        },
+        {
+          "is_pdf": false,
+          "text": "News",
+          "url": "https://www.adgm.com/media/announcements"
+        },
+        {
+          "is_pdf": false,
+          "text": "Events",
+          "url": "https://www.adgm.com/events"
+        },
+        {
+          "is_pdf": false,
+          "text": "Spotlight",
+          "url": "https://www.adgm.com/spotlight"
+        },
+        {
+          "is_pdf": false,
+          "text": "Podcasts",
+          "url": "https://www.adgm.com/think-by-adgm"
+        },
+        {
+          "is_pdf": false,
+          "text": "Support",
+          "url": "https://www.adgm.com/contact-us"
+        },
+        {
+          "is_pdf": false,
+          "text": "Make an enquiry",
+          "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+        }
+      ],
+      "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+      "pdf_downloaded": false,
+      "pdf_link_count": 1,
+      "pdf_parsed": false,
+      "proof_artifact": {
+        "checked_at_utc": "2026-05-31T19:36:20+00:00",
+        "extraction_method": "beautifulsoup_visible_text_normalized",
+        "fetch_method": "requests_html_only",
+        "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+        "limitations": [
+          "HTML-only validation; full HTML body was not stored.",
+          "PDF links were counted but not downloaded or parsed.",
+          "Linked PDF/document content is deferred for later validation.",
+          "Media announcement pages are not ideal primary monitoring sources."
+        ],
+        "normalized_text_chars": 5452,
+        "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+        "official_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+        "pdf_downloaded": false,
+        "pdf_links_count": 1,
+        "pdf_parsed": false,
+        "proof_quality": "strong",
+        "source_name": "ADGM/FSRA HTML validation candidate"
+      },
+      "proof_quality": "strong",
+      "recommended_next_action": "Use as a source transparency/proof example; identify the underlying listing or rulebook source before monitored-source design.",
+      "runs": [
+        {
+          "checked_at_utc": "2026-05-31T19:36:19+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 6239,
+          "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 5452,
+          "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 94423,
+          "response_time_ms": 354,
+          "run_number": 1,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "waf_or_blocked_signals": false
+        },
+        {
+          "checked_at_utc": "2026-05-31T19:36:20+00:00",
+          "content_type": "text/html",
+          "error": "",
+          "extracted_text_chars": 6239,
+          "final_url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "has_pdf_links": true,
+          "http_status": 200,
+          "normalized_text_chars": 5452,
+          "normalized_text_signature": "69878a1efb5b56d952cb97bbc831cc5e179fb233970e3cc115c2afda86679847",
+          "outbound_official_document_links": [
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/about"
+            },
+            {
+              "is_pdf": false,
+              "text": "Jurisdiction",
+              "url": "https://www.adgm.com/about/jurisdiction"
+            },
+            {
+              "is_pdf": false,
+              "text": "Authorities",
+              "url": "https://www.adgm.com/about/authorities"
+            },
+            {
+              "is_pdf": false,
+              "text": "Initiatives",
+              "url": "https://www.adgm.com/initiatives"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM Academy",
+              "url": "https://academy.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Dispute Resolution",
+              "url": "https://disputeresolution.adgm.com"
+            },
+            {
+              "is_pdf": false,
+              "text": "Careers",
+              "url": "https://www.adgm.com/careers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Overview",
+              "url": "https://www.adgm.com/business"
+            },
+            {
+              "is_pdf": false,
+              "text": "Business Areas",
+              "url": "https://www.adgm.com/business-areas"
+            },
+            {
+              "is_pdf": false,
+              "text": "Setting up",
+              "url": "https://www.adgm.com/setting-up"
+            },
+            {
+              "is_pdf": false,
+              "text": "Operating in",
+              "url": "https://www.adgm.com/operating-in-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Public Registers",
+              "url": "https://www.adgm.com/public-registers"
+            },
+            {
+              "is_pdf": false,
+              "text": "Legal Framework",
+              "url": "https://www.adgm.com/legal-framework"
+            },
+            {
+              "is_pdf": false,
+              "text": "AccessRP",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessrp"
+            },
+            {
+              "is_pdf": false,
+              "text": "ACCESSADGM",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/accessadgm-government-services-portal"
+            },
+            {
+              "is_pdf": false,
+              "text": "Online Registry Solution",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/online-registry-solution"
+            },
+            {
+              "is_pdf": false,
+              "text": "Electronic Prudential Reporting",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/electronic-prudential-reporting"
+            },
+            {
+              "is_pdf": false,
+              "text": "FSRA Connect",
+              "url": "https://www.adgm.com/operating-in-adgm/e-services/fsra-connect"
+            },
+            {
+              "is_pdf": false,
+              "text": "ADGM eCourts Platform",
+              "url": "https://www.adgm.com/adgm-courts/digital-approach"
+            },
+            {
+              "is_pdf": false,
+              "text": "News",
+              "url": "https://www.adgm.com/media/announcements"
+            },
+            {
+              "is_pdf": false,
+              "text": "Events",
+              "url": "https://www.adgm.com/events"
+            },
+            {
+              "is_pdf": false,
+              "text": "Spotlight",
+              "url": "https://www.adgm.com/spotlight"
+            },
+            {
+              "is_pdf": false,
+              "text": "Podcasts",
+              "url": "https://www.adgm.com/think-by-adgm"
+            },
+            {
+              "is_pdf": false,
+              "text": "Support",
+              "url": "https://www.adgm.com/contact-us"
+            },
+            {
+              "is_pdf": false,
+              "text": "Make an enquiry",
+              "url": "https://www.adgm.com/contact-us/make-an-enquiry"
+            }
+          ],
+          "page_title": "ADGM\u2019s FSRA Issues Cyber Risk Management Framework",
+          "pdf_downloaded": false,
+          "pdf_link_count": 1,
+          "pdf_parsed": false,
+          "response_size_bytes": 94423,
+          "response_time_ms": 459,
+          "run_number": 2,
+          "timeout_or_connection_error": false,
+          "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+          "waf_or_blocked_signals": false
+        }
+      ],
+      "signature_stable_across_runs": true,
+      "title_stable_across_runs": true,
+      "url": "https://www.adgm.com/media/announcements/adgms-fsra-issues-cyber-risk-management-framework",
+      "waf_or_blocked_signals": false
+    }
+  ],
+  "urls_tested": 4
+}

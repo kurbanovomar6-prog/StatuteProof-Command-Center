@@ -4,6 +4,19 @@
 
 ---
 
+## Two Layers
+
+| Layer | Location | Use for |
+|-------|----------|---------|
+| **Operating layer** | Root of this folder | Planning, agents, skills, prompts, workflows, docs, legal review |
+| **Implementation layer** | `product/` | Code — Python pipeline, frontend, deployment config |
+
+For planning and docs: use the root Command Center.  
+For code: go to `product/regradar/` first, inspect before editing.  
+First code task: source spec + evidence dry run (see Step 4 below and `docs/product-integration.md`).
+
+---
+
 ## Sequence
 
 1. Open this folder for StatuteProof work only.

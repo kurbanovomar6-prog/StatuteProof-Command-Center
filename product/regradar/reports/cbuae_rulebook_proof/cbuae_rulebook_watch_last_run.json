@@ -1,0 +1,21 @@
+{
+  "added_count": 0,
+  "alert_draft_candidate_path": null,
+  "automatic_delivery_enabled": false,
+  "baseline_created": false,
+  "changed_count": 0,
+  "error_message": null,
+  "recommended_status": "under_validation",
+  "removed_count": 0,
+  "report_json_path": "reports/cbuae_rulebook_proof/cbuae_rulebook_diff_2026-06-04.json",
+  "report_path": "reports/cbuae_rulebook_proof/cbuae_rulebook_diff_2026-06-04.md",
+  "row_count": 10,
+  "run_finished_at": "2026-06-04T14:31:30+00:00",
+  "run_started_at": "2026-06-04T14:31:27+00:00",
+  "snapshot_path": "data/source_snapshots/cbuae_rulebook_proof/cbuae_rulebook_snapshot_20260604T143130Z.json",
+  "source_activated": false,
+  "source_id": "ae-cbuae-rulebook-aml-payments",
+  "source_name": "CBUAE Rulebook revision updates",
+  "success": true,
+  "telegram_sent": false
+}

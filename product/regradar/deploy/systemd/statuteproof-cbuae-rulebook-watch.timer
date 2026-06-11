@@ -1,0 +1,11 @@
+[Unit]
+Description=Run StatuteProof CBUAE Rulebook proof/diff watcher hourly
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=300
+Unit=statuteproof-cbuae-rulebook-watch.service
+
+[Install]
+WantedBy=timers.target

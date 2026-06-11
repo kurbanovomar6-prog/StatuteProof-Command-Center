@@ -1,0 +1,35 @@
+# =============================================================================
+# railway.toml — конфигурация деплоя RegRadar на Railway
+# =============================================================================
+#
+# Railway не поддерживает docker-compose.yml напрямую.
+# Каждый сервис (web-api, celery-worker, celery-beat) создаётся отдельно
+# в Railway UI и использует один и тот же образ из нашего Dockerfile,
+# но с разными startCommand.
+#
+# Этот файл применяется к сервису, с которым связан `railway link`.
+# По умолчанию — к web-api (главный сервис).
+# =============================================================================
+
+[build]
+# Railway автоматически обнаружит Dockerfile в корне репо.
+# builder = "dockerfile" можно не указывать, но явное лучше неявного.
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Точка входа для web-api сервиса.
+# Celery-worker и celery-beat задают свой startCommand в Railway UI.
+startCommand = "bash entrypoint.sh web"
+
+# Railway poll-ит этот endpoint после деплоя.
+# HTTP 200 = деплой успешен; любой другой код = Railway откатывает.
+healthcheckPath = "/api/v1/health"
+
+# NiceGUI + SQLAlchemy инициализируются дольше обычного Flask.
+# 300 секунд достаточно даже на слабых Railway-инстансах.
+healthcheckTimeout = 300
+
+# Автоматический рестарт при падении (не при успешном завершении).
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

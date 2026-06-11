@@ -1,0 +1,68 @@
+
+[36m════════════════════════════════════════════════════════════════════[0m
+  [1m[33m⚡  RegRadar v7 — DEMO MODE[0m
+  [2mSimulated regulatory change — for presentation purposes only.[0m
+  [2mNo production database writes. No real monitoring data.[0m
+[36m════════════════════════════════════════════════════════════════════[0m
+────────────────────────────────────────────────────────────────────
+  [1mURL:[0m           [36mdemo://regulatory-change[0m
+   [2mSource:                   [0m[DEMO] National Financial Monitoring Agency — Regulatory Update
+   [2mJurisdiction:             [0mDEMO
+   [2mCategory:                 [0mfinancial_regulator
+   [2mTimestamp:                [0m2026-05-21T09:48:34.124769
+────────────────────────────────────────────────────────────────────
+
+[41m[97m[1m  ⚠  HIGH RISK — IMMEDIATE COMPLIANCE REVIEW REQUIRED  ⚠  [0m
+
+   [2mRisk reason:              [0mHIGH — mandatory AML reporting obligation with lowered STR threshold (USD 75k → USD 50k), criminal VASP licensing penalty (USD 500k/day + director liability), PEP EDD retrospective deadline (19 August 2026). Affects banks, fintechs, payment providers, and all VASPs.
+   [2mAdded paragraphs:         [0m3
+   [2mModified sections:        [0m1
+   [2mChars extracted:          [0m1,732
+   [2mQuality:                  [0m[32m✓ good[0m
+   [2mMethod:                   [0mdemo
+   [2mAI analysis:              [0m[2mNot used (demo — no API key required)[0m
+   [2mTelegram alert:           [0m[2mNot sent[0m
+
+  [1mExecutive Summary:[0m
+    The National Financial Monitoring Agency has issued a
+    significant AML/CFT regulatory update with three material
+    changes effective 19 August 2026. First, the STR reporting
+    threshold is lowered from USD 75,000 to USD 50,000,
+    substantially increasing the transaction monitoring workload for
+    all licensed institutions. Second, a new mandatory licensing
+    regime covers all virtual asset service providers, with a
+    180-day compliance window and criminal penalties — including
+    director liability — for non-compliance. Third, Enhanced Due
+    Diligence is mandatory for all PEPs and correspondent banking
+    relationships, requiring a full retrospective audit to be
+    submitted by 19 August 2026. Immediate compliance planning is
+    required across all affected business lines.
+
+  [1mRequired Business Action:[0m
+    [33m1. Brief compliance, legal, and senior management on new AML[0m
+    [33mobligations today. 2. Update transaction monitoring rules to[0m
+    [33malert on transactions at or above USD 50,000. 3. If operating[0m
+    [33many VASP or crypto-related services, initiate the Type-II[0m
+    [33mlicence application without delay — the 180-day window has[0m
+    [33malready started. 4. Commission a retrospective EDD audit of all[0m
+    [33mPEP and correspondent relationships. 5. Procure and integrate an[0m
+    [33mapproved automated PEP screening solution. 6. Update AML/CFT[0m
+    [33mpolicies, procedures, and staff training materials. All actions[0m
+    [33mmust be completed before 19 August 2026.[0m
+····································································
+  [1mDetected regulatory changes (3 new paragraphs):[0m
+  [32m+[0m [1] Article 14(a) — Enhanced STR Reporting Threshold. With effect from 19 August 2026, all licensed financial institutions —…
+  [32m+[0m [2] Article 14(b) — Mandatory Licensing for Virtual Asset Service Providers. Any entity that provides virtual asset exchange…
+  [32m+[0m [3] Article 14(c) — Enhanced Due Diligence for Politically Exposed Persons. Financial institutions must apply Enhanced Due D…
+────────────────────────────────────────────────────────────────────
+
+[36m════════════════════════════════════════════════════════════════════[0m
+  [1m[DEMO][0m This simulation demonstrates RegRadar's capabilities:
+  [2m  • Real-time regulatory change detection across CIS + international sources[0m
+  [2m  • Paragraph-level diff with added / removed / modified tracking[0m
+  [2m  • Automated HIGH / MEDIUM / LOW risk classification[0m
+  [2m  • AI-enhanced executive summaries and business action guidance[0m
+  [2m  • Telegram compliance alerts for MEDIUM and HIGH risk changes[0m
+  [2m  • Multi-source watch mode with configurable monitoring interval[0m
+[36m════════════════════════════════════════════════════════════════════[0m
+

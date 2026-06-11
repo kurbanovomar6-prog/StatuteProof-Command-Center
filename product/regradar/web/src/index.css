@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #07111F;
+    color: #f8fafc;
+  }
+}
+
+@keyframes rr-pulse-x {
+  0%, 100% { transform: scaleX(0); opacity: 0; }
+  50% { transform: scaleX(1); opacity: 1; }
+}
+.animate-rr-pulse-x { animation: rr-pulse-x 3s ease-in-out infinite; }
