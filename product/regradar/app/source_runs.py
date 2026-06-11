@@ -495,6 +495,72 @@ def _quality_from_chars(chars: int) -> str:
     return "FAILED"
 
 
+def deduplicate_alerts(
+    alerts: list[dict],
+    similarity_threshold: float = 0.85,
+) -> list[dict]:
+    """
+    Remove duplicate alerts where two sources detected the same regulatory event.
+
+    Uses normalised text overlap (difflib.SequenceMatcher ratio on the first 500
+    chars of change_text) to identify near-identical change excerpts.
+
+    When duplicates are found:
+    - Keep the alert from the higher-tier source (tier 1 > 2 > 3 > 99 for unknown).
+    - Add a ``merged_sources`` field listing all source_ids that detected the event.
+    """
+    import difflib
+
+    _TIER_ORDER = {"1": 1, "2": 2, "3": 3}
+
+    def _tier(alert: dict) -> int:
+        return _TIER_ORDER.get(str(alert.get("tier") or ""), 99)
+
+    def _excerpt(alert: dict) -> str:
+        text = (
+            alert.get("change_text")
+            or alert.get("executive_summary")
+            or alert.get("ai_summary")
+            or ""
+        )
+        return str(text)[:500].lower()
+
+    if not alerts:
+        return alerts
+
+    kept: list[dict] = []
+    used: list[bool] = [False] * len(alerts)
+
+    for i, a in enumerate(alerts):
+        if used[i]:
+            continue
+        group = [i]
+        exc_a = _excerpt(a)
+        for j in range(i + 1, len(alerts)):
+            if used[j]:
+                continue
+            exc_b = _excerpt(alerts[j])
+            ratio = difflib.SequenceMatcher(None, exc_a, exc_b).ratio()
+            if ratio >= similarity_threshold:
+                group.append(j)
+                used[j] = True
+
+        if len(group) == 1:
+            a.setdefault("merged_sources", [a.get("source_id", "")])
+            kept.append(a)
+        else:
+            best = min(group, key=lambda idx: _tier(alerts[idx]))
+            winner = dict(alerts[best])
+            winner["merged_sources"] = [
+                alerts[idx].get("source_id", "") for idx in group
+            ]
+            kept.append(winner)
+
+        used[i] = True
+
+    return kept
+
+
 def render_history_terminal(
     *,
     market: str = "AE",

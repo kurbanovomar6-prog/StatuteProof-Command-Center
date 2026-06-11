@@ -487,7 +487,10 @@
     "jurisdiction": "AE",
     "category": "central_bank",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "source_id": "AE-cbuae-homepage",
+    "notes": "CBUAE homepage — general entry point. Prefer AE-cbuae-regulations for regulatory content monitoring.",
+    "tier": "1"
   },
   {
     "name": "Dubai Virtual Assets Regulatory Authority (VARA)",
@@ -495,7 +498,10 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "source_id": "AE-vara-framework",
+    "notes": "VARA primary regulatory framework page — rules, regulations, and guidance documents.",
+    "tier": "1"
   },
   {
     "name": "Dubai Financial Services Authority (DFSA)",
@@ -503,7 +509,10 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "source_id": "AE-dfsa-rules",
+    "notes": "DFSA rules and standards — rulebook updates, regulatory standards for DIFC-regulated firms.",
+    "tier": "1"
   },
   {
     "name": "Abu Dhabi Global Market (ADGM)",
@@ -511,7 +520,10 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "source_id": "AE-adgm-fsra-regulations",
+    "notes": "ADGM FSRA rules and regulations page — covers all FSRA-regulated entities in Abu Dhabi Global Market.",
+    "tier": "1"
   },
   {
     "name": "UAE Ministry of Finance",
@@ -519,7 +531,10 @@
     "jurisdiction": "AE",
     "category": "finance_ministry",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "source_id": "AE-mof-homepage",
+    "notes": "UAE Ministry of Finance — tax, fiscal policy, and federal financial regulations.",
+    "tier": "2"
   },
   {
     "name": "UAE Legislation Portal",
@@ -528,7 +543,9 @@
     "category": "legal_acts",
     "enabled": true,
     "status": "active",
-    "notes": "High-value UAE federal legislation source. Access and item-level monitoring require continued validation due to WAF/access constraints and aggregate-page change noise."
+    "notes": "High-value UAE federal legislation source. Access and item-level monitoring require continued validation due to WAF/access constraints and aggregate-page change noise.",
+    "source_id": "AE-uae-legislation",
+    "tier": "2"
   },
   {
     "name": "UAE Financial Intelligence Unit (UAEFIU)",
@@ -536,7 +553,10 @@
     "jurisdiction": "AE",
     "category": "aml",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "source_id": "AE-uaefiu-homepage",
+    "notes": "UAE FIU homepage — AML/CFT framework. Prefer AE-uaefiu-circulars for publication monitoring.",
+    "tier": "3"
   },
   {
     "name": "UAE Securities and Commodities Authority (SCA)",
@@ -572,7 +592,9 @@
     "category": "legal_database",
     "enabled": true,
     "status": "active",
-    "notes": "Dubai International Financial Centre official laws and regulations. Domain updated to difc.com laws/regulations page. Verify item-level structure before source expansion. Prior difc.ae page tested 9,150c GOOD (2026-05-27)."
+    "notes": "Dubai International Financial Centre official laws and regulations. Domain updated to difc.com laws/regulations page. Verify item-level structure before source expansion. Prior difc.ae page tested 9,150c GOOD (2026-05-27).",
+    "source_id": "AE-difc-laws-homepage",
+    "tier": "1"
   },
   {
     "name": "UAE Ministry of Economy",
@@ -581,7 +603,9 @@
     "category": "company_registry",
     "enabled": true,
     "status": "active",
-    "notes": "Domain updated to Ministry of Economy and Tourism official site. Covers commercial registry, trade licences, business regulation, competition, consumer protection, and intellectual property. PDF-heavy source requires validation. Prior moec.gov.ae page tested 14,646c GOOD (2026-05-27)."
+    "notes": "Domain updated to Ministry of Economy and Tourism official site. Covers commercial registry, trade licences, business regulation, competition, consumer protection, and intellectual property. PDF-heavy source requires validation. Prior moec.gov.ae page tested 14,646c GOOD (2026-05-27).",
+    "source_id": "AE-moe-homepage",
+    "tier": "2"
   },
   {
     "source_id": "AE-vara-enforcement",
@@ -592,7 +616,8 @@
     "enabled": true,
     "status": "active",
     "scraper_tier": 1,
-    "notes": "VARA enforcement actions and notices"
+    "notes": "VARA enforcement actions and notices",
+    "tier": "1"
   },
   {
     "source_id": "AE-cbuae-regulations",
@@ -603,7 +628,8 @@
     "enabled": true,
     "status": "active",
     "scraper_tier": 1,
-    "notes": "CBUAE regulations listing page — not homepage"
+    "notes": "CBUAE regulations listing page — not homepage",
+    "tier": "1"
   },
   {
     "source_id": "AE-uaefiu-circulars",
@@ -614,7 +640,8 @@
     "enabled": true,
     "status": "active",
     "scraper_tier": 2,
-    "notes": "AML/CFT circulars and typology notices"
+    "notes": "AML/CFT circulars and typology notices",
+    "tier": "3"
   },
   {
     "name": "Qatar Financial Centre Regulatory Authority (QFCRA)",
@@ -1254,5 +1281,82 @@
     "enabled": false,
     "status": "limited",
     "notes": "Customs authority. Root returns 307c (SPA). All tested sub-paths (/en/Pages/default.aspx, /en/LM/Pages, /en/PR/Pages, /en/AK/Pages) return 404 or 0c. Entire site appears to be a deep SharePoint portal inaccessible without session navigation. Adapter required. (2026-05-27)"
+  },
+  {
+    "source_id": "AE-vara-rulebook",
+    "name": "VARA Virtual Assets Regulation",
+    "url": "https://www.vara.ae/en/regulatory-framework/",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": false,
+    "status": "duplicate_url",
+    "tier": "1",
+    "notes": "VARA primary rulebook and framework updates — duplicate of AE-vara-framework, kept as alias."
+  },
+  {
+    "source_id": "AE-dfsa-notices",
+    "name": "DFSA Regulatory Notices",
+    "url": "https://www.dfsa.ae/regulation/notices-public-registers",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "notes": "DFSA notices, decisions, and consultations — primary source for DIFC-regulated firm regulatory actions."
+  },
+  {
+    "source_id": "AE-adgm-fsra-rules",
+    "name": "ADGM FSRA Rulebook",
+    "url": "https://www.fsra.adgm.com/rules-and-regulations/rulebooks",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "notes": "ADGM Financial Services Regulatory Authority rulebook — covers all FSRA-authorised activities."
+  },
+  {
+    "source_id": "AE-cbuae-circulars",
+    "name": "CBUAE Circulars",
+    "url": "https://www.centralbank.ae/en/regulations/",
+    "jurisdiction": "AE",
+    "category": "central_bank",
+    "enabled": false,
+    "status": "duplicate_url",
+    "tier": "1",
+    "notes": "CBUAE circulars and regulatory decisions — duplicate of AE-cbuae-regulations URL, kept as alias."
+  },
+  {
+    "source_id": "AE-uaefiu-guidance",
+    "name": "UAE FIU AML Guidance",
+    "url": "https://www.uaefiu.gov.ae/en/Publications/",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": false,
+    "status": "duplicate_url",
+    "tier": "3",
+    "notes": "AML/CFT guidance, typologies, STR notices — duplicate of AE-uaefiu-circulars URL, kept as alias."
+  },
+  {
+    "source_id": "AE-difc-legislation",
+    "name": "DIFC Laws Portal",
+    "url": "https://www.difc.ae/business/laws-regulations/legislation/",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "notes": "DIFC primary and delegated legislation. Separate from difc.com portal — verify access before expanding."
+  },
+  {
+    "source_id": "AE-sca-decisions",
+    "name": "SCA Board Decisions",
+    "url": "https://www.sca.gov.ae/en/legislation/sca-decisions.aspx",
+    "jurisdiction": "AE",
+    "category": "securities_regulator",
+    "enabled": true,
+    "status": "active",
+    "tier": "3",
+    "notes": "Securities and Commodities Authority board decisions — relevant for listed companies and capital markets."
   }
 ]

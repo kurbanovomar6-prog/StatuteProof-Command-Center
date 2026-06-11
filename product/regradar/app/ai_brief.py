@@ -51,14 +51,21 @@ _MATERIALITY_MAP = {
 }
 
 _SYSTEM = """\
-You are a senior regulatory compliance analyst covering banks, fintechs, \
-payment providers, virtual asset service providers (VASPs), and regulated \
-financial institutions operating under UAE regulators including CBUAE, VARA, \
-DFSA, ADGM/FSRA, UAE FIU, and the Ministry of Finance.
+You are a UAE regulatory compliance intelligence analyst writing for MLROs and CCOs \
+at VARA-licensed VASPs, DFSA-authorised firms, and ADGM-registered entities.
 
-You read regulatory change text and produce a structured compliance brief \
-for the institution's compliance team.  Do NOT rely on keyword matching alone \
-— understand the legal and operational meaning of the change.
+Your output must meet these standards:
+1. SPECIFIC: Name the regulation, article, or section that changed — never say \
+"the regulatory framework was updated" without citing what changed.
+2. ACTIONABLE: Every HIGH or MEDIUM alert must contain one specific action the \
+compliance officer should take, with a suggested timeframe.
+3. CALIBRATED: Do not overclaim. If the change is a minor editorial update, say so. \
+If it creates a new obligation, state exactly what the obligation is.
+4. UAE-AWARE: VARA governs VASPs in Dubai mainland, DFSA governs DIFC firms, \
+ADGM/FSRA governs Abu Dhabi Global Market firms. A VARA circular does not bind \
+DFSA-regulated firms. Always specify which licence type is affected.
+5. EVIDENCE-FIRST: Your analysis is based on a hash-verified diff from an official \
+source. Never claim certainty beyond what the diff shows.
 
 Risk level definitions:
   LOW    — purely informational; no new obligation; no deadline; no operational impact
@@ -81,12 +88,22 @@ Respond with ONLY a valid JSON object — no markdown fences, no text outside th
 
 Required JSON format (all keys mandatory):
 {{
-  "risk_level": "LOW" | "MEDIUM" | "HIGH",
-  "executive_summary": "2-3 sentences: what changed and why it matters for regulated entities",
-  "business_action_required": "one concrete action the compliance team must take, \
-or No immediate action required for LOW risk",
+  "risk_level": "HIGH" | "MEDIUM" | "LOW",
+  "confidence": 0.0,
+  "executive_summary": "2-3 sentences: what changed, why it matters, who is affected. \
+Name the specific regulation or article where possible.",
+  "business_action_required": "one concrete action the compliance team must take. \
+For LOW risk: No immediate action required.",
   "reason": "concise explanation of risk_level based on substance",
-  "affected_entities": ["list of entity types; empty list if unclear"],
+  "affected_entities": ["list of entity types e.g. VARA VASP, DFSA authorised firm"],
+  "specific_obligation": "exact new obligation if any — empty string if none",
+  "implementation_deadline": "specific date or timeframe if mentioned — \
+'Not specified in source' if absent",
+  "suggested_timeframe": "e.g. within 5 business days, before end of quarter",
+  "licence_scope": "which UAE licence types are affected",
+  "regulatory_body": "VARA | CBUAE | DFSA | ADGM | UAEFIU | SCA | other",
+  "change_type": "new_obligation | amended_requirement | enforcement_action | \
+consultation | guidance | editorial",
   "urgency": "low" | "medium" | "high",
   "deadline": "explicit date if stated, or null",
   "semantic_findings": {{
@@ -96,12 +113,24 @@ or No immediate action required for LOW risk",
     "licensing_impact": true | false,
     "enforcement_exposure": true | false,
     "operational_impact": "none" | "low" | "medium" | "high",
-    "materiality": "informational" | "low" | "material" | "critical"
+    "materiality": "informational" | "low" | "material" | "critical",
+    "key_terms": ["list of key regulatory terms found"],
+    "jurisdiction_signals": ["list of jurisdiction indicators found"],
+    "obligation_signals": ["list of obligation indicators found"]
   }},
-  "confidence": "low" | "medium" | "high",
+  "disclaimer_required": true,
+  "monitoring_note": "any source quality or coverage limitation relevant to this alert",
   "review_required": true | false,
   "review_reason": "brief explanation if review_required is true, otherwise empty string"
 }}\
+"""
+
+_USER_RETRY_SUFFIX = """\
+
+Previous output failed quality check: {issues}.
+Be more specific. Name the exact regulation, article, or section. \
+State the exact obligation in the specific_obligation field. \
+List the affected entity types explicitly in affected_entities.\
 """
 
 
@@ -179,8 +208,32 @@ def _parse_ai_response(raw: str) -> dict | None:
         sf[bool_key] = bool(sf[bool_key])
     data["semantic_findings"] = sf
 
-    conf = str(data.get("confidence", "medium")).lower()
-    data["confidence"] = conf if conf in ("low", "medium", "high") else "medium"
+    # Confidence: accept float 0-1 or string low/medium/high
+    raw_conf = data.get("confidence", "medium")
+    try:
+        conf_float = float(raw_conf)
+        data["confidence"] = conf_float
+    except (TypeError, ValueError):
+        conf_str = str(raw_conf).lower()
+        data["confidence"] = conf_str if conf_str in ("low", "medium", "high") else "medium"
+
+    # New fields with safe defaults
+    data.setdefault("specific_obligation",     "")
+    data.setdefault("implementation_deadline", "Not specified in source")
+    data.setdefault("suggested_timeframe",     "")
+    data.setdefault("licence_scope",           "")
+    data.setdefault("regulatory_body",         "")
+    data.setdefault("change_type",             "")
+    data.setdefault("disclaimer_required",     True)
+    data.setdefault("monitoring_note",         "")
+
+    sf = data["semantic_findings"]
+    if not isinstance(sf.get("key_terms"), list):
+        sf["key_terms"] = []
+    if not isinstance(sf.get("jurisdiction_signals"), list):
+        sf["jurisdiction_signals"] = []
+    if not isinstance(sf.get("obligation_signals"), list):
+        sf["obligation_signals"] = []
 
     data["review_required"] = bool(data.get("review_required", False))
     data["review_reason"]   = str(data.get("review_reason", "")).strip()
@@ -246,6 +299,31 @@ def _fallback_brief(change_text: str, metadata: dict, error: str) -> dict:
         "model":                    None,
         "error":                    error,
     }
+
+
+def _quality_check(brief: dict) -> list[str]:
+    """
+    STEP 1 quality gate — checks brief completeness before delivery.
+
+    Returns a list of issue strings; empty list means the brief passes.
+    """
+    issues = []
+    if len(brief.get("executive_summary", "")) < 100:
+        issues.append("executive_summary too short — not specific enough")
+    if brief.get("risk_level") == "HIGH" and not brief.get("specific_obligation"):
+        issues.append("HIGH risk brief has no specific_obligation — unacceptable")
+    if not brief.get("affected_entities"):
+        issues.append("affected_entities is empty — who does this apply to?")
+    if not brief.get("business_action_required"):
+        issues.append("no business_action_required — brief has no value for MLRO")
+    if (
+        brief.get("implementation_deadline") in (None, "", "Not specified", "Not specified in source")
+        and brief.get("risk_level") == "HIGH"
+    ):
+        issues.append(
+            "HIGH risk brief has no deadline — must say 'not specified in source' explicitly"
+        )
+    return issues
 
 
 def generate_ai_brief(
@@ -395,22 +473,56 @@ def generate_ai_brief(
         if parsed is None:
             return _fallback_brief(truncated, metadata, "AI returned unparseable JSON")
 
-        urgency_raw  = parsed.get("urgency", "medium")
-        mat_raw      = parsed.get("semantic_findings", {}).get("materiality", "informational")
+        def _assemble_brief(p: dict) -> dict:
+            urgency_raw = p.get("urgency", "medium")
+            mat_raw = p.get("semantic_findings", {}).get("materiality", "informational")
+            return {
+                **p,
+                "urgency":         _URGENCY_MAP.get(urgency_raw, "unclear"),
+                "urgency_raw":     urgency_raw,
+                "materiality":     _MATERIALITY_MAP.get(mat_raw, "unclear"),
+                "materiality_raw": mat_raw,
+                "source_language": metadata.get("source_language", "unknown"),
+                "output_language": output_language,
+                "ai_used":         True,
+                "fallback_used":   False,
+                "model":           _MODEL,
+                "error":           None,
+            }
 
-        brief = {
-            **parsed,
-            "urgency":        _URGENCY_MAP.get(urgency_raw, "unclear"),
-            "urgency_raw":    urgency_raw,
-            "materiality":    _MATERIALITY_MAP.get(mat_raw, "unclear"),
-            "materiality_raw": mat_raw,
-            "source_language": metadata.get("source_language", "unknown"),
-            "output_language": output_language,
-            "ai_used":         True,
-            "fallback_used":   False,
-            "model":           _MODEL,
-            "error":           None,
-        }
+        brief = _assemble_brief(parsed)
+
+        # ── STEP 1: Quality gate ─────────────────────────────────────────
+        issues = _quality_check(brief)
+        if issues:
+            source_id = metadata.get("source_id") or metadata.get("url") or "unknown"
+            for issue in issues:
+                logger.warning("ai_brief: quality issue [%s]: %s", source_id, issue)
+
+            retry_prompt = user_prompt + _USER_RETRY_SUFFIX.format(
+                issues="; ".join(issues)
+            )
+            try:
+                retry_msg = client.messages.create(
+                    model      = _MODEL,
+                    max_tokens = 1400,
+                    system     = _SYSTEM,
+                    messages   = [{"role": "user", "content": retry_prompt}],
+                )
+                if retry_msg.stop_reason != "max_tokens":
+                    retry_parsed = _parse_ai_response(retry_msg.content[0].text)  # type: ignore[union-attr]
+                    if retry_parsed is not None:
+                        retry_issues = _quality_check(_assemble_brief(retry_parsed))
+                        if not retry_issues:
+                            brief = _assemble_brief(retry_parsed)
+                            logger.info("ai_brief: retry passed quality gate [%s]", source_id)
+                        else:
+                            logger.warning(
+                                "BRIEF_QUALITY_FAIL source_id=%s issues=%s",
+                                source_id, retry_issues,
+                            )
+            except Exception as retry_exc:
+                logger.warning("ai_brief: retry failed (%s)", retry_exc)
 
         logger.info(
             "ai_brief: OK — risk=%s confidence=%s urgency=%s materiality=%s",

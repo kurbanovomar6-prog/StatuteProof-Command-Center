@@ -12,6 +12,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import logging
+
 from app.alert_review import (
     DECISION_URGENT,
     DECISION_WEEKLY,
@@ -19,8 +21,10 @@ from app.alert_review import (
     STATUS_APPROVED_WEEKLY,
     latest_review_for,
     list_alert_drafts,
+    review_alert,
 )
 from app.client_profiles import load_client_profile, score_alert_relevance, source_metadata_for_alert
+from app.source_runs import deduplicate_alerts
 from app.sources import load_sources
 _FULL_BRIEF_DISCLAIMER = (
     "StatuteProof reports are generated from monitored official-source records and are provided "
@@ -40,6 +44,57 @@ _BASE_DIR = Path(__file__).parent.parent
 _OUTPUT_DIR = _BASE_DIR / "reports" / "weekly_briefs"
 _INCLUDED_STATUSES = {STATUS_APPROVED_WEEKLY, STATUS_APPROVED_URGENT}
 _INCLUDED_DECISIONS = {DECISION_WEEKLY, DECISION_URGENT}
+logger = logging.getLogger(__name__)
+
+# ── STEP 2: Legal language gate ───────────────────────────────────────────────
+FORBIDDEN_IN_BRIEF = [
+    "guarantee compliance",
+    "prevent fines",
+    "ensure you are compliant",
+    "you will be compliant",
+    "automatically compliant",
+    "no action needed",
+    "fully covered",
+    "certified",
+    "official partner",
+]
+
+
+def legal_scan_brief(brief: dict) -> list[str]:
+    """
+    STEP 2 — Scan brief fields for forbidden legal claims before delivery.
+
+    Returns a list of flag strings; empty list means the brief is clean.
+    """
+    flags = []
+    for field in ("executive_summary", "business_action_required", "specific_obligation"):
+        text = str(brief.get(field) or "").lower()
+        for phrase in FORBIDDEN_IN_BRIEF:
+            if phrase in text:
+                flags.append(f"FORBIDDEN phrase '{phrase}' in field '{field}'")
+    return flags
+
+
+# ── STEP 3: QA gate ───────────────────────────────────────────────────────────
+
+def qa_gate(brief: dict) -> str:
+    """
+    STEP 3 — Final quality/completeness gate before brief inclusion.
+
+    Returns "SHIP" or a "HOLD: <reason>" string.
+    """
+    if brief.get("risk_level") == "HIGH":
+        if not brief.get("specific_obligation"):
+            return "HOLD: HIGH brief missing specific_obligation"
+        if not brief.get("licence_scope"):
+            return "HOLD: HIGH brief does not specify which UAE licence type is affected"
+    raw_conf = brief.get("confidence", "medium")
+    try:
+        if float(raw_conf) < 0.4:
+            return "HOLD: confidence below 0.4 — brief is too uncertain to deliver"
+    except (TypeError, ValueError):
+        pass  # string confidence values (low/medium/high) always pass the float gate
+    return "SHIP"
 
 
 def generate_weekly_brief(
@@ -120,7 +175,7 @@ def collect_approved_alerts(
         alert["_effective_send_decision"] = decision
         rows.append(alert)
     rows.sort(key=lambda item: _risk_sort(item), reverse=True)
-    return rows
+    return deduplicate_alerts(rows)
 
 
 def build_weekly_brief(
@@ -132,6 +187,46 @@ def build_weekly_brief(
     alerts: list[dict[str, Any]],
     demo_fixture: bool = False,
 ) -> dict[str, Any]:
+    # ── STEP 2 + 3: Legal scan and QA gate before rendering ──────────────
+    approved_alerts: list[dict[str, Any]] = []
+    for alert in alerts:
+        source_id = alert.get("source_id") or alert.get("alert_id") or "unknown"
+        brief_data = {
+            "executive_summary": alert.get("executive_summary") or alert.get("ai_summary") or "",
+            "business_action_required": alert.get("business_action_required") or "",
+            "specific_obligation": alert.get("specific_obligation") or "",
+            "risk_level": alert.get("risk_level") or "LOW",
+            "licence_scope": alert.get("licence_scope") or "",
+            "confidence": alert.get("confidence") or "medium",
+        }
+        legal_flags = legal_scan_brief(brief_data)
+        if legal_flags:
+            logger.warning(
+                "BRIEF_LEGAL_BLOCK source_id=%s flags=%s",
+                source_id, legal_flags,
+            )
+            continue
+        qa_result = qa_gate(brief_data)
+        if qa_result != "SHIP":
+            logger.warning(
+                "BRIEF_QA_HOLD source_id=%s reason=%s",
+                source_id, qa_result,
+            )
+            try:
+                if not demo_fixture:
+                    review_alert(
+                        alert_id=str(alert.get("alert_id") or source_id),
+                        action="manual_review",
+                        reviewer="qa_gate",
+                        note=qa_result,
+                        force=True,
+                    )
+            except Exception as exc:
+                logger.debug("qa_gate: could not route to manual review: %s", exc)
+            continue
+        approved_alerts.append(alert)
+
+    alerts = approved_alerts
     urgent = [item for item in alerts if item.get("_effective_send_decision") == DECISION_URGENT]
     weekly = [item for item in alerts if item.get("_effective_send_decision") == DECISION_WEEKLY]
     limitations = _collect_limitations(alerts)
