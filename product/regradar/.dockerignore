@@ -1,0 +1,47 @@
+# Secrets — never bake into image
+.env
+.env.*
+*.env
+secrets/
+credentials/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Dev/test artefacts
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime data — use Railway volume mount instead
+data/
+regradar.db
+*.db
+*.db-shm
+*.db-wal
+
+# Node / frontend build (served separately)
+web/node_modules/
+web/.env
+web/.env.*
+web/dist/
+
+# Local tooling
+.venv/
+venv/
+.idea/
+.vscode/
+*.DS_Store
+
+# Playwright browser cache (large; installed fresh in container)
+~/.cache/ms-playwright/
