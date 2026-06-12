@@ -1,0 +1,16 @@
+{
+  "change_status": "CHANGED",
+  "delivery_approved": false,
+  "diff_json_path": "data/source_snapshots/2026-06-11/AE/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/diff.json",
+  "human_reviewed": false,
+  "normalized_hash": "2cedc486a126302a5318a749f49e0c817eb113515aa7ddc99ac70ae1223082eb",
+  "notes": "",
+  "proof_block_path": "data/source_snapshots/2026-06-11/AE/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/proof.json",
+  "queued_at": "2026-06-11T22:29:38+00:00",
+  "reviewed_at": null,
+  "reviewer": null,
+  "run_at": "2026-06-11T22:35:57+00:00",
+  "run_id": "AE-20260611T222827Z-db5a1dea",
+  "source_id": "AE-dubai-financial-services-authority-dfsa",
+  "status": "PENDING_REVIEW"
+}

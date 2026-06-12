@@ -1,0 +1,16 @@
+{
+  "change_status": "CHANGED",
+  "delivery_approved": false,
+  "diff_json_path": "data/source_snapshots/2026-06-11/AE/AE-central-bank-of-the-uae/AE-20260611T222827Z-db5a1dea/diff.json",
+  "human_reviewed": false,
+  "normalized_hash": "966e76c0f6e5281e9c164bb7d1b0938be7a3ce059fd7d59352b4fa729537bbc4",
+  "notes": "",
+  "proof_block_path": "data/source_snapshots/2026-06-11/AE/AE-central-bank-of-the-uae/AE-20260611T222827Z-db5a1dea/proof.json",
+  "queued_at": "2026-06-11T22:28:53+00:00",
+  "reviewed_at": null,
+  "reviewer": null,
+  "run_at": "2026-06-11T22:35:57+00:00",
+  "run_id": "AE-20260611T222827Z-db5a1dea",
+  "source_id": "AE-central-bank-of-the-uae",
+  "status": "PENDING_REVIEW"
+}

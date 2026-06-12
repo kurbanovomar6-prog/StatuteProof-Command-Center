@@ -1,0 +1,16 @@
+{
+  "change_status": "CHANGED",
+  "delivery_approved": false,
+  "diff_json_path": "data/source_snapshots/2026-06-11/AE/AE-uae-financial-intelligence-unit-uaefiu/AE-20260611T222827Z-db5a1dea/diff.json",
+  "human_reviewed": false,
+  "normalized_hash": "a6c580e5c53a6ca3e4cf9454ac1515e82049f8c7ff87db27d975f8f4872779c0",
+  "notes": "",
+  "proof_block_path": "data/source_snapshots/2026-06-11/AE/AE-uae-financial-intelligence-unit-uaefiu/AE-20260611T222827Z-db5a1dea/proof.json",
+  "queued_at": "2026-06-11T22:33:03+00:00",
+  "reviewed_at": null,
+  "reviewer": null,
+  "run_at": "2026-06-11T22:35:57+00:00",
+  "run_id": "AE-20260611T222827Z-db5a1dea",
+  "source_id": "AE-uae-financial-intelligence-unit-uaefiu",
+  "status": "PENDING_REVIEW"
+}

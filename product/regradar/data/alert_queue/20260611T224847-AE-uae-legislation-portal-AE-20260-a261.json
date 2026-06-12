@@ -1,0 +1,16 @@
+{
+  "change_status": "CHANGED",
+  "delivery_approved": false,
+  "diff_json_path": "data/source_snapshots/2026-06-11/AE/AE-uae-legislation-portal/AE-20260611T224414Z-2a59324c/diff.json",
+  "human_reviewed": false,
+  "normalized_hash": "2b005e02367098464bf68ea3ae8e7b5729cabaa5efff0703ea46736fb37515b0",
+  "notes": "",
+  "proof_block_path": "data/source_snapshots/2026-06-11/AE/AE-uae-legislation-portal/AE-20260611T224414Z-2a59324c/proof.json",
+  "queued_at": "2026-06-11T22:48:47+00:00",
+  "reviewed_at": null,
+  "reviewer": null,
+  "run_at": "2026-06-11T22:52:43+00:00",
+  "run_id": "AE-20260611T224414Z-2a59324c",
+  "source_id": "AE-uae-legislation-portal",
+  "status": "PENDING_REVIEW"
+}

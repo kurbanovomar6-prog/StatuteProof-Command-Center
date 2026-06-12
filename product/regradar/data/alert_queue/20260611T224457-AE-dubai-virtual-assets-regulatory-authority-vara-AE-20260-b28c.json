@@ -1,0 +1,16 @@
+{
+  "change_status": "CHANGED",
+  "delivery_approved": false,
+  "diff_json_path": "data/source_snapshots/2026-06-11/AE/AE-dubai-virtual-assets-regulatory-authority-vara/AE-20260611T224414Z-2a59324c/diff.json",
+  "human_reviewed": false,
+  "normalized_hash": "69e27e157168cf8affc2e518d6dd6cf8aedca1b6aaac0cee5a9901d0db6e2d7f",
+  "notes": "",
+  "proof_block_path": "data/source_snapshots/2026-06-11/AE/AE-dubai-virtual-assets-regulatory-authority-vara/AE-20260611T224414Z-2a59324c/proof.json",
+  "queued_at": "2026-06-11T22:44:57+00:00",
+  "reviewed_at": null,
+  "reviewer": null,
+  "run_at": "2026-06-11T22:52:43+00:00",
+  "run_id": "AE-20260611T224414Z-2a59324c",
+  "source_id": "AE-dubai-virtual-assets-regulatory-authority-vara",
+  "status": "PENDING_REVIEW"
+}

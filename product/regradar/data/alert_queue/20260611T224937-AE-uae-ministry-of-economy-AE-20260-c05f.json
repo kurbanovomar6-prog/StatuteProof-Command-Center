@@ -1,0 +1,16 @@
+{
+  "change_status": "CHANGED",
+  "delivery_approved": false,
+  "diff_json_path": "data/source_snapshots/2026-06-11/AE/AE-uae-ministry-of-economy/AE-20260611T224414Z-2a59324c/diff.json",
+  "human_reviewed": false,
+  "normalized_hash": "d20aa13294aa54e7fe4b796d97205c70d25f1b318ce54338b4ca604656940af1",
+  "notes": "",
+  "proof_block_path": "data/source_snapshots/2026-06-11/AE/AE-uae-ministry-of-economy/AE-20260611T224414Z-2a59324c/proof.json",
+  "queued_at": "2026-06-11T22:49:37+00:00",
+  "reviewed_at": null,
+  "reviewer": null,
+  "run_at": "2026-06-11T22:52:43+00:00",
+  "run_id": "AE-20260611T224414Z-2a59324c",
+  "source_id": "AE-uae-ministry-of-economy",
+  "status": "PENDING_REVIEW"
+}
