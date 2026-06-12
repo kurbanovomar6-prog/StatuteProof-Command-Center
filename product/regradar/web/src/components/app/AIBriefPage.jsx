@@ -231,6 +231,16 @@ export default function AIBriefPage() {
             </button>
             <span className="text-xs text-slate-500">Sample brief delivery is available from Integrations. Weekly brief delivery remains a pilot roadmap item.</span>
           </div>
+
+          {/* Mandatory legal disclaimer per brief */}
+          <div className="px-5 py-3 border-t border-slate-800 bg-slate-950/40">
+            <p className="text-[10px] text-slate-600 leading-relaxed">
+              <strong className="text-slate-500">Not legal advice.</strong> StatuteProof reports are generated from monitored official-source records and are provided
+              for information and compliance review support only. They do not constitute legal advice, regulatory advice,
+              compliance certification, or a legal opinion. Users should verify official source material directly
+              and consult qualified legal or compliance professionals before making regulatory decisions.
+            </p>
+          </div>
         </div>
       </div>
     </div>

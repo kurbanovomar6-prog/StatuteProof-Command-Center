@@ -24,6 +24,7 @@ export default function AppTopbar({ page, onMenuClick, navigate, currentUser }) 
   const labels = {
     dashboard:    'Dashboard',
     sources:      'Source Map',
+    evidence:     'Evidence Records',
     alerts:       'Sample Alerts',
     briefs:       'Brief Previews',
     reports:      'Source Reports',

@@ -8,6 +8,7 @@ import AIBriefPage from './AIBriefPage'
 import ReportsPage from './ReportsPage'
 import IntegrationsPage from './IntegrationsPage'
 import SettingsPage from './SettingsPage'
+import EvidencePage from './EvidencePage'
 
 export default function AppShell({ initialPage = 'dashboard', currentUser, onSignOut }) {
   const [page, setPage]         = useState(initialPage)
@@ -22,6 +23,7 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
   const PAGE = {
     dashboard:    <DashboardHome navigate={navigate} currentUser={currentUser} />,
     sources:      <SourcesPage />,
+    evidence:     <EvidencePage />,
     alerts:       <AlertsPage />,
     briefs:       <AIBriefPage />,
     reports:      <ReportsPage />,

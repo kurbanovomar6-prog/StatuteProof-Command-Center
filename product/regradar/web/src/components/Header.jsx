@@ -4,12 +4,11 @@ import { Menu, X } from 'lucide-react'
 const navLinks = [
   { label: 'How It Works',    href: '#how-it-works' },
   { label: 'Source Coverage', href: '#coverage' },
-  { label: 'Alert Profiles',  href: '#configured-monitoring' },
   { label: 'Evidence',        href: '#trust' },
   { label: 'Pricing',         href: '#pricing' },
 ]
 
-export default function Header({ onSignIn, onCreateWorkspace }) {
+export default function Header({ onSignIn, onCreateWorkspace, onSourceReview }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -52,9 +51,15 @@ export default function Header({ onSignIn, onCreateWorkspace }) {
           </button>
           <button
             onClick={onCreateWorkspace}
+            className="text-sm font-semibold text-slate-300 border border-slate-700 hover:border-slate-500 hover:text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Register
+          </button>
+          <button
+            onClick={onSourceReview}
             className="text-sm font-bold bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] px-5 py-2 rounded-lg transition-colors"
           >
-            Create pilot workspace
+            Request Source Review
           </button>
         </div>
 
@@ -82,9 +87,15 @@ export default function Header({ onSignIn, onCreateWorkspace }) {
             </button>
             <button
               onClick={() => { setOpen(false); onCreateWorkspace?.() }}
+              className="text-sm font-semibold text-slate-300 border border-slate-700 py-2 rounded-lg text-center"
+            >
+              Register
+            </button>
+            <button
+              onClick={() => { setOpen(false); onSourceReview?.() }}
               className="text-sm font-bold bg-[#16D9F5] text-[#07111F] py-2 rounded-lg text-center"
             >
-              Create pilot workspace
+              Request Source Review
             </button>
           </div>
         </div>

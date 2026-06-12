@@ -21,6 +21,7 @@ import LoginPage from './components/auth/LoginPage'
 import RegisterPage from './components/auth/RegisterPage'
 import OnboardingPage from './components/app/OnboardingPage'
 import AppShell from './components/app/AppShell'
+import SourceReadinessReviewPage from './components/SourceReadinessReviewPage'
 
 const SAMPLE_RECORD = {
   _label: 'SAMPLE / FAKE',
@@ -196,16 +197,23 @@ export default function App() {
     )
   }
 
+  if (view === 'source-readiness-review') {
+    return (
+      <SourceReadinessReviewPage onBack={() => setView('landing')} />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#07111F] text-slate-200">
       <Header
         onSignIn={() => setView('login')}
         onCreateWorkspace={() => setView('register')}
+        onSourceReview={() => setView('source-readiness-review')}
       />
       <main>
         <Hero
-          onCreateWorkspace={() => setView('register')}
-          onSignIn={() => setView('login')}
+          onCreateWorkspace={() => setView('source-readiness-review')}
+          onSignIn={() => setView('register')}
         />
         <Problem />
         <WithoutWith />
@@ -216,15 +224,43 @@ export default function App() {
         <ConfiguredMonitoring />
         <TrustLayer />
         {/* Evidence Demo Section — SAMPLE / FAKE */}
-        <section className="py-16 px-4 bg-slate-50">
+        <section className="py-16 px-4 bg-[#07111F]" id="evidence">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10">
-              <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">SAMPLE / FAKE — demonstration only</p>
-              <h2 className="text-2xl font-bold text-slate-900 mb-3">Evidence-backed monitoring</h2>
-              <p className="text-slate-600 max-w-xl mx-auto text-sm">
+              <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 bg-amber-400/10 border border-amber-400/20 inline-block px-3 py-1 rounded-full">SAMPLE / FAKE — demonstration only</p>
+              <h2 className="text-2xl font-bold text-white mt-4 mb-3">Evidence-backed monitoring</h2>
+              <p className="text-slate-400 max-w-xl mx-auto text-sm">
                 Detected changes are cryptographically hashed, timestamped, and stored for human review.
                 Not legal advice. For monitoring information only.
               </p>
+            </div>
+            {/* Spec sample evidence alert card */}
+            <div className="max-w-xl mx-auto mb-8">
+              <div className="bg-[#0D1B2E] border border-slate-700 rounded-xl p-5 text-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded">SAMPLE — NOT REAL REGULATORY DATA</span>
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded-full">CHANGED</span>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-0.5">Source</p>
+                  <p className="text-sm font-semibold text-white">VARA Regulatory Framework</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div><p className="text-slate-500 mb-0.5">Regulator</p><p className="text-slate-200">VARA</p></div>
+                  <div><p className="text-slate-500 mb-0.5">Detected</p><p className="text-slate-200">2026-06-10 09:14:22 UTC [SAMPLE]</p></div>
+                  <div><p className="text-slate-500 mb-0.5">Risk</p><p className="text-red-400 font-bold">HIGH</p></div>
+                  <div><p className="text-slate-500 mb-0.5">Affected</p><p className="text-slate-200">VASP / MLRO / Compliance teams</p></div>
+                  <div className="col-span-2"><p className="text-slate-500 mb-0.5">Official URL</p><a href="https://www.vara.ae/en/regulatory-framework/" target="_blank" rel="noopener noreferrer" className="text-[#16D9F5] hover:underline break-all">https://www.vara.ae/en/regulatory-framework/</a></div>
+                  <div><p className="text-slate-500 mb-0.5">Old hash</p><p className="text-slate-400 font-mono">a3f8d9c2...</p></div>
+                  <div><p className="text-slate-500 mb-0.5">New hash</p><p className="text-slate-400 font-mono">7b1e4a8f...</p></div>
+                  <div><p className="text-slate-500 mb-0.5">Diff</p><p className="text-emerald-400">Available</p></div>
+                  <div><p className="text-slate-500 mb-0.5">Snapshot</p><p className="text-slate-300">Saved</p></div>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-slate-800">
+                  <span className="text-amber-400 text-xs font-semibold">Human review: Required</span>
+                  <span className="text-xs text-slate-600">Not legal advice</span>
+                </div>
+              </div>
             </div>
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               <EvidenceCard record={SAMPLE_RECORD} />

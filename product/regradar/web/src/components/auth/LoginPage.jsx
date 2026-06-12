@@ -53,10 +53,10 @@ export default function LoginPage({ onLogin, onRegister }) {
   }
 
   return (
-    <AuthLayout quote="Track UAE source readiness with clear validation status, limitation notes, and human-reviewed brief previews.">
-      <h1 className="text-2xl font-bold text-white mb-2">Sign in to your StatuteProof pilot workspace</h1>
+    <AuthLayout quote="Official-source monitoring with evidence-backed compliance briefs for MLROs and compliance teams.">
+      <h1 className="text-2xl font-bold text-white mb-2">Sign in to your StatuteProof workspace</h1>
       <p className="text-slate-400 text-sm mb-8">
-        Access your saved source profile, Telegram pairing, sample brief delivery, and reviewed alert previews.
+        Review monitored sources, evidence records, alerts, and weekly briefs.
       </p>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
@@ -122,7 +122,7 @@ export default function LoginPage({ onLogin, onRegister }) {
       </div>
 
       <p className="mt-5 text-center text-xs text-slate-600 leading-relaxed">
-        Founding pilot workspace. Your profile, source readiness status and Telegram connection are saved to your account.
+        StatuteProof supports compliance review and does not provide legal advice.
       </p>
 
       <div className="mt-5 text-center text-sm text-slate-400">

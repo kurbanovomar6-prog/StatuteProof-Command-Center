@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Bell, CheckCircle, Clock, FileText, Globe, Link2, ShieldCheck } from 'lucide-react'
+import { Bell, CheckCircle, Clock, FileText, Globe, Link2, ShieldCheck, AlertTriangle } from 'lucide-react'
 
-import { telegramPair } from '../../api'
+import { telegramPair, sources as sourcesApi } from '../../api'
 import { MOCK_ALERTS, COVERAGE_MARKETS } from '../../data/appMockData'
 import { getWorkspaceProfile, profileLabel, filterAlerts, filterCoverage } from '../../data/workspaceProfile'
 
@@ -195,15 +195,65 @@ function SourceReadinessCard({ navigate }) {
   )
 }
 
+// Derive summary widgets from real sources/status API response
+function buildWidgets(sourcesData) {
+  if (!sourcesData) return null
+  const { sources = [], summary = {}, last_run_at, total_sources } = sourcesData
+  const changed   = summary.CHANGED     || 0
+  const failed    = summary.FAILED      || 0
+  const firstSeen = summary.FIRST_SEEN  || 0
+  const highRiskPending = sources.filter(s => s.change_status === 'CHANGED' || s.change_status === 'FIRST_SEEN').length
+  const lastCheck = last_run_at
+    ? new Date(last_run_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }) + ' UTC'
+    : 'No runs yet'
+  return {
+    totalSources: total_sources || 0,
+    lastCheck,
+    changedThisWeek: changed + firstSeen,
+    highRiskPending,
+    failedSources: failed,
+    evidenceRecords: sources.filter(s => s.change_status !== 'NOT_RUN').length,
+    briefStatus: 'Sample available',
+    reviewRequired: highRiskPending,
+  }
+}
+
+const STATUS_BADGE_CLS = {
+  CHANGED:      'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+  UNCHANGED:    'text-slate-400 bg-slate-700/30 border-slate-600/30',
+  FIRST_SEEN:   'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  FAILED:       'text-red-400 bg-red-500/10 border-red-500/30',
+  QUALITY_DROP: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+  NOT_RUN:      'text-slate-500 bg-slate-800/50 border-slate-700/30',
+  UNKNOWN:      'text-slate-500 bg-slate-800/50 border-slate-700/30',
+}
+const EXTRACTION_CLS = {
+  GOOD:    'text-emerald-400',
+  OK:      'text-amber-400',
+  POOR:    'text-red-400',
+  UNKNOWN: 'text-slate-500',
+}
+
+function SourceStatusBadge({ status }) {
+  const cls = STATUS_BADGE_CLS[status] || STATUS_BADGE_CLS.UNKNOWN
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${cls}`}>
+      {status || 'UNKNOWN'}
+    </span>
+  )
+}
+
 export default function DashboardHome({ navigate, currentUser }) {
   const profile = getWorkspaceProfile()
-  const hasProfile = profile.markets.length > 0
   const alerts = filterAlerts(MOCK_ALERTS, profile)
   const coverage = filterCoverage(COVERAGE_MARKETS, profile)
   const selectedBrief = alerts[0] || null
 
-  const [telegramStatus, setTelegramStatus] = useState(null)
+  const [telegramStatus, setTelegramStatus]   = useState(null)
   const [telegramLoading, setTelegramLoading] = useState(true)
+  const [sourcesData, setSourcesData]         = useState(null)
+  const [sourcesLoading, setSourcesLoading]   = useState(true)
+  const [sourcesError, setSourcesError]       = useState('')
 
   useEffect(() => {
     let active = true
@@ -214,16 +264,104 @@ export default function DashboardHome({ navigate, currentUser }) {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    let active = true
+    sourcesApi.status('AE')
+      .then(data => { if (active) setSourcesData(data) })
+      .catch(err => { if (active) setSourcesError(err.message || 'Could not load source status.') })
+      .finally(() => { if (active) setSourcesLoading(false) })
+    return () => { active = false }
+  }, [])
+
+  const widgets = buildWidgets(sourcesData)
+
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5">
       <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <InfoCard icon={Globe} tone="cyan" label="Markets in profile" value={hasProfile ? profile.markets.length : '—'} sub={hasProfile ? 'selected by workspace' : 'setup pending'} />
-        <InfoCard icon={ShieldCheck} tone="emerald" label="Source activation" value="Gated" sub="validation required before monitoring" />
-        <InfoCard icon={Link2} tone={telegramStatus?.connected ? 'emerald' : 'amber'} label="Telegram" value={telegramStatus?.connected ? 'Connected' : 'Not connected'} sub={telegramStatus?.connected ? 'test delivery available' : 'connect in Integrations'} />
-        <InfoCard icon={FileText} tone="cyan" label="Brief delivery" value="Manual" sub="sample and reviewed-alert previews available" />
-      </div>
+      {/* 8-widget row — real data from /api/sources/status */}
+      {sourcesLoading ? (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4 animate-pulse">
+              <div className="h-3 bg-slate-700 rounded w-2/3 mb-4" />
+              <div className="h-7 bg-slate-700 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : sourcesError ? (
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 px-5 py-4 flex items-center gap-3">
+          <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+          <p className="text-sm text-rose-300">Could not load source status. Start the API server and refresh.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <InfoCard icon={Globe}     tone="cyan"    label="Sources monitored"    value={widgets?.totalSources ?? '—'}  sub="enabled AE sources" />
+          <InfoCard icon={Clock}     tone="slate"   label="Last check"           value={widgets?.lastCheck ?? '—'}     sub="most recent run (UTC)" />
+          <InfoCard icon={Bell}      tone="emerald" label="Changes this week"    value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
+          <InfoCard icon={AlertTriangle} tone="amber" label="High-risk pending"  value={widgets?.highRiskPending ?? 0} sub="changes needing review" />
+          <InfoCard icon={ShieldCheck} tone={widgets?.failedSources > 0 ? 'amber' : 'emerald'} label="Failed sources" value={widgets?.failedSources ?? 0} sub="extraction failures" />
+          <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with data" />
+          <InfoCard icon={Link2}     tone={telegramStatus?.connected ? 'emerald' : 'amber'} label="Telegram" value={telegramStatus?.connected ? 'Connected' : 'Not connected'} sub={telegramStatus?.connected ? 'test delivery available' : 'connect in Integrations'} />
+          <InfoCard icon={CheckCircle} tone="slate" label="Review required"      value={widgets?.reviewRequired ?? 0}  sub="changed sources" />
+        </div>
+      )}
+
+      {/* Real source table — from /api/sources/status */}
+      {!sourcesLoading && !sourcesError && sourcesData?.sources?.length > 0 && (
+        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-white">Source status</h2>
+              <p className="mt-1 text-xs text-slate-500">Live data from /api/sources/status — {sourcesData.total_sources} enabled UAE sources.</p>
+            </div>
+            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2.5 py-1 rounded-full">LIVE</span>
+          </div>
+          <div className="overflow-x-auto rounded-lg border border-slate-800">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-slate-800/60">
+                  {['Source', 'Regulator', 'Last checked', 'Status', 'Extraction', 'Actions'].map(h => (
+                    <th key={h} className="px-4 py-2.5 text-left font-medium text-slate-400 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {sourcesData.sources.slice(0, 12).map(s => (
+                  <tr key={s.source_id} className="transition-colors hover:bg-slate-800/40">
+                    <td className="px-4 py-3 font-medium text-white max-w-[200px] truncate">{s.name}</td>
+                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.category?.replace(/_/g, ' ') || '—'}</td>
+                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                      {s.last_run_at
+                        ? new Date(s.last_run_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                        : 'Not run'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <SourceStatusBadge status={s.change_status} />
+                    </td>
+                    <td className={`px-4 py-3 whitespace-nowrap font-medium ${EXTRACTION_CLS[s.extraction_quality] || EXTRACTION_CLS.UNKNOWN}`}>
+                      {s.extraction_quality || 'UNKNOWN'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <a
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#16D9F5] hover:underline text-[10px] font-medium"
+                      >
+                        View source
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-xs text-slate-600">
+            {sourcesData.disclaimer || 'Not legal advice. For monitoring information only.'}
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div className="space-y-5">

@@ -182,21 +182,21 @@ export default function Hero({ onCreateWorkspace, onSignIn }) {
 
         {/* Headline */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-[1.15] mb-6 tracking-tight max-w-4xl mx-auto">
-          Regulatory changes, reviewed before<br />
-          <span className="text-[#16D9F5] relative inline-block">your team sees them.
+          UAE regulatory updates, captured with evidence<br />
+          <span className="text-[#16D9F5] relative inline-block">before they become compliance surprises.
             <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#16D9F5] rounded-full" />
           </span>
         </h1>
 
         {/* Description */}
         <p className="text-lg md:text-xl text-slate-400 mb-3 leading-relaxed max-w-2xl mx-auto">
-          StatuteProof monitors official UAE regulatory sources and delivers source-backed compliance briefs —
-          with human review, relevance filtering, and limitations disclosed before delivery.
+          StatuteProof monitors official UAE regulatory sources, detects text changes, preserves timestamped evidence records,
+          and prepares human-reviewed compliance briefs for MLROs and compliance teams.
         </p>
         <p className="text-sm text-slate-500 mb-8 max-w-4xl mx-auto leading-relaxed">
-          9 validated UAE financial sources. Extraction quality documented per source. Honest about what cannot be monitored.
+          12 validated UAE official sources. Extraction quality documented per source. Honest about what cannot be monitored.
           <br />
-          CBUAE · VARA · DFSA · ADGM/FSRA · UAE FIU and more — source transparency report included before every pilot.
+          CBUAE · VARA · DFSA · ADGM/FSRA · UAE FIU · DIFC and more — source transparency report included before every pilot.
         </p>
 
         {/* CTAs */}
@@ -205,18 +205,18 @@ export default function Hero({ onCreateWorkspace, onSignIn }) {
             onClick={onCreateWorkspace}
             className="inline-flex items-center justify-center gap-2 bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] font-bold px-8 py-3 rounded-lg transition-colors shadow-[0_0_20px_rgba(22,217,245,0.25)] hover:shadow-[0_0_30px_rgba(22,217,245,0.5)]"
           >
-            Create pilot workspace <ArrowRight className="w-4 h-4" />
+            Request a free source readiness review <ArrowRight className="w-4 h-4" />
           </button>
           <button
             type="button"
             onClick={onSignIn}
             className="inline-flex items-center justify-center gap-2 text-white border border-slate-700 hover:bg-slate-800 hover:border-[#16D9F5]/40 px-8 py-3 rounded-lg transition-colors"
           >
-            Sign in
+            View sample evidence brief
           </button>
         </div>
         <p className="text-xs text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
-          Monitoring information only. Not legal advice and not a guarantee of compliance.
+          Monitoring intelligence only — not legal advice.
         </p>
         <p className="text-xs text-slate-700 mt-2 max-w-3xl mx-auto leading-relaxed">
           FTA, e-Laws, Official Gazette, and Capital Market Authority / former SCA have documented

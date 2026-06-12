@@ -300,18 +300,29 @@ export default function SettingsPage({ onResetWorkspace }) {
         </div>
       </Section>
 
-      {/* Legal */}
-      <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5">
+      {/* Legal Acknowledgement */}
+      <div className="bg-[#0D1B2E] border border-cyan-400/20 rounded-xl p-5">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+          <ShieldCheck className="w-4 h-4 text-[#16D9F5] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-medium text-slate-400 mb-1">Compliance note</p>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              StatuteProof reviewed brief previews are generated for informational purposes only.
-              They do not replace qualified counsel and should not be relied upon as such.
-              Always verify regulatory changes with official sources and consult qualified
-              legal counsel before taking any compliance action.
+            <p className="text-xs font-semibold text-white mb-2">Legal Acknowledgement</p>
+            <p className="text-xs text-slate-400 leading-relaxed mb-3">
+              StatuteProof provides monitoring intelligence only and does not provide legal advice.
+              Reports are generated from monitored official-source records and are provided for information
+              and compliance review support only. They do not constitute legal advice, regulatory advice,
+              compliance certification, or a legal opinion.
             </p>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              StatuteProof does not replace qualified legal counsel, compliance professionals, MLROs, or
+              other professional advisers. Users should verify official source material directly and consult
+              qualified professionals before making regulatory, filing, operational, or customer decisions.
+            </p>
+            <div className="mt-3 pt-3 border-t border-slate-800">
+              <p className="text-[10px] text-slate-600 leading-relaxed">
+                Billing: Founding pilot terms. Advance notice will be given of any pricing changes.
+                Contact the StatuteProof team to review your subscription or access level.
+              </p>
+            </div>
           </div>
         </div>
       </div>
