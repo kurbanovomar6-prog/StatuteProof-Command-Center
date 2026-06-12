@@ -107,3 +107,16 @@ export const delivery = {
     })
   },
 }
+
+export const plan = {
+  get() {
+    return authRequest('/api/plan')
+  },
+
+  set(planName) {
+    return authRequest('/api/plan', {
+      method: 'POST',
+      body: JSON.stringify({ plan_name: planName }),
+    })
+  },
+}

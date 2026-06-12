@@ -232,6 +232,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_evidence_list()
         elif path == "/api/briefs":
             self._handle_briefs_list()
+        elif path == "/api/plan":
+            self._handle_plan_get()
         elif path == "/api/settings/telegram":
             self._disabled_endpoint()
         elif path in ("/api/health", "/api/"):
@@ -255,6 +257,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_auth_login()
         elif self.path == "/api/auth/logout":
             self._handle_auth_logout()
+        elif self.path == "/api/plan":
+            self._handle_plan_set()
         elif self.path == "/api/telegram/pair/generate":
             self._handle_telegram_pair_generate()
         elif self.path == "/api/telegram/pair/unlink":
@@ -828,6 +832,49 @@ class _Handler(BaseHTTPRequestHandler):
             })
         except Exception as exc:
             logger.error("briefs list failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_plan_get(self) -> None:
+        """GET /api/plan — returns current plan + trial state for the logged-in user."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            from app.plan import get_plan_state
+            state = get_plan_state(int(user["id"]))
+            self._send_json({"ok": True, "plan": state})
+        except Exception as exc:
+            logger.error("plan_get failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_plan_set(self) -> None:
+        """POST /api/plan — record plan intent (no payment processed)."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        plan_name = str(body.get("plan_name", "")).strip()
+        try:
+            from app.plan import set_plan_intent, PLAN_NAMES
+            if plan_name not in PLAN_NAMES:
+                self._send_json({"ok": False, "message": f"Unknown plan: {plan_name}"}, 400)
+                return
+            state = set_plan_intent(int(user["id"]), plan_name)
+            self._send_json({
+                "ok": True,
+                "plan": state,
+                "message": "Plan intent recorded. Our team will contact you to activate your pilot.",
+                "disclaimer": "No payment has been processed. Billing is manually activated for founding pilots.",
+            })
+        except ValueError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+        except Exception as exc:
+            logger.error("plan_set failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_save(self) -> None:

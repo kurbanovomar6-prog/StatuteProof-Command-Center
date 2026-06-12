@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
-import { auth, profile } from './api'
+import { auth, profile, plan as planApi } from './api'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
@@ -21,8 +21,10 @@ const DiffViewer            = lazy(() => import('./components/DiffViewer'))
 const LoginPage             = lazy(() => import('./components/auth/LoginPage'))
 const RegisterPage          = lazy(() => import('./components/auth/RegisterPage'))
 const OnboardingPage        = lazy(() => import('./components/app/OnboardingPage'))
+const ChoosePlanPage        = lazy(() => import('./components/app/ChoosePlanPage'))
 const AppShell              = lazy(() => import('./components/app/AppShell'))
 const SourceReadinessReviewPage = lazy(() => import('./components/SourceReadinessReviewPage'))
+const PricingPage           = lazy(() => import('./components/PricingPage'))
 
 function GlobalLoader() {
   return (
@@ -81,6 +83,7 @@ export default function App() {
   const [view, setView] = useState('landing')
   const [currentUser, setCurrentUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [planState, setPlanState] = useState(null)
 
   useEffect(() => {
     function handleExpired() {
@@ -147,11 +150,21 @@ export default function App() {
     }
   }
 
+  async function loadPlan() {
+    try {
+      const data = await planApi.get()
+      if (data.ok && data.plan) setPlanState(data.plan)
+    } catch {
+      // Silent fallback
+    }
+  }
+
   async function handleAuthenticated(user) {
     setCurrentUser(user)
     try {
       const data = await profile.get()
       syncProfileToLocalStorage(data.profile)
+      loadPlan()
       setView(dashboardViewForProfile(data.profile))
     } catch {
       setView('onboarding')
@@ -200,7 +213,26 @@ export default function App() {
   if (view === 'onboarding') {
     return (
       <Suspense fallback={<GlobalLoader />}>
-        <OnboardingPage navigate={() => setView('app')} currentUser={currentUser} />
+        <OnboardingPage navigate={() => setView('choose-plan')} currentUser={currentUser} />
+      </Suspense>
+    )
+  }
+
+  if (view === 'choose-plan') {
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <ChoosePlanPage
+          onContinue={() => setView('app')}
+          selectPlan={async (planName) => {
+            try {
+              const data = await planApi.set(planName)
+              if (data.ok && data.plan) setPlanState(data.plan)
+              return data
+            } catch (err) {
+              throw err
+            }
+          }}
+        />
       </Suspense>
     )
   }
@@ -211,7 +243,17 @@ export default function App() {
         <AppShell
           currentUser={currentUser}
           onSignOut={handleSignOut}
+          planState={planState}
+          onChoosePlan={() => setView('choose-plan')}
         />
+      </Suspense>
+    )
+  }
+
+  if (view === 'pricing') {
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <PricingPage onBack={() => setView('landing')} onCreateWorkspace={() => setView('register')} />
       </Suspense>
     )
   }
@@ -230,6 +272,7 @@ export default function App() {
         onSignIn={() => setView('login')}
         onCreateWorkspace={() => setView('register')}
         onSourceReview={() => setView('source-readiness-review')}
+        onPricing={() => setView('pricing')}
       />
       <main>
         <Hero

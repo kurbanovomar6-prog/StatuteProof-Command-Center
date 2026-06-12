@@ -1,4 +1,4 @@
-import { LayoutDashboard, Globe, Bell, FileText, BarChart3, Plug, Settings, ChevronLeft, ChevronRight, LogOut, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Globe, Bell, FileText, BarChart3, Plug, Settings, ChevronLeft, ChevronRight, LogOut, ShieldCheck, CreditCard } from 'lucide-react'
 
 const NAV = [
   { id: 'dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
@@ -8,6 +8,7 @@ const NAV = [
   { id: 'briefs',       label: 'Brief Previews',  icon: FileText },
   { id: 'reports',      label: 'Source Reports',  icon: BarChart3 },
   { id: 'integrations', label: 'Integrations',    icon: Plug },
+  { id: 'billing',      label: 'Billing',         icon: CreditCard },
   { id: 'settings',     label: 'Settings',        icon: Settings },
 ]
 

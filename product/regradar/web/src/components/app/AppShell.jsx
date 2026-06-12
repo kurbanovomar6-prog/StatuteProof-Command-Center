@@ -10,6 +10,7 @@ const ReportsPage     = lazy(() => import('./ReportsPage'))
 const IntegrationsPage = lazy(() => import('./IntegrationsPage'))
 const SettingsPage    = lazy(() => import('./SettingsPage'))
 const EvidencePage    = lazy(() => import('./EvidencePage'))
+const BillingPage     = lazy(() => import('./BillingPage'))
 
 function PageLoader() {
   return (
@@ -19,7 +20,7 @@ function PageLoader() {
   )
 }
 
-export default function AppShell({ initialPage = 'dashboard', currentUser, onSignOut }) {
+export default function AppShell({ initialPage = 'dashboard', currentUser, onSignOut, planState, onChoosePlan }) {
   const [page, setPage]           = useState(initialPage)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -31,15 +32,16 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
 
   function renderPage() {
     switch (page) {
-      case 'dashboard':    return <DashboardHome navigate={navigate} currentUser={currentUser} />
+      case 'dashboard':    return <DashboardHome navigate={navigate} currentUser={currentUser} planState={planState} onChoosePlan={onChoosePlan} />
       case 'sources':      return <SourcesPage />
       case 'evidence':     return <EvidencePage />
       case 'alerts':       return <AlertsPage />
       case 'briefs':       return <AIBriefPage />
       case 'reports':      return <ReportsPage />
       case 'integrations': return <IntegrationsPage />
+      case 'billing':      return <BillingPage planState={planState} />
       case 'settings':     return <SettingsPage onResetWorkspace={onSignOut} />
-      default:             return <DashboardHome navigate={navigate} currentUser={currentUser} />
+      default:             return <DashboardHome navigate={navigate} currentUser={currentUser} planState={planState} onChoosePlan={onChoosePlan} />
     }
   }
 

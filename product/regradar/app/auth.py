@@ -136,8 +136,9 @@ def create_user(
             """
             INSERT INTO users
                 (email, password_hash, full_name, company_name, industry,
-                 job_title, company_type, jurisdiction, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 job_title, company_type, jurisdiction, plan_name, trial_started_at,
+                 created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 normalized,
@@ -148,6 +149,8 @@ def create_user(
                 _sanitize_optional_text(job_title, 120),
                 _sanitize_optional_text(company_type, 120),
                 _sanitize_optional_text(jurisdiction, 120),
+                "evidence_preview",
+                now,
                 now,
                 now,
             ),
@@ -170,7 +173,8 @@ def get_user_by_email(email) -> dict | None:
         row = conn.execute(
             """
             SELECT id, email, password_hash, full_name, company_name, industry,
-                   created_at, updated_at, is_active
+                   created_at, updated_at, is_active,
+                   plan_name, trial_started_at, plan_intent_at
             FROM users
             WHERE email = ?
             LIMIT 1
@@ -189,7 +193,8 @@ def get_user_by_id(user_id) -> dict | None:
         row = conn.execute(
             """
             SELECT id, email, password_hash, full_name, company_name, industry,
-                   created_at, updated_at, is_active
+                   created_at, updated_at, is_active,
+                   plan_name, trial_started_at, plan_intent_at
             FROM users
             WHERE id = ?
             LIMIT 1

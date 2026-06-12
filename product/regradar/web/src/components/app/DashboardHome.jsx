@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Bell, CheckCircle, Clock, FileText, Globe, Link2, ShieldCheck, AlertTriangle } from 'lucide-react'
 
 import { telegramPair, sources as sourcesApi } from '../../api'
+import PlanBanner from './PlanBanner'
 import { MOCK_ALERTS, COVERAGE_MARKETS } from '../../data/appMockData'
 import { getWorkspaceProfile, profileLabel, filterAlerts, filterCoverage } from '../../data/workspaceProfile'
 
@@ -63,7 +64,7 @@ function RiskBadge({ risk }) {
   )
 }
 
-function ProfileSummaryCard({ profile, currentUser, navigate }) {
+function ProfileSummaryCard({ profile, currentUser, navigate, planState }) {
   const hasProfile = profile.markets.length > 0 || profile.industries.length > 0 || profile.topics.length > 0
   const company = profile.company || currentUser?.company_name || 'Profile workspace'
 
@@ -72,7 +73,7 @@ function ProfileSummaryCard({ profile, currentUser, navigate }) {
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="mb-2 flex flex-wrap gap-2">
-            <StatusPill tone="cyan">Founding pilot</StatusPill>
+            <StatusPill tone="cyan">{planState?.plan_display || 'Evidence Preview'}</StatusPill>
             <StatusPill tone={hasProfile ? 'emerald' : 'amber'}>
               {hasProfile ? 'Profile saved' : 'Profile setup'}
             </StatusPill>
@@ -243,7 +244,7 @@ function SourceStatusBadge({ status }) {
   )
 }
 
-export default function DashboardHome({ navigate, currentUser }) {
+export default function DashboardHome({ navigate, currentUser, planState, onChoosePlan }) {
   const profile = getWorkspaceProfile()
   const alerts = filterAlerts(MOCK_ALERTS, profile)
   const coverage = filterCoverage(COVERAGE_MARKETS, profile)
@@ -277,7 +278,8 @@ export default function DashboardHome({ navigate, currentUser }) {
 
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
-      <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} />
+      <PlanBanner planState={planState} onChoosePlan={onChoosePlan} />
+      <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} planState={planState} />
 
       {/* 8-widget row — real data from /api/sources/status */}
       {sourcesLoading ? (

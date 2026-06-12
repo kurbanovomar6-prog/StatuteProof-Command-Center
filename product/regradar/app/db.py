@@ -147,6 +147,15 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
         if "jurisdiction" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN jurisdiction TEXT")
             logger.info("DB: added users.jurisdiction column")
+        if "plan_name" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN plan_name TEXT NOT NULL DEFAULT 'evidence_preview'")
+            logger.info("DB: added users.plan_name column")
+        if "trial_started_at" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN trial_started_at TIMESTAMP")
+            logger.info("DB: added users.trial_started_at column")
+        if "plan_intent_at" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN plan_intent_at TIMESTAMP")
+            logger.info("DB: added users.plan_intent_at column")
         conn.commit()
     finally:
         if owned_conn:
