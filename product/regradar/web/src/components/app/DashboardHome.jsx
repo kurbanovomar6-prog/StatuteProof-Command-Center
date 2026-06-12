@@ -219,9 +219,9 @@ function buildWidgets(sourcesData) {
 }
 
 const STATUS_BADGE_CLS = {
-  CHANGED:      'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+  CHANGED:      'text-blue-400 bg-blue-500/10 border-blue-500/30',
   UNCHANGED:    'text-slate-400 bg-slate-700/30 border-slate-600/30',
-  FIRST_SEEN:   'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  FIRST_SEEN:   'text-violet-400 bg-violet-500/10 border-violet-500/30',
   FAILED:       'text-red-400 bg-red-500/10 border-red-500/30',
   QUALITY_DROP: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
   NOT_RUN:      'text-slate-500 bg-slate-800/50 border-slate-700/30',
@@ -276,7 +276,7 @@ export default function DashboardHome({ navigate, currentUser }) {
   const widgets = buildWidgets(sourcesData)
 
   return (
-    <div className="min-h-full space-y-5 bg-[#07111F] p-5">
+    <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
       <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} />
 
       {/* 8-widget row — real data from /api/sources/status */}

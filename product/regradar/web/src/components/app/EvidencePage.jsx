@@ -5,6 +5,7 @@
  * All records shown here are sample data for interface demonstration.
  * Evidence records support compliance review and do not determine legal obligations.
  */
+import { useEffect, useState } from 'react'
 import { Shield, Clock, Hash, FileText, AlertTriangle } from 'lucide-react'
 
 const SAMPLE_EVIDENCE_RECORDS = [
@@ -62,9 +63,9 @@ const SAMPLE_EVIDENCE_RECORDS = [
 ]
 
 const STATUS_STYLES = {
-  CHANGED:     { bg: 'bg-emerald-500/10 border-emerald-500/30', text: 'text-emerald-400', label: 'CHANGED' },
+  CHANGED:     { bg: 'bg-blue-500/10 border-blue-500/30',       text: 'text-blue-400',    label: 'CHANGED' },
   UNCHANGED:   { bg: 'bg-slate-700/30 border-slate-600/30',     text: 'text-slate-400',   label: 'UNCHANGED' },
-  FIRST_SEEN:  { bg: 'bg-blue-500/10 border-blue-500/30',       text: 'text-blue-400',    label: 'FIRST SEEN' },
+  FIRST_SEEN:  { bg: 'bg-violet-500/10 border-violet-500/30',   text: 'text-violet-400',  label: 'FIRST SEEN' },
   FAILED:      { bg: 'bg-red-500/10 border-red-500/30',         text: 'text-red-400',     label: 'FAILED' },
   QUALITY_DROP:{ bg: 'bg-amber-500/10 border-amber-500/30',     text: 'text-amber-400',   label: 'QUALITY DROP' },
 }
@@ -139,7 +140,9 @@ function EvidenceCard({ record }) {
           <p className="text-slate-500 mb-0.5 flex items-center gap-1">
             <Hash className="w-3 h-3" /> New hash
           </p>
-          <p className="text-slate-400 font-mono truncate">{record.new_hash || '—'}</p>
+          <p className={`font-mono truncate ${record.status === 'CHANGED' ? 'text-blue-400' : 'text-slate-400'}`}>
+            {record.new_hash || '—'}
+          </p>
         </div>
       </div>
 
@@ -179,6 +182,17 @@ function EvidenceCard({ record }) {
 }
 
 export default function EvidencePage() {
+  const [records, setRecords] = useState(SAMPLE_EVIDENCE_RECORDS)
+
+  useEffect(() => {
+    fetch('/api/evidence?market=AE', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.records?.length) setRecords(data.records)
+      })
+      .catch(() => {}) // silent fallback to SAMPLE data
+  }, [])
+
   return (
     <div className="p-5 space-y-5">
       {/* Page header */}
@@ -235,7 +249,7 @@ export default function EvidencePage() {
 
       {/* Evidence cards */}
       <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-        {SAMPLE_EVIDENCE_RECORDS.map(record => (
+        {records.map(record => (
           <EvidenceCard key={record.evidence_record_id} record={record} />
         ))}
       </div>

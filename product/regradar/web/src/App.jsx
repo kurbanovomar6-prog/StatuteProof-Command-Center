@@ -1,27 +1,36 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { auth, profile } from './api'
 import Header from './components/Header'
 import Hero from './components/Hero'
-import Problem from './components/Problem'
-import WithoutWith from './components/WithoutWith'
-import DashboardPreview from './components/DashboardPreview'
-import Coverage from './components/Coverage'
-import SourceTransparencyMatrix from './components/SourceTransparencyMatrix'
-import BuyerSourcePacks from './components/BuyerSourcePacks'
-import ConfiguredMonitoring from './components/ConfiguredMonitoring'
-import SampleBrief from './components/SampleBrief'
-import TrustLayer from './components/TrustLayer'
-import Pricing from './components/Pricing'
-import Contact from './components/Contact'
 import Footer from './components/Footer'
-import EvidenceCard from './components/EvidenceCard'
-import SourceCoverageTable from './components/SourceCoverageTable'
-import DiffViewer from './components/DiffViewer'
-import LoginPage from './components/auth/LoginPage'
-import RegisterPage from './components/auth/RegisterPage'
-import OnboardingPage from './components/app/OnboardingPage'
-import AppShell from './components/app/AppShell'
-import SourceReadinessReviewPage from './components/SourceReadinessReviewPage'
+
+const Problem               = lazy(() => import('./components/Problem'))
+const WithoutWith           = lazy(() => import('./components/WithoutWith'))
+const DashboardPreview      = lazy(() => import('./components/DashboardPreview'))
+const Coverage              = lazy(() => import('./components/Coverage'))
+const SourceTransparencyMatrix = lazy(() => import('./components/SourceTransparencyMatrix'))
+const BuyerSourcePacks      = lazy(() => import('./components/BuyerSourcePacks'))
+const ConfiguredMonitoring  = lazy(() => import('./components/ConfiguredMonitoring'))
+const SampleBrief           = lazy(() => import('./components/SampleBrief'))
+const TrustLayer            = lazy(() => import('./components/TrustLayer'))
+const Pricing               = lazy(() => import('./components/Pricing'))
+const Contact               = lazy(() => import('./components/Contact'))
+const EvidenceCard          = lazy(() => import('./components/EvidenceCard'))
+const SourceCoverageTable   = lazy(() => import('./components/SourceCoverageTable'))
+const DiffViewer            = lazy(() => import('./components/DiffViewer'))
+const LoginPage             = lazy(() => import('./components/auth/LoginPage'))
+const RegisterPage          = lazy(() => import('./components/auth/RegisterPage'))
+const OnboardingPage        = lazy(() => import('./components/app/OnboardingPage'))
+const AppShell              = lazy(() => import('./components/app/AppShell'))
+const SourceReadinessReviewPage = lazy(() => import('./components/SourceReadinessReviewPage'))
+
+function GlobalLoader() {
+  return (
+    <div className="flex items-center justify-center h-screen bg-[#07111F]">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#16D9F5]" />
+    </div>
+  )
+}
 
 const SAMPLE_RECORD = {
   _label: 'SAMPLE / FAKE',
@@ -168,38 +177,50 @@ export default function App() {
 
   if (view === 'login') {
     return (
-      <LoginPage
-        onLogin={handleAuthenticated}
-        onRegister={() => setView('register')}
-      />
+      <Suspense fallback={<GlobalLoader />}>
+        <LoginPage
+          onLogin={handleAuthenticated}
+          onRegister={() => setView('register')}
+        />
+      </Suspense>
     )
   }
 
   if (view === 'register') {
     return (
-      <RegisterPage
-        onRegister={handleAuthenticated}
-        onLogin={() => setView('login')}
-      />
+      <Suspense fallback={<GlobalLoader />}>
+        <RegisterPage
+          onRegister={handleAuthenticated}
+          onLogin={() => setView('login')}
+        />
+      </Suspense>
     )
   }
 
   if (view === 'onboarding') {
-    return <OnboardingPage navigate={() => setView('app')} currentUser={currentUser} />
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <OnboardingPage navigate={() => setView('app')} currentUser={currentUser} />
+      </Suspense>
+    )
   }
 
   if (view === 'app') {
     return (
-      <AppShell
-        currentUser={currentUser}
-        onSignOut={handleSignOut}
-      />
+      <Suspense fallback={<GlobalLoader />}>
+        <AppShell
+          currentUser={currentUser}
+          onSignOut={handleSignOut}
+        />
+      </Suspense>
     )
   }
 
   if (view === 'source-readiness-review') {
     return (
-      <SourceReadinessReviewPage onBack={() => setView('landing')} />
+      <Suspense fallback={<GlobalLoader />}>
+        <SourceReadinessReviewPage onBack={() => setView('landing')} />
+      </Suspense>
     )
   }
 
@@ -215,70 +236,44 @@ export default function App() {
           onCreateWorkspace={() => setView('source-readiness-review')}
           onSignIn={() => setView('register')}
         />
-        <Problem />
-        <WithoutWith />
-        <SampleBrief />
-        <Coverage onCreateWorkspace={() => setView('register')} />
-        <SourceTransparencyMatrix onCreateWorkspace={() => setView('register')} />
-        <BuyerSourcePacks onCreateWorkspace={() => setView('register')} />
-        <ConfiguredMonitoring />
-        <TrustLayer />
-        {/* Evidence Demo Section — SAMPLE / FAKE */}
-        <section className="py-16 px-4 bg-[#07111F]" id="evidence">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 bg-amber-400/10 border border-amber-400/20 inline-block px-3 py-1 rounded-full">SAMPLE / FAKE — demonstration only</p>
-              <h2 className="text-2xl font-bold text-white mt-4 mb-3">Evidence-backed monitoring</h2>
-              <p className="text-slate-400 max-w-xl mx-auto text-sm">
-                Detected changes are cryptographically hashed, timestamped, and stored for human review.
-                Not legal advice. For monitoring information only.
-              </p>
-            </div>
-            {/* Spec sample evidence alert card */}
-            <div className="max-w-xl mx-auto mb-8">
-              <div className="bg-[#0D1B2E] border border-slate-700 rounded-xl p-5 text-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded">SAMPLE — NOT REAL REGULATORY DATA</span>
-                  <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded-full">CHANGED</span>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 mb-0.5">Source</p>
-                  <p className="text-sm font-semibold text-white">VARA Regulatory Framework</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div><p className="text-slate-500 mb-0.5">Regulator</p><p className="text-slate-200">VARA</p></div>
-                  <div><p className="text-slate-500 mb-0.5">Detected</p><p className="text-slate-200">2026-06-10 09:14:22 UTC [SAMPLE]</p></div>
-                  <div><p className="text-slate-500 mb-0.5">Risk</p><p className="text-red-400 font-bold">HIGH</p></div>
-                  <div><p className="text-slate-500 mb-0.5">Affected</p><p className="text-slate-200">VASP / MLRO / Compliance teams</p></div>
-                  <div className="col-span-2"><p className="text-slate-500 mb-0.5">Official URL</p><a href="https://www.vara.ae/en/regulatory-framework/" target="_blank" rel="noopener noreferrer" className="text-[#16D9F5] hover:underline break-all">https://www.vara.ae/en/regulatory-framework/</a></div>
-                  <div><p className="text-slate-500 mb-0.5">Old hash</p><p className="text-slate-400 font-mono">a3f8d9c2...</p></div>
-                  <div><p className="text-slate-500 mb-0.5">New hash</p><p className="text-slate-400 font-mono">7b1e4a8f...</p></div>
-                  <div><p className="text-slate-500 mb-0.5">Diff</p><p className="text-emerald-400">Available</p></div>
-                  <div><p className="text-slate-500 mb-0.5">Snapshot</p><p className="text-slate-300">Saved</p></div>
-                </div>
-                <div className="flex items-center justify-between pt-1 border-t border-slate-800">
-                  <span className="text-amber-400 text-xs font-semibold">Human review: Required</span>
-                  <span className="text-xs text-slate-600">Not legal advice</span>
-                </div>
+        <Suspense fallback={<div className="py-20" />}>
+          <Problem />
+          <WithoutWith />
+          <SampleBrief />
+          <Coverage onCreateWorkspace={() => setView('register')} />
+          <SourceTransparencyMatrix onCreateWorkspace={() => setView('register')} />
+          <BuyerSourcePacks onCreateWorkspace={() => setView('register')} />
+          <ConfiguredMonitoring />
+          <TrustLayer />
+          {/* Evidence Demo Section — SAMPLE / FAKE */}
+          <section className="py-16 px-4 bg-[#07111F]" id="evidence">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-10">
+                <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 bg-amber-400/10 border border-amber-400/20 inline-block px-3 py-1 rounded-full">SAMPLE / FAKE — demonstration only</p>
+                <h2 className="text-2xl font-bold text-white mt-4 mb-3">Evidence-backed monitoring</h2>
+                <p className="text-slate-400 max-w-xl mx-auto text-sm">
+                  Detected changes are cryptographically hashed, timestamped, and stored for human review.
+                  Not legal advice. For monitoring information only.
+                </p>
               </div>
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <EvidenceCard record={SAMPLE_RECORD} />
+                <SourceCoverageTable />
+              </div>
+              <DiffViewer
+                diffText={SAMPLE_DIFF}
+                sourceId="AE-cbuae-homepage"
+                detectedAt="2026-05-30"
+              />
             </div>
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <EvidenceCard record={SAMPLE_RECORD} />
-              <SourceCoverageTable />
-            </div>
-            <DiffViewer
-              diffText={SAMPLE_DIFF}
-              sourceId="AE-cbuae-homepage"
-              detectedAt="2026-05-30"
-            />
-          </div>
-        </section>
-        <DashboardPreview />
-        <Pricing onCreateWorkspace={() => setView('register')} />
-        <Contact
-          onCreateWorkspace={() => setView('register')}
-          onSignIn={() => setView('login')}
-        />
+          </section>
+          <DashboardPreview />
+          <Pricing onCreateWorkspace={() => setView('register')} />
+          <Contact
+            onCreateWorkspace={() => setView('register')}
+            onSignIn={() => setView('login')}
+          />
+        </Suspense>
       </main>
       <Footer />
     </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle, Download, ExternalLink, Brain } from 'lucide-react'
 import { MOCK_ALERTS } from '../../data/appMockData'
 import { getWorkspaceProfile, filterAlerts } from '../../data/workspaceProfile'
@@ -16,7 +16,18 @@ export default function AIBriefPage() {
   const baseBriefs = filterAlerts(MOCK_ALERTS, profile)
 
   const [selectedId, setSelectedId] = useState(baseBriefs[0]?.id || 'a1')
-  const [reviewed, setReviewed] = useState(new Set())
+  const [reviewed, setReviewed]     = useState(new Set())
+
+  useEffect(() => {
+    fetch('/api/briefs?market=AE', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        // When live briefs are available, they can be merged here.
+        // Currently falls back silently to sample data.
+        void data
+      })
+      .catch(() => {})
+  }, [])
 
   const brief = baseBriefs.find(a => a.id === selectedId) || baseBriefs[0]
 
@@ -26,17 +37,17 @@ export default function AIBriefPage() {
         <h1 className="text-lg font-bold text-white mb-1">Reviewed Brief Previews</h1>
         <p className="text-sm text-slate-400">
           {profile.markets.length > 0
-            ? `AI-assisted reviewed brief previews for: ${profile.markets.join(', ')}`
-            : 'AI-assisted reviewed brief previews — select markets in Settings to filter.'}
+            ? `Reviewed brief previews for: ${profile.markets.join(', ')}`
+            : 'Reviewed brief previews — select markets in Settings to filter.'}
         </p>
       </div>
 
       <div className="mb-4 rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white">AI-assisted reviewed brief</h2>
+            <h2 className="text-sm font-semibold text-white">Reviewed compliance brief</h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
-              AI assists drafting. Human review gates client delivery. These examples show reviewed brief structure; sample brief delivery can be tested from Integrations after Telegram pairing.
+              Briefs are drafted from official source evidence and gated by human review before delivery. These examples show the brief structure; sample brief delivery can be tested from Integrations after Telegram pairing.
               Weekly brief delivery remains a pilot roadmap item.
             </p>
           </div>

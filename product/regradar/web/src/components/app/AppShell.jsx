@@ -1,17 +1,26 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import AppSidebar from './AppSidebar'
 import AppTopbar from './AppTopbar'
-import DashboardHome from './DashboardHome'
-import SourcesPage from './SourcesPage'
-import AlertsPage from './AlertsPage'
-import AIBriefPage from './AIBriefPage'
-import ReportsPage from './ReportsPage'
-import IntegrationsPage from './IntegrationsPage'
-import SettingsPage from './SettingsPage'
-import EvidencePage from './EvidencePage'
+
+const DashboardHome   = lazy(() => import('./DashboardHome'))
+const SourcesPage     = lazy(() => import('./SourcesPage'))
+const AlertsPage      = lazy(() => import('./AlertsPage'))
+const AIBriefPage     = lazy(() => import('./AIBriefPage'))
+const ReportsPage     = lazy(() => import('./ReportsPage'))
+const IntegrationsPage = lazy(() => import('./IntegrationsPage'))
+const SettingsPage    = lazy(() => import('./SettingsPage'))
+const EvidencePage    = lazy(() => import('./EvidencePage'))
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[300px]">
+      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[#16D9F5]" />
+    </div>
+  )
+}
 
 export default function AppShell({ initialPage = 'dashboard', currentUser, onSignOut }) {
-  const [page, setPage]         = useState(initialPage)
+  const [page, setPage]           = useState(initialPage)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -20,15 +29,18 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
     setMobileOpen(false)
   }
 
-  const PAGE = {
-    dashboard:    <DashboardHome navigate={navigate} currentUser={currentUser} />,
-    sources:      <SourcesPage />,
-    evidence:     <EvidencePage />,
-    alerts:       <AlertsPage />,
-    briefs:       <AIBriefPage />,
-    reports:      <ReportsPage />,
-    integrations: <IntegrationsPage />,
-    settings:     <SettingsPage onResetWorkspace={onSignOut} />,
+  function renderPage() {
+    switch (page) {
+      case 'dashboard':    return <DashboardHome navigate={navigate} currentUser={currentUser} />
+      case 'sources':      return <SourcesPage />
+      case 'evidence':     return <EvidencePage />
+      case 'alerts':       return <AlertsPage />
+      case 'briefs':       return <AIBriefPage />
+      case 'reports':      return <ReportsPage />
+      case 'integrations': return <IntegrationsPage />
+      case 'settings':     return <SettingsPage onResetWorkspace={onSignOut} />
+      default:             return <DashboardHome navigate={navigate} currentUser={currentUser} />
+    }
   }
 
   return (
@@ -67,7 +79,9 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
           currentUser={currentUser}
         />
         <main className="flex-1 overflow-y-auto">
-          {PAGE[page] || PAGE.dashboard}
+          <Suspense fallback={<PageLoader />}>
+            {renderPage()}
+          </Suspense>
         </main>
       </div>
     </div>

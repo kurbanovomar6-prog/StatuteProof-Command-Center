@@ -228,6 +228,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_delivery_preview()
         elif path == "/api/sources/status":
             self._handle_sources_status()
+        elif path == "/api/evidence":
+            self._handle_evidence_list()
+        elif path == "/api/briefs":
+            self._handle_briefs_list()
         elif path == "/api/settings/telegram":
             self._disabled_endpoint()
         elif path in ("/api/health", "/api/"):
@@ -286,6 +290,9 @@ class _Handler(BaseHTTPRequestHandler):
         full_name = body.get("full_name") or body.get("fullName") or body.get("name")
         company_name = str(body.get("company_name", "")).strip()
         industry = str(body.get("industry", "")).strip()
+        job_title = str(body.get("job_title", "")).strip()
+        company_type = str(body.get("company_type", "")).strip()
+        jurisdiction = str(body.get("jurisdiction", "")).strip()
 
         if not validate_email(email):
             self._send_json({"ok": False, "message": "Enter a valid email address."}, 400)
@@ -303,6 +310,9 @@ class _Handler(BaseHTTPRequestHandler):
                 full_name=full_name,
                 company_name=company_name,
                 industry=industry,
+                job_title=job_title,
+                company_type=company_type,
+                jurisdiction=jurisdiction,
             )
             session_id = create_session(int(user["id"]))
             self._send_json(
@@ -712,6 +722,112 @@ class _Handler(BaseHTTPRequestHandler):
             })
         except Exception as exc:
             logger.error("sources/status failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_evidence_list(self) -> None:
+        """GET /api/evidence — returns source run records from source_runs.jsonl."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            params = parse_qs(urlparse(self.path).query)
+            market = str((params.get("market") or ["AE"])[0]).upper().strip() or "AE"
+            limit_raw = (params.get("limit") or ["50"])[0]
+            try:
+                limit = max(1, min(int(limit_raw), 200))
+            except (TypeError, ValueError):
+                limit = 50
+
+            runs_path = BASE_DIR / "data" / "source_runs" / "source_runs.jsonl"
+            records: list[dict] = []
+            if runs_path.exists():
+                with runs_path.open(encoding="utf-8") as fh:
+                    for line in fh:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            rec = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        if str(rec.get("market") or rec.get("jurisdiction") or "").upper() == market:
+                            records.append({
+                                "run_id": rec.get("run_id"),
+                                "source_id": rec.get("source_id"),
+                                "source_name": rec.get("source_name") or rec.get("name"),
+                                "change_status": rec.get("change_status"),
+                                "extraction_quality": rec.get("extraction_quality"),
+                                "extracted_chars": rec.get("extracted_chars", 0),
+                                "content_hash": rec.get("content_hash") or rec.get("normalized_hash"),
+                                "timestamp_utc": rec.get("timestamp_utc") or rec.get("run_at"),
+                                "category": rec.get("category"),
+                                "error": rec.get("error"),
+                            })
+
+            records.sort(key=lambda r: r.get("timestamp_utc") or "", reverse=True)
+            self._send_json({
+                "ok": True,
+                "market": market,
+                "evidence": records[:limit],
+                "total": len(records),
+                "disclaimer": "Not legal advice. For monitoring information only.",
+            })
+        except Exception as exc:
+            logger.error("evidence list failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_briefs_list(self) -> None:
+        """GET /api/briefs — returns alert queue entries from data/alert_queue/*.json."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            params = parse_qs(urlparse(self.path).query)
+            market = str((params.get("market") or ["AE"])[0]).upper().strip() or "AE"
+            limit_raw = (params.get("limit") or ["50"])[0]
+            try:
+                limit = max(1, min(int(limit_raw), 200))
+            except (TypeError, ValueError):
+                limit = 50
+
+            import glob as _glob
+            alert_dir = BASE_DIR / "data" / "alert_queue"
+            briefs: list[dict] = []
+            if alert_dir.exists():
+                for fpath in _glob.glob(str(alert_dir / "*.json")):
+                    try:
+                        with open(fpath, encoding="utf-8") as fh:
+                            rec = json.load(fh)
+                    except Exception:
+                        continue
+                    source_id = str(rec.get("source_id") or "")
+                    if not source_id.startswith(market + "-") and market != "ALL":
+                        continue
+                    briefs.append({
+                        "alert_id": os.path.basename(fpath).removesuffix(".json"),
+                        "source_id": source_id,
+                        "run_id": rec.get("run_id"),
+                        "change_status": rec.get("change_status"),
+                        "status": rec.get("status"),
+                        "human_reviewed": bool(rec.get("human_reviewed")),
+                        "delivery_approved": bool(rec.get("delivery_approved")),
+                        "queued_at": rec.get("queued_at"),
+                        "run_at": rec.get("run_at"),
+                        "normalized_hash": rec.get("normalized_hash"),
+                    })
+
+            briefs.sort(key=lambda b: b.get("queued_at") or "", reverse=True)
+            self._send_json({
+                "ok": True,
+                "market": market,
+                "briefs": briefs[:limit],
+                "total": len(briefs),
+                "disclaimer": "Not legal advice. For monitoring information only.",
+            })
+        except Exception as exc:
+            logger.error("briefs list failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_save(self) -> None:

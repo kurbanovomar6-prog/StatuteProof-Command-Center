@@ -123,6 +123,9 @@ def create_user(
     full_name=None,
     company_name=None,
     industry=None,
+    job_title=None,
+    company_type=None,
+    jurisdiction=None,
 ) -> dict:
     ensure_auth_tables()
     normalized = normalize_email(email)
@@ -132,8 +135,9 @@ def create_user(
         cur = conn.execute(
             """
             INSERT INTO users
-                (email, password_hash, full_name, company_name, industry, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+                (email, password_hash, full_name, company_name, industry,
+                 job_title, company_type, jurisdiction, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 normalized,
@@ -141,6 +145,9 @@ def create_user(
                 _sanitize_optional_text(full_name, 160),
                 _sanitize_optional_text(company_name, 200),
                 _sanitize_optional_text(industry, 120),
+                _sanitize_optional_text(job_title, 120),
+                _sanitize_optional_text(company_type, 120),
+                _sanitize_optional_text(jurisdiction, 120),
                 now,
                 now,
             ),

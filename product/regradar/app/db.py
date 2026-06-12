@@ -138,6 +138,15 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
         if "full_name" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN full_name TEXT")
             logger.info("DB: added users.full_name column")
+        if "job_title" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN job_title TEXT")
+            logger.info("DB: added users.job_title column")
+        if "company_type" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN company_type TEXT")
+            logger.info("DB: added users.company_type column")
+        if "jurisdiction" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN jurisdiction TEXT")
+            logger.info("DB: added users.jurisdiction column")
         conn.commit()
     finally:
         if owned_conn:
