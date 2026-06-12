@@ -81,6 +81,12 @@ export const telegramPair = {
   },
 }
 
+export const sources = {
+  status(market = 'AE') {
+    return authRequest(`/api/sources/status?market=${encodeURIComponent(market)}`)
+  },
+}
+
 export const delivery = {
   testBrief() {
     return authRequest('/api/delivery/test-brief', { method: 'POST' })

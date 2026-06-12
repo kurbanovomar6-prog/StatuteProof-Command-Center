@@ -10,6 +10,10 @@ const ACTIVE_SOURCES = [
   { source: 'UAE Legislation Portal', publishes: 'Federal laws and decrees', extraction: 'HTML structured; aggregate page changes require adapter review for item-level alerts' },
   { source: 'DIFC Laws', publishes: 'Primary and subsidiary DIFC legislation', extraction: 'HTML structured' },
   { source: 'Ministry of Economy', publishes: 'Commercial licensing, AML policy', extraction: 'HTML structured' },
+  { source: 'VARA Enforcement Notices', publishes: 'VASP enforcement actions and regulatory decisions', extraction: 'HTML structured' },
+  { source: 'CBUAE Regulations Sub-page', publishes: 'CBUAE regulations listing — circulars, licensing standards', extraction: 'HTML structured' },
+  { source: 'UAE FIU Circulars and Notices', publishes: 'AML/CFT circulars and typology notices', extraction: 'HTML / PDF' },
+  { source: 'DFSA Regulatory Notices', publishes: 'DFSA notices, decisions, and consultations for DIFC-regulated firms', extraction: 'HTML structured' },
 ]
 
 const LIMITED_SOURCES = [

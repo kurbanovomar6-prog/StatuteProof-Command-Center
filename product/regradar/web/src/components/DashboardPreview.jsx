@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -7,6 +8,7 @@ import {
 import { sourceHealthRows } from '../data/mockData'
 import { Badge } from './ui/Badge'
 import { ShieldCheck, Clock, FileSearch, Activity, Link2, Gauge } from 'lucide-react'
+import { sources as sourcesApi } from '../api'
 
 const qualityLabel   = { good: 'Stable', low_content: 'Limited', failed: 'Blocked' }
 const qualityVariant = { good: 'green',  low_content: 'yellow',  failed: 'red' }
@@ -116,6 +118,75 @@ function SourceTable() {
   )
 }
 
+function SourceStatusSummary() {
+  const [statusData, setStatusData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let active = true
+    sourcesApi.status('AE')
+      .then(data => { if (active) setStatusData(data) })
+      .catch(() => { if (active) setError(true) })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="text-slate-300 text-sm mt-0.5">
+        Loading source status...
+      </div>
+    )
+  }
+
+  if (error || !statusData) {
+    return (
+      <div className="text-slate-300 text-sm mt-0.5">
+        Could not load source status
+      </div>
+    )
+  }
+
+  const { summary, total_sources, last_run_at } = statusData
+  const changed = summary['CHANGED'] || 0
+  const unchanged = (summary['UNCHANGED'] || 0) + (summary['FIRST_SEEN'] || 0)
+  const notRun = summary['NOT_RUN'] || 0
+  const failed = summary['FAILED'] || 0
+
+  if (notRun === total_sources) {
+    return (
+      <div className="text-slate-300 text-sm mt-0.5">
+        No monitoring runs yet — {total_sources} sources configured
+      </div>
+    )
+  }
+
+  const lastRunStr = last_run_at
+    ? new Date(last_run_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : null
+
+  const parts = [
+    `${total_sources} sources checked`,
+    changed > 0 ? `${changed} change${changed !== 1 ? 's' : ''} detected` : null,
+    unchanged > 0 ? `${unchanged} unchanged` : null,
+    failed > 0 ? `${failed} failed` : null,
+  ].filter(Boolean).join(' · ')
+
+  return (
+    <>
+      <div className="text-slate-300 text-sm mt-0.5">
+        {parts} · source proof attached
+      </div>
+      {lastRunStr && (
+        <div className="text-slate-400 text-xs mt-1">
+          Last run: {lastRunStr} UTC
+        </div>
+      )}
+    </>
+  )
+}
+
 export default function DashboardPreview() {
   return (
     <section className="py-20 bg-white" id="dashboard">
@@ -142,23 +213,22 @@ export default function DashboardPreview() {
               </div>
               <div>
                 <div className="text-white font-bold text-lg">
-                  Sample UAE monitoring session — illustrative
+                  UAE monitoring — official sources
                 </div>
-                <div className="text-slate-300 text-sm mt-0.5">
-                  9 sources checked · 1 change detected · 8 unchanged · source proof attached
-                </div>
+                {/* TODO: mock data below (last-check time, review queue, proof note) — replace when scheduler/run-history API is wired */}
+                <SourceStatusSummary />
                 <div className="text-slate-400 text-sm mt-2 max-w-3xl leading-relaxed">
-                  Example source: VARA publications / CBUAE circular / DFSA notice. This is illustrative
-                  sample copy, not a live customer alert.
+                  Official sources: VARA / CBUAE / DFSA / ADGM and others. Not legal advice. For monitoring information only.
                 </div>
               </div>
             </div>
             <div className="text-right flex-shrink-0">
+              {/* TODO: last-check time and review queue are mock — wire to scheduler run data */}
               <div className="flex items-center gap-2 text-slate-300 text-sm">
                 <Clock className="w-4 h-4" />
-                Last check: 14:32
+                Monitored sources: AE
               </div>
-              <div className="text-slate-500 text-xs mt-1">Review queue: 2 sources</div>
+              <div className="text-slate-500 text-xs mt-1">Changes queued for human review</div>
               <div className="text-emerald-400 text-xs mt-1 font-medium">Source proof attached</div>
             </div>
           </div>
