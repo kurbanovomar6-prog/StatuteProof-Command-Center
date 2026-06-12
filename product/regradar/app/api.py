@@ -226,6 +226,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_delivery_logs()
         elif path == "/api/delivery/preview":
             self._handle_delivery_preview()
+        elif path == "/api/sources/status":
+            self._handle_sources_status()
         elif path == "/api/settings/telegram":
             self._disabled_endpoint()
         elif path in ("/api/health", "/api/"):
@@ -627,6 +629,89 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send_json(payload, 400)
         except Exception as exc:
             logger.error("Preview alert delivery failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_sources_status(self) -> None:
+        """
+        GET /api/sources/status?market=AE
+
+        Returns live source run status from source_runs.jsonl merged with the
+        enabled source list from sources.json.
+
+        Requires session auth (same as all other protected endpoints).
+        Returns status counts even when no runs have been recorded yet.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+
+        params = parse_qs(urlparse(self.path).query)
+        market = str((params.get("market") or ["AE"])[0]).upper().strip() or "AE"
+
+        try:
+            from app.source_readiness import load_market_sources
+            from app.source_runs import latest_runs
+
+            all_sources = load_market_sources(market)
+            enabled_sources = [s for s in all_sources if s.get("enabled", False)]
+
+            # latest_runs returns dict keyed by source_id (or url fallback)
+            run_map = latest_runs(market)
+
+            sources_out: list[dict] = []
+            last_run_at: str | None = None
+
+            for src in enabled_sources:
+                source_id = str(src.get("source_id") or src.get("id") or "")
+                name = str(src.get("name") or "")
+
+                # Try lookup by source_id first, then by name
+                run = run_map.get(source_id) or run_map.get(name)
+
+                if run:
+                    change_status = str(run.get("change_status") or "UNKNOWN")
+                    run_at = str(run.get("timestamp_utc") or run.get("run_at") or "")
+                    access_status = str(run.get("access_status") or "unknown")
+                    extraction_quality = str(run.get("extraction_quality") or "UNKNOWN")
+                    # Track most recent run timestamp across all sources
+                    if run_at and (last_run_at is None or run_at > last_run_at):
+                        last_run_at = run_at
+                else:
+                    change_status = "NOT_RUN"
+                    run_at = None
+                    access_status = "unknown"
+                    extraction_quality = "UNKNOWN"
+
+                sources_out.append({
+                    "source_id": source_id,
+                    "name": name,
+                    "category": str(src.get("category") or ""),
+                    "url": str(src.get("url") or ""),
+                    "status": str(src.get("status") or "active"),
+                    "change_status": change_status,
+                    "last_run_at": run_at,
+                    "access_status": access_status,
+                    "extraction_quality": extraction_quality,
+                })
+
+            # Build summary counts
+            summary: dict[str, int] = {}
+            for s in sources_out:
+                cs = s["change_status"]
+                summary[cs] = summary.get(cs, 0) + 1
+
+            self._send_json({
+                "ok": True,
+                "market": market,
+                "sources": sources_out,
+                "summary": summary,
+                "total_sources": len(sources_out),
+                "last_run_at": last_run_at,
+                "disclaimer": "Not legal advice. For monitoring information only.",
+            })
+        except Exception as exc:
+            logger.error("sources/status failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_save(self) -> None:
