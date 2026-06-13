@@ -1,7 +1,7 @@
 // Plan definitions — no Stripe, no payment processing.
-// Billing is manually activated for founding pilots.
-// Prices: Monitor $349/mo | Professional $749/mo | Consultant custom
-// Source count: 13 validated UAE sources total (honest count as of 2026-06)
+// Billing is manually activated for founding pilots after source readiness review.
+// Prices: Founding Pilot $199/mo | UAE Monitor $399/mo | Consultant custom
+// Source count: 13 enabled UAE sources under evidence-readiness validation (as of 2026-06)
 
 export const PLAN_NAMES = {
   EVIDENCE_PREVIEW: 'evidence_preview',
@@ -11,16 +11,16 @@ export const PLAN_NAMES = {
 }
 
 export const PLAN_DISPLAY = {
-  evidence_preview: 'Evidence Preview',
-  starter_pilot: 'Monitor',         // Display name updated from "Starter Pilot"
-  professional: 'Professional',
+  evidence_preview: 'Source Readiness Review',
+  starter_pilot: 'Founding Pilot',
+  professional: 'UAE Monitor',
   consultant: 'Compliance Consultant',
 }
 
 export const PLAN_PRICE = {
   evidence_preview: 'Free',
-  starter_pilot: '$349',
-  professional: '$749',
+  starter_pilot: '$199',
+  professional: '$399',
   consultant: 'Talk to us',
 }
 
@@ -37,9 +37,11 @@ export const PLAN_FEATURE_STATUS = {
   auditExport: 'pilot_roadmap',
   pdfExport: 'requires_activation',
   emailBrief: 'requires_activation',
-  customSources: 'requires_activation',   // professional only, needs onboarding
+  customSources: 'requires_activation',   // UAE Monitor only, needs onboarding
   whiteLabel: 'pilot_roadmap',
   multipleWorkspaces: 'pilot_roadmap',
+  highRiskQueue: 'available',             // UAE Monitor+
+  weeklyBrief: 'available',               // Telegram; email requires_activation
 }
 
 export const PLAN_CAPABILITIES = {
@@ -59,13 +61,13 @@ export const PLAN_CAPABILITIES = {
   },
   starter_pilot: {
     liveMonitoring: true,
-    sourceLimit: 5,
+    sourceLimit: 3,            // 3 official UAE sources — manually curated per workspace
     customSources: 0,
-    weeklyBriefs: 'status_only',   // source status summary, not full MLRO brief
+    weeklyBriefs: 'status_only',  // source status summary; not full MLRO brief
     auditExport: false,
     pdfExport: false,
     users: 1,
-    retentionDays: 90,
+    retentionDays: 30,
     multipleWorkspaces: false,
     whiteLabel: false,
     highRiskQueue: false,
@@ -73,13 +75,13 @@ export const PLAN_CAPABILITIES = {
   },
   professional: {
     liveMonitoring: true,
-    sourceLimit: 13,               // honest count — 13 validated sources in sources.json
-    customSources: 3,              // requires activation
-    weeklyBriefs: true,            // Telegram; email requires_activation
-    auditExport: false,            // pilot_roadmap — not yet built
-    pdfExport: false,              // requires_activation
+    sourceLimit: 13,           // 13 enabled UAE sources under evidence-readiness validation
+    customSources: 2,          // requires activation
+    weeklyBriefs: true,        // Telegram; email requires_activation
+    auditExport: false,        // pilot_roadmap — not yet built
+    pdfExport: false,          // requires_activation
     users: 2,
-    retentionDays: 365,
+    retentionDays: 180,
     multipleWorkspaces: false,
     whiteLabel: false,
     highRiskQueue: true,
@@ -90,12 +92,12 @@ export const PLAN_CAPABILITIES = {
     sourceLimit: 999,
     customSources: 999,
     weeklyBriefs: true,
-    auditExport: false,            // pilot_roadmap
-    pdfExport: false,              // pilot_roadmap
+    auditExport: false,        // pilot_roadmap
+    pdfExport: false,          // pilot_roadmap
     users: 999,
     retentionDays: 999,
-    multipleWorkspaces: false,     // pilot_roadmap
-    whiteLabel: false,             // pilot_roadmap
+    multipleWorkspaces: false, // pilot_roadmap
+    whiteLabel: false,         // pilot_roadmap
     highRiskQueue: true,
     diffView: true,
   },

@@ -320,7 +320,7 @@ for path in (root / 'examples').rglob('*.md'):
 # ── .env file check ───────────────────────────────────────────────────────────
 
 for path in root.rglob('.env*'):
-    if path.is_file() and '.reference_tmp' not in str(path):
+    if path.is_file() and '.reference_tmp' not in str(path) and not path.name.endswith('.example'):
         errors.append(f'.env file found: {path.relative_to(root)} — remove before commit')
 
 # ── Print results ─────────────────────────────────────────────────────────────

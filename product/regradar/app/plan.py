@@ -17,17 +17,17 @@ PLAN_NAMES = {
 }
 
 PLAN_DISPLAY = {
-    "evidence_preview": "Evidence Preview",
-    "starter_pilot": "Monitor",
-    "professional": "Professional",
+    "evidence_preview": "Source Readiness Review",
+    "starter_pilot": "Founding Pilot",
+    "professional": "UAE Monitor",
     "consultant": "Compliance Consultant",
 }
 
 PLAN_PRICE_MONTHLY = {
     "evidence_preview": 0,
-    "starter_pilot": 349,
-    "professional": 749,
-    "consultant": 0,  # custom
+    "starter_pilot": 199,
+    "professional": 399,
+    "consultant": 0,  # custom / Talk to us
 }
 
 PLAN_CAPABILITIES = {
@@ -45,39 +45,42 @@ PLAN_CAPABILITIES = {
     },
     "starter_pilot": {
         "live_monitoring": True,
-        "source_limit": 5,
+        "source_limit": 3,          # 3 official UAE sources, manually curated
         "custom_sources": 0,
-        "weekly_briefs": "status_only",
+        "weekly_briefs": "status_only",  # source status summary only
         "audit_export": False,
         "pdf_export": False,
         "users": 1,
-        "retention_days": 90,
+        "retention_days": 30,
         "multiple_workspaces": False,
         "white_label": False,
+        "high_risk_queue": False,
     },
     "professional": {
         "live_monitoring": True,
-        "source_limit": 13,
-        "custom_sources": 3,
-        "weekly_briefs": True,
-        "audit_export": False,   # pilot roadmap — not yet built
-        "pdf_export": False,     # requires activation
+        "source_limit": 13,         # 13 enabled UAE sources under evidence-readiness validation
+        "custom_sources": 2,        # requires activation
+        "weekly_briefs": True,      # Telegram; email requires activation
+        "audit_export": False,      # pilot roadmap — not yet built
+        "pdf_export": False,        # requires activation
         "users": 2,
-        "retention_days": 365,
+        "retention_days": 180,
         "multiple_workspaces": False,
         "white_label": False,
+        "high_risk_queue": True,
     },
     "consultant": {
         "live_monitoring": True,
         "source_limit": 999,
         "custom_sources": 999,
         "weekly_briefs": True,
-        "audit_export": True,
-        "pdf_export": True,
+        "audit_export": False,      # pilot roadmap
+        "pdf_export": False,        # pilot roadmap
         "users": 999,
         "retention_days": 999,
-        "multiple_workspaces": True,
-        "white_label": True,
+        "multiple_workspaces": False,  # pilot roadmap
+        "white_label": False,          # pilot roadmap
+        "high_risk_queue": True,
     },
 }
 

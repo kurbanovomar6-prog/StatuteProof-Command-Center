@@ -4,73 +4,76 @@ import { CheckCircle, Lock, ArrowRight, Sparkles } from 'lucide-react'
 const PLANS = [
   {
     id: 'evidence_preview',
-    name: 'Evidence Preview',
+    name: 'Source Readiness Review',
     price: 'Free',
-    period: '7-day access',
-    badge: null,
+    period: '',
+    badge: 'Start here',
     highlight: false,
-    desc: 'Explore the StatuteProof workspace with sample evidence records and source-readiness tools. No live monitoring.',
-    cta: 'Continue with Evidence Preview',
+    desc: 'See which UAE regulatory sources are active, limited, or blocked for your compliance profile — before any monitoring commitment. No live monitoring.',
+    cta: 'Request source review',
     ctaStyle: 'secondary',
     features: [
-      'Source readiness review (sample)',
-      'Sample evidence records',
+      'Source readiness assessment',
+      'Suggested UAE source pack',
+      'Sample evidence record',
       'Sample brief preview',
       'Workspace access',
     ],
     locked: [
       'Live source monitoring',
-      'Weekly MLRO brief',
+      'Evidence records (live)',
+      'Weekly source status summary',
       'Audit binder export',
     ],
   },
   {
     id: 'starter_pilot',
-    name: 'Monitor',
-    price: '$349',
+    name: 'Founding Pilot',
+    price: '$199',
     period: '/ month',
     badge: null,
     highlight: false,
-    desc: 'Up to 5 official UAE sources monitored. Evidence records, diff view, source status summary. 90-day retention.',
-    cta: 'Select Monitor',
+    desc: 'First paid plan for early users. Up to 3 official UAE sources, evidence records, basic diff view, and weekly source status summary. Manually activated after source readiness review.',
+    cta: 'Start founding pilot',
     ctaStyle: 'secondary',
     features: [
-      'Up to 5 official UAE sources',
+      'Up to 3 official UAE sources',
       'Evidence records',
-      'Diff view',
+      'Basic diff view',
       'Weekly source status summary',
-      '90-day evidence retention',
+      '30-day evidence retention',
       '1 user',
     ],
     locked: [
       'Custom sources',
       'High-risk review queue',
-      'Audit binder export (pilot roadmap)',
+      'Weekly MLRO brief',
+      'Audit binder export — pilot roadmap',
     ],
   },
   {
     id: 'professional',
-    name: 'Professional',
-    price: '$749',
+    name: 'UAE Monitor',
+    price: '$399',
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    desc: 'All 13 validated UAE sources — VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU and more. Full MLRO workflow with high-risk review queue.',
-    cta: 'Select Professional',
+    desc: '13 enabled UAE sources under evidence-readiness validation — VARA, CBUAE, DFSA, ADGM, UAE FIU and more. Full evidence workflow with high-risk review queue.',
+    cta: 'Upgrade to UAE Monitor',
     ctaStyle: 'primary',
     features: [
-      'All 13 validated UAE sources',
+      '13 enabled UAE sources (evidence-readiness validation)',
       'VARA / CBUAE / DFSA / ADGM / UAE FIU source pack',
       'Evidence records + full diff view',
-      'Weekly MLRO brief (Telegram)',
       'High-risk review queue',
-      '3 custom sources (requires activation)',
-      'PDF export (requires activation)',
-      '12-month evidence retention',
+      'Weekly MLRO brief — Telegram (email: requires activation)',
+      'Up to 2 custom sources — requires activation',
+      '180-day evidence retention',
       '2 users',
     ],
     locked: [
       'Audit binder export — pilot roadmap',
+      'PDF export — requires activation',
     ],
   },
   {
@@ -80,15 +83,16 @@ const PLANS = [
     period: '',
     badge: null,
     highlight: false,
-    desc: 'Advisory firms managing multiple UAE-regulated clients. Multi-workspace, extended coverage, white-label on the roadmap.',
+    desc: 'Advisory firms managing multiple UAE-regulated clients. Custom source scope, extended retention, multi-workspace and white-label on the roadmap.',
     cta: 'Talk to us',
     ctaStyle: 'secondary',
     features: [
       'Custom source scope',
-      'Multiple client workspaces (pilot roadmap)',
       'Custom evidence retention',
-      'White-label reports (pilot roadmap)',
-      'Team roles (pilot roadmap)',
+      'Custom user count',
+      'Multiple client workspaces — pilot roadmap',
+      'White-label reports — pilot roadmap',
+      'Team roles — pilot roadmap',
     ],
     locked: [],
   },
@@ -117,7 +121,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
       setSelected(planId)
       setConfirmMsg('Plan request saved. Our team will contact you to activate your founding pilot. No payment has been processed.')
     } catch {
-      setError('Could not save plan selection. Please try again or continue with Evidence Preview.')
+      setError('Could not save plan selection. Please try again or continue with the Source Readiness Review.')
     } finally {
       setSelecting(null)
     }
@@ -220,8 +224,9 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
 
         {/* Disclaimer */}
         <p className="text-center text-xs text-slate-500 max-w-2xl mx-auto">
-          Not legal advice. For monitoring information only. No payment is processed during plan selection.
-          Billing is manually activated after source readiness review and founding pilot confirmation.
+          Monitoring intelligence only. Not legal advice. Source readiness validation required before activation.
+          No payment is processed during plan selection.
+          Features marked "pilot roadmap" are not live by default. Billing is manually activated after source readiness review and founding pilot confirmation.
         </p>
 
         {/* Skip link */}
@@ -231,7 +236,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
               onClick={onContinue}
               className="text-xs text-slate-500 hover:text-slate-300 underline"
             >
-              Skip for now — continue with Evidence Preview
+              Skip for now — continue with Source Readiness Review
             </button>
           </div>
         )}

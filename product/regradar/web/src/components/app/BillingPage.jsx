@@ -11,9 +11,9 @@ function Row({ label, value, highlight }) {
 }
 
 const PLAN_DISPLAY = {
-  evidence_preview: 'Evidence Preview',
-  starter_pilot: 'Starter Pilot',
-  professional: 'Professional',
+  evidence_preview: 'Source Readiness Review',
+  starter_pilot: 'Founding Pilot',
+  professional: 'UAE Monitor',
   consultant: 'Compliance Consultant',
 }
 
@@ -51,7 +51,7 @@ export default function BillingPage({ planState }) {
         <Row label="Live monitoring" value={caps.liveMonitoring ? 'Included' : 'Not included'} />
         <Row label="Source limit" value={caps.sourceLimit > 100 ? 'Custom' : caps.sourceLimit === 0 ? 'Sample only' : String(caps.sourceLimit)} />
         <Row label="Custom sources" value={caps.customSources > 100 ? 'Custom' : caps.customSources === 0 ? 'Not included' : String(caps.customSources)} />
-        <Row label="Weekly MLRO brief" value={caps.weeklyBriefs === true ? 'Included' : caps.weeklyBriefs === 'limited' ? 'Limited' : 'Not included'} />
+        <Row label="Weekly MLRO brief" value={caps.weeklyBriefs === true ? 'Included' : caps.weeklyBriefs === 'status_only' ? 'Source status summary' : 'Not included'} />
         <Row label="Audit binder export" value={caps.auditExport ? 'Included' : 'Not included'} />
         <Row label="PDF export" value={caps.pdfExport ? 'Included' : 'Not included'} />
         <Row label="Users" value={caps.users > 100 ? 'Custom' : String(caps.users)} />
@@ -76,13 +76,13 @@ export default function BillingPage({ planState }) {
       {/* Upgrade CTA */}
       {(plan === 'evidence_preview' || plan === 'starter_pilot') ? (
         <div className="bg-[#16D9F5]/5 border border-[#16D9F5]/20 rounded-xl p-4">
-          <p className="text-sm font-semibold text-white mb-1">Upgrade to Professional</p>
+          <p className="text-sm font-semibold text-white mb-1">Upgrade to UAE Monitor</p>
           <p className="text-xs text-slate-400 mb-3">
-            13–16 official UAE sources, weekly MLRO brief, audit binder export, 12-month evidence retention.
+            13 enabled UAE sources under evidence-readiness validation, high-risk review queue, weekly MLRO brief, 180-day evidence retention.
           </p>
           <div className="flex gap-2">
             <a
-              href="mailto:hello@statuteproof.com?subject=Professional%20Plan%20Enquiry"
+              href="mailto:hello@statuteproof.com?subject=UAE%20Monitor%20Plan%20Enquiry"
               className="sp-btn-primary text-xs py-1.5 px-3 inline-flex items-center gap-1.5"
             >
               Request upgrade <ArrowRight className="w-3.5 h-3.5" />

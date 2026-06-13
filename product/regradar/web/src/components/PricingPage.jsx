@@ -11,7 +11,7 @@ const PLANS_DATA = [
     period: '',
     badge: 'Start here',
     highlight: false,
-    purpose: 'See which UAE regulatory sources are active, limited, or blocked for your compliance profile — before any monitoring commitment.',
+    purpose: 'See which UAE regulatory sources are active, limited, or blocked for your compliance profile — before any monitoring commitment. No live monitoring included.',
     cta: 'Request source readiness review',
     ctaPrimary: false,
     features: [
@@ -19,6 +19,8 @@ const PLANS_DATA = [
       { label: 'Source readiness review', value: 'Sample' },
       { label: 'Sample evidence record', value: true },
       { label: 'Sample brief preview', value: true },
+      { label: 'Evidence records (live)', value: false },
+      { label: 'Diff view', value: false },
       { label: 'Custom sources', value: false },
       { label: 'Weekly MLRO brief', value: false },
       { label: 'High-risk review queue', value: false },
@@ -29,17 +31,17 @@ const PLANS_DATA = [
     ],
   },
   {
-    id: 'monitor',
-    name: 'Monitor',
-    price: '$349',
+    id: 'starter_pilot',
+    name: 'Founding Pilot',
+    price: '$199',
     period: '/ month',
     badge: null,
     highlight: false,
-    purpose: '1-person compliance team. Live monitoring of up to 5 UAE regulatory sources with evidence records and diff view.',
-    cta: 'Start Monitor Pilot',
+    purpose: 'First paid plan for early users. Up to 3 official UAE sources, evidence records, basic diff view, and weekly source status summary. Manually activated.',
+    cta: 'Start founding pilot',
     ctaPrimary: false,
     features: [
-      { label: 'Official UAE sources', value: 'Up to 5' },
+      { label: 'Official UAE sources', value: 'Up to 3' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records', value: true },
       { label: 'Diff view', value: true },
@@ -48,31 +50,31 @@ const PLANS_DATA = [
       { label: 'High-risk review queue', value: false },
       { label: 'Audit binder export', value: false },
       { label: 'Users', value: '1' },
-      { label: 'Evidence retention', value: '90 days' },
+      { label: 'Evidence retention', value: '30 days' },
       { label: 'Multiple workspaces', value: false },
     ],
   },
   {
     id: 'professional',
-    name: 'Professional',
-    price: '$749',
+    name: 'UAE Monitor',
+    price: '$399',
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    purpose: 'MLRO or CCO at a UAE-regulated firm. All 13 validated UAE sources, high-risk review queue, weekly brief, 12-month retention.',
-    cta: 'Upgrade to Professional',
+    purpose: 'MLRO or CCO at a UAE-regulated firm. 13 enabled UAE sources under evidence-readiness validation, high-risk review queue, weekly brief, 180-day retention.',
+    cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: 'All 13 validated' },
+      { label: 'Official UAE sources', value: '13 (evidence-readiness validation)' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
-      { label: 'Custom sources', value: '3 (requires activation)' },
+      { label: 'Custom sources', value: 'Up to 2 — requires activation' },
       { label: 'Weekly MLRO brief', value: 'Telegram (email: requires activation)' },
       { label: 'High-risk review queue', value: true },
       { label: 'Audit binder export', value: 'Pilot roadmap' },
       { label: 'PDF / Markdown export', value: 'Requires activation' },
       { label: 'Users', value: '2' },
-      { label: 'Evidence retention', value: '12 months' },
+      { label: 'Evidence retention', value: '180 days' },
       { label: 'Multiple workspaces', value: false },
     ],
   },
@@ -83,14 +85,14 @@ const PLANS_DATA = [
     period: '',
     badge: null,
     highlight: false,
-    purpose: 'Advisory firms managing multiple UAE-regulated clients. Multi-workspace, extended coverage, white-label reporting on the roadmap.',
+    purpose: 'Advisory firms managing multiple UAE-regulated clients. Custom source scope and extended retention. Multi-workspace and white-label on the roadmap.',
     cta: 'Talk to us',
     ctaPrimary: false,
     features: [
       { label: 'Official UAE sources', value: 'Custom scope' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
-      { label: 'Custom sources', value: 'Custom (roadmap)' },
+      { label: 'Custom sources', value: 'Custom — pilot roadmap' },
       { label: 'Weekly MLRO brief', value: 'Pilot roadmap' },
       { label: 'High-risk review queue', value: 'Pilot roadmap' },
       { label: 'Audit binder export', value: 'Pilot roadmap' },
@@ -105,7 +107,7 @@ const PLANS_DATA = [
 const COMPARISON_ROWS = [
   { label: 'Official UAE sources', key: 'Official UAE sources' },
   { label: 'Evidence records', key: 'Evidence records' },
-  { label: 'Diff view', key: 'Basic diff view' },
+  { label: 'Diff view', key: 'Diff view' },
   { label: 'Custom sources', key: 'Custom sources' },
   { label: 'Weekly MLRO brief', key: 'Weekly MLRO brief' },
   { label: 'High-risk review queue', key: 'High-risk review queue' },
@@ -121,8 +123,12 @@ const FAQS = [
     a: 'No. StatuteProof provides official-source regulatory monitoring intelligence. Reports are for information and compliance review support only. They do not constitute legal advice, regulatory advice, or compliance certification. Consult qualified legal or compliance professionals before making regulatory decisions.',
   },
   {
+    q: 'What does "evidence-readiness validation" mean?',
+    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: confirming it is publicly accessible, extractable, and producing reliable text diffs. Sources that pass validation are marked Active. Sources with access issues are marked Limited or Blocked and documented in your evidence record.',
+  },
+  {
     q: 'Can I add my own sources?',
-    a: 'Yes — on the Professional and Consultant plans. Custom public sources require a source readiness check before monitoring begins. We document access quality, extraction method, and known limitations for each source.',
+    a: 'Yes — on the UAE Monitor and Consultant plans. Custom public sources require a source readiness check before monitoring begins. We document access quality, extraction method, and known limitations for each source.',
   },
   {
     q: 'What happens if a source fails?',
@@ -130,15 +136,15 @@ const FAQS = [
   },
   {
     q: 'Can consultants use it for multiple clients?',
-    a: 'Yes — the Compliance Consultant plan supports multiple client workspaces, team roles, and white-label reporting. Contact us to discuss your requirements.',
-  },
-  {
-    q: 'Can I start with only VARA or CBUAE?',
-    a: 'Yes. Source packs are tailored to your regulatory profile. You can start with specific regulators and expand coverage after your source readiness review is complete.',
+    a: 'Multi-workspace support is on the pilot roadmap for the Compliance Consultant plan. Contact us to discuss your requirements and timeline.',
   },
   {
     q: 'Is billing automatic?',
     a: 'No. During the founding pilot, billing is manually activated after source readiness review and pilot confirmation. No payment method is stored until billing is formally set up. You will receive advance notice before any charges.',
+  },
+  {
+    q: 'Why does UAE Monitor say "evidence-readiness validation"?',
+    a: 'We currently have 13 enabled UAE regulatory sources. Before we commit to monitoring a source for your workspace, we run a readiness check to confirm reliable access and extraction. This is documented in your source status dashboard.',
   },
 ]
 
@@ -174,8 +180,8 @@ export default function PricingPage({ onBack, onCreateWorkspace }) {
             Choose the source monitoring plan that matches your UAE compliance footprint
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Founding pilots are manually activated after source readiness review. Stripe billing can be connected later.
-            No payment method required to start.
+            Founding pilots are manually activated after source readiness review. No payment method required to start.
+            Source readiness validation is required before activation.
           </p>
         </div>
 
@@ -272,7 +278,7 @@ export default function PricingPage({ onBack, onCreateWorkspace }) {
         <div className="text-center bg-[#0D1B2E] border border-slate-800 rounded-2xl p-10">
           <h2 className="text-2xl font-bold text-white mb-3">Ready to start?</h2>
           <p className="text-slate-400 text-sm mb-6 max-w-lg mx-auto">
-            Request a source readiness review, start a founding pilot, or talk to us about your compliance footprint.
+            Request a source readiness review, start a founding pilot, or talk to us about your UAE compliance footprint.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <button
@@ -297,7 +303,8 @@ export default function PricingPage({ onBack, onCreateWorkspace }) {
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-8">
-          Not legal advice. For monitoring information only. StatuteProof does not guarantee compliance, prevent fines, or certify regulatory coverage.
+          Monitoring intelligence only. Not legal advice. StatuteProof does not guarantee compliance, prevent fines, or certify regulatory coverage.
+          Source readiness validation required before activation. Features marked "pilot roadmap" are not live by default.
           Founding pilot pricing applies to the first cohort while source validation and brief format are being refined.
         </p>
       </div>

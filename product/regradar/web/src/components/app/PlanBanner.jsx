@@ -38,8 +38,8 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
               </div>
               <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
                 {trial_expired
-                  ? 'Your Evidence Preview has ended. Choose a plan to unlock live monitoring, weekly briefs, and audit exports.'
-                  : 'Explore the workspace with sample evidence and source-readiness tools. Choose a plan to unlock live monitoring, weekly briefs, custom sources, and audit exports.'}
+                  ? 'Your source readiness review access has ended. Choose a plan to start live monitoring and evidence records.'
+                  : 'Explore the workspace with sample evidence and source-readiness tools. Choose a plan to start live monitoring, evidence records, and weekly source status updates.'}
               </p>
             </div>
           </div>
@@ -65,7 +65,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           {[
             { label: 'Current plan', value: plan_display },
             { label: 'Live monitoring', value: 'Not included', muted: true },
-            { label: 'Recommended', value: 'Professional' },
+            { label: 'Recommended', value: 'UAE Monitor' },
             { label: 'Next step', value: 'Choose your source pack' },
           ].map(({ label, value, muted }) => (
             <div key={label}>
