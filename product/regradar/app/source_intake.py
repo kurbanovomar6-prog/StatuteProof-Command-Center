@@ -25,6 +25,7 @@ import logging
 from pathlib import Path
 
 from app.source_tester import validate_public_url
+from app.text_normalization import normalize_for_change_hash
 
 logger = logging.getLogger(__name__)
 
@@ -182,6 +183,10 @@ def run_source_intake(
         "hash_collision": False,
         "collision_source_id": None,
         "quality": "POOR",
+        "content_hash": "",
+        "extraction_method": "",
+        "failure_reason": "",
+        "remediation_hint": "",
         "evidence_written": False,
         "errors": [],
         "notes": "",
@@ -191,6 +196,8 @@ def run_source_intake(
     safe, reason = validate_public_url(url)
     if not safe:
         result["status"] = SourceIntakeStatus.BLOCKED
+        result["failure_reason"] = reason
+        result["remediation_hint"] = "Use a public http(s) URL without credentials, login, private network, or restricted portal access."
         result["errors"].append(f"URL blocked: {reason}")
         return result
 
@@ -204,7 +211,13 @@ def run_source_intake(
             force_playwright=(fetch_method == "playwright"),
         )
     except Exception as exc:
-        result["status"] = SourceIntakeStatus.BLOCKED
+        if wait_selector or content_selector or fetch_method == "playwright":
+            result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
+            result["remediation_hint"] = "Review the configured wait_for_selector/content_selector before activation."
+        else:
+            result["status"] = SourceIntakeStatus.BLOCKED
+            result["remediation_hint"] = "Confirm the source is public and technically accessible."
+        result["failure_reason"] = f"Fetch failed: {exc}"
         result["errors"].append(f"Fetch failed: {exc}")
         return result
 
@@ -214,19 +227,28 @@ def run_source_intake(
     try:
         from app.extractors import extract_best_text
         extracted = extract_best_text(html)
-        text: str = extracted[0] if isinstance(extracted, tuple) else str(extracted)
+        if isinstance(extracted, tuple):
+            text = str(extracted[0] or "")
+            result["extraction_method"] = str(extracted[1] or "")
+        elif isinstance(extracted, dict):
+            text = str(extracted.get("text") or "")
+            result["extraction_method"] = str(extracted.get("method") or extracted.get("source") or "")
+        else:
+            text = str(extracted or "")
     except Exception as exc:
         result["errors"].append(f"Extraction failed: {exc}")
         text = ""
 
-    result["chars_normalized"] = len(text)
+    normalized_text = normalize_for_change_hash(text)
+    result["chars_normalized"] = len(normalized_text)
 
     # ── 4. Nav-shell detection ────────────────────────────────────────────────
-    nav_shell = is_nav_shell_only(text)
+    nav_shell = is_nav_shell_only(normalized_text)
     result["nav_shell_detected"] = nav_shell
 
     # ── 5. Hash collision check ───────────────────────────────────────────────
-    content_hash = _content_hash(text)
+    content_hash = _content_hash(normalized_text)
+    result["content_hash"] = content_hash
     collision_id: str | None = None
     if all_sources and source_id:
         collision, collision_id = _check_hash_collision(content_hash, source_id, all_sources)
@@ -244,18 +266,32 @@ def run_source_intake(
 
     if nav_shell or collision:
         result["status"] = SourceIntakeStatus.NAV_SHELL_ONLY
+        result["failure_reason"] = "Extracted content is a navigation shell or collides with another source hash."
+        result["remediation_hint"] = "Configure a precise content_selector or adapter before marking this source ready."
     elif chars == 0 or result["chars_raw"] < 200:
         result["status"] = SourceIntakeStatus.BLOCKED
+        result["failure_reason"] = "No meaningful extractable content was found."
+        result["remediation_hint"] = "Confirm the URL is public, accessible, and not a private portal or blocked page."
     elif chars < 100:
         result["status"] = SourceIntakeStatus.JS_RENDERING_NEEDED
+        result["failure_reason"] = "Extracted text is too small for reliable monitoring."
+        result["remediation_hint"] = "Use Playwright rendering and a stable content selector."
     elif chars < 500 and pdf_chars == 0:
         result["status"] = SourceIntakeStatus.JS_RENDERING_NEEDED
+        result["failure_reason"] = "Extracted text is below the minimum reliable threshold."
+        result["remediation_hint"] = "Use Playwright rendering and a stable content selector."
     elif chars < 500 and pdf_chars > 1000:
         result["status"] = SourceIntakeStatus.PDF_EXTRACTION_NEEDED
+        result["failure_reason"] = "HTML text is thin but PDF text appears available."
+        result["remediation_hint"] = "Add a PDF extraction path before activating monitoring."
     elif chars < expected_min:
         result["status"] = SourceIntakeStatus.QUALITY_DROP
+        result["failure_reason"] = f"Normalized text length {chars} is below expected minimum {expected_min}."
+        result["remediation_hint"] = "Review selector, rendering, or source structure before activation."
     elif chars < 1000 and not wait_selector:
         result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
+        result["failure_reason"] = "Text is present but too thin without an explicit selector."
+        result["remediation_hint"] = "Add wait_for_selector/content_selector and retest."
     else:
         result["status"] = SourceIntakeStatus.CONFIRMED_ACCESSIBLE
 
@@ -263,6 +299,8 @@ def run_source_intake(
     total = chars + pdf_chars
     if total >= 5_000 and result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
         result["quality"] = "GOOD"
+    elif result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
+        result["quality"] = "ACCEPTABLE"
     elif total >= 1_000:
         result["quality"] = "LIMITED"
     else:
@@ -283,7 +321,7 @@ def run_source_intake(
     # ── 10. Evidence write (optional) ────────────────────────────────────────
     if write_evidence and result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
         try:
-            _write_intake_evidence(source_id, url, html, text, content_hash)
+            _write_intake_evidence(source_id, url, html, normalized_text, content_hash)
             result["evidence_written"] = True
         except Exception as exc:
             result["errors"].append(f"Evidence write failed: {exc}")
@@ -353,28 +391,66 @@ def readiness_summary(sources: list[dict] | None = None) -> dict:
     ready = 0
     remediation = 0
 
+    hash_to_source_ids: dict[str, list[str]] = {}
+    for sid, run in runs.items():
+        h = run.get("normalized_hash")
+        if h:
+            hash_to_source_ids.setdefault(str(h), []).append(str(sid))
+    colliding_source_ids = {
+        sid
+        for source_ids in hash_to_source_ids.values()
+        if len(set(source_ids)) > 1
+        for sid in source_ids
+    }
+
     for s in enabled:
         sid = s.get("source_id", "")
         run = runs.get(sid)
+        failure_reason = ""
+        remediation_hint = ""
 
         if run:
-            chars = run.get("chars", 0)
+            chars = int(run.get("normalized_chars") or run.get("extracted_chars") or 0)
             last_run = run.get("timestamp_utc", "")[:10] if run.get("timestamp_utc") else ""
-            # Approximate status from run data (no live fetch here)
-            if chars >= 1000:
-                status = SourceIntakeStatus.CONFIRMED_ACCESSIBLE
-                ready += 1
-            elif chars >= 100:
+            change_status = str(run.get("change_status") or "")
+            access_status = str(run.get("access_status") or "")
+            quality = str(run.get("extraction_quality") or "")
+            normalized_hash = run.get("normalized_hash")
+            proof_path = run.get("proof_block_path")
+            limitations = " ".join(str(x) for x in (run.get("limitations_notes") or []))
+            expected_min = int(s.get("expected_min_length") or _GLOBAL_MIN_CHARS)
+
+            bad_change = change_status in {"FAILED", "QUALITY_DROP", "SOURCE_STRUCTURE_CHANGED"}
+            bad_access = access_status in {"failed", "blocked", "restricted"}
+            bad_quality = quality not in {"GOOD", "MEDIUM", "ACCEPTABLE"}
+            collision = sid in colliding_source_ids
+            nav_shell = "nav" in limitations.lower() and "shell" in limitations.lower()
+
+            if bad_change or bad_access:
+                status = SourceIntakeStatus.BLOCKED
+                failure_reason = f"Latest run status is not usable: change_status={change_status}, access_status={access_status}."
+                remediation_hint = "Fix source access or extraction before marking this source ready."
+                remediation += 1
+            elif nav_shell or collision:
+                status = SourceIntakeStatus.NAV_SHELL_ONLY
+                failure_reason = "Latest run appears to be a nav shell or shares a normalized hash with another source."
+                remediation_hint = "Add a precise selector/adapter and rerun evidence validation."
+                remediation += 1
+            elif bad_quality or chars < expected_min or not normalized_hash or not proof_path:
                 status = SourceIntakeStatus.QUALITY_DROP
+                failure_reason = "Latest run does not meet extraction quality, hash, length, or proof artifact requirements."
+                remediation_hint = "Rerun source validation and confirm normalized hash plus proof artifact exist."
                 remediation += 1
             else:
-                status = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
-                remediation += 1
+                status = SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+                ready += 1
         else:
             status = SourceIntakeStatus.UNSUPPORTED
             last_run = ""
             remediation += 1
             chars = 0
+            failure_reason = "No stored source run record exists."
+            remediation_hint = "Run a safe source validation with evidence recording before activation."
 
         breakdown.append({
             "source_id": sid,
@@ -384,6 +460,8 @@ def readiness_summary(sources: list[dict] | None = None) -> dict:
             "severity": STATUS_SEVERITY.get(status, "error"),
             "chars": chars,
             "last_run": last_run,
+            "failure_reason": failure_reason,
+            "remediation_hint": remediation_hint,
         })
 
     return {

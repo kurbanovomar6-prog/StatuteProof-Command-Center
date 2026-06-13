@@ -107,6 +107,9 @@ def validate_public_url(url: str) -> tuple[bool, str]:
     if not host:
         return False, "URL has no hostname"
 
+    if parsed.username or parsed.password:
+        return False, "URLs with embedded credentials are not allowed"
+
     if host in _BLOCKED_HOSTNAMES:
         return False, f"Hostname {host!r} is a loopback / internal address"
 

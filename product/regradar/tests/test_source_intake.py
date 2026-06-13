@@ -19,6 +19,7 @@ from app.source_intake import (
     _check_hash_collision,
     _content_hash,
     is_nav_shell_only,
+    readiness_summary,
     run_source_intake,
 )
 
@@ -94,6 +95,31 @@ def test_localhost_blocked():
     assert safe is False
 
 
+def test_file_url_blocked():
+    from app.source_tester import validate_public_url
+    safe, reason = validate_public_url("file:///etc/passwd")
+    assert safe is False
+
+
+def test_loopback_ip_blocked():
+    from app.source_tester import validate_public_url
+    safe, reason = validate_public_url("http://127.0.0.1:5000/api")
+    assert safe is False
+
+
+def test_unspecified_ip_blocked():
+    from app.source_tester import validate_public_url
+    safe, reason = validate_public_url("http://0.0.0.0:8000")
+    assert safe is False
+
+
+def test_credentials_in_url_blocked():
+    from app.source_tester import validate_public_url
+    safe, reason = validate_public_url("https://user:password@example.com/source")
+    assert safe is False
+    assert "credentials" in reason.lower()
+
+
 # ── 2. Nav-shell detection ────────────────────────────────────────────────────
 
 
@@ -103,6 +129,19 @@ def test_nav_shell_detected_on_short_lines():
 
 def test_good_content_passes_nav_check():
     assert is_nav_shell_only(_GOOD_TEXT) is False
+
+
+def test_repeated_menu_shell_detected():
+    repeated_shell = "\n".join([
+        "Home", "About", "Rules", "Guidance", "Forms", "News", "Contact",
+        "Search", "Privacy", "Accessibility",
+    ] * 12)
+    assert is_nav_shell_only(repeated_shell) is True
+
+
+def test_mixed_page_with_article_not_nav_shell():
+    mixed = _NAV_SHELL_TEXT + "\n" + (_GOOD_TEXT * 4)
+    assert is_nav_shell_only(mixed) is False
 
 
 def test_nav_shell_below_max_chars_threshold():
@@ -280,7 +319,371 @@ def test_content_hash_deterministic():
     assert h1 == h2
 
 
+def test_intake_uses_extracted_dict_text_not_dict_repr():
+    from app.text_normalization import normalize_for_change_hash
+
+    text = _GOOD_TEXT * 4
+    source = {
+        "source_id": "AE-test",
+        "url": "https://example.com/source",
+        "expected_min_length": 500,
+        "wait_for_selector": "main",
+        "content_selector": "main",
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=_GOOD_HTML), \
+         patch("app.extractors.extract_best_text", return_value={"text": text, "method": "unit-test"}):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["extraction_method"] == "unit-test"
+    assert result["chars_normalized"] == len(normalize_for_change_hash(text))
+    assert len(result["content_hash"]) == 16
+    assert result["evidence_written"] is False
+
+
+def test_readiness_summary_requires_hash_quality_and_proof():
+    sources = [
+        {
+            "source_id": "AE-ready",
+            "enabled": True,
+            "name": "Ready source",
+            "expected_min_length": 500,
+        },
+        {
+            "source_id": "AE-no-proof",
+            "enabled": True,
+            "name": "No proof source",
+            "expected_min_length": 500,
+        },
+    ]
+    runs = {
+        "AE-ready": {
+            "timestamp_utc": "2026-06-13T10:00:00+00:00",
+            "normalized_chars": 1200,
+            "change_status": "UNCHANGED",
+            "access_status": "success",
+            "extraction_quality": "GOOD",
+            "normalized_hash": "hash-ready",
+            "proof_block_path": "data/source_runs/proof.json",
+            "limitations_notes": [],
+        },
+        "AE-no-proof": {
+            "timestamp_utc": "2026-06-13T10:00:00+00:00",
+            "normalized_chars": 1200,
+            "change_status": "UNCHANGED",
+            "access_status": "success",
+            "extraction_quality": "GOOD",
+            "normalized_hash": "hash-no-proof",
+            "limitations_notes": [],
+        },
+    }
+
+    with patch("app.source_runs.latest_runs", return_value=runs):
+        summary = readiness_summary(sources)
+
+    statuses = {row["source_id"]: row["status"] for row in summary["breakdown"]}
+    assert statuses["AE-ready"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert statuses["AE-no-proof"] == SourceIntakeStatus.QUALITY_DROP
+    assert summary["confirmed_ready"] == 1
+
+
 def test_content_hash_differs():
     h1 = _content_hash("content A")
     h2 = _content_hash("content B")
     assert h1 != h2
+
+
+# ── 5. Failure reason and remediation hint ────────────────────────────────────
+
+
+def test_failure_reason_set_on_blocked():
+    """BLOCKED status must include a failure_reason."""
+    from app.source_tester import validate_public_url
+    with patch("app.source_intake.run_source_intake") as mock_intake:
+        mock_intake.return_value = {
+            "source_id": "AE-test",
+            "url": "http://192.168.1.1/page",
+            "status": SourceIntakeStatus.BLOCKED,
+            "chars_raw": 0,
+            "chars_normalized": 0,
+            "pdf_chars": 0,
+            "nav_shell_detected": False,
+            "hash_collision": False,
+            "collision_source_id": None,
+            "quality": "POOR",
+            "content_hash": "",
+            "extraction_method": "",
+            "failure_reason": "URL blocked: IP address is not a public routable address",
+            "remediation_hint": "Use a public http(s) URL without credentials.",
+            "evidence_written": False,
+            "errors": ["URL blocked: IP address is not a public routable address"],
+            "notes": "",
+        }
+        result = mock_intake({"url": "http://192.168.1.1/page"})
+        assert result["failure_reason"] != ""
+        assert result["status"] == SourceIntakeStatus.BLOCKED
+
+
+def test_remediation_hint_set_on_blocked():
+    """BLOCKED status must include a remediation_hint."""
+    with patch("app.source_intake.run_source_intake") as mock_intake:
+        mock_intake.return_value = {
+            "source_id": "AE-test",
+            "url": "http://localhost/page",
+            "status": SourceIntakeStatus.BLOCKED,
+            "chars_raw": 0,
+            "chars_normalized": 0,
+            "pdf_chars": 0,
+            "nav_shell_detected": False,
+            "hash_collision": False,
+            "collision_source_id": None,
+            "quality": "POOR",
+            "content_hash": "",
+            "extraction_method": "",
+            "failure_reason": "URL blocked: localhost is not allowed",
+            "remediation_hint": "Use a public http(s) URL without credentials, login, private network, or restricted portal access.",
+            "evidence_written": False,
+            "errors": [],
+            "notes": "",
+        }
+        result = mock_intake({"url": "http://localhost/page"})
+        assert result["remediation_hint"] != ""
+
+
+def test_quality_drop_never_confirmed():
+    """A source with QUALITY_DROP status must NOT be CONFIRMED_ACCESSIBLE."""
+    with patch("app.source_intake.run_source_intake") as mock_intake:
+        mock_intake.return_value = {
+            "source_id": "AE-test",
+            "url": "https://example.com",
+            "status": SourceIntakeStatus.QUALITY_DROP,
+            "chars_raw": 3000,
+            "chars_normalized": 2000,
+            "pdf_chars": 0,
+            "nav_shell_detected": False,
+            "hash_collision": False,
+            "collision_source_id": None,
+            "quality": "LIMITED",
+            "content_hash": "abc123",
+            "extraction_method": "trafilatura",
+            "failure_reason": "Normalized text length 2000 is below expected minimum 5000.",
+            "remediation_hint": "Review selector or rendering.",
+            "evidence_written": False,
+            "errors": [],
+            "notes": "Chars (2000) below expected minimum (5000).",
+        }
+        result = mock_intake({"url": "https://example.com", "expected_min_length": 5000})
+        assert result["status"] != SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+        assert result["status"] == SourceIntakeStatus.QUALITY_DROP
+
+
+def test_status_constants_never_overlap_with_unchanged():
+    """No intake status should equal 'UNCHANGED' — that belongs to change detection."""
+    statuses = [
+        SourceIntakeStatus.CONFIRMED_ACCESSIBLE,
+        SourceIntakeStatus.JS_RENDERING_NEEDED,
+        SourceIntakeStatus.PDF_EXTRACTION_NEEDED,
+        SourceIntakeStatus.NAV_SHELL_ONLY,
+        SourceIntakeStatus.QUALITY_DROP,
+        SourceIntakeStatus.NEEDS_SELECTOR_REVIEW,
+        SourceIntakeStatus.UNSUPPORTED,
+        SourceIntakeStatus.BLOCKED,
+    ]
+    assert "UNCHANGED" not in statuses, "UNCHANGED is a change-detection status, not an intake status"
+
+
+def test_extraction_method_in_result_dict():
+    """result dict must include extraction_method key."""
+    text = _GOOD_TEXT * 4
+    source = {
+        "source_id": "AE-test",
+        "url": "https://example.com/source",
+        "expected_min_length": 500,
+    }
+    with patch("app.scraper.fetch_page_with_config", return_value=_GOOD_HTML), \
+         patch("app.extractors.extract_best_text", return_value={"text": text, "method": "bs4"}):
+        result = run_source_intake(source, write_evidence=False)
+    assert "extraction_method" in result
+    assert result["extraction_method"] == "bs4"
+
+
+def test_content_hash_in_result_dict():
+    """result dict must include content_hash key with length 16."""
+    text = _GOOD_TEXT * 4
+    source = {
+        "source_id": "AE-test",
+        "url": "https://example.com/source",
+        "expected_min_length": 500,
+    }
+    with patch("app.scraper.fetch_page_with_config", return_value=_GOOD_HTML), \
+         patch("app.extractors.extract_best_text", return_value={"text": text, "method": "trafilatura"}):
+        result = run_source_intake(source, write_evidence=False)
+    assert "content_hash" in result
+    assert len(result["content_hash"]) == 16
+
+
+# ── 6. Provider wrappers — html_extraction ────────────────────────────────────
+
+
+def test_html_provider_result_schema():
+    """best_html_extract returns a dict with required keys."""
+    from app.providers.html_extraction import best_html_extract
+    result = best_html_extract(_GOOD_HTML)
+    required_keys = ["provider_name", "success", "dependency_available", "content",
+                     "confidence", "warnings", "error", "elapsed_ms"]
+    for key in required_keys:
+        assert key in result, f"Missing key: {key}"
+
+
+def test_html_provider_trafilatura_returns_content():
+    """trafilatura_extract should succeed on well-formed HTML."""
+    from app.providers.html_extraction import trafilatura_extract
+    result = trafilatura_extract(_GOOD_HTML)
+    assert result["provider_name"] == "trafilatura"
+    if result["dependency_available"]:
+        assert result["success"] is True
+        assert len(result["content"]) > 0
+
+
+def test_html_provider_bs4_always_available():
+    """bs4_extract must succeed — bs4 is a required dep."""
+    from app.providers.html_extraction import bs4_extract
+    result = bs4_extract(_GOOD_HTML)
+    assert result["provider_name"] == "bs4"
+    assert result["dependency_available"] is True
+    assert result["success"] is True
+    assert len(result["content"]) > 0
+
+
+def test_html_provider_selectolax_graceful_missing():
+    """selectolax_extract must not raise if selectolax is not installed."""
+    from app.providers.html_extraction import selectolax_extract
+    result = selectolax_extract(_GOOD_HTML, selector="main")
+    assert result["provider_name"] == "selectolax"
+    assert isinstance(result["success"], bool)
+    assert isinstance(result["dependency_available"], bool)
+
+
+def test_html_provider_cascade_returns_longest():
+    """best_html_extract should return content (not crash) on good HTML."""
+    from app.providers.html_extraction import best_html_extract
+    result = best_html_extract(_GOOD_HTML)
+    assert result["success"] is True
+    assert len(result["content"]) > 100
+
+
+def test_html_provider_readability_graceful():
+    """readability_extract must not raise if dep is missing or available."""
+    from app.providers.html_extraction import readability_extract
+    result = readability_extract(_GOOD_HTML)
+    assert result["provider_name"] == "readability"
+    assert isinstance(result["success"], bool)
+    assert isinstance(result["dependency_available"], bool)
+
+
+# ── 7. Provider wrappers — pdf_extraction ────────────────────────────────────
+
+
+def test_pdf_provider_result_schema():
+    """best_pdf_extract with empty bytes returns structured result."""
+    from app.providers.pdf_extraction import best_pdf_extract
+    result = best_pdf_extract(b"not-a-pdf")
+    required_keys = ["provider_name", "success", "dependency_available", "content",
+                     "page_count", "confidence", "warnings", "error", "elapsed_ms"]
+    for key in required_keys:
+        assert key in result, f"Missing key: {key}"
+
+
+def test_pdf_provider_graceful_on_bad_bytes():
+    """PDF extraction providers must not raise uncaught exceptions on bad input."""
+    from app.providers.pdf_extraction import pymupdf_extract, pdfplumber_extract, pypdf_extract
+    for fn in [pymupdf_extract, pdfplumber_extract, pypdf_extract]:
+        result = fn(b"not-a-real-pdf")
+        assert isinstance(result["success"], bool)
+        assert isinstance(result["dependency_available"], bool)
+
+
+def test_pdf_provider_none_result_on_all_fail():
+    """best_pdf_extract on bad bytes returns provider_name='none' and success=False."""
+    from app.providers.pdf_extraction import best_pdf_extract
+    result = best_pdf_extract(b"not-a-real-pdf")
+    assert result["success"] is False
+
+
+# ── 8. Provider wrappers — optional_tools ────────────────────────────────────
+
+
+def test_optional_tools_deepdiff_fallback():
+    """structured_diff must not raise if deepdiff is not installed."""
+    from app.providers.optional_tools import structured_diff
+    old = {"a": 1, "b": 2}
+    new = {"a": 1, "b": 3, "c": 4}
+    result = structured_diff(old, new)
+    required_keys = ["provider", "available", "success", "has_changes", "diff", "error", "elapsed_ms"]
+    for key in required_keys:
+        assert key in result, f"Missing key: {key}"
+    assert result["success"] is True
+    assert result["has_changes"] is True
+
+
+def test_optional_tools_deepdiff_no_change():
+    """structured_diff on identical dicts returns has_changes=False."""
+    from app.providers.optional_tools import structured_diff
+    d = {"a": 1, "b": 2}
+    result = structured_diff(d, d.copy())
+    assert result["has_changes"] is False
+
+
+def test_optional_tools_htmldate_fallback():
+    """extract_date_from_html must not raise if htmldate is not installed."""
+    from app.providers.optional_tools import extract_date_from_html
+    result = extract_date_from_html(_GOOD_HTML)
+    required_keys = ["provider", "available", "success", "date", "error", "elapsed_ms"]
+    for key in required_keys:
+        assert key in result, f"Missing key: {key}"
+    assert isinstance(result["success"], bool)
+    assert isinstance(result["date"], str)
+
+
+def test_optional_tools_courlan_fallback():
+    """canonicalize_url must not raise if courlan is not installed."""
+    from app.providers.optional_tools import canonicalize_url
+    result = canonicalize_url("https://www.dfsa.ae/rules-and-standards")
+    required_keys = ["provider", "available", "success", "canonical_url", "is_valid", "error", "elapsed_ms"]
+    for key in required_keys:
+        assert key in result, f"Missing key: {key}"
+    assert result["is_valid"] is True
+    assert "dfsa.ae" in result["canonical_url"]
+
+
+def test_optional_tools_courlan_rejects_invalid():
+    """canonicalize_url returns is_valid=False for malformed URLs."""
+    from app.providers.optional_tools import canonicalize_url
+    result = canonicalize_url("not-a-url-at-all")
+    assert result["is_valid"] is False
+
+
+# ── 9. can_activate gate — status-level checks ───────────────────────────────
+
+
+def test_can_activate_true_only_for_confirmed():
+    """Only CONFIRMED_ACCESSIBLE maps to can_activate=True."""
+    from app.source_intake import SourceIntakeStatus
+    non_confirmable = [
+        SourceIntakeStatus.JS_RENDERING_NEEDED,
+        SourceIntakeStatus.PDF_EXTRACTION_NEEDED,
+        SourceIntakeStatus.NAV_SHELL_ONLY,
+        SourceIntakeStatus.QUALITY_DROP,
+        SourceIntakeStatus.NEEDS_SELECTOR_REVIEW,
+        SourceIntakeStatus.UNSUPPORTED,
+        SourceIntakeStatus.BLOCKED,
+    ]
+    for s in non_confirmable:
+        can_activate = (s == SourceIntakeStatus.CONFIRMED_ACCESSIBLE)
+        assert can_activate is False, f"{s} should NOT be can_activate=True"
+
+
+def test_needs_selector_review_is_not_confirmed():
+    """NEEDS_SELECTOR_REVIEW must not resolve to CONFIRMED_ACCESSIBLE."""
+    assert SourceIntakeStatus.NEEDS_SELECTOR_REVIEW != SourceIntakeStatus.CONFIRMED_ACCESSIBLE

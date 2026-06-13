@@ -411,8 +411,11 @@ def fetch_page_with_config(
         if wait_for_selector:
             try:
                 page.wait_for_selector(wait_for_selector, timeout=10_000)
-            except Exception:
+            except Exception as exc:
                 logger.warning("wait_for_selector '%s' not found within 10s at %s", wait_for_selector, url)
+                raise TimeoutError(
+                    f"wait_for_selector {wait_for_selector!r} not found at {url}"
+                ) from exc
         else:
             page.wait_for_timeout(_PW_JS_SETTLE_MS)
 
@@ -422,8 +425,10 @@ def fetch_page_with_config(
                 html = element.inner_html()
                 logger.info("content_selector '%s' extracted %d chars from %s", content_selector, len(html), url)
             else:
-                logger.warning("content_selector '%s' matched nothing at %s — using full page", content_selector, url)
-                html = page.content()
+                logger.warning("content_selector '%s' matched nothing at %s", content_selector, url)
+                raise ValueError(
+                    f"content_selector {content_selector!r} matched nothing at {url}"
+                )
         else:
             html = page.content()
     finally:

@@ -1219,23 +1219,36 @@ class _Handler(BaseHTTPRequestHandler):
             all_sources = load_sources_json()
             result = run_source_intake(source, all_sources=all_sources, write_evidence=False)
 
-            can_activate = result["status"] in (
-                "CONFIRMED_ACCESSIBLE", "PDF_EXTRACTION_NEEDED"
-            )
+            can_activate = result["status"] == "CONFIRMED_ACCESSIBLE"
+            raw_hash = result.get("content_hash", "")
             self._send_json({
                 "ok": True,
                 "status": result["status"],
                 "status_label": STATUS_LABELS.get(result["status"], result["status"]),
+                "can_activate": can_activate,
+                # extraction details
                 "chars": result["chars_normalized"],
+                "normalized_length": result["chars_normalized"],
                 "chars_raw": result["chars_raw"],
                 "pdf_chars": result["pdf_chars"],
+                "extraction_method": result.get("extraction_method", ""),
+                "normalized_hash": raw_hash[:12] if raw_hash else "",
+                # quality
+                "quality": result["quality"],
+                "quality_label": result["quality"],
+                # safety flags
                 "nav_shell_detected": result["nav_shell_detected"],
                 "hash_collision": result["hash_collision"],
                 "collision_source_id": result["collision_source_id"],
-                "quality": result["quality"],
-                "can_activate": can_activate,
+                # failure detail
+                "failure_reason": result.get("failure_reason", ""),
+                "remediation_hint": result.get("remediation_hint", ""),
+                "warnings": result.get("errors", []),
                 "notes": result["notes"],
-                "errors": result["errors"],
+                # evidence status for this no-save test
+                "evidence_written": False,
+                "evidence_required": True,
+                "proof_path": None,
             })
         except Exception as exc:
             logger.error("custom-source test error: %s: %s", type(exc).__name__, exc)
@@ -1283,13 +1296,17 @@ class _Handler(BaseHTTPRequestHandler):
                 "url": url,
                 "jurisdiction": jurisdiction,
                 "category": category,
-                "enabled": True,
+                "enabled": False,
                 "status": "pending_validation",
                 "custom": True,
                 "tier": "custom",
             }
             append_source_to_json(new_source)
-            self._send_json({"ok": True, "source_id": source_id, "message": "Custom source added. Run a pipeline cycle to validate."})
+            self._send_json({
+                "ok": True,
+                "source_id": source_id,
+                "message": "Custom source saved for validation. It is not active until readiness and evidence checks pass.",
+            })
         except Exception as exc:
             logger.error("custom-sources add error: %s: %s", type(exc).__name__, exc)
             self._send_json({"ok": False, "message": "Failed to add source."}, 500)

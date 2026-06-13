@@ -1,9 +1,54 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, X, Loader2, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
+import { Plus, X, Loader2, CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react'
 import { MOCK_SOURCES } from '../../data/appMockData'
 import { getWorkspaceProfile, filterSources } from '../../data/workspaceProfile'
-import { profile as profileApi } from '../../api'
 
+// ── status display helpers ────────────────────────────────────────────────────
+
+const INTAKE_STATUS_LABELS = {
+  CONFIRMED_ACCESSIBLE:  'Accessible',
+  JS_RENDERING_NEEDED:   'JS rendering needed',
+  PDF_EXTRACTION_NEEDED: 'PDF extraction needed',
+  NAV_SHELL_ONLY:        'Nav shell — selector needed',
+  QUALITY_DROP:          'Quality below threshold',
+  NEEDS_SELECTOR_REVIEW: 'Selector review needed',
+  UNSUPPORTED:           'Not supported',
+  BLOCKED:               'Blocked',
+  // old api/source-test statuses (fallback compat)
+  PASS:                  'Accessible',
+  NEEDS_ADAPTER:         'Needs adapter',
+  FAILED:                'Failed',
+}
+
+const INTAKE_STATUS_COLOR = {
+  CONFIRMED_ACCESSIBLE:  'text-emerald-400',
+  JS_RENDERING_NEEDED:   'text-amber-400',
+  PDF_EXTRACTION_NEEDED: 'text-amber-400',
+  NAV_SHELL_ONLY:        'text-rose-400',
+  QUALITY_DROP:          'text-amber-400',
+  NEEDS_SELECTOR_REVIEW: 'text-amber-400',
+  UNSUPPORTED:           'text-slate-400',
+  BLOCKED:               'text-rose-400',
+  PASS:                  'text-emerald-400',
+  NEEDS_ADAPTER:         'text-amber-400',
+  FAILED:                'text-rose-400',
+}
+
+const INTAKE_STATUS_BG = {
+  CONFIRMED_ACCESSIBLE:  'bg-emerald-500/10 border-emerald-500/20',
+  JS_RENDERING_NEEDED:   'bg-amber-500/10 border-amber-500/20',
+  PDF_EXTRACTION_NEEDED: 'bg-amber-500/10 border-amber-500/20',
+  NAV_SHELL_ONLY:        'bg-rose-500/10 border-rose-500/20',
+  QUALITY_DROP:          'bg-amber-500/10 border-amber-500/20',
+  NEEDS_SELECTOR_REVIEW: 'bg-amber-500/10 border-amber-500/20',
+  UNSUPPORTED:           'bg-slate-700/50 border-slate-600',
+  BLOCKED:               'bg-rose-500/10 border-rose-500/20',
+  PASS:                  'bg-emerald-500/10 border-emerald-500/20',
+  NEEDS_ADAPTER:         'bg-amber-500/10 border-amber-500/20',
+  FAILED:                'bg-rose-500/10 border-rose-500/20',
+}
+
+// legacy source table styles
 const HEALTH_STYLE = {
   PASS:    'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   Review:  'text-amber-400   bg-amber-500/10   border-amber-500/20',
@@ -17,79 +62,38 @@ const STATUS_STYLE = {
   'Needs adapter':  'text-amber-400',
 }
 
-const FILTERS = ['All', 'Validated', 'Limited', 'Partial', 'Needs adapter', 'User source']
-
-const MARKETS = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
+const FILTERS   = ['All', 'Validated', 'Limited', 'Partial', 'Needs adapter', 'User source']
+const MARKETS   = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const CATEGORIES = [
   'Central bank', 'Financial regulator', 'Crypto regulator', 'AML authority',
   'Capital markets', 'Tax authority', 'Legal database', 'Other',
 ]
 
 const TEST_STEPS = [
-  'Checking HTML accessibility…',
-  'Looking for PDF documents…',
-  'Checking RSS / sitemap…',
-  'Evaluating content quality…',
+  'Checking URL safety…',
+  'Fetching page content…',
+  'Extracting regulatory text…',
+  'Evaluating extraction quality…',
 ]
 
-const RESULT_MSG = {
-  PASS:          'Source validation request saved.',
-  LIMITED:       'Source saved for review. Additional configuration may be needed before monitoring.',
-  NEEDS_ADAPTER: 'Source saved for adapter setup. StatuteProof may need a custom connector for this portal.',
-  FAILED:        'Source could not be monitored reliably. Try another URL or contact support.',
-}
+// ── localStorage fallback (for dev mode / offline) ───────────────────────────
 
-function loadCustomSources() {
+function loadLocalCustomSources() {
   try {
     const p = JSON.parse(localStorage.getItem('regradar_workspace_profile') || '{}')
-    return Array.isArray(p.customSources) ? p.customSources.map(normalizeCustomSource) : []
-  } catch (e) {
-    console.warn('loadCustomSources failed', e)
-    return []
-  }
+    return Array.isArray(p.customSources) ? p.customSources : []
+  } catch { return [] }
 }
 
-function normalizeCustomSource(source) {
-  let hostname = source.name || source.url || 'User source'
-  try { if (source.url) hostname = new URL(source.url).hostname } catch { /* keep fallback */ }
-  return {
-    id: source.id || `user-${source.url || hostname}`,
-    name: source.name || hostname,
-    flag: source.flag || '🌐',
-    market: source.market || '',
-    category: source.category || '',
-    status: source.status || 'Limited',
-    extraction: source.extraction || 'Unknown',
-    lastChecked: source.lastChecked || 'Saved',
-    health: source.health || 'Review',
-    userSource: true,
-    ...source,
-  }
-}
-
-function persistCustomSource(source) {
+function saveLocalCustomSource(source) {
   try {
     const p = JSON.parse(localStorage.getItem('regradar_workspace_profile') || '{}')
     p.customSources = [...(p.customSources || []), source]
     localStorage.setItem('regradar_workspace_profile', JSON.stringify(p))
-    return p.customSources
-  } catch (e) {
-    console.warn('persistCustomSource failed', e)
-    return [source]
-  }
+  } catch (e) { console.warn('localStorage fallback failed', e) }
 }
 
-function backendCustomSources(sources) {
-  return sources
-    .filter(s => typeof s?.url === 'string' && /^https?:\/\//.test(s.url))
-    .map(s => ({
-      url: s.url,
-      market: s.market || '',
-      category: s.category || '',
-      notes: s.notes || '',
-      status: s.status || '',
-    }))
-}
+// ── component ─────────────────────────────────────────────────────────────────
 
 export default function SourcesPage() {
   const profile = getWorkspaceProfile()
@@ -98,15 +102,15 @@ export default function SourcesPage() {
   const [showModal, setShowModal]         = useState(false)
   const [form, setForm]                   = useState({ url: '', market: profile.markets[0] || '', category: '', notes: '' })
   const [formErrors, setFormErrors]       = useState({})
-  const [testPhase, setTestPhase]         = useState('idle')  // idle | testing | result | saved
+  const [testPhase, setTestPhase]         = useState('idle')   // idle | testing | result | saving | saved | error
   const [testResult, setTestResult]       = useState(null)
   const [testError, setTestError]         = useState('')
-  const [saveWarning, setSaveWarning]     = useState('')
+  const [legalConfirmed, setLegalConfirmed] = useState(false)
+  const [saveError, setSaveError]         = useState('')
   const [stepIndex, setStepIndex]         = useState(0)
-  const [customSources, setCustomSources] = useState(loadCustomSources)
+  const [customSources, setCustomSources] = useState(loadLocalCustomSources)
   const stepTimer                         = useRef(null)
 
-  // Manage step animation interval while testing (stepIndex reset happens in handleTest)
   useEffect(() => {
     if (testPhase === 'testing') {
       stepTimer.current = setInterval(() => {
@@ -122,7 +126,7 @@ export default function SourcesPage() {
     if (filter === 'User source') return false
     if (filter === 'All') return true
     if (filter === 'Validated') return s.status === 'Active' || s.status === 'Validated'
-    if (filter === 'Needs adapter') return s.extraction.includes('adapter') || s.extraction.includes('Geo')
+    if (filter === 'Needs adapter') return s.extraction?.includes('adapter') || s.extraction?.includes('Geo')
     return s.status === filter
   })
 
@@ -133,37 +137,41 @@ export default function SourcesPage() {
     return s.status === filter
   })
 
-  const allSources = [...filteredMock, ...filteredCustom]
+  const allSources = [...filteredMock, ...filteredCustom.map(s => ({ ...s, userSource: true }))]
 
   function resetModal() {
     setTestPhase('idle')
     setTestResult(null)
     setTestError('')
-    setSaveWarning('')
+    setSaveError('')
     setFormErrors({})
+    setLegalConfirmed(false)
     setForm({ url: '', market: profile.markets[0] || '', category: '', notes: '' })
   }
 
   function validate() {
     const errs = {}
-    if (!form.url.trim())      errs.url      = 'URL is required.'
+    if (!form.url.trim()) errs.url = 'URL is required.'
     else if (!/^https?:\/\//.test(form.url)) errs.url = 'Enter a valid URL starting with http(s)://'
     if (!form.market.trim())   errs.market   = 'Market is required.'
     if (!form.category.trim()) errs.category = 'Category is required.'
     return errs
   }
 
+  // ── test source using new /api/custom-sources/test endpoint ──────────────
   async function handleTest() {
     const errs = validate()
     if (Object.keys(errs).length) { setFormErrors(errs); return }
     setStepIndex(0)
     setTestPhase('testing')
     setTestError('')
+    setLegalConfirmed(false)
+
     try {
-      const res  = await fetch('/api/source-test', {
+      const res  = await fetch('/api/custom-sources/test', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ url: form.url, market: form.market, category: form.category }),
+        body:    JSON.stringify({ url: form.url, name: form.url }),
       })
       const data = await res.json()
       if (data.ok) {
@@ -174,39 +182,56 @@ export default function SourcesPage() {
         setTestPhase('idle')
       }
     } catch {
-      setTestError('API server not running. Start with: python run.py api')
+      setTestError('API server not reachable. Start with: python run.py api')
       setTestPhase('idle')
     }
   }
 
-  function handleSaveSource() {
-    let hostname = form.url
-    try { hostname = new URL(form.url).hostname } catch { /* use raw url as fallback */ }
+  // ── save source using /api/custom-sources endpoint ────────────────────────
+  async function handleSaveSource() {
+    if (!testResult?.can_activate) return
+    if (!legalConfirmed) return
+    setSaveError('')
+    setTestPhase('saving')
 
-    const source = {
+    let savedViaBackend = false
+    try {
+      const res = await fetch('/api/custom-sources', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          url:          form.url,
+          name:         form.url,
+          category:     form.category,
+          jurisdiction: form.market,
+        }),
+      })
+      const data = await res.json()
+      if (data.ok) savedViaBackend = true
+      else setSaveError(data.message || 'Backend save failed — saved locally.')
+    } catch {
+      setSaveError('API server not reachable — source saved locally only.')
+    }
+
+    // Always keep in local state for UI display
+    const localSource = {
       id:          `user-${Date.now()}`,
       url:         form.url,
-      name:        hostname,
-      flag:        '🌐',
+      name:        (() => { try { return new URL(form.url).hostname } catch { return form.url } })(),
       market:      form.market,
       category:    form.category,
-      notes:       form.notes,
-      status:      testResult.status === 'PASS' ? 'Validated' : testResult.status === 'NEEDS_ADAPTER' ? 'Needs adapter' : 'Limited',
-      extraction:  testResult.extraction?.join(' + ') || 'Unknown',
+      status:      'Validated',
+      extraction:  testResult.extraction_method || 'HTML',
       lastChecked: 'Just added',
-      health:      testResult.status === 'PASS' ? 'PASS' : 'Review',
+      health:      'PASS',
       userSource:  true,
     }
-    const updatedCustomSources = persistCustomSource(source)
-    setCustomSources(cs => [...cs, source])
-    profileApi.update({ custom_sources: backendCustomSources(updatedCustomSources) }).catch(err => {
-      console.warn('profile custom source save failed', err)
-      setSaveWarning('Source added locally. Backend profile sync failed; try saving settings again.')
-    })
+    saveLocalCustomSource(localSource)
+    setCustomSources(cs => [...cs, localSource])
     setTestPhase('saved')
   }
 
-  const inputCls = (field) =>
+  const inputCls = field =>
     `w-full bg-slate-900 border rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#16D9F5]/50 transition ${
       formErrors[field] ? 'border-rose-500/60' : 'border-slate-700'
     }`
@@ -216,9 +241,21 @@ export default function SourcesPage() {
   }
 
   function lastCheckedLabel(source) {
-    if (source.userSource) return source.lastChecked
-    return 'Readiness snapshot'
+    return source.userSource ? (source.lastChecked || 'Saved') : 'Readiness snapshot'
   }
+
+  // ── result panel helpers ──────────────────────────────────────────────────
+
+  const statusLabel = testResult
+    ? (INTAKE_STATUS_LABELS[testResult.status] || testResult.status)
+    : ''
+
+  const isGood    = testResult?.status === 'CONFIRMED_ACCESSIBLE' || testResult?.status === 'PASS'
+  const isFailed  = testResult?.status === 'BLOCKED' || testResult?.status === 'FAILED' || testResult?.status === 'UNSUPPORTED'
+  const needsWork = !isGood && !isFailed
+
+  const canActivate  = testResult?.can_activate === true
+  const saveEnabled  = canActivate && legalConfirmed
 
   return (
     <div className="p-5">
@@ -237,17 +274,19 @@ export default function SourcesPage() {
           className="flex items-center gap-1.5 bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Request validation
+          Test custom source
         </button>
       </div>
 
+      {/* Info banner */}
       <div className="bg-[#0D1B2E] border border-cyan-400/20 rounded-xl p-5 mb-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white mb-1">Your source map is based on your saved profile.</h2>
+            <h2 className="text-sm font-semibold text-white mb-1">Sources are validated before monitoring activates.</h2>
             <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
-              Adding a source here requests validation. It does not activate production monitoring automatically.
-              Validated sources only enter a pilot profile after access, extraction and proof/diff checks.
+              StatuteProof tests public official sources for accessibility, extraction quality, and content depth.
+              Sources pass only if meaningful regulatory text is extracted and hashed.
+              Custom sources are saved for validation — monitoring is not activated automatically.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -307,7 +346,9 @@ export default function SourcesPage() {
                     </td>
                     <td className="px-4 py-3 text-slate-300 whitespace-nowrap">{s.flag} {s.market}</td>
                     <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.category}</td>
-                    <td className={`px-4 py-3 font-medium whitespace-nowrap ${STATUS_STYLE[sourceStatusLabel(s.status)] || STATUS_STYLE[s.status] || 'text-slate-400'}`}>{sourceStatusLabel(s.status)}</td>
+                    <td className={`px-4 py-3 font-medium whitespace-nowrap ${STATUS_STYLE[sourceStatusLabel(s.status)] || STATUS_STYLE[s.status] || 'text-slate-400'}`}>
+                      {sourceStatusLabel(s.status)}
+                    </td>
                     <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.extraction}</td>
                     <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{lastCheckedLabel(s)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -323,7 +364,7 @@ export default function SourcesPage() {
         ) : (
           <div className="px-5 py-10 text-center">
             <p className="text-sm text-slate-400 mb-1">No sources match the current filter.</p>
-            <p className="text-xs text-slate-600">Try changing your filter or add a source.</p>
+            <p className="text-xs text-slate-600">Try changing your filter or test a custom source.</p>
           </div>
         )}
       </div>
@@ -335,7 +376,7 @@ export default function SourcesPage() {
 
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-              <h3 className="text-sm font-semibold text-white">Test Source Compatibility</h3>
+              <h3 className="text-sm font-semibold text-white">Test Custom Source</h3>
               <button onClick={() => { setShowModal(false); resetModal() }} className="text-slate-500 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
@@ -346,18 +387,20 @@ export default function SourcesPage() {
               <div className="px-6 py-8 text-center">
                 <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
                 <p className="text-sm font-semibold text-white mb-1">
-                  {RESULT_MSG[testResult?.status] || RESULT_MSG.PASS}
+                  Source saved for validation.
                 </p>
-                <p className="text-xs text-slate-400 mb-5">
-                  {testResult?.status === 'PASS'
-                    ? 'The source now appears in your source map for review.'
-                    : 'The source is saved with its current status.'}
+                <p className="text-xs text-slate-400 mb-3">
+                  The source appears in your source map. Monitoring activates only after evidence validation is complete.
                 </p>
-                {saveWarning && (
+                {saveError && (
                   <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mb-4">
-                    {saveWarning}
+                    {saveError}
                   </p>
                 )}
+                <div className="text-xs text-slate-500 bg-slate-800/50 rounded-lg px-3 py-2 mb-4 text-left">
+                  <p className="font-medium text-slate-400 mb-1">Evidence note</p>
+                  <p>This test confirmed accessibility without writing an evidence record. A full evidence record with hash, snapshot, and proof artifact is created during the first scheduled monitoring run.</p>
+                </div>
                 <button
                   onClick={() => { setShowModal(false); resetModal() }}
                   className="text-xs font-medium text-[#16D9F5] border border-[#16D9F5]/30 hover:border-[#16D9F5]/60 px-4 py-2 rounded-lg transition-colors"
@@ -367,64 +410,131 @@ export default function SourcesPage() {
               </div>
             )}
 
+            {/* PHASE: saving */}
+            {testPhase === 'saving' && (
+              <div className="px-6 py-8 text-center">
+                <Loader2 className="w-10 h-10 text-[#16D9F5] animate-spin mx-auto mb-3" />
+                <p className="text-sm text-slate-300">Saving source…</p>
+              </div>
+            )}
+
             {/* PHASE: result */}
             {testPhase === 'result' && testResult && (
               <div className="px-6 py-5 space-y-4">
+
                 {/* Status banner */}
-                <div className={`flex items-start gap-3 p-4 rounded-xl border ${
-                  testResult.status === 'PASS'
-                    ? 'bg-emerald-500/10 border-emerald-500/20'
-                    : testResult.status === 'FAILED'
-                    ? 'bg-rose-500/10 border-rose-500/20'
-                    : 'bg-amber-500/10 border-amber-500/20'
-                }`}>
-                  {testResult.status === 'PASS'    && <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />}
-                  {testResult.status === 'FAILED'  && <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />}
-                  {testResult.status !== 'PASS' && testResult.status !== 'FAILED' && <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />}
-                  <div>
-                    <p className={`text-sm font-semibold mb-0.5 ${
-                      testResult.status === 'PASS' ? 'text-emerald-400' :
-                      testResult.status === 'FAILED' ? 'text-rose-400' : 'text-amber-400'
-                    }`}>{testResult.recommendation}</p>
-                    <p className="text-xs text-slate-400 leading-relaxed">{testResult.message}</p>
+                <div className={`flex items-start gap-3 p-4 rounded-xl border ${INTAKE_STATUS_BG[testResult.status] || 'bg-slate-700/50 border-slate-600'}`}>
+                  {isGood    && <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />}
+                  {isFailed  && <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />}
+                  {needsWork && <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />}
+                  <div className="min-w-0">
+                    <p className={`text-sm font-semibold mb-0.5 ${INTAKE_STATUS_COLOR[testResult.status] || 'text-slate-300'}`}>
+                      {statusLabel}
+                    </p>
+                    {isGood && !testResult.evidence_written && (
+                      <p className="text-xs text-slate-400 leading-relaxed">
+                        Test passed — save required for evidence record.
+                        Evidence hash, snapshot, and proof artifact are created during the first monitoring run.
+                      </p>
+                    )}
+                    {(testResult.failure_reason) && (
+                      <p className="text-xs text-slate-400 leading-relaxed">{testResult.failure_reason}</p>
+                    )}
                   </div>
                 </div>
 
-                {/* Details */}
-                {testResult.status !== 'FAILED' && (
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+                {/* Remediation hint (when not good) */}
+                {!isGood && testResult.remediation_hint && (
+                  <div className="flex items-start gap-2 bg-slate-800/50 rounded-lg px-3 py-2.5 text-xs text-slate-300">
+                    <Info className="w-3.5 h-3.5 text-[#16D9F5] flex-shrink-0 mt-0.5" />
+                    <span>{testResult.remediation_hint}</span>
+                  </div>
+                )}
+
+                {/* Metric grid */}
+                <div className="grid grid-cols-2 gap-2.5 text-xs">
+                  <div className="bg-slate-900 rounded-lg px-3 py-2.5">
+                    <p className="text-slate-500 mb-0.5">Normalized chars</p>
+                    <p className="text-slate-200 font-medium">{(testResult.chars || 0).toLocaleString()}</p>
+                  </div>
+                  <div className="bg-slate-900 rounded-lg px-3 py-2.5">
+                    <p className="text-slate-500 mb-0.5">Quality</p>
+                    <p className={`font-medium ${testResult.quality === 'GOOD' ? 'text-emerald-400' : testResult.quality === 'ACCEPTABLE' ? 'text-amber-400' : 'text-slate-400'}`}>
+                      {testResult.quality || '—'}
+                    </p>
+                  </div>
+                  {testResult.extraction_method && (
                     <div className="bg-slate-900 rounded-lg px-3 py-2.5">
                       <p className="text-slate-500 mb-0.5">Extraction</p>
-                      <p className="text-slate-200 font-medium">{testResult.extraction?.join(' + ') || '—'}</p>
+                      <p className="text-slate-200 font-medium truncate">{testResult.extraction_method}</p>
                     </div>
+                  )}
+                  {testResult.normalized_hash && (
                     <div className="bg-slate-900 rounded-lg px-3 py-2.5">
-                      <p className="text-slate-500 mb-0.5">Content size</p>
-                      <p className="text-slate-200 font-medium">{testResult.chars?.toLocaleString() || '0'} chars</p>
+                      <p className="text-slate-500 mb-0.5">Content hash</p>
+                      <p className="text-slate-200 font-mono font-medium">{testResult.normalized_hash}…</p>
                     </div>
+                  )}
+                </div>
+
+                {/* Safety flags */}
+                {(testResult.nav_shell_detected || testResult.hash_collision) && (
+                  <div className="bg-rose-500/5 border border-rose-500/20 rounded-lg px-3 py-2.5 text-xs space-y-1">
+                    {testResult.nav_shell_detected && (
+                      <p className="text-rose-300">⚠ Nav shell detected — extracted text is primarily navigation items, not regulatory content.</p>
+                    )}
+                    {testResult.hash_collision && (
+                      <p className="text-rose-300">⚠ Hash collision — this source produces identical content to {testResult.collision_source_id || 'another source'}.</p>
+                    )}
                   </div>
+                )}
+
+                {/* Evidence note */}
+                <div className="bg-slate-800/40 rounded-lg px-3 py-2.5 text-xs text-slate-500 flex items-start gap-2">
+                  <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                  <span>
+                    {canActivate
+                      ? 'Test passed. Save this source to queue it for evidence validation. No evidence record exists yet — the first monitoring run creates the hash, snapshot, and proof artifact.'
+                      : 'This source cannot be activated until the extraction issue is resolved. See the remediation hint above.'}
+                  </span>
+                </div>
+
+                {/* Legal confirmation (shown only when can_activate) */}
+                {canActivate && (
+                  <label className="flex items-start gap-2.5 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={legalConfirmed}
+                      onChange={e => setLegalConfirmed(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-slate-600 bg-slate-900 text-[#16D9F5] cursor-pointer"
+                    />
+                    <span className="text-xs text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">
+                      I confirm this is a publicly accessible official source, I am authorized to monitor it, and I understand that StatuteProof monitoring is for information only and does not constitute legal advice.
+                    </span>
+                  </label>
                 )}
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-1">
                   <button
-                    onClick={() => { setTestPhase('idle'); setTestResult(null) }}
+                    onClick={() => { setTestPhase('idle'); setTestResult(null); setLegalConfirmed(false) }}
                     className="text-xs font-medium text-slate-400 border border-slate-700 hover:border-slate-600 py-2 px-4 rounded-lg transition-colors"
                   >
                     Test another
                   </button>
-                  {testResult.status !== 'FAILED' && (
+                  {canActivate ? (
                     <button
                       onClick={handleSaveSource}
+                      disabled={!saveEnabled}
                       className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${
-                        testResult.status === 'PASS'
+                        saveEnabled
                           ? 'bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F]'
-                          : 'border border-amber-500/40 text-amber-400 hover:border-amber-500/70'
+                          : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                       }`}
                     >
-                      {testResult.status === 'PASS' ? 'Save validation request' : 'Save for review'}
+                      {saveEnabled ? 'Save for validation' : 'Confirm above to save'}
                     </button>
-                  )}
-                  {testResult.status === 'FAILED' && (
+                  ) : (
                     <button
                       onClick={() => { setShowModal(false); resetModal() }}
                       className="flex-1 text-xs font-medium text-slate-400 border border-slate-700 hover:border-slate-600 py-2 px-4 rounded-lg transition-colors"
@@ -441,7 +551,7 @@ export default function SourcesPage() {
               <div className="px-6 py-8">
                 <div className="flex items-center gap-2 mb-5">
                   <Loader2 className="w-4 h-4 text-[#16D9F5] animate-spin flex-shrink-0" />
-                  <p className="text-sm font-medium text-white">Testing source compatibility…</p>
+                  <p className="text-sm font-medium text-white">Testing source…</p>
                 </div>
                 <div className="space-y-2">
                   {TEST_STEPS.map((step, i) => (
@@ -458,7 +568,7 @@ export default function SourcesPage() {
                   ))}
                 </div>
                 <p className="mt-5 text-xs text-slate-600">
-                  Compatibility test — validation preview for this workspace.
+                  Only public sources are tested. Login, CAPTCHA, and private portals are not supported.
                 </p>
               </div>
             )}
@@ -466,12 +576,11 @@ export default function SourcesPage() {
             {/* PHASE: idle (form) */}
             {testPhase === 'idle' && (
               <div className="px-6 py-4 space-y-3">
-
                 <p className="text-xs text-slate-400">
-                  Add a source URL to test whether StatuteProof can monitor it automatically.
+                  Test whether a public regulatory source is accessible for monitoring.
+                  Only public http(s) sources are supported.
                 </p>
 
-                {/* URL */}
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Source URL *</label>
                   <input
@@ -484,7 +593,6 @@ export default function SourcesPage() {
                   {formErrors.url && <p className="text-rose-400 text-xs mt-1">{formErrors.url}</p>}
                 </div>
 
-                {/* Market */}
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Market *</label>
                   <select
@@ -498,7 +606,6 @@ export default function SourcesPage() {
                   {formErrors.market && <p className="text-rose-400 text-xs mt-1">{formErrors.market}</p>}
                 </div>
 
-                {/* Category */}
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Category *</label>
                   <select
@@ -512,7 +619,6 @@ export default function SourcesPage() {
                   {formErrors.category && <p className="text-rose-400 text-xs mt-1">{formErrors.category}</p>}
                 </div>
 
-                {/* Notes */}
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Notes (optional)</label>
                   <textarea
@@ -530,6 +636,12 @@ export default function SourcesPage() {
                   </p>
                 )}
 
+                <div className="pt-1 bg-slate-800/30 rounded-lg px-3 py-2.5 text-xs text-slate-500">
+                  StatuteProof only monitors publicly accessible official sources.
+                  Login-protected portals, CAPTCHA-gated sites, and private networks are not supported.
+                  Testing does not write evidence records.
+                </div>
+
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => { setShowModal(false); resetModal() }}
@@ -541,7 +653,7 @@ export default function SourcesPage() {
                     onClick={handleTest}
                     className="flex-1 text-xs font-semibold bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] py-2 rounded-lg transition-colors"
                   >
-                    Test compatibility
+                    Test source
                   </button>
                 </div>
               </div>
