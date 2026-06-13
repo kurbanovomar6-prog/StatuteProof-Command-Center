@@ -1216,26 +1216,38 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             from app.source_intake import run_source_intake, load_sources_json, STATUS_LABELS
             source = {"url": url, "source_id": "", "name": body.get("name", "")}
+            if body.get("content_selector"):
+                source["content_selector"] = str(body.get("content_selector"))
+            if body.get("wait_for_selector"):
+                source["wait_for_selector"] = str(body.get("wait_for_selector"))
+            if body.get("fetch_method") == "playwright":
+                source["fetch_method"] = "playwright"
             all_sources = load_sources_json()
             result = run_source_intake(source, all_sources=all_sources, write_evidence=False)
 
             can_activate = result["status"] == "CONFIRMED_ACCESSIBLE"
-            raw_hash = result.get("content_hash", "")
+            normalized_hash = result.get("normalized_hash") or result.get("content_hash", "")
             self._send_json({
                 "ok": True,
                 "status": result["status"],
+                "readiness_status": result["status"],
                 "status_label": STATUS_LABELS.get(result["status"], result["status"]),
                 "can_activate": can_activate,
+                "source_type": "custom_public_source",
                 # extraction details
                 "chars": result["chars_normalized"],
                 "normalized_length": result["chars_normalized"],
                 "chars_raw": result["chars_raw"],
                 "pdf_chars": result["pdf_chars"],
                 "extraction_method": result.get("extraction_method", ""),
-                "normalized_hash": raw_hash[:12] if raw_hash else "",
+                "provider_used": result.get("provider_used") or result.get("extraction_method", ""),
+                "normalized_hash": normalized_hash,
+                "normalized_preview": result.get("normalized_preview", ""),
                 # quality
                 "quality": result["quality"],
                 "quality_label": result["quality"],
+                "quality_score": result.get("quality_score", 0),
+                "quality_breakdown": result.get("quality_breakdown", {}),
                 # safety flags
                 "nav_shell_detected": result["nav_shell_detected"],
                 "hash_collision": result["hash_collision"],
@@ -1249,6 +1261,10 @@ class _Handler(BaseHTTPRequestHandler):
                 "evidence_written": False,
                 "evidence_required": True,
                 "proof_path": None,
+                "evidence_level": result.get("evidence_level", "PREVIEW_ONLY"),
+                "certification_status": result.get("certification_status", ""),
+                "certification": result.get("certification", {}),
+                "legal_policy_status": result.get("legal_policy_status", "PUBLIC_SOURCE_ONLY"),
             })
         except Exception as exc:
             logger.error("custom-source test error: %s: %s", type(exc).__name__, exc)
@@ -1271,13 +1287,21 @@ class _Handler(BaseHTTPRequestHandler):
         name = str(body.get("name", "")).strip() or url
         category = str(body.get("category", "custom")).strip()
         jurisdiction = str(body.get("jurisdiction", "AE")).strip()
+        legal_confirmed = bool(body.get("legal_confirmed") or body.get("legalConfirmation"))
 
         if not url:
             self._send_json({"ok": False, "message": "URL is required."}, 400)
             return
+        if not legal_confirmed:
+            self._send_json({
+                "ok": False,
+                "message": "Legal confirmation is required before saving a custom source.",
+            }, 400)
+            return
 
         try:
             from app.source_tester import validate_public_url, source_url_exists, append_source_to_json
+            from app.source_intake import run_source_intake, load_sources_json
             import hashlib
 
             safe, reason = validate_public_url(url)
@@ -1287,6 +1311,27 @@ class _Handler(BaseHTTPRequestHandler):
 
             if source_url_exists(url):
                 self._send_json({"ok": False, "message": "This URL is already in the source list."}, 409)
+                return
+
+            intake_result = run_source_intake(
+                {
+                    "url": url,
+                    "source_id": "",
+                    "name": name,
+                    "category": category,
+                    "jurisdiction": jurisdiction,
+                },
+                all_sources=load_sources_json(),
+                write_evidence=False,
+            )
+            if intake_result.get("status") != "CONFIRMED_ACCESSIBLE":
+                self._send_json({
+                    "ok": False,
+                    "message": "Source cannot be saved until readiness test passes.",
+                    "readiness_status": intake_result.get("status"),
+                    "failure_reason": intake_result.get("failure_reason", ""),
+                    "remediation_hint": intake_result.get("remediation_hint", ""),
+                }, 400)
                 return
 
             source_id = f"custom-{hashlib.sha256(url.encode()).hexdigest()[:8]}"

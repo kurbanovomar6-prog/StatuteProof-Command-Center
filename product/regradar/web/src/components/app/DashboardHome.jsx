@@ -161,21 +161,21 @@ function SourceReadinessCard({ navigate }) {
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-white">Source readiness</h2>
-          <p className="mt-1 text-xs text-slate-500">Mapped does not mean active.</p>
+          <p className="mt-1 text-xs text-slate-500">Mapped does not mean certified.</p>
         </div>
-        <StatusPill tone="cyan">35+ source layers mapped</StatusPill>
+        <StatusPill tone="cyan">Certification in progress</StatusPill>
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2">
-        <StatusPill tone="emerald">Validated</StatusPill>
-        <StatusPill tone="amber">Under validation</StatusPill>
+        <StatusPill tone="emerald">Evidence confirmed</StatusPill>
+        <StatusPill tone="amber">Baseline pending</StatusPill>
         <StatusPill tone="cyan">Needs adapter</StatusPill>
         <StatusPill tone="slate">Limited</StatusPill>
       </div>
 
       <div className="space-y-2.5 text-sm text-slate-400">
         {[
-          'Validated sources only enter monitoring profiles.',
+          'Monitoring certification requires evidence and baseline runs.',
           'Under-validation sources are disclosed before pilot scope.',
           'Limitations are reviewed before relying on a source map.',
         ].map(text => (
@@ -191,6 +191,12 @@ function SourceReadinessCard({ navigate }) {
         className="mt-5 w-full rounded-lg bg-[#16D9F5] px-4 py-2.5 text-sm font-semibold text-[#07111F] transition-colors hover:bg-[#11c2db]"
       >
         Review source map
+      </button>
+      <button
+        onClick={() => navigate('source-lab')}
+        className="mt-2 w-full rounded-lg border border-cyan-400/25 px-4 py-2.5 text-sm font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50"
+      >
+        Open Source Lab
       </button>
     </div>
   )

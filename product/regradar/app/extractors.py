@@ -218,27 +218,10 @@ def _try_crawl4ai(url: str) -> str | None:
 
 # ── public API ────────────────────────────────────────────────────────────────
 
-def extract_best_text(html: str, url: str = "") -> dict:
+def _legacy_extract_best_text(html: str, url: str = "") -> dict:
     """
-    Run all available extraction strategies on `html` and return the best.
-
-    Parameters
-    ----------
-    html : str
-        Raw HTML already fetched from `url`.
-    url : str
-        Source URL — passed to Crawl4AI only when other strategies fail and
-        ENABLE_CRAWL4AI_EXTRACTOR is true.
-
-    Returns
-    -------
-    dict
-        text             — best extracted text (empty string on total failure)
-        method           — winning strategy name
-        extracted_chars  — character count of winning text
-        quality          — "good" | "low_content" | "failed"
-        candidates       — list of all tried candidates:
-                           [{"method": str, "chars": int, "quality": str}, ...]
+    Legacy extraction cascade retained as a safe fallback when provider wrappers
+    fail unexpectedly.
     """
     if not html:
         return {
@@ -303,15 +286,97 @@ def extract_best_text(html: str, url: str = "") -> dict:
         best_text   = bs_text
 
     best_chars = len(best_text)
-    logger.info(
-        "extractors: best=%s chars=%d quality=%s (tried %d strategies)",
-        best_method, best_chars, _quality(best_chars), len(raw),
-    )
-
     return {
         "text":            best_text,
         "method":          best_method,
+        "provider_used":   best_method,
         "extracted_chars": best_chars,
         "quality":         _quality(best_chars),
         "candidates":      candidates,
+        "warnings":        [],
+    }
+
+
+def extract_best_text(html: str, url: str = "", content_selector: str | None = None) -> dict:
+    """
+    Run the provider extraction cascade on `html` and return the best result.
+
+    Parameters
+    ----------
+    html : str
+        Raw HTML already fetched from `url`.
+    url : str
+        Source URL — passed to Crawl4AI only when other strategies fail and
+        ENABLE_CRAWL4AI_EXTRACTOR is true.
+
+    Returns
+    -------
+    dict
+        text             — best extracted text (empty string on total failure)
+        method           — winning strategy name
+        provider_used    — provider-layer strategy name
+        extracted_chars  — character count of winning text
+        quality          — "good" | "low_content" | "failed"
+        candidates       — list of all tried candidates:
+                           [{"method": str, "chars": int, "quality": str}, ...]
+    """
+    if not html:
+        return {
+            "text":            "",
+            "method":          "none",
+            "provider_used":   "none",
+            "extracted_chars": 0,
+            "quality":         "failed",
+            "candidates":      [],
+            "warnings":        [],
+        }
+
+    try:
+        from app.providers.html_extraction import best_html_extract
+        provider_result = best_html_extract(html, content_selector=content_selector)
+    except Exception as exc:
+        logger.warning("extractors: provider cascade failed, using legacy fallback: %s", exc)
+        return _legacy_extract_best_text(html, url)
+
+    if not provider_result.get("success"):
+        legacy = _legacy_extract_best_text(html, url)
+        legacy.setdefault("warnings", []).append(provider_result.get("error") or "provider cascade returned no content")
+        return legacy
+
+    text = _deduplicate(_normalize(str(provider_result.get("content") or "")))
+    chars = len(text)
+    method = str(provider_result.get("provider_name") or "provider")
+    candidates = [
+        {
+            "method": c.get("provider_name"),
+            "chars": len(str(c.get("content") or "")),
+            "quality": _quality(len(str(c.get("content") or ""))),
+            "confidence": c.get("confidence"),
+            "dependency_available": c.get("dependency_available"),
+        }
+        for c in provider_result.get("candidates", [])
+    ]
+    if not candidates:
+        candidates = [{
+            "method": method,
+            "chars": chars,
+            "quality": _quality(chars),
+            "confidence": provider_result.get("confidence"),
+            "dependency_available": provider_result.get("dependency_available"),
+        }]
+
+    logger.info(
+        "extractors: provider best=%s chars=%d quality=%s (tried %d providers)",
+        method, chars, _quality(chars), len(candidates),
+    )
+
+    return {
+        "text":            text,
+        "method":          method,
+        "provider_used":   method,
+        "extracted_chars": chars,
+        "quality":         _quality(chars),
+        "confidence":      provider_result.get("confidence", "unknown"),
+        "candidates":      candidates,
+        "warnings":        provider_result.get("warnings", []),
     }

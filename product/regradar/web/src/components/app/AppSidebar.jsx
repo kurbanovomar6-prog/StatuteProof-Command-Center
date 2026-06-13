@@ -1,8 +1,9 @@
-import { LayoutDashboard, Globe, Bell, FileText, BarChart3, Plug, Settings, ChevronLeft, ChevronRight, LogOut, ShieldCheck, CreditCard } from 'lucide-react'
+import { LayoutDashboard, Globe, Bell, FileText, BarChart3, Plug, Settings, ChevronLeft, ChevronRight, LogOut, ShieldCheck, CreditCard, FlaskConical } from 'lucide-react'
 
 const NAV = [
   { id: 'dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
   { id: 'sources',      label: 'Sources',         icon: Globe },
+  { id: 'source-lab',   label: 'Source Lab',      icon: FlaskConical },
   { id: 'evidence',     label: 'Evidence',        icon: ShieldCheck },
   { id: 'alerts',       label: 'Sample Alerts',   icon: Bell },
   { id: 'briefs',       label: 'Brief Previews',  icon: FileText },

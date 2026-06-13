@@ -1912,6 +1912,89 @@ def _cmd_discover_source(url: str, json_export: bool, jurisdiction: str, categor
     print(f"  {_DIM}Run with --json to export a machine-readable report.{_R}\n")
 
 
+def _cmd_source_lab(
+    url: str,
+    *,
+    save: bool = False,
+    json_export: bool = False,
+    baseline_runs: int = 2,
+    providers_report: bool = False,
+    content_selector: str | None = None,
+    wait_for_selector: str | None = None,
+    js: bool = False,
+    pdf: bool = False,
+) -> None:
+    """Run one safe source-intake lab check. Never runs all sources."""
+    import json
+    from app.source_intake import run_source_intake, load_sources_json
+
+    source = {
+        "source_id": "source-lab",
+        "name": "Source Lab URL",
+        "url": url,
+        "jurisdiction": "LAB",
+        "category": "custom",
+        "enabled": False,
+        "baseline_runs_required": baseline_runs,
+    }
+    if content_selector:
+        source["content_selector"] = content_selector
+    if wait_for_selector:
+        source["wait_for_selector"] = wait_for_selector
+    if js:
+        source["fetch_method"] = "playwright"
+    if pdf:
+        source["source_type"] = "pdf"
+
+    result = run_source_intake(source, all_sources=load_sources_json(), write_evidence=save)
+    payload = {
+        "source_url": url,
+        "canonical_url": url,
+        "source_type": source.get("source_type") or "custom_public_source",
+        "provider_used": result.get("provider_used"),
+        "provider_candidates": result.get("provider_candidates", []),
+        "normalized_length": result.get("chars_normalized"),
+        "normalized_hash": result.get("normalized_hash"),
+        "quality_score": result.get("quality_score"),
+        "quality_label": (result.get("quality_breakdown") or {}).get("quality_label") or result.get("quality"),
+        "evidence_level": result.get("evidence_level"),
+        "certification_status": result.get("certification_status"),
+        "readiness_status": result.get("status"),
+        "failure_reason": result.get("failure_reason"),
+        "remediation_hint": result.get("remediation_hint"),
+        "proof_path": result.get("proof_path"),
+        "evidence_paths": result.get("evidence_paths"),
+        "warnings": result.get("errors", []),
+        "nav_shell_detected": result.get("nav_shell_detected"),
+        "hash_collision": result.get("hash_collision"),
+        "certification": result.get("certification"),
+        "quality_breakdown": result.get("quality_breakdown"),
+    }
+    if providers_report:
+        payload["provider_report"] = {
+            "provider_used": result.get("provider_used"),
+            "extraction_method": result.get("extraction_method"),
+            "notes": result.get("notes"),
+        }
+    if json_export:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return
+
+    print(f"\n{_BOLD}Source Lab{_R}")
+    print(f"  URL: {url}")
+    print(f"  Readiness: {payload['readiness_status']}")
+    print(f"  Certification: {payload['certification_status']}")
+    print(f"  Evidence level: {payload['evidence_level']}")
+    print(f"  Quality: {payload['quality_score']}/100 ({payload['quality_label']})")
+    print(f"  Provider: {payload['provider_used'] or '-'}")
+    print(f"  Normalized chars: {payload['normalized_length']}")
+    print(f"  Normalized hash: {payload['normalized_hash'] or '-'}")
+    if payload["failure_reason"]:
+        print(f"  Failure: {payload['failure_reason']}")
+    if payload["remediation_hint"]:
+        print(f"  Remediation: {payload['remediation_hint']}")
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -1930,6 +2013,9 @@ def main() -> None:
         print("  python run.py demo --send-telegram      demo + Telegram demo alert", file=sys.stderr)
         print("  python run.py test-source <url>              test a URL without saving", file=sys.stderr)
         print("  python run.py test-source <url> --deep      6-layer deep source discovery", file=sys.stderr)
+        print("  python run.py source-lab <url> --no-save --json  one-source parser/evidence lab", file=sys.stderr)
+        print("  python run.py source-lab <url> --save --json     one-source lab with evidence write", file=sys.stderr)
+        print("  python run.py source-lab <url> --js --content-selector main --wait-for-selector main", file=sys.stderr)
         print("  python run.py add-source                     interactively add a source", file=sys.stderr)
         print("  python run.py coverage                       coverage dashboard (uses latest audit JSON)", file=sys.stderr)
         print("  python run.py coverage --json                export reports/coverage_YYYY-MM-DD.json", file=sys.stderr)
@@ -2099,6 +2185,79 @@ def main() -> None:
             )
             sys.exit(2)
         _cmd_test_source(url_arg.strip(), deep=deep)
+
+    elif cmd == "source-lab":
+        extra = args[1:]
+        url_arg: str | None = None
+        save = False
+        json_export = False
+        providers_report = False
+        js = False
+        pdf = False
+        baseline_runs = 2
+        content_selector = None
+        wait_for_selector = None
+        i_ = 0
+        while i_ < len(extra):
+            tok = extra[i_]
+            if tok == "--json":
+                json_export = True
+                i_ += 1
+            elif tok == "--save":
+                save = True
+                i_ += 1
+            elif tok == "--no-save":
+                save = False
+                i_ += 1
+            elif tok == "--providers-report":
+                providers_report = True
+                i_ += 1
+            elif tok == "--js":
+                js = True
+                i_ += 1
+            elif tok == "--pdf":
+                pdf = True
+                i_ += 1
+            elif tok == "--certify":
+                i_ += 1
+            elif tok == "--baseline-runs":
+                if i_ + 1 >= len(extra):
+                    print("Error: --baseline-runs requires an integer.", file=sys.stderr)
+                    sys.exit(2)
+                baseline_runs = int(extra[i_ + 1])
+                i_ += 2
+            elif tok == "--content-selector":
+                if i_ + 1 >= len(extra):
+                    print("Error: --content-selector requires a CSS selector.", file=sys.stderr)
+                    sys.exit(2)
+                content_selector = extra[i_ + 1]
+                i_ += 2
+            elif tok == "--wait-for-selector":
+                if i_ + 1 >= len(extra):
+                    print("Error: --wait-for-selector requires a CSS selector.", file=sys.stderr)
+                    sys.exit(2)
+                wait_for_selector = extra[i_ + 1]
+                i_ += 2
+            elif url_arg is None:
+                url_arg = tok
+                i_ += 1
+            else:
+                print(f"Error: unexpected argument {tok!r} for 'source-lab'.", file=sys.stderr)
+                sys.exit(2)
+        if not url_arg:
+            print("Error: 'source-lab' requires a URL.", file=sys.stderr)
+            sys.exit(2)
+        _cmd_source_lab(
+            url_arg.strip(),
+            save=save,
+            json_export=json_export,
+            baseline_runs=baseline_runs,
+            providers_report=providers_report,
+            content_selector=content_selector,
+            wait_for_selector=wait_for_selector,
+            js=js,
+            pdf=pdf,
+        )
 
     elif cmd == "test-mapped":
         raw_limit = 10
@@ -2687,7 +2846,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
             file=sys.stderr,
         )
         sys.exit(2)

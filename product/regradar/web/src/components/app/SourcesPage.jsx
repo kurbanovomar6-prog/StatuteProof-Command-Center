@@ -57,6 +57,7 @@ const HEALTH_STYLE = {
 const STATUS_STYLE = {
   Active:           'text-emerald-400',
   Validated:        'text-emerald-400',
+  'Under validation': 'text-amber-400',
   Limited:          'text-amber-400',
   Partial:          'text-slate-400',
   'Needs adapter':  'text-amber-400',
@@ -204,11 +205,16 @@ export default function SourcesPage() {
           name:         form.url,
           category:     form.category,
           jurisdiction: form.market,
+          legal_confirmed: legalConfirmed,
         }),
       })
       const data = await res.json()
       if (data.ok) savedViaBackend = true
-      else setSaveError(data.message || 'Backend save failed — saved locally.')
+      else {
+        setSaveError(data.message || 'Backend save failed. Source was not activated.')
+        setTestPhase('result')
+        return
+      }
     } catch {
       setSaveError('API server not reachable — source saved locally only.')
     }
@@ -220,10 +226,10 @@ export default function SourcesPage() {
       name:        (() => { try { return new URL(form.url).hostname } catch { return form.url } })(),
       market:      form.market,
       category:    form.category,
-      status:      'Validated',
+      status:      savedViaBackend ? 'Under validation' : 'Under validation',
       extraction:  testResult.extraction_method || 'HTML',
       lastChecked: 'Just added',
-      health:      'PASS',
+      health:      savedViaBackend ? 'Review' : 'Review',
       userSource:  true,
     }
     saveLocalCustomSource(localSource)

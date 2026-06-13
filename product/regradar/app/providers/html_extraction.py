@@ -17,6 +17,11 @@ from __future__ import annotations
 import time
 from typing import Any
 
+_MIN_USEFUL_CHARS = 100
+_GOOD_CHARS = 1000
+_NAV_SHORT_WORDS = 8
+_NAV_SHORT_LINE_RATIO = 0.72
+
 
 def _provider_result(
     *,
@@ -42,6 +47,24 @@ def _provider_result(
         "elapsed_ms": elapsed_ms,
         "metadata": metadata or {},
     }
+
+
+def _looks_nav_shell(text: str) -> bool:
+    text = (text or "").strip()
+    if not text:
+        return False
+    if len(text) >= 10_000:
+        return False
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    if len(lines) < 8:
+        return False
+    short = sum(1 for ln in lines if len(ln.split()) < _NAV_SHORT_WORDS)
+    return (short / len(lines)) >= _NAV_SHORT_LINE_RATIO
+
+
+def _is_useful(result: dict) -> bool:
+    content = str(result.get("content") or "").strip()
+    return bool(result.get("success")) and len(content) >= _MIN_USEFUL_CHARS and not _looks_nav_shell(content)
 
 
 def trafilatura_extract(html: str) -> dict:
@@ -204,13 +227,23 @@ def best_html_extract(html: str, content_selector: str | None = None) -> dict:
 
     if content_selector:
         r = selectolax_extract(html, content_selector)
-        if r["success"] and r["dependency_available"]:
-            candidates.append(r)
+        if _looks_nav_shell(r.get("content", "")):
+            r["warnings"].append("Provider output looked like navigation shell.")
+            r["confidence"] = "low"
+        candidates.append(r)
+        if _is_useful(r):
+            r["candidates"] = candidates
+            return r
 
-    for fn in [trafilatura_extract, readability_extract, bs4_extract]:
+    for fn in [trafilatura_extract, readability_extract, selectolax_extract, bs4_extract]:
         r = fn(html)
-        if r["success"]:
-            candidates.append(r)
+        if _looks_nav_shell(r.get("content", "")):
+            r["warnings"].append("Provider output looked like navigation shell.")
+            r["confidence"] = "low"
+        candidates.append(r)
+        if _is_useful(r):
+            r["candidates"] = candidates
+            return r
 
     if not candidates:
         return _provider_result(
@@ -220,5 +253,10 @@ def best_html_extract(html: str, content_selector: str | None = None) -> dict:
             error="All HTML extraction providers failed.",
         )
 
-    # Pick longest content (most content = better)
-    return max(candidates, key=lambda r: len(r["content"]))
+    fallback = max(candidates, key=lambda r: len(str(r.get("content") or "")))
+    fallback["success"] = bool(str(fallback.get("content") or "").strip())
+    fallback.setdefault("warnings", []).append(
+        "No provider produced clearly useful main content; returning best fallback."
+    )
+    fallback["candidates"] = candidates
+    return fallback

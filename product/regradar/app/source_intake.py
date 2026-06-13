@@ -26,6 +26,8 @@ from pathlib import Path
 
 from app.source_tester import validate_public_url
 from app.text_normalization import normalize_for_change_hash
+from app.source_quality import build_quality_score
+from app.source_certification import build_preview_certification, EvidenceLevel
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +118,10 @@ def _content_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()[:16]
 
 
+def _sha256_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
+
+
 def _check_hash_collision(
     text_hash: str,
     source_id: str,
@@ -184,7 +190,19 @@ def run_source_intake(
         "collision_source_id": None,
         "quality": "POOR",
         "content_hash": "",
+        "normalized_hash": "",
         "extraction_method": "",
+        "provider_used": "",
+        "provider_candidates": [],
+        "normalized_preview": "",
+        "legal_policy_status": "PUBLIC_SOURCE_ONLY",
+        "quality_score": 0,
+        "quality_breakdown": {},
+        "evidence_level": EvidenceLevel.PREVIEW_ONLY,
+        "proof_path": None,
+        "evidence_paths": {},
+        "certification_status": "",
+        "certification": {},
         "failure_reason": "",
         "remediation_hint": "",
         "evidence_written": False,
@@ -199,6 +217,25 @@ def run_source_intake(
         result["failure_reason"] = reason
         result["remediation_hint"] = "Use a public http(s) URL without credentials, login, private network, or restricted portal access."
         result["errors"].append(f"URL blocked: {reason}")
+        quality_report = build_quality_score(
+            url="",
+            fetch_success=False,
+            normalized_text="",
+            raw_html="",
+            normalized_hash=None,
+            canonical_url=None,
+        )
+        result["quality_score"] = quality_report["quality_score"]
+        result["quality_breakdown"] = quality_report
+        result["certification"] = build_preview_certification(
+            source_id=source_id,
+            source_url=url,
+            canonical_url=url,
+            intake_result=result,
+            quality_report=quality_report,
+            baseline_runs_required=int(source.get("baseline_runs_required") or 2),
+        )
+        result["certification_status"] = result["certification"].get("certification_status", "")
         return result
 
     # ── 2. Fetch ──────────────────────────────────────────────────────────────
@@ -224,15 +261,19 @@ def run_source_intake(
     result["chars_raw"] = len(html)
 
     # ── 3. Extract text ───────────────────────────────────────────────────────
+    extracted: dict = {}
     try:
         from app.extractors import extract_best_text
-        extracted = extract_best_text(html)
+        extracted = extract_best_text(html, url=url, content_selector=content_selector)
         if isinstance(extracted, tuple):
             text = str(extracted[0] or "")
             result["extraction_method"] = str(extracted[1] or "")
+            result["provider_used"] = result["extraction_method"]
         elif isinstance(extracted, dict):
             text = str(extracted.get("text") or "")
             result["extraction_method"] = str(extracted.get("method") or extracted.get("source") or "")
+            result["provider_used"] = str(extracted.get("provider_used") or result["extraction_method"])
+            result["provider_candidates"] = extracted.get("candidates") or []
         else:
             text = str(extracted or "")
     except Exception as exc:
@@ -241,6 +282,7 @@ def run_source_intake(
 
     normalized_text = normalize_for_change_hash(text)
     result["chars_normalized"] = len(normalized_text)
+    result["normalized_preview"] = normalized_text[:500]
 
     # ── 4. Nav-shell detection ────────────────────────────────────────────────
     nav_shell = is_nav_shell_only(normalized_text)
@@ -249,6 +291,7 @@ def run_source_intake(
     # ── 5. Hash collision check ───────────────────────────────────────────────
     content_hash = _content_hash(normalized_text)
     result["content_hash"] = content_hash
+    result["normalized_hash"] = _sha256_hash(normalized_text) if normalized_text else ""
     collision_id: str | None = None
     if all_sources and source_id:
         collision, collision_id = _check_hash_collision(content_hash, source_id, all_sources)
@@ -261,10 +304,37 @@ def run_source_intake(
     pdf_chars = source.get("pdf_chars", 0)
     result["pdf_chars"] = pdf_chars
 
+    provider_confidence = ""
+    if isinstance(extracted, dict):
+        provider_confidence = str(extracted.get("confidence") or "")
+    quality_report = build_quality_score(
+        url=url,
+        fetch_success=bool(html),
+        normalized_text=normalized_text,
+        raw_html=html,
+        nav_shell=nav_shell,
+        hash_collision=bool(result["hash_collision"]),
+        selector_timeout=False,
+        pdf_shallow=bool(pdf_chars and pdf_chars < 500),
+        proof_path=None,
+        normalized_hash=result["normalized_hash"],
+        canonical_url=url,
+        provider_confidence=provider_confidence,
+        metadata={"canonical_url": url},
+    )
+    result["quality_score"] = quality_report["quality_score"]
+    result["quality_breakdown"] = quality_report
+    if quality_report.get("policy_warnings"):
+        result["legal_policy_status"] = "POLICY_REVIEW_REQUIRED"
+
     # ── 7. Status verdict ─────────────────────────────────────────────────────
     chars = result["chars_normalized"]
 
-    if nav_shell or collision:
+    if quality_report.get("policy_warnings"):
+        result["status"] = SourceIntakeStatus.BLOCKED
+        result["failure_reason"] = "Source appears to require login, CAPTCHA, paywall access, or a private portal."
+        result["remediation_hint"] = "Use only public pages that are permitted to be monitored without bypassing access controls."
+    elif nav_shell or collision:
         result["status"] = SourceIntakeStatus.NAV_SHELL_ONLY
         result["failure_reason"] = "Extracted content is a navigation shell or collides with another source hash."
         result["remediation_hint"] = "Configure a precise content_selector or adapter before marking this source ready."
@@ -288,7 +358,7 @@ def run_source_intake(
         result["status"] = SourceIntakeStatus.QUALITY_DROP
         result["failure_reason"] = f"Normalized text length {chars} is below expected minimum {expected_min}."
         result["remediation_hint"] = "Review selector, rendering, or source structure before activation."
-    elif chars < 1000 and not wait_selector:
+    elif chars < 1000 and not (wait_selector or content_selector):
         result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
         result["failure_reason"] = "Text is present but too thin without an explicit selector."
         result["remediation_hint"] = "Add wait_for_selector/content_selector and retest."
@@ -318,11 +388,33 @@ def run_source_intake(
         notes_parts.append(f"PDF content available: {pdf_chars:,} chars.")
     result["notes"] = " ".join(notes_parts)
 
+    result["certification"] = build_preview_certification(
+        source_id=source_id,
+        source_url=url,
+        canonical_url=url,
+        intake_result=result,
+        quality_report=quality_report,
+        baseline_runs_required=int(source.get("baseline_runs_required") or 2),
+    )
+    result["certification_status"] = result["certification"].get("certification_status", "")
+
     # ── 10. Evidence write (optional) ────────────────────────────────────────
     if write_evidence and result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
         try:
-            _write_intake_evidence(source_id, url, html, normalized_text, content_hash)
+            evidence = _write_intake_evidence(
+                source=source,
+                source_id=source_id,
+                url=url,
+                html=html,
+                text=normalized_text,
+                content_hash=content_hash,
+                result=result,
+                quality_report=quality_report,
+            )
             result["evidence_written"] = True
+            result["proof_path"] = evidence.get("proof_path")
+            result["evidence_paths"] = evidence.get("evidence_paths", {})
+            result["evidence_level"] = evidence.get("evidence_level", EvidenceLevel.BASIC_EVIDENCE)
         except Exception as exc:
             result["errors"].append(f"Evidence write failed: {exc}")
 
@@ -330,18 +422,29 @@ def run_source_intake(
 
 
 def _write_intake_evidence(
-    source_id: str, url: str, html: str, text: str, content_hash: str
-) -> None:
+    *,
+    source: dict,
+    source_id: str,
+    url: str,
+    html: str,
+    text: str,
+    content_hash: str,
+    result: dict,
+    quality_report: dict,
+) -> dict:
     """Write raw/normalized snapshot for the intake result."""
     import datetime
-    from app.source_runs import _write_snapshots
+    from app.source_runs import _write_snapshots, append_run, _rel
+    from app.source_certification import build_certification_from_runs
+    from app.source_runs import latest_runs
+    from app.text_normalization import stable_normalized_hash
 
     now = datetime.datetime.now(datetime.timezone.utc)
     timestamp_utc = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     run_id = f"intake-{now.strftime('%Y%m%dT%H%M%SZ')}"
     jur = source_id.split("-")[0] if "-" in source_id else "XX"
 
-    _write_snapshots(
+    snapshots = _write_snapshots(
         timestamp_utc=timestamp_utc,
         market=jur,
         source_id=source_id,
@@ -354,9 +457,87 @@ def _write_intake_evidence(
             "url": url,
             "run_id": run_id,
             "content_hash": content_hash,
+            "normalized_hash": result.get("normalized_hash"),
+            "provider_used": result.get("provider_used"),
+            "quality_score": result.get("quality_score"),
             "intake_mode": True,
         },
     )
+    snapshot_base = (Path(__file__).parent.parent / str(snapshots["snapshot_metadata_path"])).parent
+    provider_report_path = snapshot_base / "provider_report.json"
+    quality_report_path = snapshot_base / "quality_report.json"
+    certification_report_path = snapshot_base / "certification_report.json"
+    hash_chain_path = snapshot_base / "hash_chain.json"
+
+    run_quality = result.get("quality") or "ACCEPTABLE"
+    if run_quality == "ACCEPTABLE":
+        run_quality = "MEDIUM"
+    record = {
+        "run_id": run_id,
+        "timestamp_utc": timestamp_utc,
+        "market": jur,
+        "jurisdiction": jur,
+        "source_id": source_id,
+        "source_name": source.get("name", ""),
+        "category": source.get("category", ""),
+        "official_url": url,
+        "final_url": url,
+        "access_status": "accessible",
+        "fetch_method": source.get("fetch_method") or "source_lab",
+        "extraction_quality": run_quality,
+        "extracted_chars": result.get("chars_normalized") or 0,
+        "raw_chars": result.get("chars_raw") or 0,
+        "normalized_chars": result.get("chars_normalized") or 0,
+        "raw_hash": hashlib.sha256((html or "").encode("utf-8", errors="replace")).hexdigest() if html else None,
+        "normalized_hash": result.get("normalized_hash") or stable_normalized_hash(text) or None,
+        "pdf_text_hash": None,
+        "pdf_links_count": 0,
+        "pdf_extracted_chars": result.get("pdf_chars") or 0,
+        "content_hash": content_hash,
+        **snapshots,
+        "title": None,
+        "publication_date": None,
+        "limitations_notes": result.get("notes") or "",
+        "error": None,
+        "pipeline_version": "source-intake-1.0",
+        "normalization_version": "1.0",
+        "provider_report_path": _rel(provider_report_path),
+        "quality_report_path": _rel(quality_report_path),
+        "certification_report_path": _rel(certification_report_path),
+        "hash_chain_path": _rel(hash_chain_path),
+    }
+    appended = append_run(record)
+    all_latest = latest_runs()
+    certification = build_certification_from_runs(
+        source_id=source_id,
+        source_url=url,
+        runs=[r for r in all_latest.values() if r.get("source_id") == source_id] + [appended],
+        baseline_runs_required=int(source.get("baseline_runs_required") or 2),
+        quality_score=int(result.get("quality_score") or 0),
+    )
+    provider_report_path.write_text(json.dumps({
+        "provider_used": result.get("provider_used"),
+        "extraction_method": result.get("extraction_method"),
+        "normalized_length": result.get("chars_normalized"),
+        "warnings": result.get("errors", []),
+    }, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    quality_report_path.write_text(json.dumps(quality_report, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    certification_report_path.write_text(json.dumps(certification, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    hash_chain_path.write_text(json.dumps({
+        "run_id": run_id,
+        "raw_hash": appended.get("raw_hash"),
+        "normalized_hash": appended.get("normalized_hash"),
+        "content_hash": appended.get("content_hash"),
+        "previous_hash": None,
+    }, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    return {
+        "proof_path": appended.get("proof_block_path"),
+        "evidence_level": EvidenceLevel.FULL_EVIDENCE if appended.get("proof_block_path") else EvidenceLevel.BASIC_EVIDENCE,
+        "evidence_paths": {
+            **{k: v for k, v in appended.items() if k.endswith("_path")},
+        },
+        "certification": certification,
+    }
 
 
 # ── batch readiness summary ───────────────────────────────────────────────────
@@ -382,14 +563,20 @@ def readiness_summary(sources: list[dict] | None = None) -> dict:
     enabled = [s for s in sources if s.get("enabled")]
 
     try:
-        from app.source_runs import latest_runs
+        from app.source_runs import latest_runs, _read_runs
         runs = latest_runs()
+        all_run_rows = _read_runs()
     except Exception:
         runs = {}
+        all_run_rows = []
 
     breakdown = []
     ready = 0
     remediation = 0
+    evidence_confirmed = 0
+    monitoring_certified = 0
+    baseline_pending = 0
+    blocked = 0
 
     hash_to_source_ids: dict[str, list[str]] = {}
     for sid, run in runs.items():
@@ -452,6 +639,24 @@ def readiness_summary(sources: list[dict] | None = None) -> dict:
             failure_reason = "No stored source run record exists."
             remediation_hint = "Run a safe source validation with evidence recording before activation."
 
+        from app.source_certification import build_certification_from_runs
+        certification = build_certification_from_runs(
+            source_id=sid,
+            source_url=s.get("url", ""),
+            runs=all_run_rows,
+            baseline_runs_required=int(s.get("baseline_runs_required") or 2),
+            quality_score=100 if status == SourceIntakeStatus.CONFIRMED_ACCESSIBLE else 40 if status == SourceIntakeStatus.QUALITY_DROP else 0,
+        )
+        cert_status = certification.get("certification_status")
+        if certification.get("evidence_level") in {"BASIC_EVIDENCE", "FULL_EVIDENCE", "CERTIFIED_EVIDENCE"}:
+            evidence_confirmed += 1
+        if cert_status == "MONITORING_CERTIFIED":
+            monitoring_certified += 1
+        elif cert_status == "BASELINE_PENDING":
+            baseline_pending += 1
+        elif status in {SourceIntakeStatus.BLOCKED, SourceIntakeStatus.UNSUPPORTED}:
+            blocked += 1
+
         breakdown.append({
             "source_id": sid,
             "name": s.get("name", ""),
@@ -462,11 +667,19 @@ def readiness_summary(sources: list[dict] | None = None) -> dict:
             "last_run": last_run,
             "failure_reason": failure_reason,
             "remediation_hint": remediation_hint,
+            "certification_status": cert_status,
+            "evidence_level": certification.get("evidence_level"),
+            "baseline_runs_completed": certification.get("baseline_runs_completed"),
+            "baseline_runs_required": certification.get("baseline_runs_required"),
         })
 
     return {
         "total_enabled": len(enabled),
         "confirmed_ready": ready,
+        "evidence_confirmed": evidence_confirmed,
+        "monitoring_certified": monitoring_certified,
+        "baseline_pending": baseline_pending,
+        "blocked": blocked,
         "remediation_needed": remediation,
         "breakdown": breakdown,
     }

@@ -1,5 +1,13 @@
 # Universal Source Intake Engine — V2 Hardening Report
 
+> Current-state note, 2026-06-13: this report is superseded by
+> `docs/parser-code-vs-repositories-final-report.md` for parser-provider
+> integration status. At the time of this V2 report, provider wrappers existed
+> but were not yet wired into `app/extractors.extract_best_text()`. That gap has
+> since been addressed in the parser-provider integration pass. Treat this file
+> as historical implementation context, not proof that the full parser is
+> customer-ready.
+
 **Date:** 2026-06-13
 **Scope:** `product/regradar/` — source intake layer, provider wrappers, frontend custom source UI, API response completeness
 **Baseline:** V1 verification report score: 6/10
@@ -154,7 +162,7 @@ These failures are known and tracked separately. They are NOT caused by any chan
    "
    ```
 
-2. **Wire providers into extractors.py:** `best_html_extract()` is not yet called by `extract_best_text()` in `app/extractors.py`. The provider package is ready but not yet integrated into the main extraction path. This is the next implementation step.
+2. **Wire providers into extractors.py:** Historical note: at the time of this report, `best_html_extract()` was not yet called by `extract_best_text()` in `app/extractors.py`. This has since been addressed in the parser-provider integration pass documented in `docs/parser-code-vs-repositories-final-report.md`.
 
 3. **selectolax, htmldate, courlan:** Not yet installed. Graceful degradation is in place; install when needed.
 

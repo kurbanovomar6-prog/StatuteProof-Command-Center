@@ -523,6 +523,28 @@ def test_content_hash_in_result_dict():
     assert len(result["content_hash"]) == 16
 
 
+def test_intake_includes_provider_metadata_and_preview():
+    text = _GOOD_TEXT * 4
+    source = {
+        "source_id": "AE-test",
+        "url": "https://example.com/source",
+        "expected_min_length": 500,
+        "content_selector": "main",
+    }
+    with patch("app.scraper.fetch_page_with_config", return_value=_GOOD_HTML), \
+         patch("app.extractors.extract_best_text", return_value={
+             "text": text,
+             "method": "trafilatura",
+             "provider_used": "trafilatura",
+         }):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["provider_used"] == "trafilatura"
+    assert len(result["normalized_hash"]) == 64
+    assert result["normalized_preview"]
+    assert result["legal_policy_status"] == "PUBLIC_SOURCE_ONLY"
+
+
 # ── 6. Provider wrappers — html_extraction ────────────────────────────────────
 
 
@@ -580,6 +602,99 @@ def test_html_provider_readability_graceful():
     assert result["provider_name"] == "readability"
     assert isinstance(result["success"], bool)
     assert isinstance(result["dependency_available"], bool)
+
+
+def test_extract_best_text_uses_provider_cascade():
+    from app.extractors import extract_best_text
+
+    with patch("app.providers.html_extraction.best_html_extract", return_value={
+        "provider_name": "trafilatura",
+        "success": True,
+        "dependency_available": True,
+        "content": _GOOD_TEXT,
+        "confidence": "high",
+        "warnings": [],
+        "candidates": [
+            {
+                "provider_name": "trafilatura",
+                "content": _GOOD_TEXT,
+                "confidence": "high",
+                "dependency_available": True,
+            }
+        ],
+    }) as mock_best:
+        result = extract_best_text(_GOOD_HTML, url="https://example.com", content_selector="main")
+
+    mock_best.assert_called_once_with(_GOOD_HTML, content_selector="main")
+    assert result["method"] == "trafilatura"
+    assert result["provider_used"] == "trafilatura"
+    assert result["text"]
+
+
+def test_html_provider_prefers_trafilatura_over_later_longer_fallback():
+    from app.providers.html_extraction import best_html_extract
+
+    trafilatura_text = _GOOD_TEXT * 2
+    bs4_text = _GOOD_TEXT * 5
+    with patch("app.providers.html_extraction.trafilatura_extract", return_value={
+        "provider_name": "trafilatura",
+        "success": True,
+        "dependency_available": True,
+        "requires_dependency": "trafilatura",
+        "content": trafilatura_text,
+        "confidence": "high",
+        "warnings": [],
+        "error": "",
+        "elapsed_ms": 1,
+        "metadata": {},
+    }), patch("app.providers.html_extraction.readability_extract") as mock_readability, \
+         patch("app.providers.html_extraction.bs4_extract", return_value={
+             "provider_name": "bs4",
+             "success": True,
+             "dependency_available": True,
+             "requires_dependency": "bs4",
+             "content": bs4_text,
+             "confidence": "low",
+             "warnings": [],
+             "error": "",
+             "elapsed_ms": 1,
+             "metadata": {},
+         }):
+        result = best_html_extract(_GOOD_HTML)
+
+    assert result["provider_name"] == "trafilatura"
+    mock_readability.assert_not_called()
+
+
+def test_html_provider_falls_back_when_trafilatura_missing():
+    from app.providers.html_extraction import best_html_extract
+
+    with patch("app.providers.html_extraction.trafilatura_extract", return_value={
+        "provider_name": "trafilatura",
+        "success": False,
+        "dependency_available": False,
+        "requires_dependency": "trafilatura",
+        "content": "",
+        "confidence": "unknown",
+        "warnings": [],
+        "error": "missing",
+        "elapsed_ms": 1,
+        "metadata": {},
+    }), patch("app.providers.html_extraction.readability_extract", return_value={
+        "provider_name": "readability",
+        "success": True,
+        "dependency_available": True,
+        "requires_dependency": "readability",
+        "content": _GOOD_TEXT * 2,
+        "confidence": "medium",
+        "warnings": [],
+        "error": "",
+        "elapsed_ms": 1,
+        "metadata": {},
+    }):
+        result = best_html_extract(_GOOD_HTML)
+
+    assert result["provider_name"] == "readability"
 
 
 # ── 7. Provider wrappers — pdf_extraction ────────────────────────────────────
