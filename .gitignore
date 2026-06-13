@@ -52,6 +52,7 @@ product/agentdb.rvf.lock
 product/logs/
 product/regradar/.env
 product/regradar/.env.*
+!product/regradar/.env.example
 product/regradar/data/telegram_clients.json
 
 # Python cache anywhere in product

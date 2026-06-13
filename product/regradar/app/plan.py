@@ -18,9 +18,16 @@ PLAN_NAMES = {
 
 PLAN_DISPLAY = {
     "evidence_preview": "Evidence Preview",
-    "starter_pilot": "Starter Pilot",
+    "starter_pilot": "Monitor",
     "professional": "Professional",
     "consultant": "Compliance Consultant",
+}
+
+PLAN_PRICE_MONTHLY = {
+    "evidence_preview": 0,
+    "starter_pilot": 349,
+    "professional": 749,
+    "consultant": 0,  # custom
 }
 
 PLAN_CAPABILITIES = {
@@ -38,24 +45,24 @@ PLAN_CAPABILITIES = {
     },
     "starter_pilot": {
         "live_monitoring": True,
-        "source_limit": 3,
+        "source_limit": 5,
         "custom_sources": 0,
-        "weekly_briefs": "limited",
+        "weekly_briefs": "status_only",
         "audit_export": False,
         "pdf_export": False,
         "users": 1,
-        "retention_days": 30,
+        "retention_days": 90,
         "multiple_workspaces": False,
         "white_label": False,
     },
     "professional": {
         "live_monitoring": True,
-        "source_limit": 16,
+        "source_limit": 13,
         "custom_sources": 3,
         "weekly_briefs": True,
-        "audit_export": True,
-        "pdf_export": True,
-        "users": 3,
+        "audit_export": False,   # pilot roadmap — not yet built
+        "pdf_export": False,     # requires activation
+        "users": 2,
         "retention_days": 365,
         "multiple_workspaces": False,
         "white_label": False,
