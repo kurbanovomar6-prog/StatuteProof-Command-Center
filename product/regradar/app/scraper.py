@@ -359,3 +359,77 @@ def fetch_page(url: str) -> str:
             )
             return requests_html
         raise
+
+
+def fetch_page_with_config(
+    url: str,
+    *,
+    wait_for_selector: str | None = None,
+    content_selector: str | None = None,
+    force_playwright: bool = False,
+) -> str:
+    """
+    Fetch `url` with optional per-source Playwright config.
+
+    When wait_for_selector or content_selector are provided, Playwright is
+    used regardless of Tier 1 content quality (force_playwright=True implicit).
+    These fields come from sources.json per-source config:
+      "wait_for_selector": "main"    — wait for this CSS selector before capture
+      "content_selector": "main"     — extract HTML from this element only
+
+    Falls back to fetch_page() when no per-source config is set.
+    """
+    needs_playwright = force_playwright or bool(wait_for_selector) or bool(content_selector)
+
+    if not needs_playwright:
+        return fetch_page(url)
+
+    # Per-source Playwright run
+    print(f"  Per-source Playwright config — {url}", file=sys.stderr, flush=True)
+    if wait_for_selector:
+        print(f"    wait_for_selector: {wait_for_selector}", file=sys.stderr, flush=True)
+    if content_selector:
+        print(f"    content_selector: {content_selector}", file=sys.stderr, flush=True)
+
+    browser = _get_shared_browser()
+    context = browser.new_context(
+        user_agent=REQUESTS_UA,
+        locale="en-US",
+        viewport={"width": 1280, "height": 900},
+    )
+    page = context.new_page()
+
+    try:
+        page.goto(url, timeout=PAGE_TIMEOUT_MS, wait_until="networkidle")
+    except Exception:
+        try:
+            page.wait_for_timeout(_PW_IDLE_EXTRA_MS)
+        except Exception:
+            pass
+
+    try:
+        if wait_for_selector:
+            try:
+                page.wait_for_selector(wait_for_selector, timeout=10_000)
+            except Exception:
+                logger.warning("wait_for_selector '%s' not found within 10s at %s", wait_for_selector, url)
+        else:
+            page.wait_for_timeout(_PW_JS_SETTLE_MS)
+
+        if content_selector:
+            element = page.query_selector(content_selector)
+            if element:
+                html = element.inner_html()
+                logger.info("content_selector '%s' extracted %d chars from %s", content_selector, len(html), url)
+            else:
+                logger.warning("content_selector '%s' matched nothing at %s — using full page", content_selector, url)
+                html = page.content()
+        else:
+            html = page.content()
+    finally:
+        context.close()
+
+    if not html or len(html) < 200:
+        raise ValueError(f"fetch_page_with_config: empty result from {url}")
+
+    return html

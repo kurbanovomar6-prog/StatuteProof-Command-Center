@@ -512,7 +512,12 @@
     "status": "active",
     "source_id": "AE-dubai-financial-services-authority-dfsa",
     "notes": "DFSA rules and standards — rulebook updates, regulatory standards for DIFC-regulated firms.",
-    "tier": "1"
+    "tier": "1",
+    "fetch_method": "playwright",
+    "wait_for_selector": "main",
+    "content_selector": "main",
+    "expected_min_length": 3000,
+    "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13."
   },
   {
     "name": "Abu Dhabi Global Market (ADGM)",
@@ -1302,7 +1307,12 @@
     "enabled": true,
     "status": "active",
     "tier": "1",
-    "notes": "DFSA notices, decisions, and consultations — primary source for DIFC-regulated firm regulatory actions."
+    "notes": "DFSA notices, decisions, and consultations — primary source for DIFC-regulated firm regulatory actions.",
+    "fetch_method": "playwright",
+    "wait_for_selector": "main",
+    "content_selector": "main",
+    "expected_min_length": 3000,
+    "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13."
   },
   {
     "source_id": "AE-adgm-fsra-rules",

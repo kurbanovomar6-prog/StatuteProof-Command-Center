@@ -228,6 +228,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_delivery_preview()
         elif path == "/api/sources/status":
             self._handle_sources_status()
+        elif path == "/api/sources/readiness":
+            self._handle_sources_readiness()
+        elif path == "/api/custom-sources":
+            self._handle_custom_sources_list()
         elif path == "/api/evidence":
             self._handle_evidence_list()
         elif path == "/api/briefs":
@@ -277,6 +281,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_contact()
         elif self.path == "/api/source-test":
             self._handle_source_test()
+        elif self.path == "/api/custom-sources/test":
+            self._handle_custom_source_test()
+        elif self.path == "/api/custom-sources":
+            self._handle_custom_sources_add()
         else:
             self._send_json({"error": "not found"}, 404)
 
@@ -1141,6 +1149,150 @@ class _Handler(BaseHTTPRequestHandler):
             "message":        reason,
             "recommendation": recommendation,
         })
+
+
+    def _handle_sources_readiness(self) -> None:
+        """
+        Return readiness summary for all enabled sources.
+
+        Uses latest run records — no live fetch. Safe to call frequently.
+        GET /api/sources/readiness
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            from app.source_intake import readiness_summary, load_sources_json
+            sources = load_sources_json()
+            summary = readiness_summary(sources)
+            self._send_json({"ok": True, **summary})
+        except Exception as exc:
+            logger.error("sources/readiness error: %s", exc)
+            self._send_json({"ok": False, "message": "Failed to load readiness data."}, 500)
+
+    def _handle_custom_sources_list(self) -> None:
+        """
+        List custom (user-added) sources for the authenticated user.
+
+        GET /api/custom-sources
+        Custom sources are identified by 'custom': True in sources.json.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            from app.source_intake import load_sources_json
+            sources = load_sources_json()
+            custom = [s for s in sources if s.get("custom") is True]
+            self._send_json({"ok": True, "sources": custom})
+        except Exception as exc:
+            logger.error("custom-sources list error: %s", exc)
+            self._send_json({"ok": False, "message": "Failed to load custom sources."}, 500)
+
+    def _handle_custom_source_test(self) -> None:
+        """
+        Test a custom source URL using the intake layer.
+
+        POST /api/custom-sources/test
+        Body: { "url": "https://...", "name": "optional label" }
+        Returns: intake result with status, chars, nav_shell_detected, can_activate
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_SOURCE_TEST_LIMITER, "custom_source_test"):
+            return
+
+        body = self._read_json()
+        url = str(body.get("url", "")).strip()
+
+        if not url:
+            self._send_json({"ok": False, "message": "URL is required."}, 400)
+            return
+
+        try:
+            from app.source_intake import run_source_intake, load_sources_json, STATUS_LABELS
+            source = {"url": url, "source_id": "", "name": body.get("name", "")}
+            all_sources = load_sources_json()
+            result = run_source_intake(source, all_sources=all_sources, write_evidence=False)
+
+            can_activate = result["status"] in (
+                "CONFIRMED_ACCESSIBLE", "PDF_EXTRACTION_NEEDED"
+            )
+            self._send_json({
+                "ok": True,
+                "status": result["status"],
+                "status_label": STATUS_LABELS.get(result["status"], result["status"]),
+                "chars": result["chars_normalized"],
+                "chars_raw": result["chars_raw"],
+                "pdf_chars": result["pdf_chars"],
+                "nav_shell_detected": result["nav_shell_detected"],
+                "hash_collision": result["hash_collision"],
+                "collision_source_id": result["collision_source_id"],
+                "quality": result["quality"],
+                "can_activate": can_activate,
+                "notes": result["notes"],
+                "errors": result["errors"],
+            })
+        except Exception as exc:
+            logger.error("custom-source test error: %s: %s", type(exc).__name__, exc)
+            self._send_json({"ok": False, "message": "Source test failed."}, 500)
+
+    def _handle_custom_sources_add(self) -> None:
+        """
+        Add a custom source after a successful test.
+
+        POST /api/custom-sources
+        Body: { "url": "https://...", "name": "Label", "category": "financial_regulator", "jurisdiction": "AE" }
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+
+        body = self._read_json()
+        url = str(body.get("url", "")).strip()
+        name = str(body.get("name", "")).strip() or url
+        category = str(body.get("category", "custom")).strip()
+        jurisdiction = str(body.get("jurisdiction", "AE")).strip()
+
+        if not url:
+            self._send_json({"ok": False, "message": "URL is required."}, 400)
+            return
+
+        try:
+            from app.source_tester import validate_public_url, source_url_exists, append_source_to_json
+            import hashlib
+
+            safe, reason = validate_public_url(url)
+            if not safe:
+                self._send_json({"ok": False, "message": f"URL blocked: {reason}"}, 400)
+                return
+
+            if source_url_exists(url):
+                self._send_json({"ok": False, "message": "This URL is already in the source list."}, 409)
+                return
+
+            source_id = f"custom-{hashlib.sha256(url.encode()).hexdigest()[:8]}"
+            new_source = {
+                "source_id": source_id,
+                "name": name,
+                "url": url,
+                "jurisdiction": jurisdiction,
+                "category": category,
+                "enabled": True,
+                "status": "pending_validation",
+                "custom": True,
+                "tier": "custom",
+            }
+            append_source_to_json(new_source)
+            self._send_json({"ok": True, "source_id": source_id, "message": "Custom source added. Run a pipeline cycle to validate."})
+        except Exception as exc:
+            logger.error("custom-sources add error: %s: %s", type(exc).__name__, exc)
+            self._send_json({"ok": False, "message": "Failed to add source."}, 500)
 
 
 def run_server(host: str = "127.0.0.1", port: int = 5001) -> None:
