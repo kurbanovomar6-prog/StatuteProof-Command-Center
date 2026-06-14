@@ -834,3 +834,28 @@ def test_source_lab_contract_separates_save_from_activation():
     assert contract["can_activate_monitoring"] is False
     assert contract["activation_readiness"] == "BASELINE_REQUIRED"
     assert contract["evidence_level"] == EvidenceLevel.PREVIEW_ONLY
+
+
+def test_source_lab_contract_uses_certified_evidence_after_baseline():
+    """Aggregate certification should drive activation fields after baseline completion."""
+    from app.source_intake import build_source_lab_contract
+    from app.source_certification import CertificationStatus, EvidenceLevel
+
+    result = {
+        "status": SourceIntakeStatus.CONFIRMED_ACCESSIBLE,
+        "evidence_written": True,
+        "evidence_level": EvidenceLevel.FULL_EVIDENCE,
+        "certification_status": CertificationStatus.MONITORING_CERTIFIED,
+        "certification": {
+            "certification_status": CertificationStatus.MONITORING_CERTIFIED,
+            "evidence_level": EvidenceLevel.CERTIFIED_EVIDENCE,
+            "baseline_runs_completed": 2,
+            "baseline_runs_required": 2,
+        },
+    }
+    contract = build_source_lab_contract(result)
+
+    assert contract["can_save_for_validation"] is False
+    assert contract["can_activate_monitoring"] is True
+    assert contract["activation_readiness"] == "MONITORING_READY"
+    assert contract["evidence_level"] == EvidenceLevel.CERTIFIED_EVIDENCE

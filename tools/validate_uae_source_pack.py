@@ -51,6 +51,7 @@ ALLOWED_ACTIVATION_STATUS = {
     "candidate",
     "readiness_supported_no_save",
     "baseline_pending",
+    "activation_ready",
     "remediation",
     "rejected",
     "blocked",
@@ -291,6 +292,15 @@ def main() -> int:
                 fail(errors, f"{source_id} baseline_pending candidate cannot activate monitoring.")
             if candidate.get("activation_status") == "baseline_pending" and baseline_completed >= baseline_required:
                 fail(errors, f"{source_id} baseline_pending has completed baselines; review activation status.")
+            if candidate.get("activation_status") == "activation_ready":
+                if not can_activate:
+                    fail(errors, f"{source_id} activation_ready candidate must set can_activate_monitoring true.")
+                if baseline_completed < baseline_required:
+                    fail(errors, f"{source_id} activation_ready candidate requires completed baselines.")
+                if evidence_level != "CERTIFIED_EVIDENCE":
+                    fail(errors, f"{source_id} activation_ready candidate requires CERTIFIED_EVIDENCE.")
+                if candidate.get("noise_risk") == "high" or candidate.get("source_health_risk") == "high":
+                    fail(errors, f"{source_id} activation_ready candidate cannot have unresolved high noise/source-health risk.")
 
     duplicate_ids = sorted(source_id for source_id, count in ids.items() if count > 1)
     duplicate_urls = sorted(url for url, count in urls.items() if count > 1)

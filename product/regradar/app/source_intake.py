@@ -133,10 +133,19 @@ def build_source_lab_contract(result: dict) -> dict:
     status = str(result.get("status") or "")
     cert = result.get("certification") or {}
     cert_status = str(cert.get("certification_status") or result.get("certification_status") or "")
-    evidence_level = str(result.get("evidence_level") or cert.get("evidence_level") or EvidenceLevel.PREVIEW_ONLY)
+    result_evidence_level = str(result.get("evidence_level") or "")
+    cert_evidence_level = str(cert.get("evidence_level") or "")
+    evidence_level = result_evidence_level or cert_evidence_level or EvidenceLevel.PREVIEW_ONLY
     evidence_written = bool(result.get("evidence_written"))
     baseline_done = int(cert.get("baseline_runs_completed") or 0)
     baseline_required = int(cert.get("baseline_runs_required") or 2)
+
+    if (
+        cert_status == "MONITORING_CERTIFIED"
+        and cert_evidence_level == EvidenceLevel.CERTIFIED_EVIDENCE
+        and baseline_done >= baseline_required
+    ):
+        evidence_level = cert_evidence_level
 
     can_save_for_validation = (
         status == SourceIntakeStatus.CONFIRMED_ACCESSIBLE

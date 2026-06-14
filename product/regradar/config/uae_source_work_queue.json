@@ -1,0 +1,4701 @@
+{
+  "version": 1,
+  "summary": {
+    "generated_at": "2026-06-14T15:55:00Z",
+    "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
+    "public_source_truth_after": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
+    "total_entries": 78,
+    "activation_ready_count": 2,
+    "baseline_pending_count": 6,
+    "remediation_count": 21,
+    "blocked_count": 21,
+    "rejected_count": 0,
+    "candidate_count": 28,
+    "proof_backed_count": 3,
+    "baseline_complete_count": 3,
+    "did_reach_50_working_sources": false,
+    "notes": "Queue applies manual agent gates. Only activation_ready entries count toward the 50 working-source target; sources.json was not expanded in this sprint."
+  },
+  "sources": [
+    {
+      "source_id": "AE-abu-dhabi-global-market-adgm",
+      "regulator": "Abu Dhabi Global Market (ADGM)",
+      "url": "https://www.adgm.com/fsra",
+      "source_type": "financial_regulator",
+      "priority": "P0",
+      "current_state": "proof_saved",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-data-protection",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection",
+      "source_type": "data_protection",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Data protection compliance matters for regulated firm governance and privacy controls.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-consultations",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/legal-framework/public-consultations",
+      "source_type": "consultation",
+      "priority": "P1",
+      "current_state": "no_save_passed",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "build_consultation_item_diff_filter_then_save_baseline",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "medium",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "baseline_pending",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "No-save output was meaningful, but evidence is not saved.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No-save result is preview only; no proof claim allowed.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Can save for validation, but cannot activate.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: no-save readiness candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "No-save readiness-supported candidate.",
+        "forbidden_wording": "evidence-confirmed, monitoring-ready"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Save/baseline run and possible filters required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Review before save."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Consultations provide early-warning rule change signals.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "baseline_pending",
+        "reason": "No-save passed; save evidence and baselines are still required.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-enforcement",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities",
+      "source_type": "enforcement",
+      "priority": "P1",
+      "current_state": "no_save_passed",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "save_baseline_only_if_source_label_is_broadened_or_split",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "baseline_pending",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "No-save output was meaningful, but evidence is not saved.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No-save result is preview only; no proof claim allowed.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Can save for validation, but cannot activate.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: no-save readiness candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "No-save readiness-supported candidate.",
+        "forbidden_wording": "evidence-confirmed, monitoring-ready"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Save/baseline run and possible filters required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Review before save."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Enforcement actions help compliance teams track regulatory expectations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "baseline_pending",
+        "reason": "No-save passed; save evidence and baselines are still required.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-financial-crime-prevention",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+      "source_type": "aml_cft_guidance",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "source_monitor_founder_review_then_sources_json_candidate_activation",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "proof_path": "data/source_snapshots/2026-06-14/AE/AE-adgm-fsra-financial-crime-prevention/intake-20260614T154830Z/proof.json",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official/public source with stable URL, selector, non-nav-shell output, and reviewed source-health risk.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof paths exist and baseline requirement is satisfied.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, no hash collision, no shallow-shell activation claim.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: activation-ready candidate after evidence/baseline gates; not regulator certified and not legal advice.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Activation-ready candidate after local proof and baseline checks.",
+        "forbidden_wording": "validated, certified, guaranteed, legal advice"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses existing Source Lab evidence pipeline and selector strategy; no broad rewrite required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Monitor selector stability during source-health checks."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Direct ADGM financial crime, AML/TFS, sanctions, STR/SAR and high-risk jurisdiction guidance surface.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "All required gate fields pass for candidate activation; sources.json still requires explicit registry-change approval.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-guidance-policy",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/legal-framework/guidance-and-policy-statements",
+      "source_type": "guidance",
+      "priority": "P0",
+      "current_state": "no_save_passed",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "add_item_level_noise_filters_then_save_baseline",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "medium",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "baseline_pending",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "No-save output was meaningful, but evidence is not saved.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No-save result is preview only; no proof claim allowed.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Can save for validation, but cannot activate.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: no-save readiness candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "No-save readiness-supported candidate.",
+        "forbidden_wording": "evidence-confirmed, monitoring-ready"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Save/baseline run and possible filters required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Review before save."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "FSRA guidance and policy statements are compliance-operating inputs.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "baseline_pending",
+        "reason": "No-save passed; save evidence and baselines are still required.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-homepage",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/fsra",
+      "source_type": "regulator_homepage",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Official page is useful for discovery but too broad for default monitoring. URL remediation note: replace_with_specific_adgm_fsra_subpages.",
+      "next_action": "do_not_activate_homepage_use_specific_sources",
+      "expected_extraction_strategy": "blocked",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official FSRA anchor for ADGM regulated firms.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-notices",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/fsra/notices",
+      "source_type": "notice",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Notices are high-signal operational regulatory updates.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-public-register",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/public-registers",
+      "source_type": "register",
+      "priority": "P1",
+      "current_state": "remediation",
+      "blocker": "Extractable but shallow; register/search pages need a specific adapter before default-pack monitoring.",
+      "next_action": "build_register_adapter_before_activation",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extractable but shallow; register/search pages need a specific adapter before default-pack monitoring.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Build public-register/search adapter or keep as manual review source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Build public-register/search adapter or keep as manual review source."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Register changes matter for authorization and counterparty diligence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-rulebooks",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/legal-framework/rules-and-regulations",
+      "source_type": "rulebook",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "source_monitor_founder_review_then_sources_json_candidate_activation",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "proof_path": "data/source_snapshots/2026-06-14/AE/AE-adgm-fsra-rulebooks/intake-20260614T154850Z/proof.json",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official/public source with stable URL, selector, non-nav-shell output, and reviewed source-health risk.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof paths exist and baseline requirement is satisfied.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, no hash collision, no shallow-shell activation claim.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: activation-ready candidate after evidence/baseline gates; not regulator certified and not legal advice.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Activation-ready candidate after local proof and baseline checks.",
+        "forbidden_wording": "validated, certified, guaranteed, legal advice"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses existing Source Lab evidence pipeline and selector strategy; no broad rewrite required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Monitor selector stability during source-health checks."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "FSRA rulebooks drive obligations for ADGM regulated firms.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "All required gate fields pass for candidate activation; sources.json still requires explicit registry-change approval.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-rules",
+      "regulator": "ADGM FSRA Rulebook",
+      "url": "https://www.fsra.adgm.com/rules-and-regulations/rulebooks",
+      "source_type": "financial_regulator",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-legal-framework-legislation",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/legal-framework",
+      "source_type": "law",
+      "priority": "P1",
+      "current_state": "remediation",
+      "blocker": "Original legislation URL returned nav/404 shell; use specific legal-framework subpages instead.",
+      "next_action": "keep_remediation_until_specific_legislation_page_passes",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Original legislation URL returned nav/404 shell; use specific legal-framework subpages instead.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Investigate federal/Abu Dhabi legislation subpages separately before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Investigate federal/Abu Dhabi legislation subpages separately before activation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "ADGM legislation updates affect regulated and corporate obligations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-legal-framework-rules",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/legal-framework/rules-and-regulations",
+      "source_type": "regulation",
+      "priority": "P1",
+      "current_state": "no_save_passed",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "dedupe_with_adgm_fsra_rulebooks_before_save",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "adgm-page > span",
+      "wait_selector": "adgm-page > span",
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "baseline_pending",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "No-save output was meaningful, but evidence is not saved.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No-save result is preview only; no proof claim allowed.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Can save for validation, but cannot activate.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: no-save readiness candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "No-save readiness-supported candidate.",
+        "forbidden_wording": "evidence-confirmed, monitoring-ready"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Save/baseline run and possible filters required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Review before save."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "ADGM rules and regulations shape obligations for ADGM firms.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "baseline_pending",
+        "reason": "No-save passed; save evidence and baselines are still required.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-aml-cft",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/our-operations/anti-money-laundering-and-combatting-the-financing-of-terrorism/",
+      "source_type": "aml_guidance",
+      "priority": "P0",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "AML/CFT central bank guidance is direct compliance monitoring input.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-circulars",
+      "regulator": "CBUAE Circulars",
+      "url": "https://www.centralbank.ae/en/regulations/",
+      "source_type": "central_bank",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-consultations",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/consultations/",
+      "source_type": "consultation",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Consultations give early-warning signals for upcoming regulatory changes.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-consumer-protection",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/consumer-protection/",
+      "source_type": "guidance",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Consumer protection changes affect regulated financial product controls.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-homepage",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/",
+      "source_type": "regulator_homepage",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Broad central bank anchor for UAE financial regulatory updates.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-licensing",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/licensing/",
+      "source_type": "licensing",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Licensing pages can affect regulatory perimeter and authorization workflows.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-news",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/media-center/news/",
+      "source_type": "publication",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official news may announce regulatory changes, enforcement, or consultations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-open-data",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/open-data/",
+      "source_type": "data",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "table_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Open data may support context but is lower-signal for obligations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-payment-systems",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/our-operations/payment-systems/",
+      "source_type": "payment_regulation",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Payment systems and stored value rules matter for UAE fintech/payment monitoring.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-publications",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/publications/",
+      "source_type": "publication",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official publications may contain guidance, annual reports, and regulatory material.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-regulations",
+      "regulator": "CBUAE",
+      "url": "https://www.centralbank.ae/en/regulations/",
+      "source_type": "regulation",
+      "priority": "P0",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Core regulations for UAE financial institutions and fintech/payment firms.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-central-bank-of-the-uae",
+      "regulator": "Central Bank of the UAE",
+      "url": "https://www.centralbank.ae/",
+      "source_type": "central_bank",
+      "priority": "P0",
+      "current_state": "proof_saved",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-aml-ctf-sanctions",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance",
+      "source_type": "aml_guidance",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "DFSA financial crime pages frame MLRO obligations and official notice areas.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-aml-mlro-notices",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/financial-crime-prevention-notices-and-mlro-letters",
+      "source_type": "aml_notice",
+      "priority": "P0",
+      "current_state": "no_save_passed",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "baseline_pending",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "No-save output was meaningful, but evidence is not saved.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No-save result is preview only; no proof claim allowed.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Can save for validation, but cannot activate.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: no-save readiness candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "No-save readiness-supported candidate.",
+        "forbidden_wording": "evidence-confirmed, monitoring-ready"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Save/baseline run and possible filters required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Review before save."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Financial crime prevention notices and MLRO letters are direct MLRO monitoring inputs.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "baseline_pending",
+        "reason": "No-save passed; save evidence and baselines are still required.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-consultation-papers",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/your-resources/publications/consultation-papers",
+      "source_type": "consultation",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Consultations give early warning before rule changes are finalized.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-enforcement-regulatory-actions",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions",
+      "source_type": "enforcement",
+      "priority": "P0",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Enforcement/regulatory actions provide high-signal compliance and conduct risk changes.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-notices",
+      "regulator": "DFSA Regulatory Notices",
+      "url": "https://www.dfsa.ae/regulation/notices-public-registers",
+      "source_type": "financial_regulator",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Source requires selector, adapter, or URL remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Adapter or selector review required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Adapter or selector review required."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-public-register",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/public-register",
+      "source_type": "register",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Public register changes affect firm authorization and counterparty checks.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-publications",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/your-resources/publications",
+      "source_type": "publication",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Publication index can surface consultation, policy, and enforcement documents.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-rulebook-official",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/your-resources/regulatory/laws-and-rules",
+      "source_type": "rulebook",
+      "priority": "P0",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "DFSA rules are central obligations for DIFC-authorised firms.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-rulebook-thomsonreuters",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/rulebook-modules",
+      "source_type": "rulebook",
+      "priority": "P0",
+      "current_state": "no_save_passed",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "baseline_pending",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "No-save output was meaningful, but evidence is not saved.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No-save result is preview only; no proof claim allowed.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Can save for validation, but cannot activate.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: no-save readiness candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "No-save readiness-supported candidate.",
+        "forbidden_wording": "evidence-confirmed, monitoring-ready"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Save/baseline run and possible filters required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Review before save."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Officially linked rulebook platform may be a cleaner source for DFSA module monitoring.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "baseline_pending",
+        "reason": "No-save passed; save evidence and baselines are still required.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-difc-consultation-papers",
+      "regulator": "DIFC",
+      "url": "https://www.difc.com/business/laws-and-regulations/consultation-papers/",
+      "source_type": "consultation",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Consultation papers are early-warning signals for DIFC legal changes.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection",
+      "regulator": "DIFC",
+      "url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
+      "source_type": "data_protection",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Data protection updates can affect regulated firm compliance controls.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-difc-laws-and-regulations",
+      "regulator": "DIFC Laws and Regulations",
+      "url": "https://www.difc.com/business/laws-and-regulations/",
+      "source_type": "legal_database",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Source requires selector, adapter, or URL remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Adapter or selector review required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Adapter or selector review required."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-difc-laws-regulations",
+      "regulator": "DIFC",
+      "url": "https://www.difc.com/business/laws-and-regulations/",
+      "source_type": "law",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "DIFC laws/regulations shape compliance obligations for DIFC firms.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-difc-legal-database",
+      "regulator": "DIFC",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
+      "source_type": "legal_database",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Legal database can be a structured index for DIFC legal changes.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-difc-legislation",
+      "regulator": "DIFC Laws Portal",
+      "url": "https://www.difc.ae/business/laws-regulations/legislation/",
+      "source_type": "financial_regulator",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dubai-financial-services-authority-dfsa",
+      "regulator": "Dubai Financial Services Authority (DFSA)",
+      "url": "https://www.dfsa.ae/rules-and-standards",
+      "source_type": "financial_regulator",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Source requires selector, adapter, or URL remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Adapter or selector review required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Adapter or selector review required."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-dubai-virtual-assets-regulatory-authority-vara",
+      "regulator": "Dubai Virtual Assets Regulatory Authority (VARA)",
+      "url": "https://www.vara.ae/",
+      "source_type": "financial_regulator",
+      "priority": "P0",
+      "current_state": "proof_saved",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-eocn-homepage",
+      "regulator": "Executive Office for Control and Non-Proliferation",
+      "url": "https://www.eocn.gov.ae/",
+      "source_type": "sanctions",
+      "priority": "P0",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Sanctions/TFS updates are central to AML and screening controls.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-federal-tax-authority-homepage",
+      "regulator": "Federal Tax Authority",
+      "url": "https://tax.gov.ae/",
+      "source_type": "tax",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Tax authority updates affect regulated firms, but broad homepage should not count as strong compliance coverage.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-fta-corporate-tax-guides",
+      "regulator": "Federal Tax Authority",
+      "url": "https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.guides.references.aspx",
+      "source_type": "tax_guidance",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Corporate tax guides and references matter for regulated-firm compliance operations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-fta-vat-public-clarifications",
+      "regulator": "Federal Tax Authority",
+      "url": "https://tax.gov.ae/en/taxes/vat/vat-public-clarifications.aspx",
+      "source_type": "tax_guidance",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Public clarifications affect firm tax compliance and advisory workflows.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-moec-aml",
+      "regulator": "Ministry of Economy",
+      "url": "https://www.moec.gov.ae/en/anti-money-laundering",
+      "source_type": "aml_guidance",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "MoEc AML pages are relevant to DNFBP and broader AML compliance context.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-mof-homepage",
+      "regulator": "Ministry of Finance",
+      "url": "https://mof.gov.ae/",
+      "source_type": "finance_ministry",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official MoF anchor for finance and tax policy context.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-aml-cft",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+      "source_type": "aml_cft_guidance",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Saved run extracted only carousel/navigation text: Previous / Next.",
+      "next_action": "selector_adapter_remediation_before_save",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "[data-icms-list]",
+      "wait_selector": "[data-icms-list]",
+      "expected_min_length": null,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Saved run extracted only carousel/navigation text: Previous / Next.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Investigate a more stable post-render selector or SCA item/list adapter before retrying save mode.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Investigate a more stable post-render selector or SCA item/list adapter before retrying save mode."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Official SCA AML/CFT and financial-crime compliance page for UAE capital-markets participants.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-circulars",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+      "source_type": "circular",
+      "priority": "P1",
+      "current_state": "remediation",
+      "blocker": "Correct URL found, but extracted text is below the reliable threshold.",
+      "next_action": "build_card_listing_adapter_then_retest",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "main section",
+      "wait_selector": "main section",
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Correct URL found, but extracted text is below the reliable threshold.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Build item/card extraction adapter for circular titles and detail URLs.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Build item/card extraction adapter for circular titles and detail URLs."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Circulars are high-signal operational updates for regulated firms.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-decisions",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/regulations",
+      "source_type": "decision",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Legacy decisions URL returned service-shell output; current decision items appear under latest regulations.",
+      "next_action": "replace_with_sca_latest_regulations_candidate",
+      "expected_extraction_strategy": "blocked",
+      "selector": "[data-icms-list]",
+      "wait_selector": "[data-icms-list]",
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Board decisions can introduce or amend obligations for market participants.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-homepage",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/",
+      "source_type": "regulator_homepage",
+      "priority": "P2",
+      "current_state": "remediation",
+      "blocker": "Homepage is official but navigation/service-heavy; use specific regulation pages instead. URL remediation note: replace_with_specific_sca_regulations_pages.",
+      "next_action": "do_not_activate_homepage_use_specific_sources",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "main",
+      "wait_selector": "main",
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Homepage is official but navigation/service-heavy; use specific regulation pages instead.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Do not activate the SCA homepage as default monitoring if specific subpages are available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not activate the SCA homepage as default monitoring if specific subpages are available."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official UAE SCA anchor; not Saudi CMA.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-latest-regulations",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/regulations",
+      "source_type": "regulations_listing",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Two stable saved baselines exist, but high source-health risk and listing-only extraction remain unresolved.",
+      "next_action": "build_sca_listing_adapter_then_repeat_activation_review",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "[data-icms-list]",
+      "wait_selector": "[data-icms-list]",
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "high",
+      "proof_path": "data/source_snapshots/2026-06-14/AE/AE-sca-latest-regulations/intake-20260614T154911Z/proof.json",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Proof exists, but high noise or source-health risk is unresolved.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof paths exist and baseline count is recorded, but source-health gate controls activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "High operational risk blocks activation until filter/remediation is implemented.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: proof-backed but not activation-ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Proof-backed candidate under remediation.",
+        "forbidden_wording": "monitoring-ready, validated"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Add SCA listing-row normalization and source-health safeguards before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Add SCA listing-row normalization and source-health safeguards before activation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Official UAE SCA latest-regulations listing for capital-markets regulatory changes.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Proof exists, but unresolved high noise/source-health risk blocks activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-laws",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/regulations-listing",
+      "source_type": "law",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Legacy laws URL returned service-shell output; regulations-listing remains CAPTCHA/filter noisy.",
+      "next_action": "keep_remediation_build_listing_adapter",
+      "expected_extraction_strategy": "blocked",
+      "selector": "main",
+      "wait_selector": "main",
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Securities laws affect regulated market participant obligations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-legislation",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/legislation.aspx",
+      "source_type": "regulation",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Legacy /en/legislation.aspx redirects through a 404 handler to the home/service shell. URL remediation note: replace_legacy_legislation_aspx_with_specific_regulations_paths.",
+      "next_action": "deprecate_legacy_url_and_split_sca_sources",
+      "expected_extraction_strategy": "blocked",
+      "selector": "[data-icms-list]",
+      "wait_selector": "[data-icms-list]",
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "SCA legislation is central for securities/capital market compliance.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-news",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/media-center/news.aspx",
+      "source_type": "publication",
+      "priority": "P2",
+      "current_state": "remediation",
+      "blocker": "News is lower signal than regulations/AML/CFT for default MLRO pack. URL remediation note: defer_lower_signal_news_source.",
+      "next_action": "defer",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "main",
+      "wait_selector": "main",
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "News is lower signal than regulations/AML/CFT for default MLRO pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Keep news out of default pack unless a customer explicitly requests it.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Keep news out of default pack unless a customer explicitly requests it."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official news may flag regulatory announcements and consultation outcomes.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-regulations",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/regulations",
+      "source_type": "regulation",
+      "priority": "P1",
+      "current_state": "remediation",
+      "blocker": "Legacy legislation URL is stale; latest-regulations evidence is tracked under AE-sca-latest-regulations.",
+      "next_action": "keep_legacy_candidate_replaced_by_split_source_id",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": "[data-icms-list]",
+      "wait_selector": "[data-icms-list]",
+      "expected_min_length": null,
+      "noise_risk": "medium",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Legacy legislation URL is stale; latest-regulations evidence is tracked under AE-sca-latest-regulations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Use AE-sca-latest-regulations for the current official latest-regulations listing model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Use AE-sca-latest-regulations for the current official latest-regulations listing model."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Regulation pages are higher-signal than SCA homepage monitoring.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uae-elaws-moj",
+      "regulator": "UAE Ministry of Justice",
+      "url": "https://elaws.moj.gov.ae/",
+      "source_type": "law",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official legal database can supplement the UAE legislation portal if monitorable.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uae-financial-intelligence-unit-uaefiu",
+      "regulator": "UAE Financial Intelligence Unit (UAEFIU)",
+      "url": "https://www.uaefiu.gov.ae/",
+      "source_type": "aml",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Source requires selector, adapter, or URL remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Adapter or selector review required.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Adapter or selector review required."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uae-legislation-portal",
+      "regulator": "UAE Legislation",
+      "url": "https://uaelegislation.gov.ae/",
+      "source_type": "law",
+      "priority": "P1",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Federal legislation portal supports legal/regulatory change evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uae-ministry-of-economy",
+      "regulator": "UAE Ministry of Economy",
+      "url": "https://www.moet.gov.ae/en/",
+      "source_type": "company_registry",
+      "priority": "P0",
+      "current_state": "proof_saved",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uae-ministry-of-finance",
+      "regulator": "UAE Ministry of Finance",
+      "url": "https://mof.gov.ae/",
+      "source_type": "finance_ministry",
+      "priority": "P0",
+      "current_state": "proof_saved",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-awareness",
+      "regulator": "UAE FIU",
+      "url": "https://www.uaefiu.gov.ae/en/Awareness/",
+      "source_type": "guidance",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Awareness/guidance pages may contain AML typologies or reporting education.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-circulars",
+      "regulator": "UAE FIU Circulars and Notices",
+      "url": "https://www.uaefiu.gov.ae/en/Publications/",
+      "source_type": "aml",
+      "priority": "P0",
+      "current_state": "proof_saved",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-goaml-public",
+      "regulator": "UAE FIU",
+      "url": "https://www.uaefiu.gov.ae/en/goAML/",
+      "source_type": "aml_guidance",
+      "priority": "P0",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Public goAML guidance can affect reporting workflow and internal MLRO procedures.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-guidance",
+      "regulator": "UAE FIU AML Guidance",
+      "url": "https://www.uaefiu.gov.ae/en/Publications/",
+      "source_type": "aml",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-homepage",
+      "regulator": "UAE FIU",
+      "url": "https://www.uaefiu.gov.ae/",
+      "source_type": "regulator_homepage",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official UAE FIU anchor, but shallow homepage monitoring is weak.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-laws-regulations",
+      "regulator": "UAE FIU",
+      "url": "https://www.uaefiu.gov.ae/en/Laws-Regulations/",
+      "source_type": "law",
+      "priority": "P1",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "FIU-linked legal references help AML compliance teams track relevant obligations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-publications",
+      "regulator": "UAE FIU",
+      "url": "https://www.uaefiu.gov.ae/en/Publications/",
+      "source_type": "publication",
+      "priority": "P0",
+      "current_state": "blocked",
+      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "blocked",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "blocked",
+      "source_monitor_gate": {
+        "status": "fail",
+        "reason": "Blocked or access-restricted source; do not monitor.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "fail",
+        "reason": "No acceptable proof/baseline path for blocked source.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Blocked source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: blocked or remediation required only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Blocked or under remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "May require alternative official URL or access-safe source model.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Do not bypass access controls."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "FIU publications/circulars are direct AML reporting and typology inputs.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "blocked",
+        "reason": "Access/source-health blockers prevent activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-aml-cft-rulebook",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/",
+      "source_type": "aml_guidance",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "pdf_extractor",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "AML/CFT rulebook changes are direct MLRO obligations.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-company-rulebook",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/en/regulatory-framework/company-rulebook/",
+      "source_type": "rulebook",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "pdf_extractor",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Company rulebook obligations affect governance, compliance, and operational controls.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-enforcement",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/en/enforcement/",
+      "source_type": "enforcement",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Public enforcement actions are high-signal for VASP compliance and risk controls.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-homepage",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/",
+      "source_type": "regulator_homepage",
+      "priority": "P1",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "playwright_selector",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Broad official anchor for Dubai virtual asset regulatory updates.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-news",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/en/news/",
+      "source_type": "publication",
+      "priority": "P2",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "hold",
+        "reason": "Official announcements can point to consultations, enforcement, and policy movement.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-public-register",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/en/public-register/",
+      "source_type": "register",
+      "priority": "P1",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "listing_adapter",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Entity authorization/register changes affect counterparties and licensing review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-regulatory-framework",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/en/regulatory-framework/",
+      "source_type": "rulebook",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "pdf_extractor",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Rulebook and framework changes drive VASP obligation updates.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-rulebook",
+      "regulator": "VARA Virtual Assets Regulation",
+      "url": "https://www.vara.ae/en/regulatory-framework/",
+      "source_type": "financial_regulator",
+      "priority": "P1",
+      "current_state": "candidate",
+      "blocker": "Not activation-ready under agent-gated standard.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "static_html",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "candidate",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Candidate not yet tested or not migrated through source monitor review.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No saved proof/baseline in gated queue.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Cannot count as working without tests and evidence.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: candidate only.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Candidate source under validation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Extraction strategy must be verified before activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Pending Source Lab validation."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate is not yet validated enough for activation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    },
+    {
+      "source_id": "AE-vara-rulebooks-overview",
+      "regulator": "VARA",
+      "url": "https://www.vara.ae/en/regulatory-framework/rulebooks/",
+      "source_type": "rulebook",
+      "priority": "P0",
+      "current_state": "remediation",
+      "blocker": "Extracted content is a navigation shell or collides with another source hash.",
+      "next_action": "continue_source_remediation_or_validation",
+      "expected_extraction_strategy": "pdf_extractor",
+      "selector": null,
+      "wait_selector": null,
+      "expected_min_length": null,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "proof_path": null,
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "activation_decision": "remediation",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No complete activation evidence available.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "proof_paths_checked": false
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Remediation source cannot count as working.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording: under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "allowed_wording": "Under extraction remediation.",
+        "forbidden_wording": "ready, validated, monitored"
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Configure a precise content_selector or adapter before marking this source ready.",
+        "reviewed_at": "2026-06-14T15:55:00Z",
+        "adapter_or_code_notes": "Configure a precise content_selector or adapter before marking this source ready."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Grouped rulebook listing would be a cleaner monitor than a broad homepage if reachable.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Source remains under extraction remediation.",
+        "reviewed_at": "2026-06-14T15:55:00Z"
+      }
+    }
+  ]
+}
