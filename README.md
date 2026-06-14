@@ -2,9 +2,9 @@
 
 > Official-source regulatory monitoring with evidence-backed compliance briefs.
 
-This repository is the **operating and tooling workspace** for StatuteProof. It contains agents, Claude Code skills, prompts, workflows, docs, and checklists for running the StatuteProof monitoring pipeline.
+This repository is the **operating, tooling, and product workspace** for StatuteProof. It contains agents, Claude Code skills, prompts, workflows, docs, checklists, and the current StatuteProof product implementation.
 
-The live pipeline code is at `regradar/` (separate location). This workspace does not contain pipeline code.
+The product code lives in `product/regradar/`.
 
 ## Quick Start
 
@@ -40,6 +40,7 @@ StatuteProof-Command-Center/
 ├── workflows/              — step-by-step operating workflows
 ├── examples/               — SAMPLE / FAKE labeled output examples
 ├── checklists/             — pre-task quality gates
+├── product/regradar/       — current Python backend, parser, app, and React frontend
 ├── tools/                  — validation and packaging scripts
 └── references/             — notes on reference repos (no full copies)
 ```
