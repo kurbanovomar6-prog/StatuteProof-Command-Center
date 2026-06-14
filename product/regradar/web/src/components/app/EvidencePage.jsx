@@ -1,8 +1,8 @@
 /**
  * EvidencePage — SAMPLE / FAKE demonstration data only.
  *
- * No /api/evidence endpoint exists in the current backend.
- * All records shown here are sample data for interface demonstration.
+ * The page attempts to load /api/evidence and falls back to clearly
+ * labeled sample data when no live evidence records are available.
  * Evidence records support compliance review and do not determine legal obligations.
  */
 import { useEffect, useState } from 'react'
@@ -296,8 +296,8 @@ export default function EvidencePage() {
       {/* Evidence cards */}
       {records.length > 0 && (
       <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-        {records.map(record => (
-          <EvidenceCard key={record.evidence_record_id} record={record} />
+        {records.map((record, index) => (
+          <EvidenceCard key={`${record.evidence_record_id}-${index}`} record={record} />
         ))}
       </div>
       )}

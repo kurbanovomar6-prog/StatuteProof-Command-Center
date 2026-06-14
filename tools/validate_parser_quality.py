@@ -36,6 +36,8 @@ REQUIRED_FILES = [
     "docs/parser-quality-gates.md",
 ]
 
+SAMPLE_BRIEF_PATH = "docs/samples/first-proof-backed-sample-brief.md"
+
 REQUIRED_PROVIDER_FILES = [
     "product/regradar/app/providers/html_extraction.py",
     "product/regradar/app/providers/pdf_extraction.py",
@@ -142,6 +144,27 @@ def collect_customer_files() -> list[Path]:
     return files
 
 
+def validate_sample_brief(errors: list[str]) -> None:
+    path = ROOT / SAMPLE_BRIEF_PATH
+    if not path.exists():
+        fail(errors, f"Proof-backed sample brief is missing: {SAMPLE_BRIEF_PATH}")
+        return
+
+    text = path.read_text(encoding="utf-8")
+    lower = text.lower()
+    required_markers = {
+        "SAMPLE / FAKE DEMO": "sample/fake demo label",
+        "Proof artifact:": "proof artifact reference",
+        "Normalized hash": "normalized hash reference",
+        "not legal advice": "not-legal-advice disclaimer",
+        "Human Review Required": "human review gate",
+    }
+
+    for marker, description in required_markers.items():
+        if marker.lower() not in lower:
+            fail(errors, f"Sample brief missing {description}: {SAMPLE_BRIEF_PATH}")
+
+
 def main() -> int:
     errors: list[str] = []
 
@@ -189,6 +212,8 @@ def main() -> int:
     if CURRENT_PROMISE not in current_docs:
         fail(errors, "Current customer-safe parser promise is missing from parser docs.")
 
+    validate_sample_brief(errors)
+
     for file_path in collect_customer_files():
         try:
             text = file_path.read_text(encoding="utf-8")
@@ -223,6 +248,7 @@ def main() -> int:
     print("- Reference repositories ignored")
     print("- Customer-facing overclaim scan passed")
     print("- Current parser promise present in docs")
+    print("- Proof-backed sample brief guard passed")
     return 0
 
 
