@@ -146,15 +146,16 @@ Change detection is **deterministic hash comparison only** — no LLM used.
 **DO NOT USE:** "13 confirmed UAE regulatory sources"
 
 **USE (honest):**
-- "UAE regulatory source pack — 13 sources enabled, 10 confirmed accessible with evidence records"
+- "UAE regulatory source pack — 13 sources enabled, evidence-readiness review in progress"
+- "Latest readiness run artifacts available for sources that completed proof validation"
 - "Covers VARA, CBUAE, DFSA, ADGM, UAE FIU, DIFC and more — source readiness validation in progress"
 - "13 UAE regulatory sources under evidence-readiness review" (acceptable during validation period)
 
 **After DFSA fix is confirmed:**
-- "11 UAE regulatory sources confirmed ready, 2 (DFSA) under extraction remediation"
+- "11 UAE regulatory sources passed the latest readiness check, 2 (DFSA) under extraction remediation"
 
 **After all 3 remediations are complete:**
-- "13 UAE regulatory sources — all confirmed accessible with evidence records and hash-verified snapshots"
+- "13 UAE regulatory sources passed the latest evidence-readiness run with hash-verified snapshots"
 
 ---
 
