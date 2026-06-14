@@ -25,8 +25,8 @@ const PACKS = [
     profile: 'DIFC / DFSA',
     bestFor: 'DIFC regulated firms, funds, advisers, law firms and compliance consultants',
     layers: [
-      'DFSA rulebook',
-      'DFSA consultation papers',
+      'DFSA rulebook remediation before activation',
+      'DFSA consultation papers under validation',
       'DIFC Laws',
       'DIFC Data Protection guidance',
     ],
@@ -35,9 +35,9 @@ const PACKS = [
     profile: 'ADGM / FSRA',
     bestFor: 'ADGM regulated firms, funds, securities teams and regulatory advisers',
     layers: [
-      'FSRA rulebook',
-      'FSRA circulars',
-      'ADGM publications',
+      'ADGM / FSRA main source confirmed with caveats',
+      'FSRA rulebook outside confirmed scope until readiness checks clear',
+      'FSRA circulars under validation',
       'ADGM Data Protection guidance',
     ],
   },
@@ -73,9 +73,9 @@ const PACKS = [
 ]
 
 const STATUSES = [
-  ['Validated', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
+  ['Confirmed', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
   ['Under validation', 'border-amber-400/25 bg-amber-400/10 text-amber-300'],
-  ['Needs adapter', 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'],
+  ['Needs remediation', 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'],
 ]
 
 export default function BuyerSourcePacks({ onCreateWorkspace }) {
@@ -91,7 +91,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
             Built around your regulatory profile
           </h2>
           <p className="text-slate-400">
-            StatuteProof maps official source layers by licence type, then activates only sources that pass technical validation.
+            StatuteProof maps official source layers by licence type, then activates only sources that clear readiness checks.
           </p>
         </div>
 
@@ -143,7 +143,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
         </div>
 
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/45 p-4 text-sm leading-relaxed text-slate-400">
-          Source packs are maps for buyer scoping. They do not imply every listed source layer is active in monitoring.
+          Source packs are maps for buyer scoping. They do not imply every listed source layer is confirmed for monitoring.
         </div>
       </div>
     </section>

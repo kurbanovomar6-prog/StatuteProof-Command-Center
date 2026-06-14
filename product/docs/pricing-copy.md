@@ -11,7 +11,7 @@ _Last updated: 2026-06-12_
 
 For compliance officers who need documented monitoring of one key regulator.
 
-- Weekly monitoring digest for 1 selected regulator (choose from 9 ready sources)
+- Weekly monitoring digest for 1 selected regulator, subject to source readiness and activation review
 - SHA-256 snapshot record with UTC timestamp per run
 - Human-reviewed before delivery — email only
 
@@ -45,7 +45,7 @@ For compliance programs with broader UAE source coverage requirements.
 - Priority human review turnaround
 - Defined SLA and dedicated support
 
-Who it is for: A compliance team at a licensed VASP, exchange, or financial institution that requires documented monitoring across the full UAE regulatory landscape and needs an SLA.
+Who it is for: A compliance team at a licensed VASP, exchange, or financial institution that needs documented monitoring across an agreed UAE official-source scope and a defined support arrangement.
 
 Contact us to confirm source scope and pricing before committing.
 
@@ -57,7 +57,7 @@ _Monitoring information only. Not legal advice and not a guarantee of compliance
 
 ### Usage notes for marketing / web team
 
-- Do not use the phrases "never miss", "always up to date", "complete UAE coverage", "all regulators", or "automated compliance".
+- Do not use absolute detection, freshness, complete-coverage, all-regulator, or automated-compliance phrases.
 - Do not imply that purchasing any tier guarantees detection of all regulatory changes.
 - Each tier description must be reviewed by Legal Language before the page goes live.
 - The footer disclaimer must appear on the pricing page in legible type — not hidden in a tooltip.

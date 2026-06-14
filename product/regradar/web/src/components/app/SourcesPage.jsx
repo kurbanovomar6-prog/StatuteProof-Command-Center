@@ -50,20 +50,23 @@ const INTAKE_STATUS_BG = {
 
 // legacy source table styles
 const HEALTH_STYLE = {
-  PASS:    'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  Review:  'text-amber-400   bg-amber-500/10   border-amber-500/20',
-  Limited: 'text-slate-400   bg-slate-700      border-slate-600',
+  PASS:                 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  'Evidence confirmed': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  Review:               'text-amber-400   bg-amber-500/10   border-amber-500/20',
+  Limited:              'text-slate-400   bg-slate-700      border-slate-600',
 }
 const STATUS_STYLE = {
   Active:           'text-emerald-400',
   Validated:        'text-emerald-400',
+  Confirmed:        'text-emerald-400',
   'Under validation': 'text-amber-400',
   Limited:          'text-amber-400',
   Partial:          'text-slate-400',
   'Needs adapter':  'text-amber-400',
+  'Needs remediation': 'text-amber-400',
 }
 
-const FILTERS   = ['All', 'Validated', 'Limited', 'Partial', 'Needs adapter', 'User source']
+const FILTERS   = ['All', 'Confirmed', 'Needs remediation', 'Limited', 'Partial', 'Needs adapter', 'User source']
 const MARKETS   = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const CATEGORIES = [
   'Central bank', 'Financial regulator', 'Crypto regulator', 'AML authority',
@@ -96,7 +99,7 @@ function saveLocalCustomSource(source) {
 
 // ── component ─────────────────────────────────────────────────────────────────
 
-export default function SourcesPage() {
+export default function SourcesPage({ onAddCustomSource }) {
   const profile = getWorkspaceProfile()
 
   const [filter, setFilter]               = useState('All')
@@ -126,14 +129,16 @@ export default function SourcesPage() {
   const filteredMock = filterSources(MOCK_SOURCES, profile).filter(s => {
     if (filter === 'User source') return false
     if (filter === 'All') return true
-    if (filter === 'Validated') return s.status === 'Active' || s.status === 'Validated'
-    if (filter === 'Needs adapter') return s.extraction?.includes('adapter') || s.extraction?.includes('Geo')
+    if (filter === 'Confirmed') return s.status === 'Active' || s.status === 'Validated' || s.status === 'Confirmed'
+    if (filter === 'Needs remediation') return s.status === 'Needs remediation'
+    if (filter === 'Needs adapter') return s.status === 'Needs adapter' || s.extraction?.includes('adapter') || s.extraction?.includes('Geo')
     return s.status === filter
   })
 
   const filteredCustom = customSources.filter(s => {
     if (filter === 'All' || filter === 'User source') return true
-    if (filter === 'Validated') return s.status === 'Active' || s.status === 'Validated'
+    if (filter === 'Confirmed') return s.status === 'Active' || s.status === 'Validated' || s.status === 'Confirmed'
+    if (filter === 'Needs remediation') return s.status === 'Needs remediation'
     if (filter === 'Needs adapter') return s.status === 'Needs adapter'
     return s.status === filter
   })
@@ -243,7 +248,12 @@ export default function SourcesPage() {
     }`
 
   function sourceStatusLabel(status) {
-    return status === 'Active' ? 'Validated' : status
+    if (status === 'Active' || status === 'Validated') return 'Confirmed'
+    return status
+  }
+
+  function sourceHealthLabel(health) {
+    return health === 'PASS' ? 'Evidence confirmed' : health
   }
 
   function lastCheckedLabel(source) {
@@ -276,11 +286,18 @@ export default function SourcesPage() {
           </p>
         </div>
         <button
-          onClick={() => { resetModal(); setShowModal(true) }}
+          onClick={() => {
+            if (onAddCustomSource) {
+              onAddCustomSource()
+            } else {
+              resetModal()
+              setShowModal(true)
+            }
+          }}
           className="flex items-center gap-1.5 bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Test custom source
+          Add custom source
         </button>
       </div>
 
@@ -288,16 +305,16 @@ export default function SourcesPage() {
       <div className="bg-[#0D1B2E] border border-cyan-400/20 rounded-xl p-5 mb-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white mb-1">Sources are validated before monitoring activates.</h2>
+            <h2 className="text-sm font-semibold text-white mb-1">Sources are checked before monitoring activates.</h2>
             <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
               StatuteProof tests public official sources for accessibility, extraction quality, and content depth.
-              Sources pass only if meaningful regulatory text is extracted and hashed.
-              Custom sources are saved for validation — monitoring is not activated automatically.
+              Sources are marked confirmed only when meaningful regulatory text is extracted and hashed.
+              Custom sources are saved for readiness review — monitoring is not activated automatically.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {[
-              ['Validated', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
+              ['Confirmed', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
               ['Under validation', 'border-amber-400/25 bg-amber-400/10 text-amber-300'],
               ['Needs adapter', 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'],
               ['Limited', 'border-slate-600 bg-slate-800 text-slate-300'],
@@ -359,7 +376,7 @@ export default function SourcesPage() {
                     <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{lastCheckedLabel(s)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${HEALTH_STYLE[s.health] || 'text-slate-400 bg-slate-700 border-slate-600'}`}>
-                        {s.health}
+                        {sourceHealthLabel(s.health)}
                       </span>
                     </td>
                   </tr>
@@ -439,7 +456,7 @@ export default function SourcesPage() {
                     </p>
                     {isGood && !testResult.evidence_written && (
                       <p className="text-xs text-slate-400 leading-relaxed">
-                        Test passed — save required for evidence record.
+                        Threshold met — save required for evidence record.
                         Evidence hash, snapshot, and proof artifact are created during the first monitoring run.
                       </p>
                     )}
@@ -500,7 +517,7 @@ export default function SourcesPage() {
                   <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                   <span>
                     {canActivate
-                      ? 'Test passed. Save this source to queue it for evidence validation. No evidence record exists yet — the first monitoring run creates the hash, snapshot, and proof artifact.'
+                      ? 'Readiness threshold met. Save this source to queue it for evidence validation. No evidence record exists yet — the first monitoring run creates the hash, snapshot, and proof artifact.'
                       : 'This source cannot be activated until the extraction issue is resolved. See the remediation hint above.'}
                   </span>
                 </div>

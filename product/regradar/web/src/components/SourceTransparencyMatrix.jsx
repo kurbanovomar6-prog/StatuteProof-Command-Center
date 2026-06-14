@@ -3,51 +3,51 @@ import { ArrowRight, FileSearch, ShieldCheck } from 'lucide-react'
 const MATRIX_ROWS = [
   {
     category: 'Financial regulation',
-    map: 'CBUAE / payments / AML layers',
-    status: 'Under validation',
-    statusTone: 'validation',
-    extraction: 'HTML / rulebook / adapter review',
-    limitation: 'Some CBUAE pages may require mirror/WAF strategy',
+    map: 'CBUAE Main / CBUAE Regulations',
+    status: 'Confirmed with caveats',
+    statusTone: 'confirmed',
+    extraction: 'HTML structured',
+    limitation: 'Counter-change noise filters and alert relevance checks still apply before delivery',
   },
   {
     category: 'Virtual assets',
-    map: 'VARA publications and rulebooks',
-    status: 'Under validation',
-    statusTone: 'validation',
-    extraction: 'HTML + document-link validation',
-    limitation: 'PDF/document content may be deferred',
+    map: 'VARA Main / Enforcement Notices',
+    status: 'Confirmed with document caveats',
+    statusTone: 'confirmed',
+    extraction: 'HTML / PDF-link validation',
+    limitation: 'PDF/document content is disclosed separately when full text requires manual review',
   },
   {
     category: 'DIFC / DFSA',
-    map: 'DIFC Laws / DFSA rulebook / consultations',
-    status: 'Validated + under validation',
-    statusTone: 'validated',
-    extraction: 'HTML / item-level validation',
-    limitation: 'Some DFSA sources may require WAF/mirror review',
+    map: 'DIFC Laws confirmed; DFSA Rulebook and Regulatory Notices in remediation',
+    status: 'Confirmed + remediation',
+    statusTone: 'validation',
+    extraction: 'HTML structured / selector remediation',
+    limitation: 'DFSA rows are not confirmed until navigation-shell extraction and hash-collision issues are fixed',
   },
   {
     category: 'ADGM / FSRA',
-    map: 'FSRA circulars / ADGM publications',
-    status: 'Under validation',
-    statusTone: 'validation',
-    extraction: 'HTML row extraction / proof-diff',
-    limitation: 'Generic pages require item-level mapping',
+    map: 'ADGM FSRA Main',
+    status: 'Confirmed with caveats',
+    statusTone: 'confirmed',
+    extraction: 'HTML structured',
+    limitation: 'Low character count caveat is disclosed before activation; FSRA rulebook source remains outside confirmed scope',
   },
   {
     category: 'AML / sanctions',
-    map: 'UAE FIU / EOCN / MoET AML',
-    status: 'Under validation',
+    map: 'UAE FIU Circulars confirmed; UAE FIU Homepage in remediation; EOCN under validation',
+    status: 'Mixed readiness',
     statusTone: 'validation',
     extraction: 'HTML / JS validation',
-    limitation: 'Some FIU pages may require JS rendering',
+    limitation: 'FIU homepage extraction is shallow; circular/publication source review is required before activation',
   },
   {
     category: 'Tax / corporate',
-    map: 'FTA clarifications / guides / MoF',
-    status: 'Candidate',
+    map: 'UAE Ministry of Finance confirmed; FTA clarifications and guides require item-level checks',
+    status: 'Confirmed + FTA item-level review',
     statusTone: 'adapter',
     extraction: 'HTML / PDF-link validation',
-    limitation: 'Activation requires item-level source check',
+    limitation: 'MoF is confirmed in the current run; FTA activation requires item-level source checks',
   },
   {
     category: 'Data protection',
@@ -59,16 +59,16 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Legislation / gazettes',
-    map: 'UAE legislation / Dubai Gazette',
-    status: 'Limited / blocked',
+    map: 'UAE Legislation Portal confirmed; official gazette layers blocked or pending',
+    status: 'Confirmed + blocked',
     statusTone: 'limited',
-    extraction: 'WAF / item-level validation',
-    limitation: 'Not active until access is reliable',
+    extraction: 'HTML structured / WAF review',
+    limitation: 'Aggregate legal-portal changes are not treated as customer-ready item updates until item-level extraction is confirmed',
   },
 ]
 
 const BADGE_STYLES = {
-  validated: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
+  confirmed: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
   validation: 'border-amber-400/25 bg-amber-400/10 text-amber-300',
   adapter: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',
   limited: 'border-rose-400/25 bg-rose-400/10 text-rose-300',
@@ -96,7 +96,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
               Broad source map. Strict activation standard.
             </h2>
             <p className="max-w-3xl text-slate-400">
-              Mapped does not mean active. Only validated sources enter client monitoring profiles.
+              Mapped does not mean confirmed for monitoring. Only confirmed sources enter client monitoring profiles.
             </p>
           </div>
 
@@ -106,7 +106,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
               Pilot transparency
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
-              Every pilot includes a source transparency report showing active, under-validation, limited and blocked sources.
+              Every pilot includes a source transparency report showing confirmed, under-validation, limited and blocked sources.
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
           <table className="w-full min-w-[980px] text-sm">
             <thead className="border-b border-slate-800 bg-slate-950/60">
               <tr>
-                {['Regulatory layer', 'Source map', 'Validation status', 'Extraction method', 'Limitation'].map(column => (
+                {['Regulatory layer', 'Source map', 'Readiness status', 'Extraction method', 'Limitation'].map(column => (
                   <th key={column} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                     {column}
                   </th>

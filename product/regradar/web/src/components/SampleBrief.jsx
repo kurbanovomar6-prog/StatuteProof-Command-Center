@@ -17,7 +17,7 @@ const reviewSteps = [
 
 const proofItems = [
   ['Official source', 'cbuae.gov.ae'],
-  ['Extraction quality', 'PASS (HTML monitoring)'],
+  ['Extraction quality', 'GOOD (HTML monitoring)'],
   ['Known limitations', 'Full PDF attachment requires manual download to verify complete circular text'],
 ]
 
@@ -42,7 +42,7 @@ export default function SampleBrief() {
         <div className="mb-10 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200">
             <FileText className="h-4 w-4" />
-            Sample output
+            SAMPLE / DEMO — not a real regulatory update
           </div>
           <h2 className="mb-3 text-3xl font-bold text-white">What a monitoring brief looks like</h2>
           <p className="mx-auto max-w-3xl text-slate-400">
@@ -57,7 +57,7 @@ export default function SampleBrief() {
               <div>
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-200">
-                    Sample output
+                    SAMPLE / DEMO
                   </span>
                   <span className="rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-200">
                     HIGH

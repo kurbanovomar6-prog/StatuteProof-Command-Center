@@ -3,7 +3,7 @@ import { plan as planApi } from '../api'
 
 const DEFAULT_STATE = {
   plan_name: 'evidence_preview',
-  plan_display: 'Evidence Preview',
+  plan_display: 'Source Readiness Review',
   trial_active: false,
   trial_expired: false,
   days_remaining: 7,
@@ -37,18 +37,17 @@ export function usePlan() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    const timer = window.setTimeout(() => { load() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [load])
 
   async function selectPlan(planName) {
-    try {
-      const data = await planApi.set(planName)
-      if (data.ok && data.plan) {
-        setPlanState(data.plan)
-      }
-      return data
-    } catch (err) {
-      throw err
+    const data = await planApi.set(planName)
+    if (data.ok && data.plan) {
+      setPlanState(data.plan)
     }
+    return data
   }
 
   return { planState, loading, selectPlan, reload: load }

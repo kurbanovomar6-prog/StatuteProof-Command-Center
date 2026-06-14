@@ -21,7 +21,7 @@ const PANELS = [
     icon: AlertTriangle,
     title: 'The limits',
     body: [
-      'Every brief includes a Known Limitations field. If a source uses dynamic rendering that can produce false CHANGED signals, we state it. If a source is PDF-primary with variable extraction quality, we state it. If a source was inaccessible during the run, we state it. The limitations field is never empty and never optional.',
+      'Every brief includes a Known Limitations field. If a source uses dynamic rendering that can produce false CHANGED signals, we state it. If a source is PDF-primary with variable extraction quality, we state it. If a source was inaccessible during the run, we state it. The limitations field is designed to be visible and reviewed.',
       'StatuteProof provides early-warning regulatory intelligence. It is not a law firm. Final compliance decisions should be reviewed by qualified legal or compliance professionals.',
     ],
   },
@@ -41,7 +41,7 @@ export default function TrustLayer() {
           </h2>
           <p className="text-slate-400 max-w-3xl mx-auto leading-relaxed">
             The question a compliance officer should be able to answer after receiving any regulatory alert:
-            <span className="italic"> can I verify this myself?</span> StatuteProof is designed so the answer is always yes.
+            <span className="italic"> can I verify this myself?</span> StatuteProof is designed to make the evidence trail visible for review.
           </p>
         </div>
 

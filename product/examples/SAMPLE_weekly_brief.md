@@ -41,10 +41,10 @@ This brief is a SAMPLE / FAKE document for demonstration purposes only.
 
 *StatuteProof reports are generated from monitored official-source records and are
 provided for information and compliance review support only. StatuteProof reports do
-not constitute legal advice, regulatory advice, compliance certification, or a legal
+not constitute legal advice, regulatory advice, compliance determination, or a legal
 opinion. StatuteProof does not replace qualified legal counsel, compliance professionals,
-MLROs, or other professional advisers. StatuteProof does not guarantee compliance,
-prevent fines, or certify that all regulatory updates have been captured. Source
+MLROs, or other professional advisers. StatuteProof does not determine compliance outcomes,
+prevent fines, or confirm that all regulatory updates have been captured. Source
 monitoring may be affected by publication delays, website changes, PDF formatting,
 access limits, or source structure changes. Users should verify official source material
 directly and review evidence records, hashes, timestamps, and diffs before relying on

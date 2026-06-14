@@ -80,11 +80,11 @@ function thresholdToggles(threshold) {
   }
 }
 
-function languageLabel(value) {
+function languageLabel() {
   return 'English'
 }
 
-function languageCode(label) {
+function languageCode() {
   return 'en'
 }
 
@@ -94,9 +94,15 @@ function thresholdFromToggles({ mediumAlerts, lowAlerts }) {
   return 'HIGH'
 }
 
-export default function SettingsPage({ onResetWorkspace }) {
+function displayPlanName(planState) {
+  if (planState?.plan_name === 'evidence_preview') return 'Source Readiness Review'
+  return planState?.plan_display || 'Source Readiness Review'
+}
+
+export default function SettingsPage({ onResetWorkspace, planState }) {
   const profile = loadProfile()
   const thresholds = thresholdToggles(profile.alertThreshold)
+  const planLabel = displayPlanName(planState)
 
   const [workspace,  setWorkspace]  = useState(profile.company || 'Profile workspace')
   const [markets,    setMarkets]    = useState(Array.isArray(profile.markets)    ? profile.markets    : [])
@@ -198,7 +204,7 @@ export default function SettingsPage({ onResetWorkspace }) {
           </div>
           <div className="flex justify-between items-center py-1">
             <span className="text-slate-400">Plan</span>
-            <span className="text-cyan-400 font-medium">Founding pilot</span>
+            <span className="text-cyan-400 font-medium">{planLabel}</span>
           </div>
         </div>
       </Section>
@@ -310,7 +316,7 @@ export default function SettingsPage({ onResetWorkspace }) {
               StatuteProof provides monitoring intelligence only and does not provide legal advice.
               Reports are generated from monitored official-source records and are provided for information
               and compliance review support only. They do not constitute legal advice, regulatory advice,
-              compliance certification, or a legal opinion.
+              compliance determination, or a legal opinion.
             </p>
             <p className="text-xs text-slate-500 leading-relaxed">
               StatuteProof does not replace qualified legal counsel, compliance professionals, MLROs, or
@@ -319,7 +325,7 @@ export default function SettingsPage({ onResetWorkspace }) {
             </p>
             <div className="mt-3 pt-3 border-t border-slate-800">
               <p className="text-[10px] text-slate-600 leading-relaxed">
-                Billing: Founding pilot terms. Advance notice will be given of any pricing changes.
+                Billing: manual activation terms. Advance notice will be given of any pricing changes.
                 Contact the StatuteProof team to review your subscription or access level.
               </p>
             </div>

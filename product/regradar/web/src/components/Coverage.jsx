@@ -1,25 +1,40 @@
 import { ArrowRight } from 'lucide-react'
 
-const ACTIVE_SOURCES = [
-  { source: 'Central Bank of the UAE (CBUAE)', publishes: 'Circulars, licensing notices, payment system regulations', extraction: 'HTML structured' },
-  { source: 'Virtual Assets Regulatory Authority (VARA)', publishes: 'VASP licensing, rulebook updates, guidance notes', extraction: 'HTML / PDF' },
-  { source: 'Dubai Financial Services Authority (DFSA)', publishes: 'DIFC firm regulations, rulebook notices', extraction: 'HTML structured' },
-  { source: 'ADGM / FSRA', publishes: 'ADGM regulations, FSRA notices, licensing updates', extraction: 'HTML structured' },
-  { source: 'UAE Financial Intelligence Unit (FIU)', publishes: 'AML/CFT guidance, typologies, circulars', extraction: 'HTML / PDF' },
-  { source: 'Ministry of Finance', publishes: 'Federal financial notices, regulations', extraction: 'HTML structured' },
-  { source: 'UAE Legislation Portal', publishes: 'Federal laws and decrees', extraction: 'HTML structured; aggregate page changes require adapter review for item-level alerts' },
-  { source: 'DIFC Laws', publishes: 'Primary and subsidiary DIFC legislation', extraction: 'HTML structured' },
-  { source: 'Ministry of Economy', publishes: 'Commercial licensing, AML policy', extraction: 'HTML structured' },
+const READY_SOURCES = [
+  { source: 'CBUAE Main', publishes: 'Central bank notices, licensing and supervisory material', extraction: 'HTML structured' },
+  { source: 'CBUAE Regulations', publishes: 'CBUAE regulations listing and standards', extraction: 'HTML structured; counter-change noise filter needed before alert delivery' },
+  { source: 'UAE Ministry of Finance', publishes: 'Financial policy notices and public ministry publications', extraction: 'HTML structured + PDF text' },
+  { source: 'VARA Main', publishes: 'VASP licensing, rulebook updates, guidance notes', extraction: 'HTML / PDF' },
   { source: 'VARA Enforcement Notices', publishes: 'VASP enforcement actions and regulatory decisions', extraction: 'HTML structured' },
-  { source: 'CBUAE Regulations Sub-page', publishes: 'CBUAE regulations listing — circulars, licensing standards', extraction: 'HTML structured' },
-  { source: 'UAE FIU Circulars and Notices', publishes: 'AML/CFT circulars and typology notices', extraction: 'HTML / PDF' },
-  { source: 'DFSA Regulatory Notices', publishes: 'DFSA notices, decisions, and consultations for DIFC-regulated firms', extraction: 'HTML structured' },
+  { source: 'ADGM FSRA Main', publishes: 'ADGM regulations, FSRA notices, licensing updates', extraction: 'HTML structured; low character count caveat' },
+  { source: 'UAE FIU Circulars', publishes: 'FIU publications, circulars and public notices', extraction: 'HTML structured' },
+  { source: 'DIFC Laws Portal', publishes: 'Primary and subsidiary DIFC legislation', extraction: 'HTML structured' },
+  { source: 'UAE Legislation Portal', publishes: 'Federal laws and decrees', extraction: 'HTML structured; aggregate page changes require adapter review for item-level alerts' },
+  { source: 'UAE Ministry of Economy', publishes: 'Commercial licensing, AML policy', extraction: 'HTML structured' },
+]
+
+const REMEDIATION_SOURCES = [
+  {
+    source: 'DFSA Rulebook',
+    issue: 'Current extraction reaches the DFSA navigation shell rather than unique regulatory page content.',
+    remediation: 'Add a precise wait selector or adapter, then rerun evidence validation.',
+  },
+  {
+    source: 'DFSA Regulatory Notices',
+    issue: 'Latest run produced the same content hash as the DFSA Rules page, indicating a hash collision.',
+    remediation: 'Extract actual notices content or mark one source limited until the adapter is fixed.',
+  },
+  {
+    source: 'UAE FIU Homepage',
+    issue: 'Homepage extraction is shallow and less useful than the FIU circulars/publications source.',
+    remediation: 'Promote the circulars source as primary and demote the homepage to reference status.',
+  },
 ]
 
 const LIMITED_SOURCES = [
   {
     source: 'Federal Tax Authority (FTA)',
-    constraint: 'Direct portal access restricted. VAT and corporate tax monitoring available only where validated fallback sources support the profile. Disclosed where FTA is in scope.',
+    constraint: 'Direct portal access restricted. VAT and corporate tax monitoring require item-level source checks before activation. Disclosed where FTA is in scope.',
   },
   {
     source: 'Capital Market Authority / former SCA',
@@ -27,7 +42,7 @@ const LIMITED_SOURCES = [
   },
   {
     source: 'UAE Legislation Portal item-level adapter',
-    constraint: 'The portal is active as a source, but homepage aggregate changes are not treated as customer-ready legal updates until item-level extraction is validated.',
+    constraint: 'The portal is confirmed as a source, but homepage aggregate changes are not treated as customer-ready legal updates until item-level extraction is checked.',
   },
 ]
 
@@ -47,7 +62,7 @@ const UNDER_VALIDATION = [
   { source: 'Executive Office for AML/CFT', why: 'AML/CFT guidance and national risk priorities affect supervised financial and VASP firms.', profile: 'AML consultants, VASPs, payments, banks' },
   { source: 'DMCC regulatory notices', why: 'Free zone notices may affect commodity, crypto, and corporate service providers.', profile: 'DMCC firms and consultants' },
   { source: 'Insurance Authority / insurance supervision', why: 'Insurance supervision affects carriers, brokers, insurtech, and legal advisers.', profile: 'Insurance, insurtech, law firms' },
-  { source: 'CBUAE circulars/publications sub-page adapter', why: 'Improves precision for circular-level monitoring beyond broad page checks.', profile: 'Banks, payments, stored value providers' },
+  { source: 'CBUAE publications sub-page adapter', why: 'Improves precision for publication-level monitoring beyond broad page checks.', profile: 'Banks, payments, stored value providers' },
   { source: 'VARA publications sub-page adapter', why: 'Improves precision for rulebook, guidance, and publication-level VASP monitoring.', profile: 'VASPs, crypto exchanges, custodians' },
   { source: 'DFSA consultation papers', why: 'Consultations indicate future DIFC supervisory expectations.', profile: 'DIFC-regulated firms, legal teams' },
   { source: 'ADGM/FSRA consultation and notices', why: 'Consultations and notices affect ADGM firms before final rule changes.', profile: 'ADGM-regulated firms, funds, securities teams' },
@@ -57,7 +72,7 @@ const UNDER_VALIDATION = [
 
 function SourceStatusBadge({ tone, children }) {
   const styles = {
-    validated: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+    confirmed: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
     validation: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
     limited: 'border-slate-500/25 bg-slate-500/10 text-slate-300',
     blocked: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
@@ -113,19 +128,20 @@ export default function Coverage({ onCreateWorkspace }) {
             What is monitored — and what is not
           </h2>
           <p className="text-slate-400 max-w-3xl mx-auto">
-            StatuteProof starts with a validated core source layer, then discloses constrained, blocked,
-            and under-validation sources separately. This is not presented as the entire UAE market.
+            StatuteProof starts with a UAE source pack under evidence-readiness review, then discloses
+            confirmed, remediation, constrained, blocked, and under-validation sources separately.
+            This is not presented as the entire UAE market.
           </p>
           <p className="text-xs text-slate-500 max-w-3xl mx-auto mt-3">
-            Mapped does not mean active. Sources enter client monitoring only after access, extraction and proof/diff validation.
+            Mapped does not mean confirmed for monitoring. Sources enter client monitoring only after access, extraction and proof/diff checks clear.
           </p>
         </div>
 
         <div className="space-y-8">
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Active validated core layer — monitored, extraction quality verified</h3>
-              <SourceStatusBadge tone="validated">Validated</SourceStatusBadge>
+              <h3 className="font-bold text-white">Confirmed in the latest evidence-readiness run — 10 sources</h3>
+              <SourceStatusBadge tone="confirmed">Confirmed</SourceStatusBadge>
             </div>
             <SourceTable
               columns={[
@@ -133,7 +149,22 @@ export default function Coverage({ onCreateWorkspace }) {
                 { key: 'publishes', label: 'What it publishes' },
                 { key: 'extraction', label: 'Extraction' },
               ]}
-              rows={ACTIVE_SOURCES}
+              rows={READY_SOURCES}
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between gap-4 mb-3">
+              <h3 className="font-bold text-white">Under extraction remediation — 3 sources</h3>
+              <SourceStatusBadge tone="validation">Remediation</SourceStatusBadge>
+            </div>
+            <SourceTable
+              columns={[
+                { key: 'source', label: 'Source' },
+                { key: 'issue', label: 'Issue found' },
+                { key: 'remediation', label: 'Remediation path' },
+              ]}
+              rows={REMEDIATION_SOURCES}
             />
           </div>
 
@@ -153,7 +184,7 @@ export default function Coverage({ onCreateWorkspace }) {
 
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Under validation — commercially relevant, not active yet</h3>
+              <h3 className="font-bold text-white">Under validation — commercially relevant, not confirmed yet</h3>
               <SourceStatusBadge tone="validation">Under validation</SourceStatusBadge>
             </div>
             <SourceTable
@@ -164,14 +195,14 @@ export default function Coverage({ onCreateWorkspace }) {
               ]}
               rows={UNDER_VALIDATION.map(row => ({
                 ...row,
-                why: `${row.why} Status: Under validation. Not included in pilot scope until validated.`,
+                why: `${row.why} Status: Under validation. Not included in pilot scope until confirmed.`,
               }))}
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Not yet active / blocked — disclosed, not hidden</h3>
+              <h3 className="font-bold text-white">Not confirmed / blocked — disclosed, not hidden</h3>
               <SourceStatusBadge tone="blocked">Blocked</SourceStatusBadge>
             </div>
             <SourceTable
@@ -186,8 +217,8 @@ export default function Coverage({ onCreateWorkspace }) {
 
         <div className="bg-[#0A1628] border border-slate-800 rounded-xl p-6 mt-8 mb-6">
           <p className="text-sm text-slate-400 leading-relaxed">
-            Source status reflects live technical accessibility and extraction quality — not regulatory significance.
-            A source being listed as Limited or Not Active does not reduce its legal importance. It means
+            Source status reflects latest technical accessibility and extraction quality — not regulatory significance.
+            A source being listed as Limited or Not Confirmed does not reduce its legal importance. It means
             StatuteProof cannot currently monitor it reliably, and we will say so before you rely on it.
           </p>
         </div>

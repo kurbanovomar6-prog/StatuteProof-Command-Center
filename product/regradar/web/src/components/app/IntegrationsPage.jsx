@@ -75,7 +75,8 @@ export default function IntegrationsPage() {
   }
 
   useEffect(() => {
-    refreshStatus()
+    const timer = window.setTimeout(() => { refreshStatus() }, 0)
+    return () => window.clearTimeout(timer)
   }, [])
 
   async function handleGenerate() {

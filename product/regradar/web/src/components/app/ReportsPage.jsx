@@ -27,13 +27,13 @@ const REPORT_DETAIL = {
     alertIds: ['a1'],
   },
   r4: {
-    summary: 'DIFC / DFSA source transparency sample showing validated, under-validation and limited source layers for a UAE pilot profile.',
-    sections: ['DIFC / DFSA source map', 'Validated sources', 'Under-validation sources', 'Limitations disclosed'],
+    summary: 'DIFC / DFSA source transparency sample showing confirmed, remediation and limited source layers for a UAE pilot profile.',
+    sections: ['DIFC / DFSA source map', 'Confirmed sources', 'Remediation sources', 'Limitations disclosed'],
     alertIds: ['a3'],
   },
   r5: {
-    summary: 'ADGM / FSRA circulars preview showing how circular source layers would be reviewed before activation.',
-    sections: ['ADGM / FSRA source layer', 'Circular mapping', 'Proof/diff validation', 'Limitations disclosed'],
+    summary: 'ADGM / FSRA preview showing the confirmed main-source layer and circular/rulebook layers still under validation before activation.',
+    sections: ['ADGM / FSRA main source', 'Circular/rulebook validation status', 'Proof/diff validation', 'Limitations disclosed'],
     alertIds: [],
   },
   r6: {

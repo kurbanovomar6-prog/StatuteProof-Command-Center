@@ -11,7 +11,7 @@ const PLANS_DATA = [
     period: '',
     badge: 'Start here',
     highlight: false,
-    purpose: 'See which UAE regulatory sources are active, limited, or blocked for your compliance profile — before any monitoring commitment. No live monitoring included.',
+    purpose: 'See which UAE regulatory sources are confirmed, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring included.',
     cta: 'Request source readiness review',
     ctaPrimary: false,
     features: [
@@ -61,11 +61,11 @@ const PLANS_DATA = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    purpose: 'MLRO or CCO at a UAE-regulated firm. 13 enabled UAE sources under evidence-readiness validation, high-risk review queue, weekly brief, 180-day retention.',
+    purpose: 'MLRO or CCO at a UAE-regulated firm. 13 enabled UAE sources under evidence-readiness review: 10 confirmed in the latest run, 3 under extraction remediation.',
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '13 (evidence-readiness validation)' },
+      { label: 'Official UAE sources', value: '13 enabled; 10 confirmed, 3 under extraction remediation' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },
@@ -120,11 +120,11 @@ const COMPARISON_ROWS = [
 const FAQS = [
   {
     q: 'Is this legal advice?',
-    a: 'No. StatuteProof provides official-source regulatory monitoring intelligence. Reports are for information and compliance review support only. They do not constitute legal advice, regulatory advice, or compliance certification. Consult qualified legal or compliance professionals before making regulatory decisions.',
+    a: 'No. StatuteProof provides official-source regulatory monitoring intelligence. Reports are for information and compliance review support only. They do not constitute legal advice, regulatory advice, or compliance determination. Consult qualified legal or compliance professionals before making regulatory decisions.',
   },
   {
     q: 'What does "evidence-readiness validation" mean?',
-    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: confirming it is publicly accessible, extractable, and producing reliable text diffs. Sources that pass validation are marked Active. Sources with access issues are marked Limited or Blocked and documented in your evidence record.',
+    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: confirming it is publicly accessible, extractable, and producing reliable text diffs. Sources that clear readiness checks are marked confirmed. Sources with access, content, or extraction issues are marked limited, blocked, or remediation required.',
   },
   {
     q: 'Can I add my own sources?',
@@ -132,7 +132,7 @@ const FAQS = [
   },
   {
     q: 'What happens if a source fails?',
-    a: 'Source failures are documented in your evidence records. Access status (Active / Limited / Blocked) is tracked per source. You are notified when a source becomes unavailable, and the limitation is recorded in your audit trail.',
+    a: 'Source failures are documented in your evidence records. Access status (Confirmed / Limited / Blocked) is tracked per source. You are notified when a source becomes unavailable, and the limitation is recorded in your audit trail.',
   },
   {
     q: 'Can consultants use it for multiple clients?',
@@ -144,7 +144,7 @@ const FAQS = [
   },
   {
     q: 'Why does UAE Monitor say "evidence-readiness validation"?',
-    a: 'We currently have 13 enabled UAE regulatory sources. Before we commit to monitoring a source for your workspace, we run a readiness check to confirm reliable access and extraction. This is documented in your source status dashboard.',
+    a: 'We currently have 13 enabled UAE regulatory sources. The latest readiness report confirms 10 sources and keeps 3 sources under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
   },
 ]
 
@@ -154,12 +154,24 @@ function FeatureVal({ val }) {
   return <span className="text-xs text-slate-300">{val}</span>
 }
 
-export default function PricingPage({ onBack, onCreateWorkspace }) {
+export default function PricingPage({ onBack, onCreateWorkspace, onSourceReview, onSelectPlan }) {
   const [openFaq, setOpenFaq] = useState(null)
 
   function handleCta(plan) {
     if (plan.id === 'consultant') {
-      window.location.href = 'mailto:hello@statuteproof.com?subject=Consultant%20Plan%20Enquiry'
+      window.location.assign('mailto:hello@statuteproof.com?subject=Consultant%20Plan%20Enquiry')
+      return
+    }
+    if (plan.id === 'free') {
+      onSourceReview?.()
+      return
+    }
+    if (plan.id === 'starter_pilot') {
+      onSelectPlan?.('starter_pilot')
+      return
+    }
+    if (plan.id === 'professional') {
+      onSelectPlan?.('professional')
       return
     }
     onCreateWorkspace?.()
@@ -176,7 +188,8 @@ export default function PricingPage({ onBack, onCreateWorkspace }) {
 
         {/* Hero */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <div className="sp-kicker mb-5">Manual activation after readiness review</div>
+          <h1 className="text-4xl font-semibold text-white mb-4">
             Choose the source monitoring plan that matches your UAE compliance footprint
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
@@ -190,10 +203,10 @@ export default function PricingPage({ onBack, onCreateWorkspace }) {
           {PLANS_DATA.map(plan => (
             <div
               key={plan.id}
-              className={`rounded-xl border p-6 flex flex-col ${
+              className={`sp-panel p-6 flex flex-col ${
                 plan.highlight
                   ? 'border-[#16D9F5]/40 bg-[#16D9F5]/5 shadow-[0_0_30px_rgba(22,217,245,0.08)]'
-                  : 'border-slate-800 bg-[#0D1B2E]'
+                  : ''
               }`}
             >
               {plan.badge && (
@@ -282,13 +295,13 @@ export default function PricingPage({ onBack, onCreateWorkspace }) {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <button
-              onClick={onCreateWorkspace}
+              onClick={onSourceReview}
               className="sp-btn-primary inline-flex items-center gap-2"
             >
               Request source readiness review <ArrowRight className="w-4 h-4" />
             </button>
             <button
-              onClick={onCreateWorkspace}
+              onClick={() => onSelectPlan?.('starter_pilot')}
               className="sp-btn-secondary inline-flex items-center gap-2"
             >
               Start founding pilot
@@ -303,7 +316,7 @@ export default function PricingPage({ onBack, onCreateWorkspace }) {
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-8">
-          Monitoring intelligence only. Not legal advice. StatuteProof does not guarantee compliance, prevent fines, or certify regulatory coverage.
+          Monitoring intelligence only. Not legal advice. StatuteProof does not determine compliance outcomes, prevent fines, or determine regulatory coverage.
           Source readiness validation required before activation. Features marked "pilot roadmap" are not live by default.
           Founding pilot pricing applies to the first cohort while source validation and brief format are being refined.
         </p>

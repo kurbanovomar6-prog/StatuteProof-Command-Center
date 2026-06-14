@@ -21,11 +21,13 @@ function getWorkspace(currentUser) {
 const PAGE_LABELS = {
   dashboard:    'Dashboard',
   sources:      'Source Map',
+  'source-lab': 'Source Lab',
   evidence:     'Evidence Records',
   alerts:       'Sample Alerts',
   briefs:       'Brief Previews',
   reports:      'Source Reports',
   integrations: 'Integrations',
+  billing:      'Plan & Billing',
   settings:     'Settings',
 }
 

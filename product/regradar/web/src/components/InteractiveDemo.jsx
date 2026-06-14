@@ -83,7 +83,7 @@ const ALERTS = {
       affected: ['Payment companies', 'Banks', 'Fintech operators'],
       steps: ['Review CBUAE payment source layer', 'Assess profile relevance', 'Validate proof/diff before activation'],
       whatChanged: 'A UAE payment source layer is shown in sample format.',
-      whyMatters: 'Payment institutions need validated source monitoring before depending on alert delivery.',
+      whyMatters: 'Payment institutions need confirmed source monitoring before depending on alert delivery.',
       signals: ['Payments', 'Reporting', 'Licensing'],
     },
     'Legal & Compliance': {

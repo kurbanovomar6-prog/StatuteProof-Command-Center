@@ -38,8 +38,14 @@ function getWorkspace(currentUser) {
   }
 }
 
-export default function AppSidebar({ page, navigate, collapsed, onToggle, currentUser, onSignOut }) {
+function planDisplay(planState) {
+  if (planState?.plan_name === 'evidence_preview') return 'Source Readiness Review'
+  return planState?.plan_display || 'Source Readiness Review'
+}
+
+export default function AppSidebar({ page, navigate, collapsed, onToggle, currentUser, planState, onSignOut }) {
   const ws = getWorkspace(currentUser)
+  const planLabel = planDisplay(planState)
 
   return (
     <aside className={`flex-shrink-0 flex flex-col bg-[#0A1628] border-r border-slate-800 transition-all duration-200 h-screen ${collapsed ? 'w-16' : 'w-64'}`}>
@@ -108,7 +114,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-white truncate">{ws.displayName}</p>
-                <p className="text-xs text-slate-500 truncate">{ws.email || ws.company || 'Founding pilot'}</p>
+                <p className="text-xs text-slate-500 truncate">{ws.email || ws.company || planLabel}</p>
               </div>
             </div>
 
@@ -116,7 +122,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
               <div className="mb-1 flex items-center justify-between gap-2">
                 <span className="text-slate-500">Workspace</span>
                 <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 font-semibold text-cyan-200">
-                  Founding pilot
+                  {planLabel}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2">

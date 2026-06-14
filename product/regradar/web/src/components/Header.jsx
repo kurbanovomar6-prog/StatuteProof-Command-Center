@@ -4,15 +4,22 @@ import { Menu, X } from 'lucide-react'
 const navLinks = [
   { label: 'How It Works',    href: '#how-it-works' },
   { label: 'Source Coverage', href: '#coverage' },
-  { label: 'Evidence',        href: '#trust' },
-  { label: 'Pricing',         href: '#pricing' },
+  { label: 'Evidence',        href: '#evidence' },
+  { label: 'Pricing',         action: 'pricing' },
 ]
 
-export default function Header({ onSignIn, onCreateWorkspace, onSourceReview }) {
+export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, onPricing }) {
   const [open, setOpen] = useState(false)
 
+  function handleNav(link) {
+    if (link.action === 'pricing') {
+      onPricing?.()
+      setOpen(false)
+    }
+  }
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#07111F]/90 backdrop-blur-md border-b border-slate-800/60 transition-all">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-800/70 bg-[#06101D]/92 backdrop-blur-md transition-all">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -34,13 +41,24 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview }) 
         {/* Desktop nav — center */}
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-400">
           {navLinks.map(l => (
-            <a
-              key={l.label}
-              href={l.href}
-              className="hover:text-slate-100 transition-colors"
-            >
-              {l.label}
-            </a>
+            l.href ? (
+              <a
+                key={l.label}
+                href={l.href}
+                className="hover:text-slate-100 transition-colors"
+              >
+                {l.label}
+              </a>
+            ) : (
+              <button
+                key={l.label}
+                type="button"
+                onClick={() => handleNav(l)}
+                className="text-slate-400 hover:text-slate-100"
+              >
+                {l.label}
+              </button>
+            )
           ))}
         </nav>
 
@@ -48,21 +66,21 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview }) 
         <div className="hidden md:flex items-center gap-2">
           <button
             onClick={onSignIn}
-            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors"
+            className="inline-flex min-h-10 items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
           >
             Login
           </button>
           <button
             onClick={onCreateWorkspace}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-transparent px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 hover:border-slate-600 transition-colors"
+            className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-700 bg-[#0D1B2E] px-4 py-2 text-sm font-semibold text-slate-200 hover:border-cyan-400/35 hover:bg-slate-800"
           >
             Register
           </button>
           <button
             onClick={onSourceReview}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#16D9F5] px-5 py-2 text-sm font-semibold text-[#07111F] hover:bg-[#0EC8E4] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#16D9F5]"
+            className="sp-btn-primary min-h-10 px-5 py-2 text-sm"
           >
-            Request Review
+            Request Source Review
           </button>
         </div>
 
@@ -80,14 +98,25 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview }) 
       {open && (
         <div className="md:hidden bg-[#0A1628] border-t border-slate-800 px-6 py-5 flex flex-col gap-2">
           {navLinks.map(l => (
-            <a
-              key={l.label}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="text-sm font-medium text-slate-300 hover:text-[#16D9F5] transition-colors py-1.5"
-            >
-              {l.label}
-            </a>
+            l.href ? (
+              <a
+                key={l.label}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-slate-300 hover:text-[#16D9F5] transition-colors py-1.5"
+              >
+                {l.label}
+              </a>
+            ) : (
+              <button
+                key={l.label}
+                type="button"
+                onClick={() => handleNav(l)}
+                className="py-1.5 text-left text-sm font-medium text-slate-300 hover:text-[#16D9F5]"
+              >
+                {l.label}
+              </button>
+            )
           ))}
           <div className="pt-3 border-t border-slate-800 flex flex-col gap-2 mt-1">
             <button
@@ -106,7 +135,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview }) 
               onClick={() => { setOpen(false); onSourceReview?.() }}
               className="text-sm font-bold bg-[#16D9F5] hover:bg-[#0EC8E4] text-[#07111F] py-2.5 rounded-lg text-center transition-colors"
             >
-              Request Review
+              Request Source Review
             </button>
           </div>
         </div>

@@ -14,12 +14,6 @@ function AuthLayout({ children, quote }) {
             backgroundSize: '40px 40px',
           }}
         />
-        {/* Radial accent */}
-        <div
-          className="absolute -top-40 -left-40 w-80 h-80 rounded-full opacity-[0.04]"
-          style={{ background: 'radial-gradient(circle, #16D9F5, transparent 70%)' }}
-        />
-
         <div className="relative z-10">
           <div className="flex items-center gap-2.5">
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-9 w-auto" />
@@ -32,13 +26,19 @@ function AuthLayout({ children, quote }) {
         <div className="relative z-10 max-w-sm">
           <div className="w-10 h-[3px] bg-[#16D9F5] rounded-full mb-6" />
           <h2 className="text-2xl font-bold text-white mb-6 leading-tight">{quote}</h2>
-          <div className="flex items-center gap-2.5 text-slate-500 text-sm">
-            <div className="flex gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#16D9F5]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#16D9F5]/50" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#16D9F5]/20" />
+          <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/35 p-4 text-xs text-slate-400">
+            <div className="flex justify-between gap-3">
+              <span>Evidence</span>
+              <span className="text-slate-200">hash + timestamp</span>
             </div>
-            Enterprise B2B RegTech — UAE
+            <div className="flex justify-between gap-3">
+              <span>Briefs</span>
+              <span className="text-slate-200">human-reviewed</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span>Scope</span>
+              <span className="text-slate-200">UAE official sources</span>
+            </div>
           </div>
         </div>
         <div />
@@ -108,9 +108,11 @@ export default function LoginPage({ onLogin, onRegister }) {
             </label>
             <button
               type="button"
-              className="text-xs text-[#16D9F5] hover:underline focus:outline-none"
+              disabled
+              title="Password reset is not enabled yet."
+              className="cursor-not-allowed text-xs text-slate-600"
             >
-              Forgot password?
+              Password reset pending
             </button>
           </div>
           <div className="relative">

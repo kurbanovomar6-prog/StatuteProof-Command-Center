@@ -18,7 +18,7 @@ const REGULATORS = [
   'DIFC',
   'UAE Legislation Portal',
   'UAE Ministry of Finance',
-  'Ministry of Economy',
+  'UAE Ministry of Economy',
   'Other',
 ]
 
@@ -154,7 +154,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
 
           {/* Title */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700 text-[#16D9F5] text-[11px] font-semibold mb-5 uppercase tracking-widest">
+            <div className="sp-kicker mb-5">
               <Shield className="w-3.5 h-3.5" />
               Free Source Readiness Review
             </div>
@@ -168,10 +168,22 @@ export default function SourceReadinessReviewPage({ onBack }) {
             <p className="text-xs text-slate-600 mt-3">
               This is not legal advice and does not determine regulatory obligations.
             </p>
+            <div className="mx-auto mt-6 grid max-w-lg grid-cols-3 gap-2 text-center">
+              {[
+                ['13', 'enabled'],
+                ['10', 'confirmed'],
+                ['3', 'under extraction remediation'],
+              ].map(([value, label]) => (
+                <div key={label} className="sp-panel-muted px-3 py-2">
+                  <p className="sp-mono text-xl font-semibold text-white">{value}</p>
+                  <p className="text-[11px] text-slate-500">{label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Form card */}
-          <div className="bg-[#0D1B2E] border border-slate-800 rounded-2xl p-7 sm:p-10">
+          <div className="sp-panel p-7 sm:p-10">
             <form className="space-y-5" onSubmit={handleSubmit}>
 
               {/* Email */}
@@ -282,7 +294,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
               <p className="text-xs text-slate-600 text-center leading-relaxed">
                 This is not legal advice and does not determine regulatory obligations.
                 StatuteProof provides monitoring intelligence only and does not provide legal advice or
-                guarantee compliance.
+                determine compliance outcomes.
               </p>
             </form>
           </div>
@@ -290,11 +302,11 @@ export default function SourceReadinessReviewPage({ onBack }) {
           {/* What to expect */}
           <div className="mt-8 grid sm:grid-cols-3 gap-4">
             {[
-              { title: 'Source map', body: 'We identify which official UAE sources are accessible, validated, or limited for your profile.' },
+              { title: 'Source map', body: 'We identify which official UAE sources are confirmed, under validation, under extraction remediation, or limited for your profile.' },
               { title: 'Honest about limits', body: 'We disclose sources that have access restrictions, geo-blocking, or extraction issues.' },
               { title: 'Not legal advice', body: 'This is monitoring intelligence only. Consult qualified professionals for legal and compliance decisions.' },
             ].map(item => (
-              <div key={item.title} className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-4">
+              <div key={item.title} className="sp-panel p-4">
                 <h3 className="text-sm font-semibold text-white mb-2">{item.title}</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">{item.body}</p>
               </div>

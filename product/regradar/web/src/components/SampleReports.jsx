@@ -32,11 +32,11 @@ const REPORTS = [
     date: 'Sample',
     sourceUrl: 'vara.ae / centralbank.ae / uaefiu.gov.ae',
     executive: 'Sample preview showing how StatuteProof summarizes UAE VASP source readiness across VARA, CBUAE and UAE FIU layers. It is not a live monitoring report.',
-    keyUpdate: 'Mapped source layers are grouped by validation state. Only validated sources enter monitoring profiles after proof/diff checks and limitations review.',
+    keyUpdate: 'Mapped source layers are grouped by readiness state. Only confirmed sources enter monitoring profiles after proof/diff checks and limitations review.',
     whyMatters: 'VASP, crypto and AML teams need a clear source map before relying on regulatory monitoring outputs.',
     steps: [
       'Review mapped VARA, CBUAE and UAE FIU source layers',
-      'Confirm which sources are validated, under validation or limited',
+      'Confirm which sources are confirmed, under validation, under extraction remediation or limited',
       'Document limitations before any pilot activation',
       'Use the sample as a readiness review, not legal advice',
     ],
@@ -72,19 +72,19 @@ const REPORTS = [
     risk: 'MEDIUM',
     title: 'DIFC / DFSA Source Transparency Report',
     audience: ['DIFC firms', 'Fund managers', 'Legal teams', 'Compliance teams'],
-    summary: 'Source transparency sample for DIFC Laws, DFSA rulebook and DFSA consultation layers.',
+    summary: 'Source transparency sample for DIFC Laws readiness and DFSA remediation layers.',
     date: 'Sample',
     sourceUrl: 'dfsa.ae / difc.ae',
-    executive: 'Sample report showing which DIFC / DFSA source layers are validated, under validation or limited for a pilot profile.',
-    keyUpdate: 'The report separates mapped sources from validated sources and documents limitations near each source layer.',
+    executive: 'Sample report showing DIFC Laws as confirmed while DFSA rulebook and notices remain in remediation for a pilot profile.',
+    keyUpdate: 'The report separates mapped sources from confirmed, remediation and limited sources, with limitations documented near each source layer.',
     whyMatters: 'DIFC-regulated firms need clear source provenance before using any alert workflow.',
     steps: [
-      'Review DFSA rulebook and consultation source layers',
+      'Review DFSA rulebook and notices remediation notes',
       'Check DIFC Laws validation state',
       'Flag WAF or mirror limitations if present',
       'Confirm pilot scope before activation',
     ],
-    evidence: { sourceHealth: 'Validated + under validation', changeType: 'Source transparency sample', aiConfidence: 'Medium', note: null },
+    evidence: { sourceHealth: 'Confirmed + remediation', changeType: 'Source transparency sample', aiConfidence: 'Medium', note: 'DFSA rows require remediation before activation.' },
   },
   {
     id: 'adgm-fsra-preview',
@@ -94,11 +94,11 @@ const REPORTS = [
     risk: 'MEDIUM',
     title: 'ADGM / FSRA Circulars Preview',
     audience: ['ADGM firms', 'Financial services teams', 'Legal teams', 'Compliance teams'],
-    summary: 'Sample preview for ADGM / FSRA publications and circular source layers.',
+    summary: 'Sample preview for the ADGM/FSRA main source, with FSRA circular layers shown as under validation.',
     date: 'Sample',
     sourceUrl: 'adgm.com',
-    executive: 'Sample brief showing how ADGM / FSRA circulars would be reviewed with source proof and limitation notes.',
-    keyUpdate: 'A circular source layer is shown as a readiness snapshot, not a live monitored update.',
+    executive: 'Sample brief showing how ADGM/FSRA source material would be reviewed with source proof and limitation notes.',
+    keyUpdate: 'The ADGM/FSRA main source is confirmed with caveats; FSRA circular/rulebook layers remain outside confirmed scope until readiness checks clear.',
     whyMatters: 'ADGM firms need documented proof/diff validation before depending on monitoring output.',
     steps: [
       'Review ADGM / FSRA publication layer',
@@ -120,13 +120,13 @@ const REPORTS = [
     date: 'Sample',
     sourceUrl: 'Official UAE source links',
     executive: 'Sample artifact for a UAE-first pilot workspace. It shows source proof format, not production delivery.',
-    keyUpdate: 'Validated, under-validation, limited and blocked statuses are disclosed separately so mapped sources are not confused with active monitoring.',
+    keyUpdate: 'Confirmed, under-validation, limited and blocked statuses are disclosed separately so mapped sources are not confused with live monitoring.',
     whyMatters: 'Buyer trust depends on clear limitations and source evidence before any pilot activation.',
     steps: [
       'Review the readiness status for each UAE source layer',
       'Check source proof and extraction limitations',
       'Agree pilot watchlist scope',
-      'Activate only validated sources after proof/diff checks',
+      'Activate only confirmed sources after proof/diff checks',
     ],
     evidence: { sourceHealth: 'Readiness snapshot', changeType: 'Proof/diff sample', aiConfidence: 'Medium', note: 'No production delivery implied.' },
   },
@@ -292,7 +292,7 @@ export default function SampleReports() {
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Evidence Trail</p>
                 <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                   {[
-                    { ok: report.evidence.sourceHealth === 'PASS', label: 'Source health', value: report.evidence.sourceHealth },
+                    { ok: report.evidence.sourceHealth === 'PASS', label: 'Source health', value: report.evidence.sourceHealth === 'PASS' ? 'Evidence confirmed' : report.evidence.sourceHealth },
                     { ok: true, label: 'Change type', value: report.evidence.changeType },
                   ].map(({ ok, label, value }) => (
                     <div key={label} className="flex items-start gap-2">

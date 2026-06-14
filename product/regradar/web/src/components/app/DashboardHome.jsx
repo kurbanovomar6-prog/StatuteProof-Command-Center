@@ -19,6 +19,19 @@ const COV_COLOR = {
   slate:   'text-slate-400 bg-slate-500/10 border-slate-500/20',
 }
 
+const SOURCE_READINESS_SUMMARY = {
+  enabled: 13,
+  confirmed: 10,
+  remediation: 3,
+}
+
+const REMEDIATION_SOURCE_IDS = new Set([
+  'AE-dfsa-rulebook',
+  'AE-dubai-financial-services-authority-dfsa',
+  'AE-dfsa-notices',
+  'AE-uae-financial-intelligence-unit-uaefiu',
+])
+
 function StatusPill({ tone = 'slate', children }) {
   const styles = {
     emerald: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
@@ -43,7 +56,7 @@ function InfoCard({ icon: Icon, tone, label, value, sub }) {
   }[tone] || 'bg-slate-800 text-slate-400'
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+    <div className="sp-panel p-4">
       <div className="mb-3 flex items-start justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconStyle}`}>
@@ -64,16 +77,22 @@ function RiskBadge({ risk }) {
   )
 }
 
+function displayPlanName(planState) {
+  if (planState?.plan_name === 'evidence_preview') return 'Source Readiness Review'
+  return planState?.plan_display || 'Source Readiness Review'
+}
+
 function ProfileSummaryCard({ profile, currentUser, navigate, planState }) {
   const hasProfile = profile.markets.length > 0 || profile.industries.length > 0 || profile.topics.length > 0
   const company = profile.company || currentUser?.company_name || 'Profile workspace'
+  const planLabel = displayPlanName(planState)
 
   return (
-    <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-5">
+    <div className="sp-panel border-cyan-400/20 p-5">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="mb-2 flex flex-wrap gap-2">
-            <StatusPill tone="cyan">{planState?.plan_display || 'Evidence Preview'}</StatusPill>
+            <StatusPill tone="cyan">{planLabel}</StatusPill>
             <StatusPill tone={hasProfile ? 'emerald' : 'amber'}>
               {hasProfile ? 'Profile saved' : 'Profile setup'}
             </StatusPill>
@@ -120,12 +139,12 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
     { label: 'Account created', detail: 'Signed-in workspace account', status: 'Complete', tone: 'emerald' },
     { label: 'Profile saved', detail: hasProfile ? profileLabel(profile) : 'Add markets and licence profile', status: hasProfile ? 'Complete' : 'Pending', tone: hasProfile ? 'emerald' : 'amber', action: 'settings' },
     { label: 'Telegram connected', detail: connected ? 'Account pairing confirmed' : 'Connect Telegram in Integrations', status: connected ? 'Complete' : telegramLoading ? 'Checking' : 'Pending', tone: connected ? 'emerald' : 'amber', action: 'integrations' },
-    { label: 'Source map reviewed', detail: 'Review validated, under-validation and limited sources', status: 'Needs review', tone: 'amber', action: 'sources' },
+    { label: 'Source map reviewed', detail: 'Review confirmed, under-validation, remediation and limited sources', status: 'Needs review', tone: 'amber', action: 'sources' },
     { label: 'First reviewed brief', detail: 'Sample brief delivery can be tested from Integrations', status: 'Sample available', tone: 'slate', action: 'briefs' },
   ]
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+    <div className="sp-panel p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-white">Pilot setup checklist</h2>
         <StatusPill tone="cyan">Pilot setup</StatusPill>
@@ -157,13 +176,13 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
 
 function SourceReadinessCard({ navigate }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+    <div className="sp-panel p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-white">Source readiness</h2>
-          <p className="mt-1 text-xs text-slate-500">Mapped does not mean certified.</p>
+          <p className="mt-1 text-xs text-slate-500">Mapped does not mean approved for monitoring.</p>
         </div>
-        <StatusPill tone="cyan">Certification in progress</StatusPill>
+        <StatusPill tone="cyan">Activation readiness in progress</StatusPill>
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2">
@@ -175,7 +194,7 @@ function SourceReadinessCard({ navigate }) {
 
       <div className="space-y-2.5 text-sm text-slate-400">
         {[
-          'Monitoring certification requires evidence and baseline runs.',
+          'Monitoring activation requires evidence and baseline runs.',
           'Under-validation sources are disclosed before pilot scope.',
           'Limitations are reviewed before relying on a source map.',
         ].map(text => (
@@ -205,35 +224,28 @@ function SourceReadinessCard({ navigate }) {
 // Derive summary widgets from real sources/status API response
 function buildWidgets(sourcesData) {
   if (!sourcesData) return null
-  const { sources = [], summary = {}, last_run_at, total_sources } = sourcesData
+  const { sources = [], summary = {}, last_run_at } = sourcesData
   const changed   = summary.CHANGED     || 0
   const failed    = summary.FAILED      || 0
+  const qualityDrop = summary.QUALITY_DROP || 0
   const firstSeen = summary.FIRST_SEEN  || 0
   const highRiskPending = sources.filter(s => s.change_status === 'CHANGED' || s.change_status === 'FIRST_SEEN').length
   const lastCheck = last_run_at
     ? new Date(last_run_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }) + ' UTC'
     : 'No runs yet'
   return {
-    totalSources: total_sources || 0,
+    confirmedSources: SOURCE_READINESS_SUMMARY.confirmed,
+    remediationSources: SOURCE_READINESS_SUMMARY.remediation,
     lastCheck,
     changedThisWeek: changed + firstSeen,
     highRiskPending,
-    failedSources: failed,
+    failedSources: failed + qualityDrop,
     evidenceRecords: sources.filter(s => s.change_status !== 'NOT_RUN').length,
     briefStatus: 'Sample available',
     reviewRequired: highRiskPending,
   }
 }
 
-const STATUS_BADGE_CLS = {
-  CHANGED:      'text-blue-400 bg-blue-500/10 border-blue-500/30',
-  UNCHANGED:    'text-slate-400 bg-slate-700/30 border-slate-600/30',
-  FIRST_SEEN:   'text-violet-400 bg-violet-500/10 border-violet-500/30',
-  FAILED:       'text-red-400 bg-red-500/10 border-red-500/30',
-  QUALITY_DROP: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  NOT_RUN:      'text-slate-500 bg-slate-800/50 border-slate-700/30',
-  UNKNOWN:      'text-slate-500 bg-slate-800/50 border-slate-700/30',
-}
 const EXTRACTION_CLS = {
   GOOD:    'text-emerald-400',
   OK:      'text-amber-400',
@@ -241,11 +253,34 @@ const EXTRACTION_CLS = {
   UNKNOWN: 'text-slate-500',
 }
 
-function SourceStatusBadge({ status }) {
-  const cls = STATUS_BADGE_CLS[status] || STATUS_BADGE_CLS.UNKNOWN
+function ReadinessBadge({ source }) {
+  let label = 'ACTIVATION PENDING'
+  let cls = 'border-slate-600/40 bg-slate-800/60 text-slate-300'
+  if (REMEDIATION_SOURCE_IDS.has(source.source_id)) {
+    label = 'NEEDS REVIEW'
+    cls = 'border-amber-400/30 bg-amber-400/10 text-amber-200'
+  } else if (source.change_status === 'FAILED' || source.access_status === 'failed') {
+    label = 'BLOCKED'
+    cls = 'border-rose-400/30 bg-rose-400/10 text-rose-200'
+  } else if (source.change_status === 'QUALITY_DROP') {
+    label = 'QUALITY DROP'
+    cls = 'border-amber-400/30 bg-amber-400/10 text-amber-200'
+  } else if (source.change_status && source.change_status !== 'NOT_RUN') {
+    label = 'CONFIRMED'
+    cls = 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
+  }
+  return <span className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-bold ${cls}`}>{label}</span>
+}
+
+function EvidenceBadge({ source }) {
+  const hasEvidence = source.change_status && source.change_status !== 'NOT_RUN'
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${cls}`}>
-      {status || 'UNKNOWN'}
+    <span className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-bold ${
+      hasEvidence
+        ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200'
+        : 'border-slate-600/40 bg-slate-800/60 text-slate-400'
+    }`}>
+      {hasEvidence ? 'PROOF RECORDED' : 'PENDING RUN'}
     </span>
   )
 }
@@ -285,6 +320,39 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
       <PlanBanner planState={planState} onChoosePlan={onChoosePlan} />
+
+      <div className="sp-panel border-amber-400/20 p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-2 flex flex-wrap gap-2">
+              <StatusPill tone="amber">Source pack validation in progress</StatusPill>
+              <StatusPill tone="cyan">Evidence-readiness review</StatusPill>
+            </div>
+            <h2 className="text-lg font-semibold text-white">
+              10 of 13 built-in UAE sources confirmed. 3 need extraction remediation.
+            </h2>
+            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
+              DFSA extraction and one UAE FIU homepage source are still under remediation. Built-in source activation
+              remains subject to source readiness, evidence, and baseline checks.
+            </p>
+          </div>
+          <div className="grid min-w-[280px] grid-cols-3 gap-2 text-center">
+            <div className="rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-2">
+              <p className="sp-mono text-xl font-semibold text-white">13</p>
+              <p className="text-[11px] text-slate-500">enabled</p>
+            </div>
+            <div className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2">
+              <p className="sp-mono text-xl font-semibold text-emerald-100">10</p>
+              <p className="text-[11px] text-emerald-100/70">confirmed</p>
+            </div>
+            <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
+              <p className="sp-mono text-xl font-semibold text-amber-100">3</p>
+              <p className="text-[11px] text-amber-100/70">under extraction remediation</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} planState={planState} />
 
       {/* 8-widget row — real data from /api/sources/status */}
@@ -304,58 +372,61 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <InfoCard icon={Globe}     tone="cyan"    label="Sources monitored"    value={widgets?.totalSources ?? '—'}  sub="enabled AE sources" />
-          <InfoCard icon={Clock}     tone="slate"   label="Last check"           value={widgets?.lastCheck ?? '—'}     sub="most recent run (UTC)" />
-          <InfoCard icon={Bell}      tone="emerald" label="Changes this week"    value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
+          <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={SOURCE_READINESS_SUMMARY.enabled}  sub="reviewed UAE source pack" />
+          <InfoCard icon={CheckCircle} tone="emerald" label="Sources confirmed" value={SOURCE_READINESS_SUMMARY.confirmed} sub="latest readiness run" />
+          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={SOURCE_READINESS_SUMMARY.remediation} sub="DFSA/FIU extraction work" />
+          <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with proof data" />
+          <InfoCard icon={Bell}      tone="emerald" label="Changed sources"      value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
           <InfoCard icon={AlertTriangle} tone="amber" label="High-risk pending"  value={widgets?.highRiskPending ?? 0} sub="changes needing review" />
-          <InfoCard icon={ShieldCheck} tone={widgets?.failedSources > 0 ? 'amber' : 'emerald'} label="Failed sources" value={widgets?.failedSources ?? 0} sub="extraction failures" />
-          <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with data" />
-          <InfoCard icon={Link2}     tone={telegramStatus?.connected ? 'emerald' : 'amber'} label="Telegram" value={telegramStatus?.connected ? 'Connected' : 'Not connected'} sub={telegramStatus?.connected ? 'test delivery available' : 'connect in Integrations'} />
-          <InfoCard icon={CheckCircle} tone="slate" label="Review required"      value={widgets?.reviewRequired ?? 0}  sub="changed sources" />
+          <InfoCard icon={ShieldCheck} tone={widgets?.failedSources > 0 ? 'amber' : 'emerald'} label="Failed / quality drop" value={widgets?.failedSources ?? 0} sub="source health flags" />
+          <InfoCard icon={Link2}     tone={telegramStatus?.connected ? 'emerald' : 'amber'} label="Plan state" value={displayPlanName(planState)} sub={telegramStatus?.connected ? 'Telegram connected' : 'choose plan or connect delivery'} />
         </div>
       )}
 
       {/* Real source table — from /api/sources/status */}
       {!sourcesLoading && !sourcesError && sourcesData?.sources?.length > 0 && (
-        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+        <div className="sp-panel p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-white">Source status</h2>
-              <p className="mt-1 text-xs text-slate-500">Live data from /api/sources/status — {sourcesData.total_sources} enabled UAE sources.</p>
+              <p className="mt-1 text-xs text-slate-500">Live data from /api/sources/status, shown with readiness-safe labels.</p>
             </div>
-            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2.5 py-1 rounded-full">LIVE</span>
+            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300">LIVE API</span>
           </div>
           <div className="overflow-x-auto rounded-lg border border-slate-800">
-            <table className="w-full text-xs">
+            <table className="sp-table min-w-[860px]">
               <thead>
-                <tr className="bg-slate-800/60">
-                  {['Source', 'Regulator', 'Last checked', 'Status', 'Extraction', 'Actions'].map(h => (
-                    <th key={h} className="px-4 py-2.5 text-left font-medium text-slate-400 whitespace-nowrap">{h}</th>
+                <tr>
+                  {['Source', 'Regulator', 'Last checked', 'Readiness', 'Extraction quality', 'Evidence', 'Action'].map(h => (
+                    <th key={h} className="whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {sourcesData.sources.slice(0, 12).map(s => (
                   <tr key={s.source_id} className="transition-colors hover:bg-slate-800/40">
-                    <td className="px-4 py-3 font-medium text-white max-w-[200px] truncate">{s.name}</td>
-                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.category?.replace(/_/g, ' ') || '—'}</td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                    <td className="font-medium text-white max-w-[260px] truncate">{s.name}</td>
+                    <td className="text-slate-400 whitespace-nowrap">{s.category?.replace(/_/g, ' ') || '—'}</td>
+                    <td className="text-slate-500 whitespace-nowrap">
                       {s.last_run_at
                         ? new Date(s.last_run_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
                         : 'Not run'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <SourceStatusBadge status={s.change_status} />
+                    <td className="whitespace-nowrap">
+                      <ReadinessBadge source={s} />
                     </td>
-                    <td className={`px-4 py-3 whitespace-nowrap font-medium ${EXTRACTION_CLS[s.extraction_quality] || EXTRACTION_CLS.UNKNOWN}`}>
+                    <td className={`whitespace-nowrap font-medium ${EXTRACTION_CLS[s.extraction_quality] || EXTRACTION_CLS.UNKNOWN}`}>
                       {s.extraction_quality || 'UNKNOWN'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="whitespace-nowrap">
+                      <EvidenceBadge source={s} />
+                    </td>
+                    <td className="whitespace-nowrap">
                       <a
                         href={s.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#16D9F5] hover:underline text-[10px] font-medium"
+                        className="text-[#16D9F5] hover:underline text-xs font-semibold"
                       >
                         View source
                       </a>

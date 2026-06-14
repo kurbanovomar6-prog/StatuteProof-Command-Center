@@ -436,7 +436,7 @@
     "jurisdiction": "TR",
     "category": "financial_regulator",
     "enabled": false,
-    "status": "active",
+    "status": "remediation",
     "notes": "Tier 1 SSL cert fails — Playwright fallback used; 2,056c extracted reliably."
   },
   {
@@ -509,9 +509,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active",
+    "status": "remediation",
     "source_id": "AE-dubai-financial-services-authority-dfsa",
-    "notes": "DFSA rules and standards — rulebook updates, regulatory standards for DIFC-regulated firms.",
+    "notes": "DFSA rules and standards — under extraction remediation; not treated as confirmed until Playwright extraction is verified against meaningful non-navigation content.",
     "tier": "1",
     "fetch_method": "playwright",
     "wait_for_selector": "main",
@@ -558,9 +558,9 @@
     "jurisdiction": "AE",
     "category": "aml",
     "enabled": true,
-    "status": "active",
+    "status": "remediation",
     "source_id": "AE-uae-financial-intelligence-unit-uaefiu",
-    "notes": "UAE FIU homepage — AML/CFT framework. Prefer AE-uaefiu-circulars for publication monitoring.",
+    "notes": "UAE FIU homepage — under extraction remediation due shallow homepage extraction. Prefer AE-uaefiu-circulars for publication monitoring.",
     "tier": "3"
   },
   {
@@ -596,7 +596,7 @@
     "jurisdiction": "AE",
     "category": "legal_database",
     "enabled": true,
-    "status": "active",
+    "status": "remediation",
     "notes": "Dubai International Financial Centre official laws and regulations. Domain updated to difc.com laws/regulations page. Verify item-level structure before source expansion. Prior difc.ae page tested 9,150c GOOD (2026-05-27).",
     "source_id": "AE-difc-laws-and-regulations",
     "tier": "1"
@@ -1305,9 +1305,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active",
+    "status": "remediation",
     "tier": "1",
-    "notes": "DFSA notices, decisions, and consultations — primary source for DIFC-regulated firm regulatory actions.",
+    "notes": "DFSA notices, decisions, and consultations — under extraction remediation; not treated as confirmed until content extraction and hash uniqueness are verified.",
     "fetch_method": "playwright",
     "wait_for_selector": "main",
     "content_selector": "main",

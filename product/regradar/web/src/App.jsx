@@ -1,10 +1,12 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { auth, profile, plan as planApi } from './api'
+import { appPageToPath, pathToRoute, publicViewToPath } from './routeMap'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
 
 const Problem               = lazy(() => import('./components/Problem'))
+const HowItWorks            = lazy(() => import('./components/HowItWorks'))
 const WithoutWith           = lazy(() => import('./components/WithoutWith'))
 const DashboardPreview      = lazy(() => import('./components/DashboardPreview'))
 const Coverage              = lazy(() => import('./components/Coverage'))
@@ -25,6 +27,7 @@ const ChoosePlanPage        = lazy(() => import('./components/app/ChoosePlanPage
 const AppShell              = lazy(() => import('./components/app/AppShell'))
 const SourceReadinessReviewPage = lazy(() => import('./components/SourceReadinessReviewPage'))
 const PricingPage           = lazy(() => import('./components/PricingPage'))
+const LegalPage             = lazy(() => import('./components/LegalPage'))
 
 function GlobalLoader() {
   return (
@@ -79,19 +82,76 @@ function dashboardViewForProfile(profileData) {
   return profileData?.onboarding_completed ? 'app' : 'onboarding'
 }
 
+const initialRoute = pathToRoute(
+  typeof window !== 'undefined' ? window.location.pathname : '/',
+)
+
 export default function App() {
-  const [view, setView] = useState('landing')
+  const [view, setView] = useState(initialRoute.view)
+  const [appPage, setAppPage] = useState(initialRoute.appPage)
   const [currentUser, setCurrentUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [planState, setPlanState] = useState(null)
+
+  function updatePath(path, replace = false) {
+    if (typeof window === 'undefined') return
+    const current = `${window.location.pathname}${window.location.search}`
+    if (current === path) return
+    window.history[replace ? 'replaceState' : 'pushState']({}, '', path)
+  }
+
+  function navigatePublic(nextView, options = {}) {
+    const { replace = false, query = '' } = options
+    setView(nextView)
+    if (nextView !== 'app') setAppPage('dashboard')
+    updatePath(`${publicViewToPath(nextView)}${query}`, replace)
+  }
+
+  function navigateRegister(planId) {
+    const query = planId ? `?plan=${encodeURIComponent(planId)}` : ''
+    navigatePublic('register', { query })
+  }
+
+  function navigateAppPage(nextPage, options = {}) {
+    setAppPage(nextPage)
+    setView('app')
+    updatePath(appPageToPath(nextPage), options.replace)
+  }
+
+  useEffect(() => {
+    function handlePopState() {
+      const route = pathToRoute(window.location.pathname)
+      setAppPage(route.appPage)
+      if (!currentUser && (route.view === 'app' || route.view === 'choose-plan')) {
+        setView('login')
+        return
+      }
+      setView(route.view)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [currentUser])
 
   useEffect(() => {
     function handleExpired() {
       localStorage.removeItem('regradar_user_registered')
       localStorage.removeItem('regradar_onboarding_complete')
       localStorage.removeItem('regradar_workspace_profile')
+      const route = pathToRoute(window.location.pathname)
       setCurrentUser(null)
+      if (route.view === 'app' || route.view === 'choose-plan') {
+        setAppPage(route.appPage || 'dashboard')
+        setView('login')
+        updatePath('/login', true)
+        return
+      }
+      if (['landing', 'login', 'register', 'pricing', 'source-readiness-review', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
+        setView(route.view)
+        return
+      }
       setView('landing')
+      setAppPage('dashboard')
+      updatePath('/', true)
     }
     window.addEventListener('auth:expired', handleExpired)
     return () => window.removeEventListener('auth:expired', handleExpired)
@@ -101,6 +161,8 @@ export default function App() {
     let active = true
 
     async function bootstrapAuth() {
+      const route = pathToRoute(window.location.pathname)
+      setAppPage(route.appPage)
       try {
         const authData = await auth.me()
         let profileData = null
@@ -114,11 +176,34 @@ export default function App() {
         }
         if (!active) return
         setCurrentUser(authData.user)
+        loadPlan()
+        if (route.view === 'app') {
+          setView(dashboardViewForProfile(profileData))
+          return
+        }
+        if (route.view === 'choose-plan') {
+          setView('choose-plan')
+          return
+        }
+        if (route.view === 'login' || route.view === 'register') {
+          setView(dashboardViewForProfile(profileData))
+          updatePath('/app/dashboard', true)
+          return
+        }
+        if (['landing', 'pricing', 'source-readiness-review', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
+          setView(route.view)
+          return
+        }
         setView(dashboardViewForProfile(profileData))
       } catch {
         if (!active) return
         setCurrentUser(null)
-        setView('landing')
+        if (route.view === 'app' || route.view === 'choose-plan') {
+          setView('login')
+          updatePath('/login', true)
+        } else {
+          setView(route.view)
+        }
       } finally {
         if (active) setAuthLoading(false)
       }
@@ -127,28 +212,6 @@ export default function App() {
     bootstrapAuth()
     return () => { active = false }
   }, [])
-
-  async function goToDashboard() {
-    if (currentUser) {
-      try {
-        const data = await profile.get()
-        syncProfileToLocalStorage(data.profile)
-        setView(dashboardViewForProfile(data.profile))
-      } catch {
-        setView('onboarding')
-      }
-      return
-    }
-    try {
-      const data = await auth.me()
-      setCurrentUser(data.user)
-      const profileResponse = await profile.get()
-      syncProfileToLocalStorage(profileResponse.profile)
-      setView(dashboardViewForProfile(profileResponse.profile))
-    } catch {
-      setView('login')
-    }
-  }
 
   async function loadPlan() {
     try {
@@ -165,9 +228,15 @@ export default function App() {
       const data = await profile.get()
       syncProfileToLocalStorage(data.profile)
       loadPlan()
-      setView(dashboardViewForProfile(data.profile))
+      if (dashboardViewForProfile(data.profile) === 'app') {
+        navigateAppPage(appPage || 'dashboard', { replace: true })
+      } else {
+        setView('onboarding')
+        updatePath('/app/dashboard', true)
+      }
     } catch {
       setView('onboarding')
+      updatePath('/app/dashboard', true)
     }
   }
 
@@ -181,7 +250,12 @@ export default function App() {
     localStorage.removeItem('regradar_onboarding_complete')
     localStorage.removeItem('regradar_workspace_profile')
     setCurrentUser(null)
-    setView('landing')
+    navigatePublic('landing', { replace: true })
+  }
+
+  function handleViewSampleEvidence() {
+    updatePath('/#evidence')
+    document.getElementById('evidence')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   if (authLoading) {
@@ -193,7 +267,7 @@ export default function App() {
       <Suspense fallback={<GlobalLoader />}>
         <LoginPage
           onLogin={handleAuthenticated}
-          onRegister={() => setView('register')}
+          onRegister={() => navigateRegister()}
         />
       </Suspense>
     )
@@ -204,7 +278,7 @@ export default function App() {
       <Suspense fallback={<GlobalLoader />}>
         <RegisterPage
           onRegister={handleAuthenticated}
-          onLogin={() => setView('login')}
+          onLogin={() => navigatePublic('login')}
         />
       </Suspense>
     )
@@ -213,7 +287,7 @@ export default function App() {
   if (view === 'onboarding') {
     return (
       <Suspense fallback={<GlobalLoader />}>
-        <OnboardingPage navigate={() => setView('choose-plan')} currentUser={currentUser} />
+        <OnboardingPage navigate={() => navigatePublic('choose-plan')} currentUser={currentUser} />
       </Suspense>
     )
   }
@@ -222,15 +296,11 @@ export default function App() {
     return (
       <Suspense fallback={<GlobalLoader />}>
         <ChoosePlanPage
-          onContinue={() => setView('app')}
+          onContinue={() => navigateAppPage('dashboard')}
           selectPlan={async (planName) => {
-            try {
-              const data = await planApi.set(planName)
-              if (data.ok && data.plan) setPlanState(data.plan)
-              return data
-            } catch (err) {
-              throw err
-            }
+            const data = await planApi.set(planName)
+            if (data.ok && data.plan) setPlanState(data.plan)
+            return data
           }}
         />
       </Suspense>
@@ -241,10 +311,12 @@ export default function App() {
     return (
       <Suspense fallback={<GlobalLoader />}>
         <AppShell
+          key={appPage}
+          initialPage={appPage}
           currentUser={currentUser}
           onSignOut={handleSignOut}
           planState={planState}
-          onChoosePlan={() => setView('choose-plan')}
+          onChoosePlan={() => navigatePublic('choose-plan')}
         />
       </Suspense>
     )
@@ -253,7 +325,12 @@ export default function App() {
   if (view === 'pricing') {
     return (
       <Suspense fallback={<GlobalLoader />}>
-        <PricingPage onBack={() => setView('landing')} onCreateWorkspace={() => setView('register')} />
+        <PricingPage
+          onBack={() => navigatePublic('landing')}
+          onCreateWorkspace={() => navigateRegister()}
+          onSourceReview={() => navigatePublic('source-readiness-review')}
+          onSelectPlan={navigateRegister}
+        />
       </Suspense>
     )
   }
@@ -261,7 +338,15 @@ export default function App() {
   if (view === 'source-readiness-review') {
     return (
       <Suspense fallback={<GlobalLoader />}>
-        <SourceReadinessReviewPage onBack={() => setView('landing')} />
+        <SourceReadinessReviewPage onBack={() => navigatePublic('landing')} />
+      </Suspense>
+    )
+  }
+
+  if (view === 'terms' || view === 'privacy' || view === 'disclaimer') {
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <LegalPage type={view} onBack={() => navigatePublic('landing')} />
       </Suspense>
     )
   }
@@ -269,23 +354,24 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#07111F] text-slate-200">
       <Header
-        onSignIn={() => setView('login')}
-        onCreateWorkspace={() => setView('register')}
-        onSourceReview={() => setView('source-readiness-review')}
-        onPricing={() => setView('pricing')}
+        onSignIn={() => navigatePublic('login')}
+        onCreateWorkspace={() => navigateRegister()}
+        onSourceReview={() => navigatePublic('source-readiness-review')}
+        onPricing={() => navigatePublic('pricing')}
       />
       <main>
         <Hero
-          onCreateWorkspace={() => setView('source-readiness-review')}
-          onSignIn={() => setView('register')}
+          onCreateWorkspace={() => navigatePublic('source-readiness-review')}
+          onViewSample={handleViewSampleEvidence}
         />
         <Suspense fallback={<div className="py-20" />}>
           <Problem />
+          <HowItWorks />
           <WithoutWith />
           <SampleBrief />
-          <Coverage onCreateWorkspace={() => setView('register')} />
-          <SourceTransparencyMatrix onCreateWorkspace={() => setView('register')} />
-          <BuyerSourcePacks onCreateWorkspace={() => setView('register')} />
+          <Coverage onCreateWorkspace={() => navigatePublic('source-readiness-review')} />
+          <SourceTransparencyMatrix onCreateWorkspace={() => navigateRegister()} />
+          <BuyerSourcePacks onCreateWorkspace={() => navigateRegister()} />
           <ConfiguredMonitoring />
           <TrustLayer />
           {/* Evidence Demo Section — SAMPLE / FAKE */}
@@ -311,10 +397,14 @@ export default function App() {
             </div>
           </section>
           <DashboardPreview />
-          <Pricing onCreateWorkspace={() => setView('register')} />
+          <Pricing
+            onCreateWorkspace={() => navigateRegister()}
+            onSourceReview={() => navigatePublic('source-readiness-review')}
+            onSelectPlan={navigateRegister}
+          />
           <Contact
-            onCreateWorkspace={() => setView('register')}
-            onSignIn={() => setView('login')}
+            onCreateWorkspace={() => navigateRegister()}
+            onSignIn={() => navigatePublic('login')}
           />
         </Suspense>
       </main>

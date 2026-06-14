@@ -9,7 +9,7 @@ const PLANS = [
     period: '',
     badge: 'Start here',
     highlight: false,
-    desc: 'See which UAE regulatory sources are active, limited, or blocked for your compliance profile — before any monitoring commitment. No live monitoring.',
+    desc: 'See which UAE regulatory sources are confirmed, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring.',
     cta: 'Request source review',
     ctaStyle: 'secondary',
     features: [

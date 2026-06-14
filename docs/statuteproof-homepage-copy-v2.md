@@ -78,7 +78,7 @@ View sample evidence-backed brief
 Monitoring information only — not legal advice — source coverage and limitations disclosed
 
 **Disclaimer line (smallest text, muted):**
-StatuteProof reports are for information and compliance review support only. Not legal advice, not compliance certification. See full disclaimer →
+StatuteProof reports are for information and compliance review support only. Not legal advice, not a compliance determination. See full disclaimer →
 
 **Hero visual:** The Sample Evidence Alert Card below (see next section). No hero photography. The card IS the proof of concept.
 
@@ -152,7 +152,7 @@ The real risk is not the update you catch. It is the one that sat on an official
 And when your supervisory reviewer asks when you became aware of a rule change, "we checked the website regularly" is not the same as "here is the timestamped evidence record with the diff."
 
 **Supporting bullets:**
-- 9 UAE official regulatory sources require active monitoring for most licensed firms
+- UAE official regulatory sources require active monitoring for most licensed firms, but each source needs a readiness status before activation
 - No consolidated UAE regulatory change notification service exists
 - Website restructures, PDF reformats, and JavaScript rendering can cause missed changes even when teams are checking regularly
 - Manual monitoring creates an audit gap: you know you checked, but you cannot prove it
@@ -183,34 +183,34 @@ No alert or brief reaches a customer without explicit human review and approval.
 ## UAE SOURCE COVERAGE SECTION
 
 **Headline:**
-13 READY UAE regulatory sources. Limitations disclosed.
+13 enabled UAE regulatory sources. 10 confirmed. 3 under extraction remediation. Limitations disclosed.
 
 **Subheadline:**
-These are the official UAE sources currently active in StatuteProof's monitoring pipeline. Status and extraction quality are shown honestly.
+These are the official UAE sources currently mapped in StatuteProof's UAE source pack. Status and extraction quality are shown honestly before monitoring activation.
 
 **Source table:**
 
 | Source | Regulator | Category | Status |
 |--------|-----------|----------|--------|
-| VARA — Enforcement Notices | Dubai Virtual Assets Regulatory Authority | Financial Regulator | READY |
-| CBUAE Regulations | Central Bank of the UAE | Central Bank | READY |
-| Dubai Financial Services Authority (DFSA) | DFSA | Financial Regulator | READY |
-| DFSA Regulatory Notices | DFSA | Financial Regulator | READY |
-| Abu Dhabi Global Market (ADGM FSRA) | ADGM | Financial Regulator | READY |
-| DIFC Laws and Regulations | DIFC | Legal Database | READY |
-| UAE FIU Circulars and Notices | UAE Financial Intelligence Unit | AML/CFT | READY |
-| UAE Ministry of Finance | Ministry of Finance | Finance Ministry | READY |
-| UAE Legislation Portal | UAE Government | Legal Acts | READY |
-| UAE Ministry of Economy | Ministry of Economy | Company Registry | READY |
-| VARA Homepage | Dubai Virtual Assets Regulatory Authority | Financial Regulator | READY |
-| Central Bank UAE Homepage | Central Bank of the UAE | Central Bank | READY |
-| UAE FIU Homepage | UAE Financial Intelligence Unit | AML/CFT | READY |
+| VARA — Enforcement Notices | Dubai Virtual Assets Regulatory Authority | Financial Regulator | CONFIRMED |
+| CBUAE Regulations | Central Bank of the UAE | Central Bank | CONFIRMED |
+| DFSA Rulebook | DFSA | Financial Regulator | UNDER EXTRACTION REMEDIATION |
+| DFSA Regulatory Notices | DFSA | Financial Regulator | UNDER EXTRACTION REMEDIATION |
+| ADGM FSRA Main | ADGM | Financial Regulator | CONFIRMED |
+| DIFC Laws and Regulations | DIFC | Legal Database | CONFIRMED |
+| UAE FIU Circulars and Notices | UAE Financial Intelligence Unit | AML/CFT | CONFIRMED |
+| UAE Ministry of Finance | Ministry of Finance | Finance Ministry | CONFIRMED |
+| UAE Legislation Portal | UAE Government | Legal Acts | CONFIRMED |
+| UAE Ministry of Economy | Ministry of Economy | Company Registry | CONFIRMED |
+| VARA Homepage | Dubai Virtual Assets Regulatory Authority | Financial Regulator | CONFIRMED |
+| Central Bank UAE Homepage | Central Bank of the UAE | Central Bank | CONFIRMED |
+| UAE FIU Homepage | UAE Financial Intelligence Unit | AML/CFT | UNDER EXTRACTION REMEDIATION |
 
 **Limitation disclosure (mandatory, inline):**
 Certain UAE sources are not currently monitorable from outside the UAE: UAE Federal Tax Authority (FTA), UAE Official Gazette, certain SCA pages. These appear as BLOCKED in your source readiness report. StatuteProof does not claim complete UAE regulatory coverage. Source status and limitations are disclosed per source.
 
 **CTA below table:**
-Want to see which sources are active for your specific licence type?
+Want to see which sources are confirmed for your specific licence type?
 [Request a free UAE source readiness review]
 
 ---
@@ -274,7 +274,7 @@ Detects text changes on monitored official sources. Stores evidence of the chang
 Review the brief with your compliance team. Verify the change against the official source. Consult legal counsel if the risk level requires it. Update your compliance programme accordingly.
 
 **Disclaimer block (styled as a highlighted info box):**
-StatuteProof reports are for information and compliance review support only. They do not constitute legal advice, regulatory advice, compliance certification, or a legal opinion.
+StatuteProof reports are for information and compliance review support only. They do not constitute legal advice, regulatory advice, compliance determination, or a legal opinion.
 
 ---
 
@@ -284,10 +284,10 @@ StatuteProof reports are for information and compliance review support only. The
 See exactly which UAE sources are monitorable for your firm — before you commit.
 
 **Subheadline:**
-A free UAE Source Readiness Review gives you a detailed report of which UAE regulatory sources are currently active, which have access limitations, and which are not currently accessible.
+A free UAE Source Readiness Review gives you a detailed report of which UAE regulatory sources are confirmed, which need remediation, which have access limitations, and which are not currently accessible.
 
 **What you receive:**
-- A report of which UAE official sources are READY, LIMITED, or BLOCKED for your licence type
+- A report of which UAE official sources are CONFIRMED, UNDER EXTRACTION REMEDIATION, LIMITED, or BLOCKED for your licence type
 - Extraction quality ratings per source
 - Known limitations disclosed per source (JavaScript rendering, geo-restrictions, PDF-only sources)
 - A pilot recommendation based on your source coverage
@@ -307,7 +307,7 @@ Not legal advice. Not a compliance assessment. The readiness review is for infor
 ## PRICING PREVIEW SECTION
 
 **Headline:**
-Start with a free source readiness review. Pilot when you're ready.
+Start with a free source readiness review. Pilot after scope is confirmed.
 
 **4 tiers (preview cards):**
 
@@ -323,7 +323,7 @@ $299–499/mo
 
 **UAE VASP/Fintech Pack**
 $499–999/mo
-Full UAE source pack · Custom sources · Urgent alerts · 5 seats
+13 enabled UAE sources, with 10 confirmed and 3 under extraction remediation · Custom sources · Urgent alerts · 5 seats
 [Request details]
 
 **Compliance Consultant Pack**
@@ -346,7 +346,7 @@ Full pricing details → [Pricing page]
 No. StatuteProof is an official-source monitoring tool that detects text changes, stores evidence records, and delivers human-reviewed compliance briefs. It does not provide legal advice, regulatory interpretations, or compliance opinions. Always consult qualified legal counsel before making regulatory decisions.
 
 **Q2: Which UAE regulatory sources does StatuteProof monitor?**
-Currently: VARA, CBUAE, DFSA, ADGM FSRA, UAE FIU, DIFC Laws, UAE Ministry of Finance, UAE Ministry of Economy, and UAE Legislation Portal (13 ready sources). Some UAE sources — including the Federal Tax Authority and certain SCA pages — are not accessible from outside the UAE and are disclosed as BLOCKED. See the Source Coverage page for the full status of every source.
+Currently: 13 enabled UAE sources, with 10 confirmed and 3 under extraction remediation. DFSA Rulebook, DFSA Regulatory Notices, and UAE FIU Homepage remain under extraction remediation and are not treated as confirmed for monitoring. Some UAE sources — including the Federal Tax Authority and certain SCA pages — may require additional item-level checks or be disclosed as limited/blocked. See the Source Coverage page for the full status of every source.
 
 **Q3: What happens if a source website changes its structure?**
 When a source structure change is detected, it is flagged as SOURCE_STRUCTURE_CHANGED, not silently treated as a content change. The failure is surfaced to you. You can see which sources are FAILED or QUALITY_DROP at any time in the dashboard. We do not report UNCHANGED when extraction has failed.
@@ -384,7 +384,7 @@ For pilot enquiries: pilots@statuteproof.com
 For readiness reviews: [readiness review form]
 
 **Full disclaimer (footer):**
-StatuteProof monitors selected official UAE regulatory sources. Reports generated by StatuteProof are provided for information and compliance review support only. They do not constitute legal advice, regulatory advice, compliance certification, or a legal opinion. StatuteProof does not replace qualified legal counsel, compliance professionals, MLROs, or other professional advisers. StatuteProof does not guarantee compliance, prevent fines, or certify that all regulatory updates have been captured. Source monitoring may be affected by publication delays, website changes, PDF formatting, access limits, or source structure changes. Users should verify official source material directly and consult qualified legal or compliance professionals before making regulatory, filing, or operational decisions. StatuteProof is not affiliated with, endorsed by, or an official partner of VARA, CBUAE, DFSA, ADGM, UAE FIU, DIFC, or any UAE regulatory authority.
+StatuteProof monitors selected official UAE regulatory sources. Reports generated by StatuteProof are provided for information and compliance review support only. They do not constitute legal advice, regulatory advice, compliance determination, or a legal opinion. StatuteProof does not replace qualified legal counsel, compliance professionals, MLROs, or other professional advisers. StatuteProof does not determine compliance outcomes, prevent fines, or confirm that all regulatory updates have been captured. Source monitoring may be affected by publication delays, website changes, PDF formatting, access limits, or source structure changes. Users should verify official source material directly and consult qualified legal or compliance professionals before making regulatory, filing, or operational decisions. StatuteProof is not affiliated with, endorsed by, or an official partner of VARA, CBUAE, DFSA, ADGM, UAE FIU, DIFC, or any UAE regulatory authority.
 
 **Copyright line:**
 © 2026 StatuteProof. All rights reserved.
@@ -395,13 +395,13 @@ StatuteProof monitors selected official UAE regulatory sources. Reports generate
 
 Before implementing this homepage copy, verify:
 
-- [ ] No claim of "guarantee compliance" → None present
+- [ ] No compliance outcome guarantee claim → None present
 - [ ] No claim of "prevent fines" → None present
 - [ ] No claim of "replace lawyers" → None present
 - [ ] No claim of "100% accurate" → None present
-- [ ] No claim of "never miss an update" → None present
+- [ ] No absolute update-detection claim → None present
 - [ ] No claim of "official partner of VARA/CBUAE/DFSA/ADGM" → None present
-- [ ] No claim of "certified by" any regulator → None present
+- [ ] No regulator approval or endorsement claim → None present
 - [ ] No claim of "AI lawyer" or "automated legal advice" → None present
 - [ ] All sample data labeled [SAMPLE / FAKE] → Yes — hero card, sample brief
 - [ ] Short disclaimer in footer → Yes — "Monitoring information only. Not legal advice."

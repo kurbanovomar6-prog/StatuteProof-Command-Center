@@ -65,9 +65,14 @@ BUYER_PROFILES = {
 
 STATUS_DETAILS = {
     "active": (
-        "Active in monitoring",
-        "Change detection is operational against this source. Item-level indexing may still be under refinement.",
+        "Confirmed for monitoring",
+        "Change detection is available for this source after readiness review. Item-level indexing may still be under refinement.",
         "active",
+    ),
+    "remediation": (
+        "Under extraction remediation",
+        "Source is enabled but not confirmed for monitoring until extraction quality is fixed and rerun.",
+        "validation",
     ),
     "under_validation": (
         "Under technical validation",
@@ -111,11 +116,12 @@ STATUS_DETAILS = {
     ),
 }
 
-ACTIVE_LABELS = {"Active in monitoring"}
+ACTIVE_LABELS = {"Confirmed for monitoring"}
 VALIDATION_LABELS = {
     "Under technical validation",
     "Needs extraction adapter",
     "Monitoring limited",
+    "Under extraction remediation",
 }
 LIMITED_LABELS = {
     "Access limited — monitoring deferred",
@@ -339,7 +345,7 @@ def _render_rows(items: list[dict]) -> str:
 
 def _detail_card(item: dict, active: bool = False) -> str:
     caveat = (
-        "Active monitoring does not guarantee item-level detection of every publication."
+        "Confirmed monitoring does not determine item-level detection of every publication."
         if active
         else item["activation_note"]
     )
@@ -377,7 +383,7 @@ def _sample_brief(profile: dict) -> str:
         "<h3>Source Proof</h3>",
         f"<p>{_html(official_source)}. A real brief includes official source proof and reviewed limitations.</p>",
         "<h3>Limitation Note</h3>",
-        "<p>This sample is illustrative only. Real briefs include only human-reviewed changes from validated source layers.</p>",
+        "<p>This sample is illustrative only. Real briefs include only human-reviewed changes from confirmed source layers.</p>",
         "<h3>Not Legal Advice</h3>",
         "<p>This sample brief does not constitute legal advice and should not be relied upon for compliance decisions.</p>",
     ])
@@ -385,7 +391,7 @@ def _sample_brief(profile: dict) -> str:
 
 def _render_recommended(active_items: list[dict]) -> str:
     if not active_items:
-        return '<p class="muted">No active source recommendation is made for this profile until validation improves.</p>'
+        return '<p class="muted">No confirmed source recommendation is made for this profile until readiness improves.</p>'
     return "\n".join(_detail_card(item, active=True) for item in active_items)
 
 
@@ -424,7 +430,7 @@ def _build_report(args) -> tuple[str, dict]:
     total = len(selected)
     executive_summary = (
         f"For this profile, StatuteProof identified {total} relevant UAE source layers. "
-        f"{len(active)} are active in monitoring, {len(validation)} are under validation or need adapters, "
+        f"{len(active)} are confirmed for monitoring, {len(validation)} are under validation, need adapters, or are under extraction remediation, "
         f"and {len(limited)} have access limitations or are deferred. This is not a coverage guarantee."
     )
     context = {
@@ -483,7 +489,7 @@ def main() -> int:
 
     print(f"Output: {output}")
     print(f"Sources reviewed: {stats['total']}")
-    print(f"Active in monitoring: {stats['active']}")
+    print(f"Confirmed for monitoring: {stats['active']}")
     print(f"Under validation / needs adapter: {stats['validation']}")
     print(f"Access-limited / deferred: {stats['limited']}")
     if stats["active"] == 0:

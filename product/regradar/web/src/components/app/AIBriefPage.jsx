@@ -45,10 +45,13 @@ export default function AIBriefPage() {
       <div className="mb-4 rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white">Reviewed compliance brief</h2>
+            <div className="mb-2">
+              <span className="sp-demo-badge">SAMPLE / DEMO — not a real regulatory update</span>
+            </div>
+            <h2 className="text-sm font-semibold text-white">Brief structure preview</h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
-              Briefs are drafted from official source evidence and gated by human review before delivery. These examples show the brief structure; sample brief delivery can be tested from Integrations after Telegram pairing.
-              Weekly brief delivery remains a pilot roadmap item.
+              Briefs are drafted from official source evidence and gated by human review before delivery.
+              These examples show the brief structure only. Delivery requires an approved brief and integration setup.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -88,7 +91,7 @@ export default function AIBriefPage() {
               <p className="text-xs font-semibold text-white leading-snug mb-1.5">{a.title}</p>
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <Brain className="w-3 h-3 text-cyan-500/60" />
-              <span>Draft confidence: <span className={CONF_COLOR[a.aiConfidence]}>{a.aiConfidence}</span></span>
+              <span>Sample draft confidence: <span className={CONF_COLOR[a.aiConfidence]}>{a.aiConfidence}</span></span>
               </div>
               {reviewed.has(a.id) && (
                 <div className="mt-2 flex items-center gap-1 text-emerald-400 text-xs">
@@ -106,7 +109,8 @@ export default function AIBriefPage() {
           <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">
               <Brain className="w-4 h-4 text-cyan-400" />
-              <span className="text-sm font-semibold text-white">Reviewed Brief Preview</span>
+              <span className="text-sm font-semibold text-white">Sample Brief Preview</span>
+              <span className="sp-demo-badge">SAMPLE / DEMO</span>
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${RISK_DARK[brief.risk]}`}>{brief.risk}</span>
             </div>
             <span className="text-xs text-slate-500">{brief.date}</span>
@@ -209,7 +213,7 @@ export default function AIBriefPage() {
             {/* Limitation note */}
             <div className="px-5 py-4 bg-slate-800/30">
               <p className="text-slate-500 text-xs leading-relaxed">
-                {brief.limitationNote || 'Sample preview. Real client delivery requires approved routing, profile matching and human review.'}
+                {brief.limitationNote || 'SAMPLE / DEMO — not a real regulatory update. Real client delivery requires evidence records, approved routing, profile matching, integration setup, and human review.'}
               </p>
             </div>
           </div>
@@ -228,19 +232,24 @@ export default function AIBriefPage() {
               <CheckCircle className="w-3.5 h-3.5" />
               {reviewed.has(brief.id) ? 'Reviewed' : 'Mark reviewed'}
             </button>
-            <button className="flex items-center gap-1.5 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors">
+            <button
+              type="button"
+              disabled
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-500 border border-slate-700 bg-slate-800/70 px-3 py-2 rounded-lg cursor-not-allowed"
+              title="PDF export requires activation."
+            >
               <Download className="w-3.5 h-3.5" />
-              Preview PDF
+              PDF export requires activation
             </button>
             <button
               type="button"
               disabled
               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 bg-slate-800/70 text-slate-500 cursor-not-allowed"
-              title="Sample brief delivery can be tested from Integrations after Telegram pairing."
+              title="Delivery requires approved brief and integration setup."
             >
               Preview only
             </button>
-            <span className="text-xs text-slate-500">Sample brief delivery is available from Integrations. Weekly brief delivery remains a pilot roadmap item.</span>
+            <span className="text-xs text-slate-500">Delivery requires approved brief and integration setup.</span>
           </div>
 
           {/* Mandatory legal disclaimer per brief */}
@@ -248,7 +257,7 @@ export default function AIBriefPage() {
             <p className="text-[10px] text-slate-600 leading-relaxed">
               <strong className="text-slate-500">Not legal advice.</strong> StatuteProof reports are generated from monitored official-source records and are provided
               for information and compliance review support only. They do not constitute legal advice, regulatory advice,
-              compliance certification, or a legal opinion. Users should verify official source material directly
+              compliance determination, or a legal opinion. Users should verify official source material directly
               and consult qualified legal or compliance professionals before making regulatory decisions.
             </p>
           </div>

@@ -223,18 +223,19 @@ export const MOCK_ALERTS = [
 ]
 
 export const MOCK_SOURCES = [
-  { id: 's1', name: 'VARA', flag: '🇦🇪', market: 'UAE', category: 'VASP / crypto', status: 'Validated', extraction: 'HTML + document links', lastChecked: 'Readiness snapshot', health: 'PASS' },
-  { id: 's2', name: 'CBUAE', flag: '🇦🇪', market: 'UAE', category: 'Central bank / payments', status: 'Under validation', extraction: 'HTML / adapter review', lastChecked: 'Readiness snapshot', health: 'Review' },
-  { id: 's3', name: 'UAE FIU', flag: '🇦🇪', market: 'UAE', category: 'AML / FIU', status: 'Under validation', extraction: 'HTML / JS validation', lastChecked: 'Readiness snapshot', health: 'Review' },
-  { id: 's4', name: 'DFSA', flag: '🇦🇪', market: 'UAE', category: 'DIFC / financial regulator', status: 'Validated', extraction: 'HTML / item-level validation', lastChecked: 'Readiness snapshot', health: 'PASS' },
-  { id: 's5', name: 'DIFC Laws', flag: '🇦🇪', market: 'UAE', category: 'DIFC legislation', status: 'Validated', extraction: 'HTML', lastChecked: 'Readiness snapshot', health: 'PASS' },
-  { id: 's6', name: 'ADGM / FSRA', flag: '🇦🇪', market: 'UAE', category: 'ADGM / financial regulator', status: 'Under validation', extraction: 'HTML row extraction / proof-diff', lastChecked: 'Readiness snapshot', health: 'Review' },
-  { id: 's7', name: 'MoET AML / DNFBP', flag: '🇦🇪', market: 'UAE', category: 'AML / DNFBP', status: 'Under validation', extraction: 'HTML / guidance pages', lastChecked: 'Readiness snapshot', health: 'Review' },
-  { id: 's8', name: 'FTA', flag: '🇦🇪', market: 'UAE', category: 'Tax / corporate', status: 'Needs adapter', extraction: 'HTML / PDF-link validation', lastChecked: 'Readiness snapshot', health: 'Review' },
-  { id: 's9', name: 'UAE Legislation Portal', flag: '🇦🇪', market: 'UAE', category: 'Federal legislation', status: 'Limited', extraction: 'Item-level mapping required', lastChecked: 'Readiness snapshot', health: 'Limited' },
-  { id: 's10', name: 'Executive Office / Sanctions', flag: '🇦🇪', market: 'UAE', category: 'Sanctions / AML', status: 'Under validation', extraction: 'HTML / JS validation', lastChecked: 'Readiness snapshot', health: 'Review' },
-  { id: 's11', name: 'DIFC Data Protection', flag: '🇦🇪', market: 'UAE', category: 'Data protection', status: 'Under validation', extraction: 'HTML guidance pages', lastChecked: 'Readiness snapshot', health: 'Review' },
-  { id: 's12', name: 'ADGM Data Protection', flag: '🇦🇪', market: 'UAE', category: 'Data protection', status: 'Under validation', extraction: 'HTML guidance pages', lastChecked: 'Readiness snapshot', health: 'Review' },
+  { id: 's1', name: 'CBUAE Main', flag: '🇦🇪', market: 'UAE', category: 'Central bank / payments', status: 'Confirmed', extraction: 'HTML structured', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's2', name: 'CBUAE Regulations', flag: '🇦🇪', market: 'UAE', category: 'Central bank / payments', status: 'Confirmed', extraction: 'HTML structured; counter-change noise filter needed', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's3', name: 'UAE Ministry of Finance', flag: '🇦🇪', market: 'UAE', category: 'Financial policy', status: 'Confirmed', extraction: 'HTML structured + PDF text', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's4', name: 'VARA Main', flag: '🇦🇪', market: 'UAE', category: 'VASP / crypto', status: 'Confirmed', extraction: 'HTML / PDF', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's5', name: 'VARA Enforcement Notices', flag: '🇦🇪', market: 'UAE', category: 'VASP / crypto', status: 'Confirmed', extraction: 'HTML structured', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's6', name: 'ADGM FSRA Main', flag: '🇦🇪', market: 'UAE', category: 'ADGM / financial regulator', status: 'Confirmed', extraction: 'HTML structured; low character count caveat', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's7', name: 'UAE FIU Circulars', flag: '🇦🇪', market: 'UAE', category: 'AML / FIU', status: 'Confirmed', extraction: 'HTML structured publications listing', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's8', name: 'DIFC Laws Portal', flag: '🇦🇪', market: 'UAE', category: 'DIFC legislation', status: 'Confirmed', extraction: 'HTML structured', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's9', name: 'UAE Legislation Portal', flag: '🇦🇪', market: 'UAE', category: 'Federal legislation', status: 'Confirmed', extraction: 'HTML structured; item-level adapter review required for alerts', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's10', name: 'UAE Ministry of Economy', flag: '🇦🇪', market: 'UAE', category: 'AML / DNFBP', status: 'Confirmed', extraction: 'HTML structured', lastChecked: 'Readiness snapshot', health: 'Evidence confirmed' },
+  { id: 's11', name: 'DFSA Rulebook', flag: '🇦🇪', market: 'UAE', category: 'DIFC / financial regulator', status: 'Needs remediation', extraction: 'Navigation shell only; selector/adapter required', lastChecked: 'Readiness snapshot', health: 'Review' },
+  { id: 's12', name: 'DFSA Regulatory Notices', flag: '🇦🇪', market: 'UAE', category: 'DIFC / financial regulator', status: 'Needs remediation', extraction: 'Hash collision with rulebook source; adapter required', lastChecked: 'Readiness snapshot', health: 'Review' },
+  { id: 's13', name: 'UAE FIU Homepage', flag: '🇦🇪', market: 'UAE', category: 'AML / FIU', status: 'Needs remediation', extraction: 'Shallow homepage extraction; circulars source review needed', lastChecked: 'Readiness snapshot', health: 'Review' },
 ]
 
 export const MOCK_REPORTS = [
@@ -242,7 +243,7 @@ export const MOCK_REPORTS = [
   { id: 'r2', title: 'CBUAE / AML Brief Preview', markets: '🇦🇪 UAE', risk: 'MEDIUM', date: 'Sample', status: 'Requires pilot setup', alerts: 1, reviewItems: 1, marketList: ['UAE'] },
   { id: 'r3', title: 'VARA Rulebook Update Preview', markets: '🇦🇪 UAE', risk: 'HIGH', date: 'Sample', status: 'Available sample', alerts: 1, reviewItems: 1, marketList: ['UAE'] },
   { id: 'r4', title: 'DIFC / DFSA Source Transparency Report', markets: '🇦🇪 UAE', risk: 'MIXED', date: 'Sample', status: 'Generated manually', alerts: 1, reviewItems: 1, marketList: ['UAE'] },
-  { id: 'r5', title: 'ADGM / FSRA Circulars Preview', markets: '🇦🇪 UAE', risk: 'MEDIUM', date: 'Sample', status: 'Readiness snapshot', alerts: 0, reviewItems: 1, marketList: ['UAE'] },
+  { id: 'r5', title: 'ADGM / FSRA Circulars Preview', markets: '🇦🇪 UAE', risk: 'MEDIUM', date: 'Sample', status: 'Under validation sample', alerts: 0, reviewItems: 1, marketList: ['UAE'] },
   { id: 'r6', title: 'FTA Public Clarification Watch', markets: '🇦🇪 UAE', risk: 'INFO', date: 'Sample', status: 'Requires pilot setup', alerts: 1, reviewItems: 0, marketList: ['UAE'] },
   { id: 'r7', title: 'UAE FIU Typology Brief Preview', markets: '🇦🇪 UAE', risk: 'HIGH', date: 'Sample', status: 'Available sample', alerts: 1, reviewItems: 1, marketList: ['UAE'] },
   { id: 'r8', title: 'Proof/Diff Artifact Sample', markets: '🇦🇪 UAE', risk: 'INFO', date: 'Sample', status: 'Available sample', alerts: 0, reviewItems: 0, marketList: ['UAE'] },

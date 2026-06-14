@@ -3,7 +3,8 @@ import { AlertTriangle, Clock, ArrowRight, CheckCircle } from 'lucide-react'
 export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) {
   if (!planState) return null
 
-  const { plan_name, plan_display, trial_active, trial_expired, days_remaining, status } = planState
+  const { plan_name, plan_display, trial_expired, days_remaining, status } = planState
+  const displayName = plan_name === 'evidence_preview' ? 'Source Readiness Review' : plan_display
 
   if (plan_name === 'evidence_preview') {
     const urgent = days_remaining !== null && days_remaining <= 2
@@ -24,7 +25,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="text-sm font-semibold text-white">
-                  {trial_expired ? 'Evidence Preview ended' : '7-day Evidence Preview active'}
+                  {trial_expired ? 'Source Readiness Review access ended' : 'Source Readiness Review enabled'}
                 </span>
                 {days_remaining !== null && !trial_expired && (
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
@@ -38,8 +39,8 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
               </div>
               <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
                 {trial_expired
-                  ? 'Your source readiness review access has ended. Choose a plan to start live monitoring and evidence records.'
-                  : 'Explore the workspace with sample evidence and source-readiness tools. Choose a plan to start live monitoring, evidence records, and weekly source status updates.'}
+                  ? 'Your source readiness review access has ended. Choose a plan to start monitored sources and evidence records.'
+                  : 'Explore the workspace with sample evidence and source-readiness tools. Choose a plan to unlock monitored sources, weekly briefs, and custom source activation.'}
               </p>
             </div>
           </div>
@@ -63,7 +64,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
 
         <div className="mt-3 pt-3 border-t border-slate-700/50 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Current plan', value: plan_display },
+            { label: 'Current plan', value: displayName || 'Source Readiness Review' },
             { label: 'Live monitoring', value: 'Not included', muted: true },
             { label: 'Recommended', value: 'UAE Monitor' },
             { label: 'Next step', value: 'Choose your source pack' },
@@ -80,6 +81,9 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
 
   // Paid / Founding Pilot plan
   const caps = planState.capabilities || {}
+  const sourceLimit = caps.sourceLimit ?? caps.source_limit
+  const users = caps.users
+  const retentionDays = caps.retentionDays ?? caps.retention_days
   return (
     <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 mb-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -89,9 +93,9 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-sm font-semibold text-white">{plan_display} workspace</span>
+              <span className="text-sm font-semibold text-white">{displayName} workspace</span>
               <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 text-emerald-300">
-                {status === 'active' ? 'Active' : 'Pending activation'}
+                {status === 'active' ? 'Plan enabled' : 'Pending activation'}
               </span>
             </div>
             <p className="text-xs text-slate-400">
@@ -107,10 +111,10 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
       </div>
       <div className="mt-3 pt-3 border-t border-slate-700/50 grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Current plan', value: plan_display },
-          { label: 'Source limit', value: caps.sourceLimit > 100 ? 'Custom' : String(caps.sourceLimit || '—') },
-          { label: 'Users', value: caps.users > 100 ? 'Custom' : String(caps.users || 1) },
-          { label: 'Evidence retention', value: caps.retentionDays > 500 ? 'Custom' : caps.retentionDays ? `${caps.retentionDays} days` : '—' },
+          { label: 'Current plan', value: displayName },
+          { label: 'Source limit', value: sourceLimit > 100 ? 'Custom' : String(sourceLimit || '—') },
+          { label: 'Users', value: users > 100 ? 'Custom' : String(users || 1) },
+          { label: 'Evidence retention', value: retentionDays > 500 ? 'Custom' : retentionDays ? `${retentionDays} days` : '—' },
         ].map(({ label, value }) => (
           <div key={label}>
             <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500 mb-0.5">{label}</p>

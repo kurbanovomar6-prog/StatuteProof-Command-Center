@@ -138,7 +138,7 @@ Per-source billing creates procurement friction ("how many sources do I need?") 
 
 | Feature | Status |
 |---------|--------|
-| Official UAE sources | Up to 5 (from the 13 validated set) |
+| Official UAE sources | Up to 5 confirmed sources |
 | Source readiness review | Available |
 | Evidence records | Available |
 | Diff view | Available |
@@ -154,7 +154,7 @@ Per-source billing creates procurement friction ("how many sources do I need?") 
 | Support | Standard (email) |
 
 **CTA**: Start Monitor Pilot  
-**Upgrade reason**: "You're monitoring 5 sources. The full UAE source pack (13 sources including VARA enforcement, CBUAE regulations, UAE FIU circulars) requires Professional. Audit export, diff archives, and high-risk review queue are also locked."
+**Upgrade reason**: "You're monitoring 5 confirmed sources. The 13 enabled UAE source pack requires Professional and currently contains 10 confirmed sources plus 3 under extraction remediation. Audit export, diff archives, and high-risk review queue are also locked."
 
 **Why $349 not $299**:  
 $299 for compliance-grade software signals "not serious." $349 is still accessible for a small VASP spending $500–$2,000/month on compliance tasks. The extra $50/month does not create meaningful buyer resistance but adds credibility.
@@ -175,7 +175,7 @@ $299 for compliance-grade software signals "not serious." $349 is still accessib
 
 | Feature | Status |
 |---------|--------|
-| Official UAE sources | All 13 validated UAE sources |
+| Official UAE sources | 13 enabled UAE sources: 10 confirmed, 3 under extraction remediation |
 | Source readiness review | Available |
 | Evidence records | Available |
 | Full diff view | Available |
@@ -192,13 +192,13 @@ $299 for compliance-grade software signals "not serious." $349 is still accessib
 | Support | Priority email |
 
 **CTA**: Upgrade to Professional  
-**Upgrade reason over Monitor**: "Professional covers the full UAE regulatory source pack — CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, Ministry of Finance, DIFC Laws, and more. Includes the high-risk review queue for CHANGED events and 12-month evidence retention for audit purposes."
+**Upgrade reason over Monitor**: "Professional covers the 13 enabled UAE source pack, currently 10 confirmed and 3 under extraction remediation. Includes the high-risk review queue for CHANGED events and 12-month evidence retention for audit purposes."
 
 **Why $749 not $799**:  
 Audit binder export and automated PDF export are not built yet. Charging $799 for incomplete professional-grade features is dishonest. $749 is the honest "we're building toward $899" price. As audit export is delivered, this becomes $899.
 
 **Why this is the recommended plan for MLROs**:  
-- All 13 active UAE sources are covered
+- 13 enabled UAE sources are covered, with 10 confirmed and 3 under extraction remediation
 - 12-month evidence retention satisfies most UAE regulatory audit windows
 - High-risk review queue is the core MLRO workflow
 - $749/month is dramatically cheaper than any compliance consulting engagement for equivalent coverage
@@ -243,7 +243,7 @@ An MLRO at a DFSA-regulated firm receives regulatory updates from 13+ sources. M
 
 The Professional plan is not "more sources for more money." The upgrade from Monitor to Professional unlocks a qualitatively different compliance workflow:
 
-1. **Full UAE regulatory source pack**: All 13 validated sources including VARA enforcement actions, CBUAE regulations database, UAE FIU circulars, DFSA supervisory notices, and DIFC Laws — not just 5
+1. **UAE regulatory source pack**: 13 enabled sources, currently 10 confirmed and 3 under extraction remediation — not just 5
 2. **High-risk review queue**: CHANGED events with HIGH/MEDIUM risk scoring are surfaced for urgent human review — Monitor does not have this
 3. **12-month evidence retention**: Audit-grade retention for regulatory inspection windows — Monitor only keeps 90 days
 4. **2 users**: Small compliance team can both access the workspace and review evidence
@@ -316,14 +316,14 @@ STRIPE_WEBHOOK_SECRET=
 > *Monitoring intelligence only. Not legal advice.*
 
 **Monitor — $349/month**
-> Live monitoring of up to 5 validated UAE regulatory sources. Evidence records with SHA-256 hash and timestamp. Diff view for content changes. 90-day retention.
+> Live monitoring of up to 5 confirmed UAE regulatory sources. Evidence records with SHA-256 hash and timestamp. Diff view for content changes. 90-day retention.
 > 
 > Suitable for: 1-person compliance teams at UAE startups, early VASPs.
 > 
 > *Monitoring intelligence only. Not legal advice.*
 
 **Professional — $749/month** *(Recommended)*
-> Full UAE source pack: all 13 validated official sources — CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, Ministry of Finance, DIFC Laws, and more. High-risk review queue, weekly brief, 12-month retention.
+> UAE source pack: 13 enabled sources, with 10 confirmed and 3 under extraction remediation. High-risk review queue, weekly brief, 12-month retention.
 > 
 > Suitable for: MLRO, CCO, or Head of Compliance at a UAE-regulated firm.
 > 
@@ -335,7 +335,7 @@ STRIPE_WEBHOOK_SECRET=
 > *Pilot roadmap — features in development.*
 
 ### Legal footnote (required on every pricing page)
-> StatuteProof reports are generated from monitored official-source records and are provided for information and compliance review support only. StatuteProof reports do not constitute legal advice, regulatory advice, compliance certification, or a legal opinion. StatuteProof does not guarantee compliance, prevent fines, or certify that all regulatory updates have been captured. Users should verify official source material directly and consult qualified legal or compliance professionals before making regulatory or operational decisions.
+> StatuteProof reports are generated from monitored official-source records and are provided for information and compliance review support only. StatuteProof reports do not constitute legal advice, regulatory advice, compliance determination, or a legal opinion. StatuteProof does not determine compliance outcomes, prevent fines, or confirm that all regulatory updates have been captured. Users should verify official source material directly and consult qualified legal or compliance professionals before making regulatory or operational decisions.
 
 ---
 
@@ -343,7 +343,7 @@ STRIPE_WEBHOOK_SECRET=
 
 ### Evidence Preview banner
 **Title**: "7-day Evidence Preview active"  
-**Body**: "Explore the StatuteProof workspace with sample evidence and source-readiness tools. Monitor plan activates live monitoring of up to 5 UAE sources. Professional covers all 13 validated sources with the full MLRO workflow."
+**Body**: "Explore the StatuteProof workspace with sample evidence and source-readiness tools. Monitor plan activates live monitoring of up to 5 confirmed UAE sources. Professional covers the 13 enabled UAE source pack with 10 confirmed sources and 3 under extraction remediation."
 
 **Fields row**: Current plan: Evidence Preview | Trial ends in: X days | Recommended: Professional | Next step: Request source readiness review
 
@@ -379,7 +379,7 @@ STRIPE_WEBHOOK_SECRET=
 ### What to implement now
 
 1. **Update pricing UI** to reflect honest prices: $349 Monitor, $749 Professional
-2. **Fix source count**: The Professional plan currently claims "13–16 sources." Use "13 validated UAE sources" — that is the honest current count. Do not claim 16.
+2. **Fix source count**: The Professional plan currently claims "13–16 sources." Use "13 enabled UAE sources: 10 confirmed, 3 under extraction remediation." Do not claim 16.
 3. **Mark audit export as "Pilot roadmap"** in all plan displays and feature tables
 4. **Mark PDF export as "Requires activation"** (not "Available")
 5. **Remove Starter plan's claim of "weekly MLRO brief (Limited)"** — replace with "Weekly source status summary" which is what is actually delivered
@@ -404,4 +404,4 @@ STRIPE_WEBHOOK_SECRET=
 
 ---
 
-*Monitoring intelligence only. Not legal advice. Not a compliance certification.*
+*Monitoring intelligence only. Not legal advice. Not a compliance determination.*

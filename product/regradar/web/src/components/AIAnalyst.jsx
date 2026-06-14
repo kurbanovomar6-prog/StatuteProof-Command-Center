@@ -44,7 +44,7 @@ const REVIEW_STEPS = [
 const TRUST_POINTS = [
   { mark: '✓', text: 'Official source link included',                       c: 'text-emerald-400' },
   { mark: '✓', text: 'Paragraph-level change detected',                     c: 'text-emerald-400' },
-  { mark: '✓', text: 'Source health: PASS',                                 c: 'text-emerald-400' },
+  { mark: '✓', text: 'Source health: Evidence confirmed',                   c: 'text-emerald-400' },
   { mark: '✓', text: 'Risk signals: AML/CFT · reporting · licensing · deadline', c: 'text-emerald-400' },
   { mark: '~', text: 'AI confidence: Medium',                               c: 'text-amber-400'   },
   { mark: '~', text: 'Human review recommended for high-risk updates',      c: 'text-amber-400'   },

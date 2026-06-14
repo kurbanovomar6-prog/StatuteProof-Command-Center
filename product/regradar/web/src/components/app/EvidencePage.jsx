@@ -10,6 +10,7 @@ import { Shield, Clock, Hash, FileText, AlertTriangle } from 'lucide-react'
 
 const SAMPLE_EVIDENCE_RECORDS = [
   {
+    is_sample:          true,
     evidence_record_id: 'EVR-2026-AE-001',
     source:             'VARA Regulatory Framework',
     source_id:          'AE-dubai-virtual-assets-regulatory-authority-vara',
@@ -27,6 +28,7 @@ const SAMPLE_EVIDENCE_RECORDS = [
     affected:           'VASP / MLRO / Compliance teams',
   },
   {
+    is_sample:          true,
     evidence_record_id: 'EVR-2026-AE-002',
     source:             'CBUAE Regulations',
     source_id:          'AE-cbuae-regulations',
@@ -44,6 +46,7 @@ const SAMPLE_EVIDENCE_RECORDS = [
     affected:           'Banks / Payment firms',
   },
   {
+    is_sample:          true,
     evidence_record_id: 'EVR-2026-AE-003',
     source:             'DFSA Rules and Standards',
     source_id:          'AE-dubai-financial-services-authority-dfsa',
@@ -74,6 +77,7 @@ const RISK_STYLES = {
   HIGH:   'text-red-400 bg-red-500/10 border-red-500/30',
   MEDIUM: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
   LOW:    'text-slate-400 bg-slate-700/30 border-slate-600/30',
+  REVIEW: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/25',
 }
 
 function StatusBadge({ status }) {
@@ -104,11 +108,17 @@ function EvidenceCard({ record }) {
       {/* Header row */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded">
-              SAMPLE — NOT REAL REGULATORY DATA
-            </span>
-          </div>
+          {record.is_sample ? (
+            <div className="flex items-center gap-2 mb-1">
+              <span className="sp-demo-badge">
+                SAMPLE / DEMO — not a real regulatory update
+              </span>
+            </div>
+          ) : (
+            <div className="mb-1 inline-flex rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+              LIVE EVIDENCE RECORD
+            </div>
+          )}
           <h3 className="text-sm font-semibold text-white">{record.source}</h3>
           <p className="text-xs text-slate-500 mt-0.5">{record.regulator} · {record.evidence_record_id}</p>
         </div>
@@ -183,14 +193,37 @@ function EvidenceCard({ record }) {
 
 export default function EvidencePage() {
   const [records, setRecords] = useState(SAMPLE_EVIDENCE_RECORDS)
+  const [sampleMode, setSampleMode] = useState(true)
+  const [apiChecked, setApiChecked] = useState(false)
 
   useEffect(() => {
     fetch('/api/evidence?market=AE', { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (data?.records?.length) setRecords(data.records)
+        if (Array.isArray(data?.evidence)) {
+          setSampleMode(false)
+          setRecords(data.evidence.map((record, index) => ({
+            evidence_record_id: record.run_id || `EVR-LIVE-${index + 1}`,
+            source: record.source_name || record.source_id || 'Official source',
+            source_id: record.source_id,
+            regulator: record.category || 'AE source',
+            detected_at: record.timestamp_utc,
+            run_id: record.run_id,
+            status: record.change_status || 'UNCHANGED',
+            old_hash: null,
+            new_hash: record.content_hash ? `sha256:${String(record.content_hash).slice(0, 16)}` : null,
+            diff_available: record.change_status === 'CHANGED',
+            proof_block: { chain_verified: false },
+            review_status: record.change_status === 'CHANGED' || record.change_status === 'FIRST_SEEN' ? 'NEEDS_REVIEW' : 'NO_ACTION',
+            official_url: '',
+            risk: record.change_status === 'CHANGED' ? 'REVIEW' : 'LOW',
+            affected: record.error || `Extraction quality: ${record.extraction_quality || 'UNKNOWN'}`,
+            is_sample: false,
+          })))
+        }
       })
       .catch(() => {}) // silent fallback to SAMPLE data
+      .finally(() => setApiChecked(true))
   }, [])
 
   return (
@@ -203,9 +236,13 @@ export default function EvidencePage() {
             Detected source changes are cryptographically hashed, timestamped, and stored for human review.
           </p>
         </div>
-        <span className="flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1.5 rounded-full flex-shrink-0">
+        <span className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${
+          sampleMode
+            ? 'text-amber-400 bg-amber-400/10 border border-amber-400/20'
+            : 'text-emerald-300 bg-emerald-400/10 border border-emerald-400/20'
+        }`}>
           <AlertTriangle className="w-3.5 h-3.5" />
-          SAMPLE DATA
+          {sampleMode ? 'SAMPLE DATA' : 'LIVE API'}
         </span>
       </div>
 
@@ -239,31 +276,44 @@ export default function EvidencePage() {
       </div>
 
       {/* Sample notice */}
-      <div className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-4 py-3">
-        <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-        <p className="text-xs text-amber-300">
-          <strong>SAMPLE / FAKE — demonstration only.</strong> No live evidence API is currently connected.
-          Records below are sample data for interface review. Not real regulatory data.
-        </p>
-      </div>
+      {sampleMode ? (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-4 py-3">
+          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+          <p className="text-xs text-amber-300">
+            <strong>SAMPLE / DEMO — demonstration only.</strong> Records below are sample data for interface review.
+            Not real regulatory data.
+          </p>
+        </div>
+      ) : records.length === 0 ? (
+        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-10 text-center">
+          <p className="font-medium text-slate-300">No evidence-backed brief available yet</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Evidence records appear after monitored sources produce run records with hashes and timestamps.
+          </p>
+        </div>
+      ) : null}
 
       {/* Evidence cards */}
+      {records.length > 0 && (
       <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
         {records.map(record => (
           <EvidenceCard key={record.evidence_record_id} record={record} />
         ))}
       </div>
+      )}
 
       {/* Backend gap note */}
       <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
         <div className="flex items-start gap-3">
           <FileText className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
           <div className="text-xs text-slate-500 leading-relaxed">
-            <p className="font-medium text-slate-400 mb-1">Live evidence API not yet available</p>
+            <p className="font-medium text-slate-400 mb-1">
+              {sampleMode ? 'Sample mode enabled' : apiChecked ? 'Live evidence endpoint checked' : 'Checking evidence endpoint'}
+            </p>
             <p>
-              A <code className="text-slate-400 bg-slate-800 px-1 rounded">GET /api/evidence</code> endpoint
-              is not yet implemented in the backend. When implemented, this page will display real evidence records
-              from monitoring runs. Evidence records support compliance review and do not determine legal obligations.
+              This page reads from <code className="text-slate-400 bg-slate-800 px-1 rounded">GET /api/evidence</code> when available.
+              Sample records are displayed only when the endpoint is unavailable. Evidence records support compliance
+              review and do not determine legal obligations.
             </p>
           </div>
         </div>

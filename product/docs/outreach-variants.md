@@ -14,7 +14,7 @@ VARA's regulatory framework page has been updating more frequently over the past
 
 I built StatuteProof for Dubai VASP compliance teams who manually check regulators each week and need a documented record showing they checked, not just their own memory of it.
 
-We monitor VARA's framework pages, DFSA, CBUAE, ADGM FSRA, and five other UAE official sources. You get a human-reviewed weekly digest, not a raw automated alert.
+StatuteProof currently frames the UAE pack as 13 enabled sources: 10 confirmed and 3 under extraction remediation. You get a human-reviewed weekly digest for confirmed sources, not a raw automated alert.
 
 If a free pilot week would be useful, I can set one up for you — no card required.
 
@@ -30,11 +30,11 @@ _Word count: 120. Do not send before Legal Language review._
 
 Hi [Name],
 
-DFSA rules and standards pages are among the most actively maintained regulatory sources in the region — we track them through StatuteProof and store a timestamped SHA-256 snapshot record each run.
+DFSA rulebook and notices pages are important regulatory sources, but they are currently under extraction remediation in StatuteProof. We disclose that status before any pilot scope is agreed.
 
 I built StatuteProof for DIFC-regulated compliance teams who check the DFSA rulebook manually each week and need a written paper trail showing they did, not a spreadsheet note from memory.
 
-We monitor DFSA, VARA, CBUAE, ADGM FSRA, and five other UAE official sources. Each digest is human-reviewed before it reaches you.
+StatuteProof currently frames the UAE pack as 13 enabled sources: 10 confirmed and 3 under extraction remediation. Each digest for confirmed sources is human-reviewed before it reaches you.
 
 If you would find a free pilot week useful, I can set one up. No card required.
 
@@ -54,7 +54,7 @@ ADGM FSRA's regulations page is one of the harder sources to track manually — 
 
 I built StatuteProof for ADGM-regulated compliance teams who need documented evidence they checked, not just a calendar reminder they did.
 
-We cover ADGM FSRA, DFSA, VARA, CBUAE, and five other UAE official sources. Digests are human-reviewed before delivery.
+StatuteProof currently frames the UAE pack as 13 enabled sources: 10 confirmed and 3 under extraction remediation. Digests for confirmed sources are human-reviewed before delivery.
 
 Free pilot week available — no card required.
 
@@ -68,27 +68,20 @@ _Word count: 124. Do not send before Legal Language review._
 
 ## Source Readiness Review Email
 
-**Subject:** StatuteProof — the 9 sources we monitor today (pilot available)
+**Subject:** StatuteProof — UAE source readiness review (pilot available)
 
 Hi [Name],
 
-Good question. Here is exactly what StatuteProof monitors today.
+Good question. Here is exactly how StatuteProof frames the UAE source pack today.
 
-**9 READY sources — available in the pilot:**
+**13 enabled UAE sources — readiness status:**
 
-| Regulator | Jurisdiction | Source page |
-|---|---|---|
-| CBUAE | UAE Federal | CBUAE homepage |
-| VARA | Dubai | VARA regulatory framework |
-| DFSA | DIFC | DFSA rules and standards |
-| ADGM FSRA | Abu Dhabi | ADGM FSRA regulations |
-| DIFC | Dubai | DIFC laws homepage |
-| UAE Ministry of Finance | UAE Federal | Ministry of Finance official site |
-| UAE Ministry of Economy | UAE Federal | Ministry of Economy official site |
-| UAE Legislation Portal | UAE Federal | UAE Legislation Portal homepage |
-| UAE FIU | UAE Federal | UAEFIU homepage |
+| Status | Source count | Notes |
+|---|---:|---|
+| Confirmed | 10 | Includes CBUAE, VARA, ADGM FSRA Main, DIFC Laws, UAE FIU Circulars, UAE Ministry of Finance, UAE Ministry of Economy, and UAE Legislation Portal layers |
+| Under extraction remediation | 3 | DFSA Rulebook, DFSA Regulatory Notices, and UAE FIU Homepage |
 
-**3 additional sources are in testing and are not yet available for monitoring.** These cover ADGM FSRA rules, DIFC legislation, and SCA decisions. I will let you know when they are ready.
+Remediation sources are not treated as confirmed until extraction quality is fixed and rerun.
 
 Each source is monitored on a defined schedule. When a change is detected, a human-reviewed digest goes to you — with the SHA-256 snapshot hash and UTC timestamp for each run, so you have a documented record you can point to.
 

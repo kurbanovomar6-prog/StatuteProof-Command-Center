@@ -153,7 +153,7 @@
     <header class="hero">
       <div class="brand">StatuteProof</div>
       <h1>Source Readiness Review</h1>
-      <p class="muted">Broad source map. Strict activation standard. Mapped does not mean active.</p>
+      <p class="muted">Broad source map. Strict activation standard. Mapped does not mean confirmed for monitoring.</p>
       <div class="meta">
         <div class="meta-item"><div class="label">Company</div><div class="value">{{ company_name }}</div></div>
         <div class="meta-item"><div class="label">Contact</div><div class="value">{{ contact_name }}</div></div>
@@ -174,7 +174,7 @@
     <section class="section">
       <h2>Executive Summary</h2>
       <div class="grid">
-        <div class="stat"><div class="stat-number">{{ active_count }}</div><div class="stat-label">Active in monitoring</div></div>
+        <div class="stat"><div class="stat-number">{{ active_count }}</div><div class="stat-label">Confirmed for monitoring</div></div>
         <div class="stat"><div class="stat-number">{{ validation_count }}</div><div class="stat-label">Under validation / needs adapter</div></div>
         <div class="stat"><div class="stat-number">{{ limited_count }}</div><div class="stat-label">Access-limited / deferred</div></div>
         <div class="stat"><div class="stat-number">{{ total_count }}</div><div class="stat-label">Relevant source layers reviewed</div></div>
@@ -204,7 +204,7 @@
     </section>
 
     <section class="section">
-      <h2>Active Sources — Detail</h2>
+      <h2>Confirmed Sources — Detail</h2>
       <div class="detail-list">{{ active_details }}</div>
     </section>
 
@@ -216,7 +216,7 @@
 
     <section class="section">
       <h2>Access-Limited / Deferred Sources</h2>
-      <p class="muted">These source layers are not active for this pilot scope unless access and extraction limitations are resolved and documented.</p>
+      <p class="muted">These source layers are not confirmed for this pilot scope unless access and extraction limitations are resolved and documented.</p>
       <div class="detail-list">{{ limited_details }}</div>
     </section>
 
@@ -251,7 +251,7 @@
 
     <section class="section">
       <h2>Next Steps</h2>
-      <p>To proceed, StatuteProof confirms the pilot source scope in writing, enables only validated sources, and documents limitations before monitoring begins.</p>
+      <p>To proceed, StatuteProof confirms the pilot source scope in writing, enables only confirmed sources, and documents limitations before monitoring begins.</p>
     </section>
 
     <footer>

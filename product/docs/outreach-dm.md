@@ -11,7 +11,7 @@ The CBUAE homepage updated last week — we detected the change through StatuteP
 
 I am building StatuteProof for UAE VASP compliance officers who need a documented paper trail showing they checked regulatory sources, without spending hours on manual review each week.
 
-We monitor CBUAE, VARA, DFSA, ADGM FSRA, and five other official UAE sources. When something changes, you get a human-reviewed digest — not an automated alert with no context.
+StatuteProof currently frames the UAE pack as 13 enabled sources: 10 confirmed and 3 under extraction remediation. When a confirmed source changes, you get a human-reviewed digest — not an automated alert with no context.
 
 If you would find a free pilot week useful, I can set one up for your team this week.
 

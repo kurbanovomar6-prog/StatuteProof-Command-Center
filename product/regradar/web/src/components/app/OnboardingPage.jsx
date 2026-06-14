@@ -308,7 +308,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                 <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 <p className="text-emerald-400/90 text-sm">
                   Your profile helps determine which UAE source layers are relevant.
-                  Only validated sources enter monitoring, and limitations are disclosed before pilot delivery.
+                  Only confirmed sources enter monitoring, and limitations are disclosed before pilot delivery.
                   You can update your settings any time from the dashboard.
                 </p>
               </div>

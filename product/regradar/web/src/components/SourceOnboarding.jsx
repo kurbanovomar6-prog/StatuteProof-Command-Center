@@ -9,8 +9,8 @@ const STATUSES = [
     iconColor: 'text-emerald-500',
     bgColor: 'bg-emerald-50',
     borderColor: 'border-emerald-200',
-    label: 'Ready for monitoring',
-    desc: 'The source can be connected to scheduled automated checks.',
+    label: 'Confirmed for monitoring',
+    desc: 'The source can be connected to scheduled checks after readiness review.',
   },
   {
     key: 'limited',
@@ -58,7 +58,7 @@ const FLOW_STEPS = [
     Icon: ClipboardCheck,
     n: '03',
     title: 'You receive a clear assessment',
-    desc: 'Ready for monitoring · Limited monitoring · Adapter required · Source unavailable',
+    desc: 'Confirmed for monitoring · Limited monitoring · Adapter required · Source unavailable',
   },
 ]
 

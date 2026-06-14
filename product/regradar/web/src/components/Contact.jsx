@@ -24,7 +24,7 @@ export default function Contact({ onCreateWorkspace, onSignIn }) {
                   'Save your company and licence profile',
                   'Select UAE source layers that matter to your team',
                   'Connect Telegram for sample brief and reviewed alert previews',
-                  'See which sources are active, under validation, or limited',
+                  'See which sources are confirmed, under validation, or limited',
                 ].map(item => (
                   <div key={item} className="flex gap-2 text-sm leading-relaxed text-slate-300">
                     <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />

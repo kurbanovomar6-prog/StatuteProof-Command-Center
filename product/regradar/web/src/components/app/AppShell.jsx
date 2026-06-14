@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react'
+import { appPageToPath } from '../../routeMap'
 import AppSidebar from './AppSidebar'
 import AppTopbar from './AppTopbar'
 
@@ -29,20 +30,26 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
   function navigate(target) {
     setPage(target)
     setMobileOpen(false)
+    if (typeof window !== 'undefined') {
+      const path = appPageToPath(target)
+      if (window.location.pathname !== path) {
+        window.history.pushState({}, '', path)
+      }
+    }
   }
 
   function renderPage() {
     switch (page) {
       case 'dashboard':    return <DashboardHome navigate={navigate} currentUser={currentUser} planState={planState} onChoosePlan={onChoosePlan} />
-      case 'sources':      return <SourcesPage />
-      case 'source-lab':   return <SourceLabPage />
+      case 'sources':      return <SourcesPage onAddCustomSource={() => navigate('source-lab')} />
+      case 'source-lab':   return <SourceLabPage planState={planState} onChoosePlan={onChoosePlan} />
       case 'evidence':     return <EvidencePage />
       case 'alerts':       return <AlertsPage />
       case 'briefs':       return <AIBriefPage />
       case 'reports':      return <ReportsPage />
       case 'integrations': return <IntegrationsPage />
       case 'billing':      return <BillingPage planState={planState} />
-      case 'settings':     return <SettingsPage onResetWorkspace={onSignOut} />
+      case 'settings':     return <SettingsPage onResetWorkspace={onSignOut} planState={planState} />
       default:             return <DashboardHome navigate={navigate} currentUser={currentUser} planState={planState} onChoosePlan={onChoosePlan} />
     }
   }
@@ -70,6 +77,7 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
           collapsed={collapsed}
           onToggle={() => setCollapsed(c => !c)}
           currentUser={currentUser}
+          planState={planState}
           onSignOut={onSignOut}
         />
       </div>

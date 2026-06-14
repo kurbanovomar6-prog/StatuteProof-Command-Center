@@ -1,14 +1,14 @@
 const footerLinks = [
   { label: 'How It Works', href: '#how-it-works' },
   { label: 'Source Coverage', href: '#coverage' },
-  { label: 'Evidence', href: '#trust' },
+  { label: 'Evidence', href: '#evidence' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Contact', href: '#contact' },
 ]
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0A1628] border-t border-slate-800 text-slate-400">
+    <footer className="bg-[#081425] border-t border-slate-800 text-slate-400">
 
       {/* Top section */}
       <div className="max-w-6xl mx-auto px-6 py-12">
@@ -49,9 +49,9 @@ export default function Footer() {
           <p className="text-xs text-slate-600 leading-relaxed max-w-4xl">
             StatuteProof reports are generated from monitored official-source records and are provided
             for information and compliance review support only. StatuteProof reports do not constitute
-            legal advice, regulatory advice, compliance certification, or a legal opinion. StatuteProof
+            legal advice, regulatory advice, compliance determination, or a legal opinion. StatuteProof
             does not replace qualified legal counsel, compliance professionals, MLROs, or other
-            professional advisers. StatuteProof does not guarantee compliance, prevent fines, or certify
+            professional advisers. StatuteProof does not determine compliance outcomes, prevent fines, or determine
             that all regulatory updates have been captured. Source monitoring may be affected by
             publication delays, website changes, PDF formatting, access limits, or source structure
             changes. Users should verify official source material directly and review evidence records,
@@ -67,9 +67,9 @@ export default function Footer() {
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700">
           <p>&copy; {new Date().getFullYear()} StatuteProof. All rights reserved.</p>
           <div className="flex items-center gap-5">
-            <a href="#" className="hover:text-slate-400 transition-colors">Terms</a>
-            <a href="#" className="hover:text-slate-400 transition-colors">Privacy</a>
-            <a href="#" className="hover:text-slate-400 transition-colors">Disclaimer</a>
+            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms</a>
+            <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
+            <a href="/disclaimer" className="hover:text-slate-400 transition-colors">Disclaimer</a>
           </div>
           <p className="text-slate-700">Monitoring intelligence only — not legal advice and not a guarantee of compliance.</p>
         </div>

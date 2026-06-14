@@ -14,10 +14,6 @@ function AuthLayout({ children, quote }) {
             backgroundSize: '40px 40px',
           }}
         />
-        <div
-          className="absolute -top-40 -left-40 w-80 h-80 rounded-full opacity-[0.04]"
-          style={{ background: 'radial-gradient(circle, #16D9F5, transparent 70%)' }}
-        />
         <div className="relative z-10">
           <div className="flex items-center gap-2.5">
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-9 w-auto" />
@@ -29,13 +25,19 @@ function AuthLayout({ children, quote }) {
         <div className="relative z-10 max-w-sm">
           <div className="w-10 h-[3px] bg-[#16D9F5] rounded-full mb-6" />
           <h2 className="text-2xl font-bold text-white mb-6 leading-tight">{quote}</h2>
-          <div className="flex items-center gap-2.5 text-slate-500 text-sm">
-            <div className="flex gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#16D9F5]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#16D9F5]/50" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#16D9F5]/20" />
+          <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/35 p-4 text-xs text-slate-400">
+            <div className="flex justify-between gap-3">
+              <span>Readiness</span>
+              <span className="text-slate-200">10 confirmed / 3 under extraction remediation</span>
             </div>
-            UAE-first regulatory monitoring intelligence
+            <div className="flex justify-between gap-3">
+              <span>Activation</span>
+              <span className="text-slate-200">manual after review</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span>Boundary</span>
+              <span className="text-slate-200">not legal advice</span>
+            </div>
           </div>
         </div>
         <div />
@@ -117,6 +119,9 @@ export default function RegisterPage({ onRegister, onLogin }) {
         password:     form.password,
         company_name: form.company,
         industry:     form.companyType,
+        job_title:    form.jobTitle,
+        company_type: form.companyType,
+        jurisdiction: form.jurisdiction,
       })
       onRegister(data.user)
     } catch (err) {
@@ -259,7 +264,7 @@ export default function RegisterPage({ onRegister, onLogin }) {
               id: 'disclaimer',
               checked: disclaimerAcknowledged,
               onChange: e => setDisclaimerAcknowledged(e.target.checked),
-              text: 'I understand StatuteProof provides monitoring intelligence and evidence-backed summaries only. It does not provide legal advice or guarantee compliance.',
+              text: 'I understand StatuteProof provides monitoring intelligence and evidence-backed summaries only. It does not provide legal advice or determine compliance outcomes.',
             },
           ].map(({ id, checked, onChange, text }) => (
             <label key={id} className="flex items-start gap-3 cursor-pointer group">
