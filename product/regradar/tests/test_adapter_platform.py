@@ -182,3 +182,121 @@ def test_source_intake_explicit_adapter_exposes_metadata_and_stays_preview_only(
     assert result["evidence_written"] is False
     assert result["evidence_level"] == EvidenceLevel.PREVIEW_ONLY
     assert result["can_activate_monitoring"] is False
+
+
+def test_sca_listing_adapter_extracts_item_title_link_and_date():
+    html = """
+    <html><body>
+      <header>Capital Market Authority Services Login Search</header>
+      <main>
+        <section class="icms-list">
+          <article class="decision">
+            <a href="/en/regulations/decision-11-2026">The Chairman Decision No. (11/Chairman) of 2026 Concerning AML Controls</a>
+            <time>14 June 2026</time>
+          </article>
+          <article class="decision">
+            <a href="/en/regulations/decision-13-2026">The Chairman Decision No. (13/Chairman) of 2026 Concerning Market Conduct</a>
+            <time>11 June 2026</time>
+          </article>
+        </section>
+      </main>
+      <footer>Privacy Accessibility Search Services</footer>
+    </body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.sca.gov.ae/en/regulations/regulations",
+        adapter_family="sca_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "sca_listing"
+    assert result.item_count == 2
+    assert "Decision No. (11/Chairman) of 2026" in result.text
+    assert "14 June 2026" in result.text
+    assert "Privacy Accessibility" not in result.text
+
+
+def test_dfsa_rulebook_adapter_extracts_module_titles_and_links():
+    html = """
+    <html><body><article>
+      <h1>Rulebook Modules</h1>
+      <a href="/rulebook/aml">Anti-Money Laundering, Counter-Terrorist Financing and Sanctions Module (AML)</a>
+      <a href="/rulebook/gen">General Module (GEN)</a>
+      <a href="/rulebook/cob">Conduct of Business Module (COB)</a>
+    </article></body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://dfsaen.thomsonreuters.com/rulebook/rulebook-modules",
+        adapter_family="dfsa_rulebook",
+        adapter_config={"container_selector": "article"},
+    )
+
+    assert result.adapter_name == "dfsa_rulebook"
+    assert result.item_count == 3
+    assert "Anti-Money Laundering" in result.text
+    assert "https://dfsaen.thomsonreuters.com/rulebook/aml" in result.text
+
+
+def test_cbuae_document_listing_adapter_extracts_document_links():
+    html = """
+    <html><body><main>
+      <div class="card"><a href="/media/regulations/aml-guidance.pdf">AML/CFT Guidance for Licensed Financial Institutions</a><span>2026</span></div>
+      <div class="card"><a href="/media/regulations/payment-services.pdf">Retail Payment Services Regulation</a><span>2025</span></div>
+      <nav><a href="/search">Search</a></nav>
+    </main></body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.centralbank.ae/en/regulations/",
+        adapter_family="cbuae_document_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "cbuae_document_listing"
+    assert result.item_count == 2
+    assert "AML/CFT Guidance" in result.text
+    assert "payment-services.pdf" in result.text
+
+
+def test_fiu_eocn_document_listing_adapter_extracts_publication_links():
+    html = """
+    <html><body><main>
+      <a href="/en/publications/typologies-report.pdf">UAE FIU Typologies Report 2026</a>
+      <a href="/en/publications/goaml-guide.pdf">goAML Registration Guidance</a>
+      <a href="/contact">Contact us</a>
+    </main></body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.uaefiu.gov.ae/en/Publications/",
+        adapter_family="fiu_eocn_document_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "fiu_eocn_document_listing"
+    assert result.item_count == 2
+    assert "Typologies Report" in result.text
+    assert "goAML Registration Guidance" in result.text
+
+
+def test_vara_pdf_listing_adapter_extracts_rulebook_pdf_links():
+    html = """
+    <html><body><main>
+      <a href="/media/rulebooks/company-rulebook.pdf">Company Rulebook</a>
+      <a href="/media/rulebooks/aml-cft-rulebook.pdf">AML/CFT Rulebook</a>
+      <a href="/en/contact">Contact VARA</a>
+    </main></body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.vara.ae/en/regulatory-framework/rulebooks/",
+        adapter_family="vara_pdf_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "vara_pdf_listing"
+    assert result.item_count == 2
+    assert "Company Rulebook" in result.text
+    assert "aml-cft-rulebook.pdf" in result.text

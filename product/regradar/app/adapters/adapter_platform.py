@@ -18,7 +18,31 @@ from bs4 import BeautifulSoup
 
 ADAPTER_VERSION = "adapter-platform-1.0"
 _SPACE_RE = re.compile(r"\s+")
+_DATE_RE = re.compile(
+    r"\b("
+    r"\d{1,2}\s+(?:Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|"
+    r"Jul|July|Aug|August|Sep|Sept|September|Oct|October|Nov|November|"
+    r"Dec|December)\s+\d{4}|"
+    r"\d{4}|"
+    r"\d{4}-\d{2}-\d{2}|"
+    r"\d{1,2}/\d{1,2}/\d{4}"
+    r")\b",
+    re.IGNORECASE,
+)
+_DOCUMENT_EXT_RE = re.compile(r"\.(pdf|docx?|xlsx?)($|[?#])", re.IGNORECASE)
 _DEFAULT_EXCLUDE_SELECTORS = ["script", "style", "noscript"]
+_GENERIC_NAV_TITLES = {
+    "home",
+    "search",
+    "contact",
+    "contact us",
+    "privacy",
+    "privacy policy",
+    "accessibility",
+    "login",
+    "services",
+    "news",
+}
 
 
 @dataclass
@@ -66,6 +90,16 @@ def _clean(value: str | None, *, limit: int | None = None) -> str:
 def _row_hash(*parts: str | None) -> str:
     payload = "|".join(_clean(part) for part in parts)
     return hashlib.sha256(payload.encode("utf-8", errors="replace")).hexdigest()[:16]
+
+
+def _extract_date(text: str | None) -> str:
+    match = _DATE_RE.search(text or "")
+    return match.group(1) if match else ""
+
+
+def _is_noise_title(title: str | None) -> bool:
+    cleaned = _clean(title).lower()
+    return not cleaned or cleaned in _GENERIC_NAV_TITLES or len(cleaned) < 4
 
 
 def _soup(html: str, exclude_selectors: list[str] | None = None) -> BeautifulSoup:
@@ -267,10 +301,206 @@ class TableAdapter(BaseHtmlAdapter):
         )
 
 
+class ScaListingAdapter(ListingAdapter):
+    family = "sca_listing"
+    name = "sca_listing"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        cfg = {
+            "container_selector": "main",
+            "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+            "title_selector": "a, h2, h3, h4, [data-icms-title]",
+            "date_selector": "time, .date, [data-date]",
+            "url_selector": "a[href]",
+            "exclude_selectors": ["header", "nav", "footer", "form", ".search", "script", "style", "noscript"],
+            "sort_items": True,
+            "max_items": 120,
+        }
+        cfg.update(config or {})
+        result = super().extract(html, url=url, config=cfg)
+        result.adapter_family = self.family
+        result.adapter_name = self.name
+        result.extraction_strategy = f"adapter:{self.name}"
+        if result.items:
+            by_title: dict[str, dict] = {}
+            for item in result.items:
+                title = item.get("title") or ""
+                item_url = item.get("url") or ""
+                context = item.get("raw_text_snippet") or ""
+                text = f"{title} {context}".lower()
+                if _is_noise_title(title):
+                    continue
+                if not any(token in text for token in ("decision", "regulation", "circular", "law", "aml", "market", "chairman")):
+                    continue
+                if not item.get("date"):
+                    item["date"] = _extract_date(context)
+                key = title.lower()
+                current = by_title.get(key)
+                if current:
+                    current_score = int(bool(current.get("url"))) + int(bool(current.get("date")))
+                    item_score = int(bool(item_url)) + int(bool(item.get("date")))
+                    if item_score <= current_score:
+                        continue
+                by_title[key] = item
+            filtered = list(by_title.values())
+            result.items = filtered
+            result.text = _format_items("SCA listing items", filtered)
+            result.noise_risk = "medium" if len(filtered) < 5 else "low"
+            result.source_health_risk = "medium"
+            if not filtered:
+                result.failure_reason = "No SCA regulatory listing items were isolated."
+                result.remediation_hint = "Review rendered item selectors or official list data source."
+        return result
+
+
+class RulebookModuleAdapter(BaseHtmlAdapter):
+    family = "dfsa_rulebook"
+    name = "dfsa_rulebook"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        config = config or {}
+        soup = _soup(html, config.get("exclude_selectors"))
+        container = soup.select_one(str(config.get("container_selector") or "main, article").strip()) or soup
+        items: list[dict] = []
+        seen: set[str] = set()
+        for anchor in container.select("a[href]"):
+            title = _node_text(anchor, separator=" ", limit=260)
+            href = (anchor.get("href") or "").strip()
+            title_l = title.lower()
+            if _is_noise_title(title) or not href:
+                continue
+            if not any(token in title_l for token in ("module", "rulebook", "aml", "gen", "cob", "prudential", "markets")):
+                continue
+            item_url = urljoin(url, href)
+            key = f"{title_l}|{item_url.lower()}"
+            if key in seen:
+                continue
+            seen.add(key)
+            item = {"title": title, "url": item_url, "category": "rulebook_module"}
+            item["row_hash"] = _row_hash(title, item_url, item["category"])
+            items.append(item)
+        if not items:
+            return self._empty("No rulebook modules were isolated.", "Review module selectors or source URL.")
+        return AdapterResult(
+            text=_format_items("Rulebook modules", items),
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            items=items,
+            noise_risk="medium",
+            source_health_risk="medium",
+            metadata={"container_selector": config.get("container_selector") or "main, article", "url": url},
+        )
+
+
+class DocumentListingAdapter(BaseHtmlAdapter):
+    family = "document_listing"
+    name = "document_listing"
+    allowed_tokens: tuple[str, ...] = ("regulation", "guidance", "publication", "report", "rulebook", "aml", "cft")
+    heading = "Document listing items"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        config = config or {}
+        soup = _soup(html, config.get("exclude_selectors") or ["nav", "footer", "form", ".search"])
+        container_selector = str(config.get("container_selector") or "main").strip()
+        container = soup.select_one(container_selector) if container_selector else soup
+        if not container:
+            container = soup.select_one("main") or soup.body or soup
+        items: list[dict] = []
+        seen: set[str] = set()
+        for anchor in container.select("a[href]"):
+            title = _node_text(anchor, separator=" ", limit=260)
+            href = (anchor.get("href") or "").strip()
+            if _is_noise_title(title) or not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
+                continue
+            item_url = urljoin(url, href)
+            context_node = anchor.parent or anchor
+            context = _node_text(context_node, separator=" ", limit=700)
+            combined = f"{title} {href} {context}".lower()
+            title_href = f"{title} {href}".lower()
+            is_document = bool(_DOCUMENT_EXT_RE.search(href))
+            has_signal = any(token in title_href for token in self.allowed_tokens)
+            if not is_document and not has_signal:
+                continue
+            key = f"{title.lower()}|{item_url.lower()}"
+            if key in seen:
+                continue
+            seen.add(key)
+            item = {
+                "title": title,
+                "date": _extract_date(context),
+                "url": item_url,
+                "document_url": item_url if is_document else "",
+                "category": "document" if is_document else "listing_item",
+                "raw_text_snippet": context,
+            }
+            item["row_hash"] = _row_hash(title, item.get("date"), item_url)
+            items.append(item)
+        if bool(config.get("sort_items", True)):
+            items.sort(key=lambda row: ((row.get("date") or ""), (row.get("title") or ""), (row.get("url") or "")))
+        if not items:
+            return self._empty("No document/listing items were isolated.", "Review document link selectors or official source page.")
+        return AdapterResult(
+            text=_format_items(self.heading, items),
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            items=items,
+            noise_risk="medium" if len(items) < 5 else "low",
+            source_health_risk="medium",
+            metadata={"container_selector": container_selector, "url": url},
+        )
+
+
+class CbuaeDocumentListingAdapter(DocumentListingAdapter):
+    family = "cbuae_document_listing"
+    name = "cbuae_document_listing"
+    heading = "CBUAE document listing items"
+    allowed_tokens = ("regulation", "guidance", "payment", "aml", "cft", "licensed", "financial", "consultation", "publication")
+
+
+class FiuEocnDocumentListingAdapter(DocumentListingAdapter):
+    family = "fiu_eocn_document_listing"
+    name = "fiu_eocn_document_listing"
+    heading = "FIU/EOCN document listing items"
+    allowed_tokens = ("fiu", "goaml", "aml", "cft", "sanction", "tfs", "typolog", "publication", "guidance", "report")
+
+
+class VaraPdfListingAdapter(DocumentListingAdapter):
+    family = "vara_pdf_listing"
+    name = "vara_pdf_listing"
+    heading = "VARA PDF/rulebook listing items"
+    allowed_tokens = ("rulebook", "aml", "cft", "company", "enforcement", "order", "regulatory", "framework", "virtual asset")
+
+
+def _format_items(heading: str, items: list[dict]) -> str:
+    if not items:
+        return ""
+    lines = [heading]
+    for item in items:
+        lines.append(f"- Title: {item.get('title') or ''}")
+        if item.get("date"):
+            lines.append(f"  Date: {item['date']}")
+        if item.get("category"):
+            lines.append(f"  Category: {item['category']}")
+        if item.get("url"):
+            lines.append(f"  URL: {item['url']}")
+        if item.get("document_url"):
+            lines.append(f"  Document URL: {item['document_url']}")
+        if item.get("row_hash"):
+            lines.append(f"  Row hash: {item['row_hash']}")
+    return "\n".join(lines).strip()
+
+
 _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "custom_element": CustomElementAdapter(),
     "listing": ListingAdapter(),
     "table": TableAdapter(),
+    "sca_listing": ScaListingAdapter(),
+    "dfsa_rulebook": RulebookModuleAdapter(),
+    "cbuae_document_listing": CbuaeDocumentListingAdapter(),
+    "fiu_eocn_document_listing": FiuEocnDocumentListingAdapter(),
+    "vara_pdf_listing": VaraPdfListingAdapter(),
 }
 
 

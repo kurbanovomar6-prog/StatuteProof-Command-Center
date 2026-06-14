@@ -172,7 +172,16 @@ def main() -> int:
         if adapter_status not in ALLOWED_ADAPTER_STATUSES:
             fail(errors, f"{source_id} has invalid adapter_status: {adapter_status!r}")
         if adapter_family:
-            if adapter_name not in {"custom_element", "listing", "table"}:
+            if adapter_name not in {
+                "custom_element",
+                "listing",
+                "table",
+                "sca_listing",
+                "dfsa_rulebook",
+                "cbuae_document_listing",
+                "fiu_eocn_document_listing",
+                "vara_pdf_listing",
+            }:
                 fail(errors, f"{source_id} has unsupported adapter_name: {adapter_name!r}")
             if not source.get("adapter_version"):
                 fail(errors, f"{source_id} configured adapter requires adapter_version.")

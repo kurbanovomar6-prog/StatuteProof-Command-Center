@@ -76,7 +76,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -104,6 +104,7 @@
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -112,6 +113,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -154,7 +167,7 @@
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_live_adapter_test",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -182,6 +195,7 @@
         "status": "baseline_pending"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "No-save readiness-supported candidate.",
         "forbidden_wording": "evidence-confirmed, monitoring-ready",
@@ -190,6 +204,18 @@
         "status": "pass"
       },
       "next_action": "build_consultation_item_diff_filter_then_save_baseline",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -232,7 +258,7 @@
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_live_adapter_test",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -260,6 +286,7 @@
         "status": "baseline_pending"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "No-save readiness-supported candidate.",
         "forbidden_wording": "evidence-confirmed, monitoring-ready",
@@ -268,6 +295,18 @@
         "status": "pass"
       },
       "next_action": "save_baseline_only_if_source_label_is_broadened_or_split",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "medium",
       "priority": "P1",
       "product_manager_gate": {
@@ -384,11 +423,11 @@
           "noscript"
         ]
       },
-      "adapter_failure_reason": "",
+      "adapter_failure_reason": "Fetch failed: wait_for_selector 'adgm-page > span' not found at https://www.adgm.com/fsra/guidance-and-policy-statements",
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_live_adapter_test",
+      "adapter_status": "live_test_failed",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -416,6 +455,7 @@
         "status": "baseline_pending"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "No-save readiness-supported candidate.",
         "forbidden_wording": "evidence-confirmed, monitoring-ready",
@@ -424,6 +464,18 @@
         "status": "pass"
       },
       "next_action": "add_item_level_noise_filters_then_save_baseline",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Fetch failed: wait_for_selector 'adgm-page > span' not found at https://www.adgm.com/fsra/guidance-and-policy-statements",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "",
+      "no_save_normalized_length": 0,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 5,
+      "no_save_readiness_status": "NEEDS_SELECTOR_REVIEW",
+      "no_save_remediation_hint": "Review the configured wait_for_selector/content_selector before activation.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -466,7 +518,7 @@
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_live_adapter_test",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -494,6 +546,7 @@
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -502,6 +555,18 @@
         "status": "pass"
       },
       "next_action": "do_not_activate_homepage_use_specific_sources",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -547,11 +612,11 @@
         "title_selector": "a, h2, h3, h4",
         "url_selector": "a[href]"
       },
-      "adapter_failure_reason": "",
+      "adapter_failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
       "adapter_family": "listing",
       "adapter_name": "listing",
       "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
-      "adapter_status": "configured_pending_selector_review",
+      "adapter_status": "live_test_failed",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -579,6 +644,7 @@
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -587,6 +653,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "ff5039aa00bc55ee9e14348e758c61a7cdc600a7ae70e6c5abac2c7dcd576955",
+      "no_save_normalized_length": 2641,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "NAV_SHELL_ONLY",
+      "no_save_remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -629,7 +707,7 @@
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_live_adapter_test",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -657,6 +735,7 @@
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -665,6 +744,18 @@
         "status": "pass"
       },
       "next_action": "build_register_adapter_before_activation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "medium",
       "priority": "P1",
       "product_manager_gate": {
@@ -703,7 +794,7 @@
           "noscript"
         ]
       },
-      "adapter_failure_reason": "",
+      "adapter_failure_reason": "Fetch failed: wait_for_selector 'adgm-page > span' not found at https://www.adgm.com/fsra/rules-and-regulations",
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Custom-element adapter no-save passed; existing proof/baseline gate still controls activation decisions.",
@@ -735,6 +826,7 @@
         "status": "activation_ready"
       },
       "last_adapter_test_at": "2026-06-14T19:33:34Z",
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Activation-ready candidate after local proof and baseline checks.",
         "forbidden_wording": "validated, certified, guaranteed, legal advice",
@@ -743,6 +835,18 @@
         "status": "pass"
       },
       "next_action": "source_monitor_founder_review_then_sources_json_candidate_activation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Fetch failed: wait_for_selector 'adgm-page > span' not found at https://www.adgm.com/fsra/rules-and-regulations",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "",
+      "no_save_normalized_length": 0,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 5,
+      "no_save_readiness_status": "NEEDS_SELECTOR_REVIEW",
+      "no_save_remediation_hint": "Review the configured wait_for_selector/content_selector before activation.",
+      "no_save_tested": true,
       "noise_risk": "medium",
       "priority": "P0",
       "product_manager_gate": {
@@ -854,7 +958,7 @@
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_live_adapter_test",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -882,6 +986,7 @@
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -890,6 +995,18 @@
         "status": "pass"
       },
       "next_action": "keep_remediation_until_specific_legislation_page_passes",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -932,7 +1049,7 @@
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_live_adapter_test",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -960,6 +1077,7 @@
         "status": "baseline_pending"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "No-save readiness-supported candidate.",
         "forbidden_wording": "evidence-confirmed, monitoring-ready",
@@ -968,6 +1086,18 @@
         "status": "pass"
       },
       "next_action": "dedupe_with_adgm_fsra_rulebooks_before_save",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "medium",
       "priority": "P1",
       "product_manager_gate": {
@@ -996,13 +1126,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -1022,13 +1164,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1037,6 +1180,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "9aa328d1a20bbb187b34920e38a9afd6b4854d585d739f49f287736a3eaae73e",
+      "no_save_normalized_length": 3789,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -1068,6 +1223,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -1075,17 +1231,12 @@
           "script",
           "style",
           "noscript"
-        ],
-        "item_selector": "article, li, tr, .item, .card, a[href]",
-        "max_items": 100,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4",
-        "url_selector": "a[href]"
+        ]
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
       "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -1107,7 +1258,7 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -1153,6 +1304,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -1160,18 +1312,13 @@
           "script",
           "style",
           "noscript"
-        ],
-        "item_selector": "article, li, tr, .item, .card, a[href]",
-        "max_items": 100,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4",
-        "url_selector": "a[href]"
+        ]
       },
-      "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
-      "adapter_status": "configured_pending_selector_review",
+      "adapter_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "live_test_failed",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -1192,13 +1339,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1207,6 +1355,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "9aa328d1a20bbb187b34920e38a9afd6b4854d585d739f49f287736a3eaae73e",
+      "no_save_normalized_length": 3789,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -1235,13 +1395,25 @@
     },
     {
       "activation_decision": "candidate",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Not activation-ready under agent-gated standard.",
@@ -1261,13 +1433,14 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "static_html",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1276,6 +1449,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.centralbank.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -1304,13 +1489,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -1330,13 +1527,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1345,6 +1543,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.centralbank.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -1373,13 +1583,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -1399,13 +1621,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1414,6 +1637,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.centralbank.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -1445,6 +1680,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -1452,17 +1688,12 @@
           "script",
           "style",
           "noscript"
-        ],
-        "item_selector": "article, li, tr, .item, .card, a[href]",
-        "max_items": 100,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4",
-        "url_selector": "a[href]"
+        ]
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
       "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -1484,13 +1715,14 @@
       },
       "expected_extraction_strategy": "listing_adapter",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1499,6 +1731,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.centralbank.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -1528,7 +1772,9 @@
     {
       "activation_decision": "candidate",
       "adapter_config": {
+        "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -1536,14 +1782,12 @@
           "script",
           "style",
           "noscript"
-        ],
-        "sort_rows": true,
-        "table_selector": "table"
+        ]
       },
       "adapter_failure_reason": "",
-      "adapter_family": "table",
-      "adapter_name": "table",
-      "adapter_remediation_hint": "Review table structure and pagination before save/baseline.",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
       "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -1565,13 +1809,14 @@
       },
       "expected_extraction_strategy": "table_adapter",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:table",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1580,6 +1825,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.centralbank.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -1608,13 +1865,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -1634,13 +1903,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1649,6 +1919,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.centralbank.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -1677,13 +1959,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -1703,13 +1997,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1718,6 +2013,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.centralbank.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -1746,13 +2053,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_remediation_hint": "Use CBUAE document listing adapter only after official page DOM/source-health passes.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -1772,13 +2091,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:cbuae_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1787,6 +2107,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "df14596f9fc49e354a472ac3c093eebdf3df51710681ba204377a6b8c689185d",
+      "no_save_normalized_length": 14484,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 22,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -1884,13 +2216,30 @@
     },
     {
       "activation_decision": "candidate",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ],
+        "item_selector": "article, li, tr, .item, .card, a[href]",
+        "max_items": 100,
+        "sort_items": true,
+        "title_selector": "a, h2, h3, h4",
+        "url_selector": "a[href]"
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
+      "adapter_family": "listing",
+      "adapter_name": "listing",
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Not activation-ready under agent-gated standard.",
@@ -1910,13 +2259,14 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "playwright_selector",
+      "extraction_strategy": "adapter:listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -1925,6 +2275,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.dfsa.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P1",
       "product_manager_gate": {
@@ -1956,6 +2318,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -1970,11 +2333,11 @@
         "title_selector": "a, h2, h3, h4",
         "url_selector": "a[href]"
       },
-      "adapter_failure_reason": "",
+      "adapter_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
       "adapter_family": "listing",
       "adapter_name": "listing",
       "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
-      "adapter_status": "configured_pending_selector_review",
+      "adapter_status": "live_test_failed",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -2002,6 +2365,7 @@
         "status": "baseline_pending"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "No-save readiness-supported candidate.",
         "forbidden_wording": "evidence-confirmed, monitoring-ready",
@@ -2010,6 +2374,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "5a0d6a37a25e4f4c1b84d2af380891eac40611bc768449b165f8f04156edf0c8",
+      "no_save_normalized_length": 5361,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "medium",
       "priority": "P0",
       "product_manager_gate": {
@@ -2087,6 +2463,7 @@
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2095,6 +2472,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.dfsa.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -2128,7 +2517,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -2156,6 +2545,7 @@
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2164,6 +2554,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "357b24fa800f6e24142a3bbe2cbeb925eefb1d3619905aa651ce09306f76ed75",
+      "no_save_normalized_length": 3125,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -2195,6 +2597,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -2326,6 +2729,7 @@
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2334,6 +2738,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.dfsa.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P1",
       "product_manager_gate": {
@@ -2411,6 +2827,7 @@
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2419,6 +2836,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.dfsa.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -2452,7 +2881,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -2480,6 +2909,7 @@
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2488,6 +2918,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "94fc40f766872dee354bc8137164389b287d166c65de567fccbc12444f03bef2",
+      "no_save_normalized_length": 5397,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -2516,13 +2958,15 @@
     },
     {
       "activation_decision": "baseline_pending",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "article, main"
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "dfsa_rulebook",
+      "adapter_name": "dfsa_rulebook",
+      "adapter_remediation_hint": "Run DFSA rulebook module adapter no-save, then save proof/baseline if module rows are stable.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Not activation-ready under agent-gated standard.",
@@ -2542,13 +2986,14 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "static_html",
+      "extraction_strategy": "adapter:dfsa_rulebook",
       "final_activation_gate": {
         "reason": "No-save passed; save evidence and baselines are still required.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "baseline_pending"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "No-save readiness-supported candidate.",
         "forbidden_wording": "evidence-confirmed, monitoring-ready",
@@ -2557,6 +3002,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "3a4d5bd712abc5b0e7f6a3b5e8a2ac59c70ce37840b845dc9090fbb4ecbdc47c",
+      "no_save_normalized_length": 10774,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 29,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "medium",
       "priority": "P0",
       "product_manager_gate": {
@@ -2602,11 +3059,11 @@
         "title_selector": "a, h2, h3, h4",
         "url_selector": "a[href]"
       },
-      "adapter_failure_reason": "",
+      "adapter_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
       "adapter_family": "listing",
       "adapter_name": "listing",
       "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
-      "adapter_status": "configured_pending_selector_review",
+      "adapter_status": "live_test_failed",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -2634,6 +3091,7 @@
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2642,6 +3100,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "0a0bfad8e9a60e808ea7db8dee59be5a6bb32f3f74f723d10cebc1a80923ab66",
+      "no_save_normalized_length": 995,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 23,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -2675,7 +3145,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "configured_pending_selector_review",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -2703,6 +3173,7 @@
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2711,6 +3182,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.difc.com",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -2813,7 +3296,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -2841,6 +3324,7 @@
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2849,6 +3333,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "fa6e64c30cc0dcc72c679c4a0f07c82bef1f1fc7fc02dab6a1b50f2f5363ac4a",
+      "no_save_normalized_length": 4123,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 29,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -2882,7 +3378,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -2910,6 +3406,7 @@
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -2918,6 +3415,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "87b27e52537e2b68e9245732e1924dbe63defda3eedb6aa5d189a603ad51a53f",
+      "no_save_normalized_length": 16054,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 29,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "unknown",
       "priority": "P1",
       "product_manager_gate": {
@@ -3153,13 +3662,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -3179,13 +3700,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -3194,6 +3716,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "c857d7c0d27688c2daf1c3f2e644cbff808dda87d4b52d39808321f8f3eb6c4e",
+      "no_save_normalized_length": 2085,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -3434,7 +3968,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -3462,6 +3996,7 @@
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -3470,6 +4005,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "ec6f70318b9729af9cff61003f97a25e8dca6861e6245bd0e05226473648ef3e",
+      "no_save_normalized_length": 4665,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -3503,7 +4050,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -3531,6 +4078,7 @@
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -3539,6 +4087,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "e81e75a73f89922cc6e7da8de4e91a0ceb0a113ab81012007449a818803b3c09",
+      "no_save_normalized_length": 6634,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -3568,8 +4128,10 @@
     {
       "activation_decision": "remediation",
       "adapter_config": {
-        "container_selector": "[data-icms-list]",
+        "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -3578,16 +4140,16 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
       "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -3609,7 +4171,7 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -3653,8 +4215,10 @@
     {
       "activation_decision": "remediation",
       "adapter_config": {
-        "container_selector": "main section",
+        "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -3663,17 +4227,17 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
-      "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
-      "adapter_status": "configured_for_remediation",
+      "adapter_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
+      "adapter_status": "live_test_failed",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -3694,13 +4258,14 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -3709,6 +4274,18 @@
         "status": "pass"
       },
       "next_action": "build_card_listing_adapter_then_retest",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": false,
+      "no_save_normalized_hash": "63df293615687288465ee57a7c6068e2d4125feec477addb303a19ac46eed75a",
+      "no_save_normalized_length": 3146,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 23,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "medium",
       "priority": "P1",
       "product_manager_gate": {
@@ -3738,8 +4315,10 @@
     {
       "activation_decision": "blocked",
       "adapter_config": {
-        "container_selector": "[data-icms-list]",
+        "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -3748,16 +4327,16 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
       "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -3779,7 +4358,7 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -3824,7 +4403,9 @@
       "activation_decision": "remediation",
       "adapter_config": {
         "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -3833,16 +4414,16 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
       "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -3864,7 +4445,7 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -3908,8 +4489,10 @@
     {
       "activation_decision": "remediation",
       "adapter_config": {
-        "container_selector": "[data-icms-list]",
+        "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -3918,17 +4501,17 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "Listing adapter did not isolate item rows; Source Lab still reported BLOCKED with policy warnings.",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Investigate rendered DOM/shadow data source or build SCA-specific listing parser before save/baseline.",
-      "adapter_status": "live_test_failed",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
+      "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 2,
       "baseline_runs_required": 2,
@@ -3949,7 +4532,7 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Proof exists, but unresolved high noise/source-health risk blocks activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -3994,7 +4577,9 @@
       "activation_decision": "blocked",
       "adapter_config": {
         "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -4003,16 +4588,16 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
       "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -4034,7 +4619,7 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -4078,8 +4663,10 @@
     {
       "activation_decision": "blocked",
       "adapter_config": {
-        "container_selector": "[data-icms-list]",
+        "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -4088,16 +4675,16 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
       "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -4119,7 +4706,7 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -4164,7 +4751,9 @@
       "activation_decision": "remediation",
       "adapter_config": {
         "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -4173,16 +4762,16 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
       "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -4204,7 +4793,7 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -4248,8 +4837,10 @@
     {
       "activation_decision": "remediation",
       "adapter_config": {
-        "container_selector": "[data-icms-list]",
+        "container_selector": "main",
+        "date_selector": "time, .date, [data-date]",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -4258,16 +4849,16 @@
           "style",
           "noscript"
         ],
-        "item_selector": "article, li, tr, .item, .card, [data-icms-item], a[href]",
-        "max_items": 100,
+        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
+        "max_items": 120,
         "sort_items": true,
         "title_selector": "a, h2, h3, h4, [data-icms-title]",
         "url_selector": "a[href]"
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Rerun no-save Source Lab with listing adapter and review item-level noise/source-health before any activation.",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
       "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -4289,7 +4880,7 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:sca_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -4475,7 +5066,7 @@
       "adapter_family": null,
       "adapter_name": null,
       "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
@@ -4503,6 +5094,7 @@
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -4511,6 +5103,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "a83194d8821d2a349f7cb4aa6c438159aa99d8c0cfc665745ead972332ecd4ab",
+      "no_save_normalized_length": 8534,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -4677,13 +5281,25 @@
     },
     {
       "activation_decision": "candidate",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Not activation-ready under agent-gated standard.",
@@ -4703,13 +5319,14 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "static_html",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -4718,6 +5335,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.uaefiu.gov.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -4749,6 +5378,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -4756,17 +5386,12 @@
           "script",
           "style",
           "noscript"
-        ],
-        "item_selector": "article, li, tr, .item, .card, a[href]",
-        "max_items": 100,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4",
-        "url_selector": "a[href]"
+        ]
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
       "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -4788,7 +5413,7 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -4831,13 +5456,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -4857,13 +5494,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -4872,6 +5510,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "11ff49a219ad49db95c6744476cb873168bdf5dc5ed0246c736ddf9d6148903d",
+      "no_save_normalized_length": 3646,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -4900,13 +5550,25 @@
     },
     {
       "activation_decision": "candidate",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Not activation-ready under agent-gated standard.",
@@ -4926,7 +5588,7 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "static_html",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -4969,13 +5631,25 @@
     },
     {
       "activation_decision": "candidate",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Not activation-ready under agent-gated standard.",
@@ -4995,13 +5669,14 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "static_html",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5010,6 +5685,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.uaefiu.gov.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -5038,13 +5725,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -5064,13 +5763,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5079,6 +5779,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "c98fb2e2f3e446958783c2088435a01a9a656adf346481e109b2bbf12493be1a",
+      "no_save_normalized_length": 3646,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -5107,13 +5819,25 @@
     },
     {
       "activation_decision": "blocked",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_remediation_hint": "Use FIU/EOCN document adapter after official publication/sanctions page is verified.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
@@ -5133,13 +5857,14 @@
       },
       "expected_extraction_strategy": "blocked",
       "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "extraction_strategy": "adapter:fiu_eocn_document_listing",
       "final_activation_gate": {
         "reason": "Access/source-health blockers prevent activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "blocked"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Blocked or under remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5148,6 +5873,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "3686e6b56c357a18d7d35458b6e467fcc370b59c80e31ca0b13978832a0eef15",
+      "no_save_normalized_length": 5742,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "BLOCKED",
+      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -5176,13 +5913,25 @@
     },
     {
       "activation_decision": "remediation",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Extracted content is a navigation shell or collides with another source hash.",
@@ -5202,13 +5951,14 @@
       },
       "expected_extraction_strategy": "pdf_extractor",
       "expected_min_length": null,
-      "extraction_strategy": "pdf_extractor",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5217,6 +5967,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "82dfed9854d53d2e082d452e7cdf90817f67243c40280c14fc8004c638a49669",
+      "no_save_normalized_length": 85,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "NAV_SHELL_ONLY",
+      "no_save_remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -5245,13 +6007,25 @@
     },
     {
       "activation_decision": "remediation",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Extracted content is a navigation shell or collides with another source hash.",
@@ -5271,13 +6045,14 @@
       },
       "expected_extraction_strategy": "pdf_extractor",
       "expected_min_length": null,
-      "extraction_strategy": "pdf_extractor",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5286,6 +6061,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "82dfed9854d53d2e082d452e7cdf90817f67243c40280c14fc8004c638a49669",
+      "no_save_normalized_length": 85,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "NAV_SHELL_ONLY",
+      "no_save_remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -5314,13 +6101,25 @@
     },
     {
       "activation_decision": "remediation",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
+      "adapter_status": "live_test_failed",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Extracted content is a navigation shell or collides with another source hash.",
@@ -5340,13 +6139,14 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "playwright_selector",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5355,6 +6155,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": "",
+      "no_save_adapter_used": false,
+      "no_save_duplicate_hash": false,
+      "no_save_failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "no_save_nav_shell": true,
+      "no_save_normalized_hash": "7e5ab9c8d3566b2b06ee62f55fd45cb6a4d1c013d5a65a2508db0d4e2ff33d3c",
+      "no_save_normalized_length": 4506,
+      "no_save_quality_label": "POOR",
+      "no_save_quality_score": 0,
+      "no_save_readiness_status": "NAV_SHELL_ONLY",
+      "no_save_remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+      "no_save_tested": true,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -5383,13 +6195,25 @@
     },
     {
       "activation_decision": "remediation",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Extracted content is a navigation shell or collides with another source hash.",
@@ -5409,13 +6233,14 @@
       },
       "expected_extraction_strategy": "playwright_selector",
       "expected_min_length": null,
-      "extraction_strategy": "playwright_selector",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5424,6 +6249,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.vara.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -5455,6 +6292,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -5462,17 +6300,12 @@
           "script",
           "style",
           "noscript"
-        ],
-        "item_selector": "article, li, tr, .item, .card, a[href]",
-        "max_items": 100,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4",
-        "url_selector": "a[href]"
+        ]
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
       "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -5494,13 +6327,14 @@
       },
       "expected_extraction_strategy": "listing_adapter",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "candidate"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Candidate source under validation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5509,6 +6343,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.vara.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "unknown",
       "priority": "P2",
       "product_manager_gate": {
@@ -5540,6 +6386,7 @@
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
           "form",
@@ -5547,17 +6394,12 @@
           "script",
           "style",
           "noscript"
-        ],
-        "item_selector": "article, li, tr, .item, .card, a[href]",
-        "max_items": 100,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4",
-        "url_selector": "a[href]"
+        ]
       },
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
       "adapter_status": "configured_pending_selector_review",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
@@ -5579,13 +6421,14 @@
       },
       "expected_extraction_strategy": "listing_adapter",
       "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5594,6 +6437,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.vara.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P1",
       "product_manager_gate": {
@@ -5622,13 +6477,25 @@
     },
     {
       "activation_decision": "remediation",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Extracted content is a navigation shell or collides with another source hash.",
@@ -5648,13 +6515,14 @@
       },
       "expected_extraction_strategy": "pdf_extractor",
       "expected_min_length": null,
-      "extraction_strategy": "pdf_extractor",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5663,6 +6531,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.vara.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -5691,13 +6571,25 @@
     },
     {
       "activation_decision": "candidate",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Not activation-ready under agent-gated standard.",
@@ -5717,7 +6609,7 @@
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
-      "extraction_strategy": "static_html",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Candidate is not yet validated enough for activation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
@@ -5760,13 +6652,25 @@
     },
     {
       "activation_decision": "remediation",
-      "adapter_config": {},
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
       "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
-      "adapter_version": null,
+      "adapter_family": "vara_pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_remediation_hint": "Use VARA PDF/rulebook listing adapter after official URLs stop returning not-found/nav shells.",
+      "adapter_status": "configured_pending_selector_review",
+      "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "blocker": "Extracted content is a navigation shell or collides with another source hash.",
@@ -5786,13 +6690,14 @@
       },
       "expected_extraction_strategy": "pdf_extractor",
       "expected_min_length": null,
-      "extraction_strategy": "pdf_extractor",
+      "extraction_strategy": "adapter:vara_pdf_listing",
       "final_activation_gate": {
         "reason": "Source remains under extraction remediation.",
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "remediation"
       },
       "last_adapter_test_at": null,
+      "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Under extraction remediation.",
         "forbidden_wording": "ready, validated, monitored",
@@ -5801,6 +6706,18 @@
         "status": "pass"
       },
       "next_action": "continue_source_remediation_or_validation",
+      "no_save_adapter_name": null,
+      "no_save_adapter_used": null,
+      "no_save_duplicate_hash": null,
+      "no_save_failure_reason": "domain stop after repeated failures for www.vara.ae",
+      "no_save_nav_shell": null,
+      "no_save_normalized_hash": null,
+      "no_save_normalized_length": null,
+      "no_save_quality_label": null,
+      "no_save_quality_score": null,
+      "no_save_readiness_status": "SKIPPED",
+      "no_save_remediation_hint": "",
+      "no_save_tested": false,
       "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
@@ -5830,7 +6747,7 @@
   ],
   "summary": {
     "activation_ready_count": 2,
-    "adapter_fields_updated_at": "2026-06-14T19:33:34Z",
+    "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
@@ -5840,12 +6757,36 @@
     "candidate_count": 28,
     "did_reach_50_working_sources": false,
     "generated_at": "2026-06-14T15:55:00Z",
+    "last_50_target_no_save_summary": {
+      "blocked_count": 18,
+      "domain_failures": {
+        "dfsaen.thomsonreuters.com": 1,
+        "mof.gov.ae": 1,
+        "uaelegislation.gov.ae": 1,
+        "www.adgm.com": 3,
+        "www.centralbank.ae": 3,
+        "www.dfsa.ae": 3,
+        "www.difc.com": 3,
+        "www.eocn.gov.ae": 1,
+        "www.moec.gov.ae": 1,
+        "www.sca.gov.ae": 1,
+        "www.uaefiu.gov.ae": 3,
+        "www.vara.ae": 3
+      },
+      "no_save_passed_count": 0,
+      "remediation_count": 24,
+      "skipped_count": 26,
+      "target_count": 50,
+      "tested_count": 24
+    },
+    "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready entries count toward the 50 working-source target; sources.json was not expanded in this sprint.",
     "proof_backed_count": 3,
     "public_source_truth_after": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 0,
     "remediation_count": 21,
+    "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
     "total_entries": 78
   },
   "version": 1
