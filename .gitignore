@@ -68,6 +68,7 @@ product/.swarm/
 product/regradar/.claude/
 product/regradar/data/source_runs/*.jsonl
 product/regradar/data/source_snapshots/
+product/regradar/data/alert_queue/*.json
 product/regradar/data/alert_reviews/
 product/regradar/data/diagnostics/
 
