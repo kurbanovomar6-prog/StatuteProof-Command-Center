@@ -1915,6 +1915,10 @@ def _cmd_discover_source(url: str, json_export: bool, jurisdiction: str, categor
 def _cmd_source_lab(
     url: str,
     *,
+    source_id: str = "source-lab",
+    name: str = "Source Lab URL",
+    jurisdiction: str = "LAB",
+    category: str = "custom",
     save: bool = False,
     json_export: bool = False,
     baseline_runs: int = 2,
@@ -1929,11 +1933,11 @@ def _cmd_source_lab(
     from app.source_intake import run_source_intake, load_sources_json, build_source_lab_contract
 
     source = {
-        "source_id": "source-lab",
-        "name": "Source Lab URL",
+        "source_id": source_id,
+        "name": name,
         "url": url,
-        "jurisdiction": "LAB",
-        "category": "custom",
+        "jurisdiction": jurisdiction,
+        "category": category,
         "enabled": False,
         "baseline_runs_required": baseline_runs,
     }
@@ -1949,6 +1953,7 @@ def _cmd_source_lab(
     result = run_source_intake(source, all_sources=load_sources_json(), write_evidence=save)
     contract = build_source_lab_contract(result)
     payload = {
+        "source_id": result.get("source_id"),
         "source_url": url,
         "canonical_url": url,
         "source_type": source.get("source_type") or "custom_public_source",
@@ -2023,6 +2028,7 @@ def main() -> None:
         print("  python run.py source-lab <url> --no-save --json  one-source parser/evidence lab", file=sys.stderr)
         print("  python run.py source-lab <url> --save --json     one-source lab with evidence write", file=sys.stderr)
         print("  python run.py source-lab <url> --js --content-selector main --wait-for-selector main", file=sys.stderr)
+        print("  python run.py source-lab <url> --source-id AE-example --save --json", file=sys.stderr)
         print("  python run.py add-source                     interactively add a source", file=sys.stderr)
         print("  python run.py coverage                       coverage dashboard (uses latest audit JSON)", file=sys.stderr)
         print("  python run.py coverage --json                export reports/coverage_YYYY-MM-DD.json", file=sys.stderr)
@@ -2202,6 +2208,10 @@ def main() -> None:
         js = False
         pdf = False
         baseline_runs = 2
+        source_id = "source-lab"
+        source_name = "Source Lab URL"
+        jurisdiction = "LAB"
+        category = "custom"
         content_selector = None
         wait_for_selector = None
         i_ = 0
@@ -2233,6 +2243,30 @@ def main() -> None:
                     sys.exit(2)
                 baseline_runs = int(extra[i_ + 1])
                 i_ += 2
+            elif tok == "--source-id":
+                if i_ + 1 >= len(extra):
+                    print("Error: --source-id requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                source_id = extra[i_ + 1].strip() or "source-lab"
+                i_ += 2
+            elif tok == "--name":
+                if i_ + 1 >= len(extra):
+                    print("Error: --name requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                source_name = extra[i_ + 1].strip() or "Source Lab URL"
+                i_ += 2
+            elif tok == "--jurisdiction":
+                if i_ + 1 >= len(extra):
+                    print("Error: --jurisdiction requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                jurisdiction = extra[i_ + 1].strip() or "LAB"
+                i_ += 2
+            elif tok == "--category":
+                if i_ + 1 >= len(extra):
+                    print("Error: --category requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                category = extra[i_ + 1].strip() or "custom"
+                i_ += 2
             elif tok == "--content-selector":
                 if i_ + 1 >= len(extra):
                     print("Error: --content-selector requires a CSS selector.", file=sys.stderr)
@@ -2256,6 +2290,10 @@ def main() -> None:
             sys.exit(2)
         _cmd_source_lab(
             url_arg.strip(),
+            source_id=source_id,
+            name=source_name,
+            jurisdiction=jurisdiction,
+            category=category,
             save=save,
             json_export=json_export,
             baseline_runs=baseline_runs,

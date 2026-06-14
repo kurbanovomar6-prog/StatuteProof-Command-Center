@@ -156,13 +156,21 @@ def build_certification_from_runs(
 ) -> dict:
     runs = [r for r in runs if r.get("source_id") == source_id]
     runs.sort(key=lambda r: str(r.get("timestamp_utc") or ""))
-    successful = [
-        r for r in runs
-        if r.get("access_status") not in {"failed", "restricted", "blocked"}
-        and r.get("change_status") not in {"FAILED", "QUALITY_DROP", "SOURCE_STRUCTURE_CHANGED"}
-        and r.get("proof_block_path")
-        and r.get("normalized_hash")
-    ]
+    successful = []
+    seen_success_keys = set()
+    for r in runs:
+        if (
+            r.get("access_status") in {"failed", "restricted", "blocked"}
+            or r.get("change_status") in {"FAILED", "QUALITY_DROP", "SOURCE_STRUCTURE_CHANGED"}
+            or not r.get("proof_block_path")
+            or not r.get("normalized_hash")
+        ):
+            continue
+        success_key = r.get("run_id") or r.get("proof_block_path") or r.get("timestamp_utc")
+        if success_key in seen_success_keys:
+            continue
+        seen_success_keys.add(success_key)
+        successful.append(r)
     latest = successful[-1] if successful else (runs[-1] if runs else None)
     baseline_complete = len(successful) >= baseline_runs_required
     evidence_level = evidence_level_from_run(latest, baseline_complete=baseline_complete)

@@ -172,6 +172,30 @@ def test_certification_requires_baseline():
     assert cert["certification_status"] == CertificationStatus.BASELINE_PENDING
 
 
+def test_certification_does_not_count_duplicate_run_as_baseline():
+    run = {
+        "source_id": "s1",
+        "run_id": "same-run",
+        "timestamp_utc": "2026-06-14T00:00:00Z",
+        "access_status": "accessible",
+        "change_status": "FIRST_SEEN",
+        "proof_block_path": "proof.json",
+        "snapshot_raw_path": "raw.txt",
+        "snapshot_normalized_path": "normalized.txt",
+        "snapshot_metadata_path": "metadata.json",
+        "normalized_hash": "a" * 64,
+    }
+    cert = build_certification_from_runs(
+        source_id="s1",
+        source_url="https://official.example",
+        runs=[run, dict(run)],
+        baseline_runs_required=2,
+        quality_score=80,
+    )
+    assert cert["baseline_runs_completed"] == 1
+    assert cert["certification_status"] == CertificationStatus.BASELINE_PENDING
+
+
 def test_quality_score_breakdown_sums_with_bounds():
     report = build_quality_score(
         url="https://official.example",

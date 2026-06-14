@@ -47,7 +47,14 @@ ALLOWED_INITIAL_STATUS = {
 }
 ALLOWED_TEST_STATUS = {"no_save_tested"}
 ALLOWED_RISK = {"low", "medium", "high", "unknown"}
-ALLOWED_ACTIVATION_STATUS = {"candidate", "readiness_supported_no_save", "remediation", "rejected", "blocked"}
+ALLOWED_ACTIVATION_STATUS = {
+    "candidate",
+    "readiness_supported_no_save",
+    "baseline_pending",
+    "remediation",
+    "rejected",
+    "blocked",
+}
 REQUIRED_TEST_FIELDS = {
     "tested_at",
     "test_status",
@@ -69,6 +76,15 @@ SELECTOR_INVESTIGATION_FIELDS = {
     "recommended_wait_selector",
     "recommended_content_selector",
     "recommended_next_action",
+}
+SAVED_BASELINE_FIELDS = {
+    "saved_baseline_at",
+    "proof_path",
+    "normalized_text_path",
+    "evidence_level",
+    "baseline_runs_completed",
+    "baseline_runs_required",
+    "can_activate_monitoring",
 }
 ADGM_FSRA_SCA_PREFIXES = ("AE-adgm", "AE-sca")
 CLAIM_SCAN_PATHS = [
@@ -250,6 +266,32 @@ def main() -> int:
             if candidate.get("activation_status") == "rejected" and candidate.get("accepted_for_default_pack") is True:
                 fail(errors, f"{source_id} rejected candidate cannot be accepted for default pack.")
 
+        if candidate.get("saved_baseline_attempted") is True:
+            missing_saved_fields = sorted(SAVED_BASELINE_FIELDS - set(candidate))
+            if missing_saved_fields:
+                fail(errors, f"{source_id} saved-baseline candidate missing fields: {', '.join(missing_saved_fields)}")
+            baseline_completed = int(candidate.get("baseline_runs_completed") or 0)
+            baseline_required = int(candidate.get("baseline_runs_required") or 2)
+            can_activate = candidate.get("can_activate_monitoring")
+            evidence_level = candidate.get("evidence_level")
+            if can_activate not in {True, False}:
+                fail(errors, f"{source_id} can_activate_monitoring must be boolean.")
+            if can_activate and baseline_completed < baseline_required:
+                fail(errors, f"{source_id} cannot activate before required baselines are complete.")
+            if can_activate and evidence_level != "CERTIFIED_EVIDENCE":
+                fail(errors, f"{source_id} cannot activate without CERTIFIED_EVIDENCE.")
+            if evidence_level in {"FULL_EVIDENCE", "CERTIFIED_EVIDENCE"}:
+                if not candidate.get("proof_path") or not candidate.get("normalized_text_path"):
+                    fail(errors, f"{source_id} evidence level {evidence_level} requires proof_path and normalized_text_path.")
+                if baseline_completed < 1:
+                    fail(errors, f"{source_id} full evidence requires at least one completed baseline run.")
+            if evidence_level == "PREVIEW_ONLY" and candidate.get("proof_path"):
+                fail(errors, f"{source_id} PREVIEW_ONLY saved-baseline attempt must not include proof_path.")
+            if candidate.get("activation_status") == "baseline_pending" and can_activate:
+                fail(errors, f"{source_id} baseline_pending candidate cannot activate monitoring.")
+            if candidate.get("activation_status") == "baseline_pending" and baseline_completed >= baseline_required:
+                fail(errors, f"{source_id} baseline_pending has completed baselines; review activation status.")
+
     duplicate_ids = sorted(source_id for source_id, count in ids.items() if count > 1)
     duplicate_urls = sorted(url for url, count in urls.items() if count > 1)
     if duplicate_ids:
@@ -297,6 +339,20 @@ def main() -> int:
                 fail(errors, "ADGM/FSRA + SCA remediation summary must record tested candidates.")
             if adgm_sca_investigated_count < 10:
                 fail(errors, f"Expected ADGM/FSRA + SCA selector investigation metadata, found {adgm_sca_investigated_count} candidates.")
+
+    saved_summary = data.get("last_adgm_fsra_sca_saved_baseline")
+    if saved_summary is not None:
+        if not isinstance(saved_summary, dict):
+            fail(errors, "last_adgm_fsra_sca_saved_baseline must be an object when present.")
+        else:
+            if saved_summary.get("saved_checks_run_count") != 4:
+                fail(errors, "Saved baseline summary must be scoped to exactly four checks.")
+            if saved_summary.get("sources_json_changed") is not False:
+                fail(errors, "Saved baseline summary must not claim sources.json changed.")
+            if saved_summary.get("public_truth_after_validation") != "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation":
+                fail(errors, "Saved baseline summary must preserve current public source truth.")
+            if int(saved_summary.get("monitoring_ready_count") or 0) != 0:
+                fail(errors, "Saved baseline summary must not claim monitoring-ready sources from this sprint.")
 
     sources = load_json(SOURCES_FILE)
     if isinstance(sources, dict):

@@ -515,9 +515,8 @@ def _write_intake_evidence(
 ) -> dict:
     """Write raw/normalized snapshot for the intake result."""
     import datetime
-    from app.source_runs import _write_snapshots, append_run, _rel
+    from app.source_runs import _write_snapshots, append_run, _rel, _read_runs
     from app.source_certification import build_certification_from_runs
-    from app.source_runs import latest_runs
     from app.text_normalization import stable_normalized_hash
 
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -588,11 +587,22 @@ def _write_intake_evidence(
         "hash_chain_path": _rel(hash_chain_path),
     }
     appended = append_run(record)
-    all_latest = latest_runs()
+    source_history = []
+    seen_run_ids = set()
+    for existing in _read_runs():
+        if existing.get("source_id") != source_id:
+            continue
+        run_key = existing.get("run_id") or existing.get("timestamp_utc") or existing.get("proof_block_path")
+        if run_key in seen_run_ids:
+            continue
+        seen_run_ids.add(run_key)
+        source_history.append(existing)
+    if appended.get("run_id") not in seen_run_ids:
+        source_history.append(appended)
     certification = build_certification_from_runs(
         source_id=source_id,
         source_url=url,
-        runs=[r for r in all_latest.values() if r.get("source_id") == source_id] + [appended],
+        runs=source_history,
         baseline_runs_required=int(source.get("baseline_runs_required") or 2),
         quality_score=int(result.get("quality_score") or 0),
     )
