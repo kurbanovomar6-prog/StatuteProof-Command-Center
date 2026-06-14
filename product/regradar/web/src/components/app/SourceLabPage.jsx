@@ -91,7 +91,7 @@ function ResultIcon({ result }) {
 }
 
 function customSourceLimit(planState) {
-  const caps = planState?.capabilities || {}
+  const caps = planState?.active_capabilities || planState?.capabilities || {}
   return Number(caps.customSources ?? caps.custom_sources ?? 0)
 }
 

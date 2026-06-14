@@ -151,7 +151,9 @@ class WeeklyBriefTests(unittest.TestCase):
             alerts=[alert],
         )
         markdown = render_weekly_brief_markdown(brief)
-        self.assertIn("StatuteProof provides early-warning regulatory intelligence, not legal advice.", markdown)
+        self.assertIn("provided for information and compliance review support only", markdown)
+        self.assertIn("do not constitute legal advice", markdown)
+        self.assertIn("does not guarantee compliance", markdown)
         self.assertIn("Official source: https://www.vara.ae/", markdown)
         self.assertIn("Content fingerprint: aaaaaaaaaaaaaaaa...", markdown)
         self.assertIn("Snapshot/diff: Archived internally and available on request.", markdown)
@@ -267,11 +269,11 @@ class WeeklyBriefTests(unittest.TestCase):
             alerts=[alert],
         )
         markdown = render_weekly_brief_markdown(brief)
-        self.assertIn("- Remaining monitored sources showed no material change this period.", markdown)
+        self.assertIn("- 8 additional monitored sources showed no detected change based on monitoring this period.", markdown)
 
         brief["summary"]["sources_checked"] = 4
         counted = render_weekly_brief_markdown(brief)
-        self.assertIn("- 3 additional monitored sources showed no material change this period.", counted)
+        self.assertIn("- 3 additional monitored sources showed no detected change based on monitoring this period.", counted)
 
     def test_duplicate_extraction_quality_is_not_repeated_in_limitations(self):
         alert = _write_alert(Path(tempfile.mkdtemp()), "quality", STATUS_APPROVED_WEEKLY, DECISION_WEEKLY)

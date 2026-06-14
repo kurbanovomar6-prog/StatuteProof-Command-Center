@@ -4,21 +4,39 @@ Date: 2026-06-14
 
 ## Top 5 Highest-Leverage Actions
 
-1. Resolve the canonical source-readiness truth: 13/9/4 versus 13/10/3.
-2. Remodel DFSA sources and run no-save plus evidence-baseline checks for the approved source model.
-3. Create one real evidence-backed demo brief from a non-DFSA source.
-4. Verify and fix auth/session behavior in browser across local and production-like URLs.
-5. Split plan intent from manual activation state before any paid pilot.
+1. Run the approved DFSA source-model migration/no-save/baseline task.
+2. Browser-test auth/session behavior with API + Vite before any customer demo.
+3. Convert the proof-backed VARA demo artifact into a reviewed, non-delivered weekly brief preview.
+4. Build founder/admin manual activation workflow for paid pilots.
+5. Generate one canonical source-readiness summary consumed by validators and frontend.
+
+## P0 Sprint Update
+
+Completed in the P0 execution sprint:
+
+- Canonical source-readiness truth resolved to 13 enabled UAE sources, 9 readiness-supported, and 4 under extraction remediation.
+- DFSA source model decision documented; DFSA remains under remediation pending approved registry migration, no-save checks, and saved baseline.
+- First proof-backed sample/demo brief created from a real VARA evidence/proof/diff artifact.
+- Auth session cookie behavior fixed for local HTTP while keeping production secure by default.
+- Paid plan intent now returns `pending_manual_activation`; active capabilities remain Source Readiness Review until manual activation.
+- Weekly brief tests updated to the current legal-safe disclaimer and no-detected-change wording.
+
+Still open:
+
+- DFSA cannot leave remediation.
+- Browser auth smoke is still required before a customer demo.
+- Manual activation needs a founder/admin workflow before first paid pilot.
+- A generated source-readiness summary should replace duplicated frontend constants.
 
 ## A. Immediate P0 - Before Any Customer Demo
 
 | # | Action | Why it matters | Files/modules involved | Owner/agent | Difficulty | Validation command | Acceptance criteria | Risk if skipped |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Source-readiness truth reconciliation | Prevents false claims and confused demos. | `sources.json`, frontend source tables, `validate_parser_quality.py`, readiness docs | Product Manager, Source Monitor, Legal, QA | Medium | `python3 tools/validate_parser_quality.py` | One canonical count, remediation IDs, and validator agree. | Customer sees inconsistent claims. |
-| 2 | DFSA source model decision | Current DFSA URLs are not ready and should not be sold as ready. | `sources.json`, DFSA reports, Source Lab CLI | Source Monitor, Evidence Trail | Medium | Two no-save `source-lab` runs only | Exact DFSA source IDs/URLs/selectors are approved or held in remediation. | DFSA overclaim or bad source activation. |
-| 3 | First proof-backed demo brief | Demo needs one real evidence artifact, not only sample UI. | `source_runs.py`, `alert_drafts.py`, `weekly_brief.py`, evidence docs | Evidence Trail, QA, Legal | Medium | Targeted proof/brief commands; no delivery | One reviewed artifact with proof, diff, disclaimer, and sample/live boundary. | Demo feels polished but not proven. |
-| 4 | Auth browser QA | Login/register must work before app demo. | `api.py`, `auth.py`, Vite proxy, auth pages | QA, Code Architect | Medium | Browser test + `npm run build` if changed | Register, login, refresh, logout work locally and production-like. | Live demo login failure. |
-| 5 | Plan intent vs activation state | Paid plan should not look activated by mere selection. | `plan.py`, billing/choose-plan pages | Product Manager, Code Architect, Legal | Medium | Plan tests + browser smoke | Paid selection says pending manual activation until approved. | Billing trust issue. |
+| 1 | Source-readiness truth reconciliation | Prevents false claims and confused demos. | `sources.json`, frontend source tables, `validate_parser_quality.py`, readiness docs | Product Manager, Source Monitor, Legal, QA | Medium | `python3 tools/validate_parser_quality.py` | One canonical count, remediation IDs, and validator agree. Status: completed at 13/9/4. | Customer sees inconsistent claims. |
+| 2 | DFSA source model decision | Current DFSA URLs are not ready and should not be sold as ready. | `sources.json`, DFSA reports, Source Lab CLI | Source Monitor, Evidence Trail | Medium | Two no-save `source-lab` runs only | Exact DFSA source IDs/URLs/selectors are approved or held in remediation. Status: decision documented; registry/baseline still open. | DFSA overclaim or bad source activation. |
+| 3 | First proof-backed demo brief | Demo needs one real evidence artifact, not only sample UI. | `source_runs.py`, `alert_drafts.py`, `weekly_brief.py`, evidence docs | Evidence Trail, QA, Legal | Medium | Targeted proof/brief commands; no delivery | One reviewed artifact with proof, diff, disclaimer, and sample/live boundary. Status: sample artifact created; reviewed weekly preview still open. | Demo feels polished but not proven. |
+| 4 | Auth browser QA | Login/register must work before app demo. | `api.py`, `auth.py`, Vite proxy, auth pages | QA, Code Architect | Medium | Browser test + `npm run build` if changed | Register, login, refresh, logout work locally and production-like. Status: cookie contract fixed/tested; browser smoke still open. | Live demo login failure. |
+| 5 | Plan intent vs activation state | Paid plan should not look activated by mere selection. | `plan.py`, billing/choose-plan pages | Product Manager, Code Architect, Legal | Medium | Plan tests + browser smoke | Paid selection says pending manual activation until approved. Status: backend/UI contract fixed; founder activation workflow still open. | Billing trust issue. |
 | 6 | Pre-demo sample/live script | Avoids accidental overclaim when showing sample pages. | `EvidencePage.jsx`, `AIBriefPage.jsx`, `AlertsPage.jsx`, demo docs | QA, Legal | Low | Manual checklist | Demo script names which pages are live API versus sample/demo. | Buyer misreads sample data as live proof. |
 | 7 | Evidence page stale comment fix | Prevents future agents from assuming no API exists. | `EvidencePage.jsx` | Code Architect | Low | `npm run build` if frontend validation run | Header comment matches current API reality. | Future work follows stale assumption. |
 | 8 | README project location fix | Prevents wrong worktree/path usage. | `README.md` | Chief of Staff | Low | `git diff --check` | README points to `product/regradar/`. | Agents edit wrong location. |

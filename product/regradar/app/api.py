@@ -83,6 +83,19 @@ if _ALLOWED_ORIGIN:
     _CORS["Access-Control-Allow-Origin"] = _ALLOWED_ORIGIN
 
 
+def _session_cookie_secure_for_host(host: str | None) -> bool:
+    override = os.environ.get("STATUTEPROOF_COOKIE_SECURE", "").strip().lower()
+    if override in {"1", "true", "yes", "on"}:
+        return True
+    if override in {"0", "false", "no", "off"}:
+        return False
+
+    normalized = str(host or "").strip().lower()
+    if normalized.startswith(("localhost", "127.0.0.1", "[::1]")) or normalized == "::1":
+        return False
+    return True
+
+
 class _RateLimiter:
     """Small in-memory fixed-window limiter for MVP endpoint hardening."""
 
@@ -167,7 +180,8 @@ class _Handler(BaseHTTPRequestHandler):
         cookie[SESSION_COOKIE_NAME]["samesite"] = "Strict"
         cookie[SESSION_COOKIE_NAME]["path"] = "/"
         cookie[SESSION_COOKIE_NAME]["max-age"] = str(SESSION_MAX_AGE_SECONDS)
-        cookie[SESSION_COOKIE_NAME]["secure"] = True
+        if _session_cookie_secure_for_host(self.headers.get("Host")):
+            cookie[SESSION_COOKIE_NAME]["secure"] = True
         return cookie.output(header="").strip()
 
     def _clear_session_cookie_header(self) -> str:
@@ -177,6 +191,8 @@ class _Handler(BaseHTTPRequestHandler):
         cookie[SESSION_COOKIE_NAME]["samesite"] = "Strict"
         cookie[SESSION_COOKIE_NAME]["path"] = "/"
         cookie[SESSION_COOKIE_NAME]["max-age"] = "0"
+        if _session_cookie_secure_for_host(self.headers.get("Host")):
+            cookie[SESSION_COOKIE_NAME]["secure"] = True
         return cookie.output(header="").strip()
 
     def _client_ip(self) -> str:

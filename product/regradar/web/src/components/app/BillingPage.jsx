@@ -18,10 +18,28 @@ const PLAN_DISPLAY = {
 }
 
 export default function BillingPage({ planState }) {
-  const plan = planState?.plan_name || 'evidence_preview'
-  const display = PLAN_DISPLAY[plan] || plan
-  const caps = PLAN_CAPABILITIES[plan] || PLAN_CAPABILITIES.evidence_preview
   const status = planState?.status || 'evidence_preview'
+  const activationPending = status === 'pending_manual_activation'
+  const selectedPlan = planState?.plan_name || 'evidence_preview'
+  const activePlan = activationPending ? (planState?.active_plan_name || 'evidence_preview') : selectedPlan
+  const requestedPlan = activationPending ? (planState?.requested_plan || selectedPlan) : null
+  const display = PLAN_DISPLAY[activePlan] || activePlan
+  const requestedDisplay = requestedPlan ? (PLAN_DISPLAY[requestedPlan] || requestedPlan) : ''
+  const caps = PLAN_CAPABILITIES[activePlan] || PLAN_CAPABILITIES.evidence_preview
+  const statusLabel = status === 'active'
+    ? 'Plan enabled'
+    : status === 'trial_active'
+      ? 'Review enabled'
+      : activationPending
+        ? 'Pending manual activation'
+        : 'Pending'
+  const currentStatusLabel = status === 'active'
+    ? 'Plan enabled'
+    : status === 'trial_active'
+      ? 'Source Readiness Review enabled'
+      : activationPending
+        ? 'Plan intent saved; manual activation required'
+        : 'Pending activation'
 
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-6">
@@ -48,11 +66,14 @@ export default function BillingPage({ planState }) {
               ? 'border-[#16D9F5]/30 bg-[#16D9F5]/10 text-[#16D9F5]'
               : 'border-amber-400/30 bg-amber-400/10 text-amber-300'
           }`}>
-            {status === 'active' ? 'Plan enabled' : status === 'trial_active' ? 'Review enabled' : 'Pending'}
+            {statusLabel}
           </span>
         </div>
 
-        <Row label="Current status" value={status === 'active' ? 'Plan enabled' : status === 'trial_active' ? 'Source Readiness Review enabled' : 'Pending activation'} highlight />
+        <Row label="Current status" value={currentStatusLabel} highlight />
+        {activationPending ? (
+          <Row label="Requested plan" value={`${requestedDisplay} — pending manual activation`} />
+        ) : null}
         <Row label="Live monitoring" value={caps.liveMonitoring ? 'Included after activation' : 'Not included'} />
         <Row label="Source limit" value={caps.sourceLimit > 100 ? 'Custom' : caps.sourceLimit === 0 ? 'Sample only' : String(caps.sourceLimit)} />
         <Row label="Custom source limit" value={caps.customSources > 100 ? 'Custom' : caps.customSources === 0 ? 'Not included' : `${caps.customSources} after review`} />
@@ -79,7 +100,7 @@ export default function BillingPage({ planState }) {
       </div>
 
       {/* Upgrade CTA */}
-      {(plan === 'evidence_preview' || plan === 'starter_pilot') ? (
+      {(selectedPlan === 'evidence_preview' || selectedPlan === 'starter_pilot') ? (
         <div className="bg-[#16D9F5]/5 border border-[#16D9F5]/20 rounded-xl p-4">
           <p className="text-sm font-semibold text-white mb-1">Upgrade to UAE Monitor</p>
           <p className="text-xs text-slate-400 mb-3">

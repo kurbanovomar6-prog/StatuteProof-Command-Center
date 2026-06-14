@@ -33,6 +33,7 @@ PLAN_PRICE_MONTHLY = {
 PLAN_CAPABILITIES = {
     "evidence_preview": {
         "live_monitoring": False,
+        "manual_activation_required": False,
         "source_limit": 0,
         "custom_sources": 0,
         "weekly_briefs": False,
@@ -44,7 +45,8 @@ PLAN_CAPABILITIES = {
         "white_label": False,
     },
     "starter_pilot": {
-        "live_monitoring": True,
+        "live_monitoring": False,
+        "manual_activation_required": True,
         "source_limit": 3,          # 3 official UAE sources, manually curated
         "custom_sources": 0,
         "weekly_briefs": "status_only",  # source status summary only
@@ -57,7 +59,8 @@ PLAN_CAPABILITIES = {
         "high_risk_queue": False,
     },
     "professional": {
-        "live_monitoring": True,
+        "live_monitoring": False,
+        "manual_activation_required": True,
         "source_limit": 13,         # 13 enabled UAE sources under evidence-readiness validation
         "custom_sources": 2,        # requires activation
         "weekly_briefs": True,      # Telegram; email requires activation
@@ -70,7 +73,8 @@ PLAN_CAPABILITIES = {
         "high_risk_queue": True,
     },
     "consultant": {
-        "live_monitoring": True,
+        "live_monitoring": False,
+        "manual_activation_required": True,
         "source_limit": 999,
         "custom_sources": 999,
         "weekly_briefs": True,
@@ -137,15 +141,25 @@ def _build_state(plan_name: str, trial_started_at_raw, plan_intent_at_raw) -> di
         trial_expired = remaining <= 0
 
     caps = PLAN_CAPABILITIES.get(plan, PLAN_CAPABILITIES["evidence_preview"])
+    pending_manual_activation = plan != "evidence_preview"
+    active_plan = "evidence_preview" if pending_manual_activation else plan
+    active_caps = PLAN_CAPABILITIES.get(active_plan, PLAN_CAPABILITIES["evidence_preview"])
 
     return {
         "plan_name": plan,
         "plan_display": PLAN_DISPLAY.get(plan, plan),
+        "active_plan_name": active_plan,
+        "active_plan_display": PLAN_DISPLAY.get(active_plan, active_plan),
+        "requested_plan": plan if pending_manual_activation else None,
+        "requested_plan_display": PLAN_DISPLAY.get(plan, plan) if pending_manual_activation else None,
         "trial_active": trial_active,
         "trial_expired": trial_expired,
         "days_remaining": days_remaining,
         "trial_started_at": trial_started_at_raw,
         "status": _resolve_status(plan, trial_active, trial_expired),
+        "manual_activation_required": bool(caps.get("manual_activation_required")),
+        "active_capabilities": active_caps,
+        "requested_capabilities": caps if pending_manual_activation else None,
         "capabilities": caps,
     }
 
@@ -157,7 +171,7 @@ def _resolve_status(plan: str, trial_active: bool, trial_expired: bool) -> str:
         if trial_active:
             return "trial_active"
         return "evidence_preview"
-    return "active"
+    return "pending_manual_activation"
 
 
 def set_plan_intent(user_id: int, plan_name: str) -> dict[str, Any]:
