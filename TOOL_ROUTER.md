@@ -8,6 +8,9 @@ Use this file to decide which agent, skill, or workflow to invoke for any task.
 |------|-------------|----------------|---------|
 | Source monitoring | Source Monitor Agent | `docs/source-monitor-spec-guide.md` | `workflows/02-first-source-spec.md` |
 | Source spec creation | Source Monitor Agent | `prompts/source-spec-prompt.md` | `workflows/02-first-source-spec.md` |
+| Custom source parser/intake | Source Monitor Agent + Code Architect | `custom-source-monitoring-spec` | Source Monitor → Evidence Trail → QA/Critic → Legal Language |
+| Source Lab no-save test | Source Monitor Agent | `source-monitoring-review` | Preview only; do not claim evidence or monitoring readiness |
+| Source activation readiness | Evidence Trail Agent + QA / Critic | `evidence-readiness-review` | Requires proof artifacts, baseline checks, and legal-safe wording |
 | Evidence verification | Evidence Trail Agent + `#evidence-audit` | `docs/evidence-record-spec.md` | `workflows/03-evidence-dry-run.md` |
 | Evidence dry run | Evidence Trail Agent | `prompts/evidence-dry-run-prompt.md` | `workflows/03-evidence-dry-run.md` |
 | Risk scoring | Risk + Brief Pipeline | `docs/risk-scoring-guide.md` | `workflows/04-monitoring-to-brief.md` |
@@ -41,6 +44,7 @@ Use this file to decide which agent, skill, or workflow to invoke for any task.
 | Is this decision high-stakes / irreversible? | `checklists/before-agent-council-decision.md` + `workflows/07-agent-council-review.md` |
 | Does this design look like AI slop? | `#design-taste-review` (slop test runs first) |
 | Which agent handles this? | `AGENTS.md` → routing rules |
+| Can this public source be monitored? | Source Monitor Agent + Source Lab preview; evidence/activation readiness must remain separate |
 
 ## Decision Tree for Briefs
 
@@ -77,3 +81,24 @@ QA / Critic approved?
 | `#design-taste-review` | Type `#design-taste-review` | component or page, register (brand/product), specific concern |
 | `#landing-page-conversion-review` | Type `#landing-page-conversion-review` | landing page URL or screenshot |
 | `#agent-council-review` | Type `#agent-council-review` | decision statement, options A/B/C, stakes description |
+## Codex Skill Routing
+
+| Task | Codex repo skill |
+|---|---|
+| broad audit | `statuteproof-project-review` |
+| source readiness | `evidence-readiness-review` |
+| parser/source registry | `source-monitoring-review` |
+| website/legal copy | `legal-safe-copy-review` |
+| homepage conversion | `mlro-homepage-review` |
+| custom source feature | `custom-source-monitoring-spec` |
+| copy cleanup | `anti-slop-b2b-copy` |
+| skills search | `skill-marketplace-research` |
+
+## Source Intake Safety Rules
+
+- Test only public sources that are technically accessible and permitted to be monitored.
+- Do not bypass login pages, CAPTCHA, paywalls, private portals, or access controls.
+- A no-save Source Lab result is preview only.
+- Evidence confirmed requires proof artifacts; one successful extraction is not monitoring-ready.
+- Activation readiness requires baseline/quality checks and clear failure reasons.
+- Customer-facing wording must not say any website can be parsed, guarantee parsing, guarantee compliance, or imply legal advice.
