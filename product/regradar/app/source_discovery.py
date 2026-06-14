@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import logging
 import re
+import xml.etree.ElementTree as ET
 from urllib.parse import urljoin, urlparse
 
 import requests as _req
@@ -72,12 +73,820 @@ _ROBOTS_SM_RE = re.compile(r"^Sitemap:\s*(\S+)", re.MULTILINE | re.IGNORECASE)
 _LOC_RE       = re.compile(r"<loc>\s*(https?://[^\s<]+)\s*</loc>", re.IGNORECASE)
 _FEED_MARKERS = ("<rss", "<feed", "<channel>", "xmlns:atom")
 
+_PRIVATE_URL_RE = re.compile(
+    r"(/|^)(login|log-in|signin|sign-in|account|auth|token|admin|private|captcha|paywall|checkout|cart)(/|$|[?#])",
+    re.IGNORECASE,
+)
+_REGULATORY_SIGNAL_WORDS = frozenset({
+    "aml",
+    "cft",
+    "sanction",
+    "regulation",
+    "regulations",
+    "rulebook",
+    "rule",
+    "rules",
+    "circular",
+    "notice",
+    "guidance",
+    "consultation",
+    "decision",
+    "law",
+    "enforcement",
+    "publication",
+    "register",
+    "licensed",
+    "payment",
+    "financial",
+    "virtual asset",
+    "market",
+})
+_MARKETING_SIGNAL_WORDS = frozenset({
+    "about",
+    "careers",
+    "contact",
+    "services",
+    "media",
+    "gallery",
+    "event",
+    "events",
+    "brand",
+})
+_JSON_MARKERS = ("application/json", "text/json", "+json")
+_XML_MARKERS = ("application/xml", "text/xml", "+xml", "rss", "atom")
+_PDF_MARKERS = ("application/pdf",)
+_DOC_EXT_RE = re.compile(r"\.(pdf|docx?|xlsx?|csv)($|[?#])", re.IGNORECASE)
+
 
 # ── private helpers ───────────────────────────────────────────────────────────
 
 def _origin(url: str) -> str:
     p = urlparse(url)
     return f"{p.scheme}://{p.netloc}"
+
+
+def _domain(url: str) -> str:
+    return urlparse(url).netloc.lower()
+
+
+def _same_domain(url: str, base_url: str) -> bool:
+    return _domain(url) == _domain(base_url)
+
+
+def _strip_ns(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1].lower()
+
+
+def _child_text(node: ET.Element, name: str) -> str:
+    for child in list(node):
+        if _strip_ns(child.tag) == name:
+            return (child.text or "").strip()
+    return ""
+
+
+def _clean_text(value: str | None) -> str:
+    return re.sub(r"\s+", " ", value or "").strip()
+
+
+def _private_url_reason(url: str) -> str:
+    parsed = urlparse(url)
+    pathish = f"{parsed.path}?{parsed.query}".lower()
+    if parsed.username or parsed.password:
+        return "credentials-in-url"
+    if _PRIVATE_URL_RE.search(pathish):
+        return "private/login/paywall-looking URL"
+    return ""
+
+
+def _regulatory_score_for_text(text: str) -> int:
+    lowered = text.lower()
+    return sum(1 for token in _REGULATORY_SIGNAL_WORDS if token in lowered)
+
+
+def _infer_source_type(url: str, title: str = "", content_type: str = "", signals: list[str] | None = None) -> str:
+    lowered = " ".join([url, title, content_type, " ".join(signals or [])]).lower()
+    if ".pdf" in lowered or "application/pdf" in lowered:
+        return "pdf_document"
+    if any(marker in lowered for marker in _JSON_MARKERS):
+        return "public_json_api"
+    if any(marker in lowered for marker in ("rss", "atom", "feed")) and "json" not in lowered:
+        return "feed"
+    if "sitemap" in lowered:
+        return "sitemap"
+    if "register" in lowered or "licensed" in lowered:
+        return "register"
+    if "rulebook" in lowered or "rulebook_module" in lowered:
+        return "rulebook"
+    if "table" in lowered:
+        return "table"
+    if any(token in lowered for token in ("regulation", "circular", "decision", "notice", "consultation", "publication", "listing")):
+        return "listing"
+    return "html_page"
+
+
+def _adapter_for_source_type(source_type: str, url: str = "", title: str = "") -> tuple[str, str]:
+    joined = f"{url} {title}".lower()
+    if source_type == "public_json_api":
+        return "public_json_api", "public_json_api"
+    if source_type == "pdf_document":
+        return "pdf_document", "pdf_document"
+    if source_type == "feed" or source_type == "sitemap":
+        return "sitemap_feed", "sitemap_feed"
+    if source_type == "register":
+        return "register", "register"
+    if source_type == "table":
+        return "table", "table"
+    if source_type == "rulebook":
+        return "dfsa_rulebook", "dfsa_rulebook" if "dfsa" in joined or "rulebook" in joined else "listing"
+    if "sca.gov.ae" in joined:
+        return "sca_listing", "sca_listing"
+    if "centralbank" in joined or "cbuae" in joined:
+        return "cbuae_document_listing", "cbuae_document_listing"
+    if "adgm" in joined:
+        return "adgm_fsra_listing", "adgm_fsra_listing"
+    if "dfsa" in joined:
+        return "dfsa_notice_listing", "dfsa_notice_listing"
+    if "vara" in joined:
+        return "vara_pdf_listing", "vara_pdf_listing"
+    if "fiu" in joined or "eocn" in joined:
+        return "fiu_eocn_document_listing", "fiu_eocn_document_listing"
+    if source_type == "listing":
+        return "listing", "listing"
+    return "static_html", "static_html"
+
+
+def parse_robots_sitemaps(robots_text: str) -> dict:
+    """Extract Sitemap lines from robots.txt text without interpreting access as approval."""
+    urls: list[str] = []
+    for line in (robots_text or "").splitlines():
+        stripped = line.strip()
+        if not stripped.lower().startswith("sitemap:"):
+            continue
+        url = stripped.split(":", 1)[1].strip()
+        if url and url not in urls:
+            urls.append(url)
+    return {
+        "status": "parsed" if robots_text else "empty",
+        "sitemap_urls": urls,
+        "notes": "Robots data is used for discovery only; it is not used to bypass restrictions.",
+    }
+
+
+def parse_sitemap_xml(xml_text: str, sitemap_url: str = "") -> dict:
+    """Parse sitemap index or urlset XML into normalized entries."""
+    try:
+        root = ET.fromstring(xml_text or "")
+    except ET.ParseError as exc:
+        return {"url": sitemap_url, "type": "invalid", "entries": [], "failure_reason": str(exc)}
+
+    root_type = _strip_ns(root.tag)
+    entries: list[dict] = []
+    if root_type == "sitemapindex":
+        for node in list(root):
+            if _strip_ns(node.tag) != "sitemap":
+                continue
+            loc = _child_text(node, "loc")
+            if loc:
+                entries.append({"loc": loc, "lastmod": _child_text(node, "lastmod"), "entry_type": "sitemap"})
+        parsed_type = "sitemapindex"
+    elif root_type == "urlset":
+        for node in list(root):
+            if _strip_ns(node.tag) != "url":
+                continue
+            loc = _child_text(node, "loc")
+            if loc:
+                entries.append({
+                    "loc": loc,
+                    "lastmod": _child_text(node, "lastmod"),
+                    "changefreq": _child_text(node, "changefreq"),
+                    "entry_type": "url",
+                })
+        parsed_type = "urlset"
+    else:
+        parsed_type = "unknown"
+    return {"url": sitemap_url, "type": parsed_type, "entries": entries}
+
+
+def discover_feed_links_from_html(html: str, base_url: str) -> list[dict]:
+    """Find RSS/Atom alternate links in HTML."""
+    soup = BeautifulSoup(html or "", "html.parser")
+    feeds: list[dict] = []
+    seen: set[str] = set()
+    for node in soup.select("link[href], a[href]"):
+        href = str(node.get("href") or "").strip()
+        if not href:
+            continue
+        rel = " ".join(node.get("rel") or []).lower() if node.name == "link" else ""
+        type_ = str(node.get("type") or "").lower()
+        text = _clean_text(node.get("title") or node.get_text(" ", strip=True)).lower()
+        href_l = href.lower()
+        is_feed = (
+            "alternate" in rel and any(marker in type_ for marker in ("rss", "atom", "xml"))
+        ) or any(marker in href_l for marker in ("/rss", "/feed", "atom.xml", "rss.xml")) or "rss" in text or "atom" in text
+        if not is_feed:
+            continue
+        full = urljoin(base_url, href)
+        if full in seen:
+            continue
+        seen.add(full)
+        feeds.append({
+            "url": full,
+            "title": _clean_text(node.get("title") or node.get_text(" ", strip=True)) or "Feed",
+            "source_type": "feed",
+            "discovery_method": "html_feed_link",
+        })
+    return feeds[:20]
+
+
+def parse_feed_xml(feed_text: str, feed_url: str = "") -> dict:
+    """Parse RSS/Atom title/link/date candidates."""
+    soup = BeautifulSoup(feed_text or "", "xml")
+    items: list[dict] = []
+    for node in soup.find_all(["item", "entry"]):
+        title = _clean_text(node.find("title").get_text(" ", strip=True) if node.find("title") else "")
+        link_node = node.find("link")
+        link = ""
+        if link_node:
+            link = str(link_node.get("href") or link_node.get_text(" ", strip=True) or "").strip()
+        date_node = node.find(["pubDate", "updated", "published"])
+        date = _clean_text(date_node.get_text(" ", strip=True) if date_node else "")
+        if title or link:
+            items.append({"title": title, "url": urljoin(feed_url, link) if link else "", "date": date})
+    return {"url": feed_url, "source_type": "feed", "items": items[:50], "item_count": len(items)}
+
+
+def extract_document_links_from_html(html: str, base_url: str) -> list[dict]:
+    """Extract public-looking document links from HTML."""
+    soup = BeautifulSoup(html or "", "html.parser")
+    docs: list[dict] = []
+    seen: set[str] = set()
+    for anchor in soup.select("a[href]"):
+        href = str(anchor.get("href") or "").strip()
+        if not href:
+            continue
+        full = urljoin(base_url, href)
+        if full in seen or _private_url_reason(full):
+            continue
+        match = _DOC_EXT_RE.search(full.lower())
+        if not match:
+            continue
+        ext = match.group(1).lower()
+        seen.add(full)
+        docs.append({
+            "url": full,
+            "title": _clean_text(anchor.get_text(" ", strip=True)) or full.rsplit("/", 1)[-1],
+            "source_type": "pdf_document" if ext == "pdf" else "document",
+            "adapter_family": "pdf_document" if ext == "pdf" else "document_listing",
+            "discovery_method": "document_link",
+            "content_type": f"application/{ext}",
+            "linked_from_url": base_url,
+        })
+    return docs[:100]
+
+
+def discover_same_domain_links(html: str, base_url: str, *, max_links: int = 50) -> dict:
+    """Collect same-domain public candidate links and rejection reasons."""
+    soup = BeautifulSoup(html or "", "html.parser")
+    accepted: list[dict] = []
+    rejected: list[dict] = []
+    seen: set[str] = set()
+    for anchor in soup.select("a[href]"):
+        href = str(anchor.get("href") or "").strip()
+        if not href or href.startswith(("#", "mailto:", "tel:", "javascript:", "data:")):
+            continue
+        full = urljoin(base_url, href)
+        if full in seen:
+            continue
+        seen.add(full)
+        if not _same_domain(full, base_url):
+            rejected.append({"url": full, "reason": "off-domain link"})
+            continue
+        private_reason = _private_url_reason(full)
+        if private_reason:
+            rejected.append({"url": full, "reason": private_reason})
+            continue
+        title = _clean_text(anchor.get_text(" ", strip=True))
+        score = _regulatory_score_for_text(f"{full} {title}")
+        if score == 0 and len(accepted) >= max_links:
+            continue
+        accepted.append({
+            "url": full,
+            "title": title,
+            "source_type": _infer_source_type(full, title, signals=["listing"] if score else []),
+            "regulatory_score": score,
+            "discovery_method": "same_domain_link",
+        })
+        if len(accepted) >= max_links:
+            break
+    accepted.sort(key=lambda row: (-int(row.get("regulatory_score") or 0), row.get("url") or ""))
+    return {"accepted": accepted[:max_links], "rejected": rejected[:max_links]}
+
+
+def classify_network_response(
+    url: str,
+    *,
+    status_code: int,
+    content_type: str,
+    body_preview: str,
+    page_url: str,
+) -> dict:
+    """Classify a captured browser/network response as a possible public endpoint."""
+    full = urljoin(page_url, url)
+    private_reason = _private_url_reason(full)
+    same_domain = _same_domain(full, page_url)
+    content_type_l = (content_type or "").lower()
+    preview = (body_preview or "").strip()
+    rejected = bool(private_reason or not same_domain or status_code >= 400)
+    source_type = "unknown"
+    adapter_family = ""
+    if any(marker in content_type_l for marker in _JSON_MARKERS) or preview.startswith(("{", "[")):
+        source_type = "public_json_api"
+        adapter_family = "public_json_api"
+    elif any(marker in content_type_l for marker in _PDF_MARKERS) or ".pdf" in full.lower():
+        source_type = "pdf_document"
+        adapter_family = "pdf_document"
+    elif any(marker in content_type_l for marker in _XML_MARKERS) or preview.startswith("<"):
+        source_type = "feed_or_xml"
+        adapter_family = "sitemap_feed"
+
+    if source_type == "unknown":
+        rejected = True
+
+    reason = ""
+    if private_reason:
+        reason = private_reason
+    elif not same_domain:
+        reason = "off-domain network endpoint"
+    elif status_code >= 400:
+        reason = f"HTTP {status_code}"
+    elif source_type == "unknown":
+        reason = "unsupported network content type"
+
+    return {
+        "candidate_url": full,
+        "source_type": source_type,
+        "discovery_method": "playwright_network",
+        "official_status": "official_domain" if same_domain else "off_domain",
+        "access_status": "public_fetch_candidate" if not rejected else "rejected",
+        "adapter_family": adapter_family,
+        "adapter_name": adapter_family,
+        "content_type": content_type,
+        "status_code": status_code,
+        "confidence": 75 if not rejected else 0,
+        "noise_risk": "medium" if source_type == "public_json_api" else "low",
+        "source_health_risk": "medium",
+        "failure_reason": reason,
+        "remediation_hint": "" if not rejected else "Use only same-domain public unauthenticated endpoints.",
+        "candidate_status": "candidate" if not rejected else "rejected",
+        "next_action": "run_no_save_test" if not rejected else "reject",
+    }
+
+
+def capture_playwright_network_candidates(
+    url: str,
+    *,
+    max_responses: int = 50,
+    timeout_ms: int = 20_000,
+) -> list[dict]:
+    """Capture same-domain public JSON/XML/PDF candidates from a scoped Playwright page load."""
+    safe, reason = validate_public_url(url)
+    if not safe:
+        return [{
+            "candidate_url": url,
+            "source_type": "unknown",
+            "discovery_method": "playwright_network",
+            "candidate_status": "rejected",
+            "failure_reason": reason,
+            "next_action": "reject",
+        }]
+
+    try:
+        from app.scraper import _get_shared_browser
+    except Exception as exc:
+        return [{
+            "candidate_url": url,
+            "source_type": "unknown",
+            "discovery_method": "playwright_network",
+            "candidate_status": "rejected",
+            "failure_reason": f"Playwright unavailable: {type(exc).__name__}",
+            "next_action": "manual_review",
+        }]
+
+    candidates: list[dict] = []
+    seen: set[str] = set()
+    browser = _get_shared_browser()
+    context = browser.new_context(user_agent=REQUESTS_UA)
+    page = context.new_page()
+
+    def _on_response(response) -> None:
+        if len(candidates) >= max_responses:
+            return
+        response_url = response.url
+        if response_url in seen:
+            return
+        seen.add(response_url)
+        headers = response.headers or {}
+        content_type = headers.get("content-type", "")
+        if not any(marker in content_type.lower() for marker in (*_JSON_MARKERS, *_XML_MARKERS, *_PDF_MARKERS)) and not _DOC_EXT_RE.search(response_url.lower()):
+            return
+        body_preview = ""
+        if any(marker in content_type.lower() for marker in (*_JSON_MARKERS, *_XML_MARKERS)):
+            try:
+                body_preview = response.text()[:5_000]
+            except Exception:
+                body_preview = ""
+        candidates.append(classify_network_response(
+            response_url,
+            status_code=response.status,
+            content_type=content_type,
+            body_preview=body_preview,
+            page_url=url,
+        ))
+
+    try:
+        page.on("response", _on_response)
+        page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+        try:
+            page.wait_for_timeout(1_500)
+        except Exception:
+            pass
+    except Exception as exc:
+        candidates.append({
+            "candidate_url": url,
+            "source_type": "unknown",
+            "discovery_method": "playwright_network",
+            "candidate_status": "rejected",
+            "failure_reason": f"Network capture failed: {type(exc).__name__}: {exc}",
+            "next_action": "manual_review",
+        })
+    finally:
+        try:
+            context.close()
+        except Exception:
+            pass
+
+    return candidates[:max_responses]
+
+
+def score_endpoint_candidate(candidate: dict, *, official_domain: str) -> dict:
+    """Score and enrich an endpoint candidate without marking it active."""
+    url = str(candidate.get("candidate_url") or candidate.get("url") or "")
+    title = str(candidate.get("title") or "")
+    content_type = str(candidate.get("content_type") or "")
+    signals = list(candidate.get("signals") or [])
+    same_domain = _domain(url) == official_domain.lower()
+    linked_from_url = str(candidate.get("linked_from_url") or "")
+    linked_from_official_page = bool(linked_from_url and _domain(linked_from_url) == official_domain.lower())
+    private_reason = _private_url_reason(url)
+    source_type = str(candidate.get("source_type") or _infer_source_type(url, title, content_type, signals))
+    adapter_family, adapter_name = _adapter_for_source_type(source_type, url, title)
+    signal_score = _regulatory_score_for_text(" ".join([url, title, " ".join(signals)]))
+    officially_linked_document = (
+        not same_domain
+        and linked_from_official_page
+        and str(candidate.get("discovery_method") or "") == "document_link"
+        and source_type in {"pdf", "pdf_document", "document"}
+    )
+    confidence = 20 + (25 if same_domain else 15 if officially_linked_document else 0) + min(35, signal_score * 8)
+    if source_type in {"public_json_api", "pdf_document", "feed", "sitemap", "listing", "table", "rulebook", "register"}:
+        confidence += 15
+    if private_reason:
+        confidence = 0
+
+    candidate_status = "candidate"
+    failure_reason = ""
+    remediation_hint = ""
+    if private_reason:
+        candidate_status = "rejected"
+        failure_reason = private_reason
+        remediation_hint = "Do not use private/login/auth/paywall-looking endpoints."
+    elif officially_linked_document:
+        candidate_status = "candidate"
+        failure_reason = "Document is hosted off-domain but linked from an official source page; review provenance before evidence save."
+        remediation_hint = "Treat as officially linked candidate only after Source Monitor and Legal Language review."
+    elif not same_domain:
+        candidate_status = "rejected"
+        failure_reason = "Candidate is not on the official source domain."
+        remediation_hint = "Use official or officially linked endpoints only."
+    elif confidence < 45:
+        candidate_status = "remediation"
+        failure_reason = "Low regulatory/source relevance confidence."
+        remediation_hint = "Review manually before no-save testing."
+
+    noise = "medium" if source_type in {"listing", "register", "public_json_api"} else "low"
+    health = "medium" if source_type in {"public_json_api", "listing", "register"} else "low"
+    enriched = dict(candidate)
+    enriched.update({
+        "candidate_url": url,
+        "source_type": source_type,
+        "official_status": "official_domain" if same_domain else "officially_linked" if officially_linked_document else "off_domain",
+        "access_status": "manual_review_required" if officially_linked_document else "public_candidate" if candidate_status != "rejected" else "rejected",
+        "adapter_family": adapter_family,
+        "adapter_name": adapter_name,
+        "selector_hint": candidate.get("selector_hint", ""),
+        "wait_selector_hint": candidate.get("wait_selector_hint", ""),
+        "confidence": max(0, min(100, confidence)),
+        "buyer_relevance": "MLRO/CCO regulatory monitoring" if signal_score else "manual relevance review required",
+        "noise_risk": candidate.get("noise_risk") or noise,
+        "source_health_risk": candidate.get("source_health_risk") or health,
+        "failure_reason": candidate.get("failure_reason") or failure_reason,
+        "remediation_hint": candidate.get("remediation_hint") or remediation_hint,
+        "candidate_status": candidate.get("candidate_status") or candidate_status,
+        "next_action": "manual_review" if officially_linked_document else "run_no_save_test" if candidate_status == "candidate" else "manual_review",
+    })
+    return enriched
+
+
+def generate_source_candidate(candidate: dict, *, regulator: str = "", jurisdiction: str = "") -> dict:
+    """Generate an inactive source work-queue candidate with agent gate placeholders."""
+    url = str(candidate.get("candidate_url") or candidate.get("url") or "")
+    slug = re.sub(r"[^a-z0-9]+", "-", urlparse(url).path.strip("/").lower()).strip("-") or "source"
+    domain_slug = re.sub(r"[^a-z0-9]+", "-", urlparse(url).netloc.lower()).strip("-") or "official-source"
+    proposed_id = candidate.get("proposed_source_id") or f"candidate-{domain_slug}-{slug}"[:96]
+    now_reason = "Generated candidate only; no no-save, proof, baseline, or activation gate has passed."
+    hold_gate = {"status": "hold", "reason": now_reason, "reviewed_at": "", "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]}
+    return {
+        "proposed_source_id": proposed_id,
+        "regulator": regulator,
+        "jurisdiction": jurisdiction,
+        "title": candidate.get("title") or candidate.get("candidate_url") or url,
+        "official_url": url,
+        "source_type": candidate.get("source_type", ""),
+        "discovery_method": candidate.get("discovery_method", ""),
+        "adapter_family": candidate.get("adapter_family", ""),
+        "adapter_name": candidate.get("adapter_name", ""),
+        "adapter_config": {},
+        "expected_min_length": 500,
+        "selector_hints": {
+            "selector_hint": candidate.get("selector_hint", ""),
+            "wait_selector_hint": candidate.get("wait_selector_hint", ""),
+        },
+        "buyer_relevance": candidate.get("buyer_relevance", "manual relevance review required"),
+        "noise_risk": candidate.get("noise_risk", "unknown"),
+        "source_health_risk": candidate.get("source_health_risk", "unknown"),
+        "current_state": "candidate",
+        "next_action": candidate.get("next_action", "run_no_save_test"),
+        "source_monitor_gate": {"status": "hold", "reason": "Officialness and endpoint quality require review.", "reviewed_at": "", "blocking_issues": ["source_monitor_review_required"]},
+        "evidence_trail_gate": hold_gate,
+        "qa_critic_gate": {"status": "hold", "reason": "No no-save or evidence validation has run.", "reviewed_at": "", "blocking_issues": ["qa_review_required"]},
+        "legal_language_gate": {"status": "hold", "reason": "Candidate must not be customer-facing as ready.", "reviewed_at": "", "blocking_issues": ["ready_claim_forbidden"]},
+        "product_manager_gate": {"status": "hold", "reason": "Buyer relevance requires review.", "reviewed_at": "", "blocking_issues": ["buyer_relevance_review_required"]},
+        "code_architect_gate": {"status": "hold", "reason": "Adapter config has not been tested.", "reviewed_at": "", "blocking_issues": ["adapter_test_required"]},
+        "final_activation_gate": {"status": "candidate", "reason": now_reason},
+    }
+
+
+def _metadata_from_html(html: str, base_url: str) -> dict:
+    soup = BeautifulSoup(html or "", "html.parser")
+    title = _clean_text(soup.select_one("title").get_text(" ", strip=True) if soup.select_one("title") else "")
+    canonical_node = soup.select_one("link[rel='canonical'][href]")
+    canonical = urljoin(base_url, canonical_node.get("href")) if canonical_node else base_url
+    desc_node = soup.select_one("meta[name='description'], meta[property='og:description']")
+    description = _clean_text(desc_node.get("content") if desc_node else "")
+    return {"page_title": title, "canonical_url": canonical, "meta_description": description}
+
+
+def build_discovery_report_from_html(
+    input_url: str,
+    html: str,
+    *,
+    robots_text: str = "",
+    sitemap_entries: list[dict] | None = None,
+    network_candidates: list[dict] | None = None,
+    max_links: int = 50,
+) -> dict:
+    """Build the structured no-save discovery contract from already-fetched HTML."""
+    meta = _metadata_from_html(html, input_url)
+    official_domain = _domain(input_url)
+    robots = parse_robots_sitemaps(robots_text)
+    feeds = discover_feed_links_from_html(html, input_url)
+    documents = extract_document_links_from_html(html, input_url)
+    links = discover_same_domain_links(html, input_url, max_links=max_links)
+    soup = BeautifulSoup(html or "", "html.parser")
+
+    table_candidates: list[dict] = []
+    for idx, table in enumerate(soup.select("table")[:10], 1):
+        table_candidates.append(score_endpoint_candidate({
+            "candidate_url": input_url,
+            "title": f"{meta['page_title']} table {idx}".strip(),
+            "source_type": "table",
+            "discovery_method": "dom_table",
+            "selector_hint": "table",
+            "signals": ["table", "register"] if "register" in input_url.lower() else ["table"],
+        }, official_domain=official_domain))
+
+    listing_candidates: list[dict] = []
+    for node in soup.select("[data-icms-list], .listing, .list, main")[:5]:
+        item_count = len(node.select("article, li, tr, .card, .item, a[href]"))
+        if item_count >= 3:
+            selector = "[data-icms-list]" if node.has_attr("data-icms-list") else (f".{node.get('class')[0]}" if node.get("class") else node.name)
+            listing_candidates.append(score_endpoint_candidate({
+                "candidate_url": input_url,
+                "title": meta["page_title"] or "Listing candidate",
+                "source_type": "listing",
+                "discovery_method": "dom_listing",
+                "selector_hint": selector,
+                "wait_selector_hint": selector,
+                "signals": ["listing", "regulation"],
+            }, official_domain=official_domain))
+
+    rulebook_candidates: list[dict] = []
+    register_candidates: list[dict] = []
+    for link in links["accepted"]:
+        text = f"{link.get('url')} {link.get('title')}".lower()
+        scored = score_endpoint_candidate({
+            "candidate_url": link["url"],
+            "title": link.get("title", ""),
+            "source_type": link.get("source_type", ""),
+            "discovery_method": link.get("discovery_method", "same_domain_link"),
+            "signals": ["rulebook"] if "rulebook" in text else ["register"] if "register" in text else ["regulation"],
+        }, official_domain=official_domain)
+        if scored["source_type"] == "rulebook":
+            rulebook_candidates.append(scored)
+        elif scored["source_type"] == "register":
+            register_candidates.append(scored)
+
+    public_json_candidates = [
+        cand for cand in (network_candidates or []) if cand.get("source_type") == "public_json_api" and cand.get("candidate_status") != "rejected"
+    ]
+    xhr_candidates = list(network_candidates or [])
+
+    scored_documents = [
+        score_endpoint_candidate({
+            "candidate_url": doc["url"],
+            "title": doc.get("title", ""),
+            "source_type": doc.get("source_type", "document"),
+            "discovery_method": "document_link",
+            "content_type": doc.get("content_type", ""),
+            "linked_from_url": doc.get("linked_from_url", input_url),
+            "signals": ["publication", "guidance"],
+        }, official_domain=official_domain)
+        for doc in documents
+    ]
+    scored_feeds = [
+        score_endpoint_candidate({
+            "candidate_url": feed["url"],
+            "title": feed.get("title", ""),
+            "source_type": "feed",
+            "discovery_method": feed.get("discovery_method", "html_feed_link"),
+            "signals": ["feed", "publication"],
+        }, official_domain=official_domain)
+        for feed in feeds
+    ]
+    scored_links = [
+        score_endpoint_candidate({
+            "candidate_url": link["url"],
+            "title": link.get("title", ""),
+            "source_type": link.get("source_type", ""),
+            "discovery_method": link.get("discovery_method", "same_domain_link"),
+            "signals": ["regulation"] if link.get("regulatory_score") else [],
+        }, official_domain=official_domain)
+        for link in links["accepted"]
+    ]
+    sitemap_urls = robots["sitemap_urls"] + [entry.get("loc") for entry in (sitemap_entries or []) if entry.get("loc")]
+    scored_sitemaps = [
+        score_endpoint_candidate({
+            "candidate_url": url,
+            "title": "Sitemap URL",
+            "source_type": "sitemap",
+            "discovery_method": "sitemap",
+            "signals": ["sitemap"],
+        }, official_domain=official_domain)
+        for url in sitemap_urls
+    ]
+
+    try:
+        from app.dom_investigator import investigate_html
+        dom_investigation = investigate_html(html, url=input_url)
+    except Exception as exc:
+        dom_investigation = {"failure_reason": f"DOM investigation failed: {type(exc).__name__}"}
+
+    recommended = [
+        *public_json_candidates,
+        *listing_candidates,
+        *table_candidates,
+        *rulebook_candidates,
+        *register_candidates,
+        *scored_documents,
+        *scored_feeds,
+        *scored_sitemaps,
+        *scored_links,
+    ]
+    recommended = [item for item in recommended if item.get("candidate_status") != "rejected"]
+    recommended.sort(key=lambda item: (-int(item.get("confidence") or 0), item.get("candidate_url") or ""))
+
+    return {
+        "input_url": input_url,
+        "final_url": meta["canonical_url"],
+        "official_domain": official_domain,
+        "page_title": meta["page_title"],
+        "meta_description": meta["meta_description"],
+        "robots_status": robots["status"],
+        "sitemap_urls": sitemap_urls[:100],
+        "feed_urls": scored_feeds[:50],
+        "document_links": scored_documents[:100],
+        "pdf_links": [doc for doc in scored_documents if doc.get("source_type") == "pdf_document"][:100],
+        "public_json_candidates": public_json_candidates[:50],
+        "xhr_candidates": xhr_candidates[:100],
+        "listing_candidates": listing_candidates[:20],
+        "table_candidates": table_candidates[:20],
+        "rulebook_candidates": rulebook_candidates[:20],
+        "register_candidates": register_candidates[:20],
+        "same_domain_candidate_urls": scored_links[:max_links],
+        "rejected_urls": links["rejected"][:max_links],
+        "dom_investigation": dom_investigation,
+        "warnings": [],
+        "recommended_activation_paths": recommended[:50],
+    }
+
+
+def discover_source(
+    url: str,
+    *,
+    use_js: bool = False,
+    include_network: bool = False,
+    include_sitemap: bool = True,
+    include_feeds: bool = True,
+    include_documents: bool = True,
+    max_links: int = 50,
+    max_depth: int = 1,
+) -> dict:
+    """Fetch one public URL and return structured no-save discovery output."""
+    safe, reason = validate_public_url(url)
+    if not safe:
+        return {
+            "input_url": url,
+            "final_url": url,
+            "official_domain": _domain(url),
+            "robots_status": "blocked",
+            "sitemap_urls": [],
+            "feed_urls": [],
+            "document_links": [],
+            "pdf_links": [],
+            "public_json_candidates": [],
+            "xhr_candidates": [],
+            "listing_candidates": [],
+            "table_candidates": [],
+            "rulebook_candidates": [],
+            "register_candidates": [],
+            "same_domain_candidate_urls": [],
+            "rejected_urls": [],
+            "warnings": [reason],
+            "recommended_activation_paths": [],
+        }
+
+    html = ""
+    final_url = url
+    warnings: list[str] = []
+    network_candidates: list[dict] = []
+    try:
+        if use_js:
+            html = _fetch_via_playwright(url)
+        else:
+            resp = _req.get(url, headers={"User-Agent": REQUESTS_UA, "Accept-Language": "en,ru;q=0.8"}, timeout=HTTP_TIMEOUT_S, allow_redirects=True)
+            final_url = resp.url or url
+            html = resp.text if resp.ok else ""
+            if not resp.ok:
+                warnings.append(f"HTTP {resp.status_code}")
+    except Exception as exc:
+        warnings.append(f"Fetch failed: {type(exc).__name__}: {exc}")
+
+    robots_text = ""
+    if include_sitemap:
+        try:
+            robots_resp = _req.get(_origin(final_url) + "/robots.txt", headers={"User-Agent": REQUESTS_UA}, timeout=_PROBE_TIMEOUT, allow_redirects=True)
+            robots_text = robots_resp.text if robots_resp.ok else ""
+        except Exception as exc:
+            warnings.append(f"robots.txt fetch failed: {type(exc).__name__}")
+
+    if include_network:
+        network_candidates = capture_playwright_network_candidates(final_url, max_responses=max_links)
+
+    report = build_discovery_report_from_html(
+        final_url,
+        html,
+        robots_text=robots_text,
+        network_candidates=network_candidates,
+        max_links=max_links,
+    )
+    report["input_url"] = url
+    report["final_url"] = report.get("final_url") or final_url
+    report["warnings"].extend(warnings)
+    report["discovery_options"] = {
+        "use_js": use_js,
+        "include_network": include_network,
+        "include_sitemap": include_sitemap,
+        "include_feeds": include_feeds,
+        "include_documents": include_documents,
+        "max_links": max_links,
+        "max_depth": max_depth,
+    }
+    if not include_feeds:
+        report["feed_urls"] = []
+    if not include_documents:
+        report["document_links"] = []
+        report["pdf_links"] = []
+    return report
 
 
 def _probe(url: str) -> tuple[int | None, str, str | None]:

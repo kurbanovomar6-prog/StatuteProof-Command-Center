@@ -20,11 +20,13 @@ QUALITY_LABELS = (
 )
 
 POLICY_PATTERNS: tuple[tuple[str, str], ...] = (
-    ("login", r"\b(sign in|log in|login|username|password|single sign-on|sso)\b"),
-    ("captcha", r"\b(captcha|recaptcha|verify you are human|cloudflare ray|checking your browser)\b"),
     ("paywall", r"\b(subscribe to continue|subscription required|premium access|paywall|members only)\b"),
     ("private_portal", r"\b(private portal|client portal|restricted access|authorised users only|authorized users only)\b"),
 )
+_LOGIN_VISIBLE_RE = re.compile(r"\b(sign in|log in|login|username|password|single sign-on|sso)\b", re.I)
+_LOGIN_FORM_RE = re.compile(r"(<form[^>]+login|type=['\"]password['\"]|name=['\"]password['\"])", re.I)
+_CAPTCHA_VISIBLE_RE = re.compile(r"\b(captcha|recaptcha|verify you are human|cloudflare ray|checking your browser)\b", re.I)
+_CAPTCHA_WALL_RE = re.compile(r"(cf-browser-verification|cloudflare ray id|verify you are human|checking your browser)", re.I)
 
 
 def quality_label(score: int) -> str:
@@ -35,8 +37,21 @@ def quality_label(score: int) -> str:
 
 
 def detect_policy_warnings(text: str, html: str = "") -> list[str]:
-    blob = f"{text or ''}\n{html or ''}".lower()
+    visible = (text or "").lower()
+    raw = (html or "").lower()
+    visible_len = len(visible.strip())
     warnings: list[str] = []
+
+    # Do not block public regulator pages merely because chrome contains a
+    # "Login" link or a recaptcha script asset. Treat login/captcha as hard
+    # policy warnings only when the extracted visible page itself looks like an
+    # access gate, or when raw HTML contains a real password/login form.
+    if _LOGIN_FORM_RE.search(raw) or (_LOGIN_VISIBLE_RE.search(visible) and visible_len < 1_000):
+        warnings.append("login")
+    if _CAPTCHA_WALL_RE.search(raw) or (_CAPTCHA_VISIBLE_RE.search(visible) and visible_len < 1_000):
+        warnings.append("captcha")
+
+    blob = f"{visible}\n{raw}"
     for name, pattern in POLICY_PATTERNS:
         if re.search(pattern, blob, flags=re.I):
             warnings.append(name)

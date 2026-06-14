@@ -297,6 +297,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_contact()
         elif self.path == "/api/source-test":
             self._handle_source_test()
+        elif self.path == "/api/custom-sources/discover":
+            self._handle_custom_source_discover()
         elif self.path == "/api/custom-sources/test":
             self._handle_custom_source_test()
         elif self.path == "/api/custom-sources":
@@ -1206,6 +1208,52 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             logger.error("custom-sources list error: %s", exc)
             self._send_json({"ok": False, "message": "Failed to load custom sources."}, 500)
+
+    def _handle_custom_source_discover(self) -> None:
+        """
+        Discover public endpoint candidates for a custom source URL.
+
+        POST /api/custom-sources/discover
+        Body: { "url": "https://...", "use_js": false }
+        Returns structured no-save discovery data only. It never writes evidence
+        and never marks a source ready.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_SOURCE_TEST_LIMITER, "custom_source_discover"):
+            return
+
+        body = self._read_json()
+        url = str(body.get("url", "")).strip()
+        if not url:
+            self._send_json({"ok": False, "message": "URL is required."}, 400)
+            return
+
+        try:
+            from app.source_discovery import discover_source
+            report = discover_source(
+                url,
+                use_js=bool(body.get("use_js") or body.get("js")),
+                include_network=bool(body.get("network")),
+                include_sitemap=body.get("sitemap", True) is not False,
+                include_feeds=body.get("feeds", True) is not False,
+                include_documents=body.get("documents", True) is not False,
+                max_links=int(body.get("max_links") or 50),
+                max_depth=int(body.get("max_depth") or 1),
+            )
+            self._send_json({
+                "ok": True,
+                "discovery": report,
+                "evidence_written": False,
+                "evidence_level": "PREVIEW_ONLY",
+                "can_activate_monitoring": False,
+                "message": "Discovery completed. Run a no-save Source Lab test before any evidence or activation step.",
+            })
+        except Exception as exc:
+            logger.error("custom-source discovery error: %s: %s", type(exc).__name__, exc)
+            self._send_json({"ok": False, "message": "Source discovery failed."}, 500)
 
     def _handle_custom_source_test(self) -> None:
         """

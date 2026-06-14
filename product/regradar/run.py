@@ -1808,108 +1808,76 @@ def _cmd_watch(extra_args: list[str]) -> None:
     run_watch_loop(interval)
 
 
-def _cmd_discover_source(url: str, json_export: bool, jurisdiction: str, category: str) -> None:
-    """Run the Source Connection Strategy Engine on a user-submitted URL."""
+def _cmd_discover_source(
+    url: str,
+    json_export: bool,
+    jurisdiction: str,
+    category: str,
+    *,
+    js: bool = False,
+    network: bool = False,
+    sitemap: bool = True,
+    feeds: bool = True,
+    documents: bool = True,
+    max_links: int = 50,
+    max_depth: int = 1,
+) -> None:
+    """Run structured no-save source discovery on one public URL."""
     import json as _json
-    from app.source_connector import run_source_onboarding, build_json_report
+    from app.source_discovery import discover_source
 
-    print(f"\n  {_BOLD}RegRadar — Source Connection Strategy Engine{_R}", file=sys.stderr)
-    print(f"  {_DIM}Analysing: {url}{_R}\n", file=sys.stderr)
+    print(f"\n  {_BOLD}StatuteProof — Source Discovery Engine{_R}", file=sys.stderr)
+    print(f"  {_DIM}Discovering endpoints without evidence writes: {url}{_R}\n", file=sys.stderr)
 
-    result = run_source_onboarding(url, jurisdiction=jurisdiction, category=category)
+    report = discover_source(
+        url,
+        use_js=js,
+        include_network=network,
+        include_sitemap=sitemap,
+        include_feeds=feeds,
+        include_documents=documents,
+        max_links=max_links,
+        max_depth=max_depth,
+    )
+    if jurisdiction:
+        report["jurisdiction"] = jurisdiction
+    if category:
+        report["category"] = category
 
     if json_export:
-        report = build_json_report(result)
-        today = __import__("datetime").date.today().isoformat()
-        slug = url.replace("https://", "").replace("http://", "").split("/")[0].replace(".", "_")
-        out_path = f"reports/discover_source_{slug}_{today}.json"
-        import os as _os
-        _os.makedirs("reports", exist_ok=True)
-        with open(out_path, "w", encoding="utf-8") as fh:
-            _json.dump(report, fh, indent=2, ensure_ascii=False)
-        print(_json.dumps(report, indent=2, ensure_ascii=False))
-        print(f"\n  {_GREEN}JSON exported → {out_path}{_R}", file=sys.stderr)
+        print(_json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
         return
 
-    # ── terminal display ───────────────────────────────────────────────────────
     _hr("═")
-    qlabel = result.get("quality_label", "unknown").upper()
-    qscore = result.get("quality_score", 0)
-    rstatus = result.get("recommended_status", "unknown")
-    verdict = result.get("verdict", "unknown")
-    method = result.get("connection_method", "unknown")
-    best_url = result.get("best_monitoring_url", url)
-    chars = result.get("extracted_chars", 0)
-    limitations = result.get("limitations", [])
+    _label("Official domain:", report.get("official_domain", ""))
+    _label("Final URL:", report.get("final_url", ""))
+    _label("Sitemap URLs:", str(len(report.get("sitemap_urls", []))))
+    _label("Feeds:", str(len(report.get("feed_urls", []))))
+    _label("Documents:", str(len(report.get("document_links", []))))
+    _label("Public JSON candidates:", str(len(report.get("public_json_candidates", []))))
+    _label("Same-domain candidates:", str(len(report.get("same_domain_candidate_urls", []))))
+    _label("Recommended paths:", str(len(report.get("recommended_activation_paths", []))))
 
-    _VERDICT_COLOR = {
-        "ready":          _GREEN,
-        "limited":        _YELLOW,
-        "custom_adapter": _YELLOW,
-        "unavailable":    _RED,
-    }
-    vc = _VERDICT_COLOR.get(verdict, _DIM)
-    print(f"  {vc}{_BOLD}Verdict: {verdict.upper()}{_R}  "
-          f"│  Quality: {_BOLD}{qlabel}{_R} ({qscore}/100)  "
-          f"│  Status: {_BOLD}{rstatus}{_R}")
-    print()
-    _label("Best monitoring URL:", best_url)
-    _label("Connection method:",   method)
-    _label("Extracted chars:",     f"{chars:,}c")
-    if jurisdiction:
-        _label("Jurisdiction:", jurisdiction.upper())
-    if category:
-        _label("Category:", category)
-
-    # structural signals
-    has_feed     = result.get("stages", {}).get("feeds",    {}).get("found", 0)
-    has_sitemap  = result.get("stages", {}).get("sitemaps", {}).get("found", 0)
-    has_docs     = result.get("stages", {}).get("documents",{}).get("found", 0)
-    has_api      = len(result.get("api_endpoints", []))
-    if any([has_feed, has_sitemap, has_docs, has_api]):
+    paths = report.get("recommended_activation_paths", [])
+    if paths:
         _hr("·")
-        print(f"  {_BOLD}Structural Signals{_R}")
-        if has_feed:
-            _label("RSS/Atom feeds:", str(has_feed))
-        if has_sitemap:
-            _label("Sitemaps:", str(has_sitemap))
-        if has_docs:
-            _label("Documents:", str(has_docs))
-        if has_api:
-            _label("API endpoints:", str(has_api))
+        print(f"  {_BOLD}Top Activation Path Candidates{_R}")
+        for item in paths[:8]:
+            print(
+                f"  {_DIM}{int(item.get('confidence') or 0):>3}/100{_R}  "
+                f"{item.get('adapter_family') or '-':<24}  "
+                f"{item.get('candidate_url')}"
+            )
 
-    deep_candidates = result.get("deep_url_candidates", [])
-    if deep_candidates:
+    warnings = report.get("warnings", [])
+    if warnings:
         _hr("·")
-        print(f"  {_BOLD}Top Deep URL Candidates{_R}")
-        for c in deep_candidates[:5]:
-            cq = c.get("quality", "?")
-            cc = c.get("chars", 0)
-            cu = c.get("url", "")
-            print(f"  {_DIM}  {cq:>10}  {cc:>7,}c  {cu}{_R}")
-
-    lang_versions = result.get("language_versions", [])
-    if lang_versions:
-        _hr("·")
-        print(f"  {_BOLD}Language Versions{_R}")
-        for lv in lang_versions[:3]:
-            print(f"  {_DIM}  {lv.get('language','?'):>6}  {lv.get('chars',0):>7,}c  {lv.get('url','')}{_R}")
-
-    if limitations:
-        _hr("·")
-        print(f"  {_YELLOW}Limitations{_R}")
-        for lim in limitations:
-            print(f"  {_DIM}  • {lim}{_R}")
-
-    next_steps = result.get("next_steps", [])
-    if next_steps:
-        _hr("·")
-        print(f"  {_BOLD}Next Steps{_R}")
-        for ns in next_steps:
-            print(f"    • {ns}")
+        print(f"  {_YELLOW}Warnings{_R}")
+        for warning in warnings[:8]:
+            print(f"  {_DIM}  • {warning}{_R}")
 
     _hr("═")
-    print(f"  {_DIM}Run with --json to export a machine-readable report.{_R}\n")
+    print(f"  {_DIM}No evidence was saved. Run no-save Source Lab before any proof/baseline work.{_R}\n")
 
 
 def _cmd_source_lab(
@@ -2132,6 +2100,8 @@ def main() -> None:
         print("  python run.py source-lab <url> --adapter-family listing --adapter-config-json '{\"container_selector\":\"main\"}'", file=sys.stderr)
         print("  python run.py source-lab <url> --source-id AE-example --save --json", file=sys.stderr)
         print("  python run.py investigate-source <url> --js --json  inspect DOM and suggest selectors", file=sys.stderr)
+        print("  python run.py discover-source <url> --json --sitemap --feeds --documents  discover candidate endpoints without saving", file=sys.stderr)
+        print("  python run.py source-discovery-lab <url> --js --network --json  discover endpoints + DOM remediation hints", file=sys.stderr)
         print("  python run.py add-source                     interactively add a source", file=sys.stderr)
         print("  python run.py coverage                       coverage dashboard (uses latest audit JSON)", file=sys.stderr)
         print("  python run.py coverage --json                export reports/coverage_YYYY-MM-DD.json", file=sys.stderr)
@@ -3033,21 +3003,75 @@ def main() -> None:
             sys.exit(2)
         _run_single_url(args[1].strip())
 
-    elif cmd == "discover-source":
+    elif cmd in {"discover-source", "source-discovery-lab"}:
         extra = args[1:]
         if not extra or extra[0].startswith("-"):
-            print("Error: 'discover-source' requires a URL argument.", file=sys.stderr)
-            print("  Usage: python run.py discover-source <url> [--json] [--jurisdiction CODE] [--category NAME]", file=sys.stderr)
+            print(f"Error: '{cmd}' requires a URL argument.", file=sys.stderr)
+            print(
+                f"  Usage: python run.py {cmd} <url> [--json] [--js] [--network] [--sitemap] [--feeds] [--documents] [--max-links N] [--max-depth N]",
+                file=sys.stderr,
+            )
             sys.exit(2)
         ds_url = extra[0]
         ds_json = "--json" in extra
         ds_jur = ""
         ds_cat = ""
+        ds_js = cmd == "source-discovery-lab"
+        ds_network = False
+        ds_sitemap = True
+        ds_feeds = True
+        ds_documents = True
+        ds_max_links = 50
+        ds_max_depth = 1
         i_ = 1
         while i_ < len(extra):
             tok = extra[i_]
             if tok == "--json":
                 i_ += 1
+            elif tok == "--js":
+                ds_js = True
+                i_ += 1
+            elif tok == "--network":
+                ds_network = True
+                i_ += 1
+            elif tok == "--sitemap":
+                ds_sitemap = True
+                i_ += 1
+            elif tok == "--no-sitemap":
+                ds_sitemap = False
+                i_ += 1
+            elif tok == "--feeds":
+                ds_feeds = True
+                i_ += 1
+            elif tok == "--no-feeds":
+                ds_feeds = False
+                i_ += 1
+            elif tok == "--documents":
+                ds_documents = True
+                i_ += 1
+            elif tok == "--no-documents":
+                ds_documents = False
+                i_ += 1
+            elif tok == "--max-links":
+                if i_ + 1 >= len(extra):
+                    print("Error: --max-links requires an integer.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    ds_max_links = max(1, min(250, int(extra[i_ + 1])))
+                except ValueError:
+                    print(f"Error: --max-links must be an integer, got {extra[i_+1]!r}.", file=sys.stderr)
+                    sys.exit(2)
+                i_ += 2
+            elif tok == "--max-depth":
+                if i_ + 1 >= len(extra):
+                    print("Error: --max-depth requires an integer.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    ds_max_depth = max(0, min(2, int(extra[i_ + 1])))
+                except ValueError:
+                    print(f"Error: --max-depth must be an integer, got {extra[i_+1]!r}.", file=sys.stderr)
+                    sys.exit(2)
+                i_ += 2
             elif tok == "--jurisdiction":
                 if i_ + 1 >= len(extra):
                     print("Error: --jurisdiction requires a value.", file=sys.stderr)
@@ -3061,9 +3085,21 @@ def main() -> None:
                 ds_cat = extra[i_ + 1]
                 i_ += 2
             else:
-                print(f"Error: unknown option {tok!r} for 'discover-source'.", file=sys.stderr)
+                print(f"Error: unknown option {tok!r} for '{cmd}'.", file=sys.stderr)
                 sys.exit(2)
-        _cmd_discover_source(ds_url, json_export=ds_json, jurisdiction=ds_jur, category=ds_cat)
+        _cmd_discover_source(
+            ds_url,
+            json_export=ds_json,
+            jurisdiction=ds_jur,
+            category=ds_cat,
+            js=ds_js,
+            network=ds_network,
+            sitemap=ds_sitemap,
+            feeds=ds_feeds,
+            documents=ds_documents,
+            max_links=ds_max_links,
+            max_depth=ds_max_depth,
+        )
 
     elif cmd.startswith(("http://", "https://")):
         # backward-compatible bare URL
@@ -3072,7 +3108,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
             file=sys.stderr,
         )
         sys.exit(2)

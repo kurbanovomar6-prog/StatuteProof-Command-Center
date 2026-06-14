@@ -50,6 +50,9 @@ REQUIRED_FAILURE_CODES = [
     "JS_REQUIRED",
     "PDF_ONLY_SOURCE",
     "LISTING_ADAPTER_REQUIRED",
+    "TABLE_ADAPTER_REQUIRED",
+    "REGISTER_ADAPTER_REQUIRED",
+    "RULEBOOK_ADAPTER_REQUIRED",
     "NAV_SHELL_ONLY",
     "ACCESS_BLOCKED",
     "LIKELY_WAF_403",
@@ -58,6 +61,9 @@ REQUIRED_FAILURE_CODES = [
     "SHALLOW_CONTENT",
     "SOURCE_STRUCTURE_CHANGED",
     "MANUAL_CHECK_REQUIRED",
+    "DISCOVERY_FOUND_BETTER_ENDPOINT",
+    "SITEMAP_DISCOVERY_REQUIRED",
+    "NETWORK_ENDPOINT_DISCOVERY_REQUIRED",
 ]
 
 REQUIRED_SOURCE_LAB_FIELDS = [
@@ -126,6 +132,8 @@ def main() -> int:
             errors.append(f"Source Lab contract missing field {field}.")
     if "investigate-source" not in run_text:
         errors.append("CLI must expose investigate-source command.")
+    if "discover-source" not in run_text or "source-discovery-lab" not in run_text:
+        errors.append("CLI must expose source discovery commands.")
     for label in ("Retry with JS", "Try listing adapter", "Try PDF listing", "Mark remediation", "Save baseline"):
         if label not in source_lab_text:
             errors.append(f"Source Lab UI missing remediation control: {label}")

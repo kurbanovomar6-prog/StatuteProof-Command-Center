@@ -55,6 +55,9 @@ class SourceFailureCode:
     JS_REQUIRED = "JS_REQUIRED"
     PDF_ONLY_SOURCE = "PDF_ONLY_SOURCE"
     LISTING_ADAPTER_REQUIRED = "LISTING_ADAPTER_REQUIRED"
+    TABLE_ADAPTER_REQUIRED = "TABLE_ADAPTER_REQUIRED"
+    REGISTER_ADAPTER_REQUIRED = "REGISTER_ADAPTER_REQUIRED"
+    RULEBOOK_ADAPTER_REQUIRED = "RULEBOOK_ADAPTER_REQUIRED"
     NAV_SHELL_ONLY = "NAV_SHELL_ONLY"
     ACCESS_BLOCKED = "ACCESS_BLOCKED"
     LIKELY_WAF_403 = "LIKELY_WAF_403"
@@ -63,6 +66,9 @@ class SourceFailureCode:
     SHALLOW_CONTENT = "SHALLOW_CONTENT"
     SOURCE_STRUCTURE_CHANGED = "SOURCE_STRUCTURE_CHANGED"
     MANUAL_CHECK_REQUIRED = "MANUAL_CHECK_REQUIRED"
+    DISCOVERY_FOUND_BETTER_ENDPOINT = "DISCOVERY_FOUND_BETTER_ENDPOINT"
+    SITEMAP_DISCOVERY_REQUIRED = "SITEMAP_DISCOVERY_REQUIRED"
+    NETWORK_ENDPOINT_DISCOVERY_REQUIRED = "NETWORK_ENDPOINT_DISCOVERY_REQUIRED"
 
 
 # Human-readable labels for dashboard display
@@ -208,6 +214,8 @@ def classify_failure_code(result: dict) -> str:
     """Map Source Lab outcome to a machine-readable remediation code."""
     reason = str(result.get("failure_reason") or " ".join(result.get("errors") or [])).lower()
     status = str(result.get("status") or "")
+    dom = result.get("dom_investigation") or {}
+    recommended_adapter = str(dom.get("recommended_adapter_family") or dom.get("recommended_adapter_name") or "")
     if result.get("hash_collision"):
         return SourceFailureCode.DUPLICATE_BOILERPLATE_HASH
     if result.get("nav_shell_detected") or status == SourceIntakeStatus.NAV_SHELL_ONLY:
@@ -220,6 +228,18 @@ def classify_failure_code(result: dict) -> str:
         return SourceFailureCode.SELECTOR_NOT_FOUND
     if status == SourceIntakeStatus.PDF_EXTRACTION_NEEDED:
         return SourceFailureCode.PDF_ONLY_SOURCE
+    if recommended_adapter == "listing":
+        return SourceFailureCode.LISTING_ADAPTER_REQUIRED
+    if recommended_adapter == "table":
+        return SourceFailureCode.TABLE_ADAPTER_REQUIRED
+    if recommended_adapter == "register":
+        return SourceFailureCode.REGISTER_ADAPTER_REQUIRED
+    if recommended_adapter in {"dfsa_rulebook", "rulebook"}:
+        return SourceFailureCode.RULEBOOK_ADAPTER_REQUIRED
+    if "sitemap" in reason:
+        return SourceFailureCode.SITEMAP_DISCOVERY_REQUIRED
+    if "network" in reason or "xhr" in reason or "api" in reason:
+        return SourceFailureCode.NETWORK_ENDPOINT_DISCOVERY_REQUIRED
     if status == SourceIntakeStatus.JS_RENDERING_NEEDED:
         return SourceFailureCode.JS_REQUIRED
     if status == SourceIntakeStatus.QUALITY_DROP:

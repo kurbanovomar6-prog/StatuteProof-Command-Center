@@ -117,8 +117,10 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
   const [advancedOpen, setAdvancedOpen] = useState(true)
   const [touched, setTouched] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [discoveryLoading, setDiscoveryLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [result, setResult] = useState(null)
+  const [discovery, setDiscovery] = useState(null)
   const [error, setError] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
 
@@ -136,6 +138,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
   }, [form])
 
   const canTest = Object.keys(requiredErrors).length === 0 && !loading
+  const canDiscover = Object.keys(requiredErrors).length === 0 && !discoveryLoading
   const canSave = Boolean(result?.can_save_for_validation) && planAllowsCustom && !saving
   const certification = result?.certification || {}
   const certificationStatus = certification.certification_status || result?.certification_status || 'TEST_NOT_RUN'
@@ -186,6 +189,41 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
       setError('API server not reachable. Start with: python run.py api')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function runDiscovery() {
+    setTouched(true)
+    setSaveMessage('')
+    if (!canDiscover) return
+    setDiscoveryLoading(true)
+    setError('')
+    setDiscovery(null)
+    try {
+      const res = await fetch('/api/custom-sources/discover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: form.url.trim(),
+          use_js: form.useJs,
+          network: false,
+          sitemap: true,
+          feeds: true,
+          documents: true,
+          max_links: 50,
+          max_depth: 1,
+        }),
+      })
+      const data = await res.json()
+      if (!data.ok) {
+        setError(data.message || 'Source discovery failed.')
+      } else {
+        setDiscovery(data.discovery)
+      }
+    } catch {
+      setError('API server not reachable. Start with: python run.py api')
+    } finally {
+      setDiscoveryLoading(false)
     }
   }
 
@@ -376,6 +414,14 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               Test Source
             </button>
+            <button
+              onClick={runDiscovery}
+              disabled={!canDiscover}
+              className="sp-btn-secondary w-full justify-center disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              {discoveryLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSearch className="h-4 w-4" />}
+              Discover endpoints
+            </button>
           </div>
         </section>
 
@@ -403,6 +449,50 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
           {saveMessage && (
             <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4 text-sm text-emerald-100">
               {saveMessage}
+            </div>
+          )}
+
+          {discovery && (
+            <div className="sp-panel p-5">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold text-white">Discovery mode</h2>
+                  <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">
+                    Endpoint candidates are inactive until no-save, proof, baseline, and review gates pass.
+                  </p>
+                </div>
+                <span className="rounded-md border border-cyan-400/25 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-100">
+                  {(discovery.recommended_activation_paths || []).length} candidates
+                </span>
+              </div>
+              <div className="grid gap-3 md:grid-cols-4">
+                <Metric label="Sitemaps" value={(discovery.sitemap_urls || []).length} tone="cyan" />
+                <Metric label="Feeds" value={(discovery.feed_urls || []).length} />
+                <Metric label="Documents" value={(discovery.document_links || []).length} />
+                <Metric label="Same-domain URLs" value={(discovery.same_domain_candidate_urls || []).length} />
+              </div>
+              {(discovery.recommended_activation_paths || []).length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {(discovery.recommended_activation_paths || []).slice(0, 6).map(item => (
+                    <div key={`${item.candidate_url}-${item.adapter_family}`} className="rounded-lg border border-slate-800 bg-slate-950/35 p-3">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-100">{item.title || item.candidate_url}</p>
+                          <p className="mt-1 break-all text-xs text-slate-500">{item.candidate_url}</p>
+                        </div>
+                        <span className="shrink-0 rounded-md border border-slate-700 px-2 py-1 text-[11px] font-semibold text-slate-300">
+                          {item.adapter_family || 'adapter'} · {item.confidence || 0}/100
+                        </span>
+                      </div>
+                      <div className="mt-2 grid gap-2 md:grid-cols-3">
+                        <Metric label="Next action" value={item.next_action || 'manual_review'} />
+                        <Metric label="Noise risk" value={item.noise_risk || 'unknown'} tone={item.noise_risk === 'high' ? 'rose' : item.noise_risk === 'low' ? 'emerald' : 'amber'} />
+                        <Metric label="Source-health" value={item.source_health_risk || 'unknown'} tone={item.source_health_risk === 'high' ? 'rose' : item.source_health_risk === 'low' ? 'emerald' : 'amber'} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
