@@ -31,12 +31,16 @@ const STATUS_COLOR = {
 const STATUS_LABELS = {
   TEST_NOT_RUN: 'Test not run',
   TEST_PASSED: 'Readiness threshold met',
-  CONFIRMED_ACCESSIBLE: 'Confirmed accessible',
+  CONFIRMED_ACCESSIBLE: 'Readiness threshold met',
   EVIDENCE_CONFIRMED: 'Evidence confirmed',
   BASELINE_PENDING: 'Baseline pending',
+  BASELINE_REQUIRED: 'Baseline required',
+  MONITORING_READY: 'Monitoring ready',
   MONITORING_CERTIFIED: 'Monitoring ready',
   CERTIFICATION_FAILED: 'Activation readiness failed',
+  NEEDS_REMEDIATION: 'Needs remediation',
   NEEDS_HUMAN_REVIEW: 'Needs human review',
+  NEEDS_REVIEW: 'Needs review',
   BLOCKED: 'Blocked',
   UNSUPPORTED: 'Unsupported',
   NAV_SHELL_ONLY: 'Navigation shell only',
@@ -77,7 +81,7 @@ function Metric({ label, value, tone = 'slate', mono = false }) {
 
 function ResultIcon({ result }) {
   const status = result?.readiness_status || result?.status
-  if (status === 'CONFIRMED_ACCESSIBLE' || result?.can_activate) {
+  if (result?.can_activate_monitoring || result?.can_save_for_validation) {
     return <CheckCircle className="h-5 w-5 text-emerald-300" />
   }
   if (['BLOCKED', 'UNSUPPORTED', 'NAV_SHELL_ONLY', 'CERTIFICATION_FAILED'].includes(status)) {
@@ -127,11 +131,14 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
   }, [form])
 
   const canTest = Object.keys(requiredErrors).length === 0 && !loading
-  const canSave = Boolean(result?.can_activate) && planAllowsCustom && !saving
+  const canSave = Boolean(result?.can_save_for_validation) && planAllowsCustom && !saving
   const certification = result?.certification || {}
   const certificationStatus = certification.certification_status || result?.certification_status || 'TEST_NOT_RUN'
   const evidenceLevel = result?.evidence_level || 'PREVIEW_ONLY'
-  const activateAllowed = certificationStatus === 'MONITORING_CERTIFIED' && evidenceLevel === 'CERTIFIED_EVIDENCE'
+  const activationReadiness = result?.activation_readiness || certificationStatus
+  const activateAllowed = Boolean(result?.can_activate_monitoring)
+  const baselineDone = result?.baseline_runs_completed ?? certification.baseline_runs_completed ?? 0
+  const baselineRequired = result?.baseline_runs_required ?? certification.baseline_runs_required ?? 2
 
   function set(key, value) {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -384,7 +391,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                     <div>
                       <h2 className="text-base font-semibold text-white">{result.status_label || result.readiness_status}</h2>
                       <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">
-                        {result.can_activate
+                        {result.can_save_for_validation
                           ? 'Readiness threshold met. Save queues this source for evidence validation. This is not monitoring approval.'
                           : result.failure_reason || 'This source needs remediation before evidence validation.'}
                       </p>
@@ -407,8 +414,8 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   <Metric label="Normalized length" value={(result.normalized_length || result.chars || 0).toLocaleString()} />
                   <Metric label="Hash preview" value={result.normalized_hash ? `${result.normalized_hash.slice(0, 16)}...` : '—'} mono />
                   <Metric label="Evidence level" value={evidenceLevelLabel(evidenceLevel)} tone={evidenceLevel === 'PREVIEW_ONLY' ? 'amber' : 'emerald'} />
-                  <Metric label="Activation readiness" value={statusLabel(certificationStatus)} tone={certificationStatus === 'MONITORING_CERTIFIED' ? 'emerald' : 'amber'} />
-                  <Metric label="Baseline" value={`${certification.baseline_runs_completed || 0}/${certification.baseline_runs_required || 2}`} />
+                  <Metric label="Activation readiness" value={statusLabel(activationReadiness)} tone={activateAllowed ? 'emerald' : 'amber'} />
+                  <Metric label="Baseline" value={`${baselineDone}/${baselineRequired}`} />
                   <Metric label="Policy" value={result.legal_policy_status || 'PUBLIC_SOURCE_ONLY'} />
                 </div>
 
@@ -452,7 +459,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                     onClick={saveSource}
                     disabled={!canSave}
                     className="sp-btn-primary justify-center disabled:cursor-not-allowed disabled:opacity-45"
-                    title={!planAllowsCustom ? 'Custom sources require UAE Monitor or Consultant scope.' : !result.can_activate ? 'Save is enabled only when can_activate is true.' : 'Save source for validation'}
+                    title={!planAllowsCustom ? 'Custom sources require UAE Monitor or Consultant scope.' : !result.can_save_for_validation ? 'Save is enabled only when the source can be queued for validation.' : 'Save source for validation'}
                   >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save Source

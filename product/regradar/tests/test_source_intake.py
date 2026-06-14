@@ -779,11 +779,11 @@ def test_optional_tools_courlan_rejects_invalid():
     assert result["is_valid"] is False
 
 
-# ── 9. can_activate gate — status-level checks ───────────────────────────────
+# ── 9. Source Lab save/activation gate checks ────────────────────────────────
 
 
 def test_can_activate_true_only_for_confirmed():
-    """Only CONFIRMED_ACCESSIBLE maps to can_activate=True."""
+    """Legacy status-level helper: only CONFIRMED_ACCESSIBLE may pass the first gate."""
     from app.source_intake import SourceIntakeStatus
     non_confirmable = [
         SourceIntakeStatus.JS_RENDERING_NEEDED,
@@ -802,3 +802,35 @@ def test_can_activate_true_only_for_confirmed():
 def test_needs_selector_review_is_not_confirmed():
     """NEEDS_SELECTOR_REVIEW must not resolve to CONFIRMED_ACCESSIBLE."""
     assert SourceIntakeStatus.NEEDS_SELECTOR_REVIEW != SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+
+
+def test_confirmed_accessible_label_does_not_say_ready():
+    """Customer-facing labels must not imply monitoring readiness from a preview test."""
+    from app.source_intake import STATUS_LABELS
+
+    assert STATUS_LABELS[SourceIntakeStatus.CONFIRMED_ACCESSIBLE] != "Ready"
+    assert "threshold" in STATUS_LABELS[SourceIntakeStatus.CONFIRMED_ACCESSIBLE].lower()
+
+
+def test_source_lab_contract_separates_save_from_activation():
+    """A no-save passing test can be saved for validation, but cannot activate monitoring."""
+    from app.source_intake import build_source_lab_contract
+    from app.source_certification import CertificationStatus, EvidenceLevel
+
+    result = {
+        "status": SourceIntakeStatus.CONFIRMED_ACCESSIBLE,
+        "evidence_written": False,
+        "evidence_level": EvidenceLevel.PREVIEW_ONLY,
+        "certification_status": CertificationStatus.TEST_PASSED,
+        "certification": {
+            "certification_status": CertificationStatus.TEST_PASSED,
+            "baseline_runs_completed": 0,
+            "baseline_runs_required": 2,
+        },
+    }
+    contract = build_source_lab_contract(result)
+
+    assert contract["can_save_for_validation"] is True
+    assert contract["can_activate_monitoring"] is False
+    assert contract["activation_readiness"] == "BASELINE_REQUIRED"
+    assert contract["evidence_level"] == EvidenceLevel.PREVIEW_ONLY

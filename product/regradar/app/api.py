@@ -1197,7 +1197,8 @@ class _Handler(BaseHTTPRequestHandler):
 
         POST /api/custom-sources/test
         Body: { "url": "https://...", "name": "optional label" }
-        Returns: intake result with status, chars, nav_shell_detected, can_activate
+        Returns: intake result with status, quality fields, evidence level,
+        can_save_for_validation, and can_activate_monitoring.
         """
         user = require_auth(self)
         if not user:
@@ -1214,25 +1215,34 @@ class _Handler(BaseHTTPRequestHandler):
             return
 
         try:
-            from app.source_intake import run_source_intake, load_sources_json, STATUS_LABELS
+            from app.source_intake import run_source_intake, load_sources_json, STATUS_LABELS, build_source_lab_contract
             source = {"url": url, "source_id": "", "name": body.get("name", "")}
             if body.get("content_selector"):
                 source["content_selector"] = str(body.get("content_selector"))
             if body.get("wait_for_selector"):
                 source["wait_for_selector"] = str(body.get("wait_for_selector"))
+            if body.get("expected_min_length"):
+                source["expected_min_length"] = int(body.get("expected_min_length"))
             if body.get("fetch_method") == "playwright":
                 source["fetch_method"] = "playwright"
+            if body.get("pdf_mode"):
+                source["source_type"] = "pdf"
             all_sources = load_sources_json()
             result = run_source_intake(source, all_sources=all_sources, write_evidence=False)
 
-            can_activate = result["status"] == "CONFIRMED_ACCESSIBLE"
+            contract = build_source_lab_contract(result)
             normalized_hash = result.get("normalized_hash") or result.get("content_hash", "")
             self._send_json({
                 "ok": True,
                 "status": result["status"],
                 "readiness_status": result["status"],
                 "status_label": STATUS_LABELS.get(result["status"], result["status"]),
-                "can_activate": can_activate,
+                "can_save_for_validation": contract["can_save_for_validation"],
+                "can_activate_monitoring": contract["can_activate_monitoring"],
+                "can_activate": contract["can_activate_monitoring"],
+                "activation_readiness": contract["activation_readiness"],
+                "baseline_runs_completed": contract["baseline_runs_completed"],
+                "baseline_runs_required": contract["baseline_runs_required"],
                 "source_type": "custom_public_source",
                 # extraction details
                 "chars": result["chars_normalized"],

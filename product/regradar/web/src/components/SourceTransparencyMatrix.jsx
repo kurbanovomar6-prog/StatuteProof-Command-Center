@@ -4,38 +4,38 @@ const MATRIX_ROWS = [
   {
     category: 'Financial regulation',
     map: 'CBUAE Main / CBUAE Regulations',
-    status: 'Confirmed with caveats',
-    statusTone: 'confirmed',
+    status: 'Readiness-supported with caveats',
+    statusTone: 'supported',
     extraction: 'HTML structured',
     limitation: 'Counter-change noise filters and alert relevance checks still apply before delivery',
   },
   {
     category: 'Virtual assets',
     map: 'VARA Main / Enforcement Notices',
-    status: 'Confirmed with document caveats',
-    statusTone: 'confirmed',
+    status: 'Readiness-supported with document caveats',
+    statusTone: 'supported',
     extraction: 'HTML / PDF-link validation',
     limitation: 'PDF/document content is disclosed separately when full text requires manual review',
   },
   {
     category: 'DIFC / DFSA',
-    map: 'DIFC Laws confirmed; DFSA Rulebook and Regulatory Notices in remediation',
-    status: 'Confirmed + remediation',
+    map: 'DIFC Laws, DFSA Rulebook and DFSA Regulatory Notices in remediation',
+    status: 'Remediation',
     statusTone: 'validation',
     extraction: 'HTML structured / selector remediation',
-    limitation: 'DFSA rows are not confirmed until navigation-shell extraction and hash-collision issues are fixed',
+    limitation: 'DFSA and DIFC rows are not readiness-supported until extraction and source-structure issues are fixed',
   },
   {
     category: 'ADGM / FSRA',
     map: 'ADGM FSRA Main',
-    status: 'Confirmed with caveats',
-    statusTone: 'confirmed',
+    status: 'Readiness-supported with caveats',
+    statusTone: 'supported',
     extraction: 'HTML structured',
-    limitation: 'Low character count caveat is disclosed before activation; FSRA rulebook source remains outside confirmed scope',
+    limitation: 'Low character count caveat is disclosed before activation; FSRA rulebook source remains outside readiness-supported scope',
   },
   {
     category: 'AML / sanctions',
-    map: 'UAE FIU Circulars confirmed; UAE FIU Homepage in remediation; EOCN under validation',
+    map: 'UAE FIU Circulars readiness-supported; UAE FIU Homepage in remediation; EOCN under validation',
     status: 'Mixed readiness',
     statusTone: 'validation',
     extraction: 'HTML / JS validation',
@@ -43,11 +43,11 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Tax / corporate',
-    map: 'UAE Ministry of Finance confirmed; FTA clarifications and guides require item-level checks',
-    status: 'Confirmed + FTA item-level review',
+    map: 'UAE Ministry of Finance readiness-supported; FTA clarifications and guides require item-level checks',
+    status: 'Readiness-supported + FTA item-level review',
     statusTone: 'adapter',
     extraction: 'HTML / PDF-link validation',
-    limitation: 'MoF is confirmed in the current run; FTA activation requires item-level source checks',
+    limitation: 'MoF is readiness-supported in the current registry; FTA activation requires item-level source checks',
   },
   {
     category: 'Data protection',
@@ -59,16 +59,16 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Legislation / gazettes',
-    map: 'UAE Legislation Portal confirmed; official gazette layers blocked or pending',
-    status: 'Confirmed + blocked',
+    map: 'UAE Legislation Portal readiness-supported; official gazette layers blocked or pending',
+    status: 'Readiness-supported + blocked',
     statusTone: 'limited',
     extraction: 'HTML structured / WAF review',
-    limitation: 'Aggregate legal-portal changes are not treated as customer-ready item updates until item-level extraction is confirmed',
+    limitation: 'Aggregate legal-portal changes are not treated as customer-ready item updates until item-level extraction is reviewed',
   },
 ]
 
 const BADGE_STYLES = {
-  confirmed: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
+  supported: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
   validation: 'border-amber-400/25 bg-amber-400/10 text-amber-300',
   adapter: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',
   limited: 'border-rose-400/25 bg-rose-400/10 text-rose-300',
@@ -96,7 +96,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
               Broad source map. Strict activation standard.
             </h2>
             <p className="max-w-3xl text-slate-400">
-              Mapped does not mean confirmed for monitoring. Only confirmed sources enter client monitoring profiles.
+              Mapped does not mean monitoring-ready. Only readiness-supported sources can move toward client monitoring profiles after proof/diff checks.
             </p>
           </div>
 
@@ -106,7 +106,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
               Pilot transparency
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
-              Every pilot includes a source transparency report showing confirmed, under-validation, limited and blocked sources.
+              Every pilot includes a source transparency report showing readiness-supported, under-validation, limited and blocked sources.
             </p>
           </div>
         </div>

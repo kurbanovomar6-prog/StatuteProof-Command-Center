@@ -26,8 +26,10 @@ Do not use to build broad crawlers, private portal scraping, customer-data inges
 3. Reject login-protected, paywalled, private portal, CAPTCHA-gated, or terms-conflicting sources.
 4. Run only a single approved source test before activation.
 5. Record fetch method, extraction quality, normalized hash, limitations, and source_id.
-6. Require human approval before enabling scheduled monitoring.
-7. Show customers source limitations and proof path.
+6. Treat the first no-save Source Lab result as preview only.
+7. Save only for validation after legal confirmation and readiness threshold.
+8. Require proof artifacts, baseline checks, and human approval before enabling scheduled monitoring.
+9. Show customers source limitations, failure reasons, evidence level, activation readiness, and proof path when available.
 
 ## Output format
 - Feature objective.
@@ -36,6 +38,7 @@ Do not use to build broad crawlers, private portal scraping, customer-data inges
 - Source test flow.
 - Data model fields.
 - Safety gates.
+- No-save/evidence/activation status mapping.
 - Acceptance criteria.
 
 ## Safety rules
@@ -48,6 +51,7 @@ Do not use to build broad crawlers, private portal scraping, customer-data inges
 
 ## StatuteProof-specific constraints
 Custom sources must still produce source proof and cannot bypass evidence-readiness review.
+Do not use `can_activate` wording for a no-save preview. Prefer `can_save_for_validation` and `activation_readiness`.
 
 ## Example invocation
 "Use custom-source-monitoring-spec to define the Add Custom Source flow for UAE firms."

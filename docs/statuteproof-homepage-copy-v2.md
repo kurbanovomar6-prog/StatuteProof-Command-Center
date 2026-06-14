@@ -183,7 +183,7 @@ No alert or brief reaches a customer without explicit human review and approval.
 ## UAE SOURCE COVERAGE SECTION
 
 **Headline:**
-13 enabled UAE regulatory sources. 10 confirmed. 3 under extraction remediation. Limitations disclosed.
+13 enabled UAE regulatory sources. 9 readiness-supported. 4 under extraction remediation. Limitations disclosed.
 
 **Subheadline:**
 These are the official UAE sources currently mapped in StatuteProof's UAE source pack. Status and extraction quality are shown honestly before monitoring activation.
@@ -192,25 +192,25 @@ These are the official UAE sources currently mapped in StatuteProof's UAE source
 
 | Source | Regulator | Category | Status |
 |--------|-----------|----------|--------|
-| VARA — Enforcement Notices | Dubai Virtual Assets Regulatory Authority | Financial Regulator | CONFIRMED |
-| CBUAE Regulations | Central Bank of the UAE | Central Bank | CONFIRMED |
+| VARA — Enforcement Notices | Dubai Virtual Assets Regulatory Authority | Financial Regulator | READINESS-SUPPORTED |
+| CBUAE Regulations | Central Bank of the UAE | Central Bank | READINESS-SUPPORTED |
 | DFSA Rulebook | DFSA | Financial Regulator | UNDER EXTRACTION REMEDIATION |
 | DFSA Regulatory Notices | DFSA | Financial Regulator | UNDER EXTRACTION REMEDIATION |
-| ADGM FSRA Main | ADGM | Financial Regulator | CONFIRMED |
-| DIFC Laws and Regulations | DIFC | Legal Database | CONFIRMED |
-| UAE FIU Circulars and Notices | UAE Financial Intelligence Unit | AML/CFT | CONFIRMED |
-| UAE Ministry of Finance | Ministry of Finance | Finance Ministry | CONFIRMED |
-| UAE Legislation Portal | UAE Government | Legal Acts | CONFIRMED |
-| UAE Ministry of Economy | Ministry of Economy | Company Registry | CONFIRMED |
-| VARA Homepage | Dubai Virtual Assets Regulatory Authority | Financial Regulator | CONFIRMED |
-| Central Bank UAE Homepage | Central Bank of the UAE | Central Bank | CONFIRMED |
+| ADGM FSRA Main | ADGM | Financial Regulator | READINESS-SUPPORTED |
+| DIFC Laws and Regulations | DIFC | Legal Database | UNDER EXTRACTION REMEDIATION |
+| UAE FIU Circulars and Notices | UAE Financial Intelligence Unit | AML/CFT | READINESS-SUPPORTED |
+| UAE Ministry of Finance | Ministry of Finance | Finance Ministry | READINESS-SUPPORTED |
+| UAE Legislation Portal | UAE Government | Legal Acts | READINESS-SUPPORTED |
+| UAE Ministry of Economy | Ministry of Economy | Company Registry | READINESS-SUPPORTED |
+| VARA Homepage | Dubai Virtual Assets Regulatory Authority | Financial Regulator | READINESS-SUPPORTED |
+| Central Bank UAE Homepage | Central Bank of the UAE | Central Bank | READINESS-SUPPORTED |
 | UAE FIU Homepage | UAE Financial Intelligence Unit | AML/CFT | UNDER EXTRACTION REMEDIATION |
 
 **Limitation disclosure (mandatory, inline):**
 Certain UAE sources are not currently monitorable from outside the UAE: UAE Federal Tax Authority (FTA), UAE Official Gazette, certain SCA pages. These appear as BLOCKED in your source readiness report. StatuteProof does not claim complete UAE regulatory coverage. Source status and limitations are disclosed per source.
 
 **CTA below table:**
-Want to see which sources are confirmed for your specific licence type?
+Want to see which sources are readiness-supported for your specific licence type?
 [Request a free UAE source readiness review]
 
 ---
@@ -284,10 +284,10 @@ StatuteProof reports are for information and compliance review support only. The
 See exactly which UAE sources are monitorable for your firm — before you commit.
 
 **Subheadline:**
-A free UAE Source Readiness Review gives you a detailed report of which UAE regulatory sources are confirmed, which need remediation, which have access limitations, and which are not currently accessible.
+A free UAE Source Readiness Review gives you a detailed report of which UAE regulatory sources are readiness-supported, which need remediation, which have access limitations, and which are not currently accessible.
 
 **What you receive:**
-- A report of which UAE official sources are CONFIRMED, UNDER EXTRACTION REMEDIATION, LIMITED, or BLOCKED for your licence type
+- A report of which UAE official sources are READINESS-SUPPORTED, UNDER EXTRACTION REMEDIATION, LIMITED, or BLOCKED for your licence type
 - Extraction quality ratings per source
 - Known limitations disclosed per source (JavaScript rendering, geo-restrictions, PDF-only sources)
 - A pilot recommendation based on your source coverage
@@ -323,7 +323,7 @@ $299–499/mo
 
 **UAE VASP/Fintech Pack**
 $499–999/mo
-13 enabled UAE sources, with 10 confirmed and 3 under extraction remediation · Custom sources · Urgent alerts · 5 seats
+13 enabled UAE sources, with 9 readiness-supported and 4 under extraction remediation · Custom sources · Urgent alerts · 5 seats
 [Request details]
 
 **Compliance Consultant Pack**
@@ -346,7 +346,7 @@ Full pricing details → [Pricing page]
 No. StatuteProof is an official-source monitoring tool that detects text changes, stores evidence records, and delivers human-reviewed compliance briefs. It does not provide legal advice, regulatory interpretations, or compliance opinions. Always consult qualified legal counsel before making regulatory decisions.
 
 **Q2: Which UAE regulatory sources does StatuteProof monitor?**
-Currently: 13 enabled UAE sources, with 10 confirmed and 3 under extraction remediation. DFSA Rulebook, DFSA Regulatory Notices, and UAE FIU Homepage remain under extraction remediation and are not treated as confirmed for monitoring. Some UAE sources — including the Federal Tax Authority and certain SCA pages — may require additional item-level checks or be disclosed as limited/blocked. See the Source Coverage page for the full status of every source.
+Currently: 13 enabled UAE sources, with 9 readiness-supported and 4 under extraction remediation. DFSA Rulebook, DFSA Regulatory Notices, DIFC Laws and Regulations, and UAE FIU Homepage remain under extraction remediation and are not treated as ready for monitoring. Some UAE sources — including the Federal Tax Authority and certain SCA pages — may require additional item-level checks or be disclosed as limited/blocked. See the Source Coverage page for the full status of every source.
 
 **Q3: What happens if a source website changes its structure?**
 When a source structure change is detected, it is flagged as SOURCE_STRUCTURE_CHANGED, not silently treated as a content change. The failure is surfaced to you. You can see which sources are FAILED or QUALITY_DROP at any time in the dashboard. We do not report UNCHANGED when extraction has failed.

@@ -19,8 +19,13 @@ It does **not**:
 
 ## Pipeline Architecture (regradar codebase)
 
-The live pipeline is at `/Users/kurbnovomar/документы/obsidian/ruflo/regrada/regradar/`.
-This StatuteProof-Command-Center folder is an **operating and tooling workspace only** — it does not contain the pipeline code.
+The product pipeline is in this workspace under:
+
+`product/regradar/`
+
+Older external-path references may exist in archived reports, but current parser,
+Source Lab, evidence, API, and frontend work should inspect `product/regradar`
+first.
 
 ### Pipeline Flow
 
@@ -51,21 +56,24 @@ Note: SOURCE_STRUCTURE_CHANGED is not yet implemented.
 - Run records: `data/source_runs/source_runs.jsonl`
 - Snapshots: `data/source_snapshots/{date}/{market}/{source_id}/{run_id}/`
   - `raw.txt`, `normalized.txt`, `metadata.json`, `proof.json`, `diff.json`, `diff.md`
-- Active sources: `sources.json` (9 UAE sources enabled)
+- Active source registry: `product/regradar/sources.json`
 
-## Active UAE Sources
+## UAE Source Readiness
 
-| Source | URL | Status |
-|--------|-----|--------|
-| VARA | https://www.vara.ae/ | VERIFIED ACTIVE |
-| CBUAE | https://www.centralbank.ae/ | VERIFIED ACTIVE |
-| DFSA | https://www.dfsa.ae/ | VERIFIED ACTIVE |
-| ADGM FSRA | (via adgm.com) | Active |
-| MoF UAE | (via mof.gov.ae) | Active |
-| UAE FIU | (via amlcft.ae) | Active |
-| UAE Legislation Portal | (via uaelegislation.gov.ae) | Active |
-| DIFC Laws | (via difclaw.difc.ae) | Active |
-| Ministry of Economy | (via moec.gov.ae) | Active |
+Use `product/regradar/sources.json` and the latest readiness report as the
+canonical source of truth before making customer-facing claims.
+
+As of this context refresh, `sources.json` has 13 enabled UAE sources with a
+strict readiness split of 9 registry-active sources and 4 remediation sources:
+
+- DFSA Rulebook / rules and standards
+- DFSA Regulatory Notices
+- UAE FIU Homepage
+- DIFC Laws and Regulations
+
+Do not describe DFSA, UAE FIU Homepage, or DIFC Laws as customer-visible ready
+until live Source Lab checks, proof artifacts, and QA/legal gates support that
+claim.
 
 ## Evidence Record (as of 2026-06-11)
 
@@ -75,18 +83,21 @@ Note: SOURCE_STRUCTURE_CHANGED is not yet implemented.
 
 ## Frontend Status
 
-The React 18 frontend (`regradar/web/`) currently uses 100% mock data.
-`sourceHealthRows` in `mockData.js` shows all 9 UAE sources as PASS/active — this is fabricated.
-Dashboard must be connected to live data before any customer-facing demo.
+The React 18 frontend (`product/regradar/web/`) has a real app shell and Source
+Lab UI, but some screens still use demo/mock data. Customer-facing source
+readiness labels must be checked against API/registry truth before demo use.
 
 ## Audit Findings (2026-06-11)
 
-Score: 7.5/10. Status: Ready for manual MVP.
+Score: historical 7.5/10. Current parser/source-readiness claims must be
+validated against the latest audit reports and source registry before use.
 
 Critical open items:
-1. Dashboard mock data (HIGH) — connect `GET /api/sources/health` before demo
+1. Dashboard/source data (HIGH) — verify `GET /api/sources/health` and app
+   source tables do not overclaim readiness before demo
 2. `.env` in `regradar/` (HIGH) — verify not committed, verify contents
-3. No git in `regradar/` (HIGH) — initialize before sharing pipeline
+3. Source readiness count consistency (HIGH) — align public/app copy with
+   `sources.json` and latest evidence-readiness report
 4. SOURCE_STRUCTURE_CHANGED not implemented (MEDIUM)
 
 Full audit: `/Users/kurbnovomar/AI-Company-Agent-OS/STATUTEPROOF_PROJECT_AUDIT.md`

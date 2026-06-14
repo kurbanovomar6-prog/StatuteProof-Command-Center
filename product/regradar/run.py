@@ -1926,7 +1926,7 @@ def _cmd_source_lab(
 ) -> None:
     """Run one safe source-intake lab check. Never runs all sources."""
     import json
-    from app.source_intake import run_source_intake, load_sources_json
+    from app.source_intake import run_source_intake, load_sources_json, build_source_lab_contract
 
     source = {
         "source_id": "source-lab",
@@ -1947,6 +1947,7 @@ def _cmd_source_lab(
         source["source_type"] = "pdf"
 
     result = run_source_intake(source, all_sources=load_sources_json(), write_evidence=save)
+    contract = build_source_lab_contract(result)
     payload = {
         "source_url": url,
         "canonical_url": url,
@@ -1955,11 +1956,17 @@ def _cmd_source_lab(
         "provider_candidates": result.get("provider_candidates", []),
         "normalized_length": result.get("chars_normalized"),
         "normalized_hash": result.get("normalized_hash"),
+        "normalized_preview": result.get("normalized_preview"),
         "quality_score": result.get("quality_score"),
         "quality_label": (result.get("quality_breakdown") or {}).get("quality_label") or result.get("quality"),
         "evidence_level": result.get("evidence_level"),
         "certification_status": result.get("certification_status"),
         "readiness_status": result.get("status"),
+        "activation_readiness": contract.get("activation_readiness"),
+        "can_save_for_validation": contract.get("can_save_for_validation"),
+        "can_activate_monitoring": contract.get("can_activate_monitoring"),
+        "baseline_runs_completed": contract.get("baseline_runs_completed"),
+        "baseline_runs_required": contract.get("baseline_runs_required"),
         "failure_reason": result.get("failure_reason"),
         "remediation_hint": result.get("remediation_hint"),
         "proof_path": result.get("proof_path"),

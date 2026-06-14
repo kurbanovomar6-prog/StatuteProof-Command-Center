@@ -51,7 +51,7 @@ class SourceIntakeStatus:
 
 # Human-readable labels for dashboard display
 STATUS_LABELS: dict[str, str] = {
-    SourceIntakeStatus.CONFIRMED_ACCESSIBLE: "Ready",
+    SourceIntakeStatus.CONFIRMED_ACCESSIBLE: "Readiness threshold met",
     SourceIntakeStatus.JS_RENDERING_NEEDED: "JS rendering needed",
     SourceIntakeStatus.PDF_EXTRACTION_NEEDED: "PDF extraction needed",
     SourceIntakeStatus.NAV_SHELL_ONLY: "Remediation needed",
@@ -120,6 +120,60 @@ def _content_hash(text: str) -> str:
 
 def _sha256_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
+
+
+def build_source_lab_contract(result: dict) -> dict:
+    """
+    Return customer-safe Source Lab gating fields.
+
+    A passing no-save test can be saved for validation, but it cannot activate
+    monitoring. Monitoring activation is reserved for completed baseline and
+    certified evidence states.
+    """
+    status = str(result.get("status") or "")
+    cert = result.get("certification") or {}
+    cert_status = str(cert.get("certification_status") or result.get("certification_status") or "")
+    evidence_level = str(result.get("evidence_level") or cert.get("evidence_level") or EvidenceLevel.PREVIEW_ONLY)
+    evidence_written = bool(result.get("evidence_written"))
+    baseline_done = int(cert.get("baseline_runs_completed") or 0)
+    baseline_required = int(cert.get("baseline_runs_required") or 2)
+
+    can_save_for_validation = (
+        status == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+        and not evidence_written
+        and evidence_level == EvidenceLevel.PREVIEW_ONLY
+    )
+    can_activate_monitoring = (
+        cert_status == "MONITORING_CERTIFIED"
+        and evidence_level == EvidenceLevel.CERTIFIED_EVIDENCE
+        and baseline_done >= baseline_required
+    )
+
+    if can_activate_monitoring:
+        activation_readiness = "MONITORING_READY"
+    elif status in {
+        SourceIntakeStatus.BLOCKED,
+        SourceIntakeStatus.UNSUPPORTED,
+        SourceIntakeStatus.NAV_SHELL_ONLY,
+        SourceIntakeStatus.QUALITY_DROP,
+        SourceIntakeStatus.JS_RENDERING_NEEDED,
+        SourceIntakeStatus.PDF_EXTRACTION_NEEDED,
+        SourceIntakeStatus.NEEDS_SELECTOR_REVIEW,
+    }:
+        activation_readiness = "NEEDS_REMEDIATION"
+    elif cert_status in {"BASELINE_PENDING", "TEST_PASSED", "EVIDENCE_CONFIRMED"}:
+        activation_readiness = "BASELINE_REQUIRED"
+    else:
+        activation_readiness = "NEEDS_REVIEW"
+
+    return {
+        "can_save_for_validation": can_save_for_validation,
+        "can_activate_monitoring": can_activate_monitoring,
+        "activation_readiness": activation_readiness,
+        "evidence_level": evidence_level,
+        "baseline_runs_completed": baseline_done,
+        "baseline_runs_required": baseline_required,
+    }
 
 
 def _check_hash_collision(
@@ -236,6 +290,7 @@ def run_source_intake(
             baseline_runs_required=int(source.get("baseline_runs_required") or 2),
         )
         result["certification_status"] = result["certification"].get("certification_status", "")
+        result.update(build_source_lab_contract(result))
         return result
 
     # ── 2. Fetch ──────────────────────────────────────────────────────────────
@@ -256,6 +311,26 @@ def run_source_intake(
             result["remediation_hint"] = "Confirm the source is public and technically accessible."
         result["failure_reason"] = f"Fetch failed: {exc}"
         result["errors"].append(f"Fetch failed: {exc}")
+        quality_report = build_quality_score(
+            url=url,
+            fetch_success=False,
+            normalized_text="",
+            raw_html="",
+            normalized_hash=None,
+            canonical_url=url,
+        )
+        result["quality_score"] = quality_report["quality_score"]
+        result["quality_breakdown"] = quality_report
+        result["certification"] = build_preview_certification(
+            source_id=source_id,
+            source_url=url,
+            canonical_url=url,
+            intake_result=result,
+            quality_report=quality_report,
+            baseline_runs_required=int(source.get("baseline_runs_required") or 2),
+        )
+        result["certification_status"] = result["certification"].get("certification_status", "")
+        result.update(build_source_lab_contract(result))
         return result
 
     result["chars_raw"] = len(html)
@@ -397,6 +472,7 @@ def run_source_intake(
         baseline_runs_required=int(source.get("baseline_runs_required") or 2),
     )
     result["certification_status"] = result["certification"].get("certification_status", "")
+    result.update(build_source_lab_contract(result))
 
     # ── 10. Evidence write (optional) ────────────────────────────────────────
     if write_evidence and result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
@@ -415,8 +491,13 @@ def run_source_intake(
             result["proof_path"] = evidence.get("proof_path")
             result["evidence_paths"] = evidence.get("evidence_paths", {})
             result["evidence_level"] = evidence.get("evidence_level", EvidenceLevel.BASIC_EVIDENCE)
+            if evidence.get("certification"):
+                result["certification"] = evidence["certification"]
+                result["certification_status"] = result["certification"].get("certification_status", "")
         except Exception as exc:
             result["errors"].append(f"Evidence write failed: {exc}")
+        finally:
+            result.update(build_source_lab_contract(result))
 
     return result
 

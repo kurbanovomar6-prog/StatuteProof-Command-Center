@@ -8,17 +8,17 @@ import { sourceHealthRows } from '../data/mockData'
 import { Badge } from './ui/Badge'
 import { ShieldCheck, Clock, FileSearch, Activity, Link2, Gauge } from 'lucide-react'
 
-const qualityLabel   = { confirmed: 'Confirmed', remediation: 'Remediation' }
-const qualityVariant = { confirmed: 'green',     remediation: 'yellow' }
-const statusLabel    = { confirmed: 'Confirmed', remediation: 'Remediation' }
-const statusVariant  = { confirmed: 'green',     remediation: 'yellow' }
-const verdictLabel   = { CONFIRMED: 'Confirmed', REVIEW: 'Review' }
+const qualityLabel   = { readiness_supported: 'Readiness-supported', remediation: 'Remediation' }
+const qualityVariant = { readiness_supported: 'green',                remediation: 'yellow' }
+const statusLabel    = { readiness_supported: 'Readiness-supported', remediation: 'Remediation' }
+const statusVariant  = { readiness_supported: 'green',                remediation: 'yellow' }
+const verdictLabel   = { READINESS: 'Readiness', REVIEW: 'Review' }
 const accessVariant  = { Accessible: 'green', Limited: 'yellow' }
 
 const SOURCE_PACK_SUMMARY = {
   enabled: 13,
-  confirmed: 10,
-  remediation: 3,
+  supported: 9,
+  remediation: 4,
 }
 
 const col = createColumnHelper()
@@ -59,7 +59,7 @@ const columns = [
   col.accessor('verdict', {
     header: 'Result',
     cell: i => (
-      <Badge variant={i.getValue() === 'CONFIRMED' ? 'green' : 'yellow'}>
+      <Badge variant={i.getValue() === 'READINESS' ? 'green' : 'yellow'}>
         {verdictLabel[i.getValue()] || i.getValue()}
       </Badge>
     ),
@@ -69,7 +69,7 @@ const columns = [
 const CARDS = [
   {
     icon: ShieldCheck,
-    title: 'Confirmed / Limited / Blocked',
+    title: 'Readiness-supported / Limited / Blocked',
     desc: 'Each official source is tested for accessibility, extraction quality, and monitoring reliability.',
   },
   {
@@ -126,7 +126,7 @@ function SourceStatusSummary() {
   return (
     <>
       <div className="text-slate-300 text-sm mt-0.5">
-        {SOURCE_PACK_SUMMARY.enabled} enabled sources in sample pack · {SOURCE_PACK_SUMMARY.confirmed} confirmed · {SOURCE_PACK_SUMMARY.remediation} remediation · source proof attached
+        {SOURCE_PACK_SUMMARY.enabled} enabled sources in sample pack · {SOURCE_PACK_SUMMARY.supported} readiness-supported · {SOURCE_PACK_SUMMARY.remediation} remediation · source proof attached
       </div>
       <div className="text-slate-400 text-xs mt-1">
         Sample run only. Live counts are shown inside authenticated workspaces after source readiness review.
@@ -166,7 +166,7 @@ export default function DashboardPreview() {
                 {/* TODO: mock data below (last-check time, review queue, proof note) — replace when scheduler/run-history API is wired */}
                 <SourceStatusSummary />
                 <div className="text-slate-400 text-sm mt-2 max-w-3xl leading-relaxed">
-                  UAE source pack status: {SOURCE_PACK_SUMMARY.enabled} enabled, {SOURCE_PACK_SUMMARY.confirmed} confirmed, {SOURCE_PACK_SUMMARY.remediation} under extraction remediation. Not legal advice. For monitoring information only.
+                  UAE source pack status: {SOURCE_PACK_SUMMARY.enabled} enabled, {SOURCE_PACK_SUMMARY.supported} readiness-supported, {SOURCE_PACK_SUMMARY.remediation} under extraction remediation. Not legal advice. For monitoring information only.
                 </div>
               </div>
             </div>
@@ -200,8 +200,8 @@ export default function DashboardPreview() {
         <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.25)]">
           <h3 className="font-semibold text-white mb-1 text-sm">Sample source set</h3>
           <p className="text-xs text-slate-400 mb-4">
-            Sample source set - illustrative. {SOURCE_PACK_SUMMARY.enabled} sources enabled, {SOURCE_PACK_SUMMARY.confirmed} confirmed, {SOURCE_PACK_SUMMARY.remediation} under extraction remediation.
-            Remediation sources are not treated as confirmed until extraction quality is fixed and rerun.
+            Sample source set - illustrative. {SOURCE_PACK_SUMMARY.enabled} sources enabled, {SOURCE_PACK_SUMMARY.supported} readiness-supported, {SOURCE_PACK_SUMMARY.remediation} under extraction remediation.
+            Remediation sources are not treated as ready until extraction quality is fixed and rerun.
           </p>
           <SourceTable />
         </div>

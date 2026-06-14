@@ -33,12 +33,12 @@ Findings:
 - Header actions are visually distinct: Login is subtle, Register is secondary, Request Source Review is primary.
 - Hero headline and subheadline use approved proof-first wording.
 - Hero evidence card is clearly labeled `SAMPLE / DEMO - not a real regulatory update`.
-- Homepage readiness language uses `13 enabled / 10 confirmed / 3 under extraction remediation` and avoids overstating the pack as fully confirmed.
-- Homepage evidence and dashboard-preview source tables use `13 enabled / 10 confirmed / 3 under extraction remediation` and are clearly labeled sample/demo where illustrative.
+- Homepage readiness language should use `13 enabled / 9 readiness-supported / 4 under extraction remediation` after the parser/source registry follow-up, avoiding any claim that the full pack is ready.
+- Homepage evidence and dashboard-preview source tables should use `13 enabled / 9 readiness-supported / 4 under extraction remediation` and remain clearly labeled sample/demo where illustrative.
 - No public homepage source table shows stale readiness counts.
-- Confirmed source identities match the current readiness report: UAE Ministry of Finance and UAE FIU Circulars are included; disabled aliases CBUAE Circulars and ADGM FSRA Rules are not shown as confirmed.
+- Readiness-supported source identities match the current registry: UAE Ministry of Finance and UAE FIU Circulars are included; disabled aliases CBUAE Circulars and ADGM FSRA Rules are not shown as ready.
 - Source transparency matrix now separates DIFC Laws readiness from DFSA Rulebook and DFSA Regulatory Notices remediation.
-- Alert-profile/source-pack sections no longer imply DFSA, ADGM/FSRA rulebook layers, or the UAE FIU homepage are confirmed for monitoring before remediation/readiness review.
+- Alert-profile/source-pack sections no longer imply DFSA, ADGM/FSRA rulebook layers, DIFC Laws, or the UAE FIU homepage are ready for monitoring before remediation/readiness review.
 - Public evidence/demo cards were converted to dark navy surfaces.
 - Public sample source-status counts are static sample/readiness-pack counts, not raw API totals.
 - Pricing page uses the current honest packaging: Free Source Readiness Review, $199 Founding Pilot, $399 UAE Monitor, Consultant talk-to-us.
@@ -50,7 +50,7 @@ Findings:
 - Source Lab exposes readiness status/result fields and blocks activation behind evidence/readiness gates.
 - Evidence page uses live evidence records when the endpoint is available and labels them as live records.
 - Brief previews are clearly sample/demo, with PDF export and delivery actions disabled behind activation/review gates.
-- Source registry and generated/static readiness artifacts now align with the customer-facing 13 enabled / 10 confirmed / 3 under extraction remediation story.
+- Source registry and generated/static readiness artifacts now align with the customer-facing 13 enabled / 9 readiness-supported / 4 under extraction remediation story.
 - Login/register pages render as unauthenticated routes and preserve `/login` and `/register?plan=...` URLs.
 - Unauthenticated `/app/dashboard` redirects to `/login`.
 
@@ -68,7 +68,7 @@ Verified:
 - Pricing UAE Monitor CTA -> `/register?plan=professional`
 - Sources Add custom source -> `/app/source-lab`
 - Protected `/app/dashboard` when unauthenticated -> `/login`
-- Homepage sample evidence CTA -> `/#evidence`; retest confirmed the evidence table shows 13 enabled, 10 confirmed, 3 under extraction remediation, with no stale readiness count.
+- Homepage sample evidence CTA -> `/#evidence`; retest should confirm the evidence table shows 13 enabled, 9 readiness-supported, 4 under extraction remediation, with no stale readiness count.
 - Dashboard preview retest confirmed no old DFSA/UAE FIU confirmed demo rows and no raw API source total is shown as enabled coverage.
 - Authenticated Sources retest confirmed DFSA Rulebook, DFSA Regulatory Notices, and UAE FIU Homepage render as `Needs remediation` / `Review`.
 - Rendered identity scan confirmed no stale `CBUAE Circulars` or `ADGM FSRA Rules` confirmed rows on the homepage or `/app/sources`.
@@ -93,7 +93,7 @@ Checked for forbidden positive claims:
 - Legal Language gate: PASS.
 - QA / Critic gate: PASS.
 - Source Monitor gate: PASS.
-- Source readiness consistency: PASS for public/app surfaces, metadata, static samples, source readiness reports, generator copy, and the three remediation source registry statuses.
+- Source readiness consistency: parser follow-up updates the public/app source count to four remediation source registry statuses.
 
 ## Final Validation Results
 

@@ -6,7 +6,7 @@ import { getWorkspaceProfile, filterSources } from '../../data/workspaceProfile'
 // ── status display helpers ────────────────────────────────────────────────────
 
 const INTAKE_STATUS_LABELS = {
-  CONFIRMED_ACCESSIBLE:  'Accessible',
+  CONFIRMED_ACCESSIBLE:  'Readiness threshold met',
   JS_RENDERING_NEEDED:   'JS rendering needed',
   PDF_EXTRACTION_NEEDED: 'PDF extraction needed',
   NAV_SHELL_ONLY:        'Nav shell — selector needed',
@@ -15,7 +15,7 @@ const INTAKE_STATUS_LABELS = {
   UNSUPPORTED:           'Not supported',
   BLOCKED:               'Blocked',
   // old api/source-test statuses (fallback compat)
-  PASS:                  'Accessible',
+  PASS:                  'Readiness threshold met',
   NEEDS_ADAPTER:         'Needs adapter',
   FAILED:                'Failed',
 }
@@ -56,9 +56,8 @@ const HEALTH_STYLE = {
   Limited:              'text-slate-400   bg-slate-700      border-slate-600',
 }
 const STATUS_STYLE = {
-  Active:           'text-emerald-400',
-  Validated:        'text-emerald-400',
   Confirmed:        'text-emerald-400',
+  'Readiness supported': 'text-emerald-400',
   'Under validation': 'text-amber-400',
   Limited:          'text-amber-400',
   Partial:          'text-slate-400',
@@ -66,7 +65,7 @@ const STATUS_STYLE = {
   'Needs remediation': 'text-amber-400',
 }
 
-const FILTERS   = ['All', 'Confirmed', 'Needs remediation', 'Limited', 'Partial', 'Needs adapter', 'User source']
+const FILTERS   = ['All', 'Readiness supported', 'Needs remediation', 'Limited', 'Partial', 'Needs adapter', 'User source']
 const MARKETS   = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const CATEGORIES = [
   'Central bank', 'Financial regulator', 'Crypto regulator', 'AML authority',
@@ -129,7 +128,7 @@ export default function SourcesPage({ onAddCustomSource }) {
   const filteredMock = filterSources(MOCK_SOURCES, profile).filter(s => {
     if (filter === 'User source') return false
     if (filter === 'All') return true
-    if (filter === 'Confirmed') return s.status === 'Active' || s.status === 'Validated' || s.status === 'Confirmed'
+    if (filter === 'Readiness supported') return sourceStatusLabel(s.status) === 'Readiness supported'
     if (filter === 'Needs remediation') return s.status === 'Needs remediation'
     if (filter === 'Needs adapter') return s.status === 'Needs adapter' || s.extraction?.includes('adapter') || s.extraction?.includes('Geo')
     return s.status === filter
@@ -137,7 +136,7 @@ export default function SourcesPage({ onAddCustomSource }) {
 
   const filteredCustom = customSources.filter(s => {
     if (filter === 'All' || filter === 'User source') return true
-    if (filter === 'Confirmed') return s.status === 'Active' || s.status === 'Validated' || s.status === 'Confirmed'
+    if (filter === 'Readiness supported') return sourceStatusLabel(s.status) === 'Readiness supported'
     if (filter === 'Needs remediation') return s.status === 'Needs remediation'
     if (filter === 'Needs adapter') return s.status === 'Needs adapter'
     return s.status === filter
@@ -195,7 +194,7 @@ export default function SourcesPage({ onAddCustomSource }) {
 
   // ── save source using /api/custom-sources endpoint ────────────────────────
   async function handleSaveSource() {
-    if (!testResult?.can_activate) return
+    if (!testResult?.can_save_for_validation) return
     if (!legalConfirmed) return
     setSaveError('')
     setTestPhase('saving')
@@ -248,7 +247,7 @@ export default function SourcesPage({ onAddCustomSource }) {
     }`
 
   function sourceStatusLabel(status) {
-    if (status === 'Active' || status === 'Validated') return 'Confirmed'
+    if (status === 'Active' || status === 'Validated' || status === 'Confirmed') return 'Readiness supported'
     return status
   }
 
@@ -266,12 +265,12 @@ export default function SourcesPage({ onAddCustomSource }) {
     ? (INTAKE_STATUS_LABELS[testResult.status] || testResult.status)
     : ''
 
-  const isGood    = testResult?.status === 'CONFIRMED_ACCESSIBLE' || testResult?.status === 'PASS'
+  const isGood    = testResult?.can_save_for_validation === true || testResult?.status === 'CONFIRMED_ACCESSIBLE' || testResult?.status === 'PASS'
   const isFailed  = testResult?.status === 'BLOCKED' || testResult?.status === 'FAILED' || testResult?.status === 'UNSUPPORTED'
   const needsWork = !isGood && !isFailed
 
-  const canActivate  = testResult?.can_activate === true
-  const saveEnabled  = canActivate && legalConfirmed
+  const canSaveForValidation = testResult?.can_save_for_validation === true
+  const saveEnabled  = canSaveForValidation && legalConfirmed
 
   return (
     <div className="p-5">
@@ -308,13 +307,13 @@ export default function SourcesPage({ onAddCustomSource }) {
             <h2 className="text-sm font-semibold text-white mb-1">Sources are checked before monitoring activates.</h2>
             <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
               StatuteProof tests public official sources for accessibility, extraction quality, and content depth.
-              Sources are marked confirmed only when meaningful regulatory text is extracted and hashed.
+              Sources are marked readiness-supported only when meaningful regulatory text is extracted and hashed.
               Custom sources are saved for readiness review — monitoring is not activated automatically.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {[
-              ['Confirmed', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
+              ['Readiness supported', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
               ['Under validation', 'border-amber-400/25 bg-amber-400/10 text-amber-300'],
               ['Needs adapter', 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'],
               ['Limited', 'border-slate-600 bg-slate-800 text-slate-300'],
@@ -422,7 +421,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                 )}
                 <div className="text-xs text-slate-500 bg-slate-800/50 rounded-lg px-3 py-2 mb-4 text-left">
                   <p className="font-medium text-slate-400 mb-1">Evidence note</p>
-                  <p>This test confirmed accessibility without writing an evidence record. A full evidence record with hash, snapshot, and proof artifact is created during the first scheduled monitoring run.</p>
+                  <p>This test met the readiness threshold without writing an evidence record. A full evidence record with hash, snapshot, and proof artifact is created during the first scheduled monitoring run.</p>
                 </div>
                 <button
                   onClick={() => { setShowModal(false); resetModal() }}
@@ -516,14 +515,14 @@ export default function SourcesPage({ onAddCustomSource }) {
                 <div className="bg-slate-800/40 rounded-lg px-3 py-2.5 text-xs text-slate-500 flex items-start gap-2">
                   <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                   <span>
-                    {canActivate
+                    {canSaveForValidation
                       ? 'Readiness threshold met. Save this source to queue it for evidence validation. No evidence record exists yet — the first monitoring run creates the hash, snapshot, and proof artifact.'
                       : 'This source cannot be activated until the extraction issue is resolved. See the remediation hint above.'}
                   </span>
                 </div>
 
-                {/* Legal confirmation (shown only when can_activate) */}
-                {canActivate && (
+                {/* Legal confirmation (shown only when the source can be saved for validation) */}
+                {canSaveForValidation && (
                   <label className="flex items-start gap-2.5 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -545,7 +544,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                   >
                     Test another
                   </button>
-                  {canActivate ? (
+                  {canSaveForValidation ? (
                     <button
                       onClick={handleSaveSource}
                       disabled={!saveEnabled}

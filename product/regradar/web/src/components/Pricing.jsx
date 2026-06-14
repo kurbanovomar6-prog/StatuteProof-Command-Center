@@ -89,8 +89,8 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
         </div>
 
         <p className="text-center text-xs text-slate-500 mt-6 max-w-3xl mx-auto leading-relaxed">
-          Current readiness status: 13 UAE sources enabled, 10 confirmed in the latest evidence-readiness run,
-          3 under extraction remediation. Features marked for activation or roadmap are not live by default.
+          Current readiness status: 13 UAE sources enabled, 9 readiness-supported in the latest registry review,
+          4 under extraction remediation. Features marked for activation or roadmap are not live by default.
         </p>
 
       </div>

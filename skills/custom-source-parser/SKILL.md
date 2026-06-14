@@ -42,12 +42,20 @@ Use this skill when:
 - Confirm text contains regulatory content (rules, notices, guidance) not navigation/marketing
 - Flag if text is primarily UI elements ("Submit", "Cookie policy", "Back")
 
-### Stage 6 — Verdict
-- `CONFIRMED_ACCESSIBLE`: all stages pass → recommend activate
-- `NAV_SHELL_ONLY`: stage 3 or 4 fail → add wait_for_selector + content_selector, re-run
-- `JS_RENDERING_NEEDED`: stage 2 fail → add fetch_method: playwright, re-run
-- `BLOCKED`: stage 1 fail → do not activate, document reason
-- `UNSUPPORTED`: consistent failure → escalate to adapter_required
+### Stage 6 — Evidence / Activation Separation
+- No-save test: preview only; never evidence confirmed.
+- Save mode: evidence confirmed only if proof paths, hashes, and snapshot paths exist.
+- Baseline pending: one successful evidence run exists but repeat baseline requirement is incomplete.
+- Monitoring-ready: proof artifacts and baseline/activation-readiness requirements pass.
+
+### Stage 7 — Verdict
+- `CAN_SAVE_FOR_VALIDATION`: all no-save stages pass; source may be saved for validation, not activated.
+- `BASELINE_PENDING`: evidence exists but repeat baseline requirement is incomplete.
+- `MONITORING_READY`: evidence and baseline requirements pass; still requires QA/legal-safe customer wording.
+- `NAV_SHELL_ONLY`: stage 3 or 4 fail → add wait_for_selector + content_selector, re-run.
+- `JS_RENDERING_NEEDED`: stage 2 fail → add fetch_method: playwright, re-run.
+- `BLOCKED`: stage 1 fail → do not activate, document reason.
+- `UNSUPPORTED`: consistent failure → escalate to adapter_required.
 
 ---
 
@@ -57,7 +65,7 @@ Use this skill when:
 ## Source Intake Review — [source_id]
 **Date:** YYYY-MM-DD
 **URL:** https://...
-**Status:** CONFIRMED_ACCESSIBLE | NAV_SHELL_ONLY | ...
+**Verdict:** CAN_SAVE_FOR_VALIDATION | BASELINE_PENDING | MONITORING_READY | NAV_SHELL_ONLY | ...
 
 ### Stage Results
 - Stage 1 URL Safety: PASS / FAIL — [reason]
@@ -65,11 +73,15 @@ Use this skill when:
 - Stage 3 Nav-Shell: PASS / FAIL — [short-line ratio]
 - Stage 4 Hash Uniqueness: PASS / FAIL — [collision_source_id or none]
 - Stage 5 Content Relevance: PASS / FAIL — [brief description of content]
-- Stage 6 Verdict: [status]
+- Stage 6 Evidence/Activation Separation: PASS / FAIL — [evidence level, baseline status]
+- Stage 7 Verdict: [status]
 
 ### Recommended Action
 [Specific steps to fix or activate]
 ```
+
+Customer-facing rule: never say "any website can be parsed", "certified monitoring",
+"guaranteed parsing", or "monitoring-ready" from a no-save test.
 
 ---
 

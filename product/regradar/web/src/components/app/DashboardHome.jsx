@@ -21,14 +21,14 @@ const COV_COLOR = {
 
 const SOURCE_READINESS_SUMMARY = {
   enabled: 13,
-  confirmed: 10,
-  remediation: 3,
+  supported: 9,
+  remediation: 4,
 }
 
 const REMEDIATION_SOURCE_IDS = new Set([
-  'AE-dfsa-rulebook',
   'AE-dubai-financial-services-authority-dfsa',
   'AE-dfsa-notices',
+  'AE-difc-laws-and-regulations',
   'AE-uae-financial-intelligence-unit-uaefiu',
 ])
 
@@ -139,7 +139,7 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
     { label: 'Account created', detail: 'Signed-in workspace account', status: 'Complete', tone: 'emerald' },
     { label: 'Profile saved', detail: hasProfile ? profileLabel(profile) : 'Add markets and licence profile', status: hasProfile ? 'Complete' : 'Pending', tone: hasProfile ? 'emerald' : 'amber', action: 'settings' },
     { label: 'Telegram connected', detail: connected ? 'Account pairing confirmed' : 'Connect Telegram in Integrations', status: connected ? 'Complete' : telegramLoading ? 'Checking' : 'Pending', tone: connected ? 'emerald' : 'amber', action: 'integrations' },
-    { label: 'Source map reviewed', detail: 'Review confirmed, under-validation, remediation and limited sources', status: 'Needs review', tone: 'amber', action: 'sources' },
+    { label: 'Source map reviewed', detail: 'Review readiness-supported, under-validation, remediation and limited sources', status: 'Needs review', tone: 'amber', action: 'sources' },
     { label: 'First reviewed brief', detail: 'Sample brief delivery can be tested from Integrations', status: 'Sample available', tone: 'slate', action: 'briefs' },
   ]
 
@@ -234,7 +234,7 @@ function buildWidgets(sourcesData) {
     ? new Date(last_run_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }) + ' UTC'
     : 'No runs yet'
   return {
-    confirmedSources: SOURCE_READINESS_SUMMARY.confirmed,
+    supportedSources: SOURCE_READINESS_SUMMARY.supported,
     remediationSources: SOURCE_READINESS_SUMMARY.remediation,
     lastCheck,
     changedThisWeek: changed + firstSeen,
@@ -266,7 +266,7 @@ function ReadinessBadge({ source }) {
     label = 'QUALITY DROP'
     cls = 'border-amber-400/30 bg-amber-400/10 text-amber-200'
   } else if (source.change_status && source.change_status !== 'NOT_RUN') {
-    label = 'CONFIRMED'
+    label = 'READINESS'
     cls = 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
   }
   return <span className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-bold ${cls}`}>{label}</span>
@@ -329,10 +329,10 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <StatusPill tone="cyan">Evidence-readiness review</StatusPill>
             </div>
             <h2 className="text-lg font-semibold text-white">
-              10 of 13 built-in UAE sources confirmed. 3 need extraction remediation.
+              9 of 13 built-in UAE sources are readiness-supported. 4 need extraction remediation.
             </h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
-              DFSA extraction and one UAE FIU homepage source are still under remediation. Built-in source activation
+              DFSA, DIFC Laws, and one UAE FIU homepage source are still under remediation. Built-in source activation
               remains subject to source readiness, evidence, and baseline checks.
             </p>
           </div>
@@ -342,11 +342,11 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <p className="text-[11px] text-slate-500">enabled</p>
             </div>
             <div className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-emerald-100">10</p>
-              <p className="text-[11px] text-emerald-100/70">confirmed</p>
+              <p className="sp-mono text-xl font-semibold text-emerald-100">9</p>
+              <p className="text-[11px] text-emerald-100/70">readiness-supported</p>
             </div>
             <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-amber-100">3</p>
+              <p className="sp-mono text-xl font-semibold text-amber-100">4</p>
               <p className="text-[11px] text-amber-100/70">under extraction remediation</p>
             </div>
           </div>
@@ -373,8 +373,8 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={SOURCE_READINESS_SUMMARY.enabled}  sub="reviewed UAE source pack" />
-          <InfoCard icon={CheckCircle} tone="emerald" label="Sources confirmed" value={SOURCE_READINESS_SUMMARY.confirmed} sub="latest readiness run" />
-          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={SOURCE_READINESS_SUMMARY.remediation} sub="DFSA/FIU extraction work" />
+          <InfoCard icon={CheckCircle} tone="emerald" label="Readiness-supported" value={SOURCE_READINESS_SUMMARY.supported} sub="current registry review" />
+          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={SOURCE_READINESS_SUMMARY.remediation} sub="DFSA/DIFC/FIU extraction work" />
           <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with proof data" />
           <InfoCard icon={Bell}      tone="emerald" label="Changed sources"      value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
           <InfoCard icon={AlertTriangle} tone="amber" label="High-risk pending"  value={widgets?.highRiskPending ?? 0} sub="changes needing review" />

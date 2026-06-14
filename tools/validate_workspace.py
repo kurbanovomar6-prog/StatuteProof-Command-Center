@@ -281,6 +281,8 @@ for path in root.rglob('.git'):
     if path.is_dir():
         rel = path.relative_to(root)
         parts = rel.parts
+        if any(part.startswith('.reference_') for part in parts):
+            continue
         if len(parts) > 1:
             errors.append(f'.git directory found inside references at {rel} — remove it')
 
@@ -320,7 +322,11 @@ for path in (root / 'examples').rglob('*.md'):
 # ── .env file check ───────────────────────────────────────────────────────────
 
 for path in root.rglob('.env*'):
-    if path.is_file() and '.reference_tmp' not in str(path) and not path.name.endswith('.example'):
+    if (
+        path.is_file()
+        and not any(part.startswith('.reference_') for part in path.relative_to(root).parts)
+        and not path.name.endswith('.example')
+    ):
         errors.append(f'.env file found: {path.relative_to(root)} — remove before commit')
 
 # ── Print results ─────────────────────────────────────────────────────────────

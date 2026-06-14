@@ -29,13 +29,20 @@ Do not use to fetch live sources unless the user has approved the exact safe com
 6. For CHANGED records, check diff_json_path and diff_md_path.
 7. Confirm FAILED never becomes UNCHANGED.
 8. Check append-only behavior and concurrent-write risk.
-9. Record limitations and manual review requirements.
+9. Check evidence level:
+   - PREVIEW_ONLY means no proof claim.
+   - BASIC_EVIDENCE/FULL_EVIDENCE require proof paths and hashes.
+   - CERTIFIED_EVIDENCE requires baseline completion.
+10. Check activation readiness: a single successful run cannot be monitoring-ready.
+11. Record limitations and manual review requirements.
 
 ## Output format
 - PASS / HOLD.
 - Missing fields.
 - Evidence artifacts found.
 - Status classification result.
+- Evidence level and activation readiness.
+- Baseline run count and requirement.
 - Risk to customer-facing use.
 - Exact next fix or dry-run command.
 
@@ -46,6 +53,7 @@ Do not use to fetch live sources unless the user has approved the exact safe com
 
 ## StatuteProof-specific constraints
 No brief may be drafted unless evidence_record_status is complete or the limitation is explicit and human-reviewed.
+No source may be described as monitoring-ready unless proof artifacts and baseline requirements have passed.
 
 ## Example invocation
 "Use evidence-readiness-review on the latest VARA run and tell me if proof is complete."

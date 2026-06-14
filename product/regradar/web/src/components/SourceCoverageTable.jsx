@@ -1,27 +1,27 @@
 const SOURCES = [
-  { source_id: 'AE-central-bank-of-the-uae', regulator: 'CBUAE Main', jurisdiction: 'UAE Federal', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-cbuae-regulations', regulator: 'CBUAE Regulations', jurisdiction: 'UAE Federal', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-uae-ministry-of-finance', regulator: 'UAE Ministry of Finance', jurisdiction: 'UAE Federal', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-dubai-virtual-assets-regulatory-authority-vara', regulator: 'VARA Main', jurisdiction: 'Dubai / VARA', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-vara-enforcement', regulator: 'VARA Enforcement Notices', jurisdiction: 'Dubai / VARA', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-abu-dhabi-global-market-adgm', regulator: 'ADGM FSRA Main', jurisdiction: 'ADGM / FSRA', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-uaefiu-circulars', regulator: 'UAE FIU Circulars', jurisdiction: 'UAE Federal', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-difc-laws-and-regulations', regulator: 'DIFC Laws Portal', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'CONFIRMED' },
-  { source_id: 'AE-uae-legislation-portal', regulator: 'UAE Legislation Portal', jurisdiction: 'UAE Federal', tier: 2, status: 'CONFIRMED' },
-  { source_id: 'AE-uae-ministry-of-economy', regulator: 'UAE Ministry of Economy', jurisdiction: 'UAE Federal', tier: 2, status: 'CONFIRMED' },
-  { source_id: 'AE-dfsa-rulebook', regulator: 'DFSA Rulebook', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'REMEDIATION' },
+  { source_id: 'AE-central-bank-of-the-uae', regulator: 'CBUAE Main', jurisdiction: 'UAE Federal', tier: 1, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-cbuae-regulations', regulator: 'CBUAE Regulations', jurisdiction: 'UAE Federal', tier: 1, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-uae-ministry-of-finance', regulator: 'UAE Ministry of Finance', jurisdiction: 'UAE Federal', tier: 1, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-dubai-virtual-assets-regulatory-authority-vara', regulator: 'VARA Main', jurisdiction: 'Dubai / VARA', tier: 1, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-vara-enforcement', regulator: 'VARA Enforcement Notices', jurisdiction: 'Dubai / VARA', tier: 1, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-abu-dhabi-global-market-adgm', regulator: 'ADGM FSRA Main', jurisdiction: 'ADGM / FSRA', tier: 1, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-uaefiu-circulars', regulator: 'UAE FIU Circulars', jurisdiction: 'UAE Federal', tier: 1, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-difc-laws-and-regulations', regulator: 'DIFC Laws and Regulations', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'REMEDIATION' },
+  { source_id: 'AE-uae-legislation-portal', regulator: 'UAE Legislation Portal', jurisdiction: 'UAE Federal', tier: 2, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-uae-ministry-of-economy', regulator: 'UAE Ministry of Economy', jurisdiction: 'UAE Federal', tier: 2, status: 'READINESS_SUPPORTED' },
+  { source_id: 'AE-dubai-financial-services-authority-dfsa', regulator: 'DFSA Rulebook', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'REMEDIATION' },
   { source_id: 'AE-dfsa-notices', regulator: 'DFSA Regulatory Notices', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'REMEDIATION' },
   { source_id: 'AE-uae-financial-intelligence-unit-uaefiu', regulator: 'UAE FIU Homepage', jurisdiction: 'UAE Federal', tier: 2, status: 'REMEDIATION' },
 ]
 
-const confirmedCount = SOURCES.filter(s => s.status === 'CONFIRMED').length
+const supportedCount = SOURCES.filter(s => s.status === 'READINESS_SUPPORTED').length
 const remediationCount = SOURCES.filter(s => s.status === 'REMEDIATION').length
 
 function StatusBadge({ status }) {
-  if (status === 'CONFIRMED') {
+  if (status === 'READINESS_SUPPORTED') {
     return (
       <span className="rounded-md border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-200">
-        CONFIRMED
+        READINESS-SUPPORTED
       </span>
     )
   }
@@ -45,7 +45,7 @@ export default function SourceCoverageTable() {
         </div>
         <div className="text-right text-xs">
           <p className="font-semibold text-cyan-200">{SOURCES.length} enabled</p>
-          <p className="text-emerald-200">{confirmedCount} confirmed</p>
+          <p className="text-emerald-200">{supportedCount} readiness-supported</p>
           <p className="text-amber-200">{remediationCount} under extraction remediation</p>
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function SourceCoverageTable() {
         </table>
       </div>
       <div className="border-t border-slate-800 px-4 py-2 text-xs text-slate-500">
-        Remediation sources are not treated as confirmed until extraction quality is fixed and rerun.
+        Remediation sources are not treated as ready until extraction quality is fixed and rerun.
       </div>
     </div>
   )

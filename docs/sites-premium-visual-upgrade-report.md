@@ -50,13 +50,13 @@ StatuteProof was upgraded from a mixed early-stage SaaS UI into a darker, more c
 - Hosted Sites preview URL: not available.
 - Local preview URL: `http://127.0.0.1:5174/`
 - Desktop QA completed for homepage, pricing, source readiness review, login, register, dashboard, sources, source lab, evidence, briefs, and billing.
-- Browser retest confirmed the public source-readiness surfaces show 13 enabled, 10 confirmed, and 3 under extraction remediation. Stale readiness counts and old DFSA/UAE FIU confirmed demo rows were removed.
+- Parser/source registry follow-up now supersedes the earlier source-count wording: public source-readiness surfaces should show 13 enabled, 9 readiness-supported, and 4 under extraction remediation.
 - Public dashboard-preview source counts are static sample/readiness-pack counts, not raw API totals.
 - Authenticated source-map mock data now uses the same canonical 13-source model, with DFSA Rulebook, DFSA Regulatory Notices, and UAE FIU Homepage marked as remediation/review.
 - Public source-matrix, source-pack, sample-report, and alert-profile copy now separate DIFC Laws readiness from DFSA remediation and UAE FIU homepage remediation.
-- Confirmed source identities were corrected against the readiness report: UAE Ministry of Finance and UAE FIU Circulars are shown as confirmed; disabled aliases CBUAE Circulars and ADGM FSRA Rules are not shown as confirmed.
-- ADGM/FSRA copy now treats the main ADGM/FSRA source as confirmed with caveats while keeping FSRA rulebook/circular layers outside confirmed scope until readiness checks clear.
-- Source registry statuses, generated/static readiness reports, metadata, and public samples now align to 13 enabled UAE sources, 10 confirmed, and 3 under extraction remediation.
+- Readiness-supported source identities were corrected against the registry: UAE Ministry of Finance and UAE FIU Circulars are shown as readiness-supported; disabled aliases CBUAE Circulars and ADGM FSRA Rules are not shown as ready.
+- ADGM/FSRA copy now treats the main ADGM/FSRA source as readiness-supported with caveats while keeping FSRA rulebook/circular layers outside readiness-supported scope until readiness checks clear.
+- Source registry statuses, generated/static readiness reports, metadata, and public samples now align to 13 enabled UAE sources, 9 readiness-supported, and 4 under extraction remediation.
 - Mobile viewport QA was not feasible because the in-app browser exposed no viewport resize capability.
 
 ## Gate Results
@@ -98,7 +98,7 @@ Final validation after the public source-readiness table and dashboard-preview f
 - Browser retest confirmed no stale source readiness count, no old DFSA/UAE FIU confirmed demo rows, and no light cards in the corrected public evidence/source readiness components.
 - Source readiness lists were aligned across `Coverage.jsx`, `SourceCoverageTable.jsx`, `DashboardPreview.jsx`, and `mockData.js` to one canonical 13-source model.
 - Final source-claim scan found no UI-code matches for stale readiness counts, disabled aliases (`CBUAE Circulars`, `ADGM FSRA Rules`), DFSA confirmed overclaims, or UAE FIU Homepage confirmed overclaims.
-- Browser retest confirmed the homepage and `/app/sources` render UAE Ministry of Finance and UAE FIU Circulars as confirmed identities, omit disabled aliases, and keep DFSA Rulebook, DFSA Regulatory Notices, and UAE FIU Homepage as `Needs remediation` / `Review`.
+- Browser retest should confirm the homepage and `/app/sources` render UAE Ministry of Finance and UAE FIU Circulars as readiness-supported identities, omit disabled aliases, and keep DFSA Rulebook, DFSA Regulatory Notices, DIFC Laws, and UAE FIU Homepage as `Needs remediation` / `Review`.
 
 Final validation after gate-blocker fixes:
 

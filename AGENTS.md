@@ -28,6 +28,7 @@ Agent system prompts are in `.claude/agents/` (Claude Code subagent format) and 
 ```
 source monitoring task       → Source Monitor Agent (#6)
 custom source parser/intake  → Source Monitor (#6) + Code Architect (#3) + Evidence Trail (#7)
+parser quality gate          → Source Monitor (#6) + Evidence Trail (#7) + QA / Critic (#4)
 evidence verification task   → Evidence Trail Agent (#7)
 risk scoring / brief task    → Risk + Brief Pipeline (#8)
 legal copy review            → Legal Language Agent (#5)
@@ -91,6 +92,14 @@ Parser/source-intake tasks must keep these states separate:
 - saved test = evidence-backed only if proof artifacts exist
 - source confirmed = readiness checks passed with failure reasons cleared
 - monitoring-ready = baseline and activation-readiness requirements passed
+
+Parser task handoff order:
+1. Source Monitor reviews URL/source spec and blocked-source policy.
+2. Code Architect reviews API/provider implementation if code changes are needed.
+3. Source Intake Engine runs only the approved single-source test.
+4. Evidence Trail verifies proof, hashes, paths, and baseline history.
+5. QA / Critic blocks false ready/confirmed states.
+6. Legal Language reviews any customer-facing source status wording.
 
 Custom source work is limited to public sources that are technically accessible
 and permitted to be monitored. Protected, private, login-gated, CAPTCHA-gated,

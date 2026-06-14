@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 
-const READY_SOURCES = [
+const READINESS_SUPPORTED_SOURCES = [
   { source: 'CBUAE Main', publishes: 'Central bank notices, licensing and supervisory material', extraction: 'HTML structured' },
   { source: 'CBUAE Regulations', publishes: 'CBUAE regulations listing and standards', extraction: 'HTML structured; counter-change noise filter needed before alert delivery' },
   { source: 'UAE Ministry of Finance', publishes: 'Financial policy notices and public ministry publications', extraction: 'HTML structured + PDF text' },
@@ -8,7 +8,6 @@ const READY_SOURCES = [
   { source: 'VARA Enforcement Notices', publishes: 'VASP enforcement actions and regulatory decisions', extraction: 'HTML structured' },
   { source: 'ADGM FSRA Main', publishes: 'ADGM regulations, FSRA notices, licensing updates', extraction: 'HTML structured; low character count caveat' },
   { source: 'UAE FIU Circulars', publishes: 'FIU publications, circulars and public notices', extraction: 'HTML structured' },
-  { source: 'DIFC Laws Portal', publishes: 'Primary and subsidiary DIFC legislation', extraction: 'HTML structured' },
   { source: 'UAE Legislation Portal', publishes: 'Federal laws and decrees', extraction: 'HTML structured; aggregate page changes require adapter review for item-level alerts' },
   { source: 'UAE Ministry of Economy', publishes: 'Commercial licensing, AML policy', extraction: 'HTML structured' },
 ]
@@ -29,6 +28,11 @@ const REMEDIATION_SOURCES = [
     issue: 'Homepage extraction is shallow and less useful than the FIU circulars/publications source.',
     remediation: 'Promote the circulars source as primary and demote the homepage to reference status.',
   },
+  {
+    source: 'DIFC Laws and Regulations',
+    issue: 'Current registry keeps this source in remediation pending source-structure/access review.',
+    remediation: 'Rerun Source Lab, verify meaningful hash-unique content, and keep held until Evidence Trail review clears it.',
+  },
 ]
 
 const LIMITED_SOURCES = [
@@ -42,14 +46,14 @@ const LIMITED_SOURCES = [
   },
   {
     source: 'UAE Legislation Portal item-level adapter',
-    constraint: 'The portal is confirmed as a source, but homepage aggregate changes are not treated as customer-ready legal updates until item-level extraction is checked.',
+    constraint: 'The portal is readiness-supported as a source, but homepage aggregate changes are not treated as customer-ready legal updates until item-level extraction is checked.',
   },
 ]
 
 const INACTIVE_SOURCES = [
   {
     source: 'Official Gazette / Al-Jaridah Al-Rasmiah',
-    status: 'Validation pending. Not included in any pilot scope until confirmed accessible.',
+    status: 'Validation pending. Not included in any pilot scope until public accessibility is reviewed.',
   },
   {
     source: 'e-Laws / Ministry of Justice portal',
@@ -72,7 +76,7 @@ const UNDER_VALIDATION = [
 
 function SourceStatusBadge({ tone, children }) {
   const styles = {
-    confirmed: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+    supported: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
     validation: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
     limited: 'border-slate-500/25 bg-slate-500/10 text-slate-300',
     blocked: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
@@ -129,19 +133,19 @@ export default function Coverage({ onCreateWorkspace }) {
           </h2>
           <p className="text-slate-400 max-w-3xl mx-auto">
             StatuteProof starts with a UAE source pack under evidence-readiness review, then discloses
-            confirmed, remediation, constrained, blocked, and under-validation sources separately.
+            readiness-supported, remediation, constrained, blocked, and under-validation sources separately.
             This is not presented as the entire UAE market.
           </p>
           <p className="text-xs text-slate-500 max-w-3xl mx-auto mt-3">
-            Mapped does not mean confirmed for monitoring. Sources enter client monitoring only after access, extraction and proof/diff checks clear.
+            Mapped does not mean monitoring-ready. Sources enter client monitoring only after access, extraction and proof/diff checks clear.
           </p>
         </div>
 
         <div className="space-y-8">
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Confirmed in the latest evidence-readiness run — 10 sources</h3>
-              <SourceStatusBadge tone="confirmed">Confirmed</SourceStatusBadge>
+              <h3 className="font-bold text-white">Readiness-supported in the current registry — 9 sources</h3>
+              <SourceStatusBadge tone="supported">Readiness-supported</SourceStatusBadge>
             </div>
             <SourceTable
               columns={[
@@ -149,13 +153,13 @@ export default function Coverage({ onCreateWorkspace }) {
                 { key: 'publishes', label: 'What it publishes' },
                 { key: 'extraction', label: 'Extraction' },
               ]}
-              rows={READY_SOURCES}
+              rows={READINESS_SUPPORTED_SOURCES}
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Under extraction remediation — 3 sources</h3>
+              <h3 className="font-bold text-white">Under extraction remediation — 4 sources</h3>
               <SourceStatusBadge tone="validation">Remediation</SourceStatusBadge>
             </div>
             <SourceTable
@@ -184,7 +188,7 @@ export default function Coverage({ onCreateWorkspace }) {
 
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Under validation — commercially relevant, not confirmed yet</h3>
+              <h3 className="font-bold text-white">Under validation — commercially relevant, not readiness-supported yet</h3>
               <SourceStatusBadge tone="validation">Under validation</SourceStatusBadge>
             </div>
             <SourceTable
@@ -195,14 +199,14 @@ export default function Coverage({ onCreateWorkspace }) {
               ]}
               rows={UNDER_VALIDATION.map(row => ({
                 ...row,
-                why: `${row.why} Status: Under validation. Not included in pilot scope until confirmed.`,
+                why: `${row.why} Status: Under validation. Not included in pilot scope until reviewed.`,
               }))}
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Not confirmed / blocked — disclosed, not hidden</h3>
+              <h3 className="font-bold text-white">Not readiness-supported / blocked — disclosed, not hidden</h3>
               <SourceStatusBadge tone="blocked">Blocked</SourceStatusBadge>
             </div>
             <SourceTable
@@ -218,7 +222,7 @@ export default function Coverage({ onCreateWorkspace }) {
         <div className="bg-[#0A1628] border border-slate-800 rounded-xl p-6 mt-8 mb-6">
           <p className="text-sm text-slate-400 leading-relaxed">
             Source status reflects latest technical accessibility and extraction quality — not regulatory significance.
-            A source being listed as Limited or Not Confirmed does not reduce its legal importance. It means
+            A source being listed as limited or not readiness-supported does not reduce its legal importance. It means
             StatuteProof cannot currently monitor it reliably, and we will say so before you rely on it.
           </p>
         </div>

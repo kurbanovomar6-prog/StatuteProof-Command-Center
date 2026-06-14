@@ -49,7 +49,7 @@ Implementation plan: keep the current view-state architecture but add browser hi
 
 - The visual language is dark and aligned with the brand, but still reads like generic Tailwind SaaS: centered hero, uniform rounded cards, repeated soft borders, and light hierarchy.
 - The hero evidence card is useful but too small and not premium enough for a first-viewport trust signal.
-- Source coverage tables use source-readiness wording inconsistently even though the current customer-facing story is 13 enabled UAE sources, 10 confirmed, and 3 under extraction remediation.
+- Source coverage tables use source-readiness wording inconsistently. The current parser/source registry story is 13 enabled UAE sources, 9 readiness-supported, and 4 under extraction remediation.
 - Pricing cards on the homepage still use old `mockData.js` prices and names (`$99`, `$249`, `$499`, `Profile Pilot`, `Custom Profile`) while the current honest pricing is Free / $199 / $399 / Talk to us.
 - App tables are functional but plain; they need clearer badges, denser enterprise hierarchy, and stronger status grouping.
 - Auth pages use a standard split-panel layout and do not show enough evidence/product specificity.
@@ -75,8 +75,8 @@ Implementation plan: keep the current view-state architecture but add browser hi
 ## 7. Inconsistent labels
 
 - `Evidence Preview` vs. `Source Readiness Review` appears in fallback plan state.
-- `Active validated core layer` overclaims current source readiness.
-- `13 enabled UAE sources under evidence-readiness validation` is safe only when paired with "10 confirmed, 3 under extraction remediation" where space allows.
+- Prior active/validated source-status phrasing overclaims current source readiness.
+- `13 enabled UAE sources under evidence-readiness review` is safe only when paired with the current registry count: 9 readiness-supported, 4 under extraction remediation.
 - `Sample Alerts`, `Brief Previews`, and evidence cards should consistently say `SAMPLE / DEMO — not a real regulatory update`.
 
 ## 8. Sample/demo overclaim risks

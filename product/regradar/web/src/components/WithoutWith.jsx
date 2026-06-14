@@ -10,7 +10,7 @@ const withoutItems = [
 ]
 
 const withItems = [
-  'Scheduled checks against confirmed official UAE regulatory sources',
+  'Scheduled checks against readiness-supported official UAE regulatory sources',
   'Timestamped run record for each source check',
   'Detected changes flagged for human review with source diff',
   'Source-backed alert draft with official URL and proof trail',

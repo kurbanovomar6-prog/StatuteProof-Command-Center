@@ -28,23 +28,31 @@ Do not use for outreach, design-only work, or legal-copy review. Do not run live
 5. Confirm old-vs-new comparison is deterministic and not LLM-based.
 6. Check failure paths: FAILED, QUALITY_DROP, SOURCE_STRUCTURE_CHANGED if present.
 7. Check if boilerplate stripping can hide material content.
-8. Document extraction limitations.
+8. Check blocked-source policy: login, CAPTCHA, paywall, private portal, private IP, credentials in URL, and access-control redirects.
+9. Check Source Lab state naming:
+   - no-save test = preview only.
+   - evidence confirmed = proof artifacts exist.
+   - monitoring-ready = baseline and activation-readiness checks pass.
+10. Document extraction limitations and exact remediation path.
 
 ## Output format
 - Source readiness verdict.
 - Fetch/extraction route.
 - Hash/compare route.
 - Failure-handling issues.
-- Activation recommendation.
+- Preview/evidence/activation distinction.
+- Activation recommendation: HOLD / SAVE_FOR_VALIDATION / BASELINE_PENDING / MONITORING_READY.
 
 ## Safety rules
 - No CAPTCHA bypass.
 - No private portals.
 - No login-protected content.
 - No broad crawls without explicit approval.
+- Do not claim any website can be parsed.
+- Do not move remediation sources to customer-visible ready without evidence and approval.
 
 ## StatuteProof-specific constraints
-A source is monitored only if it is in sources.json, enabled, and has current evidence of successful extraction.
+A source is monitored only if it is in sources.json, enabled, and has current evidence of successful extraction. One no-save Source Lab success is not monitoring-ready.
 
 ## Example invocation
 "Use source-monitoring-review for the CBUAE regulations source before activation."

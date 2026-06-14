@@ -11,7 +11,7 @@ const PLANS_DATA = [
     period: '',
     badge: 'Start here',
     highlight: false,
-    purpose: 'See which UAE regulatory sources are confirmed, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring included.',
+    purpose: 'See which UAE regulatory sources are readiness-supported, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring included.',
     cta: 'Request source readiness review',
     ctaPrimary: false,
     features: [
@@ -61,11 +61,11 @@ const PLANS_DATA = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    purpose: 'MLRO or CCO at a UAE-regulated firm. 13 enabled UAE sources under evidence-readiness review: 10 confirmed in the latest run, 3 under extraction remediation.',
+    purpose: 'MLRO or CCO at a UAE-regulated firm. 13 enabled UAE sources under evidence-readiness review: 9 readiness-supported in the latest registry review, 4 under extraction remediation.',
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '13 enabled; 10 confirmed, 3 under extraction remediation' },
+      { label: 'Official UAE sources', value: '13 enabled; 9 readiness-supported, 4 under extraction remediation' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },
@@ -124,7 +124,7 @@ const FAQS = [
   },
   {
     q: 'What does "evidence-readiness validation" mean?',
-    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: confirming it is publicly accessible, extractable, and producing reliable text diffs. Sources that clear readiness checks are marked confirmed. Sources with access, content, or extraction issues are marked limited, blocked, or remediation required.',
+    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: whether it is publicly accessible, extractable, and producing reliable text diffs. Sources that clear readiness checks are marked readiness-supported. Sources with access, content, or extraction issues are marked limited, blocked, or remediation required.',
   },
   {
     q: 'Can I add my own sources?',
@@ -132,7 +132,7 @@ const FAQS = [
   },
   {
     q: 'What happens if a source fails?',
-    a: 'Source failures are documented in your evidence records. Access status (Confirmed / Limited / Blocked) is tracked per source. You are notified when a source becomes unavailable, and the limitation is recorded in your audit trail.',
+    a: 'Source failures are documented in your evidence records. Access status (readiness-supported / limited / blocked) is tracked per source. You are notified when a source becomes unavailable, and the limitation is recorded in your audit trail.',
   },
   {
     q: 'Can consultants use it for multiple clients?',
@@ -144,7 +144,7 @@ const FAQS = [
   },
   {
     q: 'Why does UAE Monitor say "evidence-readiness validation"?',
-    a: 'We currently have 13 enabled UAE regulatory sources. The latest readiness report confirms 10 sources and keeps 3 sources under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
+    a: 'We currently have 13 enabled UAE regulatory sources. The latest registry review keeps 9 sources readiness-supported and 4 sources under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
   },
 ]
 

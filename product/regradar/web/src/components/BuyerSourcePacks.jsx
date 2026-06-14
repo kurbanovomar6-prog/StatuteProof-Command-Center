@@ -35,8 +35,8 @@ const PACKS = [
     profile: 'ADGM / FSRA',
     bestFor: 'ADGM regulated firms, funds, securities teams and regulatory advisers',
     layers: [
-      'ADGM / FSRA main source confirmed with caveats',
-      'FSRA rulebook outside confirmed scope until readiness checks clear',
+      'ADGM / FSRA main source readiness-supported with caveats',
+      'FSRA rulebook outside readiness-supported scope until checks clear',
       'FSRA circulars under validation',
       'ADGM Data Protection guidance',
     ],
@@ -73,7 +73,7 @@ const PACKS = [
 ]
 
 const STATUSES = [
-  ['Confirmed', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
+  ['Readiness-supported', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
   ['Under validation', 'border-amber-400/25 bg-amber-400/10 text-amber-300'],
   ['Needs remediation', 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'],
 ]
@@ -143,7 +143,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
         </div>
 
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/45 p-4 text-sm leading-relaxed text-slate-400">
-          Source packs are maps for buyer scoping. They do not imply every listed source layer is confirmed for monitoring.
+          Source packs are maps for buyer scoping. They do not imply every listed source layer is ready for monitoring.
         </div>
       </div>
     </section>

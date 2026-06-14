@@ -20,12 +20,12 @@
 | Sources with proof block on disk | 13 / 13 |
 | Sources with content hash | 13 / 13 |
 | Proof quality | ALL `LIMITED` (not `COMPLETE`) |
-| Sources confirmed READY | **10** |
-| Sources needing remediation | **3** |
+| Sources readiness-supported in current UAE registry | **9** |
+| Sources needing remediation in current UAE registry | **4** |
 | Sources blocked / inaccessible | **0** |
 
-**Can we claim "13 validated UAE sources"? NO.**  
-Honest claim: "13 UAE regulatory sources in our source pack — 10 confirmed ready, 3 under extraction remediation."
+**Can we describe all 13 enabled UAE sources as fully validated? NO.**
+Honest claim: "13 UAE regulatory sources in our source pack — 9 readiness-supported in the current registry, 4 under extraction remediation."
 
 ---
 
@@ -40,7 +40,7 @@ Honest claim: "13 UAE regulatory sources in our source pack — 10 confirmed rea
 | 5 | AE-uae-ministry-of-finance | UAE Ministry of Finance | mof.gov.ae | ✓ | ✓ | ✓ | ✓ | `d3d0cff4700e` | ✓ | UNCHANGED | 13,389 raw / 44,131 norm | GOOD | ✓ YES | Good extraction. 6 PDFs, 78,266 PDF chars. |
 | 6 | AE-uae-legislation-portal | UAE Legislation Portal | uaelegislation.gov.ae | ✓ | ✓ | ✓ | ✓ | `ae996b5574cc` | ✓ | UNCHANGED | 14,694 raw / 5,176 norm | GOOD | ✓ YES (caveat) | Notes flag WAF/access constraints and aggregate-page change noise. No PDFs extracted. |
 | 7 | AE-uae-financial-intelligence-unit-uaefiu | UAE FIU Homepage | uaefiu.gov.ae | ✓ | ✓ | ✓ | ✓ | `5f77f00c7bbb` | ✓ | UNCHANGED | 2,026 raw / 1,601 norm | GOOD | ⚠ REMEDIATION | **LOW CHARS: 2,026.** Homepage-only extraction. No PDFs. Too shallow for reliable regulatory monitoring. Recommend switching monitoring to AE-uaefiu-circulars (already enabled). |
-| 8 | AE-difc-laws-and-regulations | DIFC Laws & Regulations | difc.com/business/laws-and-regulations | ✓ | ✓ | ✓ | ✓ | `fb108f2e7625` | ✓ | UNCHANGED | 9,150 raw / 11,202 norm | GOOD | ✓ YES | Good. 6 PDFs, 7,203 PDF chars. |
+| 8 | AE-difc-laws-and-regulations | DIFC Laws & Regulations | difc.com/business/laws-and-regulations | ✓ | ✓ | ✓ | ✓ | `fb108f2e7625` | ✓ | UNCHANGED | 9,150 raw / 11,202 norm | GOOD | ⚠ REMEDIATION | Registry hold: source structure/access remediation remains open before customer-visible ready status. |
 | 9 | AE-uae-ministry-of-economy | UAE Ministry of Economy | moet.gov.ae/en | ✓ | ✓ | ✓ | ✓ | `f88791e8d578` | ✓ | CHANGED | 21,374 raw / 6,906 norm | GOOD | ✓ YES | Meaningful change detected (link removal). No PDFs — may miss PDF-heavy regulatory publications. |
 | 10 | AE-vara-enforcement | VARA Enforcement Notices | vara.ae/en/enforcement | ✓ | ✓ | ✓ | ✓ | `707b3094d76f` | ✓ | UNCHANGED | 12,677 raw / 10,560 norm | GOOD | ✓ YES | Best source for sample brief. Clean, unique, well-extracted enforcement listing. |
 | 11 | AE-cbuae-regulations | CBUAE Regulations Sub-page | centralbank.ae/en/regulations | ✓ | ✓ | ✓ | ✓ | `985856733f95` | ✓ | CHANGED | 27,509 raw / 38,131 norm | GOOD | ✓ YES (caveat) | **CHANGE NOISE:** 69 changed chunks are page rating counters ("Rated by 1009 People") not regulatory content. Needs counter-change filter. 20 PDFs, 20,893 PDF chars. |
@@ -49,7 +49,7 @@ Honest claim: "13 UAE regulatory sources in our source pack — 10 confirmed rea
 
 ---
 
-## Ready Sources (10)
+## Readiness-Supported Sources In Current Registry (9)
 
 These sources passed all checks: accessible, raw snapshot on disk, normalized snapshot on disk, proof block on disk, hash computed, extraction quality GOOD, unique content hash, no critical anomalies.
 
@@ -58,15 +58,14 @@ These sources passed all checks: accessible, raw snapshot on disk, normalized sn
 3. **AE-abu-dhabi-global-market-adgm** — ADGM/FSRA. 2,742 chars, low but unique and consistent.
 4. **AE-uae-ministry-of-finance** — MoF. 13,389 chars + 78,266 PDF chars. Strong.
 5. **AE-uae-legislation-portal** — UAE legislation portal. 14,694 chars. WAF constraint noted.
-6. **AE-difc-laws-and-regulations** — DIFC. 9,150 chars + 7,203 PDF chars.
-7. **AE-uae-ministry-of-economy** — MoEcT. 21,374 chars. Meaningful change detected.
-8. **AE-vara-enforcement** — VARA enforcement notices. 12,677 chars. Clean, stable.
-9. **AE-cbuae-regulations** — CBUAE regulations sub-page. 27,509 chars + 20,893 PDF chars. Change noise present (rating counters) — needs filter before alert delivery.
-10. **AE-uaefiu-circulars** — UAE FIU publications. 4,102 chars. Preferred FIU monitoring source.
+6. **AE-uae-ministry-of-economy** — MoEcT. 21,374 chars. Meaningful change detected.
+7. **AE-vara-enforcement** — VARA enforcement notices. 12,677 chars. Clean, stable.
+8. **AE-cbuae-regulations** — CBUAE regulations sub-page. 27,509 chars + 20,893 PDF chars. Change noise present (rating counters) — needs filter before alert delivery.
+9. **AE-uaefiu-circulars** — UAE FIU publications. 4,102 chars. Preferred FIU monitoring source.
 
 ---
 
-## Sources Needing Remediation (3)
+## Sources Needing Remediation In Current Registry (4)
 
 ### 1. AE-dubai-financial-services-authority-dfsa — CRITICAL: Hash collision
 
@@ -90,7 +89,20 @@ Same issue as above. The DFSA notices URL (`dfsa.ae/regulation/notices-public-re
 
 ---
 
-### 3. AE-uae-financial-intelligence-unit-uaefiu — LOW CHAR COUNT
+### 3. AE-difc-laws-and-regulations — REGISTRY HOLD
+
+**Issue:** The 2026-06-12 evidence run extracted meaningful text, but the current source registry keeps this source under remediation. Treat it as a hold until the source structure/access concern is resolved and reviewed.
+
+**Impact:** Do not display DIFC Laws and Regulations as customer-visible ready until Source Monitor and Evidence Trail review the registry hold.
+
+**Recommended fix:**
+- Re-run a no-save Source Lab check with the current URL and selector strategy
+- Verify the normalized content is meaningful, hash-unique, and stable
+- Move the source only after evidence-readiness review and founder approval
+
+---
+
+### 4. AE-uae-financial-intelligence-unit-uaefiu — LOW CHAR COUNT
 
 **Issue:** UAE FIU homepage extraction yields only 2,026 chars (1,601 normalized). No PDF links found. This is a homepage-level shell — not regulatory content monitoring.
 
@@ -141,21 +153,19 @@ Change detection is **deterministic hash comparison only** — no LLM used.
 
 ## Recommended Wording for Pricing / Homepage
 
-**DO NOT USE:** "13 validated UAE sources"
+**DO NOT USE:** language that describes all 13 enabled UAE sources as validated.
 
-**DO NOT USE:** "13 confirmed UAE regulatory sources"
+**DO NOT USE:** language that describes all 13 enabled UAE regulatory sources as confirmed.
 
 **USE (honest):**
 - "UAE regulatory source pack — 13 sources enabled, evidence-readiness review in progress"
+- "13 enabled UAE sources — 9 readiness-supported in the current registry, 4 under extraction remediation"
 - "Latest readiness run artifacts available for sources that completed proof validation"
 - "Covers VARA, CBUAE, DFSA, ADGM, UAE FIU, DIFC and more — source readiness validation in progress"
 - "13 UAE regulatory sources under evidence-readiness review" (acceptable during validation period)
 
-**After DFSA fix is confirmed:**
-- "11 UAE regulatory sources passed the latest readiness check, 2 (DFSA) under extraction remediation"
-
-**After all 3 remediations are complete:**
-- "13 UAE regulatory sources passed the latest evidence-readiness run with hash-verified snapshots"
+**After remediation fixes are confirmed:**
+- Update the source count only after live checks, evidence review, and registry status are aligned.
 
 ---
 
@@ -177,11 +187,12 @@ The 2026-06-12 run detected a new VARA AML/CTF guidance PDF (`vara-amlctf-busine
 
 ---
 
-## What Must Be Fixed Before Claiming "13 Validated UAE Sources"
+## What Must Be Fixed Before Claiming Full UAE Source-Pack Readiness
 
 | Fix | Source(s) affected | Priority |
 |---|---|---|
 | Resolve DFSA hash collision — extract actual page content | AE-dfsa-notices, AE-dubai-financial-services-authority-dfsa | HIGH |
+| Resolve current DIFC registry hold | AE-difc-laws-and-regulations | HIGH |
 | Upgrade UAE FIU monitoring URL to publications page | AE-uae-financial-intelligence-unit-uaefiu | MEDIUM |
 | Add counter-change noise filter for CBUAE regulations | AE-cbuae-regulations | LOW |
 | Establish 3-run baseline for all sources (multi-run validation) | All 13 | MEDIUM |
@@ -221,4 +232,4 @@ data/source_runs/source_runs.jsonl  — 198 records, 22 unique source IDs
 6. Update the run records and proof blocks
 7. Then: upgrade AE-uae-financial-intelligence-unit-uaefiu URL to the publications page
 
-Until these two fixes are confirmed, the honest source count for customer-facing claims is **10 ready, not 13.**
+Until these fixes are reviewed, the honest source count for customer-facing claims is **9 readiness-supported and 4 under remediation, not 13 ready.**

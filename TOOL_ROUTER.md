@@ -8,9 +8,9 @@ Use this file to decide which agent, skill, or workflow to invoke for any task.
 |------|-------------|----------------|---------|
 | Source monitoring | Source Monitor Agent | `docs/source-monitor-spec-guide.md` | `workflows/02-first-source-spec.md` |
 | Source spec creation | Source Monitor Agent | `prompts/source-spec-prompt.md` | `workflows/02-first-source-spec.md` |
-| Custom source parser/intake | Source Monitor Agent + Code Architect | `custom-source-monitoring-spec` | Source Monitor → Evidence Trail → QA/Critic → Legal Language |
-| Source Lab no-save test | Source Monitor Agent | `source-monitoring-review` | Preview only; do not claim evidence or monitoring readiness |
-| Source activation readiness | Evidence Trail Agent + QA / Critic | `evidence-readiness-review` | Requires proof artifacts, baseline checks, and legal-safe wording |
+| Custom source parser/intake | Source Monitor Agent + Code Architect | `custom-source-monitoring-spec` + `custom-source-parser` | `workflows/08-parser-source-intake-review.md` |
+| Source Lab no-save test | Source Monitor Agent | `source-monitoring-review` | `workflows/08-parser-source-intake-review.md` — preview only; do not claim evidence or monitoring readiness |
+| Source activation readiness | Evidence Trail Agent + QA / Critic | `evidence-readiness-review` | `workflows/08-parser-source-intake-review.md` — requires proof artifacts, baseline checks, and legal-safe wording |
 | Evidence verification | Evidence Trail Agent + `#evidence-audit` | `docs/evidence-record-spec.md` | `workflows/03-evidence-dry-run.md` |
 | Evidence dry run | Evidence Trail Agent | `prompts/evidence-dry-run-prompt.md` | `workflows/03-evidence-dry-run.md` |
 | Risk scoring | Risk + Brief Pipeline | `docs/risk-scoring-guide.md` | `workflows/04-monitoring-to-brief.md` |
@@ -88,6 +88,7 @@ QA / Critic approved?
 | broad audit | `statuteproof-project-review` |
 | source readiness | `evidence-readiness-review` |
 | parser/source registry | `source-monitoring-review` |
+| custom source parser gate | `custom-source-parser` |
 | website/legal copy | `legal-safe-copy-review` |
 | homepage conversion | `mlro-homepage-review` |
 | custom source feature | `custom-source-monitoring-spec` |
@@ -102,3 +103,4 @@ QA / Critic approved?
 - Evidence confirmed requires proof artifacts; one successful extraction is not monitoring-ready.
 - Activation readiness requires baseline/quality checks and clear failure reasons.
 - Customer-facing wording must not say any website can be parsed, guarantee parsing, guarantee compliance, or imply legal advice.
+- Founder approval is required before moving a remediation source to customer-visible ready when live verification is incomplete.

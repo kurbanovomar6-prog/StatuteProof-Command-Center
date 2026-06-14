@@ -4,6 +4,7 @@
 
 # Reference clones
 .reference_tmp/
+.reference_parser_repos/
 references/full-repos/
 
 # macOS
