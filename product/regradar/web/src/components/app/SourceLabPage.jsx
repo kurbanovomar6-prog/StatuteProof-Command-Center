@@ -4,11 +4,15 @@ import {
   CheckCircle,
   ChevronDown,
   FileSearch,
+  FileText,
+  ListChecks,
   Loader2,
   LockKeyhole,
+  RotateCcw,
   Save,
   Search,
   ShieldCheck,
+  Wrench,
   XCircle,
 } from 'lucide-react'
 
@@ -107,6 +111,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
     expectedMinLength: 2500,
     useJs: false,
     pdfMode: false,
+    adapterFamily: '',
     legalConfirmed: false,
   })
   const [advancedOpen, setAdvancedOpen] = useState(true)
@@ -163,6 +168,12 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
           expected_min_length: Number(form.expectedMinLength) || undefined,
           pdf_mode: form.pdfMode,
           fetch_method: form.useJs ? 'playwright' : undefined,
+          adapter_family: form.adapterFamily || undefined,
+          adapter_config: form.adapterFamily ? {
+            container_selector: form.contentSelector || result?.dom_investigation?.content_selector || 'main',
+            content_selector: form.contentSelector || result?.dom_investigation?.content_selector || undefined,
+            item_selector: result?.dom_investigation?.item_selector || undefined,
+          } : undefined,
         }),
       })
       const data = await res.json()
@@ -176,6 +187,19 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  function applyInvestigationSuggestion(adapterFamily) {
+    const investigation = result?.dom_investigation || {}
+    setForm(prev => ({
+      ...prev,
+      adapterFamily: adapterFamily || investigation.recommended_adapter_family || prev.adapterFamily,
+      contentSelector: investigation.content_selector || prev.contentSelector,
+      waitSelector: investigation.wait_selector || prev.waitSelector,
+      useJs: true,
+      pdfMode: adapterFamily === 'pdf_listing' || investigation.recommended_adapter_family === 'pdf_listing' || prev.pdfMode,
+    }))
+    setSaveMessage('Extraction settings updated from DOM investigation. Run the no-save test again.')
   }
 
   async function saveSource() {
@@ -417,7 +441,49 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   <Metric label="Activation readiness" value={statusLabel(activationReadiness)} tone={activateAllowed ? 'emerald' : 'amber'} />
                   <Metric label="Baseline" value={`${baselineDone}/${baselineRequired}`} />
                   <Metric label="Policy" value={result.legal_policy_status || 'PUBLIC_SOURCE_ONLY'} />
+                  <Metric label="Failure code" value={result.failure_code || '—'} tone={result.failure_code ? 'amber' : 'slate'} />
+                  <Metric label="Noise risk" value={result.noise_risk || 'unknown'} tone={result.noise_risk === 'high' ? 'rose' : result.noise_risk === 'low' ? 'emerald' : 'amber'} />
+                  <Metric label="Source-health risk" value={result.source_health_risk || 'unknown'} tone={result.source_health_risk === 'high' ? 'rose' : result.source_health_risk === 'low' ? 'emerald' : 'amber'} />
                 </div>
+
+                {result.dom_investigation && (
+                  <div className="mt-4 rounded-lg border border-cyan-400/20 bg-cyan-400/10 p-3">
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-cyan-100">DOM investigation</p>
+                        <p className="mt-1 text-xs leading-relaxed text-cyan-100/75">
+                          {result.dom_investigation.why_selector_was_chosen || 'Selector recommendation is available for a retry test.'}
+                        </p>
+                      </div>
+                      <span className="rounded-md border border-cyan-400/25 px-2 py-1 text-[11px] font-semibold text-cyan-100">
+                        {result.dom_investigation.detected_page_type || 'unknown'}
+                      </span>
+                    </div>
+                    <div className="grid gap-2 md:grid-cols-3">
+                      <Metric label="Recommended adapter" value={result.dom_investigation.recommended_adapter_name || result.dom_investigation.recommended_adapter_family || '—'} tone="cyan" />
+                      <Metric label="Content selector" value={result.dom_investigation.content_selector || '—'} />
+                      <Metric label="Selector confidence" value={`${result.dom_investigation.selector_confidence || 0}/100`} />
+                    </div>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-4">
+                      <button type="button" onClick={() => applyInvestigationSuggestion(result.dom_investigation.recommended_adapter_family)} className="sp-btn-secondary justify-center py-2 text-xs">
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Retry with JS
+                      </button>
+                      <button type="button" onClick={() => applyInvestigationSuggestion('listing')} className="sp-btn-secondary justify-center py-2 text-xs">
+                        <ListChecks className="h-3.5 w-3.5" />
+                        Try listing adapter
+                      </button>
+                      <button type="button" onClick={() => applyInvestigationSuggestion('pdf_listing')} className="sp-btn-secondary justify-center py-2 text-xs">
+                        <FileText className="h-3.5 w-3.5" />
+                        Try PDF listing
+                      </button>
+                      <button type="button" disabled className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/55 px-3 py-2 text-xs font-semibold text-slate-500" title="Roadmap: marking remediation will write to the gated source work queue after review.">
+                        <Wrench className="h-3.5 w-3.5" />
+                        Mark remediation
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {(result.warnings?.length > 0 || result.nav_shell_detected || result.hash_collision) && (
                   <div className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/10 p-3">
@@ -471,6 +537,14 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   >
                     <LockKeyhole className="h-4 w-4" />
                     Activate Monitoring
+                  </button>
+                  <button
+                    disabled
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/55 px-4 py-2 text-sm font-semibold text-slate-500"
+                    title="Saved baseline requires the evidence-save workflow and repeat baseline gate."
+                  >
+                    <LockKeyhole className="h-4 w-4" />
+                    Save baseline
                   </button>
                   <button
                     disabled={!activateAllowed}

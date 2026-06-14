@@ -1975,6 +1975,7 @@ def _cmd_source_lab(
         "extraction_strategy": result.get("extraction_strategy", ""),
         "adapter_metadata": result.get("adapter_metadata", {}),
         "adapter_warnings": result.get("adapter_warnings", []),
+        "dom_investigation": result.get("dom_investigation", {}),
         "normalized_length": result.get("chars_normalized"),
         "normalized_hash": result.get("normalized_hash"),
         "normalized_preview": result.get("normalized_preview"),
@@ -1985,11 +1986,20 @@ def _cmd_source_lab(
         "readiness_status": result.get("status"),
         "activation_readiness": contract.get("activation_readiness"),
         "can_save_for_validation": contract.get("can_save_for_validation"),
+        "can_save_evidence": result.get("can_save_evidence"),
         "can_activate_monitoring": contract.get("can_activate_monitoring"),
         "baseline_runs_completed": contract.get("baseline_runs_completed"),
         "baseline_runs_required": contract.get("baseline_runs_required"),
         "failure_reason": result.get("failure_reason"),
+        "failure_code": result.get("failure_code"),
         "remediation_hint": result.get("remediation_hint"),
+        "official_status": result.get("official_status"),
+        "access_status": result.get("access_status"),
+        "meaningful_content": result.get("meaningful_content"),
+        "shallow_content": result.get("shallow_content"),
+        "duplicate_hash": result.get("duplicate_hash"),
+        "noise_risk": result.get("noise_risk"),
+        "source_health_risk": result.get("source_health_risk"),
         "proof_path": result.get("proof_path"),
         "evidence_paths": result.get("evidence_paths"),
         "warnings": result.get("errors", []),
@@ -2022,12 +2032,80 @@ def _cmd_source_lab(
     print(f"  Provider: {payload['provider_used'] or '-'}")
     if payload.get("adapter_used"):
         print(f"  Adapter: {payload.get('adapter_name') or payload.get('adapter_family')} ({payload.get('adapter_version')})")
+    if payload.get("failure_code"):
+        print(f"  Failure code: {payload['failure_code']}")
+    print(f"  Noise/source health: {payload.get('noise_risk') or '-'} / {payload.get('source_health_risk') or '-'}")
     print(f"  Normalized chars: {payload['normalized_length']}")
     print(f"  Normalized hash: {payload['normalized_hash'] or '-'}")
     if payload["failure_reason"]:
         print(f"  Failure: {payload['failure_reason']}")
     if payload["remediation_hint"]:
         print(f"  Remediation: {payload['remediation_hint']}")
+
+
+def _cmd_investigate_source(
+    url: str,
+    *,
+    json_export: bool = False,
+    js: bool = False,
+    content_selector: str | None = None,
+    wait_for_selector: str | None = None,
+) -> None:
+    """Inspect one public URL's rendered/static DOM and recommend extraction strategy."""
+    import json
+    from app.scraper import fetch_page_with_config
+    from app.dom_investigator import investigate_html
+    from app.source_tester import validate_public_url
+
+    safe, reason = validate_public_url(url)
+    if not safe:
+        payload = {
+            "final_url": url,
+            "detected_page_type": "blocked",
+            "failure_reason": reason,
+            "remediation_hint": "Use a public http(s) URL without credentials, private network, login, CAPTCHA, or paywall access.",
+            "can_no_save_test": False,
+            "can_save_evidence": False,
+        }
+    else:
+        try:
+            html = fetch_page_with_config(
+                url,
+                wait_for_selector=wait_for_selector,
+                content_selector=content_selector,
+                force_playwright=js,
+            )
+            payload = investigate_html(html, url=url)
+            payload["raw_html_length"] = len(html or "")
+            payload["fetch_method"] = "playwright" if js else "default"
+        except Exception as exc:
+            payload = {
+                "final_url": url,
+                "detected_page_type": "fetch_failed",
+                "failure_reason": f"Fetch failed: {exc}",
+                "remediation_hint": "Retry with --js or inspect the official page manually before adding it.",
+                "can_no_save_test": False,
+                "can_save_evidence": False,
+                "warnings": [type(exc).__name__],
+            }
+
+    if json_export:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return
+
+    print(f"\n{_BOLD}Source DOM Investigation{_R}")
+    print(f"  URL: {url}")
+    print(f"  Page type: {payload.get('detected_page_type')}")
+    print(f"  Adapter: {payload.get('recommended_adapter_name') or payload.get('recommended_adapter_family') or '-'}")
+    print(f"  Wait selector: {payload.get('wait_selector') or '-'}")
+    print(f"  Content selector: {payload.get('content_selector') or '-'}")
+    print(f"  Item selector: {payload.get('item_selector') or '-'}")
+    print(f"  Selector confidence: {payload.get('selector_confidence', 0)}/100")
+    print(f"  Nav/noise/health risk: {payload.get('nav_shell_risk')} / {payload.get('noise_risk')} / {payload.get('source_health_risk')}")
+    if payload.get("failure_reason"):
+        print(f"  Failure: {payload.get('failure_reason')}")
+    if payload.get("remediation_hint"):
+        print(f"  Remediation: {payload.get('remediation_hint')}")
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -2053,6 +2131,7 @@ def main() -> None:
         print("  python run.py source-lab <url> --js --content-selector main --wait-for-selector main", file=sys.stderr)
         print("  python run.py source-lab <url> --adapter-family listing --adapter-config-json '{\"container_selector\":\"main\"}'", file=sys.stderr)
         print("  python run.py source-lab <url> --source-id AE-example --save --json", file=sys.stderr)
+        print("  python run.py investigate-source <url> --js --json  inspect DOM and suggest selectors", file=sys.stderr)
         print("  python run.py add-source                     interactively add a source", file=sys.stderr)
         print("  python run.py coverage                       coverage dashboard (uses latest audit JSON)", file=sys.stderr)
         print("  python run.py coverage --json                export reports/coverage_YYYY-MM-DD.json", file=sys.stderr)
@@ -2222,6 +2301,51 @@ def main() -> None:
             )
             sys.exit(2)
         _cmd_test_source(url_arg.strip(), deep=deep)
+
+    elif cmd == "investigate-source":
+        extra = args[1:]
+        url_arg: str | None = None
+        json_export = False
+        js = False
+        content_selector = None
+        wait_for_selector = None
+        i_ = 0
+        while i_ < len(extra):
+            tok = extra[i_]
+            if tok == "--json":
+                json_export = True
+                i_ += 1
+            elif tok == "--js":
+                js = True
+                i_ += 1
+            elif tok == "--content-selector":
+                if i_ + 1 >= len(extra):
+                    print("Error: --content-selector requires a CSS selector.", file=sys.stderr)
+                    sys.exit(2)
+                content_selector = extra[i_ + 1]
+                i_ += 2
+            elif tok == "--wait-for-selector":
+                if i_ + 1 >= len(extra):
+                    print("Error: --wait-for-selector requires a CSS selector.", file=sys.stderr)
+                    sys.exit(2)
+                wait_for_selector = extra[i_ + 1]
+                i_ += 2
+            elif url_arg is None:
+                url_arg = tok
+                i_ += 1
+            else:
+                print(f"Error: unexpected argument {tok!r} for 'investigate-source'.", file=sys.stderr)
+                sys.exit(2)
+        if not url_arg:
+            print("Error: 'investigate-source' requires a URL.", file=sys.stderr)
+            sys.exit(2)
+        _cmd_investigate_source(
+            url_arg.strip(),
+            json_export=json_export,
+            js=js,
+            content_selector=content_selector,
+            wait_for_selector=wait_for_selector,
+        )
 
     elif cmd == "source-lab":
         extra = args[1:]
@@ -2948,7 +3072,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
             file=sys.stderr,
         )
         sys.exit(2)

@@ -1281,6 +1281,7 @@ class _Handler(BaseHTTPRequestHandler):
                 "extraction_strategy": result.get("extraction_strategy", ""),
                 "adapter_metadata": result.get("adapter_metadata", {}),
                 "adapter_warnings": result.get("adapter_warnings", []),
+                "dom_investigation": result.get("dom_investigation", {}),
                 "normalized_hash": normalized_hash,
                 "normalized_preview": result.get("normalized_preview", ""),
                 # quality
@@ -1292,7 +1293,15 @@ class _Handler(BaseHTTPRequestHandler):
                 "nav_shell_detected": result["nav_shell_detected"],
                 "hash_collision": result["hash_collision"],
                 "collision_source_id": result["collision_source_id"],
+                "official_status": result.get("official_status", ""),
+                "access_status": result.get("access_status", ""),
+                "meaningful_content": result.get("meaningful_content", False),
+                "shallow_content": result.get("shallow_content", False),
+                "duplicate_hash": result.get("duplicate_hash", False),
+                "noise_risk": result.get("noise_risk", "unknown"),
+                "source_health_risk": result.get("source_health_risk", "unknown"),
                 # failure detail
+                "failure_code": result.get("failure_code", ""),
                 "failure_reason": result.get("failure_reason", ""),
                 "remediation_hint": result.get("remediation_hint", ""),
                 "warnings": result.get("errors", []),

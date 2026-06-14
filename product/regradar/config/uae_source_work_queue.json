@@ -6787,7 +6787,10 @@
     "rejected_count": 0,
     "remediation_count": 21,
     "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
-    "total_entries": 78
+    "total_entries": 78,
+    "source_activation_platform_updated_at": "2026-06-15",
+    "source_activation_platform_version": "dom-investigator-1.0",
+    "source_activation_platform_note": "Auto DOM Investigator, expanded adapter catalog, structured failure codes, Source Lab remediation controls, and source activation validator added. Public truth remains 13/9/4; activation-ready count remains 2."
   },
   "version": 1
 }

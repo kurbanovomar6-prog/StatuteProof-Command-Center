@@ -174,11 +174,21 @@ def main() -> int:
         if adapter_family:
             if adapter_name not in {
                 "custom_element",
+                "static_html",
+                "playwright_selector",
                 "listing",
                 "table",
+                "pdf_document",
+                "pdf_listing",
+                "register",
+                "sitemap_feed",
+                "public_json_api",
+                "rendered_dom_evidence",
                 "sca_listing",
                 "dfsa_rulebook",
+                "dfsa_notice_listing",
                 "cbuae_document_listing",
+                "adgm_fsra_listing",
                 "fiu_eocn_document_listing",
                 "vara_pdf_listing",
             }:

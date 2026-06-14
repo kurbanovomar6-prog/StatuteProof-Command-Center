@@ -49,6 +49,22 @@ class SourceIntakeStatus:
     BLOCKED = "BLOCKED"
 
 
+class SourceFailureCode:
+    URL_STALE = "URL_STALE"
+    SELECTOR_NOT_FOUND = "SELECTOR_NOT_FOUND"
+    JS_REQUIRED = "JS_REQUIRED"
+    PDF_ONLY_SOURCE = "PDF_ONLY_SOURCE"
+    LISTING_ADAPTER_REQUIRED = "LISTING_ADAPTER_REQUIRED"
+    NAV_SHELL_ONLY = "NAV_SHELL_ONLY"
+    ACCESS_BLOCKED = "ACCESS_BLOCKED"
+    LIKELY_WAF_403 = "LIKELY_WAF_403"
+    HIGH_NOISE_RISK = "HIGH_NOISE_RISK"
+    DUPLICATE_BOILERPLATE_HASH = "DUPLICATE_BOILERPLATE_HASH"
+    SHALLOW_CONTENT = "SHALLOW_CONTENT"
+    SOURCE_STRUCTURE_CHANGED = "SOURCE_STRUCTURE_CHANGED"
+    MANUAL_CHECK_REQUIRED = "MANUAL_CHECK_REQUIRED"
+
+
 # Human-readable labels for dashboard display
 STATUS_LABELS: dict[str, str] = {
     SourceIntakeStatus.CONFIRMED_ACCESSIBLE: "Readiness threshold met",
@@ -147,11 +163,13 @@ def build_source_lab_contract(result: dict) -> dict:
     ):
         evidence_level = cert_evidence_level
 
-    can_save_for_validation = (
+    basic_save_condition = (
         status == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
         and not evidence_written
         and evidence_level == EvidenceLevel.PREVIEW_ONLY
     )
+    strict_save_gate = bool(result.get("can_save_evidence", True))
+    can_save_for_validation = basic_save_condition and strict_save_gate
     can_activate_monitoring = (
         cert_status == "MONITORING_CERTIFIED"
         and evidence_level == EvidenceLevel.CERTIFIED_EVIDENCE
@@ -177,12 +195,77 @@ def build_source_lab_contract(result: dict) -> dict:
 
     return {
         "can_save_for_validation": can_save_for_validation,
+        "can_save_evidence": can_save_for_validation,
         "can_activate_monitoring": can_activate_monitoring,
         "activation_readiness": activation_readiness,
         "evidence_level": evidence_level,
         "baseline_runs_completed": baseline_done,
         "baseline_runs_required": baseline_required,
     }
+
+
+def classify_failure_code(result: dict) -> str:
+    """Map Source Lab outcome to a machine-readable remediation code."""
+    reason = str(result.get("failure_reason") or " ".join(result.get("errors") or [])).lower()
+    status = str(result.get("status") or "")
+    if result.get("hash_collision"):
+        return SourceFailureCode.DUPLICATE_BOILERPLATE_HASH
+    if result.get("nav_shell_detected") or status == SourceIntakeStatus.NAV_SHELL_ONLY:
+        return SourceFailureCode.NAV_SHELL_ONLY
+    if "403" in reason or "forbidden" in reason:
+        return SourceFailureCode.LIKELY_WAF_403
+    if "404" in reason or "not found" in reason:
+        return SourceFailureCode.URL_STALE
+    if "selector" in reason and ("not found" in reason or "timeout" in reason or "timed out" in reason):
+        return SourceFailureCode.SELECTOR_NOT_FOUND
+    if status == SourceIntakeStatus.PDF_EXTRACTION_NEEDED:
+        return SourceFailureCode.PDF_ONLY_SOURCE
+    if status == SourceIntakeStatus.JS_RENDERING_NEEDED:
+        return SourceFailureCode.JS_REQUIRED
+    if status == SourceIntakeStatus.QUALITY_DROP:
+        return SourceFailureCode.SOURCE_STRUCTURE_CHANGED
+    if status == SourceIntakeStatus.BLOCKED:
+        return SourceFailureCode.ACCESS_BLOCKED
+    if int(result.get("chars_normalized") or 0) < 500:
+        return SourceFailureCode.SHALLOW_CONTENT
+    return SourceFailureCode.MANUAL_CHECK_REQUIRED
+
+
+def apply_quality_gate_fields(result: dict) -> None:
+    """Add strict Source Lab gate fields without changing evidence semantics."""
+    chars = int(result.get("chars_normalized") or 0)
+    nav_shell = bool(result.get("nav_shell_detected"))
+    duplicate_hash = bool(result.get("hash_collision"))
+    quality_score = int(result.get("quality_score") or 0)
+    adapter_metadata = result.get("adapter_metadata") or {}
+    if isinstance(adapter_metadata, dict):
+        adapter_noise = adapter_metadata.get("noise_risk") or adapter_metadata.get("metadata", {}).get("noise_risk")
+        adapter_health = adapter_metadata.get("source_health_risk") or adapter_metadata.get("metadata", {}).get("source_health_risk")
+    else:
+        adapter_noise = None
+        adapter_health = None
+    noise_risk = str(adapter_noise or result.get("noise_risk") or ("high" if nav_shell else ("medium" if chars < 1000 else "low")))
+    source_health_risk = str(adapter_health or result.get("source_health_risk") or ("high" if nav_shell or duplicate_hash else "medium"))
+
+    meaningful = bool(chars >= 500 and not nav_shell and not duplicate_hash)
+    shallow = bool(chars < 500)
+    result["official_status"] = result.get("official_status") or "unverified_public_source"
+    result["access_status"] = result.get("access_status") or ("blocked_or_restricted" if result.get("status") == SourceIntakeStatus.BLOCKED else "public_fetch_attempted")
+    result["meaningful_content"] = meaningful
+    result["shallow_content"] = shallow
+    result["duplicate_hash"] = duplicate_hash
+    result["noise_risk"] = noise_risk
+    result["source_health_risk"] = source_health_risk
+    result["failure_code"] = "" if result.get("status") == SourceIntakeStatus.CONFIRMED_ACCESSIBLE else classify_failure_code(result)
+    result["can_save_evidence"] = bool(
+        result.get("status") == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+        and result.get("evidence_level") == EvidenceLevel.PREVIEW_ONLY
+        and not result.get("evidence_written")
+        and meaningful
+        and quality_score >= 60
+        and noise_risk != "high"
+        and source_health_risk != "high"
+    )
 
 
 def _check_hash_collision(
@@ -267,10 +350,20 @@ def run_source_intake(
         "extraction_strategy": "",
         "adapter_metadata": {},
         "adapter_warnings": [],
+        "dom_investigation": {},
         "normalized_preview": "",
         "legal_policy_status": "PUBLIC_SOURCE_ONLY",
         "quality_score": 0,
         "quality_breakdown": {},
+        "official_status": "unverified_public_source",
+        "access_status": "",
+        "meaningful_content": False,
+        "shallow_content": True,
+        "duplicate_hash": False,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "failure_code": "",
+        "can_save_evidence": False,
         "evidence_level": EvidenceLevel.PREVIEW_ONLY,
         "proof_path": None,
         "evidence_paths": {},
@@ -309,6 +402,7 @@ def run_source_intake(
             baseline_runs_required=int(source.get("baseline_runs_required") or 2),
         )
         result["certification_status"] = result["certification"].get("certification_status", "")
+        apply_quality_gate_fields(result)
         result.update(build_source_lab_contract(result))
         return result
 
@@ -349,10 +443,20 @@ def run_source_intake(
             baseline_runs_required=int(source.get("baseline_runs_required") or 2),
         )
         result["certification_status"] = result["certification"].get("certification_status", "")
+        apply_quality_gate_fields(result)
         result.update(build_source_lab_contract(result))
         return result
 
     result["chars_raw"] = len(html)
+    try:
+        from app.dom_investigator import investigate_html
+        result["dom_investigation"] = investigate_html(html, url=url)
+    except Exception as exc:
+        result["dom_investigation"] = {
+            "failure_reason": f"DOM investigation failed: {type(exc).__name__}",
+            "remediation_hint": "Run manual browser/DOM review before activation.",
+            "warnings": [str(exc)],
+        }
 
     # ── 3. Extract text ───────────────────────────────────────────────────────
     extracted: dict = {}
@@ -413,7 +517,8 @@ def run_source_intake(
     result["normalized_preview"] = normalized_text[:500]
 
     # ── 4. Nav-shell detection ────────────────────────────────────────────────
-    nav_shell = is_nav_shell_only(normalized_text)
+    dom_nav_shell = (result.get("dom_investigation") or {}).get("nav_shell_risk") == "high"
+    nav_shell = is_nav_shell_only(normalized_text) or bool(dom_nav_shell)
     result["nav_shell_detected"] = nav_shell
 
     # ── 5. Hash collision check ───────────────────────────────────────────────
@@ -493,6 +598,8 @@ def run_source_intake(
     else:
         result["status"] = SourceIntakeStatus.CONFIRMED_ACCESSIBLE
 
+    apply_quality_gate_fields(result)
+
     # ── 8. Quality label ──────────────────────────────────────────────────────
     total = chars + pdf_chars
     if total >= 5_000 and result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
@@ -525,6 +632,7 @@ def run_source_intake(
         baseline_runs_required=int(source.get("baseline_runs_required") or 2),
     )
     result["certification_status"] = result["certification"].get("certification_status", "")
+    apply_quality_gate_fields(result)
     result.update(build_source_lab_contract(result))
 
     # ── 10. Evidence write (optional) ────────────────────────────────────────

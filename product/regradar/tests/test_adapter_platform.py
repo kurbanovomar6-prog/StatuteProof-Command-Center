@@ -300,3 +300,141 @@ def test_vara_pdf_listing_adapter_extracts_rulebook_pdf_links():
     assert result.item_count == 2
     assert "Company Rulebook" in result.text
     assert "aml-cft-rulebook.pdf" in result.text
+
+
+def test_static_html_adapter_extracts_article_content_and_ignores_nav():
+    html = """
+    <html><body>
+      <nav>Home Services Search</nav>
+      <main><article><h1>AML Regulatory Guidance</h1><p>Regulated firms must keep
+      anti-money laundering governance, screening, reporting, and training controls
+      under periodic compliance review.</p></article></main>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://example.gov.ae/aml-guidance",
+        adapter_family="static_html",
+        adapter_config={"content_selector": "article"},
+    )
+
+    assert result.adapter_name == "static_html"
+    assert "AML Regulatory Guidance" in result.text
+    assert "Home Services Search" not in result.text
+
+
+def test_pdf_listing_adapter_extracts_document_links():
+    html = """
+    <html><body><main>
+      <a href="/docs/consultation-paper.pdf">Consultation Paper PDF</a>
+      <a href="/docs/aml-guidance.pdf">AML Guidance PDF</a>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://example.gov.ae/publications",
+        adapter_family="pdf_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "pdf_listing"
+    assert result.item_count == 2
+    assert "Consultation Paper PDF" in result.text
+
+
+def test_register_adapter_extracts_register_rows():
+    html = """
+    <html><body><main>
+      <table id="register">
+        <tr><th>Firm</th><th>Status</th><th>Licence</th></tr>
+        <tr><td>Alpha Capital</td><td>Active</td><td>Broker</td></tr>
+      </table>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://example.gov.ae/register",
+        adapter_family="register",
+        adapter_config={"table_selector": "#register"},
+    )
+
+    assert result.adapter_name == "register"
+    assert result.item_count == 1
+    assert "Alpha Capital" in result.text
+
+
+def test_pdf_document_adapter_wraps_extracted_pdf_text():
+    text = "AML Rulebook\n" + ("Regulated entities must review customer due diligence and sanctions screening. " * 20)
+
+    result = extract_with_adapter(
+        text,
+        url="https://example.gov.ae/rulebook.pdf",
+        adapter_family="pdf_document",
+    )
+
+    assert result.adapter_name == "pdf_document"
+    assert "AML Rulebook" in result.text
+    assert result.source_health_risk in {"medium", "high"}
+
+
+def test_adgm_fsra_listing_adapter_extracts_guidance_links():
+    html = """
+    <html><body><main>
+      <a href="/legal-framework/guidance/aml-guidance">FSRA AML Guidance</a>
+      <a href="/legal-framework/rules-and-regulations">FSRA Rules and Regulations</a>
+      <a href="/contact">Contact</a>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.adgm.com/legal-framework/rules-and-regulations",
+        adapter_family="adgm_fsra_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "adgm_fsra_listing"
+    assert result.item_count == 2
+    assert "FSRA AML Guidance" in result.text
+
+
+def test_dfsa_notice_listing_adapter_extracts_financial_crime_links():
+    html = """
+    <html><body><main>
+      <a href="/notices/mlro-letter-2026">MLRO Letter 2026</a>
+      <a href="/enforcement/regulatory-actions/notice-1">Regulatory Action Notice</a>
+      <a href="/contact">Contact</a>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/",
+        adapter_family="dfsa_notice_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "dfsa_notice_listing"
+    assert result.item_count == 2
+    assert "MLRO Letter" in result.text
+
+
+def test_source_intake_maps_structured_failure_code_for_nav_shell():
+    source = {
+        "source_id": "AE-test-nav-shell",
+        "name": "Nav Shell Test",
+        "url": "https://www.example.gov.ae/not-found",
+        "expected_min_length": 500,
+    }
+    html = "<html><body><nav>Home About Search Contact Privacy Accessibility</nav><main>Home Search Contact</main></body></html>"
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["status"] == SourceIntakeStatus.NAV_SHELL_ONLY
+    assert result["failure_code"] == "NAV_SHELL_ONLY"
+    assert result["can_save_evidence"] is False
+    assert result["meaningful_content"] is False

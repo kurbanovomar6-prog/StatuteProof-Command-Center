@@ -133,6 +133,43 @@ class BaseHtmlAdapter:
         )
 
 
+class StaticHtmlAdapter(BaseHtmlAdapter):
+    family = "static_html"
+    name = "static_html"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        config = config or {}
+        selector = str(config.get("content_selector") or config.get("selector") or "article, main").strip()
+        soup = _soup(html, config.get("exclude_selectors") or ["header", "nav", "footer", "form", ".search"])
+        node = soup.select_one(selector)
+        if not node and "," in selector:
+            for candidate in [part.strip() for part in selector.split(",") if part.strip()]:
+                node = soup.select_one(candidate)
+                if node:
+                    selector = candidate
+                    break
+        if not node:
+            node = soup.select_one("article") or soup.select_one("main") or soup.body
+            selector = node.name if node else selector
+        text = _node_text(node)
+        if not text:
+            return self._empty("No static HTML content was isolated.", "Review content_selector or use a listing/table adapter.")
+        return AdapterResult(
+            text=text,
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            noise_risk="low" if len(text) >= 1000 else "medium",
+            source_health_risk="low",
+            metadata={"content_selector": selector, "url": url},
+        )
+
+
+class PlaywrightSelectorAdapter(StaticHtmlAdapter):
+    family = "playwright_selector"
+    name = "playwright_selector"
+
+
 class CustomElementAdapter(BaseHtmlAdapter):
     family = "custom_element"
     name = "custom_element"
@@ -473,6 +510,102 @@ class VaraPdfListingAdapter(DocumentListingAdapter):
     allowed_tokens = ("rulebook", "aml", "cft", "company", "enforcement", "order", "regulatory", "framework", "virtual asset")
 
 
+class PdfListingAdapter(DocumentListingAdapter):
+    family = "pdf_listing"
+    name = "pdf_listing"
+    heading = "PDF listing items"
+    allowed_tokens = ("pdf", "rulebook", "regulation", "guidance", "consultation", "aml", "cft", "report", "publication")
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        result = super().extract(html, url=url, config=config)
+        if result.items:
+            result.items = [item for item in result.items if item.get("document_url") or str(item.get("url") or "").lower().endswith(".pdf")]
+            result.text = _format_items(self.heading, result.items)
+            if not result.items:
+                result.failure_reason = "No PDF document links were isolated."
+                result.remediation_hint = "Review document selectors or use a normal document listing adapter."
+        return result
+
+
+class PdfDocumentAdapter(BaseHtmlAdapter):
+    family = "pdf_document"
+    name = "pdf_document"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        text = _clean(html)
+        if len(text) < int((config or {}).get("min_chars") or 500):
+            return self._empty("PDF text is too shallow for monitoring.", "Use a better PDF extractor or mark scanned/OCR-needed PDF as remediation.")
+        return AdapterResult(
+            text=text,
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            noise_risk="low",
+            source_health_risk="medium",
+            metadata={"url": url, "pdf_text_chars": len(text)},
+        )
+
+
+class RegisterAdapter(TableAdapter):
+    family = "register"
+    name = "register"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        cfg = {"table_selector": "table", "sort_rows": True}
+        cfg.update(config or {})
+        result = super().extract(html, url=url, config=cfg)
+        result.adapter_family = self.family
+        result.adapter_name = self.name
+        result.extraction_strategy = f"adapter:{self.name}"
+        result.metadata["register_limitations"] = "Register pages may require pagination/filter coverage before activation."
+        return result
+
+
+class SitemapFeedAdapter(DocumentListingAdapter):
+    family = "sitemap_feed"
+    name = "sitemap_feed"
+    heading = "Sitemap/feed URL items"
+    allowed_tokens = ("http", "xml", "rss", "feed", "regulation", "rulebook", "guidance")
+
+
+class PublicJsonApiAdapter(BaseHtmlAdapter):
+    family = "public_json_api"
+    name = "public_json_api"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        text = _clean(html)
+        if not text.startswith(("{", "[")):
+            return self._empty("Public JSON/API adapter received non-JSON text.", "Use only public unauthenticated JSON endpoints with this adapter.")
+        return AdapterResult(
+            text=text,
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            noise_risk="low",
+            source_health_risk="medium",
+            metadata={"url": url, "format": "json"},
+        )
+
+
+class RenderedDomEvidenceAdapter(StaticHtmlAdapter):
+    family = "rendered_dom_evidence"
+    name = "rendered_dom_evidence"
+
+
+class AdgmFsraListingAdapter(DocumentListingAdapter):
+    family = "adgm_fsra_listing"
+    name = "adgm_fsra_listing"
+    heading = "ADGM/FSRA listing items"
+    allowed_tokens = ("fsra", "adgm", "aml", "financial crime", "guidance", "rule", "regulation", "consultation", "circular")
+
+
+class DfsaNoticeListingAdapter(DocumentListingAdapter):
+    family = "dfsa_notice_listing"
+    name = "dfsa_notice_listing"
+    heading = "DFSA notice/enforcement listing items"
+    allowed_tokens = ("dfsa", "mlro", "letter", "notice", "enforcement", "regulatory action", "aml", "financial crime", "sanction")
+
+
 def _format_items(heading: str, items: list[dict]) -> str:
     if not items:
         return ""
@@ -493,9 +626,19 @@ def _format_items(heading: str, items: list[dict]) -> str:
 
 
 _ADAPTERS: dict[str, BaseHtmlAdapter] = {
+    "static_html": StaticHtmlAdapter(),
+    "playwright_selector": PlaywrightSelectorAdapter(),
     "custom_element": CustomElementAdapter(),
     "listing": ListingAdapter(),
     "table": TableAdapter(),
+    "pdf_document": PdfDocumentAdapter(),
+    "pdf_listing": PdfListingAdapter(),
+    "register": RegisterAdapter(),
+    "sitemap_feed": SitemapFeedAdapter(),
+    "public_json_api": PublicJsonApiAdapter(),
+    "rendered_dom_evidence": RenderedDomEvidenceAdapter(),
+    "adgm_fsra_listing": AdgmFsraListingAdapter(),
+    "dfsa_notice_listing": DfsaNoticeListingAdapter(),
     "sca_listing": ScaListingAdapter(),
     "dfsa_rulebook": RulebookModuleAdapter(),
     "cbuae_document_listing": CbuaeDocumentListingAdapter(),
@@ -525,7 +668,7 @@ def extract_with_adapter(
             adapter_name=adapter_name or "",
             extraction_strategy=f"adapter:{key}" if key else "",
             failure_reason=f"Unknown adapter: {key}" if key else "No adapter configured.",
-            remediation_hint="Use one of: custom_element, listing, table.",
+            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, or vara_pdf_listing.",
             source_health_risk="medium",
         )
     try:
