@@ -47,7 +47,7 @@ ALLOWED_INITIAL_STATUS = {
 }
 ALLOWED_TEST_STATUS = {"no_save_tested"}
 ALLOWED_RISK = {"low", "medium", "high", "unknown"}
-ALLOWED_ACTIVATION_STATUS = {"candidate", "readiness_supported_no_save", "remediation", "rejected"}
+ALLOWED_ACTIVATION_STATUS = {"candidate", "readiness_supported_no_save", "remediation", "rejected", "blocked"}
 REQUIRED_TEST_FIELDS = {
     "tested_at",
     "test_status",
@@ -63,6 +63,27 @@ REQUIRED_TEST_FIELDS = {
     "activation_status",
 }
 FORBIDDEN_STATUS_WORDS = {"validated", "certified", "guaranteed", "perfect"}
+SELECTOR_INVESTIGATION_FIELDS = {
+    "selector_investigated",
+    "recommended_url",
+    "recommended_wait_selector",
+    "recommended_content_selector",
+    "recommended_next_action",
+}
+ADGM_FSRA_SCA_PREFIXES = ("AE-adgm", "AE-sca")
+CLAIM_SCAN_PATHS = [
+    ROOT / "README.md",
+    ROOT / "START_HERE.md",
+    ROOT / "product/regradar/web/src",
+]
+FORBIDDEN_MARKETING_CLAIMS = {
+    "40+ monitored sources",
+    "40+ sources monitored",
+    "40+ active sources",
+    "60 validated sources",
+    "60 monitored sources",
+    "60 active sources",
+}
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -72,6 +93,16 @@ def fail(errors: list[str], message: str) -> None:
 def load_json(path: Path) -> object:
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def iter_claim_scan_files() -> list[Path]:
+    files: list[Path] = []
+    for path in CLAIM_SCAN_PATHS:
+        if path.is_dir():
+            files.extend(child for child in path.rglob("*") if child.is_file())
+        elif path.exists():
+            files.append(path)
+    return files
 
 
 def main() -> int:
@@ -122,6 +153,7 @@ def main() -> int:
     top60_count = 0
     top40_count = 0
     tested_top40_count = 0
+    adgm_sca_investigated_count = 0
 
     for index, candidate in enumerate(candidates, start=1):
         if not isinstance(candidate, dict):
@@ -190,13 +222,33 @@ def main() -> int:
             if not isinstance(candidate.get("accepted_pack"), list) or not candidate.get("accepted_pack"):
                 fail(errors, f"{source_id} accepted_pack must be a non-empty list.")
             if candidate.get("accepted_for_default_pack") and candidate.get("noise_risk") == "high":
-                fail(errors, f"{source_id} cannot be accepted with high noise risk.")
+                note = " ".join(
+                    str(candidate.get(key, ""))
+                    for key in ("remediation_hint", "recommended_next_action", "recommendation")
+                ).lower()
+                if "filter" not in note and "listing" not in note and "noise" not in note:
+                    fail(errors, f"{source_id} cannot be accepted with high noise risk without a filter/noise note.")
             if candidate.get("accepted_for_default_pack") and candidate.get("source_health_risk") == "high":
-                fail(errors, f"{source_id} cannot be accepted with high source-health risk.")
+                note = " ".join(
+                    str(candidate.get(key, ""))
+                    for key in ("remediation_reason", "remediation_hint", "recommended_next_action")
+                ).lower()
+                if "remediation" not in note and "adapter" not in note and "manual" not in note:
+                    fail(errors, f"{source_id} cannot be accepted with high source-health risk without remediation note.")
             if candidate.get("activation_status") == "readiness_supported_no_save" and candidate.get("evidence_level") != "PREVIEW_ONLY":
                 fail(errors, f"{source_id} no-save readiness must remain PREVIEW_ONLY evidence level.")
-            if candidate.get("activation_status") == "readiness_supported_no_save" and candidate.get("accepted_for_default_pack") is not True:
-                fail(errors, f"{source_id} readiness_supported_no_save must be explicitly accepted for default-pack consideration.")
+
+        if source_id.startswith(ADGM_FSRA_SCA_PREFIXES) and candidate.get("selector_investigated") is True:
+            adgm_sca_investigated_count += 1
+            missing_selector_fields = sorted(SELECTOR_INVESTIGATION_FIELDS - set(candidate))
+            if missing_selector_fields:
+                fail(errors, f"{source_id} selector-investigated candidate missing fields: {', '.join(missing_selector_fields)}")
+            if candidate.get("test_status") == "no_save_tested":
+                for risk_field in ("noise_risk", "source_health_risk"):
+                    if candidate.get(risk_field) not in ALLOWED_RISK:
+                        fail(errors, f"{source_id} selector-tested candidate has invalid {risk_field}: {candidate.get(risk_field)!r}")
+            if candidate.get("activation_status") == "rejected" and candidate.get("accepted_for_default_pack") is True:
+                fail(errors, f"{source_id} rejected candidate cannot be accepted for default pack.")
 
     duplicate_ids = sorted(source_id for source_id, count in ids.items() if count > 1)
     duplicate_urls = sorted(url for url, count in urls.items() if count > 1)
@@ -232,6 +284,20 @@ def main() -> int:
             if validation_summary.get("readiness_supported_no_save_count", 0) >= 40:
                 fail(errors, "Validator refuses 40+ readiness claim without a separate source-readiness evidence report.")
 
+    selector_summary = data.get("last_adgm_fsra_sca_selector_remediation")
+    if selector_summary is not None:
+        if not isinstance(selector_summary, dict):
+            fail(errors, "last_adgm_fsra_sca_selector_remediation must be an object when present.")
+        else:
+            if selector_summary.get("sources_json_changed") is not False:
+                fail(errors, "ADGM/FSRA + SCA remediation summary must not claim sources.json changed.")
+            if selector_summary.get("public_truth_after_validation") != "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation":
+                fail(errors, "ADGM/FSRA + SCA remediation summary must preserve current public source truth.")
+            if selector_summary.get("tested_count", 0) < 1:
+                fail(errors, "ADGM/FSRA + SCA remediation summary must record tested candidates.")
+            if adgm_sca_investigated_count < 10:
+                fail(errors, f"Expected ADGM/FSRA + SCA selector investigation metadata, found {adgm_sca_investigated_count} candidates.")
+
     sources = load_json(SOURCES_FILE)
     if isinstance(sources, dict):
         active_sources = sources.get("sources", [])
@@ -251,6 +317,15 @@ def main() -> int:
             errors,
             f"Active source truth changed unexpectedly: {len(enabled_ae)} enabled / {len(active)} active / {len(remediation)} remediation.",
         )
+
+    for path in iter_claim_scan_files():
+        try:
+            text = path.read_text(encoding="utf-8").lower()
+        except UnicodeDecodeError:
+            continue
+        for claim in FORBIDDEN_MARKETING_CLAIMS:
+            if claim in text:
+                fail(errors, f"Forbidden customer-facing 40/60 marketing claim in {path.relative_to(ROOT)}: {claim}")
 
     if errors:
         for error in errors:
