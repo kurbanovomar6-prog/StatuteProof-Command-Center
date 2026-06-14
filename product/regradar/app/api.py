@@ -1243,6 +1243,13 @@ class _Handler(BaseHTTPRequestHandler):
                 source["fetch_method"] = "playwright"
             if body.get("pdf_mode"):
                 source["source_type"] = "pdf"
+            if body.get("adapter_family"):
+                source["adapter_family"] = str(body.get("adapter_family"))
+            if body.get("adapter_name"):
+                source["adapter_name"] = str(body.get("adapter_name"))
+            adapter_config = body.get("adapter_config")
+            if isinstance(adapter_config, dict):
+                source["adapter_config"] = adapter_config
             all_sources = load_sources_json()
             result = run_source_intake(source, all_sources=all_sources, write_evidence=False)
 
@@ -1267,6 +1274,13 @@ class _Handler(BaseHTTPRequestHandler):
                 "pdf_chars": result["pdf_chars"],
                 "extraction_method": result.get("extraction_method", ""),
                 "provider_used": result.get("provider_used") or result.get("extraction_method", ""),
+                "adapter_used": result.get("adapter_used", False),
+                "adapter_family": result.get("adapter_family", ""),
+                "adapter_name": result.get("adapter_name", ""),
+                "adapter_version": result.get("adapter_version", ""),
+                "extraction_strategy": result.get("extraction_strategy", ""),
+                "adapter_metadata": result.get("adapter_metadata", {}),
+                "adapter_warnings": result.get("adapter_warnings", []),
                 "normalized_hash": normalized_hash,
                 "normalized_preview": result.get("normalized_preview", ""),
                 # quality

@@ -240,6 +240,9 @@ def run_source_intake(
     wait_selector = source.get("wait_for_selector")
     content_selector = source.get("content_selector")
     fetch_method = source.get("fetch_method")
+    adapter_family = source.get("adapter_family")
+    adapter_name = source.get("adapter_name")
+    adapter_config = source.get("adapter_config") if isinstance(source.get("adapter_config"), dict) else {}
 
     result: dict = {
         "source_id": source_id,
@@ -257,6 +260,13 @@ def run_source_intake(
         "extraction_method": "",
         "provider_used": "",
         "provider_candidates": [],
+        "adapter_used": False,
+        "adapter_family": "",
+        "adapter_name": "",
+        "adapter_version": "",
+        "extraction_strategy": "",
+        "adapter_metadata": {},
+        "adapter_warnings": [],
         "normalized_preview": "",
         "legal_policy_status": "PUBLIC_SOURCE_ONLY",
         "quality_score": 0,
@@ -346,9 +356,40 @@ def run_source_intake(
 
     # ── 3. Extract text ───────────────────────────────────────────────────────
     extracted: dict = {}
+    adapter_result = None
     try:
-        from app.extractors import extract_best_text
-        extracted = extract_best_text(html, url=url, content_selector=content_selector)
+        if adapter_family or adapter_name:
+            from app.adapters.adapter_platform import extract_with_adapter
+            adapter_result = extract_with_adapter(
+                html,
+                url=url,
+                adapter_family=str(adapter_family or ""),
+                adapter_name=str(adapter_name or ""),
+                adapter_config=adapter_config,
+            )
+            result["adapter_used"] = bool(adapter_result.text)
+            result["adapter_family"] = adapter_result.adapter_family
+            result["adapter_name"] = adapter_result.adapter_name
+            result["adapter_version"] = adapter_result.adapter_version
+            result["extraction_strategy"] = adapter_result.extraction_strategy
+            result["adapter_metadata"] = adapter_result.as_metadata()
+            result["adapter_warnings"] = adapter_result.warnings
+            if adapter_result.warnings:
+                result["errors"].extend(f"Adapter warning: {warning}" for warning in adapter_result.warnings)
+            if adapter_result.failure_reason and not adapter_result.text:
+                result["errors"].append(f"Adapter failed: {adapter_result.failure_reason}")
+
+        if adapter_result and adapter_result.text:
+            extracted = {
+                "text": adapter_result.text,
+                "method": adapter_result.extraction_strategy,
+                "provider_used": adapter_result.adapter_name,
+                "confidence": "explicit_adapter",
+                "candidates": [adapter_result.as_metadata()],
+            }
+        else:
+            from app.extractors import extract_best_text
+            extracted = extract_best_text(html, url=url, content_selector=content_selector)
         if isinstance(extracted, tuple):
             text = str(extracted[0] or "")
             result["extraction_method"] = str(extracted[1] or "")
@@ -363,6 +404,9 @@ def run_source_intake(
     except Exception as exc:
         result["errors"].append(f"Extraction failed: {exc}")
         text = ""
+
+    if not result.get("extraction_strategy"):
+        result["extraction_strategy"] = result.get("extraction_method") or ""
 
     normalized_text = normalize_for_change_hash(text)
     result["chars_normalized"] = len(normalized_text)
@@ -594,6 +638,11 @@ def _write_intake_evidence(
         "quality_report_path": _rel(quality_report_path),
         "certification_report_path": _rel(certification_report_path),
         "hash_chain_path": _rel(hash_chain_path),
+        "adapter_used": result.get("adapter_used"),
+        "adapter_family": result.get("adapter_family"),
+        "adapter_name": result.get("adapter_name"),
+        "adapter_version": result.get("adapter_version"),
+        "extraction_strategy": result.get("extraction_strategy"),
     }
     appended = append_run(record)
     source_history = []
@@ -618,6 +667,12 @@ def _write_intake_evidence(
     provider_report_path.write_text(json.dumps({
         "provider_used": result.get("provider_used"),
         "extraction_method": result.get("extraction_method"),
+        "adapter_used": result.get("adapter_used"),
+        "adapter_family": result.get("adapter_family"),
+        "adapter_name": result.get("adapter_name"),
+        "adapter_version": result.get("adapter_version"),
+        "extraction_strategy": result.get("extraction_strategy"),
+        "adapter_metadata": result.get("adapter_metadata"),
         "normalized_length": result.get("chars_normalized"),
         "warnings": result.get("errors", []),
     }, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")

@@ -46,6 +46,15 @@ REQUIRED_SOURCE_FIELDS = {
     "baseline_runs_required",
     "can_activate",
     "activation_decision",
+    "adapter_family",
+    "adapter_name",
+    "adapter_version",
+    "adapter_config",
+    "extraction_strategy",
+    "last_adapter_test_at",
+    "adapter_status",
+    "adapter_failure_reason",
+    "adapter_remediation_hint",
 }
 ALLOWED_FINAL_STATUSES = {
     "activation_ready",
@@ -54,6 +63,16 @@ ALLOWED_FINAL_STATUSES = {
     "blocked",
     "rejected",
     "candidate",
+}
+ALLOWED_ADAPTER_STATUSES = {
+    "not_configured",
+    "configured_pending_live_adapter_test",
+    "configured_for_remediation",
+    "configured_pending_selector_review",
+    "live_test_passed",
+    "live_test_failed",
+    "evidence_saved",
+    "activation_ready",
 }
 PASS_REQUIRED_GATES = {
     "source_monitor_gate",
@@ -147,6 +166,23 @@ def main() -> int:
         if source.get("activation_decision") != final_status:
             fail(errors, f"{source_id} activation_decision must match final_activation_gate.status.")
 
+        adapter_family = source.get("adapter_family")
+        adapter_name = source.get("adapter_name")
+        adapter_status = source.get("adapter_status")
+        if adapter_status not in ALLOWED_ADAPTER_STATUSES:
+            fail(errors, f"{source_id} has invalid adapter_status: {adapter_status!r}")
+        if adapter_family:
+            if adapter_name not in {"custom_element", "listing", "table"}:
+                fail(errors, f"{source_id} has unsupported adapter_name: {adapter_name!r}")
+            if not source.get("adapter_version"):
+                fail(errors, f"{source_id} configured adapter requires adapter_version.")
+            if not isinstance(source.get("adapter_config"), dict):
+                fail(errors, f"{source_id} configured adapter requires adapter_config object.")
+            if not str(source.get("extraction_strategy") or "").startswith("adapter:"):
+                fail(errors, f"{source_id} configured adapter requires adapter extraction_strategy.")
+        elif final_status == "activation_ready":
+            fail(errors, f"{source_id} activation_ready source requires explicit adapter metadata.")
+
         proof_path = source.get("proof_path")
         baseline_completed = int(source.get("baseline_runs_completed") or 0)
         baseline_required = int(source.get("baseline_runs_required") or 2)
@@ -182,6 +218,8 @@ def main() -> int:
                 fail(errors, f"{source_id} activation_ready source cannot have high noise risk.")
             if source.get("source_health_risk") == "high":
                 fail(errors, f"{source_id} activation_ready source cannot have high source-health risk.")
+            if adapter_status not in {"live_test_passed", "evidence_saved", "activation_ready"}:
+                fail(errors, f"{source_id} activation_ready source needs a live-tested/evidence adapter status.")
         else:
             if source.get("can_activate") is True:
                 fail(errors, f"{source_id} can_activate true but final status is {final_status}.")

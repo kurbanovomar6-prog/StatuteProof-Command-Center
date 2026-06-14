@@ -1927,6 +1927,9 @@ def _cmd_source_lab(
     wait_for_selector: str | None = None,
     js: bool = False,
     pdf: bool = False,
+    adapter_family: str | None = None,
+    adapter_name: str | None = None,
+    adapter_config: dict | None = None,
 ) -> None:
     """Run one safe source-intake lab check. Never runs all sources."""
     import json
@@ -1949,6 +1952,12 @@ def _cmd_source_lab(
         source["fetch_method"] = "playwright"
     if pdf:
         source["source_type"] = "pdf"
+    if adapter_family:
+        source["adapter_family"] = adapter_family
+    if adapter_name:
+        source["adapter_name"] = adapter_name
+    if adapter_config:
+        source["adapter_config"] = adapter_config
 
     result = run_source_intake(source, all_sources=load_sources_json(), write_evidence=save)
     contract = build_source_lab_contract(result)
@@ -1959,6 +1968,13 @@ def _cmd_source_lab(
         "source_type": source.get("source_type") or "custom_public_source",
         "provider_used": result.get("provider_used"),
         "provider_candidates": result.get("provider_candidates", []),
+        "adapter_used": result.get("adapter_used", False),
+        "adapter_family": result.get("adapter_family", ""),
+        "adapter_name": result.get("adapter_name", ""),
+        "adapter_version": result.get("adapter_version", ""),
+        "extraction_strategy": result.get("extraction_strategy", ""),
+        "adapter_metadata": result.get("adapter_metadata", {}),
+        "adapter_warnings": result.get("adapter_warnings", []),
         "normalized_length": result.get("chars_normalized"),
         "normalized_hash": result.get("normalized_hash"),
         "normalized_preview": result.get("normalized_preview"),
@@ -1986,6 +2002,11 @@ def _cmd_source_lab(
         payload["provider_report"] = {
             "provider_used": result.get("provider_used"),
             "extraction_method": result.get("extraction_method"),
+            "adapter_used": result.get("adapter_used"),
+            "adapter_family": result.get("adapter_family"),
+            "adapter_name": result.get("adapter_name"),
+            "adapter_version": result.get("adapter_version"),
+            "extraction_strategy": result.get("extraction_strategy"),
             "notes": result.get("notes"),
         }
     if json_export:
@@ -1999,6 +2020,8 @@ def _cmd_source_lab(
     print(f"  Evidence level: {payload['evidence_level']}")
     print(f"  Quality: {payload['quality_score']}/100 ({payload['quality_label']})")
     print(f"  Provider: {payload['provider_used'] or '-'}")
+    if payload.get("adapter_used"):
+        print(f"  Adapter: {payload.get('adapter_name') or payload.get('adapter_family')} ({payload.get('adapter_version')})")
     print(f"  Normalized chars: {payload['normalized_length']}")
     print(f"  Normalized hash: {payload['normalized_hash'] or '-'}")
     if payload["failure_reason"]:
@@ -2028,6 +2051,7 @@ def main() -> None:
         print("  python run.py source-lab <url> --no-save --json  one-source parser/evidence lab", file=sys.stderr)
         print("  python run.py source-lab <url> --save --json     one-source lab with evidence write", file=sys.stderr)
         print("  python run.py source-lab <url> --js --content-selector main --wait-for-selector main", file=sys.stderr)
+        print("  python run.py source-lab <url> --adapter-family listing --adapter-config-json '{\"container_selector\":\"main\"}'", file=sys.stderr)
         print("  python run.py source-lab <url> --source-id AE-example --save --json", file=sys.stderr)
         print("  python run.py add-source                     interactively add a source", file=sys.stderr)
         print("  python run.py coverage                       coverage dashboard (uses latest audit JSON)", file=sys.stderr)
@@ -2214,6 +2238,9 @@ def main() -> None:
         category = "custom"
         content_selector = None
         wait_for_selector = None
+        adapter_family = None
+        adapter_name = None
+        adapter_config = None
         i_ = 0
         while i_ < len(extra):
             tok = extra[i_]
@@ -2279,6 +2306,33 @@ def main() -> None:
                     sys.exit(2)
                 wait_for_selector = extra[i_ + 1]
                 i_ += 2
+            elif tok == "--adapter-family":
+                if i_ + 1 >= len(extra):
+                    print("Error: --adapter-family requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                adapter_family = extra[i_ + 1].strip() or None
+                i_ += 2
+            elif tok == "--adapter-name":
+                if i_ + 1 >= len(extra):
+                    print("Error: --adapter-name requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                adapter_name = extra[i_ + 1].strip() or None
+                i_ += 2
+            elif tok == "--adapter-config-json":
+                if i_ + 1 >= len(extra):
+                    print("Error: --adapter-config-json requires a JSON object.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    import json as _json
+                    parsed_config = _json.loads(extra[i_ + 1])
+                except Exception as exc:
+                    print(f"Error: --adapter-config-json is invalid JSON: {exc}", file=sys.stderr)
+                    sys.exit(2)
+                if not isinstance(parsed_config, dict):
+                    print("Error: --adapter-config-json must decode to an object.", file=sys.stderr)
+                    sys.exit(2)
+                adapter_config = parsed_config
+                i_ += 2
             elif url_arg is None:
                 url_arg = tok
                 i_ += 1
@@ -2302,6 +2356,9 @@ def main() -> None:
             wait_for_selector=wait_for_selector,
             js=js,
             pdf=pdf,
+            adapter_family=adapter_family,
+            adapter_name=adapter_name,
+            adapter_config=adapter_config,
         )
 
     elif cmd == "test-mapped":
