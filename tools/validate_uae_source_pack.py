@@ -45,6 +45,23 @@ ALLOWED_INITIAL_STATUS = {
     "blocked",
     "rejected",
 }
+ALLOWED_TEST_STATUS = {"no_save_tested"}
+ALLOWED_RISK = {"low", "medium", "high", "unknown"}
+ALLOWED_ACTIVATION_STATUS = {"candidate", "readiness_supported_no_save", "remediation", "rejected"}
+REQUIRED_TEST_FIELDS = {
+    "tested_at",
+    "test_status",
+    "readiness_status",
+    "quality_score",
+    "quality_label",
+    "noise_risk",
+    "source_health_risk",
+    "remediation_reason",
+    "remediation_hint",
+    "accepted_for_default_pack",
+    "accepted_pack",
+    "activation_status",
+}
 FORBIDDEN_STATUS_WORDS = {"validated", "certified", "guaranteed", "perfect"}
 
 
@@ -104,6 +121,7 @@ def main() -> int:
     urls: dict[str, int] = {}
     top60_count = 0
     top40_count = 0
+    tested_top40_count = 0
 
     for index, candidate in enumerate(candidates, start=1):
         if not isinstance(candidate, dict):
@@ -133,6 +151,8 @@ def main() -> int:
 
         if candidate.get("top_40_candidate") is True:
             top40_count += 1
+            if candidate.get("test_status") == "no_save_tested":
+                tested_top40_count += 1
 
         official_status = candidate.get("official_status")
         if official_status not in ALLOWED_OFFICIAL_STATUS:
@@ -151,6 +171,33 @@ def main() -> int:
         if not isinstance(candidate.get("candidate_pack"), list) or not candidate.get("candidate_pack"):
             fail(errors, f"{source_id} must include candidate_pack list.")
 
+        if candidate.get("test_status") is not None:
+            missing_test_fields = sorted(REQUIRED_TEST_FIELDS - set(candidate))
+            if missing_test_fields:
+                fail(errors, f"{source_id} tested candidate missing fields: {', '.join(missing_test_fields)}")
+            if candidate.get("test_status") not in ALLOWED_TEST_STATUS:
+                fail(errors, f"{source_id} has invalid test_status: {candidate.get('test_status')!r}")
+            if candidate.get("noise_risk") not in ALLOWED_RISK:
+                fail(errors, f"{source_id} has invalid noise_risk: {candidate.get('noise_risk')!r}")
+            if candidate.get("source_health_risk") not in ALLOWED_RISK:
+                fail(errors, f"{source_id} has invalid source_health_risk: {candidate.get('source_health_risk')!r}")
+            if candidate.get("activation_status") not in ALLOWED_ACTIVATION_STATUS:
+                fail(errors, f"{source_id} has invalid activation_status: {candidate.get('activation_status')!r}")
+            if not isinstance(candidate.get("quality_score"), int):
+                fail(errors, f"{source_id} quality_score must be an integer.")
+            if not isinstance(candidate.get("accepted_for_default_pack"), bool):
+                fail(errors, f"{source_id} accepted_for_default_pack must be a boolean.")
+            if not isinstance(candidate.get("accepted_pack"), list) or not candidate.get("accepted_pack"):
+                fail(errors, f"{source_id} accepted_pack must be a non-empty list.")
+            if candidate.get("accepted_for_default_pack") and candidate.get("noise_risk") == "high":
+                fail(errors, f"{source_id} cannot be accepted with high noise risk.")
+            if candidate.get("accepted_for_default_pack") and candidate.get("source_health_risk") == "high":
+                fail(errors, f"{source_id} cannot be accepted with high source-health risk.")
+            if candidate.get("activation_status") == "readiness_supported_no_save" and candidate.get("evidence_level") != "PREVIEW_ONLY":
+                fail(errors, f"{source_id} no-save readiness must remain PREVIEW_ONLY evidence level.")
+            if candidate.get("activation_status") == "readiness_supported_no_save" and candidate.get("accepted_for_default_pack") is not True:
+                fail(errors, f"{source_id} readiness_supported_no_save must be explicitly accepted for default-pack consideration.")
+
     duplicate_ids = sorted(source_id for source_id, count in ids.items() if count > 1)
     duplicate_urls = sorted(url for url, count in urls.items() if count > 1)
     if duplicate_ids:
@@ -162,12 +209,28 @@ def main() -> int:
         fail(errors, f"Expected exactly 60 top_60 candidates, found {top60_count}.")
     if top40_count < 40:
         fail(errors, f"Expected at least 40 top_40 candidates, found {top40_count}.")
+    if top40_count >= 40 and tested_top40_count not in {0, top40_count}:
+        fail(errors, f"Top-40 testing is partial: {tested_top40_count} of {top40_count} top-40 candidates have no-save test fields.")
 
     rejected_ids = {str(item.get("source_id", "")).strip() for item in rejected if isinstance(item, dict)}
     candidate_ids = set(ids)
     overlap = sorted(candidate_ids & rejected_ids)
     if overlap:
         fail(errors, "Rejected source appears as candidate: " + ", ".join(overlap))
+
+    validation_summary = data.get("last_top_40_no_save_validation")
+    if validation_summary is not None:
+        if not isinstance(validation_summary, dict):
+            fail(errors, "last_top_40_no_save_validation must be an object when present.")
+        else:
+            if validation_summary.get("tested_count") != tested_top40_count:
+                fail(errors, "Top-40 validation summary tested_count does not match tested candidates.")
+            if validation_summary.get("sources_json_changed") is not False:
+                fail(errors, "Top-40 validation summary must not claim sources.json changed in this sprint.")
+            if validation_summary.get("public_truth_after_validation") != "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation":
+                fail(errors, "Top-40 validation summary must preserve current public source truth.")
+            if validation_summary.get("readiness_supported_no_save_count", 0) >= 40:
+                fail(errors, "Validator refuses 40+ readiness claim without a separate source-readiness evidence report.")
 
     sources = load_json(SOURCES_FILE)
     if isinstance(sources, dict):
