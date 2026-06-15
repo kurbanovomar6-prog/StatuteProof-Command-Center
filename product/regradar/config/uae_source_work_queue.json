@@ -7100,15 +7100,185 @@
       },
       "normalized_hash": "f9752fc4906a03d12ab587db00dc1f37c9508688eeda7954d1e2f82ca3ea4c2d",
       "normalized_text_path": "data/source_snapshots/2026-06-15/AE/AE-uaefiu-typology-reports/intake-20260615T173740Z/normalized.txt"
+    },
+    {
+      "source_id": "AE-eocn-news-en",
+      "regulator": "EOCN",
+      "url": "https://www.eocn.gov.ae/en-us/news",
+      "source_type": "sanctions_news",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:eocn_news_listing",
+      "expected_min_length": 1000,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "eocn_news_listing",
+      "adapter_name": "eocn_news_listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "#NewsContainer",
+        "max_items": 50
+      },
+      "extraction_strategy": "adapter:eocn_news_listing",
+      "last_adapter_test_at": "2026-06-15T18:10:34Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "#NewsContainer",
+      "wait_selector": "",
+      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-eocn-news-en/intake-20260615T180807Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "65507c102bc975d9a13f0cf3def4a59b2215cc5604d3404ddfa7e9e19df730ba",
+      "no_save_normalized_length": 2278,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "eocn_news_listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-15T18:10:34Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:10:34Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:10:34Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:10:34Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:10:34Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:10:34Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:10:34Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T18:10:34Z"
+      }
+    },
+    {
+      "source_id": "AE-sca-regulations-listing",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/regulations-listing",
+      "source_type": "regulations_listing",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:sca_listing",
+      "expected_min_length": 1000,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "main",
+        "max_items": 80
+      },
+      "extraction_strategy": "adapter:sca_listing",
+      "last_adapter_test_at": "2026-06-15T18:22:28Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "main",
+      "wait_selector": "",
+      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-regulations-listing/intake-20260615T182128Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "fecd262a251402488e62b2fcfc2cefc71cd50ac41b7312550a85f4d0dd5cdada",
+      "no_save_normalized_length": 11021,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "sca_listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-15T18:22:28Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:22:28Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:22:28Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:22:28Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:22:28Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:22:28Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T18:22:28Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T18:22:28Z"
+      }
     }
   ],
   "summary": {
-    "activation_ready_count": 8,
+    "activation_ready_count": 10,
     "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
-    "baseline_complete_count": 9,
+    "baseline_complete_count": 11,
     "baseline_pending_count": 4,
     "blocked_count": 21,
     "candidate_count": 28,
@@ -7138,16 +7308,17 @@
     },
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready entries count toward the 50 working-source target; sources.json was not expanded in this sprint.",
-    "proof_backed_count": 9,
-    "public_source_truth_after": "24 enabled UAE sources / 20 readiness-supported / 4 under extraction remediation",
+    "proof_backed_count": 11,
+    "public_source_truth_after": "26 enabled UAE sources / 22 readiness-supported / 4 under extraction remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 0,
     "remediation_count": 21,
     "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
-    "total_entries": 82,
+    "total_entries": 84,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
-    "source_activation_platform_note": "Auto DOM Investigator, expanded adapter catalog, structured failure codes, Source Lab remediation controls, and source activation validator are in place. The wider UAE work queue now records eight activation-ready entries; public truth is now 24/20/4 after UAE FIU typology activation."
+    "source_activation_platform_note": "Auto DOM Investigator, expanded adapter catalog, structured failure codes, Source Lab remediation controls, and source activation validators are in place. The wider UAE work queue now records ten activation-ready entries; public truth is now 26/22/4 after EOCN News and SCA Regulations Listing activation.",
+    "last_autonomous_cycle_update_at": "2026-06-15T18:25:00Z"
   },
   "version": 1
 }

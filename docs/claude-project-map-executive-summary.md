@@ -56,14 +56,15 @@ It is **not** a legal adviser, compliance certifier, or regulator partner.
 ## Current source truth (verified from sources.json + validators)
 
 ```
-24 enabled UAE sources / 20 active (readiness-supported) / 4 under remediation
+26 enabled UAE sources / 22 active (readiness-supported) / 4 under remediation
 ```
-*(Updated 2026-06-15 after UAE FIU Trends and Typology Reports activation — FIU/EOCN document-listing adapter, MONITORING_CERTIFIED, hash stable, mass-monitor MONITOR_OK.)*
+*(Updated 2026-06-15 after SCA Regulations Listing activation — source-specific SCA listing adapter, MONITORING_CERTIFIED, hash stable, mass-monitor MONITOR_OK.)*
 
 Active sources include CBUAE, VARA, DFSA subpages, ADGM/FSRA subpages, SCA
 Circulars, UAE Ministry of Finance, UAE Legislation Portal, UAE Ministry of
 Economy, VARA Enforcement, CBUAE Regulations, UAE FIU Circulars, EOCN AML/CFT
-laws, ADGM RA Circulars, and UAE FIU Trends and Typology Reports.
+laws, ADGM RA Circulars, UAE FIU Trends and Typology Reports, EOCN News and
+Sanctions Updates, and SCA Regulations Listing.
 
 Remediation: DFSA main site, UAE FIU main, DIFC Laws, DFSA Regulatory Notices.
 
@@ -72,7 +73,7 @@ Remediation: DFSA main site, UAE FIU main, DIFC Laws, DFSA Regulatory Notices.
 ## What is missing
 
 1. **Dashboard and Sources page show mock data** — not wired to `sources.json` or live runs.
-2. **50 active UAE sources** — currently 24/20/4. Getting to 50 requires 26 more genuinely passing sources with real evidence + baselines. The live no-save batches show that per-source adapters work, but JS-heavy FIU/SCA/ADGM variants still need selector remediation.
+2. **50 active UAE sources** — currently 26/22/4. Getting to 50 requires 24 more genuinely passing sources with real evidence + baselines. The live no-save batches show that per-source adapters work, but JS-heavy FIU/SCA/ADGM variants still need selector remediation.
 3. **Alert delivery** — Telegram wiring exists but requires per-client setup.
 4. **Billing** — not implemented; plan intents recorded but no payment processing.
 5. **Custom-source activation UI** — adding a URL via Source Lab saves it as `enabled:false/pending_validation`; there is no UI for the manual review + activation step (done via CLI today).
@@ -82,7 +83,7 @@ Remediation: DFSA main site, UAE FIU main, DIFC Laws, DFSA Regulatory Notices.
 
 ## Is it ready for mass monitoring?
 
-**Partially.** The monitoring engine is solid. For the 19 enabled sources, mass-monitor runs correctly in dry-run mode. For real alerts, Telegram delivery needs per-client configuration and the 50-source goal requires the ongoing activation work.
+**Partially.** The monitoring engine is solid. For activation-ready/enabled sources, mass-monitor runs correctly in dry-run/no-alerts mode. For real alerts, Telegram delivery needs per-client configuration and the 50-source goal requires the ongoing activation work.
 
 ---
 

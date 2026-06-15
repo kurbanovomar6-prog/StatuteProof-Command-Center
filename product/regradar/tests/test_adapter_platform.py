@@ -297,6 +297,35 @@ def test_sca_listing_adapter_extracts_aegov_cards():
     assert "View Details" not in result.text
 
 
+def test_sca_listing_adapter_removes_invalid_javascript_detail_urls():
+    html = """
+    <html><body>
+      <main>
+        <article class="decision">
+          <a href="javascipt:;">Administrative Decision No. (123 /R.T) of 2017 Concerning Regulatory Controls</a>
+          <time>2017</time>
+        </article>
+        <article class="decision">
+          <a href="/en/regulations/decision-46-2016">Administrative Decision No. (46 / R.T) of 2016 concerning Grievances</a>
+          <time>2016</time>
+        </article>
+      </main>
+    </body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.sca.gov.ae/en/regulations/regulations-listing",
+        adapter_family="sca_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "sca_listing"
+    assert result.item_count == 2
+    assert "Administrative Decision No. (123 /R.T)" in result.text
+    assert "javascipt:;" not in result.text
+    assert "https://www.sca.gov.ae/en/regulations/decision-46-2016" in result.text
+
+
 def test_sca_listing_adapter_keeps_aspnet_form_wrapped_content():
     html = """
     <html><body>
@@ -389,6 +418,68 @@ def test_fiu_eocn_document_listing_adapter_extracts_publication_links():
     assert result.item_count == 2
     assert "Typologies Report" in result.text
     assert "goAML Registration Guidance" in result.text
+
+
+def test_eocn_news_listing_adapter_extracts_news_and_ignores_navigation():
+    html = """
+    <html><body>
+      <nav>
+        <a href="/en-us/about-us">About Us</a>
+        <a href="/en-us/online-services/armed-vehicle-service">Armoring Request</a>
+        <a href="/en-us/careers-List">Careers</a>
+      </nav>
+      <div id="NewsContainer" class="row default-list default-list-img">
+        <div class="col-md-6">
+          <div class="item default-section">
+            <a title="Conclusion of the 42nd General Meeting of the MENAFATF group in Rebat"
+               class="item-img-container pull-left"
+               href="/en-us/news/conclusion-of-the-42nd-general-meeting-of-the-menafatf-group-in-rebat"></a>
+            <div class="item-body-container pull-left">
+              <a title="Conclusion of the 42nd General Meeting of the MENAFATF group in Rebat"
+                 class="item-title-container"
+                 href="/en-us/news/conclusion-of-the-42nd-general-meeting-of-the-menafatf-group-in-rebat">
+                <h3>Conclusion of the 42nd General Meeting of the MENA..</h3>
+              </a>
+              <div class="item-brief">
+                Led by His Excellency Talal Al Teneiji, Director of the Office, the UAE delegation
+                participated in MENAFATF discussions related to anti-money laundering and
+                counter-terrorist financing controls.
+              </div>
+              <div class="item-date"><span>14</span><span>May. 2026 </span></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="item default-section">
+            <div class="item-body-container pull-left">
+              <a title="UAE designates 16 individuals, five entities on its Local Terrorist List"
+                 class="item-title-container"
+                 href="/en-us/news/uae-designates-16-individuals-five-entities-on-its-local-terrorist-list">
+                <h3>UAE designates 16 individuals, five entities on its Local Terrorist List</h3>
+              </a>
+              <div class="item-brief">Targeted financial sanctions update for regulated entities.</div>
+              <div class="item-date"><span>9</span><span>May. 2026 </span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.eocn.gov.ae/en-us/news",
+        adapter_family="eocn_news_listing",
+        adapter_config={"container_selector": "#NewsContainer"},
+    )
+
+    assert result.adapter_name == "eocn_news_listing"
+    assert result.item_count == 2
+    assert "Conclusion of the 42nd General Meeting" in result.text
+    assert "Local Terrorist List" in result.text
+    assert "14 May. 2026" in result.text
+    assert "anti-money laundering" in result.text
+    assert "Armoring Request" not in result.text
+    assert "Careers" not in result.text
 
 
 def test_vara_pdf_listing_adapter_extracts_rulebook_pdf_links():

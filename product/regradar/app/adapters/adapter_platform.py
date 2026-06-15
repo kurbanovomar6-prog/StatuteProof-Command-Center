@@ -441,6 +441,10 @@ class ScaListingAdapter(ListingAdapter):
                     continue
                 if not item.get("date"):
                     item["date"] = _extract_date(context)
+                if str(item_url).strip().lower().startswith(("javascript:", "javascipt:", "#")):
+                    item["url"] = ""
+                    item_url = ""
+                item["row_hash"] = _row_hash(title, item.get("date"), item_url, item.get("category"))
                 key = title.lower()
                 current = by_title.get(key)
                 if current:
@@ -571,6 +575,80 @@ class FiuEocnDocumentListingAdapter(DocumentListingAdapter):
     name = "fiu_eocn_document_listing"
     heading = "FIU/EOCN document listing items"
     allowed_tokens = ("fiu", "goaml", "aml", "cft", "sanction", "tfs", "typolog", "publication", "guidance", "report")
+
+
+class EocnNewsListingAdapter(BaseHtmlAdapter):
+    family = "eocn_news_listing"
+    name = "eocn_news_listing"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        config = config or {}
+        soup = _soup(html, config.get("exclude_selectors") or ["header", "nav", "footer", "form", ".main-menu", ".site-map"])
+        container_selector = str(config.get("container_selector") or "#NewsContainer").strip()
+        container = soup.select_one(container_selector) if container_selector else soup
+        if not container:
+            return self._empty("EOCN news container was not found.", "Review #NewsContainer after Playwright rendering.")
+
+        item_selector = str(config.get("item_selector") or ".item.default-section, .item").strip()
+        title_selector = str(config.get("title_selector") or ".item-title-container[href], a[href*='/news/']").strip()
+        date_selector = str(config.get("date_selector") or ".item-date").strip()
+        brief_selector = str(config.get("brief_selector") or ".item-brief").strip()
+        max_items = int(config.get("max_items") or 50)
+        items: list[dict] = []
+        seen: set[str] = set()
+
+        for node in container.select(item_selector):
+            title_node = node.select_one(title_selector)
+            if not title_node:
+                continue
+            href = (title_node.get("href") or "").strip()
+            if not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
+                continue
+            if "/news/" not in href.lower():
+                continue
+            title = _clean(title_node.get("title") or title_node.get_text(" ", strip=True), limit=260)
+            if _is_noise_title(title):
+                continue
+            item_url = urljoin(url, href)
+            date_node = node.select_one(date_selector) if date_selector else None
+            brief_node = node.select_one(brief_selector) if brief_selector else None
+            date = _clean(date_node.get_text(" ", strip=True), limit=80) if date_node else ""
+            brief = _clean(brief_node.get_text(" ", strip=True), limit=700) if brief_node else ""
+            context = brief or _node_text(node, separator=" ", limit=700)
+            key = f"{title.lower()}|{item_url.lower()}|{date.lower()}"
+            if key in seen:
+                continue
+            seen.add(key)
+            item = {
+                "title": title,
+                "date": date,
+                "url": item_url,
+                "category": "news",
+                "raw_text_snippet": context,
+            }
+            item["row_hash"] = _row_hash(title, date, item_url, context)
+            items.append(item)
+            if len(items) >= max_items:
+                break
+
+        if not items:
+            return self._empty("No EOCN news items were isolated.", "Review EOCN news card selectors or mark source as remediation.")
+
+        return AdapterResult(
+            text=_format_items("EOCN news listing items", items),
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            items=items,
+            noise_risk="medium" if len(items) < 5 else "low",
+            source_health_risk="medium",
+            metadata={
+                "container_selector": container_selector,
+                "item_selector": item_selector,
+                "title_selector": title_selector,
+                "url": url,
+            },
+        )
 
 
 class VaraPdfListingAdapter(DocumentListingAdapter):
@@ -739,6 +817,7 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "dfsa_rulebook": RulebookModuleAdapter(),
     "cbuae_document_listing": CbuaeDocumentListingAdapter(),
     "fiu_eocn_document_listing": FiuEocnDocumentListingAdapter(),
+    "eocn_news_listing": EocnNewsListingAdapter(),
     "vara_pdf_listing": VaraPdfListingAdapter(),
 }
 
@@ -764,7 +843,7 @@ def extract_with_adapter(
             adapter_name=adapter_name or "",
             extraction_strategy=f"adapter:{key}" if key else "",
             failure_reason=f"Unknown adapter: {key}" if key else "No adapter configured.",
-            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, or vara_pdf_listing.",
+            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, or vara_pdf_listing.",
             source_health_risk="medium",
         )
     try:

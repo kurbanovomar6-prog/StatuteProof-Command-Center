@@ -274,6 +274,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "pdf_listing",
         "cbuae_document_listing",
         "fiu_eocn_document_listing",
+        "eocn_news_listing",
         "vara_pdf_listing",
         "register",
         "sitemap_feed",
@@ -288,6 +289,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "pdf_listing",
         "cbuae_document_listing",
         "fiu_eocn_document_listing",
+        "eocn_news_listing",
         "vara_pdf_listing",
     }
     if family in document_families:

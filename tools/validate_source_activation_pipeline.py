@@ -41,6 +41,7 @@ REQUIRED_ADAPTERS = [
     "cbuae_document_listing",
     "adgm_fsra_listing",
     "fiu_eocn_document_listing",
+    "eocn_news_listing",
     "vara_pdf_listing",
 ]
 

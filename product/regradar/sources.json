@@ -1605,5 +1605,43 @@
     "adapter_config": {
       "container_selector": "body"
     }
+  },
+  {
+    "name": "EOCN News and Sanctions Updates",
+    "url": "https://www.eocn.gov.ae/en-us/news",
+    "jurisdiction": "AE",
+    "category": "sanctions",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-eocn-news-en",
+    "adapter_family": "eocn_news_listing",
+    "adapter_name": "eocn_news_listing",
+    "expected_min_length": 1000,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-eocn-news-en/intake-20260615T180807Z/proof.json",
+    "normalized_hash": "65507c102bc975d9a13f0cf3def4a59b2215cc5604d3404ddfa7e9e19df730ba",
+    "adapter_config": {
+      "container_selector": "#NewsContainer",
+      "max_items": 50
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "SCA Regulations Listing",
+    "url": "https://www.sca.gov.ae/en/regulations/regulations-listing",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-sca-regulations-listing",
+    "adapter_family": "sca_listing",
+    "adapter_name": "sca_listing",
+    "expected_min_length": 1000,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-regulations-listing/intake-20260615T182128Z/proof.json",
+    "normalized_hash": "fecd262a251402488e62b2fcfc2cefc71cd50ac41b7312550a85f4d0dd5cdada",
+    "adapter_config": {
+      "container_selector": "main",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
   }
 ]
