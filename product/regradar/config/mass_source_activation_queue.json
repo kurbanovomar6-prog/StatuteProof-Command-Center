@@ -1,0 +1,688 @@
+{
+  "schema_version": "mass-source-activation-1.0",
+  "generated_at": "2026-06-15T00:00:00Z",
+  "public_source_truth": "13 enabled UAE sources / 9 readiness-supported / 4 remediation",
+  "summary": {
+    "queue_entries": 9,
+    "activation_ready_count": 0,
+    "proof_backed_count": 0,
+    "baseline_complete_count": 0,
+    "did_reach_50_working_sources": false,
+    "sources_json_changed": false
+  },
+  "sources": [
+    {
+      "source_id": "AE-sca-latest-regulations",
+      "url": "https://www.sca.gov.ae/en/regulations/regulations",
+      "regulator": "UAE Securities and Commodities Authority",
+      "source_type": "regulations_listing",
+      "official_status": "official",
+      "discovery_status": "discovered",
+      "adapter_family": "listing",
+      "adapter_name": "sca_listing",
+      "adapter_config": {
+        "content_selector": "[data-icms-list]",
+        "item_selector": "a, article, li, tr"
+      },
+      "no_save_status": "failed",
+      "quality_score": 0,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "remediation",
+      "failure_code": "LISTING_ADAPTER_REQUIRED",
+      "failure_reason": "SCA listing needs stable item-level extraction before evidence save.",
+      "remediation_hint": "Improve SCA rendered listing adapter and re-run no-save before any save.",
+      "agent_gate_status": "hold",
+      "current_state": "remediation",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official URL is useful, but item-level extraction is not reliable enough.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["listing_adapter_required"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No current mass-queue proof path or repeat baseline is recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "High noise/source-health risk blocks activation.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["high_noise_risk", "high_source_health_risk"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "May be described only as remediation/in progress, not ready.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "SCA regulations are relevant to UAE MLRO/CCO monitoring.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Source-specific SCA adapter requires further live fixture validation.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_validation_required"]
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Activation blocked by adapter, proof, baseline, noise, and source-health gaps.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["listing_adapter_required", "proof_missing", "baseline_missing", "high_noise_risk", "high_source_health_risk"]
+      }
+    },
+    {
+      "source_id": "AE-sca-aml-cft",
+      "url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+      "regulator": "UAE Securities and Commodities Authority",
+      "source_type": "aml_cft_page",
+      "official_status": "official",
+      "discovery_status": "discovered",
+      "adapter_family": "listing",
+      "adapter_name": "sca_listing",
+      "adapter_config": {
+        "content_selector": "[data-icms-list]"
+      },
+      "no_save_status": "failed",
+      "quality_score": 0,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "remediation",
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Prior save-mode attempt produced nav-shell style extraction.",
+      "remediation_hint": "Re-investigate DOM and find item/detail selectors before any evidence save.",
+      "agent_gate_status": "hold",
+      "current_state": "remediation",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": true,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official page but extraction target is still unreliable.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["nav_shell"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No acceptable proof path can be used while nav-shell persists.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "fail",
+        "reason": "Nav-shell output is not activation quality.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["nav_shell"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "Cannot be called ready or validated.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "AML/CFT content is strongly relevant if extraction is fixed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Needs source-specific adapter remediation.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_remediation_required"]
+      },
+      "final_activation_gate": {
+        "status": "remediation",
+        "reason": "Activation blocked by nav-shell extraction and missing evidence baseline.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["nav_shell", "proof_missing", "baseline_missing"]
+      }
+    },
+    {
+      "source_id": "AE-dfsa-rulebook-thomsonreuters",
+      "url": "https://dfsaen.thomsonreuters.com/",
+      "regulator": "DFSA / DIFC",
+      "source_type": "rulebook",
+      "official_status": "officially_linked",
+      "discovery_status": "discovered",
+      "adapter_family": "rulebook",
+      "adapter_name": "dfsa_rulebook",
+      "adapter_config": {},
+      "no_save_status": "not_run",
+      "quality_score": 0,
+      "noise_risk": "unknown",
+      "source_health_risk": "medium",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "candidate",
+      "failure_code": "RULEBOOK_ADAPTER_REQUIRED",
+      "failure_reason": "Rulebook module extraction must be validated before evidence save.",
+      "remediation_hint": "Run source discovery and DOM investigation, then no-save with dfsa_rulebook adapter.",
+      "agent_gate_status": "hold",
+      "current_state": "candidate",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official linkage must be checked at the module endpoint level.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["module_endpoint_review_required"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No proof or repeat baseline recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "No no-save result in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "Candidate only; no ready claim allowed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "DFSA rulebook is core compliance monitoring surface.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Rulebook adapter must be tested against real module structure.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_test_required"]
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+      }
+    },
+    {
+      "source_id": "AE-dfsa-aml-mlro-notices",
+      "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance",
+      "regulator": "DFSA",
+      "source_type": "aml_notices_listing",
+      "official_status": "official",
+      "discovery_status": "discovered",
+      "adapter_family": "listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "no_save_status": "not_run",
+      "quality_score": 0,
+      "noise_risk": "unknown",
+      "source_health_risk": "medium",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "candidate",
+      "failure_code": "LISTING_ADAPTER_REQUIRED",
+      "failure_reason": "Needs item/listing extraction before save.",
+      "remediation_hint": "Use discovery/DOM investigation to find stable AML/MLRO listing content.",
+      "agent_gate_status": "hold",
+      "current_state": "candidate",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official page but item-level monitoring target must be confirmed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["selector_review_required"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No proof or repeat baseline recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "No no-save result in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "Candidate only; no ready claim allowed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "AML/CTF sanctions page is relevant to MLRO teams.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Listing adapter must be validated with fixture/live no-save result.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_test_required"]
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+      }
+    },
+    {
+      "source_id": "AE-eocn-laws-regulations",
+      "url": "https://www.uaeiec.gov.ae/en-us/un-page?p=laws-and-regulations",
+      "regulator": "Executive Office for Control and Non-Proliferation",
+      "source_type": "sanctions_laws_listing",
+      "official_status": "official",
+      "discovery_status": "candidate",
+      "adapter_family": "listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_config": {},
+      "no_save_status": "not_run",
+      "quality_score": 0,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "candidate",
+      "failure_code": "LISTING_ADAPTER_REQUIRED",
+      "failure_reason": "Document/listing extraction has not been validated.",
+      "remediation_hint": "Run discover-source and no-save with FIU/EOCN document listing adapter.",
+      "agent_gate_status": "hold",
+      "current_state": "candidate",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official and relevant, but extraction target needs validation.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No proof or repeat baseline recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "No no-save result in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "Candidate only; no ready claim allowed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Sanctions/TFS regulations are important to MLRO teams.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Adapter and selectors not live-tested in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_test_required"]
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-financial-crime-prevention",
+      "url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+      "regulator": "ADGM/FSRA",
+      "source_type": "financial_crime_page",
+      "official_status": "official",
+      "discovery_status": "discovered",
+      "adapter_family": "custom_element",
+      "adapter_name": "custom_element",
+      "adapter_config": {
+        "content_selector": "adgm-page > span"
+      },
+      "no_save_status": "passed",
+      "quality_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "no_save_passed",
+      "failure_code": "",
+      "failure_reason": "No-save candidate only in this mass queue; proof/baseline not recorded here.",
+      "remediation_hint": "Run scoped saved baseline and repeat baseline before activation decision.",
+      "agent_gate_status": "hold",
+      "current_state": "no_save_passed",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official ADGM/FSRA page and meaningful source candidate.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No mass-queue proof path or repeat baseline recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "No-save pass cannot be called monitoring-ready.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Safe wording: no-save candidate, not active monitoring.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Financial crime page is relevant to MLRO/CCO monitoring.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Custom element adapter needs proof/baseline flow recorded in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["evidence_flow_required"]
+      },
+      "final_activation_gate": {
+        "status": "no_save_passed",
+        "reason": "No-save pass only; proof and baseline are still missing from this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      }
+    },
+    {
+      "source_id": "AE-cbuae-regulations",
+      "url": "https://www.centralbank.ae/en/our-operations/regulations/",
+      "regulator": "Central Bank of the UAE",
+      "source_type": "regulations_listing",
+      "official_status": "official",
+      "discovery_status": "candidate",
+      "adapter_family": "listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {},
+      "no_save_status": "not_run",
+      "quality_score": 0,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "candidate",
+      "failure_code": "LISTING_ADAPTER_REQUIRED",
+      "failure_reason": "CBUAE listing extraction is not validated in this mass queue.",
+      "remediation_hint": "Run discover-source, DOM investigation, and no-save with CBUAE document listing adapter.",
+      "agent_gate_status": "hold",
+      "current_state": "candidate",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official page; extraction target requires validation.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No proof or repeat baseline recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "No no-save result in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "Candidate only; no ready claim allowed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "CBUAE regulations are core UAE compliance monitoring surface.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Adapter test required before evidence save.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_test_required"]
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+      }
+    },
+    {
+      "source_id": "AE-vara-current-framework",
+      "url": "https://www.vara.ae/en/regulatory-framework/",
+      "regulator": "VARA",
+      "source_type": "rulebook_pdf_listing",
+      "official_status": "official",
+      "discovery_status": "candidate",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_config": {},
+      "no_save_status": "not_run",
+      "quality_score": 0,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "candidate",
+      "failure_code": "PDF_ONLY_SOURCE",
+      "failure_reason": "Framework/rulebook PDF listing needs scoped document discovery.",
+      "remediation_hint": "Discover official PDF links and run no-save with PDF listing adapter.",
+      "agent_gate_status": "hold",
+      "current_state": "candidate",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official page; exact framework/PDF endpoints require validation.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["document_discovery_required"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No proof or repeat baseline recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "No no-save result in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "Candidate only; no ready claim allowed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "VARA framework is important for VASP compliance monitoring.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "PDF listing adapter must be validated before evidence save.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_test_required"]
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+      }
+    },
+    {
+      "source_id": "AE-uae-fiu-publications",
+      "url": "https://www.uaefiu.gov.ae/en/publications",
+      "regulator": "UAE FIU",
+      "source_type": "publications_listing",
+      "official_status": "official",
+      "discovery_status": "candidate",
+      "adapter_family": "listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_config": {},
+      "no_save_status": "not_run",
+      "quality_score": 0,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "evidence_status": "none",
+      "baseline_status": "not_started",
+      "activation_status": "candidate",
+      "failure_code": "LISTING_ADAPTER_REQUIRED",
+      "failure_reason": "Publication listing extraction not validated in this mass queue.",
+      "remediation_hint": "Run scoped discovery and no-save if the public URL is accessible.",
+      "agent_gate_status": "hold",
+      "current_state": "candidate",
+      "proof_path": "",
+      "normalized_text_path": "",
+      "normalized_hash": "",
+      "baseline_runs_completed": 0,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official and relevant, but access/extraction must be validated.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "evidence_trail_gate": {
+        "status": "hold",
+        "reason": "No proof or repeat baseline recorded.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["proof_missing", "baseline_missing"]
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "No no-save result in this queue.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run"]
+      },
+      "legal_language_gate": {
+        "status": "hold",
+        "reason": "Candidate only; no ready claim allowed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["ready_claim_forbidden"]
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "FIU publications are relevant to AML reporting teams.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "hold",
+        "reason": "Adapter/access validation required.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["adapter_test_required"]
+      },
+      "final_activation_gate": {
+        "status": "candidate",
+        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
+        "reviewed_at": "2026-06-15T00:00:00Z",
+        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+      }
+    }
+  ]
+}
