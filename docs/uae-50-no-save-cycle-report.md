@@ -4,7 +4,23 @@ Date: 2026-06-15
 
 ## Summary
 
-No-save tested in this cycle: **7**.
+No-save tested this sprint (all cycles): **56** (7 earlier + 49 batch 2).
+
+## Batch 2 — 2026-06-15 (live batch harness, per-adapter auto-apply, 49 sources)
+
+Tested: 49 | Strong passes: 6 | New activatable: 1 | Rejected after evidence gate: 1
+
+Strong no-save passes in batch 2 (6):
+1. `AE-abu-dhabi-global-market-adgm` — custom_element q=62 (already enabled) ✓
+2. `AE-adgm-fsra-guidance-policy` — custom_element q=65 — **NEW, activated** ✓
+3. `AE-adgm-legal-framework-rules` — custom_element q=62 (already enabled) ✓
+4. `AE-dfsa-aml-mlro-notices` — pdf_listing q=60 (already enabled) ✓
+5. `AE-sca-circulars` — listing q=62 (already enabled) ✓
+6. `AE-vara-news` — pdf_listing q=65 — evidence save failed (NEEDS_SELECTOR_REVIEW); not activated
+
+Failure breakdown (43 non-passes): NAV_SHELL_ONLY 32, ACCESS_BLOCKED 3, SHALLOW_CONTENT 2, LISTING_ADAPTER_REQUIRED 1, TABLE_ADAPTER_REQUIRED 1, unknown probe failure 4.
+
+## Earlier Cycles (batch 1)
 
 Strong no-save passes:
 

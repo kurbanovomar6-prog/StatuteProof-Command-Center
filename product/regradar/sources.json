@@ -1532,5 +1532,19 @@
     "status": "disabled_navigation_only",
     "tier": "3",
     "notes": "SCA decisions — 0c extracted on test 2026-06-12; JS SPA. Needs adapter targeting SCA publications API endpoint."
+  },
+  {
+    "name": "ADGM FSRA Guidance and Policy Statements",
+    "url": "https://www.adgm.com/legal-framework/guidance-and-policy-statements",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-adgm-fsra-guidance-policy",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "expected_min_length": 2000,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-guidance-policy/intake-20260615T143126Z/proof.json",
+    "normalized_hash": "704c83258e2f32a31f8c6d61841a46539e00e650b679a171606da6006b96e141"
   }
 ]

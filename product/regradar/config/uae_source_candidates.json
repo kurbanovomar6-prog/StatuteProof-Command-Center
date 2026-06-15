@@ -2,10 +2,10 @@
   "version": "2026-06-14",
   "purpose": "Research-only UAE official source pack candidates. This file does not activate monitoring and must not be marketed as validated coverage.",
   "current_customer_truth": {
-    "enabled_uae_sources": 19,
-    "readiness_supported": 15,
+    "enabled_uae_sources": 20,
+    "readiness_supported": 16,
     "remediation": 4,
-    "customer_copy": "19 enabled UAE sources; 15 readiness-supported; 4 under extraction remediation."
+    "customer_copy": "20 enabled UAE sources; 16 readiness-supported; 4 under extraction remediation."
   },
   "status_definitions": {
     "candidate": "Official or officially linked candidate, not yet tested.",

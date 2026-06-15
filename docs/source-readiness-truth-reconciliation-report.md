@@ -6,17 +6,17 @@ Date: 2026-06-15
 
 The canonical customer-facing truth for the current StatuteProof UAE source pack is:
 
-**19 enabled UAE sources; 15 readiness-supported in the current registry; 4 under extraction remediation.**
+**20 enabled UAE sources; 16 readiness-supported in the current registry; 4 under extraction remediation.**
 
-The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later **13 enabled / 9 readiness-supported / 4 remediation** story was safe until three proof-backed, repeat-baseline-complete queue sources were promoted to `sources.json` on 2026-06-15; the current **19 / 15 / 4** story is supported after three additional ADGM/FSRA sources passed proof, repeat baseline, mass-monitor dry-run, and agent gates.
+The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later **13 enabled / 9 readiness-supported / 4 remediation** story was safe until three proof-backed, repeat-baseline-complete queue sources were promoted to `sources.json` on 2026-06-15; the **19 / 15 / 4** story was supported after three additional ADGM/FSRA sources passed proof, repeat baseline, mass-monitor dry-run, and agent gates. On 2026-06-15 (later cycle), one further source — ADGM FSRA Guidance and Policy Statements (AE-adgm-fsra-guidance-policy) — passed a live no-save batch test (custom_element adapter, q=65), two saved evidence runs (MONITORING_CERTIFIED, hash stable), mass-monitor dry-run proxy (CONFIRMED_ACCESSIBLE, hash stable vs baseline), and all six agent gates, advancing the truth to **20 / 16 / 4**.
 
 ## Canonical Counts
 
 | Count | Value | Basis |
 | --- | ---: | --- |
 | Total records in `sources.json` | 156 | Registry file parse after adding six proof-backed UAE sources across the DFSA/SCA and ADGM/FSRA activation batches. |
-| Enabled UAE sources | 19 | `enabled: true` and `jurisdiction: AE`. |
-| Readiness-supported | 15 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
+| Enabled UAE sources | 20 | `enabled: true` and `jurisdiction: AE`. |
+| Readiness-supported | 16 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
 | Under extraction remediation | 4 | Enabled UAE registry rows with `status: remediation`. |
 | Blocked / failed | 0 | Current registry uses remediation rather than blocked for the four not-ready sources. |
 

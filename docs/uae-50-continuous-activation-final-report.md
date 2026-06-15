@@ -8,15 +8,23 @@ Did we reach 50 active useful sources? **No.**
 
 Did the system improve? **Yes.**
 
-Public truth before: **16 enabled / 12 readiness-supported / 4 remediation**.
-
-Public truth after: **19 enabled / 15 readiness-supported / 4 remediation**.
+Public truth before entire sprint: **16 enabled / 12 readiness-supported / 4 remediation** (at sprint start).
+Public truth after batch 1: **19 enabled / 15 readiness-supported / 4 remediation**.
+Public truth after batch 2 (2026-06-15 continuous activation): **20 enabled / 16 readiness-supported / 4 remediation**.
 
 ## 2. Sources Added To `sources.json`
 
+Batch 1:
 1. `AE-adgm-fsra-financial-crime-prevention`
 2. `AE-adgm-fsra-rulebooks`
 3. `AE-adgm-fsra-consultations`
+
+Batch 2 (2026-06-15 continuous activation):
+4. `AE-adgm-fsra-guidance-policy` — ADGM FSRA Guidance and Policy Statements
+   - Adapter: custom_element (adgm-page)
+   - Evidence: 2 saved runs, MONITORING_CERTIFIED, hash stable
+   - All 6 agent gates: PASS (emulated manually; no subagent runtime available)
+   - Source rejected this cycle: AE-vara-news (false positive — evidence save failed both attempts)
 
 ## 3. Key Fixes
 

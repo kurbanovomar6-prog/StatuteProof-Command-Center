@@ -7,12 +7,29 @@
 - Workspace: `/Users/kurbnovomar/StatuteProof-Command-Center`.
 - Product code: `product/regradar`.
 
+### Cycle update 2026-06-15 (verified, supersedes stale numbers above)
+
+- HEAD at this cycle: `7564d79 feat: activate proof-backed UAE monitoring sources`
+  (one commit newer than `3b93688`; the 3 proof-backed queue sources — SCA
+  circulars, DFSA MLRO letters, DFSA AML rulebook — are already activated).
+- Test suite: 188 passed. Validators (9): all PASS. Worktree clean.
+- Agent gates are **emulated manually** this session — no StatuteProof subagent
+  runtime is available, and none is claimed to have run.
+
 ## 2. Current Source Truth
 
-- Enabled UAE sources: 16.
-- Readiness-supported UAE sources: 12.
+> The `16 / 12 / 4` below is the prior-session truth (commit `3b93688`). The
+> verified current truth at HEAD `7564d79` is **19 / 15 / 4**, measured directly
+> from `sources.json` (jurisdiction AE: 19 enabled = 15 active + 4 remediation).
+
+- Enabled UAE sources: 19 (was 16).
+- Readiness-supported (status:active) UAE sources: 15 (was 12).
 - UAE sources under remediation: 4.
-- Current public truth must remain `16 / 12 / 4` unless `sources.json`, proof artifacts, baselines, agent gates, readiness docs, and validators all support a new truth.
+- Public truth may only change when `sources.json`, proof artifacts, baselines,
+  agent gates, readiness docs, and validators all support the new truth.
+- Last full no-save sweep (2026-06-14) passed 0/24 under generic extraction;
+  per-source adapters are the gating work (proven: SCA circulars q=0 nav-shell →
+  q=62 CONFIRMED_ACCESSIBLE with `sca_listing`).
 
 ## 3. Definition Of Useful Active Source
 
