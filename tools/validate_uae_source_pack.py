@@ -88,6 +88,14 @@ SAVED_BASELINE_FIELDS = {
     "can_activate_monitoring",
 }
 ADGM_FSRA_SCA_PREFIXES = ("AE-adgm", "AE-sca")
+EXPECTED_ENABLED_UAE_SOURCES = 16
+EXPECTED_READINESS_SUPPORTED = 12
+EXPECTED_REMEDIATION = 4
+EXPECTED_CUSTOMER_COPY = (
+    f"{EXPECTED_ENABLED_UAE_SOURCES} enabled UAE sources; "
+    f"{EXPECTED_READINESS_SUPPORTED} readiness-supported; "
+    f"{EXPECTED_REMEDIATION} under extraction remediation"
+)
 CLAIM_SCAN_PATHS = [
     ROOT / "README.md",
     ROOT / "START_HERE.md",
@@ -141,17 +149,21 @@ def main() -> int:
 
     truth = data.get("current_customer_truth", {})
     expected_truth = {
-        "enabled_uae_sources": 13,
-        "readiness_supported": 9,
-        "remediation": 4,
+        "enabled_uae_sources": EXPECTED_ENABLED_UAE_SOURCES,
+        "readiness_supported": EXPECTED_READINESS_SUPPORTED,
+        "remediation": EXPECTED_REMEDIATION,
     }
     for key, expected in expected_truth.items():
         if truth.get(key) != expected:
             fail(errors, f"Current source truth mismatch for {key}: expected {expected}, got {truth.get(key)!r}")
 
     customer_copy = str(truth.get("customer_copy", "")).lower()
-    if "13 enabled" not in customer_copy or "9 readiness-supported" not in customer_copy or "4 under extraction remediation" not in customer_copy:
-        fail(errors, "Customer truth copy must preserve 13 enabled / 9 readiness-supported / 4 remediation wording.")
+    if (
+        f"{EXPECTED_ENABLED_UAE_SOURCES} enabled" not in customer_copy
+        or f"{EXPECTED_READINESS_SUPPORTED} readiness-supported" not in customer_copy
+        or f"{EXPECTED_REMEDIATION} under extraction remediation" not in customer_copy
+    ):
+        fail(errors, f"Customer truth copy must preserve {EXPECTED_CUSTOMER_COPY} wording.")
     if "validated" in customer_copy:
         fail(errors, "Customer truth copy must not say validated.")
 
@@ -378,7 +390,11 @@ def main() -> int:
     ]
     active = [source for source in enabled_ae if source.get("status") == "active"]
     remediation = [source for source in enabled_ae if source.get("status") == "remediation"]
-    if len(enabled_ae) != 13 or len(active) != 9 or len(remediation) != 4:
+    if (
+        len(enabled_ae) != EXPECTED_ENABLED_UAE_SOURCES
+        or len(active) != EXPECTED_READINESS_SUPPORTED
+        or len(remediation) != EXPECTED_REMEDIATION
+    ):
         fail(
             errors,
             f"Active source truth changed unexpectedly: {len(enabled_ae)} enabled / {len(active)} active / {len(remediation)} remediation.",
@@ -403,7 +419,12 @@ def main() -> int:
     print(f"Top 40 candidates: {top40_count}")
     print(f"Top 60 candidates: {top60_count}")
     print(f"Rejected examples: {len(rejected)}")
-    print("Current customer truth preserved: 13 enabled / 9 readiness-supported / 4 remediation.")
+    print(
+        "Current customer truth preserved: "
+        f"{EXPECTED_ENABLED_UAE_SOURCES} enabled / "
+        f"{EXPECTED_READINESS_SUPPORTED} readiness-supported / "
+        f"{EXPECTED_REMEDIATION} remediation."
+    )
     return 0
 
 

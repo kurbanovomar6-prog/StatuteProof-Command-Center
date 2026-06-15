@@ -96,6 +96,9 @@ FORBIDDEN_UNLESS_50 = {
     "60 validated sources",
     "60 monitored sources",
 }
+EXPECTED_ENABLED_SOURCES = 16
+EXPECTED_READINESS_SUPPORTED = 12
+EXPECTED_REMEDIATION = 4
 
 
 def load_json(path: Path) -> object:
@@ -142,7 +145,11 @@ def validate_sources_json_truth(errors: list[str]) -> None:
         for source in enabled
         if source.get("status") == "remediation"
     ]
-    if len(enabled) != 13 or len(readiness_supported) != 9 or len(remediation) != 4:
+    if (
+        len(enabled) != EXPECTED_ENABLED_SOURCES
+        or len(readiness_supported) != EXPECTED_READINESS_SUPPORTED
+        or len(remediation) != EXPECTED_REMEDIATION
+    ):
         fail(
             errors,
             "Public source truth changed without this validator being updated: "
@@ -310,7 +317,12 @@ def main() -> int:
     print(f"Activation-ready: {activation_ready_count}")
     print(f"Proof-backed: {proof_backed_count}")
     print(f"Baseline-complete: {baseline_complete_count}")
-    print("Public truth remains: 13 enabled / 9 readiness-supported / 4 remediation")
+    print(
+        "Public truth remains: "
+        f"{EXPECTED_ENABLED_SOURCES} enabled / "
+        f"{EXPECTED_READINESS_SUPPORTED} readiness-supported / "
+        f"{EXPECTED_REMEDIATION} remediation"
+    )
     return 0
 
 

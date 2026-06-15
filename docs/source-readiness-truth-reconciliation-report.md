@@ -1,22 +1,22 @@
 # Source Readiness Truth Reconciliation Report
 
-Date: 2026-06-14
+Date: 2026-06-15
 
 ## Executive Decision
 
 The canonical customer-facing truth for the current StatuteProof UAE source pack is:
 
-**13 enabled UAE sources; 9 readiness-supported in the current registry; 4 under extraction remediation.**
+**16 enabled UAE sources; 12 readiness-supported in the current registry; 4 under extraction remediation.**
 
-The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. It depends on promoting DIFC Laws and Regulations out of remediation, but the current readiness report explicitly keeps that source under a registry hold until Source Monitor and Evidence Trail review the hold.
+The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later **13 enabled / 9 readiness-supported / 4 remediation** story was safe until three proof-backed, repeat-baseline-complete queue sources were promoted to `sources.json` on 2026-06-15.
 
 ## Canonical Counts
 
 | Count | Value | Basis |
 | --- | ---: | --- |
-| Total records in `sources.json` | 150 | Registry file parse. |
-| Enabled UAE sources | 13 | `enabled: true` and `jurisdiction: AE`. |
-| Readiness-supported | 9 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
+| Total records in `sources.json` | 153 | Registry file parse after adding three proof-backed UAE sources. |
+| Enabled UAE sources | 16 | `enabled: true` and `jurisdiction: AE`. |
+| Readiness-supported | 12 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
 | Under extraction remediation | 4 | Enabled UAE registry rows with `status: remediation`. |
 | Blocked / failed | 0 | Current registry uses remediation rather than blocked for the four not-ready sources. |
 
@@ -33,6 +33,9 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 | `AE-vara-enforcement` | VARA Enforcement Notices | Current readiness report lists meaningful extraction and unique hash. |
 | `AE-cbuae-regulations` | CBUAE Regulations Sub-page | Current readiness report lists meaningful extraction with known counter-change noise caveat. |
 | `AE-uaefiu-circulars` | UAE FIU Circulars and Notices | Current readiness report treats publications/circulars as the readiness-supported FIU source. |
+| `AE-sca-circulars-rules-procedures` | SCA Circulars, Rules and Procedures | Promoted from activation-ready queue after proof-backed repeat baseline and mass-monitor dry-run. |
+| `AE-dfsa-financial-crime-mlro-letters` | DFSA Financial Crime Prevention Notices and MLRO Letters | Promoted from activation-ready queue after proof-backed repeat baseline and mass-monitor dry-run. |
+| `AE-dfsa-aml-rulebook-module` | DFSA AML Rulebook Module | Promoted from activation-ready queue after proof-backed repeat baseline and a scoped monitor-path dry-run reproduced the stored hash. |
 
 ## Sources Under Extraction Remediation
 
@@ -45,16 +48,16 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 
 ## Which Story Is Correct?
 
-**Correct today:** 13 enabled / 9 readiness-supported / 4 under extraction remediation.
+**Correct today:** 16 enabled / 12 readiness-supported / 4 under extraction remediation.
 
 **Not correct today:** 13 enabled / 10 confirmed / 3 under extraction remediation.
 
-Reason: no reviewed evidence decision has released DIFC Laws and Regulations from registry hold, and DFSA sources remain in remediation. A source may have meaningful extraction while still not being customer-visible ready if its registry hold, source model, evidence baseline, or activation review is incomplete.
+Reason: three queue sources completed proof-backed repeat baseline and mass-monitor dry-run, while DIFC Laws and the legacy DFSA configured sources remain held/remediation. A source may have meaningful extraction while still not being customer-visible ready if its registry hold, source model, evidence baseline, or activation review is incomplete.
 
 ## Allowed Customer-Facing Wording
 
-- "13 enabled UAE sources."
-- "9 readiness-supported in the current registry."
+- "16 enabled UAE sources."
+- "12 readiness-supported in the current registry."
 - "4 under extraction remediation."
 - "Source readiness in progress."
 - "DFSA source model under remediation."
@@ -64,9 +67,9 @@ Reason: no reviewed evidence decision has released DIFC Laws and Regulations fro
 
 ## Forbidden Wording
 
-- "13 validated sources."
-- "13 confirmed sources."
-- "13 ready sources."
+- "All 16 sources are validated."
+- "All 16 sources are confirmed."
+- "All 16 sources are ready."
 - "10 confirmed" unless DIFC is explicitly released from remediation by Source Monitor and Evidence Trail.
 - "DFSA ready."
 - "DIFC ready" while the registry hold remains.
@@ -77,13 +80,13 @@ Reason: no reviewed evidence decision has released DIFC Laws and Regulations fro
 
 ## Code And UI Result
 
-Current public/app source tables already use the 13/9/4 model:
+Current public/app source tables should use the 16/12/4 model:
 
 - `product/regradar/web/src/components/SourceCoverageTable.jsx`
 - `product/regradar/web/src/data/appMockData.js`
-- Pricing and billing surfaces use "13 enabled" with 9 readiness-supported and 4 under remediation.
+- Pricing and billing surfaces use "16 enabled" with 12 readiness-supported and 4 under remediation.
 
-This sprint does not change `sources.json` because the current registry status is already aligned with the conservative truth. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
+This sprint changes `sources.json` only for three proof-backed activation-ready queue sources. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
 
 ## Next Required Source Readiness Work
 

@@ -6782,7 +6782,7 @@
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready entries count toward the 50 working-source target; sources.json was not expanded in this sprint.",
     "proof_backed_count": 3,
-    "public_source_truth_after": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
+    "public_source_truth_after": "16 enabled UAE sources / 12 readiness-supported / 4 under extraction remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 0,
     "remediation_count": 21,
@@ -6790,7 +6790,7 @@
     "total_entries": 78,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
-    "source_activation_platform_note": "Auto DOM Investigator, expanded adapter catalog, structured failure codes, Source Lab remediation controls, and source activation validator added. Public truth remains 13/9/4; activation-ready count remains 2."
+    "source_activation_platform_note": "Auto DOM Investigator, expanded adapter catalog, structured failure codes, Source Lab remediation controls, and source activation validator added. Three proof-backed queue-ready sources were promoted to sources.json; public truth is now 16/12/4."
   },
   "version": 1
 }

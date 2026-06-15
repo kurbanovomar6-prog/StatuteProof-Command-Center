@@ -6,6 +6,8 @@
 **Validator:** StatuteProof source-monitor + evidence-trail agents  
 **Disclaimer:** Monitoring intelligence only. Not legal advice. This report documents source extraction quality and evidence artifacts — it does not certify regulatory coverage or guarantee compliance.
 
+**2026-06-15 registry update:** this report remains the 2026-06-12 evidence snapshot. The current registry truth after activating three proof-backed queue sources is **16 enabled UAE sources, 12 readiness-supported, and 4 under extraction remediation**.
+
 ---
 
 ## Summary
@@ -24,8 +26,8 @@
 | Sources needing remediation in current UAE registry | **4** |
 | Sources blocked / inaccessible | **0** |
 
-**Can we describe all 13 enabled UAE sources as fully validated? NO.**
-Honest claim: "13 UAE regulatory sources in our source pack — 9 readiness-supported in the current registry, 4 under extraction remediation."
+**Can we describe all enabled UAE sources as fully validated? NO.**
+Honest current claim: "16 UAE regulatory sources in our source pack — 12 readiness-supported in the current registry, 4 under extraction remediation."
 
 ---
 
@@ -153,16 +155,16 @@ Change detection is **deterministic hash comparison only** — no LLM used.
 
 ## Recommended Wording for Pricing / Homepage
 
-**DO NOT USE:** language that describes all 13 enabled UAE sources as validated.
+**DO NOT USE:** language that describes all enabled UAE sources as validated.
 
-**DO NOT USE:** language that describes all 13 enabled UAE regulatory sources as confirmed.
+**DO NOT USE:** language that describes all enabled UAE regulatory sources as confirmed.
 
 **USE (honest):**
-- "UAE regulatory source pack — 13 sources enabled, evidence-readiness review in progress"
-- "13 enabled UAE sources — 9 readiness-supported in the current registry, 4 under extraction remediation"
+- "UAE regulatory source pack — 16 sources enabled, evidence-readiness review in progress"
+- "16 enabled UAE sources — 12 readiness-supported in the current registry, 4 under extraction remediation"
 - "Latest readiness run artifacts available for sources that completed proof validation"
 - "Covers VARA, CBUAE, DFSA, ADGM, UAE FIU, DIFC and more — source readiness validation in progress"
-- "13 UAE regulatory sources under evidence-readiness review" (acceptable during validation period)
+- "16 UAE regulatory sources under evidence-readiness review" (acceptable during validation period)
 
 **After remediation fixes are confirmed:**
 - Update the source count only after live checks, evidence review, and registry status are aligned.
@@ -232,4 +234,4 @@ data/source_runs/source_runs.jsonl  — 198 records, 22 unique source IDs
 6. Update the run records and proof blocks
 7. Then: upgrade AE-uae-financial-intelligence-unit-uaefiu URL to the publications page
 
-Until these fixes are reviewed, the honest source count for customer-facing claims is **9 readiness-supported and 4 under remediation, not 13 ready.**
+Until these fixes are reviewed, the honest source count for customer-facing claims is **12 readiness-supported and 4 under remediation, not all enabled sources ready.**

@@ -38,6 +38,9 @@ FORBIDDEN_PUBLIC_CLAIMS = [
     "as legal advice",
     "regulator certified",
 ]
+EXPECTED_ENABLED_SOURCES = 16
+EXPECTED_READINESS_SUPPORTED = 12
+EXPECTED_REMEDIATION = 4
 
 
 def _load_json(path: Path) -> object:
@@ -62,7 +65,11 @@ def _validate_public_truth(errors: list[str]) -> None:
     enabled = [source for source in sources if isinstance(source, dict) and source.get("enabled") is True]
     ready = [source for source in enabled if source.get("status") == "active"]
     remediation = [source for source in enabled if source.get("status") == "remediation"]
-    if (len(enabled), len(ready), len(remediation)) != (13, 9, 4):
+    if (
+        len(enabled) != EXPECTED_ENABLED_SOURCES
+        or len(ready) != EXPECTED_READINESS_SUPPORTED
+        or len(remediation) != EXPECTED_REMEDIATION
+    ):
         errors.append(
             "Public truth changed without registry/readiness proof: "
             f"{len(enabled)} enabled / {len(ready)} readiness-supported / {len(remediation)} remediation."
@@ -139,7 +146,12 @@ def main() -> int:
     print("Mass monitoring runner validation passed.")
     print("Default mode: dry-run / no-alerts.")
     print("Unsafe queue states are blocked from default monitoring.")
-    print("Public truth remains: 13 enabled / 9 readiness-supported / 4 remediation.")
+    print(
+        "Public truth remains: "
+        f"{EXPECTED_ENABLED_SOURCES} enabled / "
+        f"{EXPECTED_READINESS_SUPPORTED} readiness-supported / "
+        f"{EXPECTED_REMEDIATION} remediation."
+    )
     return 0
 
 

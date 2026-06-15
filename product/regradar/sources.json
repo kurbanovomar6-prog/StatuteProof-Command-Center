@@ -520,6 +520,51 @@
     "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13."
   },
   {
+    "source_id": "AE-dfsa-financial-crime-mlro-letters",
+    "name": "DFSA Financial Crime Prevention Notices and MLRO Letters",
+    "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/financial-crime-prevention-notices-and-mlro-letters",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "adapter_config": {
+      "container_selector": "main",
+      "item_selector": "a[href]",
+      "title_selector": "a",
+      "url_selector": "a[href]",
+      "max_items": 100
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-financial-crime-mlro-letters/intake-20260615T114257Z/proof.json",
+    "normalized_hash": "7fefb2b0aeb6d6b2cd9de832c03b7f5586add963e192563dfae91648b33b92ae",
+    "notes": "Activated 2026-06-15 after proof-backed repeat baseline and mass-monitor dry-run. Monitors official DFSA financial-crime prevention notices and MLRO letters as an item-level document listing."
+  },
+  {
+    "source_id": "AE-dfsa-aml-rulebook-module",
+    "name": "DFSA AML Rulebook Module",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/anti-money-laundering-counter-terrorist-financing-and-sanctions-module-aml-ver3004-26",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "official_status": "officially_linked",
+    "adapter_family": "static_html",
+    "adapter_name": "static_html",
+    "adapter_config": {
+      "content_selector": "main, article, body"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/proof.json",
+    "normalized_hash": "04ece793f346ae66021950a50156127204834fc532d0606f4338e19e4e30e4f5",
+    "notes": "Activated 2026-06-15 after proof-backed repeat baseline and scoped monitor-path dry-run reproduced the stored hash. Official-linked DFSA rulebook content hosted by Thomson Reuters."
+  },
+  {
     "name": "Abu Dhabi Global Market (ADGM)",
     "url": "https://www.adgm.com/fsra",
     "jurisdiction": "AE",
@@ -571,6 +616,27 @@
     "enabled": false,
     "status": "disabled_navigation_only",
     "notes": "SPA site — Playwright renders 244K chars HTML but all extractors yield 944–1,056c of navigation-only text, identical across every page (root, /en/regulatory-framework/, /en/media/). Change detection is impossible on navigation text. Needs adapter targeting SCA publications/circulars API endpoint."
+  },
+  {
+    "source_id": "AE-sca-circulars-rules-procedures",
+    "name": "SCA Circulars, Rules and Procedures",
+    "url": "https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "adapter_family": "sca_listing",
+    "adapter_name": "sca_listing",
+    "adapter_config": {
+      "container_selector": "main",
+      "max_items": 80
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-sca-circulars-rules-procedures/intake-20260615T114453Z/proof.json",
+    "normalized_hash": "d1068c3fabf6ddb2641c988dbc834be1b76f50d38a23ec9026ffd13a4e5ff213",
+    "notes": "Activated 2026-06-15 after proof-backed repeat baseline and mass-monitor dry-run. Monitors official SCA circulars, rules, and procedures as an item-level listing."
   },
   {
     "name": "UAE Federal Tax Authority (FTA)",

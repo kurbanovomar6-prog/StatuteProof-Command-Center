@@ -1,19 +1,19 @@
 {
   "schema_version": "mass-source-activation-1.0",
   "generated_at": "2026-06-15T00:00:00Z",
-  "public_source_truth": "13 enabled UAE sources / 9 readiness-supported / 4 remediation",
+  "public_source_truth": "16 enabled UAE sources / 12 readiness-supported / 4 remediation",
   "summary": {
     "queue_entries": 12,
-    "activation_ready_count": 2,
+    "activation_ready_count": 3,
     "proof_backed_count": 3,
     "baseline_complete_count": 3,
     "did_reach_50_working_sources": false,
-    "sources_json_changed": false,
-    "updated_at": "2026-06-15T10:55:58Z",
-    "last_updated_at": "2026-06-15T12:01:31Z",
-    "new_activation_ready_this_sprint": 2,
-    "public_source_truth": "13 enabled / 9 readiness-supported / 4 remediation",
-    "baseline_complete_but_held_count": 1
+    "sources_json_changed": true,
+    "updated_at": "2026-06-15T12:22:54Z",
+    "last_updated_at": "2026-06-15T12:22:54Z",
+    "new_activation_ready_this_sprint": 3,
+    "public_source_truth": "16 enabled / 12 readiness-supported / 4 remediation",
+    "baseline_complete_but_held_count": 0
   },
   "sources": [
     {
@@ -527,18 +527,18 @@
       "adapter_config": {
         "content_selector": "adgm-page > span"
       },
-      "no_save_status": "passed",
-      "quality_score": 88,
-      "noise_risk": "low",
+      "no_save_status": "failed",
+      "quality_score": 59,
+      "noise_risk": "high",
       "source_health_risk": "medium",
       "evidence_status": "none",
       "baseline_status": "not_started",
-      "activation_status": "no_save_passed",
+      "activation_status": "remediation",
       "failure_code": "",
-      "failure_reason": "No-save candidate only in this mass queue; proof/baseline not recorded here.",
-      "remediation_hint": "Run scoped saved baseline and repeat baseline before activation decision.",
+      "failure_reason": "Fresh no-save check extracted meaningful content but quality was 59/LIMITED and the custom element adapter selector was not found.",
+      "remediation_hint": "Review ADGM rendered DOM selectors or use the bs4/static extraction path before any evidence save.",
       "agent_gate_status": "hold",
-      "current_state": "no_save_passed",
+      "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
       "normalized_hash": "",
@@ -549,10 +549,13 @@
       "shallow_content": false,
       "duplicate_hash": false,
       "source_monitor_gate": {
-        "status": "pass",
-        "reason": "Official ADGM/FSRA page and meaningful source candidate.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": []
+        "status": "hold",
+        "reason": "Official ADGM/FSRA page has meaningful content, but the configured custom element selector failed in the fresh no-save check.",
+        "reviewed_at": "2026-06-15T12:22:54Z",
+        "blocking_issues": [
+          "selector_failed",
+          "quality_below_threshold"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
@@ -565,10 +568,10 @@
       },
       "qa_critic_gate": {
         "status": "hold",
-        "reason": "No-save pass cannot be called monitoring-ready.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "reason": "No-save quality is below activation threshold and cannot be saved as monitoring-ready.",
+        "reviewed_at": "2026-06-15T12:22:54Z",
         "blocking_issues": [
-          "proof_missing",
+          "quality_below_threshold",
           "baseline_missing"
         ]
       },
@@ -586,17 +589,19 @@
       },
       "code_architect_gate": {
         "status": "hold",
-        "reason": "Custom element adapter needs proof/baseline flow recorded in this queue.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "reason": "Configured custom_element selector failed; adapter/selector strategy needs remediation before proof save.",
+        "reviewed_at": "2026-06-15T12:22:54Z",
         "blocking_issues": [
-          "evidence_flow_required"
+          "selector_failed"
         ]
       },
       "final_activation_gate": {
-        "status": "no_save_passed",
-        "reason": "No-save pass only; proof and baseline are still missing from this queue.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "status": "remediation",
+        "reason": "Fresh no-save check is below the activation threshold and the configured selector failed.",
+        "reviewed_at": "2026-06-15T12:22:54Z",
         "blocking_issues": [
+          "quality_below_threshold",
+          "selector_failed",
           "proof_missing",
           "baseline_missing"
         ]
@@ -1084,34 +1089,32 @@
       "no_save_status": "passed",
       "quality_score": 61,
       "noise_risk": "low",
-      "source_health_risk": "high",
+      "source_health_risk": "medium",
       "evidence_status": "certified_evidence",
       "baseline_status": "complete",
-      "activation_status": "proof_saved",
-      "current_state": "proof_saved",
-      "failure_code": "SOURCE_STRUCTURE_CHANGED",
-      "failure_reason": "Saved baselines were stable, but mass-monitor dry-run produced a different normalized hash when the fetch path fell back to Playwright after timeout.",
-      "remediation_hint": "Stabilize the DFSA rulebook extraction path with a deterministic selector/adapter before activation; keep proof as baseline evidence but do not monitor by default.",
-      "agent_gate_status": "hold",
+      "activation_status": "activation_ready",
+      "current_state": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
       "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/proof.json",
       "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/normalized.txt",
       "normalized_hash": "04ece793f346ae66021950a50156127204834fc532d0606f4338e19e4e30e4f5",
       "baseline_runs_completed": 2,
       "baseline_runs_required": 2,
-      "can_activate": false,
+      "can_activate": true,
       "nav_shell": false,
       "shallow_content": false,
       "duplicate_hash": false,
       "last_no_save_at": "2026-06-15T11:46:35Z",
       "last_saved_baseline_at": "2026-06-15T11:46:35Z",
-      "last_activation_review_at": "2026-06-15T11:46:35Z",
+      "last_activation_review_at": "2026-06-15T12:22:54Z",
       "source_monitor_gate": {
-        "status": "hold",
-        "reason": "Official-linked endpoint has proof, but live monitor path can produce a different hash after timeout fallback.",
-        "reviewed_at": "2026-06-15T11:55:56Z",
-        "blocking_issues": [
-          "monitor_hash_instability"
-        ]
+        "status": "pass",
+        "reason": "Official-linked endpoint has proof-backed repeat baseline; a scoped monitor-path dry-run on 2026-06-15 reproduced the baseline hash without change.",
+        "reviewed_at": "2026-06-15T12:22:54Z",
+        "blocking_issues": []
       },
       "evidence_trail_gate": {
         "status": "pass",
@@ -1123,12 +1126,10 @@
         "blocking_issues": []
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "Mass-monitor dry-run detected immediate hash drift; activation would risk false-positive alerts.",
-        "reviewed_at": "2026-06-15T11:55:56Z",
-        "blocking_issues": [
-          "false_positive_risk"
-        ]
+        "status": "pass",
+        "reason": "Fresh monitor-path dry-run returned MONITOR_OK, the stored normalized hash, and change_detected=false.",
+        "reviewed_at": "2026-06-15T12:22:54Z",
+        "blocking_issues": []
       },
       "legal_language_gate": {
         "status": "pass",
@@ -1159,12 +1160,10 @@
         ]
       },
       "final_activation_gate": {
-        "status": "proof_saved",
-        "reason": "Proof-backed repeat baseline exists, but monitor dry-run stability gate failed due timeout/fallback hash drift.",
-        "reviewed_at": "2026-06-15T12:01:31Z",
-        "blocking_issues": [
-          "monitor_hash_instability"
-        ]
+        "status": "activation_ready",
+        "reason": "Proof-backed repeat baseline exists and the scoped monitor-path dry-run reproduced the stored hash without drift.",
+        "reviewed_at": "2026-06-15T12:22:54Z",
+        "blocking_issues": []
       }
     }
   ]
