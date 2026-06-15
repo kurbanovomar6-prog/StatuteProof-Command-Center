@@ -152,12 +152,18 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "baseline_pending",
+      "activation_decision": "activation_ready",
       "adapter_config": {
-        "content_selector": "adgm-page > span",
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "ADGM Public Consultations",
+          "Public Consultations"
+        ],
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
+          "form",
           "script",
           "style",
           "noscript"
@@ -166,81 +172,81 @@
       "adapter_failure_reason": "",
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
-      "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_selector_review",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "adapter_status": "activation_ready",
       "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 0,
+      "baseline_runs_completed": 2,
       "baseline_runs_required": 2,
-      "blocker": "Not activation-ready under agent-gated standard.",
-      "can_activate": false,
+      "blocker": "",
+      "can_activate": true,
       "code_architect_gate": {
         "adapter_or_code_notes": "Review before save.",
-        "reason": "Save/baseline run and possible filters required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "status": "pass"
       },
-      "current_state": "no_save_passed",
+      "current_state": "activation_ready",
       "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No-save result is preview only; no proof claim allowed.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "proof_paths_checked": true,
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "status": "pass"
       },
       "expected_extraction_strategy": "playwright_selector",
-      "expected_min_length": null,
+      "expected_min_length": 500,
       "extraction_strategy": "adapter:custom_element",
       "final_activation_gate": {
-        "reason": "No-save passed; save evidence and baselines are still required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "baseline_pending"
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T13:08:00Z"
       },
-      "last_adapter_test_at": null,
+      "last_adapter_test_at": "2026-06-15T13:08:00Z",
       "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "No-save readiness-supported candidate.",
         "forbidden_wording": "evidence-confirmed, monitoring-ready",
-        "reason": "Allowed wording: no-save readiness candidate only.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
-      "next_action": "build_consultation_item_diff_filter_then_save_baseline",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
       "no_save_adapter_name": null,
       "no_save_adapter_used": null,
       "no_save_duplicate_hash": null,
-      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
+      "no_save_failure_reason": "",
       "no_save_nav_shell": null,
-      "no_save_normalized_hash": null,
-      "no_save_normalized_length": null,
-      "no_save_quality_label": null,
-      "no_save_quality_score": null,
-      "no_save_readiness_status": "SKIPPED",
+      "no_save_normalized_hash": "98a1cb43f5d53b2d88fa7e966912b11a9b94a2b700cf23966282c83aacb34515",
+      "no_save_normalized_length": 42084,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_quality_score": 65,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
       "no_save_remediation_hint": "",
-      "no_save_tested": false,
-      "noise_risk": "high",
+      "no_save_tested": true,
+      "noise_risk": "low",
       "priority": "P1",
       "product_manager_gate": {
-        "reason": "Consultations provide early-warning rule change signals.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
-      "proof_path": null,
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-consultations/intake-20260615T130800Z/proof.json",
       "qa_critic_gate": {
-        "reason": "Can save for validation, but cannot activate.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "status": "pass"
       },
       "regulator": "ADGM/FSRA",
-      "selector": "adgm-page > span",
+      "selector": "adgm-page",
       "source_health_risk": "medium",
       "source_id": "AE-adgm-fsra-consultations",
       "source_monitor_gate": {
-        "reason": "No-save output was meaningful, but evidence is not saved.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "source_type": "consultation",
       "url": "https://www.adgm.com/legal-framework/public-consultations",
-      "wait_selector": "adgm-page > span"
+      "wait_selector": "adgm-page"
     },
     {
       "activation_decision": "baseline_pending",
@@ -336,10 +342,16 @@
     {
       "activation_decision": "activation_ready",
       "adapter_config": {
-        "content_selector": "adgm-page > span",
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "Financial & Cybercrime Prevention",
+          "Developing sound practices in AML/TFS"
+        ],
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
+          "form",
           "script",
           "style",
           "noscript"
@@ -348,68 +360,75 @@
       "adapter_failure_reason": "",
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
-      "adapter_remediation_hint": "Custom-element adapter no-save passed; existing proof/baseline gate still controls activation decisions.",
-      "adapter_status": "live_test_passed",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "adapter_status": "activation_ready",
       "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 2,
+      "baseline_runs_completed": 5,
       "baseline_runs_required": 2,
       "blocker": "",
       "can_activate": true,
       "code_architect_gate": {
         "adapter_or_code_notes": "Monitor selector stability during source-health checks.",
-        "reason": "Uses existing Source Lab evidence pipeline and selector strategy; no broad rewrite required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "current_state": "activation_ready",
       "evidence_trail_gate": {
         "proof_paths_checked": true,
-        "reason": "Proof paths exist and baseline requirement is satisfied.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "expected_extraction_strategy": "playwright_selector",
-      "expected_min_length": null,
+      "expected_min_length": 500,
       "extraction_strategy": "adapter:custom_element",
       "final_activation_gate": {
-        "reason": "All required gate fields pass for candidate activation; sources.json still requires explicit registry-change approval.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "activation_ready"
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T13:08:00Z"
       },
-      "last_adapter_test_at": "2026-06-14T19:33:34Z",
+      "last_adapter_test_at": "2026-06-15T13:07:57Z",
       "legal_language_gate": {
         "allowed_wording": "Activation-ready candidate after local proof and baseline checks.",
         "forbidden_wording": "validated, certified, guaranteed, legal advice",
-        "reason": "Allowed wording: activation-ready candidate after evidence/baseline gates; not regulator certified and not legal advice.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
-      "next_action": "source_monitor_founder_review_then_sources_json_candidate_activation",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
       "noise_risk": "low",
       "priority": "P0",
       "product_manager_gate": {
-        "reason": "Direct ADGM financial crime, AML/TFS, sanctions, STR/SAR and high-risk jurisdiction guidance surface.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
-      "proof_path": "data/source_snapshots/2026-06-14/AE/AE-adgm-fsra-financial-crime-prevention/intake-20260614T154830Z/proof.json",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-financial-crime-prevention/intake-20260615T130757Z/proof.json",
       "qa_critic_gate": {
-        "reason": "No nav-shell, no hash collision, no shallow-shell activation claim.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "regulator": "ADGM/FSRA",
-      "selector": "adgm-page > span",
+      "selector": "adgm-page",
       "source_health_risk": "medium",
       "source_id": "AE-adgm-fsra-financial-crime-prevention",
       "source_monitor_gate": {
-        "reason": "Official/public source with stable URL, selector, non-nav-shell output, and reviewed source-health risk.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "source_type": "aml_cft_guidance",
       "url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
-      "wait_selector": "adgm-page > span"
+      "wait_selector": "adgm-page",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_normalized_hash": "5553253c8a001615c514a71cfba823a940de2fbc89580106149208193c4f81b1",
+      "no_save_normalized_length": 2039,
+      "no_save_tested": true,
+      "no_save_failure_reason": ""
     },
     {
       "activation_decision": "baseline_pending",
@@ -785,93 +804,95 @@
     {
       "activation_decision": "activation_ready",
       "adapter_config": {
-        "content_selector": "adgm-page > span",
+        "content_selector": "adgm-page",
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
+          "form",
           "script",
           "style",
           "noscript"
         ]
       },
-      "adapter_failure_reason": "Fetch failed: wait_for_selector 'adgm-page > span' not found at https://www.adgm.com/fsra/rules-and-regulations",
+      "adapter_failure_reason": "",
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
-      "adapter_remediation_hint": "Custom-element adapter no-save passed; existing proof/baseline gate still controls activation decisions.",
-      "adapter_status": "live_test_passed",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "adapter_status": "activation_ready",
       "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 2,
+      "baseline_runs_completed": 4,
       "baseline_runs_required": 2,
       "blocker": "",
       "can_activate": true,
       "code_architect_gate": {
         "adapter_or_code_notes": "Monitor selector stability during source-health checks.",
-        "reason": "Uses existing Source Lab evidence pipeline and selector strategy; no broad rewrite required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "current_state": "activation_ready",
       "evidence_trail_gate": {
         "proof_paths_checked": true,
-        "reason": "Proof paths exist and baseline requirement is satisfied.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "expected_extraction_strategy": "playwright_selector",
-      "expected_min_length": null,
+      "expected_min_length": 500,
       "extraction_strategy": "adapter:custom_element",
       "final_activation_gate": {
-        "reason": "All required gate fields pass for candidate activation; sources.json still requires explicit registry-change approval.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "activation_ready"
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T13:08:00Z"
       },
-      "last_adapter_test_at": "2026-06-14T19:33:34Z",
+      "last_adapter_test_at": "2026-06-15T13:07:57Z",
       "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
         "allowed_wording": "Activation-ready candidate after local proof and baseline checks.",
         "forbidden_wording": "validated, certified, guaranteed, legal advice",
-        "reason": "Allowed wording: activation-ready candidate after evidence/baseline gates; not regulator certified and not legal advice.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
-      "next_action": "source_monitor_founder_review_then_sources_json_candidate_activation",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
       "no_save_adapter_name": "",
       "no_save_adapter_used": false,
       "no_save_duplicate_hash": false,
-      "no_save_failure_reason": "Fetch failed: wait_for_selector 'adgm-page > span' not found at https://www.adgm.com/fsra/rules-and-regulations",
+      "no_save_failure_reason": "",
       "no_save_nav_shell": false,
-      "no_save_normalized_hash": "",
-      "no_save_normalized_length": 0,
-      "no_save_quality_label": "POOR",
-      "no_save_quality_score": 5,
-      "no_save_readiness_status": "NEEDS_SELECTOR_REVIEW",
+      "no_save_normalized_hash": "cae7770f5cfd354292b5b1b0ead14134ea5eb88a5c2f319ff1345dfc3b89efc0",
+      "no_save_normalized_length": 2833,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_quality_score": 62,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
       "no_save_remediation_hint": "Review the configured wait_for_selector/content_selector before activation.",
       "no_save_tested": true,
       "noise_risk": "medium",
       "priority": "P0",
       "product_manager_gate": {
-        "reason": "FSRA rulebooks drive obligations for ADGM regulated firms.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
-      "proof_path": "data/source_snapshots/2026-06-14/AE/AE-adgm-fsra-rulebooks/intake-20260614T154850Z/proof.json",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-rulebooks/intake-20260615T130757Z/proof.json",
       "qa_critic_gate": {
-        "reason": "No nav-shell, no hash collision, no shallow-shell activation claim.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "regulator": "ADGM/FSRA",
-      "selector": "adgm-page > span",
+      "selector": "adgm-page",
       "source_health_risk": "medium",
       "source_id": "AE-adgm-fsra-rulebooks",
       "source_monitor_gate": {
-        "reason": "Official/public source with stable URL, selector, non-nav-shell output, and reviewed source-health risk.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
         "status": "pass"
       },
       "source_type": "rulebook",
       "url": "https://www.adgm.com/legal-framework/rules-and-regulations",
-      "wait_selector": "adgm-page > span"
+      "wait_selector": "adgm-page"
     },
     {
       "activation_decision": "candidate",
@@ -6746,12 +6767,12 @@
     }
   ],
   "summary": {
-    "activation_ready_count": 2,
+    "activation_ready_count": 3,
     "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
-    "baseline_complete_count": 3,
+    "baseline_complete_count": 4,
     "baseline_pending_count": 6,
     "blocked_count": 21,
     "candidate_count": 28,
@@ -6781,8 +6802,8 @@
     },
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready entries count toward the 50 working-source target; sources.json was not expanded in this sprint.",
-    "proof_backed_count": 3,
-    "public_source_truth_after": "16 enabled UAE sources / 12 readiness-supported / 4 under extraction remediation",
+    "proof_backed_count": 4,
+    "public_source_truth_after": "19 enabled UAE sources / 15 readiness-supported / 4 under extraction remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 0,
     "remediation_count": 21,
@@ -6790,7 +6811,7 @@
     "total_entries": 78,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
-    "source_activation_platform_note": "Auto DOM Investigator, expanded adapter catalog, structured failure codes, Source Lab remediation controls, and source activation validator added. Three proof-backed queue-ready sources were promoted to sources.json; public truth is now 16/12/4."
+    "source_activation_platform_note": "Auto DOM Investigator, expanded adapter catalog, structured failure codes, Source Lab remediation controls, and source activation validator added. The wider UAE work queue now records three ADGM/FSRA activation-ready entries; the mass activation queue records six activation-ready entries across SCA, DFSA, and ADGM/FSRA; public truth is now 19/15/4."
   },
   "version": 1
 }

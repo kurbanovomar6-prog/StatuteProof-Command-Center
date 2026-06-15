@@ -132,8 +132,16 @@ def test_mass_monitor_respects_regulator_source_id_and_limit(tmp_path):
     assert summary["processed_count"] == 1
 
 
-def test_mass_monitor_keeps_adapter_selector_out_of_fetch_selector(tmp_path):
+def test_mass_monitor_promotes_adapter_selectors_to_fetch_selectors(tmp_path):
     queue_path = _queue(tmp_path / "queue.json")
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    queue["sources"][0]["adapter_family"] = "static_html"
+    queue["sources"][0]["adapter_name"] = "static_html"
+    queue["sources"][0]["adapter_config"] = {
+        "content_selector": "main, article, body",
+        "wait_for_selector": "main",
+    }
+    queue_path.write_text(json.dumps(queue, indent=2), encoding="utf-8")
     captured = []
 
     def fake_intake(source, *, write_evidence):
@@ -147,9 +155,33 @@ def test_mass_monitor_keeps_adapter_selector_out_of_fetch_selector(tmp_path):
         write_queue=False,
     )
 
-    assert captured[0]["adapter_config"]["container_selector"] == "main"
+    assert captured[0]["adapter_config"]["content_selector"] == "main, article, body"
+    assert captured[0]["content_selector"] == "main, article, body"
+    assert captured[0]["wait_for_selector"] == "main"
+
+
+def test_mass_monitor_keeps_custom_element_selector_inside_adapter_config(tmp_path):
+    queue_path = _queue(tmp_path / "queue.json")
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    queue["sources"][0]["adapter_family"] = "custom_element"
+    queue["sources"][0]["adapter_name"] = "custom_element"
+    queue["sources"][0]["adapter_config"] = {"content_selector": "adgm-page"}
+    queue_path.write_text(json.dumps(queue, indent=2), encoding="utf-8")
+    captured = []
+
+    def fake_intake(source, *, write_evidence):
+        captured.append(source)
+        return {"status": "CONFIRMED_ACCESSIBLE", "quality_score": 88, "normalized_hash": "c" * 64}
+
+    run_mass_monitoring_batch(
+        queue_path=queue_path,
+        source_id="AE-ready-1",
+        intake_func=fake_intake,
+        write_queue=False,
+    )
+
+    assert captured[0]["adapter_config"]["content_selector"] == "adgm-page"
     assert "content_selector" not in captured[0]
-    assert "wait_for_selector" not in captured[0]
 
 
 def test_mass_monitor_maps_quality_and_selector_failures(tmp_path):

@@ -61,11 +61,11 @@ const PLANS_DATA = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    purpose: 'MLRO or CCO at a UAE-regulated firm. 16 enabled UAE sources under evidence-readiness review: 12 readiness-supported in the latest registry review, 4 under extraction remediation.',
+    purpose: 'MLRO or CCO at a UAE-regulated firm. 19 enabled UAE sources under evidence-readiness review: 15 readiness-supported in the latest registry review, 4 under extraction remediation.',
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '16 enabled; 12 readiness-supported, 4 under extraction remediation' },
+      { label: 'Official UAE sources', value: '19 enabled; 15 readiness-supported, 4 under extraction remediation' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },
@@ -144,7 +144,7 @@ const FAQS = [
   },
   {
     q: 'Why does UAE Monitor say "evidence-readiness validation"?',
-    a: 'We currently have 16 enabled UAE regulatory sources. The latest registry review keeps 12 sources readiness-supported and 4 sources under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
+    a: 'We currently have 19 enabled UAE regulatory sources. The latest registry review keeps 15 sources readiness-supported and 4 sources under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
   },
 ]
 

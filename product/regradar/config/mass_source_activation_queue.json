@@ -1,19 +1,22 @@
 {
   "schema_version": "mass-source-activation-1.0",
   "generated_at": "2026-06-15T00:00:00Z",
-  "public_source_truth": "16 enabled UAE sources / 12 readiness-supported / 4 remediation",
+  "public_source_truth": "19 enabled UAE sources / 15 readiness-supported / 4 remediation",
   "summary": {
-    "queue_entries": 12,
-    "activation_ready_count": 3,
-    "proof_backed_count": 3,
-    "baseline_complete_count": 3,
+    "queue_entries": 14,
+    "activation_ready_count": 6,
+    "proof_backed_count": 6,
+    "baseline_complete_count": 6,
     "did_reach_50_working_sources": false,
     "sources_json_changed": true,
-    "updated_at": "2026-06-15T12:22:54Z",
-    "last_updated_at": "2026-06-15T12:22:54Z",
-    "new_activation_ready_this_sprint": 3,
-    "public_source_truth": "16 enabled / 12 readiness-supported / 4 remediation",
-    "baseline_complete_but_held_count": 0
+    "updated_at": "2026-06-15T13:30:47Z",
+    "last_updated_at": "2026-06-15T13:08:00Z",
+    "new_activation_ready_this_sprint": 6,
+    "public_source_truth": "19 enabled / 15 readiness-supported / 4 remediation",
+    "baseline_complete_but_held_count": 0,
+    "remediation_count": 7,
+    "blocked_count": 1,
+    "candidate_count": 0
   },
   "sources": [
     {
@@ -432,22 +435,26 @@
       "regulator": "Executive Office for Control and Non-Proliferation",
       "source_type": "sanctions_laws_listing",
       "official_status": "official",
-      "discovery_status": "candidate",
-      "adapter_family": "listing",
-      "adapter_name": "fiu_eocn_document_listing",
-      "adapter_config": {},
-      "no_save_status": "not_run",
-      "quality_score": 0,
+      "discovery_status": "discovered",
+      "adapter_family": "table",
+      "adapter_name": "table",
+      "adapter_config": {
+        "content_selector": "table",
+        "wait_for_selector": "table",
+        "item_selector": "tr"
+      },
+      "no_save_status": "failed",
+      "quality_score": 5,
       "noise_risk": "unknown",
       "source_health_risk": "unknown",
       "evidence_status": "none",
       "baseline_status": "not_started",
-      "activation_status": "candidate",
-      "failure_code": "LISTING_ADAPTER_REQUIRED",
-      "failure_reason": "Document/listing extraction has not been validated.",
-      "remediation_hint": "Run discover-source and no-save with FIU/EOCN document listing adapter.",
+      "activation_status": "remediation",
+      "failure_code": "URL_STALE",
+      "failure_reason": "Fetch failed: wait_for_selector 'table' not found at https://www.uaeiec.gov.ae/en-us/un-page?p=laws-and-regulations",
+      "remediation_hint": "Review the configured wait_for_selector/content_selector before activation.",
       "agent_gate_status": "hold",
-      "current_state": "candidate",
+      "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
       "normalized_hash": "",
@@ -455,7 +462,7 @@
       "baseline_runs_required": 2,
       "can_activate": false,
       "nav_shell": false,
-      "shallow_content": false,
+      "shallow_content": true,
       "duplicate_hash": false,
       "source_monitor_gate": {
         "status": "hold",
@@ -467,19 +474,19 @@
       },
       "evidence_trail_gate": {
         "status": "hold",
-        "reason": "No proof or repeat baseline recorded.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "reason": "No proof and repeat baseline recorded for activation.",
+        "reviewed_at": "2026-06-15T13:30:47Z",
         "blocking_issues": [
           "proof_missing",
           "baseline_missing"
         ]
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "No no-save result in this queue.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "status": "fail",
+        "reason": "No-save result did not meet activation-quality threshold.",
+        "reviewed_at": "2026-06-15T13:30:47Z",
         "blocking_issues": [
-          "no_save_not_run"
+          "URL_STALE"
         ]
       },
       "legal_language_gate": {
@@ -505,15 +512,25 @@
         ]
       },
       "final_activation_gate": {
-        "status": "candidate",
-        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "status": "remediation",
+        "reason": "Activation is blocked until all proof, baseline, source-health, quality, and agent gates pass.",
+        "reviewed_at": "2026-06-15T13:30:47Z",
         "blocking_issues": [
-          "no_save_not_run",
+          "no_save_not_passed",
+          "quality_below_threshold",
+          "shallow_content",
           "proof_missing",
-          "baseline_missing"
+          "baseline_incomplete",
+          "source_monitor_gate_not_passed",
+          "evidence_trail_gate_not_passed",
+          "qa_critic_gate_not_passed",
+          "legal_language_gate_not_passed",
+          "code_architect_gate_not_passed"
         ]
-      }
+      },
+      "last_discovery_at": "2026-06-15T13:30:03Z",
+      "last_no_save_test_at": "2026-06-15T13:30:47Z",
+      "updated_at": "2026-06-15T13:30:47Z"
     },
     {
       "source_id": "AE-adgm-fsra-financial-crime-prevention",
@@ -525,60 +542,64 @@
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_config": {
-        "content_selector": "adgm-page > span"
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "Financial & Cybercrime Prevention",
+          "Developing sound practices in AML/TFS"
+        ],
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          "script",
+          "style",
+          "noscript"
+        ]
       },
-      "no_save_status": "failed",
-      "quality_score": 59,
-      "noise_risk": "high",
+      "no_save_status": "passed",
+      "quality_score": 60,
+      "noise_risk": "low",
       "source_health_risk": "medium",
-      "evidence_status": "none",
-      "baseline_status": "not_started",
-      "activation_status": "remediation",
+      "evidence_status": "certified_evidence",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
       "failure_code": "",
-      "failure_reason": "Fresh no-save check extracted meaningful content but quality was 59/LIMITED and the custom element adapter selector was not found.",
-      "remediation_hint": "Review ADGM rendered DOM selectors or use the bs4/static extraction path before any evidence save.",
-      "agent_gate_status": "hold",
-      "current_state": "remediation",
-      "proof_path": "",
-      "normalized_text_path": "",
-      "normalized_hash": "",
-      "baseline_runs_completed": 0,
+      "failure_reason": "",
+      "remediation_hint": "Monitor with the verified ADGM custom element selector `adgm-page`; old `adgm-page > span` selector should remain rejected.",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-financial-crime-prevention/intake-20260615T130757Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-financial-crime-prevention/intake-20260615T130757Z/normalized.txt",
+      "normalized_hash": "5553253c8a001615c514a71cfba823a940de2fbc89580106149208193c4f81b1",
+      "baseline_runs_completed": 5,
       "baseline_runs_required": 2,
-      "can_activate": false,
+      "can_activate": true,
       "nav_shell": false,
       "shallow_content": false,
       "duplicate_hash": false,
       "source_monitor_gate": {
-        "status": "hold",
-        "reason": "Official ADGM/FSRA page has meaningful content, but the configured custom element selector failed in the fresh no-save check.",
-        "reviewed_at": "2026-06-15T12:22:54Z",
-        "blocking_issues": [
-          "selector_failed",
-          "quality_below_threshold"
-        ]
+        "status": "pass",
+        "reason": "Official ADGM/FSRA financial-crime page produced meaningful public regulatory content with the verified `adgm-page` selector.",
+        "reviewed_at": "2026-06-15T12:56:58Z",
+        "blocking_issues": []
       },
       "evidence_trail_gate": {
-        "status": "hold",
-        "reason": "No mass-queue proof path or repeat baseline recorded.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": [
-          "proof_missing",
-          "baseline_missing"
-        ]
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline completed with two consecutive runs on the remediated selector hash.",
+        "reviewed_at": "2026-06-15T12:56:58Z",
+        "blocking_issues": []
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "No-save quality is below activation threshold and cannot be saved as monitoring-ready.",
-        "reviewed_at": "2026-06-15T12:22:54Z",
-        "blocking_issues": [
-          "quality_below_threshold",
-          "baseline_missing"
-        ]
+        "status": "pass",
+        "reason": "No-save quality reached threshold, proof exists, repeat baseline completed, and no nav-shell, shallow, or duplicate hash flags are present.",
+        "reviewed_at": "2026-06-15T12:56:58Z",
+        "blocking_issues": []
       },
       "legal_language_gate": {
         "status": "pass",
-        "reason": "Safe wording: no-save candidate, not active monitoring.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "reason": "Safe wording: proof-backed official-source monitoring endpoint; no legal advice, guarantee, or regulator certification claim.",
+        "reviewed_at": "2026-06-15T12:56:58Z",
         "blocking_issues": []
       },
       "product_manager_gate": {
@@ -588,23 +609,190 @@
         "blocking_issues": []
       },
       "code_architect_gate": {
-        "status": "hold",
-        "reason": "Configured custom_element selector failed; adapter/selector strategy needs remediation before proof save.",
-        "reviewed_at": "2026-06-15T12:22:54Z",
-        "blocking_issues": [
-          "selector_failed"
-        ]
+        "status": "pass",
+        "reason": "Adapter strategy is scoped to the existing custom_element adapter and replaces the failed child selector with the DOM-investigator recommended parent custom element.",
+        "reviewed_at": "2026-06-15T12:56:58Z",
+        "blocking_issues": []
       },
       "final_activation_gate": {
-        "status": "remediation",
-        "reason": "Fresh no-save check is below the activation threshold and the configured selector failed.",
-        "reviewed_at": "2026-06-15T12:22:54Z",
-        "blocking_issues": [
-          "quality_below_threshold",
-          "selector_failed",
-          "proof_missing",
-          "baseline_missing"
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-15T12:56:58Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-rulebooks",
+      "url": "https://www.adgm.com/legal-framework/rules-and-regulations",
+      "regulator": "ADGM/FSRA",
+      "source_type": "rulebook_page",
+      "official_status": "official",
+      "discovery_status": "discovered",
+      "adapter_family": "custom_element",
+      "adapter_name": "custom_element",
+      "adapter_config": {
+        "content_selector": "adgm-page",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          "script",
+          "style",
+          "noscript"
         ]
+      },
+      "no_save_status": "passed",
+      "quality_score": 62,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "certified_evidence",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "Monitor with the verified ADGM custom element selector `adgm-page`; do not use the stale `/fsra/rules-and-regulations` URL.",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-rulebooks/intake-20260615T130757Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-rulebooks/intake-20260615T130757Z/normalized.txt",
+      "normalized_hash": "cae7770f5cfd354292b5b1b0ead14134ea5eb88a5c2f319ff1345dfc3b89efc0",
+      "baseline_runs_completed": 4,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official ADGM legal-framework rules and regulations page produced meaningful public regulatory content.",
+        "reviewed_at": "2026-06-15T13:07:57Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline completed on the current custom-element extraction hash.",
+        "reviewed_at": "2026-06-15T13:07:57Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No-save quality reached threshold, proof exists, repeat baseline completed, and no nav-shell, shallow, or duplicate hash flags are present.",
+        "reviewed_at": "2026-06-15T13:07:57Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Safe wording: proof-backed official-source monitoring endpoint; no legal advice, guarantee, or regulator certification claim.",
+        "reviewed_at": "2026-06-15T13:07:57Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "ADGM/FSRA rules and regulations are core regulatory obligations for ADGM firms and MLRO/CCO review.",
+        "reviewed_at": "2026-06-15T13:07:57Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses the existing custom_element adapter on the verified legal-framework URL and avoids stale nav-shell paths.",
+        "reviewed_at": "2026-06-15T13:07:57Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-15T13:07:57Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-adgm-fsra-consultations",
+      "url": "https://www.adgm.com/legal-framework/public-consultations",
+      "regulator": "ADGM/FSRA",
+      "source_type": "consultation_listing",
+      "official_status": "official",
+      "discovery_status": "discovered",
+      "adapter_family": "custom_element",
+      "adapter_name": "custom_element",
+      "adapter_config": {
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "ADGM Public Consultations",
+          "Public Consultations"
+        ],
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "certified_evidence",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "Monitor the focused public consultations text; review alert fatigue if frequent consultation archive churn appears.",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-consultations/intake-20260615T130800Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-consultations/intake-20260615T130800Z/normalized.txt",
+      "normalized_hash": "98a1cb43f5d53b2d88fa7e966912b11a9b94a2b700cf23966282c83aacb34515",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official ADGM public consultations page produced meaningful consultation and policy-change content.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline completed with two stable focused extraction hashes.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No-save quality reached threshold, proof exists, repeat baseline completed, and no nav-shell, shallow, or duplicate hash flags are present.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Safe wording: proof-backed official-source monitoring endpoint; no legal advice, guarantee, or regulator certification claim.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "ADGM/FSRA consultations are useful early-warning regulatory change sources for compliance buyers.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses the existing custom_element adapter with explicit focus keywords to avoid ADGM-wide chrome.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-15T13:08:00Z",
+        "blocking_issues": []
       }
     },
     {
@@ -717,26 +905,26 @@
       "adapter_family": "pdf_listing",
       "adapter_name": "vara_pdf_listing",
       "adapter_config": {},
-      "no_save_status": "not_run",
+      "no_save_status": "failed",
       "quality_score": 0,
-      "noise_risk": "unknown",
-      "source_health_risk": "unknown",
+      "noise_risk": "high",
+      "source_health_risk": "high",
       "evidence_status": "none",
       "baseline_status": "not_started",
-      "activation_status": "candidate",
-      "failure_code": "PDF_ONLY_SOURCE",
-      "failure_reason": "Framework/rulebook PDF listing needs scoped document discovery.",
-      "remediation_hint": "Discover official PDF links and run no-save with PDF listing adapter.",
+      "activation_status": "remediation",
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell after the current /en/regulatory-framework/ path returned 404 and Playwright fallback fetched shell content.",
+      "remediation_hint": "Find the current official VARA framework/rulebook endpoint or PDF listing before any save. Do not use stale /en/regulatory-framework/ path.",
       "agent_gate_status": "hold",
-      "current_state": "candidate",
+      "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
       "normalized_hash": "",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "can_activate": false,
-      "nav_shell": false,
-      "shallow_content": false,
+      "nav_shell": true,
+      "shallow_content": true,
       "duplicate_hash": false,
       "source_monitor_gate": {
         "status": "hold",
@@ -786,13 +974,11 @@
         ]
       },
       "final_activation_gate": {
-        "status": "candidate",
-        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "status": "remediation",
+        "reason": "Activation blocked by live no-save remediation result.",
+        "reviewed_at": "2026-06-15T13:30:47Z",
         "blocking_issues": [
-          "no_save_not_run",
-          "proof_missing",
-          "baseline_missing"
+          "NAV_SHELL_ONLY"
         ]
       }
     },
@@ -806,18 +992,18 @@
       "adapter_family": "listing",
       "adapter_name": "fiu_eocn_document_listing",
       "adapter_config": {},
-      "no_save_status": "not_run",
-      "quality_score": 0,
-      "noise_risk": "unknown",
-      "source_health_risk": "unknown",
+      "no_save_status": "failed",
+      "quality_score": 55,
+      "noise_risk": "medium",
+      "source_health_risk": "high",
       "evidence_status": "none",
       "baseline_status": "not_started",
-      "activation_status": "candidate",
-      "failure_code": "LISTING_ADAPTER_REQUIRED",
-      "failure_reason": "Publication listing extraction not validated in this mass queue.",
-      "remediation_hint": "Run scoped discovery and no-save if the public URL is accessible.",
+      "activation_status": "blocked",
+      "failure_code": "LIKELY_WAF_403",
+      "failure_reason": "HTTP 403 on UAE FIU publications path; Playwright fallback fetched content but access/source-health risk remains unresolved.",
+      "remediation_hint": "Use safe official alternate discovery only: robots/sitemap, official same-domain pages, or public document links. Do not bypass access controls.",
       "agent_gate_status": "hold",
-      "current_state": "candidate",
+      "current_state": "blocked",
       "proof_path": "",
       "normalized_text_path": "",
       "normalized_hash": "",
@@ -875,13 +1061,11 @@
         ]
       },
       "final_activation_gate": {
-        "status": "candidate",
-        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
+        "status": "blocked",
+        "reason": "Activation blocked by live no-save remediation result.",
+        "reviewed_at": "2026-06-15T13:30:47Z",
         "blocking_issues": [
-          "no_save_not_run",
-          "proof_missing",
-          "baseline_missing"
+          "LIKELY_WAF_403"
         ]
       }
     },
@@ -1087,7 +1271,7 @@
         "content_selector": "main, article, body"
       },
       "no_save_status": "passed",
-      "quality_score": 61,
+      "quality_score": 65,
       "noise_risk": "low",
       "source_health_risk": "medium",
       "evidence_status": "certified_evidence",
@@ -1096,12 +1280,12 @@
       "current_state": "activation_ready",
       "failure_code": "",
       "failure_reason": "",
-      "remediation_hint": "",
+      "remediation_hint": "Monitor with deterministic structured static_html extraction; 2026-06-15 hash drift was re-baselined after two consecutive matching saved runs.",
       "agent_gate_status": "pass",
-      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/proof.json",
-      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/normalized.txt",
-      "normalized_hash": "04ece793f346ae66021950a50156127204834fc532d0606f4338e19e4e30e4f5",
-      "baseline_runs_completed": 2,
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T132231Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T132231Z/normalized.txt",
+      "normalized_hash": "850da3025a62bc5b9584295b5193dfc37df0459331df91137715967134f9d7b5",
+      "baseline_runs_completed": 4,
       "baseline_runs_required": 2,
       "can_activate": true,
       "nav_shell": false,
@@ -1118,8 +1302,8 @@
       },
       "evidence_trail_gate": {
         "status": "pass",
-        "reason": "Two saved Source Lab baselines created stable normalized hash and proof paths.",
-        "reviewed_at": "2026-06-15T11:46:35Z",
+        "reason": "Proof path exists and repeat baseline completed after re-baselining the deterministic structured static_html hash.",
+        "reviewed_at": "2026-06-15T13:22:31Z",
         "proof_paths_checked": [
           "data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/proof.json"
         ],
@@ -1161,8 +1345,8 @@
       },
       "final_activation_gate": {
         "status": "activation_ready",
-        "reason": "Proof-backed repeat baseline exists and the scoped monitor-path dry-run reproduced the stored hash without drift.",
-        "reviewed_at": "2026-06-15T12:22:54Z",
+        "reason": "Proof, repeat baseline, re-baselined hash stability, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-15T13:22:31Z",
         "blocking_issues": []
       }
     }

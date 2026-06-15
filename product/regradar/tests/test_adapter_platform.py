@@ -434,6 +434,37 @@ def test_static_html_adapter_extracts_article_content_and_ignores_nav():
     assert "Home Services Search" not in result.text
 
 
+def test_custom_element_adapter_focus_keywords_drop_global_chrome():
+    html = """
+    <html><body>
+      <adgm-page>
+        <h2>ADGM Academy</h2>
+        <h2>AccessADGM</h2>
+        <p>Generic platform content about living and working in Abu Dhabi.</p>
+        <h1>Financial & Cybercrime Prevention</h1>
+        <h2>Developing sound practices in AML/TFS and cybercrime prevention compliance</h2>
+        <p>Financial institutions must maintain AML, CFT, sanctions, suspicious activity
+        reporting, customer due diligence, and regulatory compliance monitoring controls.</p>
+      </adgm-page>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+        adapter_family="custom_element",
+        adapter_config={
+            "content_selector": "adgm-page",
+            "focus_keywords": ["Financial & Cybercrime Prevention", "Developing sound practices"],
+        },
+    )
+
+    assert result.adapter_name == "custom_element"
+    assert result.text.startswith("Financial & Cybercrime Prevention")
+    assert "ADGM Academy" not in result.text
+    assert "AML, CFT, sanctions" in result.text
+
+
 def test_pdf_listing_adapter_extracts_document_links():
     html = """
     <html><body><main>

@@ -257,6 +257,13 @@ def _has_structured_adapter_content(result: dict) -> bool:
     if not isinstance(adapter_metadata, dict):
         return False
     family = str(adapter_metadata.get("adapter_family") or result.get("adapter_family") or "")
+    if adapter_metadata.get("failure_reason"):
+        return False
+    if family in {"static_html", "custom_element", "playwright_selector"}:
+        metadata = adapter_metadata.get("metadata") or {}
+        has_focus = bool(metadata.get("focus_keywords"))
+        chars = int(result.get("chars_normalized") or 0)
+        return bool(result.get("adapter_used")) and has_focus and chars >= 500
     structured_families = {
         "listing",
         "sca_listing",
@@ -273,8 +280,6 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "public_json_api",
     }
     if family not in structured_families:
-        return False
-    if adapter_metadata.get("failure_reason"):
         return False
     item_count = int(adapter_metadata.get("item_count") or 0)
     return bool(result.get("adapter_used")) and item_count >= 3

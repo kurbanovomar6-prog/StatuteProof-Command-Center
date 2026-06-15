@@ -58,11 +58,11 @@ const PLANS = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    desc: '16 enabled UAE sources under evidence-readiness validation — VARA, CBUAE, DFSA, ADGM, UAE FIU, SCA and more. Full evidence workflow with high-risk review queue.',
+    desc: '19 enabled UAE sources under evidence-readiness validation — VARA, CBUAE, DFSA, ADGM, UAE FIU, SCA and more. Full evidence workflow with high-risk review queue.',
     cta: 'Upgrade to UAE Monitor',
     ctaStyle: 'primary',
     features: [
-      '16 enabled UAE sources (evidence-readiness validation)',
+      '19 enabled UAE sources (evidence-readiness validation)',
       'VARA / CBUAE / DFSA / ADGM / UAE FIU source pack',
       'Evidence records + full diff view',
       'High-risk review queue',

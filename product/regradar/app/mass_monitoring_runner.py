@@ -94,10 +94,17 @@ def _source_config(entry: dict[str, Any]) -> dict[str, Any]:
         "expected_min_length": int(entry.get("expected_min_length") or 500),
         "baseline_runs_required": int(entry.get("baseline_runs_required") or 2),
     }
-    if entry.get("content_selector"):
-        source["content_selector"] = entry.get("content_selector")
-    if entry.get("wait_for_selector"):
-        source["wait_for_selector"] = entry.get("wait_for_selector")
+    should_promote_adapter_selector = source["adapter_family"] in {"static_html", "playwright_selector"}
+    content_selector = entry.get("content_selector") or (
+        adapter_config.get("content_selector") if should_promote_adapter_selector else None
+    )
+    wait_selector = entry.get("wait_for_selector") or (
+        adapter_config.get("wait_for_selector") if should_promote_adapter_selector else None
+    )
+    if content_selector:
+        source["content_selector"] = content_selector
+    if wait_selector:
+        source["wait_for_selector"] = wait_selector
     if entry.get("fetch_method"):
         source["fetch_method"] = entry.get("fetch_method")
     return source

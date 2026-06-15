@@ -197,6 +197,110 @@ def test_structured_listing_adapter_output_is_not_nav_shell():
     assert result["can_activate_monitoring"] is False
 
 
+def test_custom_element_adapter_preserves_structure_for_quality_gate():
+    aml_paragraph = (
+        "Regulated firms must maintain anti money laundering governance, customer "
+        "due diligence, enhanced due diligence, suspicious activity reporting, "
+        "financial crime risk assessment, staff training, and board-approved "
+        "compliance monitoring controls for supervised business activities. "
+    )
+    sanctions_paragraph = (
+        "Firms must maintain targeted financial sanctions screening, sanctions "
+        "alert review, asset-freezing escalation, record keeping, and reporting "
+        "procedures that support regulatory obligations and documented management "
+        "oversight across financial crime prevention controls. "
+    )
+    reporting_paragraph = (
+        "Compliance officers and MLRO functions should review regulatory guidance, "
+        "monitor rule updates, assess operational impact, update procedures, and "
+        "retain evidence of remediation decisions for supervisory review and audit "
+        "readiness across the regulated firm. "
+    )
+    html = f"""
+    <html><body>
+      <adgm-page>
+        <h1>Financial Crime Prevention</h1>
+        <h2>Anti Money Laundering Requirements</h2>
+        <p>{aml_paragraph * 3}</p>
+        <h2>Sanctions and Targeted Financial Sanctions</h2>
+        <p>{sanctions_paragraph * 3}</p>
+        <h2>Regulatory Guidance and Reporting</h2>
+        <p>{reporting_paragraph * 3}</p>
+      </adgm-page>
+    </body></html>
+    """
+    source = {
+        "source_id": "AE-adgm-structured-custom-element",
+        "url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+        "adapter_family": "custom_element",
+        "adapter_name": "custom_element",
+        "adapter_config": {"content_selector": "adgm-page"},
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["adapter_used"] is True
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["quality_breakdown"]["text_stats"]["heading_count"] >= 3
+    assert result["quality_score"] >= 60
+    assert result["can_save_for_validation"] is True
+
+
+def test_focused_custom_element_content_is_not_nav_shell():
+    html = """
+    <html><body>
+      <adgm-page>
+        <h2>ADGM Academy</h2>
+        <h2>AccessADGM</h2>
+        <p>Generic platform content about living and working in Abu Dhabi.</p>
+        <h1>Financial & Cybercrime Prevention</h1>
+        <h2>Developing sound practices in AML/TFS and cybercrime prevention compliance</h2>
+        <p>Money Laundering, Terrorism Financing, Proliferation Financing and cybercrime
+        are major risks that threaten economic growth and social stability through the
+        illicit flow of funds and illegal activities. Firms should document risk
+        assessments, maintain screening controls, review suspicious transactions,
+        escalate sanctions matches, and preserve audit evidence for supervisory
+        review and internal governance committees.</p>
+        <h2>AML and TFS Framework</h2>
+        <p>Financial Institutions and DNFBPs must maintain AML, CFT, sanctions,
+        customer due diligence, suspicious activity reporting, risk assessment,
+        governance, compliance monitoring, and record keeping controls. The
+        monitoring process should track changes in laws, rules, guidance, circulars,
+        notices, risk typologies, and targeted financial sanctions expectations.</p>
+        <h2>Risk Based Approach</h2>
+        <p>The Financial Services Regulatory Authority is the competent authority
+        for AML and TFS compliance and expects firms to maintain a robust regulatory
+        framework, documented procedures, monitoring controls, and management
+        oversight. Compliance teams should use official-source evidence to support
+        remediation decisions, board reporting, policy updates, and operational
+        control testing.</p>
+      </adgm-page>
+    </body></html>
+    """
+    source = {
+        "source_id": "AE-adgm-focused-financial-crime",
+        "url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+        "adapter_family": "custom_element",
+        "adapter_name": "custom_element",
+        "adapter_config": {
+            "content_selector": "adgm-page",
+            "focus_keywords": ["Financial & Cybercrime Prevention", "Developing sound practices"],
+        },
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["adapter_used"] is True
+    assert result["structured_adapter_content"] is True
+    assert result["nav_shell_detected"] is False
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["can_save_for_validation"] is True
+
+
 # ── 3. Hash collision detection ───────────────────────────────────────────────
 
 

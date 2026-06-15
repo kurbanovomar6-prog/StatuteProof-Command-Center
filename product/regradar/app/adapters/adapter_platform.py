@@ -121,6 +121,47 @@ def _node_text(node, *, separator: str = "\n", limit: int | None = None) -> str:
     return _clean(node.get_text(separator, strip=True) if node else "", limit=limit)
 
 
+def _structured_node_text(node, *, limit: int | None = None) -> str:
+    """Return monitorable block text while preserving heading/list boundaries."""
+    if not node:
+        return ""
+    parts: list[str] = []
+    for block in node.select("h1, h2, h3, h4, h5, h6, p, li, th, td, caption, dt, dd, blockquote"):
+        text = _clean(block.get_text(" ", strip=True))
+        if not text:
+            continue
+        if parts and (text == parts[-1] or text in parts[-1]):
+            continue
+        parts.append(text)
+    if not parts:
+        raw = node.get_text("\n", strip=True)
+        parts = [_clean(line) for line in raw.splitlines() if _clean(line)]
+    text = "\n".join(parts)
+    if limit and len(text) > limit:
+        return text[: limit - 1].rstrip() + "..."
+    return text
+
+
+def _focus_text(text: str, config: dict | None = None) -> str:
+    config = config or {}
+    raw_keywords = config.get("focus_keywords") or config.get("focus_keyword") or []
+    if isinstance(raw_keywords, str):
+        keywords = [raw_keywords]
+    elif isinstance(raw_keywords, list):
+        keywords = [str(item) for item in raw_keywords if str(item).strip()]
+    else:
+        keywords = []
+    if not keywords:
+        return text
+    lines = text.splitlines()
+    lowered_keywords = [keyword.casefold() for keyword in keywords]
+    for index, line in enumerate(lines):
+        folded = line.casefold()
+        if any(keyword in folded for keyword in lowered_keywords):
+            return "\n".join(lines[index:]).strip()
+    return text
+
+
 class BaseHtmlAdapter:
     family = "static_html"
     name = "static_html"
@@ -157,7 +198,7 @@ class StaticHtmlAdapter(BaseHtmlAdapter):
         if not node:
             node = soup.select_one("article") or soup.select_one("main") or soup.body
             selector = node.name if node else selector
-        text = _node_text(node)
+        text = _focus_text(_structured_node_text(node), config)
         if not text:
             return self._empty("No static HTML content was isolated.", "Review content_selector or use a listing/table adapter.")
         return AdapterResult(
@@ -167,7 +208,7 @@ class StaticHtmlAdapter(BaseHtmlAdapter):
             extraction_strategy=f"adapter:{self.name}",
             noise_risk="low" if len(text) >= 1000 else "medium",
             source_health_risk="low",
-            metadata={"content_selector": selector, "url": url},
+            metadata={"content_selector": selector, "url": url, "focus_keywords": config.get("focus_keywords") or config.get("focus_keyword") or []},
         )
 
 
@@ -191,7 +232,7 @@ class CustomElementAdapter(BaseHtmlAdapter):
         if not node:
             return self._empty("Custom element selector was not found.", "Review wait/content selector with Playwright rendering.")
 
-        text = _node_text(node)
+        text = _focus_text(_structured_node_text(node), config)
         if not text:
             return self._empty("Custom element selector returned empty text.", "Review rendered DOM and selector specificity.")
 
@@ -202,7 +243,7 @@ class CustomElementAdapter(BaseHtmlAdapter):
             extraction_strategy=f"adapter:{self.name}",
             noise_risk="medium" if len(text) < 1000 else "low",
             source_health_risk="medium",
-            metadata={"selector": selector, "url": url},
+            metadata={"selector": selector, "url": url, "focus_keywords": config.get("focus_keywords") or config.get("focus_keyword") or []},
         )
 
 

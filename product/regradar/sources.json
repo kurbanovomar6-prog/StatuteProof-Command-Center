@@ -560,9 +560,9 @@
     },
     "expected_min_length": 500,
     "baseline_runs_required": 2,
-    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/proof.json",
-    "normalized_hash": "04ece793f346ae66021950a50156127204834fc532d0606f4338e19e4e30e4f5",
-    "notes": "Activated 2026-06-15 after proof-backed repeat baseline and scoped monitor-path dry-run reproduced the stored hash. Official-linked DFSA rulebook content hosted by Thomson Reuters."
+    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T132231Z/proof.json",
+    "normalized_hash": "850da3025a62bc5b9584295b5193dfc37df0459331df91137715967134f9d7b5",
+    "notes": "Activated 2026-06-15 after proof-backed repeat baseline and scoped monitor-path dry-run reproduced the stored hash. Re-baselined on 2026-06-15 after structured static extraction produced two consecutive matching hashes. Official-linked DFSA rulebook content hosted by Thomson Reuters."
   },
   {
     "name": "Abu Dhabi Global Market (ADGM)",
@@ -574,6 +574,104 @@
     "source_id": "AE-abu-dhabi-global-market-adgm",
     "notes": "ADGM FSRA section — fsra.adgm.com subdomain unreachable 2026-06-12; adgm.com/fsra extracts 2,742c reliably.",
     "tier": "1"
+  },
+  {
+    "source_id": "AE-adgm-fsra-financial-crime-prevention",
+    "name": "ADGM FSRA Financial and Cyber Crime Prevention",
+    "url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "official_status": "official",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "adapter_config": {
+      "content_selector": "adgm-page",
+      "focus_keywords": [
+        "Financial & Cybercrime Prevention",
+        "Developing sound practices in AML/TFS"
+      ],
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "form",
+        "script",
+        "style",
+        "noscript"
+      ]
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-financial-crime-prevention/intake-20260615T130757Z/proof.json",
+    "normalized_hash": "5553253c8a001615c514a71cfba823a940de2fbc89580106149208193c4f81b1",
+    "notes": "Activated 2026-06-15 after remediating the failed ADGM custom selector from `adgm-page > span` to focused `adgm-page` extraction, saving repeat baseline evidence, and passing mass-monitor dry-run with MONITOR_OK."
+  },
+  {
+    "source_id": "AE-adgm-fsra-rulebooks",
+    "name": "ADGM FSRA Rules and Regulations",
+    "url": "https://www.adgm.com/legal-framework/rules-and-regulations",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "official_status": "official",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "adapter_config": {
+      "content_selector": "adgm-page",
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "form",
+        "script",
+        "style",
+        "noscript"
+      ]
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-rulebooks/intake-20260615T130757Z/proof.json",
+    "normalized_hash": "cae7770f5cfd354292b5b1b0ead14134ea5eb88a5c2f319ff1345dfc3b89efc0",
+    "notes": "Activated 2026-06-15 after proof-backed repeat baseline and mass-monitor dry-run. Uses the current ADGM legal-framework URL instead of stale FSRA rulebook paths."
+  },
+  {
+    "source_id": "AE-adgm-fsra-consultations",
+    "name": "ADGM Public Consultations",
+    "url": "https://www.adgm.com/legal-framework/public-consultations",
+    "jurisdiction": "AE",
+    "category": "consultations",
+    "enabled": true,
+    "status": "active",
+    "tier": "1",
+    "official_status": "official",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "adapter_config": {
+      "content_selector": "adgm-page",
+      "focus_keywords": [
+        "ADGM Public Consultations",
+        "Public Consultations"
+      ],
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "form",
+        "script",
+        "style",
+        "noscript"
+      ]
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-consultations/intake-20260615T130800Z/proof.json",
+    "normalized_hash": "98a1cb43f5d53b2d88fa7e966912b11a9b94a2b700cf23966282c83aacb34515",
+    "notes": "Activated 2026-06-15 after focused custom-element extraction, proof-backed repeat baseline, and mass-monitor dry-run with MONITOR_OK."
   },
   {
     "name": "UAE Ministry of Finance",

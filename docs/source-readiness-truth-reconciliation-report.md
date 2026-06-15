@@ -6,17 +6,17 @@ Date: 2026-06-15
 
 The canonical customer-facing truth for the current StatuteProof UAE source pack is:
 
-**16 enabled UAE sources; 12 readiness-supported in the current registry; 4 under extraction remediation.**
+**19 enabled UAE sources; 15 readiness-supported in the current registry; 4 under extraction remediation.**
 
-The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later **13 enabled / 9 readiness-supported / 4 remediation** story was safe until three proof-backed, repeat-baseline-complete queue sources were promoted to `sources.json` on 2026-06-15.
+The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later **13 enabled / 9 readiness-supported / 4 remediation** story was safe until three proof-backed, repeat-baseline-complete queue sources were promoted to `sources.json` on 2026-06-15; the current **19 / 15 / 4** story is supported after three additional ADGM/FSRA sources passed proof, repeat baseline, mass-monitor dry-run, and agent gates.
 
 ## Canonical Counts
 
 | Count | Value | Basis |
 | --- | ---: | --- |
-| Total records in `sources.json` | 153 | Registry file parse after adding three proof-backed UAE sources. |
-| Enabled UAE sources | 16 | `enabled: true` and `jurisdiction: AE`. |
-| Readiness-supported | 12 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
+| Total records in `sources.json` | 156 | Registry file parse after adding six proof-backed UAE sources across the DFSA/SCA and ADGM/FSRA activation batches. |
+| Enabled UAE sources | 19 | `enabled: true` and `jurisdiction: AE`. |
+| Readiness-supported | 15 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
 | Under extraction remediation | 4 | Enabled UAE registry rows with `status: remediation`. |
 | Blocked / failed | 0 | Current registry uses remediation rather than blocked for the four not-ready sources. |
 
@@ -36,6 +36,9 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 | `AE-sca-circulars-rules-procedures` | SCA Circulars, Rules and Procedures | Promoted from activation-ready queue after proof-backed repeat baseline and mass-monitor dry-run. |
 | `AE-dfsa-financial-crime-mlro-letters` | DFSA Financial Crime Prevention Notices and MLRO Letters | Promoted from activation-ready queue after proof-backed repeat baseline and mass-monitor dry-run. |
 | `AE-dfsa-aml-rulebook-module` | DFSA AML Rulebook Module | Promoted from activation-ready queue after proof-backed repeat baseline and a scoped monitor-path dry-run reproduced the stored hash. |
+| `AE-adgm-fsra-financial-crime-prevention` | ADGM FSRA Financial and Cyber Crime Prevention | Promoted from activation-ready queue after focused custom-element extraction, proof-backed repeat baseline, and mass-monitor dry-run. |
+| `AE-adgm-fsra-rulebooks` | ADGM FSRA Rules and Regulations | Promoted from activation-ready queue after proof-backed repeat baseline and mass-monitor dry-run on the current ADGM legal-framework URL. |
+| `AE-adgm-fsra-consultations` | ADGM Public Consultations | Promoted from activation-ready queue after focused custom-element extraction, proof-backed repeat baseline, and mass-monitor dry-run. |
 
 ## Sources Under Extraction Remediation
 
@@ -48,7 +51,7 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 
 ## Which Story Is Correct?
 
-**Correct today:** 16 enabled / 12 readiness-supported / 4 under extraction remediation.
+**Correct today:** 19 enabled / 15 readiness-supported / 4 under extraction remediation.
 
 **Not correct today:** 13 enabled / 10 confirmed / 3 under extraction remediation.
 
@@ -56,8 +59,8 @@ Reason: three queue sources completed proof-backed repeat baseline and mass-moni
 
 ## Allowed Customer-Facing Wording
 
-- "16 enabled UAE sources."
-- "12 readiness-supported in the current registry."
+- "19 enabled UAE sources."
+- "15 readiness-supported in the current registry."
 - "4 under extraction remediation."
 - "Source readiness in progress."
 - "DFSA source model under remediation."
@@ -67,9 +70,9 @@ Reason: three queue sources completed proof-backed repeat baseline and mass-moni
 
 ## Forbidden Wording
 
-- "All 16 sources are validated."
-- "All 16 sources are confirmed."
-- "All 16 sources are ready."
+- "All 19 sources are validated."
+- "All 19 sources are confirmed."
+- "All 19 sources are ready."
 - "10 confirmed" unless DIFC is explicitly released from remediation by Source Monitor and Evidence Trail.
 - "DFSA ready."
 - "DIFC ready" while the registry hold remains.
@@ -80,13 +83,13 @@ Reason: three queue sources completed proof-backed repeat baseline and mass-moni
 
 ## Code And UI Result
 
-Current public/app source tables should use the 16/12/4 model:
+Current public/app source tables should use the 19/15/4 model:
 
 - `product/regradar/web/src/components/SourceCoverageTable.jsx`
 - `product/regradar/web/src/data/appMockData.js`
-- Pricing and billing surfaces use "16 enabled" with 12 readiness-supported and 4 under remediation.
+- Pricing and billing surfaces use "19 enabled" with 15 readiness-supported and 4 under remediation.
 
-This sprint changes `sources.json` only for three proof-backed activation-ready queue sources. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
+This sprint changes `sources.json` only for three additional proof-backed ADGM/FSRA activation-ready queue sources. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
 
 ## Next Required Source Readiness Work
 
