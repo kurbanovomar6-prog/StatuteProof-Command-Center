@@ -6,7 +6,7 @@ Date: 2026-06-15
 
 The repo now has enough candidate volume, but not enough proof-backed strong passes. The blocker is source-specific extraction on JS-heavy or stale official pages, not discovery.
 
-Current truth: 26 enabled / 22 readiness-supported / 4 remediation. Reaching 50 requires 24 more proof-backed, baseline-stable, gate-passing sources.
+Current truth: 28 enabled / 24 readiness-supported / 4 remediation. Reaching 50 requires 22 more proof-backed, baseline-stable, gate-passing sources.
 
 ## 2. Highest Activation Potential
 

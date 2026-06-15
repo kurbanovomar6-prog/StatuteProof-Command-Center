@@ -437,7 +437,31 @@ class ScaListingAdapter(ListingAdapter):
                 text = f"{title} {context}".lower()
                 if _is_noise_title(title):
                     continue
-                if not any(token in text for token in ("decision", "regulation", "circular", "rules", "rule", "procedure", "law", "aml", "cft", "market", "chairman", "fintech", "virtual asset", "passporting")):
+                if not any(token in text for token in (
+                    "decision",
+                    "regulation",
+                    "circular",
+                    "rules",
+                    "rule",
+                    "procedure",
+                    "law",
+                    "aml",
+                    "cft",
+                    "market",
+                    "chairman",
+                    "fintech",
+                    "virtual asset",
+                    "passporting",
+                    "fatca",
+                    "crs",
+                    "automatic exchange",
+                    "exchange of information",
+                    "cabinet resolution",
+                    "reporting financial",
+                    "intergovernmental agreement",
+                    "residence by investment",
+                    "citizenship by investment",
+                )):
                     continue
                 if not item.get("date"):
                     item["date"] = _extract_date(context)
@@ -519,7 +543,7 @@ class DocumentListingAdapter(BaseHtmlAdapter):
             container = soup.select_one("main") or soup.body or soup
         items: list[dict] = []
         seen: set[str] = set()
-        for anchor in container.select("a[href]"):
+        for anchor in container.select("a[href], adgm-link-button[href]"):
             title = _node_text(anchor, separator=" ", limit=260)
             href = (anchor.get("href") or "").strip()
             if _is_noise_title(title) or not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
@@ -744,7 +768,21 @@ class AdgmFsraListingAdapter(DocumentListingAdapter):
     family = "adgm_fsra_listing"
     name = "adgm_fsra_listing"
     heading = "ADGM/FSRA listing items"
-    allowed_tokens = ("fsra", "adgm", "aml", "financial crime", "guidance", "rule", "regulation", "consultation", "circular")
+    allowed_tokens = (
+        "fsra",
+        "aml",
+        "financial crime",
+        "guidance",
+        "rule",
+        "regulation",
+        "consultation",
+        "circular",
+        "market",
+        "prospectus",
+        "listing",
+        "disclosure",
+        "securities",
+    )
 
 
 class DfsaNoticeListingAdapter(DocumentListingAdapter):

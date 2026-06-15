@@ -356,6 +356,47 @@ def test_sca_listing_adapter_keeps_aspnet_form_wrapped_content():
     assert "Search Services" not in result.text
 
 
+def test_sca_listing_adapter_extracts_fatca_crs_document_links():
+    html = """
+    <html><body>
+      <form id="aspnetForm">
+        <header>Search Services About Contact</header>
+        <main>
+          <section>
+            <h1>Automatic Exchange of Information - FATCA and CRS</h1>
+            <div class="aegov-card card-bordered card-service" aria-labelledby="fatca-item-1">
+              <h5 id="fatca-item-1">Intergovernmental Agreement between the U.S and the UAE</h5>
+              <a href="https://home.treasury.gov/system/files/131/FATCA-Agreement-UAE-6-17-2015.pdf">Download</a>
+            </div>
+            <div class="aegov-card card-bordered card-service" aria-labelledby="fatca-item-2">
+              <h5 id="fatca-item-2">Cabinet Resolution No.93 of 2021 Implementing Certain Provisions of the Multilateral Administrative Agreement for Automatic Exchange of Information</h5>
+              <a href="https://mof.gov.ae/wp-content/uploads/2023/05/Cabinet-Resolution-No.93-of-2021-Implementing-Certain-Provisions-of-the-Multilateral-Administrative-Agreement-for-Automatic-Exchange-of-Information.pdf">Download</a>
+            </div>
+            <div class="aegov-card card-bordered card-service" aria-labelledby="fatca-item-3">
+              <h5 id="fatca-item-3">FATCA Frequently Asked Questions (“FAQs”)</h5>
+              <a href="https://mof.gov.ae/wp-content/uploads/2022/08/FATCA-FAQ-ENGLISH.pdf">Download</a>
+            </div>
+          </section>
+        </main>
+      </form>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.sca.gov.ae/en/regulations/automatic-exchange-of-information-fatca-and-crs",
+        adapter_family="sca_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "sca_listing"
+    assert result.item_count == 3
+    assert "Intergovernmental Agreement between the U.S and the UAE" in result.text
+    assert "Cabinet Resolution No.93 of 2021" in result.text
+    assert "FATCA-FAQ-ENGLISH.pdf" in result.text
+    assert "Search Services" not in result.text
+
+
 def test_dfsa_rulebook_adapter_extracts_module_titles_and_links():
     html = """
     <html><body><article>
@@ -631,6 +672,49 @@ def test_adgm_fsra_listing_adapter_extracts_guidance_links():
     assert result.adapter_name == "adgm_fsra_listing"
     assert result.item_count == 2
     assert "FSRA AML Guidance" in result.text
+
+
+def test_adgm_fsra_listing_adapter_extracts_component_link_buttons():
+    html = """
+    <html><body>
+      <adgm-page>
+        <adgm-section variant="primary">
+          <adgm-expansion-panel type="plus" variant="primary">
+            <span>Rules</span>
+            <adgm-link-button href="https://assets.adgm.com/download/assets/ADGM1547_10529_VER08181223.pdf/21c4d7ae7efb11efb6bdd62fccae6617" icon="downloadPdf">
+              Market Rules
+            </adgm-link-button>
+          </adgm-expansion-panel>
+          <adgm-expansion-panel type="plus" variant="primary">
+            <span>Guidance</span>
+            <adgm-link-button href="https://assets.adgm.com/download/assets/Guidance+on+Preparing+Prospectus+VER01+290224+FINAL.pdf/740d3d527efc11ef8b05d62fccae6617" icon="downloadPdf">
+              Guidance on Preparing a Prospectus
+            </adgm-link-button>
+            <adgm-link-button href="https://assets.adgm.com/download/assets/Guidance+-+Listing+Applications+and+Eligibility+VER01.100425.pdf/11df78d01a9b11f09d2c12dc9436842e" icon="downloadPdf">
+              Guidance - Listing Applications and Eligibility
+            </adgm-link-button>
+          </adgm-expansion-panel>
+        </adgm-section>
+        <adgm-footer>
+          <a href="/operating-in-adgm/e-services/fsra-connect">FSRA Connect</a>
+        </adgm-footer>
+      </adgm-page>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.adgm.com/financial-services-regulatory-authority/listing-authority/rules-and-guidance",
+        adapter_family="adgm_fsra_listing",
+        adapter_config={"container_selector": "adgm-section"},
+    )
+
+    assert result.adapter_name == "adgm_fsra_listing"
+    assert result.item_count == 3
+    assert "Market Rules" in result.text
+    assert "Guidance on Preparing a Prospectus" in result.text
+    assert "Guidance+-+Listing+Applications" in result.text
+    assert "FSRA Connect" not in result.text
 
 
 def test_dfsa_notice_listing_adapter_extracts_financial_crime_links():

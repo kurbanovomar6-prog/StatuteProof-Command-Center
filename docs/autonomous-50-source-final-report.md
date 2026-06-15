@@ -1,14 +1,14 @@
 # Autonomous 50-Source Final Report
 
-Date: 2026-06-15
+Date: 2026-06-16
 
 ## 1. Activation Counts
 
 | Metric | Before cycle | After cycle |
 | --- | ---: | ---: |
-| Activation-ready / active sources | 20 | 22 |
-| Enabled UAE sources | 24 | 26 |
-| Readiness-supported sources | 20 | 22 |
+| Activation-ready / active sources | 22 | 24 |
+| Enabled UAE sources | 26 | 28 |
+| Readiness-supported sources | 22 | 24 |
 | Under extraction remediation | 4 | 4 |
 
 ## 2. Adapters Implemented Or Improved
@@ -17,6 +17,9 @@ Date: 2026-06-15
 | --- | --- | --- |
 | `eocn_news_listing` | new source-specific adapter | Converted EOCN News from generic-listing false positive to proof-backed active source. |
 | `sca_listing` | improved source-specific adapter | Drops invalid `javascript:` / `javascipt:` pseudo-links before normalized evidence output. |
+| `sca_listing` | improved source-specific adapter | Added FATCA/CRS, automatic exchange, cabinet resolution, reporting-financial-institution, and investment/citizenship circular signals so SCA FATCA/CRS document links are monitorable. |
+| `adgm_fsra_listing` | improved source-specific adapter | Extracts ADGM `adgm-link-button[href]` PDF/document components and rejects global service chrome. |
+| `source_intake` structured adapter gate | quality gate update | Recognizes `adgm_fsra_listing` as structured adapter output without lowering quality thresholds. |
 
 ## 3. Sources Activated
 
@@ -24,6 +27,8 @@ Date: 2026-06-15
 | --- | --- | --- | --- | --- |
 | `AE-eocn-news-en` | EOCN News and Sanctions Updates | 2 proof runs | stable | `MONITOR_OK` |
 | `AE-sca-regulations-listing` | SCA Regulations Listing | 2 proof runs | stable | `MONITOR_OK` |
+| `AE-sca-fatca-crs` | SCA FATCA and CRS Guidance | 2 proof runs | stable | `MONITOR_OK` |
+| `AE-adgm-listing-rules` | ADGM FSRA Listing Authority Rules and Guidance | 2 proof runs | stable | `MONITOR_OK` |
 
 ## 4. Candidate Sources Tested
 
@@ -42,13 +47,13 @@ Date: 2026-06-15
 
 ## 5. No-Save / Evidence Results
 
-- Candidate sources tested: 12.
-- Strong no-save passes: 3 (`AE-eocn-news-en`, `AE-sca-regulations-listing`, `AE-uaefiu-mutual-evaluation`).
-- Strong passes activated: 2.
+- Candidate sources tested: 14 across the autonomous cycle and continuation.
+- Strong no-save passes: 5 (`AE-eocn-news-en`, `AE-sca-regulations-listing`, `AE-uaefiu-mutual-evaluation`, `AE-sca-fatca-crs`, `AE-adgm-listing-rules`).
+- Strong passes activated: 4.
 - Strong pass held: 1 (`AE-uaefiu-mutual-evaluation`, duplicate active FIU typology hash).
-- Saved evidence runs: 4.
-- Baseline-complete sources: 2.
-- Agent gate pass count: 12 gate passes for 2 activated sources.
+- Saved evidence runs: 8.
+- Baseline-complete sources: 4.
+- Agent gate pass count: 24 gate passes for 4 activated sources.
 
 ## 6. sources.json Changed
 
@@ -58,10 +63,12 @@ Added:
 
 - `AE-eocn-news-en`
 - `AE-sca-regulations-listing`
+- `AE-sca-fatca-crs`
+- `AE-adgm-listing-rules`
 
 ## 7. Website/App Copy Changed
 
-No frontend copy was changed. Current truth docs/config/validators were updated to 26/22/4.
+No frontend copy was changed. Current truth docs/config/validators were updated to 28/24/4.
 
 ## 8. Batch-Onboarding Factory Status
 
@@ -69,22 +76,22 @@ Partial. The system can batch no-save-test candidates, classify failures, save p
 
 ## 9. Did We Reach 50?
 
-No. Current readiness-supported active count is 22. Reaching 50 requires 28 more proof-backed, baseline-stable, gate-passing sources.
+No. Current readiness-supported active count is 24. Reaching 50 requires 26 more proof-backed, baseline-stable, gate-passing sources.
 
 ## 10. Biggest Remaining Blocker
 
-JS-heavy official pages often render custom elements or nav shells that require source-specific selectors. ADGM RA URLs also appear stale/404. SCA FATCA/CRS is close at q=59 but needs richer context before evidence.
+JS-heavy official pages often render custom elements or nav shells that require source-specific selectors. ADGM RA URLs also appear stale/404. UAE FIU AML/CFT laws still need DOM/XHR or direct official document endpoint remediation. SCA corporate governance may be a duplicate or a too-small subpage unless a richer source-specific endpoint is found.
 
 ## 11. Next Exact Task
 
-Execute `docs/autonomous-next-execution-prompt.md`, starting with SCA FATCA/CRS q=59 and ADGM Listing Authority DOM/XHR remediation.
+Execute `docs/autonomous-next-execution-prompt.md`, starting with UAE FIU AML/CFT laws, ADGM RA notices/AML guide replacement URLs, and SCA corporate governance source-model review.
 
 ## 12. Validation Results
 
 Passed:
 
 - `python3 -m compileall product/regradar`
-- `python3 -m pytest product/regradar/tests -q` — 196 passed.
+- `python3 -m pytest product/regradar/tests -q`
 - `python3 tools/validate_source_discovery_engine.py`
 - `python3 tools/validate_source_activation_pipeline.py`
 - `python3 tools/validate_mass_source_activation_pipeline.py`

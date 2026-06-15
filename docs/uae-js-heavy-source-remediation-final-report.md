@@ -10,7 +10,7 @@ The sprint converted one JS-heavy official UAE source into a proof-backed, basel
 
 The original JS-heavy remediation cycle moved the source count from **23 enabled / 19 readiness-supported / 4 remediation** to **24 enabled / 20 readiness-supported / 4 remediation**.
 
-Autonomous follow-up on 2026-06-15 added `AE-eocn-news-en` after implementing `eocn_news_listing`, then added `AE-sca-regulations-listing` after cleaning invalid SCA pseudo-links in `sca_listing`. Both completed two stable evidence runs and mass-monitor dry-run. Current truth is now **26 enabled / 22 readiness-supported / 4 remediation**.
+Autonomous follow-up on 2026-06-15 added `AE-eocn-news-en` after implementing `eocn_news_listing`, then added `AE-sca-regulations-listing` after cleaning invalid SCA pseudo-links in `sca_listing`. Both completed two stable evidence runs and mass-monitor dry-run. The continuation cycle then added `AE-sca-fatca-crs` and `AE-adgm-listing-rules` after source-specific adapter remediation, two stable evidence runs each, and mass-monitor dry-run. Current truth is now **28 enabled / 24 readiness-supported / 4 remediation**.
 
 ## What Improved
 
@@ -37,7 +37,7 @@ Autonomous follow-up on 2026-06-15 added `AE-eocn-news-en` after implementing `e
 
 ## Did We Reach 50?
 
-No. Current truth is **26 enabled / 22 readiness-supported / 4 remediation**. Reaching 50 still requires 24 more genuinely passing sources with proof, baseline, and gates.
+No. Current truth is **28 enabled / 24 readiness-supported / 4 remediation**. Reaching 50 still requires 26 more genuinely passing sources with proof, baseline, and gates.
 
 ## Remaining Blockers
 

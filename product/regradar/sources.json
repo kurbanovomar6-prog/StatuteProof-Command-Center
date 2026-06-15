@@ -1643,5 +1643,44 @@
       "max_items": 80
     },
     "fetch_method": "playwright"
+  },
+  {
+    "name": "SCA FATCA and CRS Guidance",
+    "url": "https://www.sca.gov.ae/en/regulations/automatic-exchange-of-information-fatca-and-crs",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-sca-fatca-crs",
+    "adapter_family": "sca_listing",
+    "adapter_name": "sca_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-fatca-crs/intake-20260615T204221Z/proof.json",
+    "normalized_hash": "903d395f875a795d21a0cc07fbb9a00276ebe6c1831c7167a08d02d75a531558",
+    "adapter_config": {
+      "container_selector": "main",
+      "candidate_scan_limit": 800,
+      "max_items": 120
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "ADGM FSRA Listing Authority Rules and Guidance",
+    "url": "https://www.adgm.com/financial-services-regulatory-authority/listing-authority/rules-and-guidance",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-adgm-listing-rules",
+    "adapter_family": "adgm_fsra_listing",
+    "adapter_name": "adgm_fsra_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-listing-rules/intake-20260615T204211Z/proof.json",
+    "normalized_hash": "05953b82e9ebfc38e882507729ee24c9f4e0bc3b9b0c121f0e52a225e24b8603",
+    "adapter_config": {
+      "container_selector": "adgm-section",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
   }
 ]

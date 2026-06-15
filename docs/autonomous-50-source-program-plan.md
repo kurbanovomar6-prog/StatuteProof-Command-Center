@@ -13,8 +13,8 @@ Date: 2026-06-15
 
 Verified from the current registry and validators after the latest FIU activation:
 
-- 26 enabled UAE sources.
-- 22 readiness-supported active UAE sources.
+- 28 enabled UAE sources.
+- 24 readiness-supported active UAE sources.
 - 4 under extraction remediation.
 - 50 has not been reached.
 

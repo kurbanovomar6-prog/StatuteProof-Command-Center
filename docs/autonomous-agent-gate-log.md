@@ -39,3 +39,25 @@ Final decision: activation-ready and added to `sources.json`.
 | `AE-adgm-ra-notices` | Source Monitor HOLD | Current selector returns nav-shell. Needs alternate ADGM component selector. |
 | `AE-adgm-ra-aml-guides` | Source Monitor HOLD | Current selector returns nav-shell. Needs alternate ADGM component selector. |
 | `AE-adgm-listing-rules` | Source Monitor HOLD | Current selector returns nav-shell. Needs alternate ADGM component selector. |
+
+## Continuation Cycle: Agent Gate Decisions
+
+Date: 2026-06-16
+
+### `AE-sca-fatca-crs` — PASS
+
+- Source Monitor: PASS. Official SCA public URL, regulatory FATCA/CRS guidance and official document links, q=65, `MONITOR_OK`.
+- Evidence Trail: PASS. Two proof paths written, stable normalized hash `903d395f875a795d21a0cc07fbb9a00276ebe6c1831c7167a08d02d75a531558`, baseline complete.
+- QA/Critic: PASS. Not nav-shell, not shallow, no duplicate hash, low noise risk, no no-save-only activation.
+- Legal Language: PASS. Monitoring-source wording only; no legal advice, compliance guarantee, or regulator certification claim.
+- Product Manager: PASS. FATCA/CRS source is useful to UAE MLRO/CCO workflows for reporting and regulatory-document monitoring.
+- Code Architect: PASS. Source-family scoped adapter change, fixture-tested, no new dependency, no broad parser rewrite.
+
+### `AE-adgm-listing-rules` — PASS
+
+- Source Monitor: PASS. Official ADGM FSRA public URL, listing authority rules/guidance document links, q=62, `MONITOR_OK`.
+- Evidence Trail: PASS. Two proof paths written, stable normalized hash `05953b82e9ebfc38e882507729ee24c9f4e0bc3b9b0c121f0e52a225e24b8603`, baseline complete.
+- QA/Critic: PASS. Web-component extraction avoids ADGM footer/service chrome, not nav-shell, not shallow, low noise risk.
+- Legal Language: PASS. Safe internal source-readiness wording only.
+- Product Manager: PASS. Listing Authority rules/guidance are relevant to ADGM-regulated market participants and compliance teams.
+- Code Architect: PASS. Reuses existing `adgm_fsra_listing` adapter family with component-link support and structured gate recognition.

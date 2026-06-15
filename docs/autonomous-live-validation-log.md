@@ -43,3 +43,14 @@ Scope: 8 official UAE candidates from the current scoreboard. No broad monitorin
 ## Batch-Onboarding Lesson
 
 The factory can safely batch-test and classify candidates, but generic listing adapters can over-score navigation-heavy pages. Source-specific adapters must be available before evidence save. The EOCN adapter converted one false generic pass into one honest activation-ready source, and the SCA adapter cleanup converted one broader regulatory listing into a stable active source.
+
+## Continuation Cycle: SCA FATCA/CRS + ADGM Listing Authority
+
+Date: 2026-06-16
+
+| Source ID | URL | Adapter | No-save | Evidence | Baseline | Mass-monitor dry-run | Decision |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `AE-sca-fatca-crs` | `https://www.sca.gov.ae/en/regulations/automatic-exchange-of-information-fatca-and-crs` | `sca_listing` with `main`, candidate scan 800 | q=65, `CONFIRMED_ACCESSIBLE`, `can_save_evidence=true`, hash `903d395f...` | 2 proof runs written | 2/2 stable, `MONITORING_CERTIFIED` | `MONITOR_OK`, no change, no alert, no evidence write | Activated |
+| `AE-adgm-listing-rules` | `https://www.adgm.com/financial-services-regulatory-authority/listing-authority/rules-and-guidance` | `adgm_fsra_listing` with `adgm-section` | q=62, `CONFIRMED_ACCESSIBLE`, `can_save_evidence=true`, hash `05953b82...` | 2 proof runs written | 2/2 stable, `MONITORING_CERTIFIED` | `MONITOR_OK`, no change, no alert, no evidence write | Activated |
+
+No broad monitoring was run. The mass-monitor check used a temporary activation-ready queue containing only these two proven candidates.

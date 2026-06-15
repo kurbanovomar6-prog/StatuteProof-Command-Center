@@ -64,3 +64,27 @@ The SCA regulations listing produced meaningful item-level regulatory content, b
 ## Sources Unblocked
 
 - `AE-sca-regulations-listing`: activated after q=65 no-save, 59 extracted regulatory rows, two stable evidence runs, mass-monitor dry-run `MONITOR_OK`, and all gates pass.
+
+## Continuation Cycle: SCA FATCA/CRS + ADGM Listing Authority
+
+Date: 2026-06-16
+
+### Adapter Improvements
+
+- `sca_listing`: expanded regulatory signal detection for FATCA/CRS, automatic exchange of information, cabinet resolutions, reporting financial institutions, and residence/citizenship-by-investment circulars. This moved `AE-sca-fatca-crs` from q=59 near-pass to q=65 strong no-save by including official document links already present on the SCA page.
+- `adgm_fsra_listing`: added support for ADGM web-component document links exposed as `adgm-link-button[href]`, and tightened ADGM/FSRA signal tokens so global chrome such as ADGM Academy/AccessADGM is not treated as listing content. This moved `AE-adgm-listing-rules` from NAV_SHELL_ONLY to q=62 strong no-save.
+- `source_intake`: added `adgm_fsra_listing` to structured adapter content recognition so a valid ADGM/FSRA listing result can become evidence-eligible without weakening quality gates.
+
+### Tests Added
+
+- SCA FATCA/CRS fixture extracts official FATCA/CRS document links and excludes shell chrome.
+- ADGM Listing Authority fixture extracts `adgm-link-button` PDF links and excludes footer/global service links.
+
+### Sources Unblocked
+
+- `AE-sca-fatca-crs` — activated after q=65 no-save, two stable evidence runs, mass-monitor `MONITOR_OK`, and agent gates.
+- `AE-adgm-listing-rules` — activated after q=62 no-save, two stable evidence runs, mass-monitor `MONITOR_OK`, and agent gates.
+
+### Remaining Blocker
+
+The next high-potential batch is now UAE FIU AML/CFT laws, ADGM RA notices/AML guides replacement URLs, SCA corporate governance, VARA rulebooks, and CBUAE publications. These still need DOM/XHR or exact official endpoint remediation.
