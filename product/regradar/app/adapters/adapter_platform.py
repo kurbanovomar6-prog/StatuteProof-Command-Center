@@ -676,6 +676,26 @@ class DfsaNoticeListingAdapter(DocumentListingAdapter):
     allowed_tokens = ("dfsa", "mlro", "letter", "notice", "enforcement", "regulatory action", "aml", "financial crime", "sanction")
 
 
+_GENERIC_CONTEXT_SNIPPETS = {
+    "view",
+    "view details",
+    "read more",
+    "learn more",
+    "download",
+    "open",
+}
+
+
+def _is_meaningful_context(snippet: str, title: str) -> bool:
+    cleaned = _clean(snippet)
+    if not cleaned or cleaned == title:
+        return False
+    folded = cleaned.casefold()
+    if folded in _GENERIC_CONTEXT_SNIPPETS:
+        return False
+    return len(cleaned) >= 40 or len(cleaned.split()) >= 8
+
+
 def _format_items(heading: str, items: list[dict]) -> str:
     if not items:
         return ""
@@ -690,6 +710,12 @@ def _format_items(heading: str, items: list[dict]) -> str:
             lines.append(f"  URL: {item['url']}")
         if item.get("document_url"):
             lines.append(f"  Document URL: {item['document_url']}")
+        snippet = _clean(item.get("raw_text_snippet") or "", limit=900)
+        title = _clean(item.get("title") or "")
+        if snippet and title and title in snippet:
+            snippet = _clean(snippet.replace(title, "", 1), limit=900)
+        if _is_meaningful_context(snippet, title):
+            lines.append(f"  Context: {snippet}")
         if item.get("row_hash"):
             lines.append(f"  Row hash: {item['row_hash']}")
     return "\n".join(lines).strip()

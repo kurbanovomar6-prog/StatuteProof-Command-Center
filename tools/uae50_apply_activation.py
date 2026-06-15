@@ -104,7 +104,7 @@ def build_activation_entry(spec: dict, now: str) -> dict:
 
 
 def slug_to_status_entry(spec: dict) -> dict:
-    return {
+    entry = {
         "name": spec["name"],
         "url": spec["url"],
         "jurisdiction": "AE",
@@ -118,6 +118,23 @@ def slug_to_status_entry(spec: dict) -> dict:
         "proof_path": spec["proof_path"],
         "normalized_hash": spec.get("no_save_normalized_hash"),
     }
+    if spec.get("adapter_config"):
+        entry["adapter_config"] = spec.get("adapter_config")
+    if spec.get("fetch_method"):
+        entry["fetch_method"] = spec.get("fetch_method")
+    return entry
+
+
+def upsert_status_entry(sources: list[dict], spec: dict) -> str:
+    status_entry = slug_to_status_entry(spec)
+    sid = spec["source_id"]
+    url = spec["url"]
+    for source in sources:
+        if source.get("source_id") == sid or source.get("url") == url:
+            source.update(status_entry)
+            return "updated"
+    sources.append(status_entry)
+    return "added"
 
 
 def recompute_summary(wq: dict) -> dict:
@@ -162,10 +179,8 @@ def main() -> int:
     wq = json.loads(WORK_QUEUE.read_text(encoding="utf-8"))
     sources = json.loads(SOURCES.read_text(encoding="utf-8"))
     wq_by_id = {s.get("source_id"): i for i, s in enumerate(wq["sources"])}
-    sources_urls = {s.get("url") for s in sources}
-    sources_ids = {s.get("source_id") for s in sources if s.get("source_id")}
-
     added_active = []
+    updated_active = []
     for sp in specs:
         entry = build_activation_entry(sp, now)
         sid = sp["source_id"]
@@ -173,9 +188,11 @@ def main() -> int:
             wq["sources"][wq_by_id[sid]] = entry
         else:
             wq["sources"].append(entry)
-        if sp["url"] not in sources_urls and sid not in sources_ids:
-            sources.append(slug_to_status_entry(sp))
+        action = upsert_status_entry(sources, sp)
+        if action == "added":
             added_active.append(sid)
+        elif action == "updated":
+            updated_active.append(sid)
 
     recompute_summary(wq)
 
@@ -188,6 +205,7 @@ def main() -> int:
 
     print(json.dumps({
         "added_active_to_sources_json": added_active,
+        "updated_active_in_sources_json": updated_active,
         "work_queue_activation_ready": wq["summary"]["activation_ready_count"],
         "ae_enabled": len(ae_enabled),
         "ae_active": len(ae_active),

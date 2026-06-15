@@ -1588,5 +1588,22 @@
     "expected_min_length": 500,
     "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-ra-circulars/intake-20260615T153115Z/proof.json",
     "normalized_hash": "306cf35ed57e8071f76799331be51acc92d494b6f51c6d7e20e5b52629aa4f4b"
+  },
+  {
+    "name": "UAE FIU Trends and Typology Reports",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/trends-typology-reports/",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-uaefiu-typology-reports",
+    "adapter_family": "fiu_eocn_document_listing",
+    "adapter_name": "fiu_eocn_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-uaefiu-typology-reports/intake-20260615T173740Z/proof.json",
+    "normalized_hash": "f9752fc4906a03d12ab587db00dc1f37c9508688eeda7954d1e2f82ca3ea4c2d",
+    "adapter_config": {
+      "container_selector": "body"
+    }
   }
 ]

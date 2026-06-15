@@ -1,18 +1,18 @@
 {
   "schema_version": "mass-source-activation-1.0",
   "generated_at": "2026-06-15T00:00:00Z",
-  "public_source_truth": "23 enabled UAE sources / 19 readiness-supported / 4 under extraction remediation",
+  "public_source_truth": "24 enabled UAE sources / 20 readiness-supported / 4 under extraction remediation",
   "summary": {
-    "queue_entries": 14,
-    "activation_ready_count": 6,
-    "proof_backed_count": 6,
-    "baseline_complete_count": 6,
+    "queue_entries": 15,
+    "activation_ready_count": 7,
+    "proof_backed_count": 7,
+    "baseline_complete_count": 7,
     "did_reach_50_working_sources": false,
     "sources_json_changed": true,
-    "updated_at": "2026-06-15T13:30:47Z",
-    "last_updated_at": "2026-06-15T13:08:00Z",
-    "new_activation_ready_this_sprint": 6,
-    "public_source_truth": "23 enabled UAE sources / 19 readiness-supported / 4 under extraction remediation",
+    "updated_at": "2026-06-15T17:28:45Z",
+    "last_updated_at": "2026-06-15T17:28:45Z",
+    "new_activation_ready_this_sprint": 7,
+    "public_source_truth": "24 enabled UAE sources / 20 readiness-supported / 4 under extraction remediation",
     "baseline_complete_but_held_count": 0,
     "remediation_count": 7,
     "blocked_count": 1,
@@ -1349,6 +1349,86 @@
         "reviewed_at": "2026-06-15T13:22:31Z",
         "blocking_issues": []
       }
+    },
+    {
+      "source_id": "AE-uaefiu-typology-reports",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/trends-typology-reports/",
+      "regulator": "UAE FIU",
+      "source_type": "publication_listing",
+      "official_status": "official",
+      "discovery_status": "discovered",
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_config": {
+        "container_selector": "body"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "certified_evidence",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "Monitor with the verified FIU/EOCN document listing adapter over the rendered public knowledge-centre page.",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-uaefiu-typology-reports/intake-20260615T173740Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-uaefiu-typology-reports/intake-20260615T173740Z/normalized.txt",
+      "normalized_hash": "f9752fc4906a03d12ab587db00dc1f37c9508688eeda7954d1e2f82ca3ea4c2d",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official UAE FIU public typology publication listing produced meaningful AML/CFT content with q=65 and MONITOR_OK dry-run.",
+        "reviewed_at": "2026-06-15T17:37:51Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Two proof paths exist, normalized hash is stable across repeat baselines, and evidence level is certified.",
+        "reviewed_at": "2026-06-15T17:37:51Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate hash, or unresolved high-noise flags; duplicate FIU hub variants were held.",
+        "reviewed_at": "2026-06-15T17:37:51Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Safe wording only: proof-backed official-source monitoring endpoint; no legal advice, guarantee, or regulator certification claim.",
+        "reviewed_at": "2026-06-15T17:37:51Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "UAE FIU typology reports are directly relevant to MLRO/CCO AML monitoring.",
+        "reviewed_at": "2026-06-15T17:37:51Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses the existing fiu_eocn_document_listing adapter plus scoped quality/formatting fixes; no unsafe dependency or broad rewrite.",
+        "reviewed_at": "2026-06-15T17:37:51Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run MONITOR_OK, and required agent gates passed.",
+        "reviewed_at": "2026-06-15T17:37:51Z",
+        "blocking_issues": []
+      },
+      "no_save_normalized_hash": "f9752fc4906a03d12ab587db00dc1f37c9508688eeda7954d1e2f82ca3ea4c2d",
+      "no_save_normalized_length": 6289,
+      "last_adapter_test_at": "2026-06-15T17:37:51Z",
+      "last_no_save_test_at": "2026-06-15T17:37:51Z"
     }
   ]
 }

@@ -220,6 +220,26 @@ def _fetch_via_requests(url: str) -> str | None:
 
 _PW_JS_SETTLE_MS   = 5_000   # extra wait after navigation for JS-rendered content
 _PW_IDLE_EXTRA_MS  = 3_000   # extra wait when networkidle timed out (page IS loaded)
+_PW_CONTENT_RETRY_MS = 1_000  # retry capture when SPA content is mid-navigation
+
+
+def _capture_page_content(page) -> str:
+    """Capture rendered HTML, retrying once if a SPA is still navigating."""
+    try:
+        return page.content()
+    except Exception as exc:
+        message = str(exc).lower()
+        if "page.content" not in message or "navigat" not in message:
+            raise
+        logger.info(
+            "Playwright content capture raced with navigation — waiting %d ms and retrying",
+            _PW_CONTENT_RETRY_MS,
+        )
+        try:
+            page.wait_for_timeout(_PW_CONTENT_RETRY_MS)
+        except Exception:
+            pass
+        return page.content()
 
 
 def _fetch_via_playwright(url: str) -> str:
@@ -279,7 +299,7 @@ def _fetch_via_playwright(url: str) -> str:
             # Give any post-idle JS rendering a moment to finish
             page.wait_for_timeout(_PW_JS_SETTLE_MS)
 
-        html = page.content()
+        html = _capture_page_content(page)
 
     except PWTimeout as exc:
         raise TimeoutError(
@@ -430,7 +450,7 @@ def fetch_page_with_config(
                     f"content_selector {content_selector!r} matched nothing at {url}"
                 )
         else:
-            html = page.content()
+            html = _capture_page_content(page)
     finally:
         context.close()
 

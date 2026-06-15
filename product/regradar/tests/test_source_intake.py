@@ -301,6 +301,55 @@ def test_focused_custom_element_content_is_not_nav_shell():
     assert result["can_save_for_validation"] is True
 
 
+def test_two_substantial_fiu_document_links_are_not_nav_shell():
+    legal_context = (
+        "This official public document explains anti-money laundering, counter terrorist "
+        "financing, proliferation financing, sanctions compliance, reporting obligations, "
+        "customer due diligence, suspicious transaction reporting, financial intelligence "
+        "controls, regulatory requirements, and compliance governance for supervised entities. "
+    )
+    html = f"""
+    <html><body>
+      <main>
+        <article class="publication-card">
+          <a href="/media/laws/cabinet-resolution-134-2025.pdf">
+            Cabinet Resolution No. 134 of 2025 Regarding the Executive Regulations of
+            Federal Decree by Law No. 10 of 2025 Regarding Anti-Money Laundering and
+            Combating the Financing of Terrorism and Proliferation Financing
+          </a>
+          <p>{legal_context * 3}</p>
+        </article>
+        <article class="publication-card">
+          <a href="/media/laws/federal-decree-law-10-2025.pdf">
+            Federal Decree by Law No. 10 of 2025 Regarding Anti-Money Laundering and
+            Combating the Financing of Terrorism and Proliferation Financing
+          </a>
+          <p>{legal_context * 3}</p>
+        </article>
+        <nav><a href="/contact">Contact us</a></nav>
+      </main>
+    </body></html>
+    """
+    source = {
+        "source_id": "AE-uaefiu-aml-cft-laws-fixture",
+        "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/",
+        "adapter_family": "fiu_eocn_document_listing",
+        "adapter_config": {"container_selector": "main"},
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["adapter_used"] is True
+    assert result["adapter_metadata"]["item_count"] == 2
+    assert result["structured_adapter_content"] is True
+    assert result["nav_shell_detected"] is False
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["quality_score"] >= 60
+    assert result["can_save_for_validation"] is True
+
+
 # ── 3. Hash collision detection ───────────────────────────────────────────────
 
 

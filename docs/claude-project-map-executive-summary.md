@@ -56,13 +56,14 @@ It is **not** a legal adviser, compliance certifier, or regulator partner.
 ## Current source truth (verified from sources.json + validators)
 
 ```
-20 enabled UAE sources / 16 active (readiness-supported) / 4 under remediation
+24 enabled UAE sources / 20 active (readiness-supported) / 4 under remediation
 ```
-*(Updated 2026-06-15 after ADGM FSRA Guidance & Policy Statements activation — custom_element adapter, MONITORING_CERTIFIED, hash stable.)*
+*(Updated 2026-06-15 after UAE FIU Trends and Typology Reports activation — FIU/EOCN document-listing adapter, MONITORING_CERTIFIED, hash stable, mass-monitor MONITOR_OK.)*
 
-Active sources: CBUAE, VARA, DFSA (2 subpages), ADGM/FSRA (4 subpages), SCA
+Active sources include CBUAE, VARA, DFSA subpages, ADGM/FSRA subpages, SCA
 Circulars, UAE Ministry of Finance, UAE Legislation Portal, UAE Ministry of
-Economy, VARA Enforcement, CBUAE Regulations, UAE FIU Circulars.
+Economy, VARA Enforcement, CBUAE Regulations, UAE FIU Circulars, EOCN AML/CFT
+laws, ADGM RA Circulars, and UAE FIU Trends and Typology Reports.
 
 Remediation: DFSA main site, UAE FIU main, DIFC Laws, DFSA Regulatory Notices.
 
@@ -71,7 +72,7 @@ Remediation: DFSA main site, UAE FIU main, DIFC Laws, DFSA Regulatory Notices.
 ## What is missing
 
 1. **Dashboard and Sources page show mock data** — not wired to `sources.json` or live runs.
-2. **50 active UAE sources** — currently 19/15/4. Getting to 50 requires 31 more genuinely passing sources with real evidence + baselines. The live no-save batch run today (30/49 tested, 4 strong passes so far) is finding real additional sources via the per-adapter approach.
+2. **50 active UAE sources** — currently 24/20/4. Getting to 50 requires 26 more genuinely passing sources with real evidence + baselines. The live no-save batches show that per-source adapters work, but JS-heavy FIU/SCA/ADGM variants still need selector remediation.
 3. **Alert delivery** — Telegram wiring exists but requires per-client setup.
 4. **Billing** — not implemented; plan intents recorded but no payment processing.
 5. **Custom-source activation UI** — adding a URL via Source Lab saves it as `enabled:false/pending_validation`; there is no UI for the manual review + activation step (done via CLI today).

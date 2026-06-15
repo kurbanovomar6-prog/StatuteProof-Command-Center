@@ -282,6 +282,16 @@ def _has_structured_adapter_content(result: dict) -> bool:
     if family not in structured_families:
         return False
     item_count = int(adapter_metadata.get("item_count") or 0)
+    chars = int(result.get("chars_normalized") or 0)
+    document_families = {
+        "document_listing",
+        "pdf_listing",
+        "cbuae_document_listing",
+        "fiu_eocn_document_listing",
+        "vara_pdf_listing",
+    }
+    if family in document_families:
+        return bool(result.get("adapter_used")) and item_count >= 2 and chars >= 500
     return bool(result.get("adapter_used")) and item_count >= 3
 
 
