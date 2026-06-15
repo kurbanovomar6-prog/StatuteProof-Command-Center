@@ -1,0 +1,146 @@
+{
+  "batch": "batch5_targeted",
+  "tested_count": 5,
+  "strong_pass_count": 2,
+  "results": [
+    {
+      "status": "NAV_SHELL_ONLY",
+      "quality_score": 0,
+      "chars_normalized": 18,
+      "normalized_hash": "dd9c4c3bd6fb50a2c509f5c0838a67145ea08b96de43292cedc8c1ef4987a4c9",
+      "nav_shell_detected": true,
+      "hash_collision": false,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "can_save_evidence": false,
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "source_id": "AE-adgm-dp-regulatory-actions",
+      "adapter_family": "custom_element",
+      "adapter_name": "custom_element",
+      "adapter_config": {
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "Regulatory Actions"
+        ],
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "adgm-footer",
+          "adgm-navigation",
+          "adgm-cookie-notification",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "wait_for_selector": "adgm-page",
+      "normalized_preview": "Regulatory Actions"
+    },
+    {
+      "status": "NAV_SHELL_ONLY",
+      "quality_score": 0,
+      "chars_normalized": 271,
+      "normalized_hash": "a898af2d871f2d60b91f381ecc802b887c7b27085725e6d817a5b212d4197962",
+      "nav_shell_detected": true,
+      "hash_collision": false,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "can_save_evidence": false,
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "source_id": "AE-adgm-media-announcements",
+      "adapter_family": "adgm_fsra_listing",
+      "adapter_name": "adgm_fsra_listing",
+      "adapter_config": {
+        "container_selector": "adgm-page",
+        "item_selector": "adgm-highlight-card, [class*=listing], a[href]",
+        "max_items": 20
+      },
+      "wait_for_selector": "adgm-page",
+      "normalized_preview": "ADGM/FSRA listing items\n- Title: FSRA Connect\nCategory: listing_item\nURL: https://www.adgm.com/operating-in-adgm/e-services/fsra-connect\nContext: AccessRP ACCESSADGM Online Registry Solution Electronic Prudential Reporting ADGM eCourts Platform\nRow hash: 41009568e1207061"
+    },
+    {
+      "status": "NAV_SHELL_ONLY",
+      "quality_score": 0,
+      "chars_normalized": 271,
+      "normalized_hash": "a898af2d871f2d60b91f381ecc802b887c7b27085725e6d817a5b212d4197962",
+      "nav_shell_detected": true,
+      "hash_collision": false,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "can_save_evidence": false,
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "source_id": "AE-adgm-listing-announcements",
+      "adapter_family": "adgm_fsra_listing",
+      "adapter_name": "adgm_fsra_listing",
+      "adapter_config": {
+        "container_selector": "adgm-page",
+        "item_selector": "adgm-highlight-card, [class*=listing], a[href]",
+        "max_items": 20
+      },
+      "wait_for_selector": "adgm-page",
+      "normalized_preview": "ADGM/FSRA listing items\n- Title: FSRA Connect\nCategory: listing_item\nURL: https://www.adgm.com/operating-in-adgm/e-services/fsra-connect\nContext: AccessRP ACCESSADGM Online Registry Solution Electronic Prudential Reporting ADGM eCourts Platform\nRow hash: 41009568e1207061"
+    },
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 62,
+      "chars_normalized": 24084,
+      "normalized_hash": "554143b0d042de94843b6a8ae262c45b224b021e0542d8e6098be43e4af72b46",
+      "nav_shell_detected": false,
+      "hash_collision": false,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "can_save_evidence": true,
+      "failure_code": "",
+      "failure_reason": "",
+      "source_id": "AE-adgm-fsra-enforcement",
+      "adapter_family": "custom_element",
+      "adapter_name": "custom_element",
+      "adapter_config": {
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "Enforcement"
+        ],
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "adgm-footer",
+          "adgm-navigation",
+          "adgm-cookie-notification",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "wait_for_selector": "adgm-page",
+      "normalized_preview": "Enforcement\nThe fair and proportionate use of the FSRA enforcement powers plays a critical role in fulfilling the objectives of the ADGM. The FSRA will act swiftly and decisively to address and deter conduct that may adversely affect the integrity of the ADGM or the stability of the financial services industry in the ADGM.\nThe FSRA adopts a risk-based approach to regulation, focusing its efforts on those activities that may pose untoward risks and damaging influence to continuance of its regulat"
+    },
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "chars_normalized": 14651,
+      "normalized_hash": "e5709af71ecda2e41656880068dd4d1290f67d2d1064de9e4b11bb1550cd2328",
+      "nav_shell_detected": false,
+      "hash_collision": false,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "can_save_evidence": true,
+      "failure_code": "",
+      "failure_reason": "",
+      "source_id": "AE-sca-aml-cft",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_config": {
+        "container_selector": "main",
+        "candidate_scan_limit": 500,
+        "max_items": 80
+      },
+      "wait_for_selector": "main",
+      "normalized_preview": "SCA listing items\n- Title: AML & Financial Crimes Framework & Controls \u2013 Good Practices & Common Weaknesses\nURL: https://www.sca.gov.ae/assets/download/6447f044/aml-and-financial-crimes-framwork-and-controls-good-and-weak-practices-english.aspx\nRow hash: c97b8eb9e832e663\n- Title: AML/CFT Guidance for The Capital Market Sector\nURL: https://www.sca.gov.ae/assets/7bbca1fa/amlcft-guidance-for-the-capital-market-sector.aspx\nRow hash: 6490510561736107\n- Title: AMLDeficiencyFollowup@sca.ae\nURL: https:/"
+    }
+  ]
+}

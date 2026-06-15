@@ -1,30 +1,50 @@
 # Next Autonomous Execution Prompt
 
-Continue the StatuteProof UAE 50-source activation program from the committed state after activating `AE-sca-fatca-crs` and `AE-adgm-listing-rules`.
+Continue the StatuteProof UAE 50-source activation program from the committed state after the batch continuation that activated five new sources.
 
 Work only inside `/Users/kurbnovomar/StatuteProof-Command-Center`.
 
 Current verified truth:
 
-- 28 enabled UAE sources.
-- 24 readiness-supported active sources.
+- 33 enabled UAE sources.
+- 29 readiness-supported active sources.
 - 4 under extraction remediation.
-- 50 has not been reached; 22 more proof-backed sources are needed.
+- 50 has not been reached; 21 more proof-backed sources are needed.
 
 Latest proven additions:
 
-1. `AE-sca-fatca-crs` — `sca_listing`, q=65, two stable evidence runs, mass-monitor `MONITOR_OK`.
-2. `AE-adgm-listing-rules` — `adgm_fsra_listing`, q=62, two stable evidence runs, mass-monitor `MONITOR_OK`.
+1. `AE-sca-corporate-governance` — `table`, q=60, two stable evidence runs, mass-monitor `MONITOR_OK`.
+2. `AE-adgm-dp-guidance` — `custom_element`, q=62, two stable evidence runs, mass-monitor `MONITOR_OK`.
+3. `AE-adgm-fsra-enforcement` — `custom_element`, q=62, two stable evidence runs, mass-monitor `MONITOR_OK`.
+4. `AE-sca-aml-cft` — `sca_listing`, q=65, two stable evidence runs, mass-monitor `MONITOR_OK`.
+5. `AE-dfsa-rulebook-thomsonreuters` — `dfsa_rulebook` with `article` selector, q=65, two stable evidence runs, mass-monitor `MONITOR_OK`.
 
 Do not deploy, expose secrets, send customer messages, bypass login/CAPTCHA/paywalls, fake evidence, weaken validators, or claim 50.
 
 Next highest-leverage batch:
 
-1. `AE-uaefiu-aml-cft-laws` — NAV_SHELL_ONLY; investigate rendered DOM/XHR and direct official document URLs. Do not activate route aliases that duplicate `AE-uaefiu-typology-reports`.
-2. `AE-adgm-ra-notices` and `AE-adgm-ra-aml-guides` — currently stale/404 shell; find correct official ADGM Registration Authority replacement URLs or mark stale with exact blocker.
-3. `AE-sca-corporate-governance` — current extraction is too small; decide whether it is a distinct monitorable source or already covered by SCA regulations listing.
-4. `AE-vara-rulebooks` — official rulebook/PDF source if current URL is accessible; use PDF listing adapter only after no-save is strong.
-5. `AE-cbuae-publications` — use only official public alternate endpoints; do not bypass WAF/403.
+1. ADGM alternate listing/card selectors:
+   - `AE-adgm-dp-regulatory-actions`
+   - `AE-adgm-media-announcements`
+   - `AE-adgm-listing-announcements`
+   These pages contain rendered content but current selectors collapse to heading-only or global service/navigation links. Inspect custom elements and card/listing components with Playwright, then build a stricter ADGM announcement/listing adapter if needed.
+
+2. UAE FIU SPA/XHR/direct document discovery:
+   - `AE-uaefiu-aml-cft-laws`
+   - `AE-uaefiu-laws-regulations`
+   - `AE-uaefiu-publications`
+   Current routes are NAV-shell or duplicate aliases. Use Playwright network capture and official document endpoints only. Do not bypass access controls.
+
+3. VARA rulebook/PDF remediation:
+   - `AE-vara-rulebooks-overview`
+   - `AE-vara-aml-cft-rulebook`
+   - `AE-vara-company-rulebook`
+   Current routes are NAV-shell. Look for official PDF/document links or stable rendered selectors.
+
+4. CBUAE official public alternates:
+   - `AE-cbuae-circulars`
+   - `AE-cbuae-publications`
+   Keep ACCESS_BLOCKED if public access cannot be verified without bypassing protections.
 
 Cycle requirements:
 
@@ -37,5 +57,7 @@ Cycle requirements:
 7. Update `sources.json` only after all gates pass.
 8. Update scoreboard, work queue, truth docs, validators, and tests.
 9. Run full validation and commit/push only after validation passes.
+
+Do not stop after one source if more safe candidates can be processed.
 
 Final output must include counts before/after, sources activated, tests added, validation result, commit hash, why fewer than 50, and next exact task.

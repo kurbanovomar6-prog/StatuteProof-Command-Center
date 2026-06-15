@@ -249,95 +249,102 @@
       "wait_selector": "adgm-page"
     },
     {
-      "activation_decision": "baseline_pending",
+      "source_id": "AE-adgm-fsra-enforcement",
+      "regulator": "ADGM/FSRA",
+      "url": "https://www.adgm.com/fsra/enforcement",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:custom_element",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "custom_element",
+      "adapter_name": "custom_element",
+      "adapter_version": "adapter-platform-1.0",
       "adapter_config": {
-        "content_selector": "adgm-page > span",
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "Enforcement"
+        ],
         "exclude_selectors": [
+          "header",
           "nav",
           "footer",
+          "adgm-footer",
+          "adgm-navigation",
+          "adgm-cookie-notification",
           "script",
           "style",
           "noscript"
         ]
       },
-      "adapter_failure_reason": "",
-      "adapter_family": "custom_element",
-      "adapter_name": "custom_element",
-      "adapter_remediation_hint": "Run Source Lab with custom_element adapter and saved baseline only after no-save passes.",
-      "adapter_status": "configured_pending_selector_review",
-      "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 0,
-      "baseline_runs_required": 2,
-      "blocker": "Not activation-ready under agent-gated standard.",
-      "can_activate": false,
-      "code_architect_gate": {
-        "adapter_or_code_notes": "Review before save.",
-        "reason": "Save/baseline run and possible filters required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "current_state": "no_save_passed",
-      "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No-save result is preview only; no proof claim allowed.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "expected_extraction_strategy": "playwright_selector",
-      "expected_min_length": null,
       "extraction_strategy": "adapter:custom_element",
-      "final_activation_gate": {
-        "reason": "No-save passed; save evidence and baselines are still required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "baseline_pending"
-      },
-      "last_adapter_test_at": null,
-      "last_no_save_test_at": "2026-06-14T19:59:07Z",
-      "legal_language_gate": {
-        "allowed_wording": "No-save readiness-supported candidate.",
-        "forbidden_wording": "evidence-confirmed, monitoring-ready",
-        "reason": "Allowed wording: no-save readiness candidate only.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
-      },
-      "next_action": "save_baseline_only_if_source_label_is_broadened_or_split",
-      "no_save_adapter_name": null,
-      "no_save_adapter_used": null,
-      "no_save_duplicate_hash": null,
-      "no_save_failure_reason": "domain stop after repeated failures for www.adgm.com",
-      "no_save_nav_shell": null,
-      "no_save_normalized_hash": null,
-      "no_save_normalized_length": null,
-      "no_save_quality_label": null,
-      "no_save_quality_score": null,
-      "no_save_readiness_status": "SKIPPED",
+      "last_adapter_test_at": "2026-06-15T21:19:04Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "adgm-page",
+      "wait_selector": "adgm-page",
+      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-enforcement/intake-20260615T211739Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 62,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "554143b0d042de94843b6a8ae262c45b224b021e0542d8e6098be43e4af72b46",
+      "no_save_normalized_length": 24084,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "custom_element",
+      "no_save_failure_reason": "",
       "no_save_remediation_hint": "",
-      "no_save_tested": false,
-      "noise_risk": "medium",
-      "priority": "P1",
-      "product_manager_gate": {
-        "reason": "Enforcement actions help compliance teams track regulatory expectations.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
-      },
-      "proof_path": null,
-      "qa_critic_gate": {
-        "reason": "Can save for validation, but cannot activate.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "regulator": "ADGM/FSRA",
-      "selector": "adgm-page > span",
-      "source_health_risk": "medium",
-      "source_id": "AE-adgm-fsra-enforcement",
+      "last_no_save_test_at": "2026-06-15T21:19:04Z",
       "source_monitor_gate": {
-        "reason": "No-save output was meaningful, but evidence is not saved.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
       },
-      "source_type": "enforcement",
-      "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities",
-      "wait_selector": "adgm-page > span"
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
+      }
     },
     {
       "activation_decision": "activation_ready",
@@ -2972,88 +2979,88 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "baseline_pending",
-      "adapter_config": {
-        "container_selector": "article, main"
-      },
-      "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": "dfsa_rulebook",
-      "adapter_name": "dfsa_rulebook",
-      "adapter_remediation_hint": "Run DFSA rulebook module adapter no-save, then save proof/baseline if module rows are stable.",
-      "adapter_status": "live_test_failed",
-      "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 0,
-      "baseline_runs_required": 2,
-      "blocker": "Not activation-ready under agent-gated standard.",
-      "can_activate": false,
-      "code_architect_gate": {
-        "adapter_or_code_notes": "Review before save.",
-        "reason": "Save/baseline run and possible filters required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "current_state": "no_save_passed",
-      "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No-save result is preview only; no proof claim allowed.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "expected_extraction_strategy": "static_html",
-      "expected_min_length": null,
-      "extraction_strategy": "adapter:dfsa_rulebook",
-      "final_activation_gate": {
-        "reason": "No-save passed; save evidence and baselines are still required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "baseline_pending"
-      },
-      "last_adapter_test_at": null,
-      "last_no_save_test_at": "2026-06-14T19:59:07Z",
-      "legal_language_gate": {
-        "allowed_wording": "No-save readiness-supported candidate.",
-        "forbidden_wording": "evidence-confirmed, monitoring-ready",
-        "reason": "Allowed wording: no-save readiness candidate only.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
-      },
-      "next_action": "continue_source_remediation_or_validation",
-      "no_save_adapter_name": "",
-      "no_save_adapter_used": false,
-      "no_save_duplicate_hash": false,
-      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
-      "no_save_nav_shell": false,
-      "no_save_normalized_hash": "3a4d5bd712abc5b0e7f6a3b5e8a2ac59c70ce37840b845dc9090fbb4ecbdc47c",
-      "no_save_normalized_length": 10774,
-      "no_save_quality_label": "POOR",
-      "no_save_quality_score": 29,
-      "no_save_readiness_status": "BLOCKED",
-      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
-      "no_save_tested": true,
-      "noise_risk": "medium",
-      "priority": "P0",
-      "product_manager_gate": {
-        "reason": "Officially linked rulebook platform may be a cleaner source for DFSA module monitoring.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
-      },
-      "proof_path": null,
-      "qa_critic_gate": {
-        "reason": "Can save for validation, but cannot activate.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "regulator": "DFSA",
-      "selector": null,
-      "source_health_risk": "medium",
       "source_id": "AE-dfsa-rulebook-thomsonreuters",
-      "source_monitor_gate": {
-        "reason": "No-save output was meaningful, but evidence is not saved.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
-      },
-      "source_type": "rulebook",
+      "regulator": "DFSA",
       "url": "https://dfsaen.thomsonreuters.com/rulebook/rulebook-modules",
-      "wait_selector": null
+      "source_type": "rulebook",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:dfsa_rulebook",
+      "expected_min_length": 500,
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "rulebook",
+      "adapter_name": "dfsa_rulebook",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "article"
+      },
+      "extraction_strategy": "adapter:dfsa_rulebook",
+      "last_adapter_test_at": "2026-06-15T21:21:35Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "article",
+      "wait_selector": "article",
+      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-dfsa-rulebook-thomsonreuters/intake-20260615T212100Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "e637fa31009fd4ff458035b0ebc603c10e8bc1049b9c9da984ba489f8d62d35a",
+      "no_save_normalized_length": 15623,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "dfsa_rulebook",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-15T21:21:35Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:21:35Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:21:35Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:21:35Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:21:35Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:21:35Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:21:35Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T21:21:35Z"
+      }
     },
     {
       "activation_decision": "candidate",
@@ -4141,91 +4148,90 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "remediation",
-      "adapter_config": {
-        "container_selector": "main",
-        "date_selector": "time, .date, [data-date]",
-        "exclude_selectors": [
-          "header",
-          "nav",
-          "footer",
-          "form",
-          ".search",
-          "script",
-          "style",
-          "noscript"
-        ],
-        "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
-        "max_items": 120,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4, [data-icms-title]",
-        "url_selector": "a[href]"
-      },
-      "adapter_failure_reason": "",
+      "source_id": "AE-sca-aml-cft",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+      "source_type": "aml",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:sca_listing",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
       "adapter_family": "sca_listing",
       "adapter_name": "sca_listing",
-      "adapter_remediation_hint": "Use SCA rendered listing adapter for item-level title/date/link extraction before save/baseline.",
-      "adapter_status": "configured_for_remediation",
       "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 0,
-      "baseline_runs_required": 2,
-      "blocker": "Saved run extracted only carousel/navigation text: Previous / Next.",
-      "can_activate": false,
-      "code_architect_gate": {
-        "adapter_or_code_notes": "Investigate a more stable post-render selector or SCA item/list adapter before retrying save mode.",
-        "reason": "Investigate a more stable post-render selector or SCA item/list adapter before retrying save mode.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+      "adapter_config": {
+        "container_selector": "main",
+        "candidate_scan_limit": 500,
+        "max_items": 80
       },
-      "current_state": "remediation",
-      "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No complete activation evidence available.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "expected_extraction_strategy": "playwright_selector",
-      "expected_min_length": null,
       "extraction_strategy": "adapter:sca_listing",
-      "final_activation_gate": {
-        "reason": "Source remains under extraction remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "remediation"
-      },
-      "last_adapter_test_at": null,
-      "legal_language_gate": {
-        "allowed_wording": "Under extraction remediation.",
-        "forbidden_wording": "ready, validated, monitored",
-        "reason": "Allowed wording: under extraction remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
-      },
-      "next_action": "selector_adapter_remediation_before_save",
-      "noise_risk": "low",
-      "priority": "P0",
-      "product_manager_gate": {
-        "reason": "Official SCA AML/CFT and financial-crime compliance page for UAE capital-markets participants.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
-      },
-      "proof_path": null,
-      "qa_critic_gate": {
-        "reason": "Remediation source cannot count as working.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
-      },
-      "regulator": "SCA",
-      "selector": "[data-icms-list]",
-      "source_health_risk": "medium",
-      "source_id": "AE-sca-aml-cft",
+      "last_adapter_test_at": "2026-06-15T21:19:04Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "main",
+      "wait_selector": "main",
+      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-aml-cft/intake-20260615T211752Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "e5709af71ecda2e41656880068dd4d1290f67d2d1064de9e4b11bb1550cd2328",
+      "no_save_normalized_length": 14651,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "sca_listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-15T21:19:04Z",
       "source_monitor_gate": {
-        "reason": "Saved run extracted only carousel/navigation text: Previous / Next.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
       },
-      "source_type": "aml_cft_guidance",
-      "url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
-      "wait_selector": "[data-icms-list]"
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T21:19:04Z"
+      }
     },
     {
       "activation_decision": "remediation",
@@ -7441,16 +7447,200 @@
         "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
         "reviewed_at": "2026-06-15T20:44:13Z"
       }
+    },
+    {
+      "source_id": "AE-sca-corporate-governance",
+      "regulator": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/corporate-governance",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:table",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "table",
+      "adapter_name": "table",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "table",
+        "content_selector": "table",
+        "item_selector": "tr"
+      },
+      "extraction_strategy": "adapter:table",
+      "last_adapter_test_at": "2026-06-15T21:11:19Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "table",
+      "wait_selector": "table",
+      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-corporate-governance/intake-20260615T210655Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 60,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "78872bb601ed93e1cd563b61ce56b129fbce6da3565c29a3932d4f3a993aa68c",
+      "no_save_normalized_length": 1026,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "table",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-15T21:11:19Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:11:19Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:11:19Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:11:19Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:11:19Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:11:19Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:11:19Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T21:11:19Z"
+      }
+    },
+    {
+      "source_id": "AE-adgm-dp-guidance",
+      "regulator": "ADGM Office of Data Protection",
+      "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/guidance",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:custom_element",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "custom_element",
+      "adapter_name": "custom_element",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "content_selector": "adgm-page",
+        "focus_keywords": [
+          "Navigate Data Protection in ADGM"
+        ],
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "adgm-footer",
+          "adgm-navigation",
+          "adgm-cookie-notification",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "extraction_strategy": "adapter:custom_element",
+      "last_adapter_test_at": "2026-06-15T21:16:17Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "adgm-page",
+      "wait_selector": "adgm-page",
+      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-dp-guidance/intake-20260615T211532Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 62,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "81e9bc5944cfc3bddf877bd171ad32db5c0f3acfa6cb1150ea2ec750dd2cbe43",
+      "no_save_normalized_length": 1722,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "custom_element",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-15T21:16:17Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:16:17Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:16:17Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:16:17Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:16:17Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:16:17Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-15T21:16:17Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-15T21:16:17Z"
+      }
     }
   ],
   "summary": {
-    "activation_ready_count": 12,
+    "activation_ready_count": 17,
     "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
-    "baseline_complete_count": 13,
-    "baseline_pending_count": 4,
+    "baseline_complete_count": 18,
+    "baseline_pending_count": 2,
     "blocked_count": 21,
     "candidate_count": 28,
     "did_reach_50_working_sources": false,
@@ -7479,17 +7669,17 @@
     },
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready entries count toward the 50 working-source target; sources.json was not expanded in this sprint.",
-    "proof_backed_count": 13,
-    "public_source_truth_after": "28 enabled UAE sources / 24 readiness-supported / 4 under extraction remediation",
+    "proof_backed_count": 18,
+    "public_source_truth_after": "33 enabled UAE sources / 29 readiness-supported / 4 under extraction remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 0,
-    "remediation_count": 21,
+    "remediation_count": 20,
     "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
-    "total_entries": 86,
+    "total_entries": 88,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
-    "source_activation_platform_note": "Auto DOM Investigator, adapter catalog, structured failure codes, Source Lab controls, and validators are in place. The wider UAE work queue now records twelve activation-ready entries; public truth is now 28/24/4 after SCA FATCA/CRS and ADGM Listing Authority activation.",
-    "last_autonomous_cycle_update_at": "2026-06-15T20:42:35Z"
+    "source_activation_platform_note": "Auto DOM Investigator, adapter catalog, structured failure codes, Source Lab controls, and validators are in place. The wider UAE work queue records 17 activation-ready entries; public truth is now 33/29/4 after batch continuation activation.",
+    "last_autonomous_cycle_update_at": "2026-06-15T21:22:00Z"
   },
   "version": 1
 }

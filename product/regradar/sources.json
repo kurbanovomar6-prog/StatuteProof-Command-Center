@@ -1682,5 +1682,127 @@
       "max_items": 80
     },
     "fetch_method": "playwright"
+  },
+  {
+    "name": "SCA Corporate Governance Regulations",
+    "url": "https://www.sca.gov.ae/en/regulations/corporate-governance",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-sca-corporate-governance",
+    "adapter_family": "table",
+    "adapter_name": "table",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-corporate-governance/intake-20260615T210655Z/proof.json",
+    "normalized_hash": "78872bb601ed93e1cd563b61ce56b129fbce6da3565c29a3932d4f3a993aa68c",
+    "adapter_config": {
+      "container_selector": "table",
+      "content_selector": "table",
+      "item_selector": "tr"
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "ADGM Data Protection Guidance",
+    "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/guidance",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-adgm-dp-guidance",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-dp-guidance/intake-20260615T211532Z/proof.json",
+    "normalized_hash": "81e9bc5944cfc3bddf877bd171ad32db5c0f3acfa6cb1150ea2ec750dd2cbe43",
+    "adapter_config": {
+      "content_selector": "adgm-page",
+      "focus_keywords": [
+        "Navigate Data Protection in ADGM"
+      ],
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "adgm-footer",
+        "adgm-navigation",
+        "adgm-cookie-notification",
+        "script",
+        "style",
+        "noscript"
+      ]
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "ADGM FSRA Enforcement",
+    "url": "https://www.adgm.com/fsra/enforcement",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-adgm-fsra-enforcement",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-enforcement/intake-20260615T211739Z/proof.json",
+    "normalized_hash": "554143b0d042de94843b6a8ae262c45b224b021e0542d8e6098be43e4af72b46",
+    "adapter_config": {
+      "content_selector": "adgm-page",
+      "focus_keywords": [
+        "Enforcement"
+      ],
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "adgm-footer",
+        "adgm-navigation",
+        "adgm-cookie-notification",
+        "script",
+        "style",
+        "noscript"
+      ]
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "UAE SCA Anti-Money Laundering and Terrorist Financing",
+    "url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-sca-aml-cft",
+    "adapter_family": "sca_listing",
+    "adapter_name": "sca_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-aml-cft/intake-20260615T211752Z/proof.json",
+    "normalized_hash": "e5709af71ecda2e41656880068dd4d1290f67d2d1064de9e4b11bb1550cd2328",
+    "adapter_config": {
+      "container_selector": "main",
+      "candidate_scan_limit": 500,
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "DFSA Rulebook Modules",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/rulebook-modules",
+    "jurisdiction": "AE",
+    "category": "rulebook",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-dfsa-rulebook-thomsonreuters",
+    "adapter_family": "rulebook",
+    "adapter_name": "dfsa_rulebook",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-dfsa-rulebook-thomsonreuters/intake-20260615T212100Z/proof.json",
+    "normalized_hash": "e637fa31009fd4ff458035b0ebc603c10e8bc1049b9c9da984ba489f8d62d35a",
+    "adapter_config": {
+      "container_selector": "article"
+    },
+    "fetch_method": "playwright"
   }
 ]

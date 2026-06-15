@@ -137,6 +137,7 @@ def test_table_adapter_extracts_and_stable_sorts_rows():
         adapter_config={
             "table_selector": "#register",
             "sort_rows": True,
+            "include_headers": True,
         },
     )
 
@@ -144,6 +145,21 @@ def test_table_adapter_extracts_and_stable_sorts_rows():
     assert result.item_count == 2
     assert result.text.index("Alpha Payments LLC") < result.text.index("Beta Markets LLC")
     assert "Entity | Status | Licence" in result.text
+
+
+def test_table_adapter_omits_headers_by_default_for_stable_monitoring_hash():
+    result = extract_with_adapter(
+        _TABLE_HTML,
+        url="https://www.example.gov.ae/register",
+        adapter_family="table",
+        adapter_config={"table_selector": "#register"},
+    )
+
+    assert result.adapter_family == "table"
+    assert result.item_count == 2
+    assert "Entity | Status | Licence" not in result.text
+    assert "Beta Markets LLC | Active | Broker" in result.text
+    assert result.items[0]["Entity"] == "Beta Markets LLC"
 
 
 def test_custom_element_adapter_extracts_adgm_like_text():

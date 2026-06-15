@@ -6,21 +6,19 @@ Date: 2026-06-15
 
 The repo now has enough candidate volume, but not enough proof-backed strong passes. The blocker is source-specific extraction on JS-heavy or stale official pages, not discovery.
 
-Current truth: 28 enabled / 24 readiness-supported / 4 remediation. Reaching 50 requires 22 more proof-backed, baseline-stable, gate-passing sources.
+Current truth: 33 enabled / 29 readiness-supported / 4 remediation. Reaching 50 requires 21 more proof-backed, baseline-stable, gate-passing sources.
 
 ## 2. Highest Activation Potential
 
-1. SCA pages that are near the existing `sca_listing` pattern.
-2. ADGM/FSRA and Registration Authority pages if the correct component/URL is found.
-3. UAE FIU pages where duplicate route aliases can be replaced with direct document/detail URLs.
-4. VARA/CBUAE/DFSA only where stable public endpoints are accessible without bypassing protections.
+1. ADGM alternate listing/media/data-protection pages if the correct component/item selector is found.
+2. UAE FIU pages where duplicate route aliases can be replaced with direct document/detail URLs.
+3. VARA/CBUAE/DFSA only where stable public endpoints are accessible without bypassing protections.
 
 ## 3. Missing Adapter / Selector Work
 
-- SCA FATCA/CRS needs richer document context to move from q=59 to q>=60.
-- SCA corporate governance and market rules need a decision on whether they are separate sources or better covered by SCA regulations listing / ADX / DFM linked endpoints.
+- SCA market rules still need a decision on whether they are separate sources or better covered by SCA regulations listing / ADX / DFM linked endpoints.
 - ADGM RA notices and AML quick guides currently resolve to a 404 page shell.
-- ADGM Listing Authority rules page has a real page title but current `adgm-page` extraction returns only heading/nav.
+- ADGM media/listing/data-protection regulatory-actions pages have content but current item selectors still collapse to nav/noise.
 - FIU mutual-evaluation route duplicates active FIU typology output.
 
 ## 4. Repeating DOM Problem

@@ -376,7 +376,9 @@ class TableAdapter(BaseHtmlAdapter):
             payload["row_hash"] = _row_hash(*row)
             items.append(payload)
 
-        lines = ["Source table", " | ".join(headers)]
+        lines = ["Source table"]
+        if bool(config.get("include_headers", False)):
+            lines.append(" | ".join(headers))
         for row in body_rows:
             lines.append(" | ".join(row))
 
@@ -388,7 +390,7 @@ class TableAdapter(BaseHtmlAdapter):
             items=items,
             noise_risk="low" if len(items) >= 2 else "medium",
             source_health_risk="medium",
-            metadata={"table_selector": table_selector, "url": url},
+            metadata={"table_selector": table_selector, "headers": headers, "url": url},
         )
 
 
