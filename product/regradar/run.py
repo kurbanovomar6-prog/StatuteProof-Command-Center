@@ -2102,6 +2102,7 @@ def main() -> None:
         print("  python run.py investigate-source <url> --js --json  inspect DOM and suggest selectors", file=sys.stderr)
         print("  python run.py discover-source <url> --json --sitemap --feeds --documents  discover candidate endpoints without saving", file=sys.stderr)
         print("  python run.py source-discovery-lab <url> --js --network --json  discover endpoints + DOM remediation hints", file=sys.stderr)
+        print("  python run.py mass-source-activate --queue product/regradar/config/mass_source_activation_queue.json --no-save-only --limit 10 --regulator SCA", file=sys.stderr)
         print("  python run.py add-source                     interactively add a source", file=sys.stderr)
         print("  python run.py coverage                       coverage dashboard (uses latest audit JSON)", file=sys.stderr)
         print("  python run.py coverage --json                export reports/coverage_YYYY-MM-DD.json", file=sys.stderr)
@@ -2147,6 +2148,7 @@ def main() -> None:
         print("  python run.py discover-source <url> --json               print structured source discovery JSON", file=sys.stderr)
         print("  python run.py discover-source <url> --jurisdiction CODE  tag with jurisdiction code (e.g. AE, SG, KZ)", file=sys.stderr)
         print("  python run.py discover-source <url> --category NAME      tag with category (e.g. tax, aml, cyber)", file=sys.stderr)
+        print("  python run.py mass-source-activate --no-save-only --limit 10  safe queue batch; no evidence save by default", file=sys.stderr)
         sys.exit(2)
 
     cmd = args[0]
@@ -3003,6 +3005,103 @@ def main() -> None:
             sys.exit(2)
         _run_single_url(args[1].strip())
 
+    elif cmd == "mass-source-activate":
+        import json as _json
+        from app.mass_source_activation_runner import DEFAULT_QUEUE_PATH, run_mass_source_activation_batch
+
+        extra = args[1:]
+        queue_path = DEFAULT_QUEUE_PATH
+        regulator = None
+        source_id = None
+        status = None
+        limit = None
+        mode = "no-save-only"
+        repeat_baseline = 0
+        json_export = False
+        i_ = 0
+        while i_ < len(extra):
+            tok = extra[i_]
+            if tok == "--json":
+                json_export = True
+                i_ += 1
+            elif tok == "--queue":
+                if i_ + 1 >= len(extra):
+                    print("Error: --queue requires a path.", file=sys.stderr)
+                    sys.exit(2)
+                queue_path = Path(extra[i_ + 1])
+                i_ += 2
+            elif tok == "--regulator":
+                if i_ + 1 >= len(extra):
+                    print("Error: --regulator requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                regulator = extra[i_ + 1]
+                i_ += 2
+            elif tok == "--source-id":
+                if i_ + 1 >= len(extra):
+                    print("Error: --source-id requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                source_id = extra[i_ + 1]
+                i_ += 2
+            elif tok == "--status":
+                if i_ + 1 >= len(extra):
+                    print("Error: --status requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                status = extra[i_ + 1]
+                i_ += 2
+            elif tok == "--limit":
+                if i_ + 1 >= len(extra):
+                    print("Error: --limit requires an integer.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    limit = max(1, int(extra[i_ + 1]))
+                except ValueError:
+                    print(f"Error: --limit must be an integer, got {extra[i_+1]!r}.", file=sys.stderr)
+                    sys.exit(2)
+                i_ += 2
+            elif tok == "--discover-only":
+                mode = "discover-only"
+                i_ += 1
+            elif tok == "--no-save-only":
+                mode = "no-save-only"
+                i_ += 1
+            elif tok == "--save-passing":
+                mode = "save-passing"
+                i_ += 1
+            elif tok == "--repeat-baseline":
+                if i_ + 1 >= len(extra):
+                    print("Error: --repeat-baseline requires an integer.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    repeat_baseline = max(0, int(extra[i_ + 1]))
+                except ValueError:
+                    print(f"Error: --repeat-baseline must be an integer, got {extra[i_+1]!r}.", file=sys.stderr)
+                    sys.exit(2)
+                i_ += 2
+            else:
+                print(f"Error: unknown option {tok!r} for 'mass-source-activate'.", file=sys.stderr)
+                sys.exit(2)
+        summary = run_mass_source_activation_batch(
+            queue_path=queue_path,
+            regulator=regulator,
+            source_id=source_id,
+            status=status,
+            limit=limit,
+            mode=mode,
+            repeat_baseline=repeat_baseline,
+        )
+        if json_export:
+            print(_json.dumps(summary, indent=2, sort_keys=True))
+        else:
+            print(f"\n  {_BOLD}StatuteProof — Mass Source Activation Runner{_R}")
+            print(f"  {_DIM}Mode: {summary['mode']} · no sources.json update · no customer delivery{_R}")
+            _hr()
+            _label("Processed", str(summary["processed_count"]))
+            _label("No-save passed", str(summary["no_save_passed_count"]))
+            _label("Saved evidence", str(summary["saved_evidence_count"]))
+            _label("Activation-ready", str(summary["activation_ready_count"]))
+            for warning in summary.get("warnings") or []:
+                print(f"  {_YELLOW}Warning:{_R} {warning}")
+
     elif cmd in {"discover-source", "source-discovery-lab"}:
         extra = args[1:]
         if not extra or extra[0].startswith("-"):
@@ -3108,7 +3207,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
             file=sys.stderr,
         )
         sys.exit(2)

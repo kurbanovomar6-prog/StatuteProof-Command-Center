@@ -101,6 +101,9 @@ def _candidate_selectors(soup: BeautifulSoup) -> list[str]:
     for selector in (
         "article",
         "main",
+        ".summary",
+        ".page-summary",
+        "[data-summary]",
         "[role='main']",
         "[data-icms-list]",
         ".content",
@@ -144,6 +147,7 @@ def investigate_html(html: str, *, url: str = "") -> dict:
     table = soup.select_one("table")
     custom_element = soup.select_one("adgm-page, dfsa-page, sca-page")
     listing_node, listing_selector, listing_count = _listing_container(soup)
+    summary = soup.select_one("section.summary, .summary, .page-summary, [data-summary]")
     article = soup.select_one("article")
     main = soup.select_one("main")
 
@@ -216,20 +220,28 @@ def investigate_html(html: str, *, url: str = "") -> dict:
                 "can_save_evidence": nav_risk != "high",
             }
         )
-    elif article or main:
-        selector = "article" if article else "main"
-        text = _node_text(article or main)
+    elif summary or article or main:
+        if summary:
+            selector = ".summary"
+            selected = summary
+        else:
+            selector = "article" if article else "main"
+            selected = article or main
+        text = _node_text(selected)
+        link_count = len(selected.select("a[href]")) if selected else 0
+        is_dfsa_summary = "dfsa.ae" in (url or "").lower() and summary is not None and link_count >= 1
         result.update(
             {
-                "detected_page_type": "article",
-                "recommended_adapter_family": "static_html",
-                "recommended_adapter_name": "static_html",
+                "detected_page_type": "listing" if is_dfsa_summary else "article",
+                "recommended_adapter_family": "dfsa_notice_listing" if is_dfsa_summary else "static_html",
+                "recommended_adapter_name": "dfsa_notice_listing" if is_dfsa_summary else "static_html",
                 "wait_selector": selector,
                 "content_selector": selector,
-                "selector_confidence": 86 if len(text) >= 250 else 72,
-                "why_selector_was_chosen": f"{selector} contains the densest visible content block.",
-                "noise_risk": "low" if nav_risk == "low" else "medium",
-                "source_health_risk": "low" if nav_risk == "low" else "medium",
+                "item_selector": "a[href]" if is_dfsa_summary else "",
+                "selector_confidence": 84 if is_dfsa_summary else 86 if len(text) >= 250 else 72,
+                "why_selector_was_chosen": "DFSA summary block with regulatory links was detected." if is_dfsa_summary else f"{selector} contains the densest visible content block.",
+                "noise_risk": "medium" if is_dfsa_summary else "low" if nav_risk == "low" else "medium",
+                "source_health_risk": "medium" if is_dfsa_summary else "low" if nav_risk == "low" else "medium",
                 "can_no_save_test": bool(text),
                 "can_save_evidence": nav_risk != "high" and len(text) >= 250,
             }

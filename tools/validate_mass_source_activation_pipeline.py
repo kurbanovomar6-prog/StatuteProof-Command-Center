@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PRODUCT_ROOT = ROOT / "product/regradar"
 QUEUE_FILE = PRODUCT_ROOT / "config/mass_source_activation_queue.json"
 SOURCES_FILE = PRODUCT_ROOT / "sources.json"
+RUNNER_FILE = PRODUCT_ROOT / "app/mass_source_activation_runner.py"
+RUN_FILE = PRODUCT_ROOT / "run.py"
 
 sys.path.insert(0, str(PRODUCT_ROOT))
 
@@ -150,6 +152,23 @@ def validate_sources_json_truth(errors: list[str]) -> None:
 
 def main() -> int:
     errors: list[str] = []
+
+    if not RUNNER_FILE.exists():
+        fail(errors, "Missing safe batch runner: product/regradar/app/mass_source_activation_runner.py")
+    else:
+        runner_text = RUNNER_FILE.read_text(encoding="utf-8")
+        for required in (
+            'mode: str = "no-save-only"',
+            'write_evidence=False',
+            '"sources_json_changed": False',
+            "evaluate_activation",
+        ):
+            if required not in runner_text:
+                fail(errors, f"Mass source activation runner missing safety marker: {required}")
+
+    run_text = RUN_FILE.read_text(encoding="utf-8")
+    if "mass-source-activate" not in run_text:
+        fail(errors, "CLI must expose mass-source-activate command.")
 
     if not QUEUE_FILE.exists():
         fail(errors, f"Missing mass activation queue: {QUEUE_FILE.relative_to(ROOT)}")

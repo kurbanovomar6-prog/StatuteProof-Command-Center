@@ -212,3 +212,62 @@ def test_build_discovery_report_from_html_contains_required_contract_fields():
     assert report["table_candidates"]
     assert report["recommended_activation_paths"]
     assert report["recommended_activation_paths"][0]["next_action"] != "activate_monitoring"
+
+
+def test_sca_discovery_filters_generic_links_and_normalizes_doubled_paths():
+    html = """
+    <html><head><title>SCA Regulations</title></head>
+    <body><main>
+      <a href="en/about-us">About Us</a>
+      <a href="en/services">Services</a>
+      <a href="en/regulations/anti-money-laundering-and-terrorist-financing">AML/CFT</a>
+      <a href="en/regulations/circulars-rules-and-procedures">Circulars, Rules and procedures</a>
+      <a href="en/regulations/en/regulations/market-rules-approved-by-sca">Approved Regulations for Capital Market Institutions</a>
+      <a href="en/open-data/companies">Registered Companies</a>
+    </main></body></html>
+    """
+
+    report = build_discovery_report_from_html(
+        "https://www.sca.gov.ae/en/regulations/regulations",
+        html,
+        max_links=20,
+    )
+    urls = [item["candidate_url"] for item in report["recommended_activation_paths"]]
+    titles = [item.get("title", "") for item in report["recommended_activation_paths"]]
+
+    assert not any("/about-us" in url for url in urls)
+    assert not any("/services" in url for url in urls)
+    assert "AML/CFT" in titles
+    assert any(url.endswith("/en/regulations/circulars-rules-and-procedures") for url in urls)
+    assert any(url.endswith("/en/regulations/market-rules-approved-by-sca") for url in urls)
+    assert not any("/en/regulations/en/regulations/" in url for url in urls)
+    assert any(item["source_type"] == "register" for item in report["recommended_activation_paths"])
+
+
+def test_cbuae_403_discovery_maps_to_access_block_remediation():
+    class Response:
+        ok = False
+        status_code = 403
+        text = ""
+        url = "https://www.centralbank.ae/en/our-operations/regulations/"
+
+    def fake_get(url, **kwargs):
+        return Response()
+
+    from unittest.mock import patch
+
+    with patch("app.source_discovery._req.get", side_effect=fake_get):
+        from app.source_discovery import discover_source
+
+        report = discover_source(
+            "https://www.centralbank.ae/en/our-operations/regulations/",
+            include_sitemap=False,
+            include_feeds=False,
+            include_documents=False,
+            max_links=10,
+        )
+
+    assert report["access_status"] == "blocked"
+    assert report["failure_code"] in {"ACCESS_BLOCKED", "LIKELY_WAF_403"}
+    assert "official alternate" in report["remediation_hint"].lower()
+    assert report["recommended_activation_paths"] == []

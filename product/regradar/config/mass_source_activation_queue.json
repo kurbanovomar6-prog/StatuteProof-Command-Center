@@ -8,7 +8,8 @@
     "proof_backed_count": 0,
     "baseline_complete_count": 0,
     "did_reach_50_working_sources": false,
-    "sources_json_changed": false
+    "sources_json_changed": false,
+    "updated_at": "2026-06-15T10:55:58Z"
   },
   "sources": [
     {
@@ -18,16 +19,17 @@
       "source_type": "regulations_listing",
       "official_status": "official",
       "discovery_status": "discovered",
-      "adapter_family": "listing",
-      "adapter_name": "sca_listing",
+      "adapter_family": "table",
+      "adapter_name": "table",
       "adapter_config": {
         "content_selector": "[data-icms-list]",
-        "item_selector": "a, article, li, tr"
+        "item_selector": "a, article, li, tr",
+        "wait_for_selector": "table"
       },
       "no_save_status": "failed",
-      "quality_score": 0,
-      "noise_risk": "high",
-      "source_health_risk": "high",
+      "quality_score": 45,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
       "evidence_status": "none",
       "baseline_status": "not_started",
       "activation_status": "remediation",
@@ -38,7 +40,7 @@
       "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
-      "normalized_hash": "",
+      "normalized_hash": "fcb23c3a6d8f3a90eef8b87c2945f4bb70540be743694b6ce8beedd9d551eed5",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "can_activate": false,
@@ -49,25 +51,34 @@
         "status": "hold",
         "reason": "Official URL is useful, but item-level extraction is not reliable enough.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["listing_adapter_required"]
+        "blocking_issues": [
+          "listing_adapter_required"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
-        "reason": "No current mass-queue proof path or repeat baseline is recorded.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "reason": "No proof and repeat baseline recorded for activation.",
+        "reviewed_at": "2026-06-15T10:54:28Z",
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "High noise/source-health risk blocks activation.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["high_noise_risk", "high_source_health_risk"]
+        "status": "fail",
+        "reason": "No-save result did not meet activation-quality threshold.",
+        "reviewed_at": "2026-06-15T10:54:28Z",
+        "blocking_issues": [
+          "LISTING_ADAPTER_REQUIRED"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "May be described only as remediation/in progress, not ready.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -79,14 +90,29 @@
         "status": "hold",
         "reason": "Source-specific SCA adapter requires further live fixture validation.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_validation_required"]
+        "blocking_issues": [
+          "adapter_validation_required"
+        ]
       },
       "final_activation_gate": {
         "status": "remediation",
-        "reason": "Activation blocked by adapter, proof, baseline, noise, and source-health gaps.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["listing_adapter_required", "proof_missing", "baseline_missing", "high_noise_risk", "high_source_health_risk"]
-      }
+        "reason": "Activation is blocked until all proof, baseline, source-health, quality, and agent gates pass.",
+        "reviewed_at": "2026-06-15T10:54:28Z",
+        "blocking_issues": [
+          "no_save_not_passed",
+          "quality_below_threshold",
+          "proof_missing",
+          "baseline_incomplete",
+          "source_monitor_gate_not_passed",
+          "evidence_trail_gate_not_passed",
+          "qa_critic_gate_not_passed",
+          "legal_language_gate_not_passed",
+          "code_architect_gate_not_passed"
+        ]
+      },
+      "last_discovery_at": "2026-06-15T10:54:18Z",
+      "last_no_save_test_at": "2026-06-15T10:54:28Z",
+      "updated_at": "2026-06-15T10:54:28Z"
     },
     {
       "source_id": "AE-sca-aml-cft",
@@ -96,14 +122,16 @@
       "official_status": "official",
       "discovery_status": "discovered",
       "adapter_family": "listing",
-      "adapter_name": "sca_listing",
+      "adapter_name": "listing",
       "adapter_config": {
-        "content_selector": "[data-icms-list]"
+        "content_selector": "[data-icms-list]",
+        "wait_for_selector": "[data-icms-list]",
+        "item_selector": "article, li, tr, .card, .item, a[href]"
       },
       "no_save_status": "failed",
-      "quality_score": 0,
-      "noise_risk": "high",
-      "source_health_risk": "high",
+      "quality_score": 55,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
       "evidence_status": "none",
       "baseline_status": "not_started",
       "activation_status": "remediation",
@@ -114,36 +142,45 @@
       "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
-      "normalized_hash": "",
+      "normalized_hash": "7ef0490092da74a895e210cd8962c85d6f369f6a2da3f717f0a0b8a0d0030931",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "can_activate": false,
-      "nav_shell": true,
+      "nav_shell": false,
       "shallow_content": false,
       "duplicate_hash": false,
       "source_monitor_gate": {
         "status": "hold",
         "reason": "Official page but extraction target is still unreliable.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["nav_shell"]
+        "blocking_issues": [
+          "nav_shell"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
-        "reason": "No acceptable proof path can be used while nav-shell persists.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "reason": "No proof and repeat baseline recorded for activation.",
+        "reviewed_at": "2026-06-15T10:54:55Z",
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
         "status": "fail",
-        "reason": "Nav-shell output is not activation quality.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["nav_shell"]
+        "reason": "No-save result did not meet activation-quality threshold.",
+        "reviewed_at": "2026-06-15T10:54:55Z",
+        "blocking_issues": [
+          "NAV_SHELL_ONLY"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "Cannot be called ready or validated.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -155,14 +192,29 @@
         "status": "hold",
         "reason": "Needs source-specific adapter remediation.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_remediation_required"]
+        "blocking_issues": [
+          "adapter_remediation_required"
+        ]
       },
       "final_activation_gate": {
         "status": "remediation",
-        "reason": "Activation blocked by nav-shell extraction and missing evidence baseline.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["nav_shell", "proof_missing", "baseline_missing"]
-      }
+        "reason": "Activation is blocked until all proof, baseline, source-health, quality, and agent gates pass.",
+        "reviewed_at": "2026-06-15T10:54:55Z",
+        "blocking_issues": [
+          "no_save_not_passed",
+          "quality_below_threshold",
+          "proof_missing",
+          "baseline_incomplete",
+          "source_monitor_gate_not_passed",
+          "evidence_trail_gate_not_passed",
+          "qa_critic_gate_not_passed",
+          "legal_language_gate_not_passed",
+          "code_architect_gate_not_passed"
+        ]
+      },
+      "last_discovery_at": "2026-06-15T10:54:39Z",
+      "last_no_save_test_at": "2026-06-15T10:54:55Z",
+      "updated_at": "2026-06-15T10:54:55Z"
     },
     {
       "source_id": "AE-dfsa-rulebook-thomsonreuters",
@@ -171,53 +223,66 @@
       "source_type": "rulebook",
       "official_status": "officially_linked",
       "discovery_status": "discovered",
-      "adapter_family": "rulebook",
-      "adapter_name": "dfsa_rulebook",
-      "adapter_config": {},
-      "no_save_status": "not_run",
+      "adapter_family": "listing",
+      "adapter_name": "listing",
+      "adapter_config": {
+        "content_selector": "main",
+        "wait_for_selector": "main",
+        "item_selector": "article, li, tr, .card, .item, a[href]"
+      },
+      "no_save_status": "failed",
       "quality_score": 0,
-      "noise_risk": "unknown",
+      "noise_risk": "low",
       "source_health_risk": "medium",
       "evidence_status": "none",
       "baseline_status": "not_started",
-      "activation_status": "candidate",
-      "failure_code": "RULEBOOK_ADAPTER_REQUIRED",
-      "failure_reason": "Rulebook module extraction must be validated before evidence save.",
-      "remediation_hint": "Run source discovery and DOM investigation, then no-save with dfsa_rulebook adapter.",
+      "activation_status": "remediation",
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
       "agent_gate_status": "hold",
-      "current_state": "candidate",
+      "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
-      "normalized_hash": "",
+      "normalized_hash": "bb6c655d66472cf5525cc7829454426fba78a119a6d3d84a75514e4a8278a937",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "can_activate": false,
-      "nav_shell": false,
+      "nav_shell": true,
       "shallow_content": false,
       "duplicate_hash": false,
       "source_monitor_gate": {
         "status": "hold",
         "reason": "Official linkage must be checked at the module endpoint level.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["module_endpoint_review_required"]
+        "blocking_issues": [
+          "module_endpoint_review_required"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
-        "reason": "No proof or repeat baseline recorded.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "reason": "No proof and repeat baseline recorded for activation.",
+        "reviewed_at": "2026-06-15T10:55:58Z",
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "No no-save result in this queue.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "status": "fail",
+        "reason": "No-save result did not meet activation-quality threshold.",
+        "reviewed_at": "2026-06-15T10:55:58Z",
+        "blocking_issues": [
+          "NAV_SHELL_ONLY"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "Candidate only; no ready claim allowed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -229,14 +294,30 @@
         "status": "hold",
         "reason": "Rulebook adapter must be tested against real module structure.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_test_required"]
+        "blocking_issues": [
+          "adapter_test_required"
+        ]
       },
       "final_activation_gate": {
-        "status": "candidate",
-        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
-      }
+        "status": "remediation",
+        "reason": "Activation is blocked until all proof, baseline, source-health, quality, and agent gates pass.",
+        "reviewed_at": "2026-06-15T10:55:58Z",
+        "blocking_issues": [
+          "no_save_not_passed",
+          "quality_below_threshold",
+          "nav_shell",
+          "proof_missing",
+          "baseline_incomplete",
+          "source_monitor_gate_not_passed",
+          "evidence_trail_gate_not_passed",
+          "qa_critic_gate_not_passed",
+          "legal_language_gate_not_passed",
+          "code_architect_gate_not_passed"
+        ]
+      },
+      "last_discovery_at": "2026-06-15T10:55:52Z",
+      "last_no_save_test_at": "2026-06-15T10:55:58Z",
+      "updated_at": "2026-06-15T10:55:58Z"
     },
     {
       "source_id": "AE-dfsa-aml-mlro-notices",
@@ -245,53 +326,66 @@
       "source_type": "aml_notices_listing",
       "official_status": "official",
       "discovery_status": "discovered",
-      "adapter_family": "listing",
+      "adapter_family": "dfsa_notice_listing",
       "adapter_name": "dfsa_notice_listing",
-      "adapter_config": {},
-      "no_save_status": "not_run",
+      "adapter_config": {
+        "content_selector": ".summary",
+        "wait_for_selector": ".summary",
+        "item_selector": "a[href]"
+      },
+      "no_save_status": "failed",
       "quality_score": 0,
-      "noise_risk": "unknown",
+      "noise_risk": "low",
       "source_health_risk": "medium",
       "evidence_status": "none",
       "baseline_status": "not_started",
-      "activation_status": "candidate",
-      "failure_code": "LISTING_ADAPTER_REQUIRED",
-      "failure_reason": "Needs item/listing extraction before save.",
-      "remediation_hint": "Use discovery/DOM investigation to find stable AML/MLRO listing content.",
+      "activation_status": "remediation",
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
       "agent_gate_status": "hold",
-      "current_state": "candidate",
+      "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
-      "normalized_hash": "",
+      "normalized_hash": "9f60086cc1f6e4c43c63357a1874667d8a7bd1e96a1477eb107db9794b7594bc",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "can_activate": false,
-      "nav_shell": false,
+      "nav_shell": true,
       "shallow_content": false,
       "duplicate_hash": false,
       "source_monitor_gate": {
         "status": "hold",
         "reason": "Official page but item-level monitoring target must be confirmed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["selector_review_required"]
+        "blocking_issues": [
+          "selector_review_required"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
-        "reason": "No proof or repeat baseline recorded.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "reason": "No proof and repeat baseline recorded for activation.",
+        "reviewed_at": "2026-06-15T10:55:12Z",
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "No no-save result in this queue.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "status": "fail",
+        "reason": "No-save result did not meet activation-quality threshold.",
+        "reviewed_at": "2026-06-15T10:55:12Z",
+        "blocking_issues": [
+          "NAV_SHELL_ONLY"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "Candidate only; no ready claim allowed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -303,14 +397,30 @@
         "status": "hold",
         "reason": "Listing adapter must be validated with fixture/live no-save result.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_test_required"]
+        "blocking_issues": [
+          "adapter_test_required"
+        ]
       },
       "final_activation_gate": {
-        "status": "candidate",
-        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
-      }
+        "status": "remediation",
+        "reason": "Activation is blocked until all proof, baseline, source-health, quality, and agent gates pass.",
+        "reviewed_at": "2026-06-15T10:55:12Z",
+        "blocking_issues": [
+          "no_save_not_passed",
+          "quality_below_threshold",
+          "nav_shell",
+          "proof_missing",
+          "baseline_incomplete",
+          "source_monitor_gate_not_passed",
+          "evidence_trail_gate_not_passed",
+          "qa_critic_gate_not_passed",
+          "legal_language_gate_not_passed",
+          "code_architect_gate_not_passed"
+        ]
+      },
+      "last_discovery_at": "2026-06-15T10:55:06Z",
+      "last_no_save_test_at": "2026-06-15T10:55:12Z",
+      "updated_at": "2026-06-15T10:55:12Z"
     },
     {
       "source_id": "AE-eocn-laws-regulations",
@@ -347,25 +457,34 @@
         "status": "hold",
         "reason": "Official and relevant, but extraction target needs validation.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "blocking_issues": [
+          "no_save_not_run"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
         "reason": "No proof or repeat baseline recorded.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
         "status": "hold",
         "reason": "No no-save result in this queue.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "blocking_issues": [
+          "no_save_not_run"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "Candidate only; no ready claim allowed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -377,13 +496,19 @@
         "status": "hold",
         "reason": "Adapter and selectors not live-tested in this queue.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_test_required"]
+        "blocking_issues": [
+          "adapter_test_required"
+        ]
       },
       "final_activation_gate": {
         "status": "candidate",
         "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "no_save_not_run",
+          "proof_missing",
+          "baseline_missing"
+        ]
       }
     },
     {
@@ -429,13 +554,19 @@
         "status": "hold",
         "reason": "No mass-queue proof path or repeat baseline recorded.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
         "status": "hold",
         "reason": "No-save pass cannot be called monitoring-ready.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "legal_language_gate": {
         "status": "pass",
@@ -453,13 +584,18 @@
         "status": "hold",
         "reason": "Custom element adapter needs proof/baseline flow recorded in this queue.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["evidence_flow_required"]
+        "blocking_issues": [
+          "evidence_flow_required"
+        ]
       },
       "final_activation_gate": {
         "status": "no_save_passed",
         "reason": "No-save pass only; proof and baseline are still missing from this queue.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       }
     },
     {
@@ -468,54 +604,63 @@
       "regulator": "Central Bank of the UAE",
       "source_type": "regulations_listing",
       "official_status": "official",
-      "discovery_status": "candidate",
+      "discovery_status": "blocked",
       "adapter_family": "listing",
       "adapter_name": "cbuae_document_listing",
       "adapter_config": {},
-      "no_save_status": "not_run",
+      "no_save_status": "failed",
       "quality_score": 0,
-      "noise_risk": "unknown",
-      "source_health_risk": "unknown",
+      "noise_risk": "medium",
+      "source_health_risk": "medium",
       "evidence_status": "none",
       "baseline_status": "not_started",
-      "activation_status": "candidate",
-      "failure_code": "LISTING_ADAPTER_REQUIRED",
-      "failure_reason": "CBUAE listing extraction is not validated in this mass queue.",
-      "remediation_hint": "Run discover-source, DOM investigation, and no-save with CBUAE document listing adapter.",
+      "activation_status": "remediation",
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
       "agent_gate_status": "hold",
-      "current_state": "candidate",
+      "current_state": "remediation",
       "proof_path": "",
       "normalized_text_path": "",
-      "normalized_hash": "",
+      "normalized_hash": "4215c3999c18724ba9aaf02a13e619b7dea1b75e3ff9f31ab58307b08e47b830",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
       "can_activate": false,
-      "nav_shell": false,
-      "shallow_content": false,
+      "nav_shell": true,
+      "shallow_content": true,
       "duplicate_hash": false,
       "source_monitor_gate": {
         "status": "hold",
         "reason": "Official page; extraction target requires validation.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "blocking_issues": [
+          "no_save_not_run"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
-        "reason": "No proof or repeat baseline recorded.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "reason": "No proof and repeat baseline recorded for activation.",
+        "reviewed_at": "2026-06-15T10:55:34Z",
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "No no-save result in this queue.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "status": "fail",
+        "reason": "No-save result did not meet activation-quality threshold.",
+        "reviewed_at": "2026-06-15T10:55:34Z",
+        "blocking_issues": [
+          "NAV_SHELL_ONLY"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "Candidate only; no ready claim allowed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -527,14 +672,31 @@
         "status": "hold",
         "reason": "Adapter test required before evidence save.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_test_required"]
+        "blocking_issues": [
+          "adapter_test_required"
+        ]
       },
       "final_activation_gate": {
-        "status": "candidate",
-        "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
-        "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
-      }
+        "status": "remediation",
+        "reason": "Activation is blocked until all proof, baseline, source-health, quality, and agent gates pass.",
+        "reviewed_at": "2026-06-15T10:55:34Z",
+        "blocking_issues": [
+          "no_save_not_passed",
+          "quality_below_threshold",
+          "nav_shell",
+          "shallow_content",
+          "proof_missing",
+          "baseline_incomplete",
+          "source_monitor_gate_not_passed",
+          "evidence_trail_gate_not_passed",
+          "qa_critic_gate_not_passed",
+          "legal_language_gate_not_passed",
+          "code_architect_gate_not_passed"
+        ]
+      },
+      "last_discovery_at": "2026-06-15T10:55:21Z",
+      "last_no_save_test_at": "2026-06-15T10:55:34Z",
+      "updated_at": "2026-06-15T10:55:34Z"
     },
     {
       "source_id": "AE-vara-current-framework",
@@ -571,25 +733,34 @@
         "status": "hold",
         "reason": "Official page; exact framework/PDF endpoints require validation.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["document_discovery_required"]
+        "blocking_issues": [
+          "document_discovery_required"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
         "reason": "No proof or repeat baseline recorded.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
         "status": "hold",
         "reason": "No no-save result in this queue.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "blocking_issues": [
+          "no_save_not_run"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "Candidate only; no ready claim allowed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -601,13 +772,19 @@
         "status": "hold",
         "reason": "PDF listing adapter must be validated before evidence save.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_test_required"]
+        "blocking_issues": [
+          "adapter_test_required"
+        ]
       },
       "final_activation_gate": {
         "status": "candidate",
         "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "no_save_not_run",
+          "proof_missing",
+          "baseline_missing"
+        ]
       }
     },
     {
@@ -645,25 +822,34 @@
         "status": "hold",
         "reason": "Official and relevant, but access/extraction must be validated.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "blocking_issues": [
+          "no_save_not_run"
+        ]
       },
       "evidence_trail_gate": {
         "status": "hold",
         "reason": "No proof or repeat baseline recorded.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "proof_missing",
+          "baseline_missing"
+        ]
       },
       "qa_critic_gate": {
         "status": "hold",
         "reason": "No no-save result in this queue.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run"]
+        "blocking_issues": [
+          "no_save_not_run"
+        ]
       },
       "legal_language_gate": {
         "status": "hold",
         "reason": "Candidate only; no ready claim allowed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["ready_claim_forbidden"]
+        "blocking_issues": [
+          "ready_claim_forbidden"
+        ]
       },
       "product_manager_gate": {
         "status": "pass",
@@ -675,13 +861,19 @@
         "status": "hold",
         "reason": "Adapter/access validation required.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["adapter_test_required"]
+        "blocking_issues": [
+          "adapter_test_required"
+        ]
       },
       "final_activation_gate": {
         "status": "candidate",
         "reason": "Candidate only; no no-save/proof/baseline gates have passed.",
         "reviewed_at": "2026-06-15T00:00:00Z",
-        "blocking_issues": ["no_save_not_run", "proof_missing", "baseline_missing"]
+        "blocking_issues": [
+          "no_save_not_run",
+          "proof_missing",
+          "baseline_missing"
+        ]
       }
     }
   ]

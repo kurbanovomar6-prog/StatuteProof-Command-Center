@@ -116,6 +116,25 @@ _JSON_MARKERS = ("application/json", "text/json", "+json")
 _XML_MARKERS = ("application/xml", "text/xml", "+xml", "rss", "atom")
 _PDF_MARKERS = ("application/pdf",)
 _DOC_EXT_RE = re.compile(r"\.(pdf|docx?|xlsx?|csv)($|[?#])", re.IGNORECASE)
+_SCA_ALLOWED_OPEN_DATA_SLUGS = (
+    "/open-data/companies",
+    "/open-data/licensed-companies",
+    "/open-data/mutual-funds",
+    "/open-data/warnings",
+    "/open-data/violations-and-violators",
+    "/open-data/finfluencers",
+)
+_SCA_GENERIC_PATH_FRAGMENTS = (
+    "/about-us",
+    "/services",
+    "/media-center",
+    "/contact",
+    "/careers",
+    "/open-data/open-data-policy",
+    "/open-data/prosposerequest-data",
+    "/open-data/numbers-and-statistics",
+    "/open-data/sca-budget",
+)
 
 
 # ── private helpers ───────────────────────────────────────────────────────────
@@ -148,6 +167,39 @@ def _clean_text(value: str | None) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
 
 
+def _normalize_candidate_url(url: str) -> str:
+    """Normalize known official-site path artifacts without changing authority."""
+    parsed = urlparse(url)
+    if parsed.netloc.lower() != "www.sca.gov.ae":
+        return url
+    path = parsed.path or ""
+    while "/en/regulations/en/regulations/" in path:
+        path = path.replace("/en/regulations/en/regulations/", "/en/regulations/")
+    while "/en/regulations/en/" in path:
+        path = path.replace("/en/regulations/en/", "/en/")
+    rebuilt = parsed._replace(path=path).geturl()
+    return rebuilt
+
+
+def _is_sca_low_value_candidate(url: str, title: str = "", source_type: str = "") -> bool:
+    """Reject official-but-low-value SCA chrome pages from default activation paths."""
+    parsed = urlparse(url)
+    if parsed.netloc.lower() != "www.sca.gov.ae":
+        return False
+    path = (parsed.path or "").lower()
+    title_l = (title or "").lower()
+    if any(fragment in path for fragment in _SCA_ALLOWED_OPEN_DATA_SLUGS):
+        return False
+    if any(fragment in path for fragment in _SCA_GENERIC_PATH_FRAGMENTS):
+        return True
+    generic_titles = {"about us", "services", "cma logo", "awards and achievements", "board of directors"}
+    if title_l.strip() in generic_titles:
+        return True
+    if "/open-data/" in path and source_type not in {"register", "table"}:
+        return True
+    return False
+
+
 def _private_url_reason(url: str) -> str:
     parsed = urlparse(url)
     pathish = f"{parsed.path}?{parsed.query}".lower()
@@ -173,7 +225,9 @@ def _infer_source_type(url: str, title: str = "", content_type: str = "", signal
         return "feed"
     if "sitemap" in lowered:
         return "sitemap"
-    if "register" in lowered or "licensed" in lowered:
+    if "register" in lowered or "licensed" in lowered or (
+        "sca.gov.ae" in lowered and any(token in lowered for token in ("companies", "mutual-funds", "warnings", "violations-and-violators", "finfluencers"))
+    ):
         return "register"
     if "rulebook" in lowered or "rulebook_module" in lowered:
         return "rulebook"
@@ -354,7 +408,7 @@ def discover_same_domain_links(html: str, base_url: str, *, max_links: int = 50)
         href = str(anchor.get("href") or "").strip()
         if not href or href.startswith(("#", "mailto:", "tel:", "javascript:", "data:")):
             continue
-        full = urljoin(base_url, href)
+        full = _normalize_candidate_url(urljoin(base_url, href))
         if full in seen:
             continue
         seen.add(full)
@@ -366,13 +420,17 @@ def discover_same_domain_links(html: str, base_url: str, *, max_links: int = 50)
             rejected.append({"url": full, "reason": private_reason})
             continue
         title = _clean_text(anchor.get_text(" ", strip=True))
+        inferred_type = _infer_source_type(full, title, signals=["listing"])
+        if _is_sca_low_value_candidate(full, title, inferred_type):
+            rejected.append({"url": full, "reason": "low-value SCA chrome/generic page"})
+            continue
         score = _regulatory_score_for_text(f"{full} {title}")
         if score == 0 and len(accepted) >= max_links:
             continue
         accepted.append({
             "url": full,
             "title": title,
-            "source_type": _infer_source_type(full, title, signals=["listing"] if score else []),
+            "source_type": inferred_type,
             "regulatory_score": score,
             "discovery_method": "same_domain_link",
         })
@@ -530,7 +588,7 @@ def capture_playwright_network_candidates(
 
 def score_endpoint_candidate(candidate: dict, *, official_domain: str) -> dict:
     """Score and enrich an endpoint candidate without marking it active."""
-    url = str(candidate.get("candidate_url") or candidate.get("url") or "")
+    url = _normalize_candidate_url(str(candidate.get("candidate_url") or candidate.get("url") or ""))
     title = str(candidate.get("title") or "")
     content_type = str(candidate.get("content_type") or "")
     signals = list(candidate.get("signals") or [])
@@ -560,6 +618,10 @@ def score_endpoint_candidate(candidate: dict, *, official_domain: str) -> dict:
         candidate_status = "rejected"
         failure_reason = private_reason
         remediation_hint = "Do not use private/login/auth/paywall-looking endpoints."
+    elif _is_sca_low_value_candidate(url, title, source_type):
+        candidate_status = "rejected"
+        failure_reason = "Official SCA page is generic/chrome-heavy and not a default monitoring source."
+        remediation_hint = "Use a specific regulations, circulars, AML/CFT, market rules, register, or warnings endpoint."
     elif officially_linked_document:
         candidate_status = "candidate"
         failure_reason = "Document is hosted off-domain but linked from an official source page; review provenance before evidence save."
@@ -839,12 +901,14 @@ def discover_source(
     final_url = url
     warnings: list[str] = []
     network_candidates: list[dict] = []
+    http_status: int | None = None
     try:
         if use_js:
             html = _fetch_via_playwright(url)
         else:
             resp = _req.get(url, headers={"User-Agent": REQUESTS_UA, "Accept-Language": "en,ru;q=0.8"}, timeout=HTTP_TIMEOUT_S, allow_redirects=True)
             final_url = resp.url or url
+            http_status = resp.status_code
             html = resp.text if resp.ok else ""
             if not resp.ok:
                 warnings.append(f"HTTP {resp.status_code}")
@@ -872,6 +936,22 @@ def discover_source(
     report["input_url"] = url
     report["final_url"] = report.get("final_url") or final_url
     report["warnings"].extend(warnings)
+    if http_status and http_status >= 400:
+        report["access_status"] = "blocked" if http_status in {401, 403} else "stale_or_unavailable"
+        report["failure_code"] = "LIKELY_WAF_403" if http_status == 403 else "URL_STALE" if http_status == 404 else "ACCESS_BLOCKED"
+        report["failure_reason"] = f"HTTP {http_status}"
+        report["remediation_hint"] = (
+            "Try safe official alternate discovery only: robots/sitemap, official same-domain pages, or public document links. "
+            "Do not bypass access controls."
+        )
+        report["source_health_risk"] = "high"
+        report["recommended_activation_paths"] = []
+    else:
+        report.setdefault("access_status", "public_candidate" if html else "unknown")
+        report.setdefault("failure_code", "")
+        report.setdefault("failure_reason", "")
+        report.setdefault("remediation_hint", "")
+        report.setdefault("source_health_risk", (report.get("dom_investigation") or {}).get("source_health_risk", "unknown"))
     report["discovery_options"] = {
         "use_js": use_js,
         "include_network": include_network,

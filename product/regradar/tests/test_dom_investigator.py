@@ -102,3 +102,32 @@ def test_dom_investigator_flags_nav_shell_and_shallow_content():
     assert result["nav_shell_risk"] == "high"
     assert result["failure_reason"]
     assert result["can_save_evidence"] is False
+
+
+def test_dom_investigator_detects_dfsa_summary_content():
+    html = """
+    <html><head><title>AML, CTF and Sanctions Compliance Summary</title></head>
+      <body>
+        <header>About us Search Contact</header>
+        <section class="summary">
+          <h1>AML, CTF and Sanctions Compliance</h1>
+          <p>The DFSA publishes financial crime prevention notices, MLRO letters,
+          sanctions compliance material, and related guidance for authorised firms.</p>
+          <a href="/what-we-do/aml-ctf-sanctions-compliance/financial-crime-prevention-notices-and-mlro-letters">
+            Financial Crime Prevention Notices and MLRO Letters
+          </a>
+        </section>
+      </body>
+    </html>
+    """
+
+    result = investigate_html(
+        html,
+        url="https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary",
+    )
+
+    assert result["detected_page_type"] in {"article", "listing"}
+    assert result["content_selector"] in {".summary", "section.summary"}
+    assert result["recommended_adapter_name"] in {"static_html", "dfsa_notice_listing", "listing"}
+    assert result["can_no_save_test"] is True
+    assert result["source_health_risk"] != "high"
