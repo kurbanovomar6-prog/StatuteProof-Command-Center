@@ -1546,5 +1546,47 @@
     "expected_min_length": 2000,
     "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-guidance-policy/intake-20260615T143126Z/proof.json",
     "normalized_hash": "704c83258e2f32a31f8c6d61841a46539e00e650b679a171606da6006b96e141"
+  },
+  {
+    "name": "EOCN AML/CFT Laws and Regulations",
+    "url": "https://www.eocn.gov.ae/en-us/laws-regulations-listing",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-eocn-laws-regulations-en",
+    "adapter_family": "listing",
+    "adapter_name": "listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-eocn-laws-regulations-en/intake-20260615T152944Z/proof.json",
+    "normalized_hash": "e0aa6279be42eab54b72d0083db0b730a56ee23009921fa3a67e9d2bbb7c810d"
+  },
+  {
+    "name": "ADGM FSRA Waivers and Modifications Register",
+    "url": "https://www.adgm.com/financial-services-regulatory-authority/waivers-and-modifications",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-adgm-fsra-waivers",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-waivers/intake-20260615T153044Z/proof.json",
+    "normalized_hash": "4c92f9ecf8b37b65479e1e63c6fc8f9f401ef3b4aff2d80857b126fce0c440f8"
+  },
+  {
+    "name": "ADGM Registration Authority Circulars",
+    "url": "https://www.adgm.com/registration-authority/circulars",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-adgm-ra-circulars",
+    "adapter_family": "custom_element",
+    "adapter_name": "custom_element",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-ra-circulars/intake-20260615T153115Z/proof.json",
+    "normalized_hash": "306cf35ed57e8071f76799331be51acc92d494b6f51c6d7e20e5b52629aa4f4b"
   }
 ]
