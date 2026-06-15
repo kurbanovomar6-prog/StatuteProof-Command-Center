@@ -93,8 +93,14 @@ def _row_hash(*parts: str | None) -> str:
 
 
 def _extract_date(text: str | None) -> str:
-    match = _DATE_RE.search(text or "")
-    return match.group(1) if match else ""
+    matches = [match.group(1) for match in _DATE_RE.finditer(text or "")]
+    if not matches:
+        return ""
+    rich_matches = [
+        value for value in matches
+        if any(ch.isalpha() for ch in value) or "/" in value or "-" in value
+    ]
+    return max(rich_matches or matches, key=len)
 
 
 def _is_noise_title(title: str | None) -> bool:
@@ -227,9 +233,14 @@ class ListingAdapter(BaseHtmlAdapter):
         items: list[dict] = []
         seen: set[str] = set()
 
-        for node in nodes[:max_items]:
+        for node in nodes:
             title_node = node.select_one(title_selector) if title_selector else None
             url_node = node.select_one(url_selector) if url_selector else None
+            if node.name == "a" and node.get("href"):
+                if "a" in title_selector:
+                    title_node = title_node or node
+                if "a" in url_selector:
+                    url_node = url_node or node
             date_node = node.select_one(date_selector) if date_selector else None
             category_node = node.select_one(category_selector) if category_selector else None
             title = _node_text(title_node, limit=240) or _node_text(node, limit=240)
@@ -254,6 +265,8 @@ class ListingAdapter(BaseHtmlAdapter):
             }
             item["row_hash"] = _row_hash(title, date, item_url, category)
             items.append(item)
+            if len(items) >= max_items:
+                break
 
         if bool(config.get("sort_items", True)):
             items.sort(key=lambda row: ((row.get("date") or ""), (row.get("title") or ""), (row.get("url") or "")))
@@ -343,23 +356,39 @@ class ScaListingAdapter(ListingAdapter):
     name = "sca_listing"
 
     def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        incoming_config = dict(config or {})
+        output_max_items = int(incoming_config.get("max_items") or 120)
         cfg = {
             "container_selector": "main",
-            "item_selector": "article, li, tr, .decision, .card, .item, [data-icms-item], a[href]",
-            "title_selector": "a, h2, h3, h4, [data-icms-title]",
+            "item_selector": "article, li, tr, .decision, .aegov-card[aria-labelledby], .card, .item, [data-icms-item], a[href]",
+            "title_selector": "h1, h2, h3, h4, h5, [data-icms-title], a",
             "date_selector": "time, .date, [data-date]",
             "url_selector": "a[href]",
-            "exclude_selectors": ["header", "nav", "footer", "form", ".search", "script", "style", "noscript"],
+            "exclude_selectors": ["header", "nav", "footer", ".search", "script", "style", "noscript"],
             "sort_items": True,
-            "max_items": 120,
+            "max_items": max(output_max_items, int(incoming_config.get("candidate_scan_limit") or 500)),
         }
-        cfg.update(config or {})
+        cfg.update(incoming_config)
+        cfg["max_items"] = max(output_max_items, int(incoming_config.get("candidate_scan_limit") or 500))
         result = super().extract(html, url=url, config=cfg)
         result.adapter_family = self.family
         result.adapter_name = self.name
         result.extraction_strategy = f"adapter:{self.name}"
         if result.items:
             by_title: dict[str, dict] = {}
+
+            def _candidate_score(row: dict) -> int:
+                date = str(row.get("date") or "")
+                context = str(row.get("raw_text_snippet") or "")
+                date_score = 0
+                if date:
+                    date_score = 2 if any(ch.isalpha() for ch in date) or "/" in date or "-" in date else 1
+                return (
+                    int(bool(row.get("url"))) * 2
+                    + date_score * 3
+                    + min(len(context) // 120, 3)
+                )
+
             for item in result.items:
                 title = item.get("title") or ""
                 item_url = item.get("url") or ""
@@ -367,19 +396,19 @@ class ScaListingAdapter(ListingAdapter):
                 text = f"{title} {context}".lower()
                 if _is_noise_title(title):
                     continue
-                if not any(token in text for token in ("decision", "regulation", "circular", "law", "aml", "market", "chairman")):
+                if not any(token in text for token in ("decision", "regulation", "circular", "rules", "rule", "procedure", "law", "aml", "cft", "market", "chairman", "fintech", "virtual asset", "passporting")):
                     continue
                 if not item.get("date"):
                     item["date"] = _extract_date(context)
                 key = title.lower()
                 current = by_title.get(key)
                 if current:
-                    current_score = int(bool(current.get("url"))) + int(bool(current.get("date")))
-                    item_score = int(bool(item_url)) + int(bool(item.get("date")))
+                    current_score = _candidate_score(current)
+                    item_score = _candidate_score(item)
                     if item_score <= current_score:
                         continue
                 by_title[key] = item
-            filtered = list(by_title.values())
+            filtered = list(by_title.values())[:output_max_items]
             result.items = filtered
             result.text = _format_items("SCA listing items", filtered)
             result.noise_risk = "medium" if len(filtered) < 5 else "low"

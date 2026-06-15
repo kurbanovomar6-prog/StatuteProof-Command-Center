@@ -3,13 +3,17 @@
   "generated_at": "2026-06-15T00:00:00Z",
   "public_source_truth": "13 enabled UAE sources / 9 readiness-supported / 4 remediation",
   "summary": {
-    "queue_entries": 9,
-    "activation_ready_count": 0,
-    "proof_backed_count": 0,
-    "baseline_complete_count": 0,
+    "queue_entries": 12,
+    "activation_ready_count": 2,
+    "proof_backed_count": 3,
+    "baseline_complete_count": 3,
     "did_reach_50_working_sources": false,
     "sources_json_changed": false,
-    "updated_at": "2026-06-15T10:55:58Z"
+    "updated_at": "2026-06-15T10:55:58Z",
+    "last_updated_at": "2026-06-15T12:01:31Z",
+    "new_activation_ready_this_sprint": 2,
+    "public_source_truth": "13 enabled / 9 readiness-supported / 4 remediation",
+    "baseline_complete_but_held_count": 1
   },
   "sources": [
     {
@@ -873,6 +877,293 @@
           "no_save_not_run",
           "proof_missing",
           "baseline_missing"
+        ]
+      }
+    },
+    {
+      "source_id": "AE-sca-circulars-rules-procedures",
+      "url": "https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+      "regulator": "UAE Securities and Commodities Authority",
+      "source_type": "circulars_rules_procedures_listing",
+      "official_status": "official",
+      "discovery_status": "validated",
+      "adapter_family": "sca_listing",
+      "adapter_name": "sca_listing",
+      "adapter_config": {
+        "container_selector": "main",
+        "max_items": 80
+      },
+      "no_save_status": "passed",
+      "quality_score": 62,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "certified_evidence",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "current_state": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-sca-circulars-rules-procedures/intake-20260615T114453Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-sca-circulars-rules-procedures/intake-20260615T114453Z/normalized.txt",
+      "normalized_hash": "d1068c3fabf6ddb2641c988dbc834be1b76f50d38a23ec9026ffd13a4e5ff213",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "last_no_save_at": "2026-06-15T11:46:35Z",
+      "last_saved_baseline_at": "2026-06-15T11:46:35Z",
+      "last_activation_review_at": "2026-06-15T11:46:35Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official SCA page; source-specific ASP.NET/aegov card extraction returns 5 stable item-level regulatory links.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Two saved Source Lab baselines created stable normalized hash and proof paths.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "proof_paths_checked": [
+          "data/source_snapshots/2026-06-15/AE/AE-sca-circulars-rules-procedures/intake-20260615T114453Z/proof.json"
+        ],
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, no shallow extraction, no duplicate hash, repeat baseline complete, and no fake-ready claim.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Internal activation wording only; no legal advice, guarantee, certification, or regulator partnership claim.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "allowed_wording": "Activation-ready candidate after proof-backed baseline validation.",
+        "forbidden_wording": "Regulator-certified, guaranteed compliance, legal advice, 50 validated sources.",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "SCA circulars/rules/procedures are directly relevant to UAE compliance teams tracking securities-market regulatory obligations.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses tested sca_listing adapter with ASP.NET form wrapper and aegov-card selectors.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "risk_brief_pipeline_gate": {
+        "status": "hold",
+        "reason": "Future brief use only after monitored change evidence exists; no brief generated in this sprint.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": [
+          "no_change_event_for_brief"
+        ]
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof-backed repeat baseline complete and required source/evidence/QA/legal/product/code gates pass.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-dfsa-financial-crime-mlro-letters",
+      "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/financial-crime-prevention-notices-and-mlro-letters",
+      "regulator": "DFSA / DIFC",
+      "source_type": "financial_crime_mlro_letters_pdf_listing",
+      "official_status": "official",
+      "discovery_status": "validated",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {
+        "container_selector": "main",
+        "item_selector": "a[href]",
+        "title_selector": "a",
+        "url_selector": "a[href]",
+        "max_items": 100
+      },
+      "no_save_status": "passed",
+      "quality_score": 63,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "certified_evidence",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "current_state": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-financial-crime-mlro-letters/intake-20260615T114257Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-financial-crime-mlro-letters/intake-20260615T114257Z/normalized.txt",
+      "normalized_hash": "7fefb2b0aeb6d6b2cd9de832c03b7f5586add963e192563dfae91648b33b92ae",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "last_no_save_at": "2026-06-15T11:46:35Z",
+      "last_saved_baseline_at": "2026-06-15T11:46:35Z",
+      "last_activation_review_at": "2026-06-15T11:46:35Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official DFSA page; adapter extracts item-level document listing with 139 regulatory/document items.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Two saved Source Lab baselines created stable normalized hash and proof paths.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "proof_paths_checked": [
+          "data/source_snapshots/2026-06-15/AE/AE-dfsa-financial-crime-mlro-letters/intake-20260615T114257Z/proof.json"
+        ],
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, no shallow extraction, no duplicate hash, repeat baseline complete, and no fake-ready claim.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Internal activation wording only; no legal advice, guarantee, certification, or regulator partnership claim.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "allowed_wording": "Activation-ready candidate after proof-backed baseline validation.",
+        "forbidden_wording": "Regulator-certified, guaranteed compliance, legal advice, 50 validated sources.",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "MLRO letters and financial-crime notices are high-signal for UAE/DIFC MLRO and compliance teams.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses tested dfsa_notice_listing adapter and preserves official PDF/document links.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "risk_brief_pipeline_gate": {
+        "status": "hold",
+        "reason": "Future brief use only after monitored change evidence exists; no brief generated in this sprint.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": [
+          "no_change_event_for_brief"
+        ]
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof-backed repeat baseline complete and required source/evidence/QA/legal/product/code gates pass.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-dfsa-aml-rulebook-module",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/anti-money-laundering-counter-terrorist-financing-and-sanctions-module-aml-ver3004-26",
+      "regulator": "DFSA / DIFC",
+      "source_type": "aml_rulebook_module",
+      "official_status": "officially_linked",
+      "discovery_status": "validated",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main, article, body"
+      },
+      "no_save_status": "passed",
+      "quality_score": 61,
+      "noise_risk": "low",
+      "source_health_risk": "high",
+      "evidence_status": "certified_evidence",
+      "baseline_status": "complete",
+      "activation_status": "proof_saved",
+      "current_state": "proof_saved",
+      "failure_code": "SOURCE_STRUCTURE_CHANGED",
+      "failure_reason": "Saved baselines were stable, but mass-monitor dry-run produced a different normalized hash when the fetch path fell back to Playwright after timeout.",
+      "remediation_hint": "Stabilize the DFSA rulebook extraction path with a deterministic selector/adapter before activation; keep proof as baseline evidence but do not monitor by default.",
+      "agent_gate_status": "hold",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/normalized.txt",
+      "normalized_hash": "04ece793f346ae66021950a50156127204834fc532d0606f4338e19e4e30e4f5",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": false,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "last_no_save_at": "2026-06-15T11:46:35Z",
+      "last_saved_baseline_at": "2026-06-15T11:46:35Z",
+      "last_activation_review_at": "2026-06-15T11:46:35Z",
+      "source_monitor_gate": {
+        "status": "hold",
+        "reason": "Official-linked endpoint has proof, but live monitor path can produce a different hash after timeout fallback.",
+        "reviewed_at": "2026-06-15T11:55:56Z",
+        "blocking_issues": [
+          "monitor_hash_instability"
+        ]
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Two saved Source Lab baselines created stable normalized hash and proof paths.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "proof_paths_checked": [
+          "data/source_snapshots/2026-06-15/AE/AE-dfsa-aml-rulebook-module/intake-20260615T114343Z/proof.json"
+        ],
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "hold",
+        "reason": "Mass-monitor dry-run detected immediate hash drift; activation would risk false-positive alerts.",
+        "reviewed_at": "2026-06-15T11:55:56Z",
+        "blocking_issues": [
+          "false_positive_risk"
+        ]
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Internal activation wording only; no legal advice, guarantee, certification, or regulator partnership claim.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "allowed_wording": "Activation-ready candidate after proof-backed baseline validation.",
+        "forbidden_wording": "Regulator-certified, guaranteed compliance, legal advice, 50 validated sources.",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "DFSA AML module is core rulebook material for DIFC financial-crime compliance and MLRO controls.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses static_html adapter on the precise AML module endpoint rather than the generic rulebook homepage.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": []
+      },
+      "risk_brief_pipeline_gate": {
+        "status": "hold",
+        "reason": "Future brief use only after monitored change evidence exists; no brief generated in this sprint.",
+        "reviewed_at": "2026-06-15T11:46:35Z",
+        "blocking_issues": [
+          "no_change_event_for_brief"
+        ]
+      },
+      "final_activation_gate": {
+        "status": "proof_saved",
+        "reason": "Proof-backed repeat baseline exists, but monitor dry-run stability gate failed due timeout/fallback hash drift.",
+        "reviewed_at": "2026-06-15T12:01:31Z",
+        "blocking_issues": [
+          "monitor_hash_instability"
         ]
       }
     }

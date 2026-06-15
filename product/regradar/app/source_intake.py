@@ -251,6 +251,35 @@ def classify_failure_code(result: dict) -> str:
     return SourceFailureCode.MANUAL_CHECK_REQUIRED
 
 
+def _has_structured_adapter_content(result: dict) -> bool:
+    """Return True when an explicit adapter produced item-level monitorable text."""
+    adapter_metadata = result.get("adapter_metadata") or {}
+    if not isinstance(adapter_metadata, dict):
+        return False
+    family = str(adapter_metadata.get("adapter_family") or result.get("adapter_family") or "")
+    structured_families = {
+        "listing",
+        "sca_listing",
+        "table",
+        "dfsa_rulebook",
+        "dfsa_notice_listing",
+        "document_listing",
+        "pdf_listing",
+        "cbuae_document_listing",
+        "fiu_eocn_document_listing",
+        "vara_pdf_listing",
+        "register",
+        "sitemap_feed",
+        "public_json_api",
+    }
+    if family not in structured_families:
+        return False
+    if adapter_metadata.get("failure_reason"):
+        return False
+    item_count = int(adapter_metadata.get("item_count") or 0)
+    return bool(result.get("adapter_used")) and item_count >= 3
+
+
 def apply_quality_gate_fields(result: dict) -> None:
     """Add strict Source Lab gate fields without changing evidence semantics."""
     chars = int(result.get("chars_normalized") or 0)
@@ -538,7 +567,9 @@ def run_source_intake(
 
     # ── 4. Nav-shell detection ────────────────────────────────────────────────
     dom_nav_shell = (result.get("dom_investigation") or {}).get("nav_shell_risk") == "high"
-    nav_shell = is_nav_shell_only(normalized_text) or bool(dom_nav_shell)
+    structured_adapter_content = _has_structured_adapter_content(result)
+    result["structured_adapter_content"] = structured_adapter_content
+    nav_shell = False if structured_adapter_content else (is_nav_shell_only(normalized_text) or bool(dom_nav_shell))
     result["nav_shell_detected"] = nav_shell
 
     # ── 5. Hash collision check ───────────────────────────────────────────────
@@ -611,7 +642,7 @@ def run_source_intake(
         result["status"] = SourceIntakeStatus.QUALITY_DROP
         result["failure_reason"] = f"Normalized text length {chars} is below expected minimum {expected_min}."
         result["remediation_hint"] = "Review selector, rendering, or source structure before activation."
-    elif chars < 1000 and not (wait_selector or content_selector):
+    elif chars < 1000 and not (wait_selector or content_selector) and not structured_adapter_content:
         result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
         result["failure_reason"] = "Text is present but too thin without an explicit selector."
         result["remediation_hint"] = "Add wait_for_selector/content_selector and retest."

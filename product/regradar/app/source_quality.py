@@ -120,7 +120,7 @@ def build_quality_score(
         "nav_shell_risk_low": 15 if not nav_shell else 0,
         "hash_uniqueness": 10 if normalized_hash and not hash_collision else 0,
         "metadata_extraction": 5 if metadata.get("publication_date") or metadata.get("canonical_url") or canonical_url else 0,
-        "provider_confidence": 10 if provider_confidence == "high" else 7 if provider_confidence == "medium" else 4 if provider_confidence == "low" else 0,
+        "provider_confidence": 10 if provider_confidence in {"high", "explicit_adapter"} else 7 if provider_confidence == "medium" else 4 if provider_confidence == "low" else 0,
         "evidence_completeness": 10 if proof_path else 0,
     }
 

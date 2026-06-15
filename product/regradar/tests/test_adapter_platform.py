@@ -217,6 +217,116 @@ def test_sca_listing_adapter_extracts_item_title_link_and_date():
     assert "Privacy Accessibility" not in result.text
 
 
+def test_sca_listing_adapter_filters_noise_before_item_limit():
+    noisy_links = "\n".join(
+        f'<a href="/en/services/noise-{idx}">Service link {idx}</a>'
+        for idx in range(140)
+    )
+    html = f"""
+    <html><body>
+      <header>Capital Market Authority Services Login Search</header>
+      <section class="layout">
+        {noisy_links}
+        <a href="/en/regulations/circular-annual-general-assembly-2024">
+          Circular on the Annual General Assembly Meetings of Public Joint-Stock Companies for 2024
+        </a>
+        <a href="/en/regulations/virtual-assets-guidelines">
+          Guidelines Regulation of Virtual Assets and Virtual Assets Services Providers
+        </a>
+        <a href="/en/regulations/passporting-rules">Passporting Rules</a>
+        <a href="/en/about">About the Authority</a>
+        <a href="/en/services">Services</a>
+      </section>
+      <footer>Privacy Accessibility Search Services</footer>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+        adapter_family="sca_listing",
+        adapter_config={
+            "container_selector": "main",
+            "item_selector": "article, li, tr, .card, .item, a[href]",
+            "title_selector": "a, h2, h3, h4",
+            "url_selector": "a[href]",
+            "max_items": 20,
+        },
+    )
+
+    assert result.adapter_name == "sca_listing"
+    assert result.item_count == 3
+    assert "Annual General Assembly" in result.text
+    assert "Virtual Assets" in result.text
+    assert "Passporting Rules" in result.text
+    assert "Service link 139" not in result.text
+    assert "About the Authority" not in result.text
+
+
+def test_sca_listing_adapter_extracts_aegov_cards():
+    html = """
+    <html><body>
+      <main class="main">
+        <section>
+          <div class="grid">
+            <div class="aegov-card card-bordered card-service" role="group" aria-labelledby="general-landing-item-14529">
+              <div><h5 id="general-landing-item-14529">Passporting Rules</h5></div>
+              <div><a href="/assets/download/19029408/passporting-rules-en.aspx" title="View Details">View Details</a></div>
+            </div>
+            <div class="aegov-card card-bordered card-service" role="group" aria-labelledby="general-landing-item-14746">
+              <div><h5 id="general-landing-item-14746">Circular on the Annual General Assembly Meetings of Public Joint-Stock Companies for 2024</h5></div>
+              <div><a href="/assets/54c01814/circular-on-the-annual-general-assembly-meetings-of-public-joint-stock-companies-for-2024-en.aspx" title="View Details">View Details</a></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+        adapter_family="sca_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "sca_listing"
+    assert result.item_count == 2
+    assert "Passporting Rules" in result.text
+    assert "public-joint-stock-companies-for-2024-en.aspx" in result.text
+    assert "View Details" not in result.text
+
+
+def test_sca_listing_adapter_keeps_aspnet_form_wrapped_content():
+    html = """
+    <html><body>
+      <form id="aspnetForm">
+        <header>Search Services</header>
+        <main class="main">
+          <section>
+            <div class="aegov-card card-bordered card-service" role="group" aria-labelledby="general-landing-item-14532">
+              <h5 id="general-landing-item-14532">Guidelines Regulation of Virtual Assets and Virtual Assets Services Providers</h5>
+              <a href="/assets/2f70b3b8/guidelines-regulation-of-virtual-assets-and-virtual-assets-services-providers.aspx" title="View Details">View Details</a>
+            </div>
+          </section>
+        </main>
+      </form>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+        adapter_family="sca_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "sca_listing"
+    assert result.item_count == 1
+    assert "Virtual Assets Services Providers" in result.text
+    assert "Search Services" not in result.text
+
+
 def test_dfsa_rulebook_adapter_extracts_module_titles_and_links():
     html = """
     <html><body><article>

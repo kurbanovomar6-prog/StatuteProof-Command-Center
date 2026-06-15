@@ -155,6 +155,48 @@ def test_empty_text_not_nav_shell():
     assert is_nav_shell_only("") is False
 
 
+def test_structured_listing_adapter_output_is_not_nav_shell():
+    cards = "\n".join(
+        f"""
+        <div class="aegov-card card-bordered card-service" role="group" aria-labelledby="general-landing-item-{idx}">
+          <h5 id="general-landing-item-{idx}">{title}</h5>
+          <a href="/assets/{idx}/official-regulatory-document-{idx}.aspx" title="View Details">View Details</a>
+        </div>
+        """
+        for idx, title in enumerate(
+            [
+                "Passporting Rules for capital market participants and cross-border financial services",
+                "Circular on the Annual General Assembly Meetings of Public Joint-Stock Companies for 2024",
+                "Circular on Contracting with individuals or Unlicensed Entities for soliciting Clients",
+                "Guidelines Regulation of Virtual Assets and Virtual Assets Services Providers",
+                "FinTech regulatory framework for supervised capital market services",
+                "Market rules approved by SCA for licensed capital market institutions and compliance teams",
+                "AML/CFT regulatory procedures for supervised capital market firms and reporting controls",
+            ],
+            start=1,
+        )
+    )
+    html = f"<html><body><form id='aspnetForm'><main>{cards}</main></form></body></html>"
+    source = {
+        "source_id": "AE-sca-structured-listing",
+        "url": "https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+        "adapter_family": "sca_listing",
+        "adapter_config": {"container_selector": "main", "max_items": 20},
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["adapter_used"] is True
+    assert result["adapter_metadata"]["item_count"] == 7
+    assert result["nav_shell_detected"] is False
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["quality_score"] >= 60
+    assert result["can_save_for_validation"] is True
+    assert result["can_activate_monitoring"] is False
+
+
 # ── 3. Hash collision detection ───────────────────────────────────────────────
 
 

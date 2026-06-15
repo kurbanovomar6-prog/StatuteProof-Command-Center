@@ -2103,6 +2103,7 @@ def main() -> None:
         print("  python run.py discover-source <url> --json --sitemap --feeds --documents  discover candidate endpoints without saving", file=sys.stderr)
         print("  python run.py source-discovery-lab <url> --js --network --json  discover endpoints + DOM remediation hints", file=sys.stderr)
         print("  python run.py mass-source-activate --queue product/regradar/config/mass_source_activation_queue.json --no-save-only --limit 10 --regulator SCA", file=sys.stderr)
+        print("  python run.py mass-monitor --activation-ready-only --dry-run --no-alerts --limit 10  safe monitor dry-run", file=sys.stderr)
         print("  python run.py add-source                     interactively add a source", file=sys.stderr)
         print("  python run.py coverage                       coverage dashboard (uses latest audit JSON)", file=sys.stderr)
         print("  python run.py coverage --json                export reports/coverage_YYYY-MM-DD.json", file=sys.stderr)
@@ -2149,6 +2150,7 @@ def main() -> None:
         print("  python run.py discover-source <url> --jurisdiction CODE  tag with jurisdiction code (e.g. AE, SG, KZ)", file=sys.stderr)
         print("  python run.py discover-source <url> --category NAME      tag with category (e.g. tax, aml, cyber)", file=sys.stderr)
         print("  python run.py mass-source-activate --no-save-only --limit 10  safe queue batch; no evidence save by default", file=sys.stderr)
+        print("  python run.py mass-monitor --activation-ready-only --dry-run --no-alerts --limit 10  safe monitor dry-run only", file=sys.stderr)
         sys.exit(2)
 
     cmd = args[0]
@@ -3102,6 +3104,123 @@ def main() -> None:
             for warning in summary.get("warnings") or []:
                 print(f"  {_YELLOW}Warning:{_R} {warning}")
 
+    elif cmd == "mass-monitor":
+        import json as _json
+        from app.mass_monitoring_runner import DEFAULT_QUEUE_PATH, run_mass_monitoring_batch
+
+        extra = args[1:]
+        queue_path = DEFAULT_QUEUE_PATH
+        regulator = None
+        source_id = None
+        limit = None
+        dry_run = True
+        no_alerts = True
+        save_proof = False
+        throttle_seconds = 0.0
+        max_per_domain = 3
+        include_enabled_sources = False
+        json_export = False
+        i_ = 0
+        while i_ < len(extra):
+            tok = extra[i_]
+            if tok == "--json":
+                json_export = True
+                i_ += 1
+            elif tok == "--queue":
+                if i_ + 1 >= len(extra):
+                    print("Error: --queue requires a path.", file=sys.stderr)
+                    sys.exit(2)
+                queue_path = Path(extra[i_ + 1])
+                i_ += 2
+            elif tok == "--activation-ready-only":
+                include_enabled_sources = False
+                i_ += 1
+            elif tok == "--include-enabled-sources":
+                include_enabled_sources = True
+                i_ += 1
+            elif tok == "--regulator":
+                if i_ + 1 >= len(extra):
+                    print("Error: --regulator requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                regulator = extra[i_ + 1]
+                i_ += 2
+            elif tok == "--source-id":
+                if i_ + 1 >= len(extra):
+                    print("Error: --source-id requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                source_id = extra[i_ + 1]
+                i_ += 2
+            elif tok == "--limit":
+                if i_ + 1 >= len(extra):
+                    print("Error: --limit requires an integer.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    limit = max(1, int(extra[i_ + 1]))
+                except ValueError:
+                    print(f"Error: --limit must be an integer, got {extra[i_+1]!r}.", file=sys.stderr)
+                    sys.exit(2)
+                i_ += 2
+            elif tok == "--dry-run":
+                dry_run = True
+                i_ += 1
+            elif tok == "--save-proof":
+                save_proof = True
+                dry_run = False
+                i_ += 1
+            elif tok == "--no-alerts":
+                no_alerts = True
+                i_ += 1
+            elif tok == "--throttle-seconds":
+                if i_ + 1 >= len(extra):
+                    print("Error: --throttle-seconds requires a number.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    throttle_seconds = max(0.0, float(extra[i_ + 1]))
+                except ValueError:
+                    print(f"Error: --throttle-seconds must be numeric, got {extra[i_+1]!r}.", file=sys.stderr)
+                    sys.exit(2)
+                i_ += 2
+            elif tok == "--max-per-domain":
+                if i_ + 1 >= len(extra):
+                    print("Error: --max-per-domain requires an integer.", file=sys.stderr)
+                    sys.exit(2)
+                try:
+                    max_per_domain = max(1, int(extra[i_ + 1]))
+                except ValueError:
+                    print(f"Error: --max-per-domain must be an integer, got {extra[i_+1]!r}.", file=sys.stderr)
+                    sys.exit(2)
+                i_ += 2
+            else:
+                print(f"Error: unknown option {tok!r} for 'mass-monitor'.", file=sys.stderr)
+                sys.exit(2)
+        summary = run_mass_monitoring_batch(
+            queue_path=queue_path,
+            regulator=regulator,
+            source_id=source_id,
+            limit=limit,
+            dry_run=dry_run,
+            no_alerts=no_alerts,
+            save_proof=save_proof,
+            throttle_seconds=throttle_seconds,
+            max_per_domain=max_per_domain,
+            include_enabled_sources=include_enabled_sources,
+        )
+        if json_export:
+            print(_json.dumps(summary, indent=2, sort_keys=True))
+        else:
+            print(f"\n  {_BOLD}StatuteProof — Mass Monitoring Runner{_R}")
+            print(f"  {_DIM}Mode: {summary['mode']} · activation-ready only · no customer delivery{_R}")
+            _hr()
+            _label("Processed", str(summary["processed_count"]))
+            _label("Skipped", str(summary["skipped_count"]))
+            _label("Alerts enabled", str(summary["alert_delivery_enabled"]))
+            _label("Saved proof", str(summary["save_proof"]))
+            for status, count in sorted((summary.get("source_health_counts") or {}).items()):
+                if count:
+                    _label(status, str(count))
+            for warning in summary.get("warnings") or []:
+                print(f"  {_YELLOW}Warning:{_R} {warning}")
+
     elif cmd in {"discover-source", "source-discovery-lab"}:
         extra = args[1:]
         if not extra or extra[0].startswith("-"):
@@ -3207,7 +3326,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
             file=sys.stderr,
         )
         sys.exit(2)
