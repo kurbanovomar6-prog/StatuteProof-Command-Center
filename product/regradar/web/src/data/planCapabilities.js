@@ -35,7 +35,7 @@ export const PLAN_PERIOD = {
 // 'available' | 'requires_activation' | 'pilot_roadmap' | false
 export const PLAN_FEATURE_STATUS = {
   auditExport: 'available',
-  pdfExport: 'requires_activation',
+  pdfExport: 'available',
   emailBrief: 'requires_activation',
   customSources: 'requires_activation',   // UAE Monitor only, needs onboarding
   whiteLabel: 'pilot_roadmap',
@@ -78,8 +78,8 @@ export const PLAN_CAPABILITIES = {
     sourceLimit: 62,           // 62 readiness-supported UAE sources after proof/baseline gates
     customSources: 2,          // requires activation
     weeklyBriefs: true,        // Telegram; email requires_activation
-    auditExport: true,         // Markdown/HTML audit pack; PDF remains unavailable
-    pdfExport: false,          // requires_activation
+    auditExport: true,
+    pdfExport: true,           // PDF audit pack for internal compliance files
     users: 2,
     retentionDays: 180,
     multipleWorkspaces: false,
@@ -92,8 +92,8 @@ export const PLAN_CAPABILITIES = {
     sourceLimit: 999,
     customSources: 999,
     weeklyBriefs: true,
-    auditExport: true,         // Markdown/HTML audit pack; custom scope
-    pdfExport: false,          // pilot_roadmap
+    auditExport: true,
+    pdfExport: true,           // PDF audit pack for internal compliance files
     users: 999,
     retentionDays: 999,
     multipleWorkspaces: false, // pilot_roadmap

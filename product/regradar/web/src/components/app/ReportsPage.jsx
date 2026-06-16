@@ -54,15 +54,19 @@ export default function ReportsPage() {
 
   const selected = records.find(record => record.evidence_record_id === selectedId) || filtered[0]
 
-  async function handleExport(record) {
+  async function handleExport(record, format = 'pdf') {
     if (!record?.evidence_record_id) return
-    setExportState(prev => ({ ...prev, [record.evidence_record_id]: { status: 'exporting', message: '' } }))
+    setExportState(prev => ({ ...prev, [record.evidence_record_id]: { status: 'exporting', format, message: '' } }))
     try {
-      const data = await evidence.exportAuditPack(record.evidence_record_id)
-      const message = data.message || 'Markdown/HTML audit pack exported.'
+      const data = await evidence.exportAuditPack(record.evidence_record_id, format)
+      const paths = data.export || {}
+      const artifactPath = data.format === 'pdf'
+        ? paths.pdf_path || data.pdf_path || 'PDF path unavailable'
+        : paths.md_path || paths.html_path || 'Markdown/HTML path unavailable'
+      const message = `${data.message || 'Audit pack exported.'} ${artifactPath}`
       setExportState(prev => ({
         ...prev,
-        [record.evidence_record_id]: { status: 'ok', message, export: data.export },
+        [record.evidence_record_id]: { status: 'ok', format: data.format, message, export: data.export },
       }))
     } catch (err) {
       setExportState(prev => ({
@@ -77,7 +81,7 @@ export default function ReportsPage() {
       <div>
         <h1 className="text-lg font-bold text-white mb-1">Audit Reports</h1>
         <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
-          Real export-ready evidence records only. Generated audit packs are Markdown/HTML in this MVP; PDF export is not enabled yet.
+          Real export-ready evidence records only. Audit packs can be exported as PDF or Markdown/HTML from saved evidence records.
         </p>
       </div>
 
@@ -90,7 +94,7 @@ export default function ReportsPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {['Saved evidence only', 'Markdown/HTML export', 'PDF not enabled', 'Not legal advice'].map(label => (
+            {['Saved evidence only', 'PDF export', 'Markdown/HTML export', 'Not legal advice'].map(label => (
               <span key={label} className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300">
                 {label}
               </span>
@@ -201,12 +205,21 @@ export default function ReportsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => handleExport(selected)}
+                      onClick={() => handleExport(selected, 'pdf')}
                       disabled={exportState[selected.evidence_record_id]?.status === 'exporting'}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      {exportState[selected.evidence_record_id]?.status === 'exporting' ? 'Exporting...' : 'Export Markdown/HTML audit pack'}
+                      {exportState[selected.evidence_record_id]?.status === 'exporting' && exportState[selected.evidence_record_id]?.format === 'pdf' ? 'Exporting PDF...' : 'Export PDF audit pack'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExport(selected, 'md_html')}
+                      disabled={exportState[selected.evidence_record_id]?.status === 'exporting'}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      {exportState[selected.evidence_record_id]?.status === 'exporting' && exportState[selected.evidence_record_id]?.format === 'md_html' ? 'Exporting...' : 'Export Markdown/HTML'}
                     </button>
                     {selected.official_url && (
                       <a

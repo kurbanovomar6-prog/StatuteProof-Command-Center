@@ -35,9 +35,13 @@ def main() -> int:
     if PLAN_CAPABILITIES["professional"].get("retention_days") != 180:
         errors.append("Backend professional retention_days must be 180.")
     if not PLAN_CAPABILITIES["professional"].get("audit_export"):
-        errors.append("Backend professional audit_export must reflect Markdown/HTML audit export availability.")
-    if PLAN_CAPABILITIES["professional"].get("pdf_export"):
-        errors.append("Backend professional pdf_export must remain false until real PDF generation exists.")
+        errors.append("Backend professional audit_export must reflect audit export availability.")
+    if not PLAN_CAPABILITIES["professional"].get("pdf_export"):
+        errors.append("Backend professional pdf_export must be true because real PDF generation exists.")
+    if "def write_audit_pack_pdf" not in read("product/regradar/app/audit_export.py"):
+        errors.append("Backend claims PDF export but write_audit_pack_pdf is missing.")
+    if "format=pdf" not in api and '"pdf"' not in api:
+        errors.append("Backend claims PDF export but API does not reference PDF format.")
 
     required_frontend_markers = [
         "starter_pilot: '$199'",
@@ -45,7 +49,7 @@ def main() -> int:
         "sourceLimit: 62",
         "retentionDays: 180",
         "auditExport: true",
-        "pdfExport: false",
+        "pdfExport: true",
     ]
     for marker in required_frontend_markers:
         if marker not in frontend_caps:
@@ -73,7 +77,7 @@ def main() -> int:
     print("- Backend/frontend prices agree on $199/$399/custom")
     print("- UAE Monitor source limit and retention agree")
     print("- Review Queue claim is backed by route/API")
-    print("- PDF remains unclaimed")
+    print("- PDF export claim is backed by implementation")
     return 0
 
 

@@ -39,7 +39,7 @@ function EvidenceCard({ record }) {
   const [historyLoading, setHistoryLoading] = useState(Boolean(record.evidence_record_id))
   const [historyError, setHistoryError] = useState('')
   const [saving, setSaving] = useState(false)
-  const [exporting, setExporting] = useState(false)
+  const [exportingFormat, setExportingFormat] = useState('')
   const canAssess = Boolean(record.proof_block_path && record.evidence_record_id)
   const detectedDate = record.detected_at
     ? new Date(record.detected_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
@@ -97,18 +97,21 @@ function EvidenceCard({ record }) {
     }
   }
 
-  async function handleExport() {
+  async function handleExport(format = 'pdf') {
     if (!record.evidence_record_id) return
-    setExporting(true)
+    setExportingFormat(format)
     setExportMsg('')
     try {
-      const data = await evidenceApi.exportAuditPack(record.evidence_record_id)
+      const data = await evidenceApi.exportAuditPack(record.evidence_record_id, format)
       const paths = data.export || {}
-      setExportMsg(`Audit pack exported: ${paths.md_path || 'Markdown path unavailable'}`)
+      const artifactPath = data.format === 'pdf'
+        ? paths.pdf_path || data.pdf_path || 'PDF path unavailable'
+        : paths.md_path || paths.html_path || 'Markdown/HTML path unavailable'
+      setExportMsg(`${data.message || 'Audit pack exported.'} ${artifactPath}`)
     } catch (err) {
       setExportMsg(err.message || 'Audit export failed.')
     } finally {
-      setExporting(false)
+      setExportingFormat('')
     }
   }
 
@@ -264,12 +267,21 @@ function EvidenceCard({ record }) {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={handleExport}
-          disabled={exporting || !record.evidence_record_id}
+          onClick={() => handleExport('pdf')}
+          disabled={Boolean(exportingFormat) || !record.evidence_record_id}
           className="inline-flex items-center gap-1.5 rounded-lg bg-[#16D9F5] px-3 py-2 text-xs font-semibold text-[#07111F] disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500"
         >
-          {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-          Export audit pack
+          {exportingFormat === 'pdf' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+          Export PDF audit pack
+        </button>
+        <button
+          type="button"
+          onClick={() => handleExport('md_html')}
+          disabled={Boolean(exportingFormat) || !record.evidence_record_id}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-600"
+        >
+          {exportingFormat === 'md_html' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
+          Export Markdown/HTML
         </button>
         {exportMsg && <span className="text-xs text-slate-400">{exportMsg}</span>}
       </div>

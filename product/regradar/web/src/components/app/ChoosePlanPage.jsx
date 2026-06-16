@@ -68,13 +68,11 @@ const PLANS = [
       'High-risk review queue',
       'Weekly MLRO brief — Telegram (email: requires activation)',
       'Up to 2 custom sources — requires activation',
-      'Markdown/HTML audit export',
+      'PDF audit pack + Markdown/HTML audit export',
       '180-day evidence retention',
       '2 users',
     ],
-    locked: [
-      'PDF export — not enabled yet',
-    ],
+    locked: [],
   },
   {
     id: 'consultant',
@@ -89,7 +87,7 @@ const PLANS = [
     features: [
       'Custom source scope',
       'Custom evidence retention',
-      'Markdown/HTML audit export',
+      'PDF audit pack + Markdown/HTML audit export',
       'Custom user count',
       'Multiple client workspaces — pilot roadmap',
       'White-label reports — pilot roadmap',

@@ -1024,7 +1024,8 @@ class _Handler(BaseHTTPRequestHandler):
         if not evidence_id:
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
-        self._write_evidence_export(evidence_id)
+        export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
+        self._write_evidence_export(evidence_id, export_format=export_format)
 
     def _handle_reviews_queue_get(self) -> None:
         """GET /api/reviews/queue — saved evidence review queue."""
@@ -1067,28 +1068,27 @@ class _Handler(BaseHTTPRequestHandler):
         if not evidence_id:
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
-        self._write_evidence_export(evidence_id)
+        export_format = str(body.get("format") or "md_html").strip() or "md_html"
+        self._write_evidence_export(evidence_id, export_format=export_format)
 
-    def _write_evidence_export(self, evidence_id: str) -> None:
+    def _write_evidence_export(self, evidence_id: str, *, export_format: str = "md_html") -> None:
         try:
-            from app.audit_export import write_audit_pack
+            from app.audit_export import build_audit_pack_export_response
             from app.evidence_assessment import find_evidence_record, latest_assessment_for
 
             record = find_evidence_record(evidence_id)
             assessment = latest_assessment_for(evidence_id)
-            paths = write_audit_pack(record, assessment=assessment)
-            self._send_json({
-                "ok": True,
-                "evidence_record_id": evidence_id,
-                "assessment_id": (assessment or {}).get("assessment_id"),
-                "export": paths,
-                "format": "md_html",
-                "pdf_available": False,
-                "message": "Markdown/HTML audit pack exported. PDF export is not enabled in this MVP.",
-                "disclaimer": "Monitoring intelligence only. Not legal advice.",
-            })
+            response = build_audit_pack_export_response(
+                record,
+                assessment=assessment,
+                export_format=export_format,
+            )
+            response["evidence_record_id"] = evidence_id
+            self._send_json(response)
         except ValueError as exc:
             self._send_json({"ok": False, "message": str(exc)}, 400)
+        except RuntimeError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 500)
         except Exception as exc:
             logger.error("evidence export failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)

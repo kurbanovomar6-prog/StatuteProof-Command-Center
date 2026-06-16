@@ -22,7 +22,6 @@ Implemented:
 
 Remaining future work:
 
-- Real PDF export.
 - Production email provider/send configuration.
 - VARA direct official PDF/rulebook extraction.
 - DIFC selector/access remediation.
@@ -72,7 +71,7 @@ Backend `plan.py` and frontend `planCapabilities.js` now agree that UAE Monitor 
 - 62 readiness-supported source limit;
 - 180-day retention;
 - Markdown/HTML audit export available;
-- PDF export not enabled.
+- PDF audit pack export enabled for saved evidence records.
 
 ## 6. Review Queue Status
 
@@ -101,9 +100,9 @@ See `docs/production-email-delivery-next-step.md`.
 
 ## 8. PDF Status
 
-Markdown/HTML only.
+Implemented after the ideal-product trust workflow sprint.
 
-Real PDF export was not implemented and is not claimed. See `docs/pdf-export-next-step.md`.
+PDF audit packs are generated from the existing HTML audit-pack renderer using Playwright print-to-PDF. Markdown/HTML export remains available. See `docs/pdf-audit-pack-export-final-report.md`.
 
 ## 9. Onboarding Readiness Preview Status
 
@@ -151,11 +150,10 @@ The founding pilot can now be demoed without the most obvious authenticated mock
 
 Improved but still partial.
 
-The Review Queue materially improves the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy buyers, but production email, PDF export, VARA depth, and DIFC remediation remain important before broader self-serve sales.
+The Review Queue and PDF audit-pack export materially improve the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy buyers, but production email, VARA depth, and DIFC remediation remain important before broader self-serve sales.
 
 ## 14. Remaining Blockers
 
-- PDF export not real.
 - Production email not real.
 - VARA source depth too thin.
 - DIFC still not active.

@@ -1,54 +1,40 @@
-# PDF Export Next Step
+# PDF Export Status
 
 Date: 2026-06-16
 
 ## Current Status
 
-StatuteProof currently exports audit packs as Markdown and HTML. Real PDF export is not implemented and is not claimed.
+StatuteProof now exports audit packs as PDF, Markdown, and HTML for saved evidence records.
 
-## Why PDF Was Not Added In This Sprint
+## Implementation
 
-The ideal-product sprint prioritized trust-critical authenticated UI and the Global Review Queue:
+PDF generation uses Python Playwright print-to-PDF from the existing audit-pack HTML renderer. The implementation writes:
 
-- remove authenticated mock data;
-- API-drive source truth;
-- reconcile plan/pricing;
-- add onboarding readiness disclosure;
-- build real evidence-backed Review Queue.
+- `.pdf`
+- `.md`
+- `.html`
+- `.json` metadata
 
-Adding PDF generation safely requires validating the local browser/runtime path, deterministic rendering, file storage, and tests that prove the generated file exists and includes source URL, proof/hash metadata, assessment status, and disclaimer.
+The export includes source URL, proof path, raw/normalized hashes, source-health status, linked Acknowledge & Assess details when present, and the legal boundary disclaimer.
 
-## Recommended Implementation Path
-
-1. Use Playwright print-to-PDF only if the project runtime already supports it reliably.
-2. Generate PDF from the existing audit-pack HTML renderer, not from a separate template.
-3. Add `format=pdf` to the existing audit export endpoint.
-4. Store generated PDFs under the same audit-export artifact tree as Markdown/HTML.
-5. Include:
-   - source name;
-   - official URL;
-   - evidence record ID;
-   - proof path;
-   - raw/normalized hash;
-   - diff path if available;
-   - assessment impact/note if present;
-   - disclaimer: Monitoring intelligence only. Not legal advice.
-6. Add tests that verify:
-   - a PDF file is created;
-   - the endpoint reports `pdf_available: true`;
-   - Markdown/HTML remains available;
-   - demo exports are labeled SAMPLE / DEMO;
-   - real exports never show fake data.
-
-## Customer-Safe Wording Until Implemented
+## Customer-Safe Wording Now
 
 Allowed:
 
-- "Markdown/HTML audit pack export is available."
-- "PDF export is not enabled in this MVP."
+- "PDF audit pack export is available for saved evidence records."
+- "PDF audit packs support internal compliance review files."
+- "Monitoring intelligence only. Not legal advice."
 
 Forbidden:
 
-- "PDF export included."
-- "Inspection-ready PDF binder."
 - "Court-admissible evidence package."
+- "Legal advice."
+- "Guaranteed compliance."
+- "Never miss updates."
+- "Perfect parsing."
+
+## Remaining Work
+
+- Production email delivery remains test-mode/local-outbox only.
+- Digitally signed or tamper-evident PDFs are not implemented.
+- Bulk evidence PDF binders are not implemented.

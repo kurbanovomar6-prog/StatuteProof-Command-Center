@@ -119,6 +119,7 @@ def write_audit_pack(
     assessment: dict[str, Any] | None = None,
     base_dir: Path | None = None,
     demo: bool = False,
+    include_pdf: bool = False,
 ) -> dict[str, str]:
     root = base_dir or _BASE_DIR
     out_dir = root / "reports" / "audit_packs"
@@ -132,27 +133,145 @@ def write_audit_pack(
     html_path = out_dir / f"{stem}.html"
     md_path.write_text(markdown, encoding="utf-8")
     html_path.write_text(html_doc, encoding="utf-8")
+    pdf_path: Path | None = None
+    if include_pdf:
+        pdf_path = out_dir / f"{stem}.pdf"
+        _render_html_pdf(html_doc, pdf_path)
     metadata_path = out_dir / f"{stem}.json"
-    metadata_path.write_text(
-        json.dumps(
-            {
-                "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                "run_id": evidence_record.get("run_id"),
-                "assessment_id": (assessment or {}).get("assessment_id"),
-                "demo": demo,
-                "legal_disclaimer": LEGAL_DISCLAIMER,
-                "formats": ["md", "html"],
-            },
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        ),
-        encoding="utf-8",
-    )
-    return {
+    formats = ["md", "html"]
+    result = {
         "md_path": _rel(md_path, root),
         "html_path": _rel(html_path, root),
         "metadata_path": _rel(metadata_path, root),
+    }
+    if pdf_path is not None:
+        if not pdf_path.exists() or pdf_path.stat().st_size <= 0:
+            raise RuntimeError("PDF export failed because no PDF file was generated.")
+        formats.append("pdf")
+        result["pdf_path"] = _rel(pdf_path, root)
+    metadata = _audit_pack_metadata(
+        evidence_record,
+        assessment=assessment,
+        demo=demo,
+        formats=formats,
+        result=result,
+    )
+    metadata_path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    return result
+
+
+def write_audit_pack_pdf(
+    evidence_record: dict[str, Any],
+    *,
+    assessment: dict[str, Any] | None = None,
+    base_dir: Path | None = None,
+    demo: bool = False,
+) -> dict[str, str]:
+    """Write Markdown, HTML, metadata, and a real PDF audit pack."""
+    return write_audit_pack(
+        evidence_record,
+        assessment=assessment,
+        base_dir=base_dir,
+        demo=demo,
+        include_pdf=True,
+    )
+
+
+def build_audit_pack_export_response(
+    evidence_record: dict[str, Any],
+    *,
+    assessment: dict[str, Any] | None = None,
+    export_format: str = "md_html",
+    base_dir: Path | None = None,
+    demo: bool = False,
+) -> dict[str, Any]:
+    requested = str(export_format or "md_html").strip().lower()
+    if requested in {"pdf", "application/pdf"}:
+        paths = write_audit_pack_pdf(evidence_record, assessment=assessment, base_dir=base_dir, demo=demo)
+        return {
+            "ok": True,
+            "evidence_record_id": evidence_record.get("run_id"),
+            "assessment_id": (assessment or {}).get("assessment_id"),
+            "export": paths,
+            "format": "pdf",
+            "pdf_available": True,
+            "pdf_path": paths.get("pdf_path"),
+            "message": "PDF audit pack exported for internal compliance review.",
+            "disclaimer": LEGAL_DISCLAIMER,
+        }
+    if requested not in {"md_html", "markdown", "html"}:
+        raise ValueError("Unsupported audit export format. Use md_html or pdf.")
+    paths = write_audit_pack(evidence_record, assessment=assessment, base_dir=base_dir, demo=demo)
+    return {
+        "ok": True,
+        "evidence_record_id": evidence_record.get("run_id"),
+        "assessment_id": (assessment or {}).get("assessment_id"),
+        "export": paths,
+        "format": "md_html",
+        "pdf_available": False,
+        "message": "Markdown/HTML audit pack exported.",
+        "disclaimer": LEGAL_DISCLAIMER,
+    }
+
+
+def _render_html_pdf(html_doc: str, pdf_path: Path) -> None:
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception as exc:  # pragma: no cover - exercised only when dependency is absent
+        raise RuntimeError("PDF export requires the Playwright Python package.") from exc
+
+    try:
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content(html_doc, wait_until="networkidle")
+            page.pdf(
+                path=str(pdf_path),
+                format="A4",
+                print_background=True,
+                margin={
+                    "top": "18mm",
+                    "right": "14mm",
+                    "bottom": "18mm",
+                    "left": "14mm",
+                },
+            )
+            browser.close()
+    except Exception as exc:
+        raise RuntimeError("PDF export could not be generated with the local Playwright browser runtime.") from exc
+
+
+def _audit_pack_metadata(
+    evidence_record: dict[str, Any],
+    *,
+    assessment: dict[str, Any] | None,
+    demo: bool,
+    formats: list[str],
+    result: dict[str, str],
+) -> dict[str, Any]:
+    return {
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "run_id": evidence_record.get("run_id"),
+        "evidence_record_id": evidence_record.get("run_id"),
+        "source_id": evidence_record.get("source_id"),
+        "source_name": evidence_record.get("source_name") or evidence_record.get("source_id"),
+        "official_url": evidence_record.get("official_url") or evidence_record.get("final_url"),
+        "proof_path": evidence_record.get("proof_block_path"),
+        "diff_path": evidence_record.get("diff_json_path") or evidence_record.get("diff_md_path"),
+        "normalized_hash": evidence_record.get("normalized_hash") or evidence_record.get("content_hash"),
+        "raw_hash": evidence_record.get("raw_hash"),
+        "source_health_status": (assessment or {}).get("source_health_status") or _source_health_status(evidence_record),
+        "assessment_id": (assessment or {}).get("assessment_id"),
+        "impact_level": (assessment or {}).get("impact_level"),
+        "reviewer": (assessment or {}).get("reviewer_name") or (assessment or {}).get("reviewer_user_id"),
+        "reviewed_at": (assessment or {}).get("reviewed_at"),
+        "demo": demo,
+        "legal_disclaimer": LEGAL_DISCLAIMER,
+        "formats": formats,
+        **{key: value for key, value in result.items() if key.endswith("_path")},
     }
 
 
@@ -183,4 +302,3 @@ def _inline(text: str) -> str:
         lambda match: f'<a href="{match.group(1)}">{match.group(1)}</a>',
         escaped,
     )
-

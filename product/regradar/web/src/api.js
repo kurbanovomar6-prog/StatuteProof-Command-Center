@@ -115,10 +115,10 @@ export const evidence = {
     })
   },
 
-  exportAuditPack(evidenceRecordId) {
+  exportAuditPack(evidenceRecordId, format = 'md_html') {
     return authRequest('/api/evidence/export', {
       method: 'POST',
-      body: JSON.stringify({ evidence_record_id: evidenceRecordId }),
+      body: JSON.stringify({ evidence_record_id: evidenceRecordId, format }),
     })
   },
 }
