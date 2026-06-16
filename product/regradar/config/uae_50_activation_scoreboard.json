@@ -5,7 +5,7 @@
     "enabled_uae_sources": 66,
     "readiness_supported": 62,
     "remediation": 4,
-    "customer_copy": "66 enabled UAE sources; 62 readiness-supported; 4 under extraction remediation."
+    "customer_copy": "72 enabled UAE sources; 68 readiness-supported; 4 under extraction remediation."
   },
   "definition": "activation_ready requires official/public source, strong no-save, meaningful non-shell extraction, unique hash, reviewed noise/source-health risk, proof, repeat baseline, agent gates, validators, and safe sources.json activation.",
   "targets": [

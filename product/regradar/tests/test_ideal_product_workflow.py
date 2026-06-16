@@ -85,8 +85,8 @@ class IdealProductWorkflowTests(unittest.TestCase):
         summary = build_sources_summary("AE")
 
         self.assertTrue(summary["ok"])
-        self.assertEqual(summary["enabled_count"], 66)
-        self.assertEqual(summary["readiness_supported_count"], 62)
+        self.assertEqual(summary["enabled_count"], 72)
+        self.assertEqual(summary["readiness_supported_count"], 68)
         self.assertEqual(summary["remediation_count"], 4)
         self.assertIn("Not legal advice", summary["disclaimer"])
 

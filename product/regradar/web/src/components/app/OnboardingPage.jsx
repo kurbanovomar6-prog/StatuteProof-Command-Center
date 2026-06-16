@@ -26,9 +26,9 @@ const SOURCE_READINESS_PREVIEW = {
     tone: 'emerald',
   },
   VARA: {
-    status: 'Limited',
-    detail: '3 readiness-supported VARA sources. Direct rulebook/PDF depth remains a disclosed remediation priority.',
-    tone: 'amber',
+    status: 'Improved but not complete',
+    detail: '9 active VARA sources, including direct official rulebook PDFs for core VASP domains. Coverage is stronger, but not complete VARA coverage.',
+    tone: 'cyan',
   },
   DFSA: {
     status: 'Useful but not complete',

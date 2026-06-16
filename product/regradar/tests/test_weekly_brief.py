@@ -269,7 +269,7 @@ class WeeklyBriefTests(unittest.TestCase):
             alerts=[alert],
         )
         markdown = render_weekly_brief_markdown(brief)
-        self.assertIn("- 61 additional monitored sources showed no detected change based on monitoring this period.", markdown)
+        self.assertIn("- 67 additional monitored sources showed no detected change based on monitoring this period.", markdown)
 
         brief["summary"]["sources_checked"] = 4
         counted = render_weekly_brief_markdown(brief)

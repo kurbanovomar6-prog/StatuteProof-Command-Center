@@ -16,8 +16,8 @@ const verdictLabel   = { READINESS: 'Readiness', REVIEW: 'Review' }
 const accessVariant  = { Accessible: 'green', Limited: 'yellow' }
 
 const SOURCE_PACK_SUMMARY = {
-  enabled: 66,
-  supported: 62,
+  enabled: 72,
+  supported: 68,
   remediation: 4,
 }
 

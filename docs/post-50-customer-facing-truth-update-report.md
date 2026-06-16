@@ -27,8 +27,8 @@ Updated frontend copy in:
 
 ## Current Safe Truth
 
-- 66 enabled UAE official-source endpoints.
-- 62 readiness-supported after proof, baseline, source-health, noise, and review gates.
+- 72 enabled UAE official-source endpoints.
+- 68 readiness-supported after proof, baseline, source-health, noise, and review gates.
 - 4 sources remain under extraction remediation.
 - Monitoring intelligence only. Not legal advice.
 - No source is marked ready without evidence and repeat baseline checks.
@@ -37,8 +37,8 @@ Updated frontend copy in:
 
 Approved wording:
 
-- "66 enabled UAE official-source endpoints."
-- "62 readiness-supported after proof and baseline gates."
+- "72 enabled UAE official-source endpoints."
+- "68 readiness-supported after proof and baseline gates."
 - "4 under extraction remediation."
 - "Monitoring intelligence only. Not legal advice."
 - "Source health and remediation status are shown transparently."
@@ -55,7 +55,7 @@ Blocked wording:
 
 ## Frontend Note
 
-`SourceCoverageTable.jsx` still uses sample rows, but the header now shows current registry truth and explicitly says the rows are samples. This avoids implying the sample table is the full 66-source registry.
+`SourceCoverageTable.jsx` still uses sample rows, but the header now shows current registry truth and explicitly says the rows are samples. This avoids implying the sample table is the full 72-source registry.
 
 ## Remaining Copy Risk
 

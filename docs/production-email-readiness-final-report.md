@@ -111,11 +111,11 @@ Stronger. The founding pilot can safely demonstrate local test-mode email payloa
 
 ## 12. $399 Readiness Impact
 
-Improved but still partial. The product is more credible because email readiness is visible, but broader self-serve $399 sales still need actual provider sending, VARA source depth, and DIFC remediation.
+Improved but still partial. The product is more credible because email readiness is visible, but broader self-serve $399 sales still need actual provider sending, DIFC remediation, source-reliability trend charts, and remaining held-source cleanup.
 
 ## 13. Next Exact Product Task
 
-Improve VARA direct official PDF/rulebook source depth, starting with direct official VARA rulebook PDFs and stable PDF/hash extraction.
+Remediate DIFC selector/access coverage and add 7/30/90-day source reliability charts for readiness-supported sources.
 
 ## 14. Next Exact Sales Task
 

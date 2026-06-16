@@ -10,7 +10,7 @@ Show an MLRO prospect that StatuteProof is not just a website checker. It monito
 
 ## Opening
 
-"StatuteProof monitors public official or officially linked UAE sources that are technically accessible and permitted to monitor. Today the UAE pack has 66 enabled official-source endpoints, with 62 readiness-supported after proof, baseline, source-health, noise, and review gates. Four remain under extraction remediation. This is monitoring intelligence only, not legal advice."
+"StatuteProof monitors public official or officially linked UAE sources that are technically accessible and permitted to monitor. Today the UAE pack has 72 enabled official-source endpoints, with 68 readiness-supported after proof, baseline, source-health, noise, and review gates. Four remain under extraction remediation. This is monitoring intelligence only, not legal advice."
 
 ## Show Source Coverage
 
@@ -38,14 +38,14 @@ Say:
 
 Use examples:
 
-- VARA Rulebook Revision Updates: `AE-vara-rulebook-updates`
+- VARA Compliance and Risk Management Rulebook PDF: `AE-vara-compliance-risk-rulebook-pdf`
 - ADGM FSRA Guidance and Policy Statements: `AE-adgm-fsra-guidance-policy`
 - DFSA Consultation Papers Current: `AE-dfsa-consultation-current`
 - EOCN AML/CFT Laws and Regulations: `AE-eocn-laws-regulations-en`
 
 Say:
 
-"Coverage is not perfectly balanced yet. CBUAE is currently the strongest group. VARA, DIFC, and ADGM alternate components are the next diversification work."
+"Coverage is not perfectly balanced yet. CBUAE remains the strongest group. VARA is stronger after direct official rulebook PDF activation, while DIFC and remaining held VARA/DFSA sources are still remediation work."
 
 ## Show Honest Held Source
 

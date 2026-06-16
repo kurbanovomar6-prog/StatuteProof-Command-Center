@@ -30,8 +30,8 @@ def main() -> int:
         errors.append("Backend starter_pilot price must be 199.")
     if PLAN_PRICE_MONTHLY.get("professional") != 399:
         errors.append("Backend professional/UAE Monitor price must be 399.")
-    if PLAN_CAPABILITIES["professional"].get("source_limit") != 62:
-        errors.append("Backend professional source_limit must be 62.")
+    if PLAN_CAPABILITIES["professional"].get("source_limit") != 68:
+        errors.append("Backend professional source_limit must be 68.")
     if PLAN_CAPABILITIES["professional"].get("retention_days") != 180:
         errors.append("Backend professional retention_days must be 180.")
     if not PLAN_CAPABILITIES["professional"].get("audit_export"):
@@ -46,7 +46,7 @@ def main() -> int:
     required_frontend_markers = [
         "starter_pilot: '$199'",
         "professional: '$399'",
-        "sourceLimit: 62",
+        "sourceLimit: 68",
         "retentionDays: 180",
         "auditExport: true",
         "pdfExport: true",

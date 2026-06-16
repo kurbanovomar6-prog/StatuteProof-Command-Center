@@ -101,9 +101,9 @@ export const pricingPlans = [
     badge: 'Recommended',
     ctaType: 'plan',
     routePlan: 'professional',
-    desc: 'MLRO or CCO workspace for the UAE pack. 66 enabled official-source endpoints: 62 readiness-supported after proof and baseline gates, 4 under extraction remediation.',
+    desc: 'MLRO or CCO workspace for the UAE pack. 72 enabled official-source endpoints: 68 readiness-supported after proof and baseline gates, 4 under extraction remediation.',
     features: [
-      '62 readiness-supported UAE sources',
+      '68 readiness-supported UAE sources',
       'High-risk review queue',
       'Weekly MLRO brief requires activation',
       'Up to 2 custom sources after review',

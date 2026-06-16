@@ -10,28 +10,28 @@ The source pack is credible enough for an internal demo and a cautious MLRO pros
 
 | Metric | Count |
 | --- | ---: |
-| Enabled UAE sources | 66 |
-| Readiness-supported UAE sources | 62 |
+| Enabled UAE sources | 72 |
+| Readiness-supported UAE sources | 68 |
 | Under extraction remediation | 4 |
 
 ## Sources By Regulator
 
 | Regulator / group | Readiness-supported count | Share |
 | --- | ---: | ---: |
-| CBUAE | 27 | 43.5% |
-| ADGM/FSRA | 10 | 16.1% |
-| DFSA | 8 | 12.9% |
-| UAE FIU / EOCN / AML | 7 | 11.3% |
-| SCA | 4 | 6.5% |
-| VARA | 3 | 4.8% |
-| Federal / legislation / tax | 3 | 4.8% |
-| Total | 62 | 100.0% |
+| CBUAE | 27 | 39.7% |
+| ADGM/FSRA | 10 | 14.7% |
+| VARA | 9 | 13.2% |
+| DFSA | 8 | 11.8% |
+| UAE FIU / EOCN / AML | 7 | 10.3% |
+| SCA | 4 | 5.9% |
+| Federal / legislation / tax | 3 | 4.4% |
+| Total | 68 | 100.0% |
 
 ## Sources By Source Type
 
 | Source type | Count |
 | --- | ---: |
-| Rulebook / module | 31 |
+| Rulebook / module | 37 |
 | Law / regulation | 8 |
 | General regulatory page | 6 |
 | Document / PDF listing | 6 |
@@ -43,7 +43,7 @@ The source pack is credible enough for an internal demo and a cautious MLRO pros
 
 ## Concentration Risk
 
-CBUAE concentration is **27 / 62 = 43.5%**.
+CBUAE concentration is **27 / 68 = 39.7%**.
 
 This is commercially useful for banking, payments, AML/CFT, consumer protection, open finance, and prudential monitoring. It is also visibly concentrated. A general UAE compliance buyer will expect stronger VARA, DIFC, ADGM alternate page, SCA, and FIU/EOCN breadth before a higher-priced UAE Monitor plan feels fully balanced.
 
@@ -64,17 +64,17 @@ The pack is no longer a source-count toy. It has proof-backed, baseline-tested, 
 
 ## Weakest Commercial Zones
 
-1. VARA direct PDF/rulebook extraction.
-2. DIFC legal/regulatory selectors and access-safe alternatives.
-3. ADGM alternate components for media, listing announcements, and data protection regulatory actions.
-4. DFSA held AML/CFT sanctions source with dry-run hash drift.
+1. DIFC legal/regulatory selectors and access-safe alternatives.
+2. ADGM alternate components for media, listing announcements, and data protection regulatory actions.
+3. DFSA held AML/CFT sanctions source with dry-run hash drift.
+4. Remaining VARA activity rulebooks that tested accessible but below strict quality gate.
 5. FIU leftovers that are duplicate or shallow aliases of already activated hubs.
 
 ## Recommended Positioning
 
 Safe customer-facing wording:
 
-"StatuteProof currently has 66 enabled UAE official-source endpoints, including 62 readiness-supported sources after proof, baseline, source-health, noise, and review gates. Four sources remain under extraction remediation. Monitoring intelligence only, not legal advice."
+"StatuteProof currently has 72 enabled UAE official-source endpoints, including 68 readiness-supported sources after proof, baseline, source-health, noise, and review gates. Four sources remain under extraction remediation. Monitoring intelligence only, not legal advice."
 
 Do not say:
 

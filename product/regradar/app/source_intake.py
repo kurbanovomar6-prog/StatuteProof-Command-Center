@@ -23,6 +23,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
+from urllib.parse import urlparse
 
 from app.source_tester import validate_public_url
 from app.text_normalization import normalize_for_change_hash
@@ -142,6 +143,14 @@ def _content_hash(text: str) -> str:
 
 def _sha256_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
+
+
+def _is_direct_pdf_source(source: dict, url: str) -> bool:
+    """Return True when Source Lab should fetch/extract the URL as a direct PDF."""
+    source_type = str(source.get("source_type") or "").lower()
+    adapter_family = str(source.get("adapter_family") or "").lower()
+    path = urlparse(url).path.lower()
+    return source_type in {"pdf", "pdf_document"} or adapter_family == "pdf_document" or path.endswith(".pdf")
 
 
 def build_source_lab_contract(result: dict) -> dict:
@@ -394,6 +403,7 @@ def run_source_intake(
     adapter_family = source.get("adapter_family")
     adapter_name = source.get("adapter_name")
     adapter_config = source.get("adapter_config") if isinstance(source.get("adapter_config"), dict) else {}
+    is_direct_pdf = _is_direct_pdf_source(source, url)
 
     result: dict = {
         "source_id": source_id,
@@ -475,56 +485,117 @@ def run_source_intake(
         return result
 
     # ── 2. Fetch ──────────────────────────────────────────────────────────────
-    try:
-        from app.scraper import fetch_page_with_config
-        html = fetch_page_with_config(
-            url,
-            wait_for_selector=wait_selector,
-            content_selector=content_selector,
-            force_playwright=(fetch_method == "playwright"),
-        )
-    except Exception as exc:
-        if wait_selector or content_selector or fetch_method == "playwright":
-            result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
-            result["remediation_hint"] = "Review the configured wait_for_selector/content_selector before activation."
-        else:
-            result["status"] = SourceIntakeStatus.BLOCKED
-            result["remediation_hint"] = "Confirm the source is public and technically accessible."
-        result["failure_reason"] = f"Fetch failed: {exc}"
-        result["errors"].append(f"Fetch failed: {exc}")
-        quality_report = build_quality_score(
-            url=url,
-            fetch_success=False,
-            normalized_text="",
-            raw_html="",
-            normalized_hash=None,
-            canonical_url=url,
-        )
-        result["quality_score"] = quality_report["quality_score"]
-        result["quality_breakdown"] = quality_report
-        result["certification"] = build_preview_certification(
-            source_id=source_id,
-            source_url=url,
-            canonical_url=url,
-            intake_result=result,
-            quality_report=quality_report,
-            baseline_runs_required=int(source.get("baseline_runs_required") or 2),
-        )
-        result["certification_status"] = result["certification"].get("certification_status", "")
-        apply_quality_gate_fields(result)
-        result.update(build_source_lab_contract(result))
-        return result
+    if is_direct_pdf:
+        try:
+            from app.document_extractor import fetch_document, extract_pdf_text
 
-    result["chars_raw"] = len(html)
-    try:
-        from app.dom_investigator import investigate_html
-        result["dom_investigation"] = investigate_html(html, url=url)
-    except Exception as exc:
-        result["dom_investigation"] = {
-            "failure_reason": f"DOM investigation failed: {type(exc).__name__}",
-            "remediation_hint": "Run manual browser/DOM review before activation.",
-            "warnings": [str(exc)],
-        }
+            fetch_result = fetch_document(url)
+            result["access_status"] = "public_pdf_fetch_attempted"
+            if fetch_result.get("status") != "ok" or not fetch_result.get("data"):
+                result["status"] = SourceIntakeStatus.BLOCKED
+                result["failure_reason"] = f"PDF fetch failed: {fetch_result.get('error') or fetch_result.get('http_status') or 'unknown'}"
+                result["remediation_hint"] = "Confirm the official PDF URL is public, current, and accessible without private credentials."
+                result["errors"].append(result["failure_reason"])
+                html = ""
+            else:
+                pdf_extract = extract_pdf_text(fetch_result["data"])
+                html = str(pdf_extract.get("text") or "")
+                result["pdf_chars"] = int(pdf_extract.get("chars") or len(html))
+                result["chars_raw"] = int(fetch_result.get("bytes") or len(fetch_result.get("data") or b""))
+                result["pdf_extraction"] = {
+                    "method": pdf_extract.get("method") or "none",
+                    "quality": pdf_extract.get("quality") or "failed",
+                    "chars": result["pdf_chars"],
+                    "content_type": fetch_result.get("content_type") or "",
+                    "http_status": fetch_result.get("http_status"),
+                    "bytes": fetch_result.get("bytes"),
+                    "error": pdf_extract.get("error") or "",
+                }
+                if pdf_extract.get("error"):
+                    result["errors"].append(f"PDF extraction warning: {pdf_extract.get('error')}")
+            result["dom_investigation"] = {
+                "can_no_save_test": bool(result.get("pdf_chars", 0) >= 500),
+                "can_save_evidence": bool(result.get("pdf_chars", 0) >= 500),
+                "content_selector": "",
+                "detected_page_type": "pdf_document",
+                "failure_reason": "" if result.get("pdf_chars", 0) >= 500 else "PDF text is too shallow for reliable monitoring.",
+                "final_url": url,
+                "item_selector": "",
+                "nav_shell_risk": "low",
+                "noise_risk": "low" if result.get("pdf_chars", 0) >= 500 else "high",
+                "page_title": source.get("name") or "",
+                "recommended_adapter_family": "pdf_document",
+                "recommended_adapter_name": "pdf_document",
+                "remediation_hint": "" if result.get("pdf_chars", 0) >= 500 else "Use OCR or hold scanned/shallow PDF under remediation.",
+                "selector_confidence": 90 if result.get("pdf_chars", 0) >= 500 else 0,
+                "selectors_considered": [],
+                "source_health_risk": "medium" if result.get("pdf_chars", 0) >= 500 else "high",
+                "wait_selector": "",
+                "warnings": [],
+                "why_selector_was_chosen": "Direct PDF document extraction path.",
+            }
+        except Exception as exc:
+            result["status"] = SourceIntakeStatus.BLOCKED
+            result["failure_reason"] = f"PDF fetch failed: {exc}"
+            result["remediation_hint"] = "Confirm the official PDF URL is public and extractable."
+            result["errors"].append(f"PDF fetch failed: {exc}")
+            html = ""
+            result["dom_investigation"] = {
+                "failure_reason": f"PDF investigation failed: {type(exc).__name__}",
+                "remediation_hint": "Run manual PDF extraction review before activation.",
+                "warnings": [str(exc)],
+            }
+    else:
+        try:
+            from app.scraper import fetch_page_with_config
+            html = fetch_page_with_config(
+                url,
+                wait_for_selector=wait_selector,
+                content_selector=content_selector,
+                force_playwright=(fetch_method == "playwright"),
+            )
+        except Exception as exc:
+            if wait_selector or content_selector or fetch_method == "playwright":
+                result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
+                result["remediation_hint"] = "Review the configured wait_for_selector/content_selector before activation."
+            else:
+                result["status"] = SourceIntakeStatus.BLOCKED
+                result["remediation_hint"] = "Confirm the source is public and technically accessible."
+            result["failure_reason"] = f"Fetch failed: {exc}"
+            result["errors"].append(f"Fetch failed: {exc}")
+            quality_report = build_quality_score(
+                url=url,
+                fetch_success=False,
+                normalized_text="",
+                raw_html="",
+                normalized_hash=None,
+                canonical_url=url,
+            )
+            result["quality_score"] = quality_report["quality_score"]
+            result["quality_breakdown"] = quality_report
+            result["certification"] = build_preview_certification(
+                source_id=source_id,
+                source_url=url,
+                canonical_url=url,
+                intake_result=result,
+                quality_report=quality_report,
+                baseline_runs_required=int(source.get("baseline_runs_required") or 2),
+            )
+            result["certification_status"] = result["certification"].get("certification_status", "")
+            apply_quality_gate_fields(result)
+            result.update(build_source_lab_contract(result))
+            return result
+
+        result["chars_raw"] = len(html)
+        try:
+            from app.dom_investigator import investigate_html
+            result["dom_investigation"] = investigate_html(html, url=url)
+        except Exception as exc:
+            result["dom_investigation"] = {
+                "failure_reason": f"DOM investigation failed: {type(exc).__name__}",
+                "remediation_hint": "Run manual browser/DOM review before activation.",
+                "warnings": [str(exc)],
+            }
 
     # ── 3. Extract text ───────────────────────────────────────────────────────
     extracted: dict = {}
@@ -588,7 +659,7 @@ def run_source_intake(
     dom_nav_shell = (result.get("dom_investigation") or {}).get("nav_shell_risk") == "high"
     structured_adapter_content = _has_structured_adapter_content(result)
     result["structured_adapter_content"] = structured_adapter_content
-    nav_shell = False if structured_adapter_content else (is_nav_shell_only(normalized_text) or bool(dom_nav_shell))
+    nav_shell = False if (structured_adapter_content or is_direct_pdf) else (is_nav_shell_only(normalized_text) or bool(dom_nav_shell))
     result["nav_shell_detected"] = nav_shell
 
     # ── 5. Hash collision check ───────────────────────────────────────────────
@@ -604,7 +675,7 @@ def run_source_intake(
         collision = False
 
     # ── 6. PDF chars (best-effort — reuse cached if available) ───────────────
-    pdf_chars = source.get("pdf_chars", 0)
+    pdf_chars = result.get("pdf_chars") or source.get("pdf_chars", 0)
     result["pdf_chars"] = pdf_chars
 
     provider_confidence = ""
@@ -641,6 +712,10 @@ def run_source_intake(
         result["status"] = SourceIntakeStatus.NAV_SHELL_ONLY
         result["failure_reason"] = "Extracted content is a navigation shell or collides with another source hash."
         result["remediation_hint"] = "Configure a precise content_selector or adapter before marking this source ready."
+    elif is_direct_pdf and chars < 500:
+        result["status"] = SourceIntakeStatus.PDF_EXTRACTION_NEEDED
+        result["failure_reason"] = "PDF text is too shallow for reliable monitoring."
+        result["remediation_hint"] = "Use OCR or hold scanned/shallow PDF under remediation before activation."
     elif chars == 0 or result["chars_raw"] < 200:
         result["status"] = SourceIntakeStatus.BLOCKED
         result["failure_reason"] = "No meaningful extractable content was found."

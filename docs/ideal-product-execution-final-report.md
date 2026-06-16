@@ -11,7 +11,7 @@ Implemented:
 - Removed Monitoring Brief mock fallback by loading only `/api/briefs` records or showing an honest empty state.
 - Reframed the brief page as Monitoring Briefs instead of AI Briefs in customer-facing navigation.
 - Added `/api/sources/summary` and moved dashboard source truth to an API-backed summary.
-- Reconciled backend/frontend UAE Monitor source limit to 62 readiness-supported sources.
+- Reconciled backend/frontend UAE Monitor source limit to the current readiness-supported source count.
 - Kept pricing at the implemented $199 Founding Pilot / $399 UAE Monitor / custom Consultant model.
 - Added onboarding source readiness preview by source layer, including explicit VARA/DIFC limitations.
 - Added Global Review Queue backend helper and API route.
@@ -23,7 +23,6 @@ Implemented:
 Remaining future work:
 
 - Production external email sending.
-- VARA direct official PDF/rulebook extraction.
 - DIFC selector/access remediation.
 - 7/30/90-day source reliability charts.
 - Bulk acknowledge/assess.
@@ -54,7 +53,7 @@ The endpoint returns:
 - latest run timestamp;
 - disclaimer.
 
-The current registry truth remains 66 enabled / 62 readiness-supported / 4 remediation.
+The current registry truth is now 72 enabled / 68 readiness-supported / 4 remediation after the VARA PDF source-depth sprint.
 
 ## 5. Plan / Pricing Consistency Status
 
@@ -68,7 +67,7 @@ Current implemented pricing:
 
 Backend `plan.py` and frontend `planCapabilities.js` now agree that UAE Monitor has:
 
-- 62 readiness-supported source limit;
+- 68 readiness-supported source limit;
 - 180-day retention;
 - Markdown/HTML audit export available;
 - PDF audit pack export enabled for saved evidence records.
@@ -116,7 +115,7 @@ Onboarding now shows readiness context for key UAE source layers:
 - CBUAE strongest;
 - ADGM/FSRA strong;
 - DFSA useful but not complete;
-- VARA limited;
+- VARA improved after direct official rulebook PDF activation, but not complete coverage;
 - DIFC remediation/not active;
 - UAE FIU/EOCN AML/CFT useful;
 - SCA limited but useful.
@@ -127,7 +126,7 @@ Added `product/regradar/tests/test_ideal_product_workflow.py`.
 
 Coverage:
 
-- current source summary truth returns 66 / 62 / 4;
+- current source summary truth returns 72 / 68 / 4;
 - temp registry summary counts;
 - Review Queue pending evidence;
 - Review Queue assessed evidence;
@@ -153,19 +152,18 @@ The founding pilot can now be demoed without the most obvious authenticated mock
 
 Improved but still partial.
 
-The Review Queue, PDF audit-pack export, and email readiness controls materially improve the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy buyers, but real production email sending, VARA depth, and DIFC remediation remain important before broader self-serve sales.
+The Review Queue, PDF audit-pack export, email readiness controls, and VARA direct official rulebook PDFs materially improve the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy and VASP-adjacent buyers, but real production email sending, DIFC remediation, reliability trend charts, and bulk review/export workflows remain important before broader self-serve sales.
 
 ## 14. Remaining Blockers
 
 - Production external email sending not enabled.
-- VARA source depth too thin.
 - DIFC still not active.
 - No long-range source reliability charts.
 - No bulk review workflow.
 
 ## 15. Next Exact Product Task
 
-Improve VARA direct official PDF/rulebook source depth, starting with direct official VARA rulebook PDFs and stable PDF/hash extraction.
+Remediate DIFC selector/access coverage and activate official DIFC legal/regulatory sources only if proof, baseline, source-health, and gates pass.
 
 ## 16. Next Exact Sales Task
 
