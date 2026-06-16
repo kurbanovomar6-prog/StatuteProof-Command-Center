@@ -1,0 +1,45 @@
+{
+  "source_id": "AE-cbuae-rulebook-revision-updates",
+  "url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+  "run_results": [
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "normalized_hash": "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+      "normalized_length": 2162,
+      "evidence_written": true,
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-rulebook-revision-updates/intake-20260616T061005Z/proof.json",
+      "can_save_evidence": false,
+      "adapter_used": true,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "normalized_hash": "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+      "normalized_length": 2162,
+      "evidence_written": true,
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-rulebook-revision-updates/intake-20260616T061008Z/proof.json",
+      "can_save_evidence": false,
+      "adapter_used": true,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    }
+  ],
+  "certification_status": "MONITORING_CERTIFIED",
+  "baseline_runs_completed": 2,
+  "baseline_runs_required": 2,
+  "proof_paths": [
+    "data/source_snapshots/2026-06-16/AE/AE-cbuae-rulebook-revision-updates/intake-20260616T061005Z/proof.json",
+    "data/source_snapshots/2026-06-16/AE/AE-cbuae-rulebook-revision-updates/intake-20260616T061008Z/proof.json"
+  ],
+  "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-rulebook-revision-updates/intake-20260616T061005Z/proof.json",
+  "hash_history": [
+    "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+    "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52"
+  ],
+  "hash_stable": true,
+  "evidence_level": "CERTIFIED_EVIDENCE",
+  "certification_score": 88
+}

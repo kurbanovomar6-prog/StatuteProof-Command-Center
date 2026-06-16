@@ -6,13 +6,14 @@ Date: 2026-06-15
 
 The repo now has enough candidate volume, but not enough proof-backed strong passes. The blocker is source-specific extraction on JS-heavy or stale official pages, not discovery.
 
-Current truth: 33 enabled / 29 readiness-supported / 4 remediation. Reaching 50 requires 21 more proof-backed, baseline-stable, gate-passing sources.
+Current truth: 36 enabled / 32 readiness-supported / 4 remediation. Reaching 50 requires 18 more proof-backed, baseline-stable, gate-passing sources.
 
 ## 2. Highest Activation Potential
 
-1. ADGM alternate listing/media/data-protection pages if the correct component/item selector is found.
-2. UAE FIU pages where duplicate route aliases can be replaced with direct document/detail URLs.
-3. VARA/CBUAE/DFSA only where stable public endpoints are accessible without bypassing protections.
+1. ADGM alternate listing/media/data-protection pages if the correct component/item selector or replacement URL is found.
+2. VARA official rulebook/PDF endpoints if current nav-shell/stale paths are replaced with stable public document URLs.
+3. DFSA/DIFC only where stable listing selectors are accessible without bypassing protections.
+4. CBUAE non-rulebook public endpoints only if official alternates are accessible; the rulebook revision-update alternate has now been activated.
 
 ## 3. Missing Adapter / Selector Work
 
@@ -20,6 +21,8 @@ Current truth: 33 enabled / 29 readiness-supported / 4 remediation. Reaching 50 
 - ADGM RA notices and AML quick guides currently resolve to a 404 page shell.
 - ADGM media/listing/data-protection regulatory-actions pages have content but current item selectors still collapse to nav/noise.
 - FIU mutual-evaluation route duplicates active FIU typology output.
+- FIU annual-reports route duplicates the activated publications-hub output.
+- VARA rulebook/framework/public-register URLs still return nav-shell/stale paths under tested selectors.
 
 ## 4. Repeating DOM Problem
 
@@ -47,7 +50,7 @@ Validators correctly block fake readiness. New `validate_batch_onboarding.py` no
 
 ## 9. Next Highest-Leverage Move
 
-Fix DOM investigation and source-specific selectors for ADGM Listing Authority / ADGM RA pages, and separately raise SCA FATCA/CRS from q=59 to q>=60 with richer document-context extraction.
+Fix DOM investigation and source-specific selectors or replacement URLs for ADGM Listing Authority / ADGM RA pages, then find official VARA PDF/rulebook endpoints that do not collapse to nav-shell.
 
 ## 10. Can The System Batch-Onboard Yet?
 

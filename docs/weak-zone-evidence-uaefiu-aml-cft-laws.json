@@ -1,0 +1,45 @@
+{
+  "source_id": "AE-uaefiu-aml-cft-laws",
+  "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/",
+  "run_results": [
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 62,
+      "normalized_hash": "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff",
+      "normalized_length": 1283,
+      "evidence_written": true,
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-aml-cft-laws/intake-20260616T060941Z/proof.json",
+      "can_save_evidence": false,
+      "adapter_used": true,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 62,
+      "normalized_hash": "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff",
+      "normalized_length": 1283,
+      "evidence_written": true,
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-aml-cft-laws/intake-20260616T060945Z/proof.json",
+      "can_save_evidence": false,
+      "adapter_used": true,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    }
+  ],
+  "certification_status": "MONITORING_CERTIFIED",
+  "baseline_runs_completed": 2,
+  "baseline_runs_required": 2,
+  "proof_paths": [
+    "data/source_snapshots/2026-06-16/AE/AE-uaefiu-aml-cft-laws/intake-20260616T060941Z/proof.json",
+    "data/source_snapshots/2026-06-16/AE/AE-uaefiu-aml-cft-laws/intake-20260616T060945Z/proof.json"
+  ],
+  "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-aml-cft-laws/intake-20260616T060941Z/proof.json",
+  "hash_history": [
+    "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff",
+    "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff"
+  ],
+  "hash_stable": true,
+  "evidence_level": "CERTIFIED_EVIDENCE",
+  "certification_score": 87
+}

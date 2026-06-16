@@ -1,0 +1,247 @@
+{
+  "tested_count": 5,
+  "strong_pass_count": 1,
+  "strong_pass_ids": [
+    "AE-cbuae-rulebook-revision-updates"
+  ],
+  "results": [
+    {
+      "source_id": "AE-cbuae-rulebook-revision-updates",
+      "name": "CBUAE Rulebook Revision Updates",
+      "url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+      "category": "central_bank",
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "normalized_length": 2162,
+      "normalized_hash": "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+      "nav_shell": false,
+      "can_save_evidence": true,
+      "hash_collision": false,
+      "collision_source_id": null,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "failure_code": "",
+      "failure_reason": "",
+      "strong_pass": true,
+      "adapter_metadata": {
+        "adapter_family": "cbuae_document_listing",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_version": "adapter-platform-1.0",
+        "extraction_strategy": "adapter:cbuae_document_listing",
+        "item_count": 9,
+        "warnings": [],
+        "failure_reason": "",
+        "remediation_hint": "",
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "metadata": {
+          "container_selector": "body",
+          "url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day"
+        }
+      }
+    },
+    {
+      "source_id": "AE-cbuae-rulebook-search",
+      "name": "CBUAE Rulebook Search",
+      "url": "https://rulebook.centralbank.ae/en/rulebook",
+      "category": "central_bank",
+      "status": "NAV_SHELL_ONLY",
+      "quality_score": 0,
+      "normalized_length": 91,
+      "normalized_hash": "588f993cc176ec4775cf2462bafa4d9e459675d2f58009ccd8a762506d13f5fa",
+      "nav_shell": true,
+      "can_save_evidence": false,
+      "hash_collision": false,
+      "collision_source_id": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "medium",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "strong_pass": false,
+      "adapter_metadata": {
+        "adapter_family": "cbuae_document_listing",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_version": "adapter-platform-1.0",
+        "extraction_strategy": "adapter:cbuae_document_listing",
+        "item_count": 0,
+        "warnings": [],
+        "failure_reason": "No document/listing items were isolated.",
+        "remediation_hint": "Review document link selectors or official source page.",
+        "noise_risk": "unknown",
+        "source_health_risk": "medium",
+        "metadata": {}
+      }
+    },
+    {
+      "source_id": "AE-cbuae-rulebook-aml",
+      "name": "CBUAE Rulebook AML/CFT",
+      "url": "https://rulebook.centralbank.ae/en/anti-money-laundering-and-combating-financing-terrorism-and-illegal-organisations",
+      "category": "aml",
+      "status": "NAV_SHELL_ONLY",
+      "quality_score": 0,
+      "normalized_length": 59,
+      "normalized_hash": "aa2a7aa0d870db0973a50f11b11d15d2205055f08fc193dfd874c28509908038",
+      "nav_shell": true,
+      "can_save_evidence": false,
+      "hash_collision": false,
+      "collision_source_id": null,
+      "noise_risk": "medium",
+      "source_health_risk": "low",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "body",
+        "focus_keywords": [
+          "Anti-Money Laundering",
+          "Combating Financing Terrorism"
+        ]
+      },
+      "failure_code": "NAV_SHELL_ONLY",
+      "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+      "strong_pass": false,
+      "adapter_metadata": {
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_version": "adapter-platform-1.0",
+        "extraction_strategy": "adapter:static_html",
+        "item_count": 0,
+        "warnings": [],
+        "failure_reason": "",
+        "remediation_hint": "",
+        "noise_risk": "medium",
+        "source_health_risk": "low",
+        "metadata": {
+          "content_selector": "body",
+          "url": "https://rulebook.centralbank.ae/en/anti-money-laundering-and-combating-financing-terrorism-and-illegal-organisations",
+          "focus_keywords": [
+            "Anti-Money Laundering",
+            "Combating Financing Terrorism"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection",
+      "name": "DIFC Data Protection",
+      "url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
+      "category": "regulatory",
+      "status": "NEEDS_SELECTOR_REVIEW",
+      "quality_score": 5,
+      "normalized_length": 0,
+      "normalized_hash": "",
+      "nav_shell": false,
+      "can_save_evidence": false,
+      "hash_collision": false,
+      "collision_source_id": null,
+      "noise_risk": "unknown",
+      "source_health_risk": "unknown",
+      "adapter_family": "",
+      "adapter_name": "",
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ],
+        "item_selector": "article, li, tr, .card, .item, a[href]",
+        "title_selector": "a, h2, h3, h4",
+        "url_selector": "a[href]"
+      },
+      "failure_code": "URL_STALE",
+      "failure_reason": "Fetch failed: wait_for_selector 'main' not found at https://www.difc.com/business/laws-and-regulations/data-protection/",
+      "strong_pass": false,
+      "adapter_metadata": {}
+    },
+    {
+      "source_id": "AE-difc-legal-database",
+      "name": "DIFC Legal Database",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
+      "category": "legal_database",
+      "status": "BLOCKED",
+      "quality_score": 35,
+      "normalized_length": 22162,
+      "normalized_hash": "dc77151c5a834f63cf841cd7adfb48d33602ef8c69d044e9ed4aac541f621217",
+      "nav_shell": false,
+      "can_save_evidence": false,
+      "hash_collision": false,
+      "collision_source_id": null,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "adapter_family": "listing",
+      "adapter_name": "listing",
+      "adapter_config": {
+        "container_selector": "main",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ],
+        "item_selector": "article, li, tr, .card, .item, a[href]",
+        "title_selector": "a, h2, h3, h4",
+        "url_selector": "a[href]"
+      },
+      "failure_code": "ACCESS_BLOCKED",
+      "failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "strong_pass": false,
+      "adapter_metadata": {
+        "adapter_family": "listing",
+        "adapter_name": "listing",
+        "adapter_version": "adapter-platform-1.0",
+        "extraction_strategy": "adapter:listing",
+        "item_count": 100,
+        "warnings": [],
+        "failure_reason": "",
+        "remediation_hint": "",
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "metadata": {
+          "container_selector": "main",
+          "item_selector": "article, li, tr, .card, .item, a[href]",
+          "title_selector": "a, h2, h3, h4",
+          "url": "https://www.difc.com/business/laws-and-regulations/legal-database/"
+        }
+      }
+    }
+  ]
+}

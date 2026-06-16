@@ -4,7 +4,7 @@ Date: 2026-06-16
 
 ## Batch Continuation Addendum
 
-The batch continuation after `deff94f` activated five additional proof-backed sources and advanced the current truth to **33 enabled / 29 readiness-supported / 4 remediation**.
+The batch continuation after `deff94f` activated five additional proof-backed sources and, at that checkpoint, advanced the truth to **33 enabled / 29 readiness-supported / 4 remediation**.
 
 Newly activated in the batch continuation:
 
@@ -14,7 +14,21 @@ Newly activated in the batch continuation:
 - `AE-sca-aml-cft`
 - `AE-dfsa-rulebook-thomsonreuters`
 
-The 50-source target is still not reached; 21 more activation-ready sources are required.
+At that checkpoint, the 50-source target was still not reached; 21 more activation-ready sources were required.
+
+## Weak-Zone Remediation Addendum
+
+The weak-zone remediation cycle after `81ab229` tested 20 primary weak-zone candidates plus 5 official alternate candidates across ADGM, UAE FIU, VARA, DFSA/DIFC, and CBUAE. It improved document/listing title extraction for generic action links (`Download`, `View Details`, `Read more`) and activated three additional proof-backed sources.
+
+Newly activated in the weak-zone remediation cycle:
+
+- `AE-uaefiu-aml-cft-laws`
+- `AE-uaefiu-publications-hub`
+- `AE-cbuae-rulebook-revision-updates`
+
+Current truth after this cycle: **36 enabled / 32 readiness-supported / 4 remediation**.
+
+The 50-source target is still not reached; 18 more activation-ready sources are required.
 
 ## 1. Activation Counts
 
@@ -79,10 +93,13 @@ Added:
 - `AE-sca-regulations-listing`
 - `AE-sca-fatca-crs`
 - `AE-adgm-listing-rules`
+- `AE-uaefiu-aml-cft-laws`
+- `AE-uaefiu-publications-hub`
+- `AE-cbuae-rulebook-revision-updates`
 
 ## 7. Website/App Copy Changed
 
-No frontend copy was changed. Current truth docs/config/validators were updated to 33/29/4 after the batch continuation.
+No frontend copy was changed. Current truth docs/config/validators were updated to 36/32/4 after weak-zone remediation.
 
 ## 8. Batch-Onboarding Factory Status
 
@@ -90,15 +107,15 @@ Partial. The system can batch no-save-test candidates, classify failures, save p
 
 ## 9. Did We Reach 50?
 
-No. Current readiness-supported active count is 29. Reaching 50 requires 21 more proof-backed, baseline-stable, gate-passing sources.
+No. Current readiness-supported active count is 32. Reaching 50 requires 18 more proof-backed, baseline-stable, gate-passing sources.
 
 ## 10. Biggest Remaining Blocker
 
-JS-heavy official pages often render custom elements or nav shells that require source-specific selectors. ADGM RA URLs also appear stale/404. UAE FIU AML/CFT laws still need DOM/XHR or direct official document endpoint remediation. SCA corporate governance may be a duplicate or a too-small subpage unless a richer source-specific endpoint is found.
+JS-heavy official pages often render custom elements or nav shells that require source-specific selectors. ADGM RA URLs still appear stale/404. VARA rulebook/framework/register URLs remain nav-shell/stale under tested selectors. DFSA/DIFC listing pages remain selector/access remediation. CBUAE non-rulebook public paths remain access-blocked unless official alternates are found.
 
 ## 11. Next Exact Task
 
-Execute `docs/autonomous-next-execution-prompt.md`, starting with UAE FIU AML/CFT laws, ADGM RA notices/AML guide replacement URLs, and SCA corporate governance source-model review.
+Execute `docs/autonomous-next-execution-prompt.md`, starting with ADGM alternate replacement URLs/selectors, official VARA PDF/rulebook endpoints, and DFSA/DIFC selector remediation.
 
 ## 12. Validation Results
 

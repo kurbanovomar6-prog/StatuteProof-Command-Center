@@ -477,6 +477,39 @@ def test_fiu_eocn_document_listing_adapter_extracts_publication_links():
     assert "goAML Registration Guidance" in result.text
 
 
+def test_fiu_document_listing_uses_card_heading_when_link_text_is_generic():
+    html = """
+    <html><body><main>
+      <article class="publication-card">
+        <h3>Federal Decree-Law No. 10 of 2025 on AML/CFT and Proliferation Financing</h3>
+        <p>Official UAE FIU knowledge-centre publication for anti-money laundering,
+        counter-terrorist financing, sanctions controls, reporting obligations, and
+        financial intelligence compliance governance.</p>
+        <a href="/media/laws/federal-decree-law-10-2025.pdf">Download</a>
+      </article>
+      <article class="publication-card">
+        <h3>Cabinet Resolution No. 134 of 2025 Executive Regulations</h3>
+        <p>Executive regulations covering AML, CFT, suspicious transaction reporting,
+        targeted financial sanctions, customer due diligence, and supervisory controls.</p>
+        <a href="/media/laws/cabinet-resolution-134-2025.pdf">View Details</a>
+      </article>
+    </main></body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/",
+        adapter_family="fiu_eocn_document_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "fiu_eocn_document_listing"
+    assert result.item_count == 2
+    assert "Federal Decree-Law No. 10 of 2025" in result.text
+    assert "Cabinet Resolution No. 134 of 2025" in result.text
+    assert "- Title: Download" not in result.text
+    assert "- Title: View Details" not in result.text
+
+
 def test_eocn_news_listing_adapter_extracts_news_and_ignores_navigation():
     html = """
     <html><body>
@@ -558,6 +591,73 @@ def test_vara_pdf_listing_adapter_extracts_rulebook_pdf_links():
     assert result.item_count == 2
     assert "Company Rulebook" in result.text
     assert "aml-cft-rulebook.pdf" in result.text
+
+
+def test_vara_pdf_listing_uses_rulebook_card_heading_for_generic_buttons():
+    html = """
+    <html><body><main>
+      <section class="rulebooks">
+        <div class="card">
+          <h3>VARA AML/CFT Rulebook</h3>
+          <p>Official rulebook covering AML, CFT, sanctions, compliance governance,
+          VASP controls, reporting, and regulatory obligations.</p>
+          <a href="/media/rulebooks/aml-cft-rulebook.pdf">Download PDF</a>
+        </div>
+        <div class="card">
+          <h3>VARA Company Rulebook</h3>
+          <p>Official company rulebook covering governance, compliance, risk controls,
+          senior management, audit, record keeping, and regulatory reporting.</p>
+          <a href="/media/rulebooks/company-rulebook.pdf">Read more</a>
+        </div>
+        <a href="/en/contact">Contact VARA</a>
+      </section>
+    </main></body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.vara.ae/en/regulatory-framework/rulebooks/",
+        adapter_family="vara_pdf_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "vara_pdf_listing"
+    assert result.item_count == 2
+    assert "VARA AML/CFT Rulebook" in result.text
+    assert "VARA Company Rulebook" in result.text
+    assert "- Title: Download PDF" not in result.text
+    assert "- Title: Read more" not in result.text
+
+
+def test_cbuae_document_listing_uses_heading_for_generic_download_links():
+    html = """
+    <html><body><main>
+      <div class="publication-card">
+        <h2>Retail Payment Services and Card Schemes Regulation</h2>
+        <p>Regulation for licensed financial institutions, payment systems,
+        consumer safeguards, operational controls, and Central Bank supervision.</p>
+        <a href="/media/regulations/retail-payment-services-regulation.pdf">Download</a>
+      </div>
+      <div class="publication-card">
+        <h2>Stored Value Facilities Regulation</h2>
+        <p>Regulation covering payment service providers, stored value facilities,
+        licensing controls, safeguarding, compliance, and operational governance.</p>
+        <a href="/media/regulations/stored-value-facilities-regulation.pdf">View Details</a>
+      </div>
+    </main></body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.centralbank.ae/en/regulations/",
+        adapter_family="cbuae_document_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "cbuae_document_listing"
+    assert result.item_count == 2
+    assert "Retail Payment Services" in result.text
+    assert "Stored Value Facilities Regulation" in result.text
+    assert "- Title: Download" not in result.text
+    assert "- Title: View Details" not in result.text
 
 
 def test_static_html_adapter_extracts_article_content_and_ignores_nav():
@@ -730,6 +830,44 @@ def test_adgm_fsra_listing_adapter_extracts_component_link_buttons():
     assert "Market Rules" in result.text
     assert "Guidance on Preparing a Prospectus" in result.text
     assert "Guidance+-+Listing+Applications" in result.text
+    assert "FSRA Connect" not in result.text
+
+
+def test_adgm_listing_adapter_uses_card_heading_for_generic_action_links():
+    html = """
+    <html><body>
+      <adgm-page>
+        <adgm-section>
+          <div class="card regulatory-action">
+            <h3>Enforcement Action Against Licensed Firm</h3>
+            <p>FSRA regulatory action concerning market abuse, governance controls,
+            disclosure obligations, compliance monitoring, and enforcement outcomes.</p>
+            <adgm-link-button href="/financial-services-regulatory-authority/enforcement/firm-action">View Details</adgm-link-button>
+          </div>
+          <div class="card regulatory-action">
+            <h3>Listing Authority Market Disclosure Notice</h3>
+            <p>Listing Authority announcement covering market disclosure, prospectus
+            obligations, securities rules, issuer governance, and regulatory reporting.</p>
+            <a href="/financial-services-regulatory-authority/listing-authority/announcements/disclosure-notice">Read more</a>
+          </div>
+          <adgm-footer><a href="/fsra-connect">FSRA Connect</a></adgm-footer>
+        </adgm-section>
+      </adgm-page>
+    </body></html>
+    """
+    result = extract_with_adapter(
+        html,
+        url="https://www.adgm.com/financial-services-regulatory-authority/listing-authority/listing-authority-announcements",
+        adapter_family="adgm_fsra_listing",
+        adapter_config={"container_selector": "adgm-section"},
+    )
+
+    assert result.adapter_name == "adgm_fsra_listing"
+    assert result.item_count == 2
+    assert "Enforcement Action Against Licensed Firm" in result.text
+    assert "Listing Authority Market Disclosure Notice" in result.text
+    assert "- Title: View Details" not in result.text
+    assert "- Title: Read more" not in result.text
     assert "FSRA Connect" not in result.text
 
 

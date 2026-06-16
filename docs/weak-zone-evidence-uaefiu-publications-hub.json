@@ -1,0 +1,45 @@
+{
+  "source_id": "AE-uaefiu-publications-hub",
+  "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/",
+  "run_results": [
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "normalized_hash": "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
+      "normalized_length": 7489,
+      "evidence_written": true,
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-publications-hub/intake-20260616T060950Z/proof.json",
+      "can_save_evidence": false,
+      "adapter_used": true,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "normalized_hash": "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
+      "normalized_length": 7489,
+      "evidence_written": true,
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-publications-hub/intake-20260616T060954Z/proof.json",
+      "can_save_evidence": false,
+      "adapter_used": true,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    }
+  ],
+  "certification_status": "MONITORING_CERTIFIED",
+  "baseline_runs_completed": 2,
+  "baseline_runs_required": 2,
+  "proof_paths": [
+    "data/source_snapshots/2026-06-16/AE/AE-uaefiu-publications-hub/intake-20260616T060950Z/proof.json",
+    "data/source_snapshots/2026-06-16/AE/AE-uaefiu-publications-hub/intake-20260616T060954Z/proof.json"
+  ],
+  "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-publications-hub/intake-20260616T060950Z/proof.json",
+  "hash_history": [
+    "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
+    "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e"
+  ],
+  "hash_stable": true,
+  "evidence_level": "CERTIFIED_EVIDENCE",
+  "certification_score": 88
+}

@@ -1804,5 +1804,100 @@
       "container_selector": "article"
     },
     "fetch_method": "playwright"
+  },
+  {
+    "name": "UAE FIU AML/CFT Laws and Related Decisions",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-uaefiu-aml-cft-laws",
+    "adapter_family": "listing",
+    "adapter_name": "listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-aml-cft-laws/intake-20260616T060941Z/proof.json",
+    "normalized_hash": "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff",
+    "adapter_config": {
+      "container_selector": "body",
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "adgm-footer",
+        "adgm-navigation",
+        "adgm-cookie-notification",
+        "form",
+        ".search",
+        "script",
+        "style",
+        "noscript"
+      ],
+      "item_selector": "article, li, tr, .card, .item, a[href]",
+      "title_selector": "a, h2, h3, h4",
+      "url_selector": "a[href]",
+      "sort_items": true,
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "UAE FIU Publications Hub",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-uaefiu-publications-hub",
+    "adapter_family": "fiu_eocn_document_listing",
+    "adapter_name": "fiu_eocn_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-publications-hub/intake-20260616T060950Z/proof.json",
+    "normalized_hash": "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
+    "adapter_config": {
+      "container_selector": "body",
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "adgm-footer",
+        "adgm-navigation",
+        "adgm-cookie-notification",
+        "form",
+        ".search",
+        "script",
+        "style",
+        "noscript"
+      ]
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "CBUAE Rulebook Revision Updates",
+    "url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+    "jurisdiction": "AE",
+    "category": "central_bank",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-rulebook-revision-updates",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-rulebook-revision-updates/intake-20260616T061005Z/proof.json",
+    "normalized_hash": "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+    "adapter_config": {
+      "container_selector": "body",
+      "exclude_selectors": [
+        "header",
+        "nav",
+        "footer",
+        "form",
+        ".search",
+        "script",
+        "style",
+        "noscript"
+      ]
+    },
+    "fetch_method": "playwright"
   }
 ]

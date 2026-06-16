@@ -42,6 +42,13 @@ _GENERIC_NAV_TITLES = {
     "login",
     "services",
     "news",
+    "view",
+    "view details",
+    "read more",
+    "learn more",
+    "download",
+    "download pdf",
+    "open",
 }
 
 
@@ -106,6 +113,60 @@ def _extract_date(text: str | None) -> str:
 def _is_noise_title(title: str | None) -> bool:
     cleaned = _clean(title).lower()
     return not cleaned or cleaned in _GENERIC_NAV_TITLES or len(cleaned) < 4
+
+
+def _ancestor_context_node(node):
+    """Return the nearest card/listing-ish ancestor for a document/action link."""
+    current = node
+    for _ in range(6):
+        parent = getattr(current, "parent", None)
+        if parent is None:
+            break
+        current = parent
+        name = getattr(current, "name", "") or ""
+        if name == "[document]":
+            break
+        classes = " ".join(str(c) for c in (current.get("class") or []))
+        folded = classes.casefold()
+        if name in {"article", "li", "tr", "adgm-expansion-panel"}:
+            return current
+        if any(token in folded for token in ("card", "item", "publication", "document", "regulatory-action", "announcement")):
+            return current
+    return node
+
+
+def _title_from_context(node, fallback: str) -> str:
+    """Use nearby headings when the action link itself is generic chrome."""
+    fallback_clean = _clean(fallback, limit=260)
+    if fallback_clean and not _is_noise_title(fallback_clean):
+        return fallback_clean
+
+    for selector in (
+        "[aria-labelledby]",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "[data-title]",
+        ".title",
+        ".item-title",
+        ".card-title",
+    ):
+        candidate = node.select_one(selector) if node else None
+        if not candidate:
+            continue
+        if selector == "[aria-labelledby]":
+            label_id = candidate.get("aria-labelledby")
+            labelled = node.find(id=label_id) if label_id else None
+            text = _node_text(labelled, separator=" ", limit=260)
+        elif selector == "[data-title]":
+            text = _clean(candidate.get("data-title") or candidate.get_text(" ", strip=True), limit=260)
+        else:
+            text = _node_text(candidate, separator=" ", limit=260)
+        if text and not _is_noise_title(text):
+            return text
+    return fallback_clean
 
 
 def _soup(html: str, exclude_selectors: list[str] | None = None) -> BeautifulSoup:
@@ -538,7 +599,17 @@ class DocumentListingAdapter(BaseHtmlAdapter):
 
     def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
         config = config or {}
-        soup = _soup(html, config.get("exclude_selectors") or ["nav", "footer", "form", ".search"])
+        soup = _soup(
+            html,
+            config.get("exclude_selectors") or [
+                "nav",
+                "footer",
+                "adgm-footer",
+                "adgm-navigation",
+                "form",
+                ".search",
+            ],
+        )
         container_selector = str(config.get("container_selector") or "main").strip()
         container = soup.select_one(container_selector) if container_selector else soup
         if not container:
@@ -546,17 +617,20 @@ class DocumentListingAdapter(BaseHtmlAdapter):
         items: list[dict] = []
         seen: set[str] = set()
         for anchor in container.select("a[href], adgm-link-button[href]"):
-            title = _node_text(anchor, separator=" ", limit=260)
+            raw_title = _node_text(anchor, separator=" ", limit=260)
             href = (anchor.get("href") or "").strip()
-            if _is_noise_title(title) or not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
+            if not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
                 continue
             item_url = urljoin(url, href)
-            context_node = anchor.parent or anchor
+            context_node = _ancestor_context_node(anchor)
+            title = _title_from_context(context_node, raw_title)
+            if _is_noise_title(title):
+                continue
             context = _node_text(context_node, separator=" ", limit=700)
             combined = f"{title} {href} {context}".lower()
             title_href = f"{title} {href}".lower()
             is_document = bool(_DOCUMENT_EXT_RE.search(href))
-            has_signal = any(token in title_href for token in self.allowed_tokens)
+            has_signal = any(token in f"{title_href} {context.lower()}" for token in self.allowed_tokens)
             if not is_document and not has_signal:
                 continue
             key = f"{title.lower()}|{item_url.lower()}"

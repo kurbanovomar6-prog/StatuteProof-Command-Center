@@ -1,0 +1,73 @@
+{
+  "activation_ready_only": true,
+  "alert_delivery_enabled": false,
+  "include_enabled_sources": false,
+  "mode": "dry-run",
+  "processed_count": 3,
+  "results": [
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff",
+      "previous_hash": "",
+      "proof_path": "",
+      "quality_score": 62,
+      "regulator": "UAE FIU",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-uaefiu-aml-cft-laws",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/"
+    },
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
+      "previous_hash": "",
+      "proof_path": "",
+      "quality_score": 65,
+      "regulator": "UAE FIU",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-uaefiu-publications-hub",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/"
+    },
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+      "previous_hash": "",
+      "proof_path": "",
+      "quality_score": 65,
+      "regulator": "CBUAE",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-cbuae-rulebook-revision-updates",
+      "url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day"
+    }
+  ],
+  "save_proof": false,
+  "skipped": [],
+  "skipped_count": 0,
+  "source_health_counts": {
+    "HASH_COLLISION": 0,
+    "MANUAL_CHECK_REQUIRED": 0,
+    "MONITOR_DISCONNECTED": 0,
+    "MONITOR_OK": 3,
+    "NAV_SHELL_ONLY": 0,
+    "QUALITY_DROP": 0,
+    "REMEDIATION_REQUIRED": 0,
+    "SELECTOR_BROKEN": 0,
+    "SOURCE_STRUCTURE_CHANGED": 0
+  },
+  "sources_json_changed": false,
+  "warnings": []
+}

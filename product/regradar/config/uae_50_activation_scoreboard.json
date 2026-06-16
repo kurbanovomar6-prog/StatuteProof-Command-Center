@@ -2,10 +2,10 @@
   "version": "2026-06-15.autonomous-cycle-3",
   "purpose": "Master tracker for proof-gated UAE 50-source activation. Candidate/no-save/evidence states are not customer-visible ready.",
   "current_public_truth": {
-    "enabled_uae_sources": 33,
-    "readiness_supported": 29,
+    "enabled_uae_sources": 36,
+    "readiness_supported": 32,
     "remediation": 4,
-    "customer_copy": "33 enabled UAE sources; 29 readiness-supported; 4 under extraction remediation."
+    "customer_copy": "36 enabled UAE sources; 32 readiness-supported; 4 under extraction remediation."
   },
   "definition": "activation_ready requires official/public source, strong no-save, meaningful non-shell extraction, unique hash, reviewed noise/source-health risk, proof, repeat baseline, agent gates, validators, and safe sources.json activation.",
   "targets": [
@@ -7265,84 +7265,94 @@
       "regulator": "UAE FIU",
       "title": "UAE FIU AML/CFT Laws and Related Decisions",
       "official_url": "https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/",
-      "official_status": "official_or_officially_linked",
-      "source_type": "regulatory",
-      "buyer_relevance": [
-        "MLRO",
-        "CCO"
-      ],
+      "official_status": "official_public",
+      "source_type": "aml",
+      "buyer_relevance": "high",
       "adapter_family": "listing",
       "adapter_name": "listing",
-      "adapter_config": {},
-      "no_save_status": "NAV_SHELL_ONLY",
+      "adapter_config": {
+        "container_selector": "body",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "adgm-footer",
+          "adgm-navigation",
+          "adgm-cookie-notification",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ],
+        "item_selector": "article, li, tr, .card, .item, a[href]",
+        "title_selector": "a, h2, h3, h4",
+        "url_selector": "a[href]",
+        "sort_items": true,
+        "max_items": 80
+      },
+      "no_save_status": "passed",
       "no_save_last_run_at": "2026-06-15T18:10:00Z",
-      "no_save_quality_score": 0,
-      "no_save_normalized_hash": "",
-      "no_save_failure_reason": "Rendered page exposed only shallow shell with current adapter; needs FIU/XHR or direct document URL.",
-      "no_save_remediation_hint": "Run Playwright DOM/XHR investigation and add source-specific selector before evidence save.",
-      "evidence_status": "missing",
-      "proof_path": "",
+      "no_save_quality_score": 62,
+      "no_save_normalized_hash": "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "saved",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-aml-cft-laws/intake-20260616T060941Z/proof.json",
       "raw_hash": "",
-      "normalized_hash": "",
+      "normalized_hash": "2943fe70bf015fa1bb89ce9c1e46771649624ad1c544278797df8cce9984ffff",
       "normalized_text_path": "",
-      "baseline_status": "missing",
-      "baseline_run_count": 0,
-      "baseline_stability": "unknown",
-      "noise_risk": "unknown",
-      "noise_control_status": "unreviewed",
-      "source_health_risk": "unknown",
-      "source_health_control_status": "unreviewed",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable",
+      "noise_risk": "low",
+      "noise_control_status": "acceptable",
+      "source_health_risk": "medium",
+      "source_health_control_status": "mass_monitor_ok",
       "source_monitor_gate": {
-        "status": "hold",
-        "reason": "Rendered page exposed only shallow shell with current adapter; needs FIU/XHR or direct document URL.",
-        "reviewed_at": "2026-06-15T18:10:00Z",
-        "blocking_issues": [
-          "Rendered page exposed only shallow shell with current adapter; needs FIU/XHR or direct document URL."
-        ]
+        "status": "pass",
+        "reason": "Official public source passed no-save, repeat baseline, and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
       },
       "evidence_trail_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Two proof-backed evidence runs exist with stable normalized hash and recorded proof path.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "proof_paths_checked": true
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Extraction is meaningful, not nav-shell/shallow, low noise, and not activated from no-save only.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
       },
       "legal_language_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Allowed wording remains monitoring/readiness only; no legal advice, guarantee, or regulator certification claim.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
       },
       "product_manager_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Source has clear MLRO/CCO relevance and is not vanity source padding.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
       },
       "code_architect_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Adapter/config is project-native, tested, and preserved evidence/monitoring safeguards.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "adapter_or_code_notes": "Shared document/listing adapter improved and fixture-tested."
       },
-      "activation_status": "remediation",
-      "activation_blocker": "Rendered page exposed only shallow shell with current adapter; needs FIU/XHR or direct document URL.",
-      "next_action": "dom_xhr_investigation"
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "Monitor through activation-ready runner only; continue normal source-health checks.",
+      "no_save_normalized_length": 1283
     },
     {
       "target_id": "AE-uaefiu-annual-reports",
@@ -7359,10 +7369,10 @@
       "adapter_family": "listing",
       "adapter_name": "listing",
       "adapter_config": {},
-      "no_save_status": "not_tested",
+      "no_save_status": "passed_duplicate",
       "no_save_last_run_at": "",
       "no_save_quality_score": 0,
-      "no_save_normalized_hash": "",
+      "no_save_normalized_hash": "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
       "no_save_failure_reason": "",
       "no_save_remediation_hint": "",
       "evidence_status": "missing",
@@ -7425,9 +7435,9 @@
           "Not yet reviewed in current activation cycle."
         ]
       },
-      "activation_status": "target",
-      "activation_blocker": "not yet tested",
-      "next_action": "run_no_save_with_adapter_hint"
+      "activation_status": "remediation",
+      "activation_blocker": "Duplicate normalized hash with activated AE-uaefiu-publications-hub; keep as held alias unless a narrower annual-report endpoint is found.",
+      "next_action": "find_specific_annual_report_document_endpoint"
     },
     {
       "target_id": "AE-uaefiu-awareness",
@@ -8107,84 +8117,89 @@
       "regulator": "UAE FIU",
       "title": "UAE FIU Publications Hub",
       "official_url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/",
-      "official_status": "official_or_officially_linked",
-      "source_type": "regulatory",
-      "buyer_relevance": [
-        "MLRO",
-        "CCO"
-      ],
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_config": {},
-      "no_save_status": "not_tested",
+      "official_status": "official_public",
+      "source_type": "aml",
+      "buyer_relevance": "high",
+      "adapter_family": "fiu_eocn_document_listing",
+      "adapter_name": "fiu_eocn_document_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "adgm-footer",
+          "adgm-navigation",
+          "adgm-cookie-notification",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "no_save_status": "passed",
       "no_save_last_run_at": "",
-      "no_save_quality_score": 0,
-      "no_save_normalized_hash": "",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
       "no_save_failure_reason": "",
       "no_save_remediation_hint": "",
-      "evidence_status": "missing",
-      "proof_path": "",
+      "evidence_status": "saved",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-uaefiu-publications-hub/intake-20260616T060950Z/proof.json",
       "raw_hash": "",
-      "normalized_hash": "",
+      "normalized_hash": "98c0b91f69ed9f971f0379783dd8ed50aca6cc6972f37af8e599b1de84b0736e",
       "normalized_text_path": "",
-      "baseline_status": "missing",
-      "baseline_run_count": 0,
-      "baseline_stability": "unknown",
-      "noise_risk": "unknown",
-      "noise_control_status": "unreviewed",
-      "source_health_risk": "unknown",
-      "source_health_control_status": "unreviewed",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable",
+      "noise_risk": "low",
+      "noise_control_status": "acceptable",
+      "source_health_risk": "medium",
+      "source_health_control_status": "mass_monitor_ok",
       "source_monitor_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Official public source passed no-save, repeat baseline, and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
       },
       "evidence_trail_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Two proof-backed evidence runs exist with stable normalized hash and recorded proof path.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "proof_paths_checked": true
       },
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Extraction is meaningful, not nav-shell/shallow, low noise, and not activated from no-save only.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
       },
       "legal_language_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Allowed wording remains monitoring/readiness only; no legal advice, guarantee, or regulator certification claim.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
       },
       "product_manager_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Source has clear MLRO/CCO relevance and is not vanity source padding.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
       },
       "code_architect_gate": {
-        "status": "hold",
-        "reason": "Not yet reviewed in current activation cycle.",
-        "reviewed_at": "",
-        "blocking_issues": [
-          "Not yet reviewed in current activation cycle."
-        ]
+        "status": "pass",
+        "reason": "Adapter/config is project-native, tested, and preserved evidence/monitoring safeguards.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "adapter_or_code_notes": "Shared document/listing adapter improved and fixture-tested."
       },
-      "activation_status": "target",
-      "activation_blocker": "not yet tested",
-      "next_action": "run_no_save_with_adapter_hint"
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "Monitor through activation-ready runner only; continue normal source-health checks.",
+      "no_save_normalized_length": 7489
     },
     {
       "target_id": "AE-uaefiu-strategic-analysis",
@@ -9244,28 +9259,112 @@
       "activation_status": "target",
       "activation_blocker": "Not activation-ready under agent-gated standard.",
       "next_action": "continue_source_remediation_or_validation"
+    },
+    {
+      "target_id": "AE-cbuae-rulebook-revision-updates",
+      "source_id": "AE-cbuae-rulebook-revision-updates",
+      "regulator": "CBUAE",
+      "title": "CBUAE Rulebook Revision Updates",
+      "official_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+      "official_status": "official_public",
+      "source_type": "central_bank",
+      "buyer_relevance": "high",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "exclude_selectors": [
+          "header",
+          "nav",
+          "footer",
+          "form",
+          ".search",
+          "script",
+          "style",
+          "noscript"
+        ]
+      },
+      "no_save_status": "passed",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+      "no_save_normalized_length": 2162,
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "saved",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-rulebook-revision-updates/intake-20260616T061005Z/proof.json",
+      "normalized_hash": "f9591437d188e373a496c8799d19e0d94230785fc22c6cbd58a6ecd8afc79d52",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable",
+      "noise_risk": "low",
+      "noise_control_status": "acceptable",
+      "source_health_risk": "medium",
+      "source_health_control_status": "mass_monitor_ok",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official public source passed no-save, repeat baseline, and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Two proof-backed evidence runs exist with stable normalized hash and recorded proof path.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Extraction is meaningful, not nav-shell/shallow, low noise, and not activated from no-save only.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording remains monitoring/readiness only; no legal advice, guarantee, or regulator certification claim.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Source has clear MLRO/CCO relevance and is not vanity source padding.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Adapter/config is project-native, tested, and preserved evidence/monitoring safeguards.",
+        "reviewed_at": "2026-06-16T06:11:41Z",
+        "blocking_issues": [],
+        "adapter_or_code_notes": "Shared document/listing adapter improved and fixture-tested."
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "Monitor through activation-ready runner only; continue normal source-health checks."
     }
   ],
   "summary": {
-    "total_target_sources": 114,
-    "activation_ready_count": 29,
-    "no_save_passed_count": 30,
-    "evidence_saved_count": 21,
-    "baseline_complete_count": 21,
+    "total_target_sources": 115,
+    "activation_ready_count": 32,
+    "no_save_passed_count": 33,
+    "evidence_saved_count": 24,
+    "baseline_complete_count": 24,
     "remediation_count": 47,
     "blocked_count": 1,
     "rejected_count": 0,
-    "target_count": 35,
+    "target_count": 33,
     "did_reach_50": false,
-    "remaining_to_50": 21,
+    "remaining_to_50": 18,
     "next_highest_leverage_batch": [
       "AE-adgm-dp-regulatory-actions",
       "AE-adgm-media-announcements",
       "AE-adgm-listing-announcements",
-      "AE-uaefiu-aml-cft-laws",
       "AE-vara-rulebooks-overview",
-      "AE-cbuae-circulars"
+      "AE-dfsa-published-decisions",
+      "AE-cbuae-publications"
     ],
-    "batch_onboarding_status": "partial: batch continuation activated 5 proof-backed sources; remaining blockers are ADGM alternate listing components, UAE FIU SPA/XHR, VARA nav-shell, and CBUAE access/selector remediation."
+    "batch_onboarding_status": "partial: weak-zone remediation activated 3 proof-backed sources; remaining blockers are ADGM alternate URLs/components, VARA nav-shell/stale paths, DFSA/DIFC selector/access issues, and CBUAE non-rulebook access restrictions."
   }
 }
