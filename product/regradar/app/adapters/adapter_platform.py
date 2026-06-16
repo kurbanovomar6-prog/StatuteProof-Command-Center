@@ -44,8 +44,10 @@ _GENERIC_NAV_TITLES = {
     "news",
     "view",
     "view details",
+    "more info",
     "read more",
     "learn more",
+    "here",
     "download",
     "download pdf",
     "open",
@@ -126,11 +128,15 @@ def _ancestor_context_node(node):
         name = getattr(current, "name", "") or ""
         if name == "[document]":
             break
-        classes = " ".join(str(c) for c in (current.get("class") or []))
+        class_values = [str(c).casefold() for c in (current.get("class") or [])]
+        classes = " ".join(class_values)
         folded = classes.casefold()
         if name in {"article", "li", "tr", "adgm-expansion-panel"}:
             return current
-        if any(token in folded for token in ("card", "item", "publication", "document", "regulatory-action", "announcement")):
+        if (
+            "item" in class_values
+            or any(token in folded for token in ("card", "publication", "document", "regulatory-action", "announcement"))
+        ):
             return current
     return node
 
@@ -166,6 +172,12 @@ def _title_from_context(node, fallback: str) -> str:
             text = _node_text(candidate, separator=" ", limit=260)
         if text and not _is_noise_title(text):
             return text
+    context_text = _node_text(node, separator=" ", limit=260)
+    if fallback_clean and context_text:
+        context_text = re.sub(re.escape(fallback_clean), "", context_text, count=1, flags=re.I)
+        context_text = _clean(context_text, limit=260)
+    if context_text and not _is_noise_title(context_text):
+        return context_text
     return fallback_clean
 
 
@@ -883,6 +895,33 @@ class DfsaNoticeListingAdapter(DocumentListingAdapter):
     )
 
 
+class DifcLegalDatabaseAdapter(DocumentListingAdapter):
+    family = "difc_legal_database"
+    name = "difc_legal_database"
+    heading = "DIFC legal/regulatory listing items"
+    allowed_tokens = (
+        "difc",
+        "law",
+        "laws",
+        "regulation",
+        "regulations",
+        "consultation",
+        "paper",
+        "notice",
+        "data protection",
+        "digital assets",
+        "companies",
+        "enactment",
+        "amendment",
+        "registrar",
+        "commissioner",
+        "supervision",
+        "enforcement",
+        "guidance",
+        "pdf",
+    )
+
+
 _GENERIC_CONTEXT_SNIPPETS = {
     "view",
     "view details",
@@ -942,6 +981,7 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "rendered_dom_evidence": RenderedDomEvidenceAdapter(),
     "adgm_fsra_listing": AdgmFsraListingAdapter(),
     "dfsa_notice_listing": DfsaNoticeListingAdapter(),
+    "difc_legal_database": DifcLegalDatabaseAdapter(),
     "sca_listing": ScaListingAdapter(),
     "dfsa_rulebook": RulebookModuleAdapter(),
     "cbuae_document_listing": CbuaeDocumentListingAdapter(),
@@ -972,7 +1012,7 @@ def extract_with_adapter(
             adapter_name=adapter_name or "",
             extraction_strategy=f"adapter:{key}" if key else "",
             failure_reason=f"Unknown adapter: {key}" if key else "No adapter configured.",
-            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, or vara_pdf_listing.",
+            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, vara_pdf_listing, or difc_legal_database.",
             source_health_risk="medium",
         )
     try:

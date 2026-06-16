@@ -192,6 +192,7 @@ def main() -> int:
                 "fiu_eocn_document_listing",
                 "eocn_news_listing",
                 "vara_pdf_listing",
+                "difc_legal_database",
             }:
                 fail(errors, f"{source_id} has unsupported adapter_name: {adapter_name!r}")
             if not source.get("adapter_version"):

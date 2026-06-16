@@ -225,8 +225,11 @@ def classify_failure_code(result: dict) -> str:
     status = str(result.get("status") or "")
     dom = result.get("dom_investigation") or {}
     recommended_adapter = str(dom.get("recommended_adapter_family") or dom.get("recommended_adapter_name") or "")
+    policy_warnings = (result.get("quality_breakdown") or {}).get("policy_warnings") or []
     if result.get("hash_collision"):
         return SourceFailureCode.DUPLICATE_BOILERPLATE_HASH
+    if policy_warnings:
+        return SourceFailureCode.LIKELY_WAF_403 if "403" in reason or "forbidden" in reason else SourceFailureCode.ACCESS_BLOCKED
     if result.get("nav_shell_detected") or status == SourceIntakeStatus.NAV_SHELL_ONLY:
         return SourceFailureCode.NAV_SHELL_ONLY
     if "403" in reason or "forbidden" in reason:
@@ -287,6 +290,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "fiu_eocn_document_listing",
         "eocn_news_listing",
         "vara_pdf_listing",
+        "difc_legal_database",
         "register",
         "sitemap_feed",
         "public_json_api",
@@ -302,6 +306,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "fiu_eocn_document_listing",
         "eocn_news_listing",
         "vara_pdf_listing",
+        "difc_legal_database",
     }
     if family in document_families:
         return bool(result.get("adapter_used")) and item_count >= 2 and chars >= 500

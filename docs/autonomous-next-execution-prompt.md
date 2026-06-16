@@ -1,66 +1,127 @@
 # Next Autonomous Execution Prompt
 
-Continue the StatuteProof UAE source hardening program after the post-50 hardening sprint.
+Continue the StatuteProof ideal-product hardening program after the DIFC remediation sprint.
 
 Work only inside `/Users/kurbnovomar/StatuteProof-Command-Center`.
 
 Current verified truth:
 
-- 66 enabled UAE sources.
-- 62 readiness-supported active sources.
-- 4 under extraction remediation.
+- 79 enabled UAE sources.
+- 76 readiness-supported active sources.
+- 3 under extraction remediation.
 - 50-source minimum has been reached.
-- Work queue has 50 activation-ready rows.
+- DIFC coverage improved with 8 proof-backed official legal/data-protection sources.
+- Complete DIFC coverage is not claimed.
+- Monitoring intelligence only. Not legal advice.
 
-Latest proven additions and hardening:
+Latest proven additions:
 
-- 20 proof-backed CBUAE/DFSA official rulebook and guidance sources were activated in the final-8 sprint.
-- All activated sources passed strong no-save, two proof/baseline runs, mass-monitor dry-run `MONITOR_OK`, and six agent gates.
-- Post-50 hardening tested 33 non-CBUAE candidate/config checks across VARA, DFSA, DIFC, ADGM/FSRA, UAE FIU, and SCA.
-- 5 non-CBUAE strong no-save passes were found, but no new source was activated because the strong ADGM/SCA candidates duplicated already active URLs, DFSA MLRO evidence save was not reproducible, and DFSA AML/CTF root still drifts between evidence and monitor paths.
-- `AE-dfsa-aml-ctf-sanctions` remains held: evidence hash `d66b892...`, monitor hash `468409...`, `change_detected=true` when the expected hash is set.
+- VARA source-depth sprint activated 6 direct official VARA PDF/rulebook sources.
+- DIFC remediation sprint activated 8 official DIFC legal/data-protection sources:
+  - `AE-difc-laws-and-regulations`
+  - `AE-difc-legal-database`
+  - `AE-difc-data-protection-commissioner`
+  - `AE-difc-data-protection-guidance`
+  - `AE-difc-data-protection-regulation-10`
+  - `AE-difc-data-protection-supervision-enforcement`
+  - `AE-difc-data-protection-law-2020`
+  - `AE-difc-companies-law-2018`
+- All activated DIFC sources passed strong no-save, two proof/baseline runs, mass-monitor dry-run `MONITOR_OK`, and six review gates.
+- `AE-difc-consultation-papers` and `AE-difc-digital-assets-law-2024` remain held below strict quality threshold.
 
-Do not deploy, expose secrets, send customer messages, bypass login/CAPTCHA/paywalls, fake evidence, weaken validators, or claim "60 validated sources."
+Do not deploy, expose secrets, send customer messages, bypass login/CAPTCHA/paywalls, fake evidence, weaken validators, claim complete UAE/DIFC coverage, or claim legal advice/guaranteed compliance/perfect parsing/never-miss monitoring.
 
-Next highest-leverage task:
+Next exact product task:
 
-1. **Diversify the 50+ pack beyond CBUAE concentration**
-   - Implement direct official PDF extraction for VARA rulebook PDFs.
-   - Retest VARA AML/CFT, company, market conduct, technology, transfer/settlement, and compliance/risk rulebooks using direct PDF URLs or official PDF listings, not nav-shell framework pages.
-   - Activate only if proof/baseline/dry-run/gates pass.
+## Build 7/30/90-Day Source Reliability Charts
 
-2. **DIFC access/selector remediation**
-   - Data protection.
-   - Consultation papers.
-   - Legal database.
-   - Build fixture-backed listing/table extraction for pages that returned `LISTING_ADAPTER_REQUIRED` or `TABLE_ADAPTER_REQUIRED`.
-   - Keep blocked if public unauthenticated access still fails.
+Goal:
+Make the source-health timeline commercially useful by showing source reliability over 7, 30, and 90 day windows on Sources, Evidence, and dashboard surfaces.
 
-3. **DFSA deterministic hash fix**
-   - Build a fixture from the `AE-dfsa-aml-ctf-sanctions` evidence output and monitor output.
-   - Make `dfsa_notice_listing` stable for root AML/CTF page ordering/chrome.
-   - Do not activate until mass-monitor dry-run with `normalized_hash` returns `change_detected=false`.
+Implementation requirements:
 
-4. **ADGM alternate components**
-   - Data protection regulatory actions.
-   - Listing authority announcements.
-   - Media/regulatory announcements.
-   - Build component-specific extraction only if content is meaningful and not page chrome.
+1. Aggregate existing source run history from `product/regradar/data/source_runs/source_runs.jsonl`.
+2. Compute per-source reliability windows:
+   - 7 days
+   - 30 days
+   - 90 days
+3. For each window calculate:
+   - total runs
+   - `MONITOR_OK` count
+   - quality drops
+   - hash drift / content drift events
+   - nav-shell/source-structure/access failures
+   - latest successful check timestamp
+   - latest failure timestamp
+   - reliability percentage
+   - customer-safe health label
+4. Add backend helper/API consistent with existing architecture:
+   - `GET /api/sources/:source_id/reliability`
+   - `GET /api/sources/reliability-summary`
+5. Frontend:
+   - Add compact 7/30/90 reliability indicators to Sources page.
+   - Add source reliability section to Evidence page/review history context.
+   - Add an honest dashboard summary for source reliability.
+   - Show empty state: "No reliability history recorded yet" when run history is missing.
+6. Do not fabricate historical runs.
+7. Do not imply legal/compliance status from reliability status.
+8. Keep wording: "Source extraction reliability", not "regulatory compliance reliability".
 
-5. **Operator UX**
-   - Wire a generated source-readiness summary artifact so validators, docs, and frontend counts do not require manual constant edits.
-   - Implement Acknowledge & Assess backend persistence and tests before any visible button.
+Tests required:
 
-Cycle requirements:
+- 7/30/90 window aggregation from fixture run history.
+- Empty history returns honest empty state.
+- Hash drift and quality drops reduce reliability.
+- Remediation/source-health failures are visible.
+- API returns customer-safe fields only.
+- Frontend references 7/30/90 reliability and does not use fake history.
 
-1. Run clean git gate before edits.
-2. Add fixture tests before adapter behavior changes.
-3. Do not activate no-save-only, one-run-only, drift, nav-shell, shallow, duplicate, or high-noise sources.
-4. Save evidence only after strong no-save q>=60.
-5. Require two stable baseline runs and mass-monitor dry-run `MONITOR_OK`.
-6. Emulate Source Monitor, Evidence Trail, QA/Critic, Legal Language, Product Manager, and Code Architect gates.
-7. Update `sources.json` only after all gates pass.
-8. Update scoreboard, work queue, truth docs, validators, and tests.
-9. Run full validation and commit/push only after validation passes.
+Validators required:
 
-Final output must include whether diversification improved, sources activated, tests added, validation result, commit hash, and remaining weak zones.
+- Add `tools/validate_source_reliability_charts.py`.
+- Validator must check backend helper/API, frontend visibility, no fake history, no overclaims, and source truth 79 / 76 / 3.
+
+Run validation:
+
+```bash
+git status --short
+python3 -m compileall product/regradar
+python3 -m pytest product/regradar/tests -q
+python3 tools/validate_source_reliability_charts.py
+python3 tools/validate_difc_source_remediation.py
+python3 tools/validate_vara_source_depth.py
+python3 tools/validate_email_delivery_readiness.py
+python3 tools/validate_pdf_audit_export.py
+python3 tools/validate_no_authenticated_mock_data.py
+python3 tools/validate_plan_pricing_consistency.py
+python3 tools/validate_review_queue.py
+python3 tools/validate_source_health_timeline.py
+python3 tools/validate_mvp_trust_workflow.py
+python3 tools/validate_uae_source_pack.py
+python3 tools/validate_uae_50_working_sources.py
+python3 tools/validate_parser_quality.py
+python3 tools/validate_workspace.py
+python3 tools/validate_codex_skills.py
+git diff --check
+```
+
+If frontend is touched:
+
+```bash
+cd product/regradar/web
+npm run build
+npm run lint
+node scripts/validate-routes.mjs
+node scripts/pre-demo-smoke.mjs
+```
+
+Remaining commercial blockers after DIFC:
+
+1. 7/30/90-day source reliability charts.
+2. Bulk review/export workflows.
+3. Real production email sending is configured-safe but not live by default.
+4. ADGM alternate components remain thinner than ideal.
+5. DFSA held AML/CTF sanctions deterministic hash work remains.
+6. Remaining held VARA/DIFC candidates below strict quality thresholds.
+
+Final output must include reliability chart status, tests added, validators added, validation result, commit hash, clean git status, next exact product task, and next exact sales task.

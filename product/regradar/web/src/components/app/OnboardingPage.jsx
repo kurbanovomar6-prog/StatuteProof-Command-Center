@@ -56,9 +56,9 @@ const SOURCE_READINESS_PREVIEW = {
     tone: 'cyan',
   },
   'DIFC Laws': {
-    status: 'Remediation',
-    detail: 'DIFC laws/regulations are disclosed as remediation/not active until source model and review gates clear.',
-    tone: 'amber',
+    status: 'Improved',
+    detail: 'DIFC laws/regulations now include readiness-supported official legal/database sources, but end-to-end DIFC source scope is not claimed.',
+    tone: 'cyan',
   },
   'Ministry of Economy': {
     status: 'Narrow',

@@ -1,22 +1,26 @@
 {
   "schema_version": "mass-source-activation-1.0",
   "generated_at": "2026-06-15T00:00:00Z",
-  "public_source_truth": "72 enabled UAE sources / 68 readiness-supported / 4 under extraction remediation",
+  "public_source_truth": "75 enabled UAE sources / 72 readiness-supported / 3 under extraction remediation",
   "summary": {
-    "queue_entries": 15,
-    "activation_ready_count": 7,
-    "proof_backed_count": 7,
-    "baseline_complete_count": 7,
+    "queue_entries": 23,
+    "activation_ready_count": 15,
+    "proof_backed_count": 15,
+    "baseline_complete_count": 15,
     "did_reach_50_working_sources": false,
     "sources_json_changed": true,
     "updated_at": "2026-06-16T00:00:00Z",
-    "last_updated_at": "2026-06-15T20:42:35Z",
-    "new_activation_ready_this_sprint": 7,
-    "public_source_truth": "72 enabled UAE sources / 68 readiness-supported / 4 under extraction remediation",
+    "last_updated_at": "2026-06-16T18:22:10Z",
+    "new_activation_ready_this_sprint": 8,
+    "public_source_truth": "79 enabled UAE sources / 76 readiness-supported / 3 under extraction remediation",
     "baseline_complete_but_held_count": 0,
-    "remediation_count": 7,
+    "remediation_count": 3,
     "blocked_count": 1,
-    "candidate_count": 0
+    "candidate_count": 0,
+    "enabled_count": 79,
+    "readiness_supported_count": 76,
+    "current_truth": "79 enabled / 76 readiness-supported / 3 remediation",
+    "public_source_truth_after_validation": "79 enabled UAE sources / 76 readiness-supported / 3 under extraction remediation"
   },
   "sources": [
     {
@@ -1429,6 +1433,662 @@
       "no_save_normalized_length": 6289,
       "last_adapter_test_at": "2026-06-15T17:37:51Z",
       "last_no_save_test_at": "2026-06-15T17:37:51Z"
+    },
+    {
+      "source_id": "AE-difc-laws-and-regulations",
+      "name": "DIFC Laws and Regulations",
+      "url": "https://www.difc.com/business/laws-and-regulations/",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "legal_database",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-laws-and-regulations/intake-20260616T180330Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-laws-and-regulations/intake-20260616T180330Z/normalized.txt",
+      "normalized_hash": "421b07ad9b749e45900c6d9209242177573701c9fde1208286c3a13529aeaf3f",
+      "baseline_runs_completed": 7,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-difc-legal-database",
+      "name": "DIFC Legal Database",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "legal_database",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-legal-database/intake-20260616T180332Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-legal-database/intake-20260616T180332Z/normalized.txt",
+      "normalized_hash": "59b9e188efb5c9f82006d8277ed371b5d79a0b0c9b8476f4d3e3cbc645513298",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection-commissioner",
+      "name": "DIFC Commissioner of Data Protection",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "data_protection_regulatory",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-commissioner/intake-20260616T180334Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-commissioner/intake-20260616T180334Z/normalized.txt",
+      "normalized_hash": "f7b916ee9155d78450b2b62c69e7c9e070e9735ba9bc55df77303caa62ff24b9",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection-supervision-enforcement",
+      "name": "DIFC Data Protection Supervision and Enforcement",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/supervision-enforcement",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "data_protection_enforcement",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-supervision-enforcement/intake-20260616T180336Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-supervision-enforcement/intake-20260616T180336Z/normalized.txt",
+      "normalized_hash": "fd7a2b31d6031f8867e89e06b31cdc3ea4dc774d0e02a6b1a5ab4dcf86444c2c",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection-guidance",
+      "name": "DIFC Data Protection Guidance",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/guidance",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "data_protection_guidance",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-guidance/intake-20260616T182128Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-guidance/intake-20260616T182128Z/normalized.txt",
+      "normalized_hash": "de25f8c5e0ee3fc4e011ca2b829e8f2ee86f6008f5326419aaa13110f839e650",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection-regulation-10",
+      "name": "DIFC Data Protection Regulation 10",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "data_protection_regulatory",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-regulation-10/intake-20260616T182129Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-regulation-10/intake-20260616T182129Z/normalized.txt",
+      "normalized_hash": "aae352726964b6bb2acbb52e2fca88d24bd44213f7105af42cf20411d3a3b4ff",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection-law-2020",
+      "name": "DIFC Data Protection Law 2020",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/data-protection-law-difc-law-no-5-2020",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "legal_database",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 62,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-law-2020/intake-20260616T182203Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-law-2020/intake-20260616T182203Z/normalized.txt",
+      "normalized_hash": "0d1f16591c75e0221abfe4d12ac087fc2976970c97cee0a25fab05dae22fa666",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
+    },
+    {
+      "source_id": "AE-difc-companies-law-2018",
+      "name": "DIFC Companies Law 2018",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/companies-law-difc-law-no-5-2018",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "source_type": "legal_database",
+      "official_status": "official",
+      "discovery_status": "official_public",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_status": "passed",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "activation_status": "activation_ready",
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "agent_gate_status": "pass",
+      "current_state": "activation_ready",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-companies-law-2018/intake-20260616T182204Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-companies-law-2018/intake-20260616T182204Z/normalized.txt",
+      "normalized_hash": "9a3aeae973b0ce63f6cbeaba4a513b6db0b7aa698a95bb354560ba580b67bcc9",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "nav_shell": false,
+      "shallow_content": false,
+      "duplicate_hash": false,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "updated_at": "2026-06-16T18:36:18Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
+        "reviewed_at": "2026-06-16T18:22:10Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
+        "reviewed_at": "2026-06-16T18:36:18Z",
+        "blocking_issues": []
+      }
     }
   ]
 }

@@ -6,7 +6,7 @@ const SOURCES = [
   { source_id: 'AE-vara-enforcement', regulator: 'VARA Enforcement Notices', jurisdiction: 'Dubai / VARA', tier: 1, status: 'READINESS_SUPPORTED' },
   { source_id: 'AE-abu-dhabi-global-market-adgm', regulator: 'ADGM FSRA Main', jurisdiction: 'ADGM / FSRA', tier: 1, status: 'READINESS_SUPPORTED' },
   { source_id: 'AE-uaefiu-circulars', regulator: 'UAE FIU Circulars', jurisdiction: 'UAE Federal', tier: 1, status: 'READINESS_SUPPORTED' },
-  { source_id: 'AE-difc-laws-and-regulations', regulator: 'DIFC Laws and Regulations', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'REMEDIATION' },
+  { source_id: 'AE-difc-laws-and-regulations', regulator: 'DIFC Laws and Regulations', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'READINESS_SUPPORTED' },
   { source_id: 'AE-uae-legislation-portal', regulator: 'UAE Legislation Portal', jurisdiction: 'UAE Federal', tier: 2, status: 'READINESS_SUPPORTED' },
   { source_id: 'AE-uae-ministry-of-economy', regulator: 'UAE Ministry of Economy', jurisdiction: 'UAE Federal', tier: 2, status: 'READINESS_SUPPORTED' },
   { source_id: 'AE-dubai-financial-services-authority-dfsa', regulator: 'DFSA Rulebook', jurisdiction: 'DIFC / DFSA', tier: 1, status: 'REMEDIATION' },
@@ -15,9 +15,9 @@ const SOURCES = [
 ]
 
 const SOURCE_TRUTH = {
-  enabled: 66,
-  readinessSupported: 62,
-  remediation: 4,
+  enabled: 79,
+  readinessSupported: 76,
+  remediation: 3,
 }
 
 function StatusBadge({ status }) {

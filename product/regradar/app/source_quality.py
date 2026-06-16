@@ -53,8 +53,23 @@ def detect_policy_warnings(text: str, html: str = "") -> list[str]:
 
     blob = f"{visible}\n{raw}"
     for name, pattern in POLICY_PATTERNS:
-        if re.search(pattern, blob, flags=re.I):
-            warnings.append(name)
+        if not re.search(pattern, blob, flags=re.I):
+            continue
+        if name == "private_portal":
+            # Public regulator pages can mention a "Client Portal" in header
+            # chrome while still exposing monitorable public legal content. Keep
+            # the block for real access walls and explicit private portals.
+            access_wall = re.search(
+                r"\b(restricted access|authori[sz]ed users only|sign in|log in|login|username|password)\b",
+                visible,
+                flags=re.I,
+            )
+            explicit_private = re.search(r"\b(private portal|restricted access|authori[sz]ed users only)\b", visible, flags=re.I)
+            client_portal = re.search(r"\bclient portal\b", blob, flags=re.I)
+            if explicit_private or (client_portal and access_wall):
+                warnings.append(name)
+            continue
+        warnings.append(name)
     return sorted(set(warnings))
 
 

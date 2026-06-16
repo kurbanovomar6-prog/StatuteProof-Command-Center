@@ -2,10 +2,10 @@
   "version": "2026-06-14",
   "purpose": "Research-only UAE official source pack candidates. This file does not activate monitoring and must not be marketed as validated coverage.",
   "current_customer_truth": {
-    "enabled_uae_sources": 72,
-    "readiness_supported": 68,
-    "remediation": 4,
-    "customer_copy": "72 enabled UAE sources; 68 readiness-supported; 4 under extraction remediation."
+    "enabled_uae_sources": 79,
+    "readiness_supported": 76,
+    "remediation": 3,
+    "customer_copy": "79 enabled UAE sources; 76 readiness-supported; 3 under extraction remediation."
   },
   "status_definitions": {
     "candidate": "Official or officially linked candidate, not yet tested.",
@@ -1802,74 +1802,6 @@
       "top_60_candidate": true
     },
     {
-      "source_id": "AE-difc-laws-regulations",
-      "regulator": "DIFC",
-      "title": "DIFC Laws and Regulations",
-      "url": "https://www.difc.com/business/laws-and-regulations/",
-      "source_type": "law",
-      "jurisdiction": "DIFC",
-      "buyer_relevance": [
-        "Legal Counsel",
-        "DIFC Firm",
-        "CCO"
-      ],
-      "why_it_matters": "DIFC laws/regulations shape compliance obligations for DIFC firms.",
-      "update_frequency_guess": "low",
-      "parsing_risk": "HTML/selector",
-      "official_status": "official",
-      "priority": "P1",
-      "initial_status": "remediation",
-      "candidate_pack": [
-        "uae_monitor"
-      ],
-      "notes": "Existing active registry marks remediation pending Source Monitor and Evidence Trail review.",
-      "top_40_candidate": true,
-      "top_60_candidate": true,
-      "tested_at": "2026-06-14T14:35:51Z",
-      "test_status": "no_save_tested",
-      "readiness_status": "BLOCKED",
-      "quality_score": 29,
-      "quality_label": "POOR",
-      "provider_used": "bs4",
-      "normalized_length": 4123,
-      "normalized_hash": "fa6e64c30cc0dcc72c679c4a0f07c82bef1f1fc7fc02dab6a1b50f2f5363ac4a",
-      "evidence_level": "PREVIEW_ONLY",
-      "activation_readiness": "NEEDS_REMEDIATION",
-      "nav_shell": false,
-      "hash_collision": false,
-      "noise_risk": "high",
-      "source_health_risk": "high",
-      "likely_false_positive_causes": [
-        "listing_page_churn",
-        "access_policy_warning",
-        "low_quality_score"
-      ],
-      "dynamic_content_detected": false,
-      "footer_nav_heavy": false,
-      "listing_page_churn_risk": "medium",
-      "pagination_changing_counters_risk": "low",
-      "timestamp_only_risk": "low",
-      "duplicate_boilerplate_risk": "medium",
-      "css_script_only_risk": "low",
-      "recommendation": "remediation_needed",
-      "parser_maintenance_risk": "high",
-      "selector_fragility": "high",
-      "js_dependency": false,
-      "pdf_complexity": "low",
-      "access_blocking_risk": "high",
-      "anti_bot_risk": "high",
-      "manual_check_required": true,
-      "recommended_health_status": "blocked",
-      "remediation_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
-      "remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
-      "accepted_for_default_pack": false,
-      "accepted_pack": [
-        "none"
-      ],
-      "activation_status": "remediation",
-      "normalized_preview": "Comprehensive Laws and Regulations in Dubai | DIFC\nLaws & Regulations.\nLaws and Regulations in Dubai International Financial Centre (DIFC)\nDIFC’s unique legal and regulatory framework is based on international standards and principles of common law that is tailored to the region's unique needs, creating the optimal environment for financial services and related industries and services to grow.\nThe Dubai International Financial Centre (\"DIFC\") was launched in accordance with United Arab Emirates "
-    },
-    {
       "source_id": "AE-difc-legal-database",
       "regulator": "DIFC",
       "title": "DIFC Legal Database",
@@ -1877,23 +1809,55 @@
       "source_type": "legal_database",
       "jurisdiction": "DIFC",
       "buyer_relevance": [
-        "Legal Counsel",
         "DIFC Firm",
-        "Consultant"
+        "Legal Counsel",
+        "Compliance Officer"
       ],
-      "why_it_matters": "Legal database can be a structured index for DIFC legal changes.",
+      "why_it_matters": "Official DIFC legal/regulatory source useful for DIFC compliance and legal change monitoring.",
       "update_frequency_guess": "low",
-      "parsing_risk": "HTML/search/listing",
+      "parsing_risk": "HTML/listing",
       "official_status": "official",
       "priority": "P1",
-      "initial_status": "candidate",
+      "initial_status": "readiness_supported",
       "candidate_pack": [
-        "uae_monitor",
-        "consultant_enterprise"
+        "uae_monitor"
       ],
-      "notes": "Needs no-save check; avoid if search-only shell.",
+      "notes": "Official DIFC legal database. Activated after DIFC-specific listing/PDF extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Broad legal index; not a claim of complete DIFC coverage.",
       "top_40_candidate": false,
-      "top_60_candidate": true
+      "top_60_candidate": true,
+      "tested_at": "2026-06-16T18:03:40Z",
+      "test_status": "no_save_tested",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "normalized_hash": "59b9e188efb5c9f82006d8277ed371b5d79a0b0c9b8476f4d3e3cbc645513298",
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_for_default_pack": true,
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "activation_status": "activation_ready",
+      "saved_baseline_at": "2026-06-16T18:03:40Z",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-legal-database/intake-20260616T180332Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-legal-database/intake-20260616T180332Z/normalized.txt",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "saved_baseline_attempted": true
     },
     {
       "source_id": "AE-difc-consultation-papers",
@@ -1918,7 +1882,7 @@
       ],
       "notes": "Needs validation; lower priority than DFSA-specific sources for MLRO.",
       "top_40_candidate": false,
-      "top_60_candidate": true
+      "top_60_candidate": false
     },
     {
       "source_id": "AE-difc-data-protection",
@@ -1943,7 +1907,7 @@
       ],
       "notes": "Add only if customer profile includes data protection scope.",
       "top_40_candidate": false,
-      "top_60_candidate": true
+      "top_60_candidate": false
     },
     {
       "source_id": "AE-adgm-fsra-homepage",
@@ -3716,6 +3680,571 @@
       ],
       "activation_status": "remediation",
       "normalized_preview": "Latest Regulations / The Chairman of the Authority’s Board of Directors’ Decision No. (11/ Chairman) of 2026..."
+    },
+    {
+      "source_id": "AE-difc-laws-and-regulations",
+      "regulator": "DIFC",
+      "title": "DIFC Laws and Regulations",
+      "url": "https://www.difc.com/business/laws-and-regulations/",
+      "source_type": "legal_database",
+      "jurisdiction": "DIFC",
+      "buyer_relevance": [
+        "DIFC Firm",
+        "Legal Counsel",
+        "Compliance Officer"
+      ],
+      "why_it_matters": "Official DIFC legal/regulatory source useful for DIFC compliance and legal change monitoring.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/listing",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "readiness_supported",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Official DIFC laws and regulations page. Activated after DIFC legal database adapter remediation, two fresh stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice.",
+      "top_40_candidate": false,
+      "top_60_candidate": true,
+      "tested_at": "2026-06-16T18:03:40Z",
+      "test_status": "no_save_tested",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "normalized_hash": "421b07ad9b749e45900c6d9209242177573701c9fde1208286c3a13529aeaf3f",
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_for_default_pack": true,
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "activation_status": "activation_ready",
+      "saved_baseline_at": "2026-06-16T18:03:40Z",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-laws-and-regulations/intake-20260616T180330Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-laws-and-regulations/intake-20260616T180330Z/normalized.txt",
+      "baseline_runs_completed": 7,
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "saved_baseline_attempted": true
+    },
+    {
+      "source_id": "AE-difc-data-protection-commissioner",
+      "regulator": "DIFC",
+      "title": "DIFC Commissioner of Data Protection",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection",
+      "source_type": "data_protection_regulatory",
+      "jurisdiction": "DIFC",
+      "buyer_relevance": [
+        "DIFC Firm",
+        "Legal Counsel",
+        "Compliance Officer"
+      ],
+      "why_it_matters": "Official DIFC legal/regulatory source useful for DIFC compliance and legal change monitoring.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/listing",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "readiness_supported",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Official DIFC Commissioner of Data Protection page. Activated after DIFC-specific listing extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice.",
+      "top_40_candidate": false,
+      "top_60_candidate": true,
+      "tested_at": "2026-06-16T18:03:40Z",
+      "test_status": "no_save_tested",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "normalized_hash": "f7b916ee9155d78450b2b62c69e7c9e070e9735ba9bc55df77303caa62ff24b9",
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_for_default_pack": true,
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "activation_status": "activation_ready",
+      "saved_baseline_at": "2026-06-16T18:03:40Z",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-commissioner/intake-20260616T180334Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-commissioner/intake-20260616T180334Z/normalized.txt",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "saved_baseline_attempted": true
+    },
+    {
+      "source_id": "AE-difc-data-protection-supervision-enforcement",
+      "regulator": "DIFC",
+      "title": "DIFC Data Protection Supervision and Enforcement",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/supervision-enforcement",
+      "source_type": "data_protection_enforcement",
+      "jurisdiction": "DIFC",
+      "buyer_relevance": [
+        "DIFC Firm",
+        "Legal Counsel",
+        "Compliance Officer"
+      ],
+      "why_it_matters": "Official DIFC legal/regulatory source useful for DIFC compliance and legal change monitoring.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/listing",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "readiness_supported",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Official DIFC Commissioner of Data Protection supervision/enforcement page. Activated after DIFC-specific listing extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice.",
+      "top_40_candidate": false,
+      "top_60_candidate": true,
+      "tested_at": "2026-06-16T18:03:40Z",
+      "test_status": "no_save_tested",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "normalized_hash": "fd7a2b31d6031f8867e89e06b31cdc3ea4dc774d0e02a6b1a5ab4dcf86444c2c",
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_for_default_pack": true,
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "activation_status": "activation_ready",
+      "saved_baseline_at": "2026-06-16T18:03:40Z",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-supervision-enforcement/intake-20260616T180336Z/proof.json",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-supervision-enforcement/intake-20260616T180336Z/normalized.txt",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "saved_baseline_attempted": true
+    },
+    {
+      "source_id": "AE-difc-data-protection-guidance",
+      "name": "DIFC Data Protection Guidance",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/guidance",
+      "regulator": "DIFC",
+      "jurisdiction": "DIFC",
+      "source_type": "data_protection_guidance",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "activation_status": "activation_ready",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_status": "passed",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "baseline_runs_completed": 2,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-guidance/intake-20260616T182128Z/proof.json",
+      "normalized_hash": "de25f8c5e0ee3fc4e011ca2b829e8f2ee86f6008f5326419aaa13110f839e650",
+      "accepted_for_default_pack": true,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official public DIFC source with repeat baseline and MONITOR_OK.",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path and stable normalized hash exist.",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, duplicate, high-noise, or access-control blocker after remediation.",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Relevant to DIFC legal/data-protection compliance buyers.",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter and existing proof/baseline pipeline.",
+        "blocking_issues": []
+      },
+      "last_updated": "2026-06-16",
+      "candidate_status": "CONFIRMED_ACCESSIBLE",
+      "decision": "activated",
+      "title": "DIFC Data Protection Guidance",
+      "buyer_relevance": [
+        "DIFC Firm",
+        "Data Protection Officer",
+        "Compliance Officer",
+        "Legal Counsel"
+      ],
+      "why_it_matters": "Official DIFC legal/data-protection source useful for scoped DIFC compliance monitoring and evidence-backed review.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/listing",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "readiness_supported",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Activated after DIFC-specific extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. End-to-end DIFC source scope is not claimed.",
+      "top_40_candidate": true,
+      "top_60_candidate": false,
+      "tested_at": "2026-06-16T18:22:10Z",
+      "test_status": "no_save_tested",
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "saved_baseline_at": "2026-06-16T18:22:10Z",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-guidance/intake-20260616T182128Z/normalized.txt",
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "saved_baseline_attempted": true
+    },
+    {
+      "source_id": "AE-difc-data-protection-regulation-10",
+      "name": "DIFC Data Protection Regulation 10",
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+      "regulator": "DIFC",
+      "jurisdiction": "DIFC",
+      "source_type": "data_protection_regulatory",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "activation_status": "activation_ready",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_status": "passed",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "baseline_runs_completed": 2,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-regulation-10/intake-20260616T182129Z/proof.json",
+      "normalized_hash": "aae352726964b6bb2acbb52e2fca88d24bd44213f7105af42cf20411d3a3b4ff",
+      "accepted_for_default_pack": true,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official public DIFC source with repeat baseline and MONITOR_OK.",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path and stable normalized hash exist.",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, duplicate, high-noise, or access-control blocker after remediation.",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Relevant to DIFC legal/data-protection compliance buyers.",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter and existing proof/baseline pipeline.",
+        "blocking_issues": []
+      },
+      "last_updated": "2026-06-16",
+      "candidate_status": "CONFIRMED_ACCESSIBLE",
+      "decision": "activated",
+      "title": "DIFC Data Protection Regulation 10",
+      "buyer_relevance": [
+        "DIFC Firm",
+        "Data Protection Officer",
+        "Compliance Officer",
+        "Legal Counsel"
+      ],
+      "why_it_matters": "Official DIFC legal/data-protection source useful for scoped DIFC compliance monitoring and evidence-backed review.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/listing",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "readiness_supported",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Activated after DIFC-specific extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. End-to-end DIFC source scope is not claimed.",
+      "top_40_candidate": false,
+      "top_60_candidate": false,
+      "tested_at": "2026-06-16T18:22:10Z",
+      "test_status": "no_save_tested",
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "saved_baseline_at": "2026-06-16T18:22:10Z",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-regulation-10/intake-20260616T182129Z/normalized.txt",
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "saved_baseline_attempted": true
+    },
+    {
+      "source_id": "AE-difc-data-protection-law-2020",
+      "name": "DIFC Data Protection Law 2020",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/data-protection-law-difc-law-no-5-2020",
+      "regulator": "DIFC",
+      "jurisdiction": "DIFC",
+      "source_type": "legal_database",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "activation_status": "activation_ready",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_status": "passed",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "baseline_runs_completed": 2,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "quality_score": 62,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-law-2020/intake-20260616T182203Z/proof.json",
+      "normalized_hash": "0d1f16591c75e0221abfe4d12ac087fc2976970c97cee0a25fab05dae22fa666",
+      "accepted_for_default_pack": true,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official public DIFC source with repeat baseline and MONITOR_OK.",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path and stable normalized hash exist.",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, duplicate, high-noise, or access-control blocker after remediation.",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Relevant to DIFC legal/data-protection compliance buyers.",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter and existing proof/baseline pipeline.",
+        "blocking_issues": []
+      },
+      "last_updated": "2026-06-16",
+      "candidate_status": "CONFIRMED_ACCESSIBLE",
+      "decision": "activated",
+      "title": "DIFC Data Protection Law 2020",
+      "buyer_relevance": [
+        "DIFC Firm",
+        "Data Protection Officer",
+        "Compliance Officer",
+        "Legal Counsel"
+      ],
+      "why_it_matters": "Official DIFC legal/data-protection source useful for scoped DIFC compliance monitoring and evidence-backed review.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/JS-heavy detail page",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "readiness_supported",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Activated after DIFC-specific extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. End-to-end DIFC source scope is not claimed.",
+      "top_40_candidate": false,
+      "top_60_candidate": false,
+      "tested_at": "2026-06-16T18:22:10Z",
+      "test_status": "no_save_tested",
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "saved_baseline_at": "2026-06-16T18:22:10Z",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-law-2020/intake-20260616T182203Z/normalized.txt",
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "saved_baseline_attempted": true
+    },
+    {
+      "source_id": "AE-difc-companies-law-2018",
+      "name": "DIFC Companies Law 2018",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/companies-law-difc-law-no-5-2018",
+      "regulator": "DIFC",
+      "jurisdiction": "DIFC",
+      "source_type": "legal_database",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "activation_status": "activation_ready",
+      "readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_status": "passed",
+      "evidence_status": "proof_saved",
+      "baseline_status": "complete",
+      "baseline_runs_completed": 2,
+      "mass_monitor_status": "MONITOR_OK",
+      "monitor_ok": true,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-companies-law-2018/intake-20260616T182204Z/proof.json",
+      "normalized_hash": "9a3aeae973b0ce63f6cbeaba4a513b6db0b7aa698a95bb354560ba580b67bcc9",
+      "accepted_for_default_pack": true,
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Official public DIFC source with repeat baseline and MONITOR_OK.",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path and stable normalized hash exist.",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, duplicate, high-noise, or access-control blocker after remediation.",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Relevant to DIFC legal/data-protection compliance buyers.",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses source-specific DIFC adapter and existing proof/baseline pipeline.",
+        "blocking_issues": []
+      },
+      "last_updated": "2026-06-16",
+      "candidate_status": "CONFIRMED_ACCESSIBLE",
+      "decision": "activated",
+      "title": "DIFC Companies Law 2018",
+      "buyer_relevance": [
+        "DIFC Firm",
+        "Legal Counsel",
+        "Compliance Officer"
+      ],
+      "why_it_matters": "Official DIFC legal/data-protection source useful for scoped DIFC compliance monitoring and evidence-backed review.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/JS-heavy detail page",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "readiness_supported",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Activated after DIFC-specific extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. End-to-end DIFC source scope is not claimed.",
+      "top_40_candidate": false,
+      "top_60_candidate": false,
+      "tested_at": "2026-06-16T18:22:10Z",
+      "test_status": "no_save_tested",
+      "quality_label": "ACCEPTABLE",
+      "provider_used": "difc_legal_database",
+      "normalized_length": 0,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "activation_readiness": "MONITORING_READY",
+      "nav_shell": false,
+      "hash_collision": false,
+      "remediation_reason": "",
+      "remediation_hint": "",
+      "accepted_pack": [
+        "uae_monitor"
+      ],
+      "saved_baseline_at": "2026-06-16T18:22:10Z",
+      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-companies-law-2018/intake-20260616T182204Z/normalized.txt",
+      "baseline_runs_required": 2,
+      "can_activate_monitoring": true,
+      "saved_baseline_attempted": true
     }
   ],
   "rejected": [
@@ -3748,6 +4277,74 @@
       "source_id": "generic-search-results-page",
       "url": "https://www.google.com/search?q=uae+regulations",
       "reason": "Search result pages are not official sources."
+    },
+    {
+      "source_id": "AE-difc-laws-regulations",
+      "regulator": "DIFC",
+      "title": "DIFC Laws and Regulations",
+      "url": "https://www.difc.com/business/laws-and-regulations/",
+      "source_type": "law",
+      "jurisdiction": "DIFC",
+      "buyer_relevance": [
+        "Legal Counsel",
+        "DIFC Firm",
+        "CCO"
+      ],
+      "why_it_matters": "DIFC laws/regulations shape compliance obligations for DIFC firms.",
+      "update_frequency_guess": "low",
+      "parsing_risk": "HTML/selector",
+      "official_status": "official",
+      "priority": "P1",
+      "initial_status": "rejected",
+      "candidate_pack": [
+        "uae_monitor"
+      ],
+      "notes": "Superseded by canonical source_id AE-difc-laws-and-regulations for the same official URL.",
+      "top_40_candidate": false,
+      "top_60_candidate": false,
+      "tested_at": "2026-06-14T14:35:51Z",
+      "test_status": "no_save_tested",
+      "readiness_status": "BLOCKED",
+      "quality_score": 29,
+      "quality_label": "POOR",
+      "provider_used": "bs4",
+      "normalized_length": 4123,
+      "normalized_hash": "fa6e64c30cc0dcc72c679c4a0f07c82bef1f1fc7fc02dab6a1b50f2f5363ac4a",
+      "evidence_level": "PREVIEW_ONLY",
+      "activation_readiness": "NEEDS_REMEDIATION",
+      "nav_shell": false,
+      "hash_collision": false,
+      "noise_risk": "high",
+      "source_health_risk": "high",
+      "likely_false_positive_causes": [
+        "listing_page_churn",
+        "access_policy_warning",
+        "low_quality_score"
+      ],
+      "dynamic_content_detected": false,
+      "footer_nav_heavy": false,
+      "listing_page_churn_risk": "medium",
+      "pagination_changing_counters_risk": "low",
+      "timestamp_only_risk": "low",
+      "duplicate_boilerplate_risk": "medium",
+      "css_script_only_risk": "low",
+      "recommendation": "remediation_needed",
+      "parser_maintenance_risk": "high",
+      "selector_fragility": "high",
+      "js_dependency": false,
+      "pdf_complexity": "low",
+      "access_blocking_risk": "high",
+      "anti_bot_risk": "high",
+      "manual_check_required": true,
+      "recommended_health_status": "blocked",
+      "remediation_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+      "remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+      "accepted_for_default_pack": false,
+      "accepted_pack": [
+        "none"
+      ],
+      "activation_status": "rejected",
+      "normalized_preview": "Comprehensive Laws and Regulations in Dubai | DIFC\nLaws & Regulations.\nLaws and Regulations in Dubai International Financial Centre (DIFC)\nDIFC’s unique legal and regulatory framework is based on international standards and principles of common law that is tailored to the region's unique needs, creating the optimal environment for financial services and related industries and services to grow.\nThe Dubai International Financial Centre (\"DIFC\") was launched in accordance with United Arab Emirates "
     }
   ],
   "last_top_40_no_save_validation": {
@@ -3799,5 +4396,13 @@
     "public_source_truth_changed": false,
     "public_source_truth": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "notes": "Three scoped repeat saved baselines were run. Two ADGM candidates reached activation-ready candidate status in the gated queue. SCA latest regulations remains remediation despite certified evidence because listing/source-health risk is unresolved."
+  },
+  "sources": [],
+  "summary": {
+    "activation_ready_count": 10,
+    "enabled_count": 79,
+    "readiness_supported_count": 76,
+    "remediation_count": 3,
+    "current_truth": "79 enabled / 76 readiness-supported / 3 remediation"
   }
 }

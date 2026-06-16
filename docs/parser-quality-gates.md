@@ -19,7 +19,7 @@ This checklist is the parser/source-intake gate before a source, parser change, 
 - Do not imply all enabled sources are ready.
 - Do not imply regulator endorsement, legal advice, guaranteed compliance, perfect parsing, or complete coverage.
 - Do not show raw internal `PASS`, `Validated`, or activation-like `Active` labels in customer-facing source tables.
-- Current UAE source story: 72 enabled UAE sources, 68 readiness-supported in the current registry, 4 under extraction remediation.
+- Current UAE source story: 79 enabled UAE sources, 76 readiness-supported in the current registry, 3 under extraction remediation.
 - Remediation sources in the current registry: DFSA Rulebook / DFSA main source, DFSA Regulatory Notices, DIFC Laws and Regulations, UAE FIU Homepage.
 
 ## Source Readiness Checklist

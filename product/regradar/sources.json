@@ -760,10 +760,19 @@
     "jurisdiction": "AE",
     "category": "legal_database",
     "enabled": true,
-    "status": "remediation",
-    "notes": "Dubai International Financial Centre official laws and regulations. Domain updated to difc.com laws/regulations page. Verify item-level structure before source expansion. Prior difc.ae page tested 9,150c GOOD (2026-05-27).",
+    "status": "active",
+    "notes": "Official DIFC laws and regulations page. Activated after DIFC legal database adapter remediation, two fresh stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice.",
     "source_id": "AE-difc-laws-and-regulations",
-    "tier": "1"
+    "tier": "1",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-laws-and-regulations/intake-20260616T180330Z/proof.json",
+    "normalized_hash": "421b07ad9b749e45900c6d9209242177573701c9fde1208286c3a13529aeaf3f"
   },
   {
     "name": "UAE Ministry of Economy",
@@ -2519,5 +2528,138 @@
     "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-va-regulations-2023-pdf/intake-20260616T124800Z/proof.json",
     "normalized_hash": "3f7dab27b727e2887f38348ef8951615e1942203055c6b9c841b08e3a891dc30",
     "notes": "Official VARA current-version PDF. Activated after no-save, extracted PDF text, two proof-backed baseline runs, and review gates. Monitoring intelligence only; not legal advice."
+  },
+  {
+    "name": "DIFC Legal Database",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
+    "jurisdiction": "AE",
+    "category": "legal_database",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-difc-legal-database",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-legal-database/intake-20260616T180332Z/proof.json",
+    "normalized_hash": "59b9e188efb5c9f82006d8277ed371b5d79a0b0c9b8476f4d3e3cbc645513298",
+    "notes": "Official DIFC legal database. Activated after DIFC-specific listing/PDF extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Broad legal index; not a claim of complete DIFC coverage."
+  },
+  {
+    "name": "DIFC Commissioner of Data Protection",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection",
+    "jurisdiction": "AE",
+    "category": "data_protection_regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-difc-data-protection-commissioner",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-commissioner/intake-20260616T180334Z/proof.json",
+    "normalized_hash": "f7b916ee9155d78450b2b62c69e7c9e070e9735ba9bc55df77303caa62ff24b9",
+    "notes": "Official DIFC Commissioner of Data Protection page. Activated after DIFC-specific listing extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice."
+  },
+  {
+    "name": "DIFC Data Protection Supervision and Enforcement",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/supervision-enforcement",
+    "jurisdiction": "AE",
+    "category": "data_protection_enforcement",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-difc-data-protection-supervision-enforcement",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-supervision-enforcement/intake-20260616T180336Z/proof.json",
+    "normalized_hash": "fd7a2b31d6031f8867e89e06b31cdc3ea4dc774d0e02a6b1a5ab4dcf86444c2c",
+    "notes": "Official DIFC Commissioner of Data Protection supervision/enforcement page. Activated after DIFC-specific listing extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice."
+  },
+  {
+    "name": "DIFC Data Protection Guidance",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/guidance",
+    "jurisdiction": "AE",
+    "category": "data_protection_guidance",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-difc-data-protection-guidance",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-guidance/intake-20260616T182128Z/proof.json",
+    "normalized_hash": "de25f8c5e0ee3fc4e011ca2b829e8f2ee86f6008f5326419aaa13110f839e650",
+    "notes": "Official DIFC Commissioner of Data Protection guidance page. Activated after DIFC-specific extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice."
+  },
+  {
+    "name": "DIFC Data Protection Regulation 10",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+    "jurisdiction": "AE",
+    "category": "data_protection_regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-difc-data-protection-regulation-10",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-regulation-10/intake-20260616T182129Z/proof.json",
+    "normalized_hash": "aae352726964b6bb2acbb52e2fca88d24bd44213f7105af42cf20411d3a3b4ff",
+    "notes": "Official DIFC Commissioner of Data Protection Regulation 10 page. Activated after DIFC-specific extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice."
+  },
+  {
+    "name": "DIFC Data Protection Law 2020",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/data-protection-law-difc-law-no-5-2020",
+    "jurisdiction": "AE",
+    "category": "legal_database",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-difc-data-protection-law-2020",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-law-2020/intake-20260616T182203Z/proof.json",
+    "normalized_hash": "0d1f16591c75e0221abfe4d12ac087fc2976970c97cee0a25fab05dae22fa666",
+    "notes": "Official DIFC legal database Data Protection Law detail page. Activated after rendered extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice. Not a claim of complete DIFC coverage."
+  },
+  {
+    "name": "DIFC Companies Law 2018",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/companies-law-difc-law-no-5-2018",
+    "jurisdiction": "AE",
+    "category": "legal_database",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-difc-companies-law-2018",
+    "adapter_family": "difc_legal_database",
+    "adapter_name": "difc_legal_database",
+    "adapter_config": {
+      "container_selector": "main"
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-companies-law-2018/intake-20260616T182204Z/proof.json",
+    "normalized_hash": "9a3aeae973b0ce63f6cbeaba4a513b6db0b7aa698a95bb354560ba580b67bcc9",
+    "notes": "Official DIFC legal database Companies Law detail page. Activated after rendered extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice. Not a claim of complete DIFC coverage."
   }
 ]

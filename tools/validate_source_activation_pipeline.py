@@ -43,6 +43,7 @@ REQUIRED_ADAPTERS = [
     "fiu_eocn_document_listing",
     "eocn_news_listing",
     "vara_pdf_listing",
+    "difc_legal_database",
 ]
 
 REQUIRED_FAILURE_CODES = [

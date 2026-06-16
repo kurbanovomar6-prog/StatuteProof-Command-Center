@@ -171,8 +171,8 @@ export default function SourceReadinessReviewPage({ onBack }) {
             <div className="mx-auto mt-6 grid max-w-lg grid-cols-3 gap-2 text-center">
               {[
                 ['66', 'enabled'],
-                ['62', 'readiness-supported'],
-                ['4', 'under extraction remediation'],
+                ['76', 'readiness-supported'],
+                ['3', 'under extraction remediation'],
               ].map(([value, label]) => (
                 <div key={label} className="sp-panel-muted px-3 py-2">
                   <p className="sp-mono text-xl font-semibold text-white">{value}</p>

@@ -19,11 +19,11 @@ const MATRIX_ROWS = [
   },
   {
     category: 'DIFC / DFSA',
-    map: 'DIFC Laws, DFSA Rulebook and DFSA Regulatory Notices in remediation',
-    status: 'Remediation',
+    map: 'DIFC legal database and data-protection sources readiness-supported; DFSA legacy rows in remediation',
+    status: 'Mixed',
     statusTone: 'validation',
-    extraction: 'HTML structured / selector remediation',
-    limitation: 'DFSA and DIFC rows are not readiness-supported until extraction and source-structure issues are fixed',
+    extraction: 'DIFC legal database adapter / DFSA selector remediation',
+    limitation: 'DIFC coverage improved, but DFSA legacy rows remain under remediation and end-to-end DIFC source scope is not claimed',
   },
   {
     category: 'ADGM / FSRA',
@@ -52,10 +52,10 @@ const MATRIX_ROWS = [
   {
     category: 'Data protection',
     map: 'DIFC DP / ADGM DP / UAE PDPL',
-    status: 'Candidate',
-    statusTone: 'adapter',
+    status: 'Mixed readiness',
+    statusTone: 'validation',
     extraction: 'HTML guidance pages',
-    limitation: 'UAE Data Office status requires validation',
+    limitation: 'DIFC data-protection sources are readiness-supported; UAE Data Office status requires validation',
   },
   {
     category: 'Legislation / gazettes',

@@ -24,6 +24,7 @@ from app.weekly_brief import (
     render_weekly_brief_html,
     render_weekly_brief_markdown,
 )
+from app.sources import load_sources
 
 
 def _profile():
@@ -269,7 +270,15 @@ class WeeklyBriefTests(unittest.TestCase):
             alerts=[alert],
         )
         markdown = render_weekly_brief_markdown(brief)
-        self.assertIn("- 67 additional monitored sources showed no detected change based on monitoring this period.", markdown)
+        expected_sources_checked = sum(
+            1 for source in load_sources()
+            if source.get("enabled") and str(source.get("jurisdiction") or "").upper() == "AE"
+        )
+        expected_remaining = expected_sources_checked - 1
+        self.assertIn(
+            f"- {expected_remaining} additional monitored sources showed no detected change based on monitoring this period.",
+            markdown,
+        )
 
         brief["summary"]["sources_checked"] = 4
         counted = render_weekly_brief_markdown(brief)

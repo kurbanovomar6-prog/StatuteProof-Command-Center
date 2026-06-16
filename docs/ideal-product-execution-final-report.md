@@ -53,7 +53,7 @@ The endpoint returns:
 - latest run timestamp;
 - disclaimer.
 
-The current registry truth is now 72 enabled / 68 readiness-supported / 4 remediation after the VARA PDF source-depth sprint.
+The current registry truth is now 79 enabled / 76 readiness-supported / 3 remediation after the VARA PDF source-depth sprint and DIFC selector/access remediation.
 
 ## 5. Plan / Pricing Consistency Status
 
@@ -67,7 +67,7 @@ Current implemented pricing:
 
 Backend `plan.py` and frontend `planCapabilities.js` now agree that UAE Monitor has:
 
-- 68 readiness-supported source limit;
+- 76 readiness-supported source limit;
 - 180-day retention;
 - Markdown/HTML audit export available;
 - PDF audit pack export enabled for saved evidence records.
@@ -116,7 +116,7 @@ Onboarding now shows readiness context for key UAE source layers:
 - ADGM/FSRA strong;
 - DFSA useful but not complete;
 - VARA improved after direct official rulebook PDF activation, but not complete coverage;
-- DIFC remediation/not active;
+- DIFC improved after proof-backed source remediation, but complete DIFC coverage is not claimed;
 - UAE FIU/EOCN AML/CFT useful;
 - SCA limited but useful.
 
@@ -126,13 +126,13 @@ Added `product/regradar/tests/test_ideal_product_workflow.py`.
 
 Coverage:
 
-- current source summary truth returns 72 / 68 / 4;
+- current source summary truth returns 79 / 76 / 3;
 - temp registry summary counts;
 - Review Queue pending evidence;
 - Review Queue assessed evidence;
 - Review Queue empty state has no fake rows.
 
-Updated `product/regradar/tests/test_auth_plan_contracts.py` for the 62-source UAE Monitor contract.
+Updated `product/regradar/tests/test_auth_plan_contracts.py` for the 76-source UAE Monitor contract.
 
 ## 11. Validators Added
 
@@ -152,18 +152,18 @@ The founding pilot can now be demoed without the most obvious authenticated mock
 
 Improved but still partial.
 
-The Review Queue, PDF audit-pack export, email readiness controls, and VARA direct official rulebook PDFs materially improve the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy and VASP-adjacent buyers, but real production email sending, DIFC remediation, reliability trend charts, and bulk review/export workflows remain important before broader self-serve sales.
+The Review Queue, PDF audit-pack export, email readiness controls, VARA direct official rulebook PDFs, and DIFC legal-source remediation materially improve the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy, VASP-adjacent, and DIFC-aware buyers, but real production email sending, reliability trend charts, and bulk review/export workflows remain important before broader self-serve sales.
 
 ## 14. Remaining Blockers
 
 - Production external email sending not enabled.
-- DIFC still not active.
+- Complete DIFC coverage is not claimed; only the proof-backed DIFC sources are readiness-supported.
 - No long-range source reliability charts.
 - No bulk review workflow.
 
 ## 15. Next Exact Product Task
 
-Remediate DIFC selector/access coverage and activate official DIFC legal/regulatory sources only if proof, baseline, source-health, and gates pass.
+Build 7/30/90-day source reliability charts for readiness-supported sources.
 
 ## 16. Next Exact Sales Task
 
