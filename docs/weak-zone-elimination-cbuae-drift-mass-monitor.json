@@ -1,0 +1,73 @@
+{
+  "activation_ready_only": true,
+  "alert_delivery_enabled": false,
+  "include_enabled_sources": false,
+  "mode": "dry-run",
+  "processed_count": 3,
+  "results": [
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26",
+      "previous_hash": "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26",
+      "proof_path": "",
+      "quality_score": 65,
+      "regulator": "CBUAE",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-cbuae-amlcft-rulebook-doclist",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft"
+    },
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0",
+      "previous_hash": "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0",
+      "proof_path": "",
+      "quality_score": 65,
+      "regulator": "CBUAE",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-cbuae-amlcft-entire-section-doclist",
+      "url": "https://rulebook.centralbank.ae/en/entiresection/644"
+    },
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c",
+      "previous_hash": "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c",
+      "proof_path": "",
+      "quality_score": 65,
+      "regulator": "CBUAE",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-cbuae-consumer-protection-rulebook-doclist",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation"
+    }
+  ],
+  "save_proof": false,
+  "skipped": [],
+  "skipped_count": 0,
+  "source_health_counts": {
+    "HASH_COLLISION": 0,
+    "MANUAL_CHECK_REQUIRED": 0,
+    "MONITOR_DISCONNECTED": 0,
+    "MONITOR_OK": 3,
+    "NAV_SHELL_ONLY": 0,
+    "QUALITY_DROP": 0,
+    "REMEDIATION_REQUIRED": 0,
+    "SELECTOR_BROKEN": 0,
+    "SOURCE_STRUCTURE_CHANGED": 0
+  },
+  "sources_json_changed": false,
+  "warnings": []
+}

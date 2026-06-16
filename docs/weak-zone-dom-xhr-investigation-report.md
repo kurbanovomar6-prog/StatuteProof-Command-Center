@@ -53,3 +53,13 @@ Targeted weak-zone checks were run against ADGM alternate components, UAE FIU kn
 - ADGM alternate/media/listing announcement URLs still returned nav shell or stale component selectors under tested configurations.
 - VARA tested rulebook/public-register/news URLs remained nav shell or stale paths.
 - DFSA/DIFC tested listing URLs remained nav shell, selector stale, or access-blocked.
+
+## Weak-Zone Elimination Update
+
+The follow-up elimination cycle found stronger official alternates:
+
+- VARA: `rulebooks.vara.ae/view-revision-updates` is monitorable with `vara_pdf_listing`; direct PDF URLs under `rulebooks.vara.ae/sites/default/files/...` still need a real PDF extraction path.
+- CBUAE: `rulebook.centralbank.ae` pages are monitorable with `cbuae_document_listing`; static HTML extraction can drift on large rulebook pages, so document-listing variants are safer.
+- DFSA: current official DFSA consultation/enforcement pages and official-linked Thomson Reuters rulebook pages are monitorable with `dfsa_notice_listing`.
+- DIFC: tested pages still return blocked/nav-shell behavior under safe public access.
+- ADGM alternate: legal-framework pages remain near-threshold but below the activation gate; media/data-protection alternate components still need better selectors or replacement URLs.

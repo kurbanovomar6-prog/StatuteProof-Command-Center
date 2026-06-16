@@ -865,7 +865,22 @@ class DfsaNoticeListingAdapter(DocumentListingAdapter):
     family = "dfsa_notice_listing"
     name = "dfsa_notice_listing"
     heading = "DFSA notice/enforcement listing items"
-    allowed_tokens = ("dfsa", "mlro", "letter", "notice", "enforcement", "regulatory action", "aml", "financial crime", "sanction")
+    allowed_tokens = (
+        "dfsa",
+        "mlro",
+        "letter",
+        "notice",
+        "enforcement",
+        "regulatory action",
+        "published decision",
+        "decision",
+        "consultation",
+        "paper",
+        "supervisory",
+        "aml",
+        "financial crime",
+        "sanction",
+    )
 
 
 _GENERIC_CONTEXT_SNIPPETS = {

@@ -1,0 +1,559 @@
+{
+  "tested_count": 7,
+  "strong_pass_count": 3,
+  "strong_pass_ids": [
+    "AE-cbuae-retail-payment-services-rulebook",
+    "AE-dfsa-consultation-paper-165",
+    "AE-dfsa-notice-supervisory-review"
+  ],
+  "results": [
+    {
+      "source_id": "AE-vara-aml-cft-controls",
+      "name": "VARA AML/CFT Controls",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/rulebook/c-amlcft-controls",
+      "attempts": [
+        {
+          "status": "NAV_SHELL_ONLY",
+          "quality_score": 0,
+          "normalized_length": 1224,
+          "normalized_hash": "bcf2165fdab1df5e221537fad373f0d1aff95c3ac987dacec8fda9e5a270d814",
+          "nav_shell": true,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "NAV_SHELL_ONLY",
+          "adapter_name": "static_html",
+          "adapter_family": "static_html",
+          "strong_pass": false,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "preview": "Entire section\nCustom print\nText Only\nRich Text\nPrint\n1.\nVASPs should have effective AML/CFT controls and systems in place which can adequately manage the AML/CFT risks relevant to their VA Activities, including the use of distributed ledger analytics tools, as well as other investigative tools or c",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "NAV_SHELL_ONLY",
+          "quality_score": 0,
+          "normalized_length": 1000,
+          "normalized_hash": "fdc10afc92f65cbf95602716fc907eb1aa30929b705ac06ef0577e061dabb130",
+          "nav_shell": true,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "NAV_SHELL_ONLY",
+          "adapter_name": "vara_pdf_listing",
+          "adapter_family": "vara_pdf_listing",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "preview": "VARA PDF/rulebook listing items\n- Title: C. AML/CFT Controls\nCategory: document\nURL: https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_123_VER20250519.pdf\nDocument URL: https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_123_VER20250519.pdf\nContext: Download",
+          "attempt_config": {
+            "container_selector": "body",
+            "max_items": 80
+          }
+        }
+      ],
+      "best": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "normalized_length": 1224,
+        "normalized_hash": "bcf2165fdab1df5e221537fad373f0d1aff95c3ac987dacec8fda9e5a270d814",
+        "nav_shell": true,
+        "can_save_evidence": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "NAV_SHELL_ONLY",
+        "adapter_name": "static_html",
+        "adapter_family": "static_html",
+        "strong_pass": false,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "preview": "Entire section\nCustom print\nText Only\nRich Text\nPrint\n1.\nVASPs should have effective AML/CFT controls and systems in place which can adequately manage the AML/CFT risks relevant to their VA Activities, including the use of distributed ledger analytics tools, as well as other investigative tools or c",
+        "attempt_config": {
+          "content_selector": "body"
+        }
+      }
+    },
+    {
+      "source_id": "AE-cbuae-retail-payment-services-rulebook",
+      "name": "CBUAE Retail Payment Services and Card Schemes Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/312-retail-payment-services-and-card-schemes-regulation",
+      "attempts": [
+        {
+          "status": "NAV_SHELL_ONLY",
+          "quality_score": 0,
+          "normalized_length": 1077,
+          "normalized_hash": "af337ad8f45bf9b57f15bb0241bfb53f22b1380a6d01d59cd6475718397486db",
+          "nav_shell": true,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "NAV_SHELL_ONLY",
+          "adapter_name": "static_html",
+          "adapter_family": "static_html",
+          "strong_pass": false,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "preview": "Entire section\nCustom print\nText Only\nRich Text\nPrint\nIn July 2021 the CBUAE issued the Retail Payment Services and Card Schemes Regulation (Circular No. 15/2021 issued by Notice 3603/2021) . Under its Article 12 , payment service providers must comply with the relevant UAE AML/CFT laws and regulati",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_length": 3457,
+          "normalized_hash": "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb",
+          "nav_shell": false,
+          "can_save_evidence": true,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "cbuae_document_listing",
+          "adapter_family": "cbuae_document_listing",
+          "strong_pass": true,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "preview": "CBUAE document listing items\n- Title: 3.1.2. Retail Payment Services and Card Schemes Regulation\nDate: 1/8/2022\nCategory: document\nURL: https://rulebook.centralbank.ae/sites/default/files/en_net_file_store/CBUAE_EN_4368_VER1.pdf\nDocument URL: https://rulebook.centralbank.ae/sites/default/files/en_ne",
+          "attempt_config": {
+            "container_selector": "body",
+            "max_items": 80
+          }
+        }
+      ],
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 3457,
+        "normalized_hash": "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_family": "cbuae_document_listing",
+        "strong_pass": true,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "preview": "CBUAE document listing items\n- Title: 3.1.2. Retail Payment Services and Card Schemes Regulation\nDate: 1/8/2022\nCategory: document\nURL: https://rulebook.centralbank.ae/sites/default/files/en_net_file_store/CBUAE_EN_4368_VER1.pdf\nDocument URL: https://rulebook.centralbank.ae/sites/default/files/en_ne",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      }
+    },
+    {
+      "source_id": "AE-dfsa-consultation-paper-165",
+      "name": "DFSA Consultation Paper No.165",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/consultation-paper-no165-proposed-changes-dfsas-approach-licensed-functions-and-authorised",
+      "attempts": [
+        {
+          "status": "NEEDS_SELECTOR_REVIEW",
+          "quality_score": 59,
+          "normalized_length": 575,
+          "normalized_hash": "f4789b2cf0acb453b970166b1748cd03130790d3c4de7eda0d45d21f1843c356",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "TABLE_ADAPTER_REQUIRED",
+          "adapter_name": "static_html",
+          "adapter_family": "static_html",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "low",
+          "preview": "Dubai Financial Services Authority (DFSA)\nEntire section\nCustom print\nLink\nText Only\nRich Text\nPrint\nLocation:\nConsultation Paper No.165 - Proposed Changes to the DFSA’s Approach to Licensed Functions and Authorised Individuals\nClick here to download the Consultation paper in PDF Format.\nClick here ",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_length": 17129,
+          "normalized_hash": "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8",
+          "nav_shell": false,
+          "can_save_evidence": true,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "dfsa_notice_listing",
+          "adapter_family": "dfsa_notice_listing",
+          "strong_pass": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+          "attempt_config": {
+            "container_selector": "body",
+            "max_items": 80
+          }
+        }
+      ],
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 17129,
+        "normalized_hash": "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_family": "dfsa_notice_listing",
+        "strong_pass": true,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      }
+    },
+    {
+      "source_id": "AE-dfsa-notice-supervisory-review",
+      "name": "DFSA Supervisory Review Rulebook",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/supervisory-review-and-evaluation-process",
+      "attempts": [
+        {
+          "status": "NAV_SHELL_ONLY",
+          "quality_score": 0,
+          "normalized_length": 14,
+          "normalized_hash": "a469ab4ca4e55bf547566e9ebfa1b809c933207e9d558156bc0c4252b17533fe",
+          "nav_shell": true,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "NAV_SHELL_ONLY",
+          "adapter_name": "static_html",
+          "adapter_family": "static_html",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "low",
+          "preview": "Page not found",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 59,
+          "normalized_length": 749,
+          "normalized_hash": "ab9a7cda820ac1803eec7e77f9b67d69ea1d769d2628a43e8f36590bc17572df",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "dfsa_rulebook",
+          "adapter_family": "dfsa_rulebook",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "preview": "Rulebook modules\n- Title: Financial Markets Tribunal\nCategory: rulebook_module\nURL: https://www.dfsa.ae/about-dfsa/our-structure/financial-markets-tribunal\nRow hash: 1ebc678b7baf6e26\n- Title: AML, CTF & Sanctions Compliance\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nRow",
+          "attempt_config": {
+            "container_selector": "body"
+          }
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_length": 15356,
+          "normalized_hash": "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a",
+          "nav_shell": false,
+          "can_save_evidence": true,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "dfsa_notice_listing",
+          "adapter_family": "dfsa_notice_listing",
+          "strong_pass": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+          "attempt_config": {
+            "container_selector": "body",
+            "max_items": 80
+          }
+        }
+      ],
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 15356,
+        "normalized_hash": "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_family": "dfsa_notice_listing",
+        "strong_pass": true,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      }
+    },
+    {
+      "source_id": "AE-adgm-abu-dhabi-legislation-retest",
+      "name": "ADGM Abu Dhabi Legislation",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/legal-framework/abu-dhabi-legislation",
+      "attempts": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 57,
+          "normalized_length": 1723,
+          "normalized_hash": "d9b716fccff2f890ef340e7412ef018bb1b4feb3a2baced32b52fd885d74729f",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "custom_element",
+          "adapter_family": "custom_element",
+          "strong_pass": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "preview": "Abu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destination. Its exceptional qualities make it an ideal location to live, work, and conduct business.\nA financial centre that provides transparency, efficiency, and integrity, through ",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 57,
+          "normalized_length": 1723,
+          "normalized_hash": "d9b716fccff2f890ef340e7412ef018bb1b4feb3a2baced32b52fd885d74729f",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "static_html",
+          "adapter_family": "static_html",
+          "strong_pass": false,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "preview": "Abu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destination. Its exceptional qualities make it an ideal location to live, work, and conduct business.\nA financial centre that provides transparency, efficiency, and integrity, through ",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 59,
+          "normalized_length": 722,
+          "normalized_hash": "440a88a728179476142ac9980026a5c539b338a133c130618b11b4d80ef0eb6e",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "adgm_fsra_listing",
+          "adapter_family": "adgm_fsra_listing",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "preview": "ADGM/FSRA listing items\n- Title: ADGM Regulations and Rules\nCategory: listing_item\nURL: https://www.adgm.com/legal-framework/rules-and-regulations\nRow hash: eec4c158375e2a30\n- Title: Law No. (4) of 2013 Concerning Abu Dhabi Global Market - Unofficial English translation\nDate: 2013\nURL: https://asset",
+          "attempt_config": {
+            "container_selector": "body",
+            "max_items": 80
+          }
+        }
+      ],
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 59,
+        "normalized_length": 722,
+        "normalized_hash": "440a88a728179476142ac9980026a5c539b338a133c130618b11b4d80ef0eb6e",
+        "nav_shell": false,
+        "can_save_evidence": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "adgm_fsra_listing",
+        "adapter_family": "adgm_fsra_listing",
+        "strong_pass": false,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "preview": "ADGM/FSRA listing items\n- Title: ADGM Regulations and Rules\nCategory: listing_item\nURL: https://www.adgm.com/legal-framework/rules-and-regulations\nRow hash: eec4c158375e2a30\n- Title: Law No. (4) of 2013 Concerning Abu Dhabi Global Market - Unofficial English translation\nDate: 2013\nURL: https://asset",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      }
+    },
+    {
+      "source_id": "AE-adgm-federal-legislation-retest",
+      "name": "ADGM Federal Legislation",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/legal-framework/federal-legislation",
+      "attempts": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 58,
+          "normalized_length": 2626,
+          "normalized_hash": "e7a9fdbcf13458ef954f1a9cac1810520003e6821859b672fd6e1917e7fa7005",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "custom_element",
+          "adapter_family": "custom_element",
+          "strong_pass": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "preview": "Abu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destination. Its exceptional qualities make it an ideal location to live, work, and conduct business.\nA financial centre that provides transparency, efficiency, and integrity, through ",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 58,
+          "normalized_length": 2626,
+          "normalized_hash": "e7a9fdbcf13458ef954f1a9cac1810520003e6821859b672fd6e1917e7fa7005",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "static_html",
+          "adapter_family": "static_html",
+          "strong_pass": false,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "preview": "Abu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destination. Its exceptional qualities make it an ideal location to live, work, and conduct business.\nA financial centre that provides transparency, efficiency, and integrity, through ",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        },
+        {
+          "status": "NAV_SHELL_ONLY",
+          "quality_score": 0,
+          "normalized_length": 323,
+          "normalized_hash": "758b6f466af534dd7e2ce7e91058bb6da3803cc24565eec6b7bdcf3eb5dd0cec",
+          "nav_shell": true,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "NAV_SHELL_ONLY",
+          "adapter_name": "adgm_fsra_listing",
+          "adapter_family": "adgm_fsra_listing",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "preview": "ADGM/FSRA listing items\n- Title: ADGM Regulations and Rules\nCategory: listing_item\nURL: https://www.adgm.com/legal-framework/rules-and-regulations\nRow hash: eec4c158375e2a30\n- Title: FATCA and Common Reporting Standards (CRS) Guidance\nURL: https://www.adgm.com/legal-framework/federal-legislation\nRow",
+          "attempt_config": {
+            "container_selector": "body",
+            "max_items": 80
+          }
+        }
+      ],
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 58,
+        "normalized_length": 2626,
+        "normalized_hash": "e7a9fdbcf13458ef954f1a9cac1810520003e6821859b672fd6e1917e7fa7005",
+        "nav_shell": false,
+        "can_save_evidence": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "custom_element",
+        "adapter_family": "custom_element",
+        "strong_pass": false,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "Abu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destination. Its exceptional qualities make it an ideal location to live, work, and conduct business.\nA financial centre that provides transparency, efficiency, and integrity, through ",
+        "attempt_config": {
+          "content_selector": "body"
+        }
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-press-releases-retest",
+      "name": "UAE FIU Press Releases",
+      "regulator": "UAE FIU",
+      "url": "https://uaefiu.gov.ae/en/more/media/press-releases/",
+      "attempts": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 59,
+          "normalized_length": 954,
+          "normalized_hash": "22342e1ba00cd5e3da7a40c2e3363e0dbee6f4f6dd54e213a266c26c5b576170",
+          "nav_shell": false,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "",
+          "adapter_name": "fiu_eocn_document_listing",
+          "adapter_family": "fiu_eocn_document_listing",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "preview": "FIU/EOCN document listing items\n- Title: UAE FIU\nCategory: listing_item\nURL: https://uaefiu.gov.ae/en\nRow hash: 6c25ace12508c43d\n- Title: UAEFIU hosts inaugural meeting of UAE - UK “Combined Anti Money Laundering Operational Team”\nDate: 19 January 2024\nURL: https://uaefiu.gov.ae/en/more/media/press-",
+          "attempt_config": {
+            "container_selector": "body",
+            "max_items": 80
+          }
+        },
+        {
+          "status": "NAV_SHELL_ONLY",
+          "quality_score": 0,
+          "normalized_length": 256,
+          "normalized_hash": "0f6070f45e178d32cec4f25db70d31026e9f9de0248043b5a8e5667d338a365b",
+          "nav_shell": true,
+          "can_save_evidence": false,
+          "duplicate_hash": false,
+          "collision_source_id": null,
+          "failure_code": "NAV_SHELL_ONLY",
+          "adapter_name": "static_html",
+          "adapter_family": "static_html",
+          "strong_pass": false,
+          "noise_risk": "medium",
+          "source_health_risk": "low",
+          "preview": "Notifications\nAccessibility settings\nReset\n#1E8800\n#000000\n#DA291C\nLast updated on 3 September 2021\nTotal visitors 98099\nGo to Open Data\nDid you find this page helpful?\nPress Releases\nClear All\nLoad more\nAdd a Comment\nThank you for rating the service card!",
+          "attempt_config": {
+            "content_selector": "body"
+          }
+        }
+      ],
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 59,
+        "normalized_length": 954,
+        "normalized_hash": "22342e1ba00cd5e3da7a40c2e3363e0dbee6f4f6dd54e213a266c26c5b576170",
+        "nav_shell": false,
+        "can_save_evidence": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "fiu_eocn_document_listing",
+        "adapter_family": "fiu_eocn_document_listing",
+        "strong_pass": false,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "preview": "FIU/EOCN document listing items\n- Title: UAE FIU\nCategory: listing_item\nURL: https://uaefiu.gov.ae/en\nRow hash: 6c25ace12508c43d\n- Title: UAEFIU hosts inaugural meeting of UAE - UK “Combined Anti Money Laundering Operational Team”\nDate: 19 January 2024\nURL: https://uaefiu.gov.ae/en/more/media/press-",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      }
+    }
+  ]
+}

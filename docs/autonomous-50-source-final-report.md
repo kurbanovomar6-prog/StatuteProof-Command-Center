@@ -26,9 +26,28 @@ Newly activated in the weak-zone remediation cycle:
 - `AE-uaefiu-publications-hub`
 - `AE-cbuae-rulebook-revision-updates`
 
-Current truth after this cycle: **36 enabled / 32 readiness-supported / 4 remediation**.
+Current truth after this cycle: **46 enabled / 42 readiness-supported / 4 remediation**.
 
-The 50-source target is still not reached; 18 more activation-ready sources are required.
+The 50-source target is still not reached; 8 more activation-ready sources are required after the weak-zone elimination cycle.
+
+## Weak-Zone Elimination Addendum
+
+The weak-zone elimination cycle after `dd51c04` investigated 31 primary official alternate candidates, 7 near-threshold candidates, and 3 CBUAE drift candidates. It activated ten additional proof-backed sources:
+
+- `AE-vara-rulebook-updates`
+- `AE-dfsa-consultation-current`
+- `AE-dfsa-enforcement-decisions-current`
+- `AE-dfsa-regulatory-actions-current`
+- `AE-cbuae-retail-payment-services-rulebook`
+- `AE-dfsa-consultation-paper-165`
+- `AE-dfsa-notice-supervisory-review`
+- `AE-cbuae-amlcft-rulebook-doclist`
+- `AE-cbuae-amlcft-entire-section-doclist`
+- `AE-cbuae-consumer-protection-rulebook-doclist`
+
+Current truth after this cycle: **46 enabled / 42 readiness-supported / 4 remediation**.
+
+The 50-source target is still not reached; 8 more activation-ready sources are required.
 
 ## 1. Activation Counts
 
@@ -96,10 +115,20 @@ Added:
 - `AE-uaefiu-aml-cft-laws`
 - `AE-uaefiu-publications-hub`
 - `AE-cbuae-rulebook-revision-updates`
+- `AE-vara-rulebook-updates`
+- `AE-dfsa-consultation-current`
+- `AE-dfsa-enforcement-decisions-current`
+- `AE-dfsa-regulatory-actions-current`
+- `AE-cbuae-retail-payment-services-rulebook`
+- `AE-dfsa-consultation-paper-165`
+- `AE-dfsa-notice-supervisory-review`
+- `AE-cbuae-amlcft-rulebook-doclist`
+- `AE-cbuae-amlcft-entire-section-doclist`
+- `AE-cbuae-consumer-protection-rulebook-doclist`
 
 ## 7. Website/App Copy Changed
 
-No frontend copy was changed. Current truth docs/config/validators were updated to 36/32/4 after weak-zone remediation.
+No frontend copy was changed. Current truth docs/config/validators were updated to 46/42/4 after weak-zone remediation.
 
 ## 8. Batch-Onboarding Factory Status
 
@@ -107,15 +136,15 @@ Partial. The system can batch no-save-test candidates, classify failures, save p
 
 ## 9. Did We Reach 50?
 
-No. Current readiness-supported active count is 32. Reaching 50 requires 18 more proof-backed, baseline-stable, gate-passing sources.
+No. Current readiness-supported active count is 42. Reaching 50 requires 8 more proof-backed, baseline-stable, gate-passing sources.
 
 ## 10. Biggest Remaining Blocker
 
-JS-heavy official pages often render custom elements or nav shells that require source-specific selectors. ADGM RA URLs still appear stale/404. VARA rulebook/framework/register URLs remain nav-shell/stale under tested selectors. DFSA/DIFC listing pages remain selector/access remediation. CBUAE non-rulebook public paths remain access-blocked unless official alternates are found.
+The biggest remaining blockers are now narrower: direct VARA PDF extraction is not implemented in the current Playwright fetch path; DIFC pages remain selector/access blocked; ADGM alternate media/data-protection/listing components still need stable selectors or replacement URLs; and some UAE FIU routes are duplicate/shallow aliases of the activated publications hub.
 
 ## 11. Next Exact Task
 
-Execute `docs/autonomous-next-execution-prompt.md`, starting with ADGM alternate replacement URLs/selectors, official VARA PDF/rulebook endpoints, and DFSA/DIFC selector remediation.
+Execute `docs/autonomous-next-execution-prompt.md`, starting with direct official PDF extraction for VARA rulebooks, DIFC selector/access remediation, and ADGM alternate component replacement URLs.
 
 ## 12. Validation Results
 

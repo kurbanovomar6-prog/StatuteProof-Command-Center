@@ -1,0 +1,1423 @@
+{
+  "tested_count": 31,
+  "strong_pass_count": 8,
+  "strong_pass_ids": [
+    "AE-vara-rulebook-updates",
+    "AE-vara-compliance-risk-rulebook",
+    "AE-cbuae-amlcft-rulebook",
+    "AE-cbuae-amlcft-entire-section",
+    "AE-cbuae-consumer-protection-rulebook",
+    "AE-dfsa-consultation-current",
+    "AE-dfsa-enforcement-decisions-current",
+    "AE-dfsa-regulatory-actions-current"
+  ],
+  "results": [
+    {
+      "source_id": "AE-vara-rulebook-updates",
+      "name": "VARA Rulebook Revision Updates",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/view-revision-updates?f_days=onchanged%3D-30+day",
+      "source_type": "rulebook_updates",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "vara_pdf_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 2802,
+        "normalized_hash": "359b52c0488c7bbbd40c07cf015a0a9ecd8f98c9bd6e0aaddbf4087b36313977",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "vara_pdf_listing",
+        "adapter_name": "vara_pdf_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://rulebooks.vara.ae/view-revision-updates?f_days=onchanged%3D-30+day"
+        },
+        "preview": "VARA PDF/rulebook listing items\n- Title: A Category 1 VA Issuance (Example 1)\nCategory: listing_item\nURL: https://rulebooks.vara.ae/rulebook/category-1-va-issuance-example-1\nRow hash: 795606e5e3d060c6\n- Title: B Category 1 VA Issuance (Example 2)\nURL: https://rulebooks.vara.ae/rulebook/b-category-1-",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-vara-aml-cft-controls",
+      "name": "VARA AML/CFT Controls",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/rulebook/c-amlcft-controls",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "AML",
+          "CFT",
+          "money laundering",
+          "terrorist financing"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 58,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 1167,
+        "normalized_hash": "00e516a0273548df9dfee6b1fb77c25ef9367be646ac26e57b0335a6c2bce6ab",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": false,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebooks.vara.ae/rulebook/c-amlcft-controls",
+          "focus_keywords": [
+            "AML",
+            "CFT",
+            "money laundering",
+            "terrorist financing"
+          ]
+        },
+        "preview": "VASPs should have effective AML/CFT controls and systems in place which can adequately manage the AML/CFT risks relevant to their VA Activities, including the use of distributed ledger analytics tools, as well as other investigative tools or capabilities to monitor and screen transactions.\n2.\nIn res",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-vara-compliance-risk-rulebook",
+      "name": "VARA Compliance and Risk Management Rulebook",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Compliance",
+          "Risk Management",
+          "Rulebook"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 62,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 1694,
+        "normalized_hash": "c75a38fd30b3c5116947b3d75a5a355d2b2e86af1b2d3244699b0b8280a1d30d",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook",
+          "focus_keywords": [
+            "Compliance",
+            "Risk Management",
+            "Rulebook"
+          ]
+        },
+        "preview": "Part I – Compliance Management Introduction A. General Principles B. Compliance Management System C. Duties of the Compliance Officer D. Risk Management E. Operation Management F. Books and Records G. Audit H. Regulatory Reporting I. Regulatory Notifications J. Staff Management and Training\nPart II ",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-vara-va-regulations-pdf",
+      "name": "VARA Virtual Assets Regulations PDF",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_18_VER992_2.pdf",
+      "source_type": "pdf_rulebook",
+      "requested_adapter_family": "pdf_document",
+      "requested_adapter_name": "pdf_document",
+      "requested_adapter_config": {
+        "min_chars": 500
+      },
+      "result": {
+        "status": "NEEDS_SELECTOR_REVIEW",
+        "quality_score": 5,
+        "quality_label": "POOR",
+        "normalized_length": 0,
+        "normalized_hash": "",
+        "nav_shell": false,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "failure_code": "SHALLOW_CONTENT",
+        "failure_reason": "Fetch failed: fetch_page_with_config: empty result from https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_18_VER992_2.pdf",
+        "remediation_hint": "Review the configured wait_for_selector/content_selector before activation.",
+        "adapter_family": "",
+        "adapter_name": "",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-vara-tech-info-rulebook-pdf",
+      "name": "VARA Technology and Information Rulebook PDF",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_169_VER20250519.pdf",
+      "source_type": "pdf_rulebook",
+      "requested_adapter_family": "pdf_document",
+      "requested_adapter_name": "pdf_document",
+      "requested_adapter_config": {
+        "min_chars": 500
+      },
+      "result": {
+        "status": "NEEDS_SELECTOR_REVIEW",
+        "quality_score": 5,
+        "quality_label": "POOR",
+        "normalized_length": 0,
+        "normalized_hash": "",
+        "nav_shell": false,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "failure_code": "SHALLOW_CONTENT",
+        "failure_reason": "Fetch failed: fetch_page_with_config: empty result from https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_169_VER20250519.pdf",
+        "remediation_hint": "Review the configured wait_for_selector/content_selector before activation.",
+        "adapter_family": "",
+        "adapter_name": "",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-vara-va-issuance-rulebook-pdf",
+      "name": "VARA Virtual Asset Issuance Rulebook PDF",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_293_VER20250519.pdf",
+      "source_type": "pdf_rulebook",
+      "requested_adapter_family": "pdf_document",
+      "requested_adapter_name": "pdf_document",
+      "requested_adapter_config": {
+        "min_chars": 500
+      },
+      "result": {
+        "status": "NEEDS_SELECTOR_REVIEW",
+        "quality_score": 5,
+        "quality_label": "POOR",
+        "normalized_length": 0,
+        "normalized_hash": "",
+        "nav_shell": false,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "failure_code": "SHALLOW_CONTENT",
+        "failure_reason": "Fetch failed: fetch_page_with_config: empty result from https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_293_VER20250519.pdf",
+        "remediation_hint": "Review the configured wait_for_selector/content_selector before activation.",
+        "adapter_family": "",
+        "adapter_name": "",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-amlcft-rulebook",
+      "name": "CBUAE AML/CFT Rulebook",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "AML",
+          "CFT",
+          "Anti-Money Laundering"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "quality_label": "GOOD",
+        "normalized_length": 9540,
+        "normalized_hash": "790318346eb3158bec493eb6207b0bf62146b2eb028df7fdde86f36ef9d4e6a4",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+          "focus_keywords": [
+            "AML",
+            "CFT",
+            "Anti-Money Laundering"
+          ]
+        },
+        "preview": "Anti-Money Laundering and Combating the Financing of Terrorism and Illegal Organisations Laws Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing Cabinet Resolution No. (134) of 2025 Regarding the Executive Regu",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-amlcft-entire-section",
+      "name": "CBUAE AML/CFT Entire Section",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "AML",
+          "CFT",
+          "Anti-Money Laundering"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 63,
+        "quality_label": "GOOD",
+        "normalized_length": 100232,
+        "normalized_hash": "2fe6370c9c59fe4407dfb22cf15c4ea74786daf9cc1cd7585a023a8e89b45c3c",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+          "focus_keywords": [
+            "AML",
+            "CFT",
+            "Anti-Money Laundering"
+          ]
+        },
+        "preview": "1.1 Purpose Article 44.11 of the Cabinet Decision No. (10) of 2019 Concerning the Implementing Regulation of Decree Law No. (20) of 2018 on Anti-Money Laundering and Combating the Financing of Terrorism and Illegal Organisations charges Supervisory Authorities with “providing Financial Institutions.",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-retail-payment-services-rulebook",
+      "name": "CBUAE Retail Payment Services and Card Schemes Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/312-retail-payment-services-and-card-schemes-regulation",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Retail Payment",
+          "Card Schemes",
+          "Regulation"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 58,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 1023,
+        "normalized_hash": "426ba499f4bee8ca17e40fea9172e1065f5d53f665635a7374af56ad8b1686e5",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": false,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/312-retail-payment-services-and-card-schemes-regulation",
+          "focus_keywords": [
+            "Retail Payment",
+            "Card Schemes",
+            "Regulation"
+          ]
+        },
+        "preview": "In July 2021 the CBUAE issued the Retail Payment Services and Card Schemes Regulation (Circular No. 15/2021 issued by Notice 3603/2021) . Under its Article 12 , payment service providers must comply with the relevant UAE AML/CFT laws and regulations and address ML/FT risks through appropriate preven",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-stored-value-facilities-rulebook",
+      "name": "CBUAE Stored Value Facilities Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/stored-value-facilities-regulation",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Stored Value",
+          "Regulation"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 59,
+        "normalized_hash": "aa2a7aa0d870db0973a50f11b11d15d2205055f08fc193dfd874c28509908038",
+        "nav_shell": true,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "low",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/stored-value-facilities-regulation",
+          "focus_keywords": [
+            "Stored Value",
+            "Regulation"
+          ]
+        },
+        "preview": "Skip to main content\nThe requested page could not be found.",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-consumer-protection-rulebook",
+      "name": "CBUAE Consumer Protection Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Consumer Protection",
+          "Regulation"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "quality_label": "GOOD",
+        "normalized_length": 55212,
+        "normalized_hash": "3aa3a00e55edc46bd3f3ea401b499440124793cf69ace05a0ad2b11ef12d07a1",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+          "focus_keywords": [
+            "Consumer Protection",
+            "Regulation"
+          ]
+        },
+        "preview": "Consumer Protection Regulation C 8/2020 Effective from 25/12/2020 Status: In-Force\nIntroduction One of the Central Bank’s objectives, as mandated by the Decretal Federal Law No. 14 of 2018 Regarding the Central Bank & Organization of Licensed Financial Institutions and Activities , is to establish R",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-complaints-management-rulebook",
+      "name": "CBUAE Complaints Management Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/complaints-management-regulation",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Complaints",
+          "Regulation"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 59,
+        "normalized_hash": "aa2a7aa0d870db0973a50f11b11d15d2205055f08fc193dfd874c28509908038",
+        "nav_shell": true,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "low",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/complaints-management-regulation",
+          "focus_keywords": [
+            "Complaints",
+            "Regulation"
+          ]
+        },
+        "preview": "Skip to main content\nThe requested page could not be found.",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-consultation-current",
+      "name": "DFSA Consultation Papers Current",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/your-resources/regulatory/consultation-papers",
+      "source_type": "consultations",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "dfsa_notice_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 100
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "GOOD",
+        "normalized_length": 16510,
+        "normalized_hash": "e8c0edb976af811770be2b2c8bd102de8a6e7ef142e2ba82ef61a4d3b1100ed0",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "dfsa_notice_listing",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.dfsa.ae/your-resources/regulatory/consultation-papers"
+        },
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-consultation-paper-165",
+      "name": "DFSA Consultation Paper No.165",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/consultation-paper-no165-proposed-changes-dfsas-approach-licensed-functions-and-authorised",
+      "source_type": "consultation",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "article, main, body",
+        "focus_keywords": [
+          "Consultation Paper",
+          "Proposed Changes",
+          "DFSA"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 59,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 575,
+        "normalized_hash": "f4789b2cf0acb453b970166b1748cd03130790d3c4de7eda0d45d21f1843c356",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "low",
+        "can_save_evidence": false,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "article, main, body",
+          "url": "https://dfsaen.thomsonreuters.com/rulebook/consultation-paper-no165-proposed-changes-dfsas-approach-licensed-functions-and-authorised",
+          "focus_keywords": [
+            "Consultation Paper",
+            "Proposed Changes",
+            "DFSA"
+          ]
+        },
+        "preview": "Dubai Financial Services Authority (DFSA)\nEntire section\nCustom print\nLink\nText Only\nRich Text\nPrint\nLocation:\nConsultation Paper No.165 - Proposed Changes to the DFSA’s Approach to Licensed Functions and Authorised Individuals\nClick here to download the Consultation paper in PDF Format.\nClick here ",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-notice-supervisory-review",
+      "name": "DFSA Supervisory Review Rulebook",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/supervisory-review-and-evaluation-process",
+      "source_type": "rulebook",
+      "requested_adapter_family": "dfsa_rulebook",
+      "requested_adapter_name": "dfsa_rulebook",
+      "requested_adapter_config": {
+        "container_selector": "body"
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 59,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 749,
+        "normalized_hash": "ab9a7cda820ac1803eec7e77f9b67d69ea1d769d2628a43e8f36590bc17572df",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "dfsa_rulebook",
+        "adapter_name": "dfsa_rulebook",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://dfsaen.thomsonreuters.com/rulebook/supervisory-review-and-evaluation-process"
+        },
+        "preview": "Rulebook modules\n- Title: Financial Markets Tribunal\nCategory: rulebook_module\nURL: https://www.dfsa.ae/about-dfsa/our-structure/financial-markets-tribunal\nRow hash: 1ebc678b7baf6e26\n- Title: AML, CTF & Sanctions Compliance\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nRow",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-enforcement-decisions-current",
+      "name": "DFSA Published Enforcement Decisions",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/enforcement/published-decisions",
+      "source_type": "enforcement",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "dfsa_notice_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "GOOD",
+        "normalized_length": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "dfsa_notice_listing",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.dfsa.ae/what-we-do/enforcement/published-decisions"
+        },
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-regulatory-actions-current",
+      "name": "DFSA Enforcement Regulatory Actions",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions",
+      "source_type": "enforcement",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "dfsa_notice_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "GOOD",
+        "normalized_length": 21491,
+        "normalized_hash": "9ca97aa68da8f5edc418c76341146d06829c7abede4c89c104080755b7959078",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "dfsa_notice_listing",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions"
+        },
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-difc-consultation-papers-current",
+      "name": "DIFC Consultation Papers",
+      "regulator": "DIFC",
+      "url": "https://www.difc.com/business/laws-and-regulations/consultation-papers/",
+      "source_type": "consultations",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "dfsa_notice_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "result": {
+        "status": "BLOCKED",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 547,
+        "normalized_hash": "71de5358d5ee41159145d2d11f2383e9b776286567c5079c20adce1734eaea96",
+        "nav_shell": true,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
+        "remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
+        "adapter_family": "dfsa_notice_listing",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.difc.com/business/laws-and-regulations/consultation-papers/"
+        },
+        "preview": "DFSA notice/enforcement listing items\n- Title: Article 9(b)(2)-(4) of Dubai Law 5 of 2021\nDate: 2021\nCategory: document\nURL: https://edge.sitecorecloud.io/dubaiintern0078-difcexperie96c5-production-3253/media/project/difcexperiences/difc/difcwebsite/documents/difc_docs/dubai-law-no-5-of-2021-english",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-difc-data-protection-current",
+      "name": "DIFC Data Protection",
+      "regulator": "DIFC",
+      "url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
+      "source_type": "law",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Data Protection",
+          "Law"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 14,
+        "normalized_hash": "f219040fd0c28b52221cd3dc0ea56f77f2f479f980b9bc17ed82b7eeac5163a9",
+        "nav_shell": true,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "low",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
+          "focus_keywords": [
+            "Data Protection",
+            "Law"
+          ]
+        },
+        "preview": "Go to Homepage",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-adgm-dp-regulatory-actions-retest",
+      "name": "ADGM Data Protection Regulatory Actions",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/regulatory-actions",
+      "source_type": "regulatory_actions",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "adgm_fsra_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80,
+        "allowed_tokens": [
+          "enforcement",
+          "regulatory",
+          "action",
+          "penalty",
+          "decision",
+          "data protection"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "LIMITED",
+        "normalized_length": 3376,
+        "normalized_hash": "c47c939bd0960c678f8815dc5eda371714511f05783c02b4505ceb5a08ebc554",
+        "nav_shell": true,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "adgm_fsra_listing",
+        "adapter_name": "adgm_fsra_listing",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "Office Of Data Protection Regulatory Actions\nOverview\nJurisdiction\nAuthorities\nInitiatives\nADGM Academy\nDispute Resolution\nCareers\nA platform that offers limitless opportunities and paves the way for a brighter future\nAbu Dhabi boasts first-class infrastructure and unparalleled global connectivity, ",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-adgm-media-announcements-retest",
+      "name": "ADGM Media Announcements",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/media/announcements",
+      "source_type": "announcements",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "adgm_fsra_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80,
+        "allowed_tokens": [
+          "regulation",
+          "guidance",
+          "consultation",
+          "enforcement",
+          "rulebook",
+          "aml",
+          "fsra"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "LIMITED",
+        "normalized_length": 3839,
+        "normalized_hash": "532ccf038d7bb535d11fbe4abfbb3ee3be4bf59722e0ae0ddc0ca2ec64a9e376",
+        "nav_shell": true,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "adgm_fsra_listing",
+        "adapter_name": "adgm_fsra_listing",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "ADGM Media Announcements\nOverview\nJurisdiction\nAuthorities\nInitiatives\nADGM Academy\nDispute Resolution\nCareers\nA platform that offers limitless opportunities and paves the way for a brighter future\nAbu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier ",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-adgm-abu-dhabi-legislation-retest",
+      "name": "ADGM Abu Dhabi Legislation",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/legal-framework/abu-dhabi-legislation",
+      "source_type": "legislation",
+      "requested_adapter_family": "custom_element",
+      "requested_adapter_name": "custom_element",
+      "requested_adapter_config": {
+        "content_selector": "adgm-page, main, body",
+        "focus_keywords": [
+          "Abu Dhabi Legislation",
+          "Law",
+          "Regulation"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 59,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 605,
+        "normalized_hash": "2c913998899a498e1b6e2a78644c857f96aa86da3e2ac894006e91a537f671d7",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "custom_element",
+        "adapter_name": "custom_element",
+        "adapter_used": true,
+        "adapter_config": {
+          "selector": "adgm-page, main, body",
+          "url": "https://www.adgm.com/legal-framework/abu-dhabi-legislation",
+          "focus_keywords": [
+            "Abu Dhabi Legislation",
+            "Law",
+            "Regulation"
+          ]
+        },
+        "preview": "Abu Dhabi Legislation\nThe Abu Dhabi Law No. (4) of 2013 sets out the governance, legislative, and regulatory framework and activities to be carried on in the Abu Dhabi Global Market.\nAbu Dhabi Law No. (12) of 2020 amends certain of the provisions of Abu Dhabi Law No. (4) of 2013.\nAbout\nBusiness eSer",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-adgm-federal-legislation-retest",
+      "name": "ADGM Federal Legislation",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/legal-framework/federal-legislation",
+      "source_type": "legislation",
+      "requested_adapter_family": "custom_element",
+      "requested_adapter_name": "custom_element",
+      "requested_adapter_config": {
+        "content_selector": "adgm-page, main, body",
+        "focus_keywords": [
+          "Federal Legislation",
+          "Law",
+          "Regulation"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 58,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 1508,
+        "normalized_hash": "6faa60bce5105ce993a83a8a474202b7b98156454dad6e18244b3d154e387549",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "custom_element",
+        "adapter_name": "custom_element",
+        "adapter_used": true,
+        "adapter_config": {
+          "selector": "adgm-page, main, body",
+          "url": "https://www.adgm.com/legal-framework/federal-legislation",
+          "focus_keywords": [
+            "Federal Legislation",
+            "Law",
+            "Regulation"
+          ]
+        },
+        "preview": "Federal Legislation\nFederal Legislation establishes ADGM as a Financial Free Zone\nUAE Constitution\nArticle 121 of the UAE Constitution contemplates the division of legislative jurisdiction between the federation and each Emirate. In 2004, Article 121 was amended in order to extend the legislative ju",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-adgm-ra-aml-guides-retest",
+      "name": "ADGM RA AML/CFT Quick Guides",
+      "regulator": "ADGM",
+      "url": "https://www.adgm.com/registration-authority/aml-cft-quick-guides",
+      "source_type": "guidance",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "adgm_fsra_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80,
+        "allowed_tokens": [
+          "aml",
+          "cft",
+          "guide",
+          "quick guide",
+          "beneficial ownership"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "LIMITED",
+        "normalized_length": 2641,
+        "normalized_hash": "ff5039aa00bc55ee9e14348e758c61a7cdc600a7ae70e6c5abac2c7dcd576955",
+        "nav_shell": true,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "adgm_fsra_listing",
+        "adapter_name": "adgm_fsra_listing",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "404\nOverview\nJurisdiction\nAuthorities\nInitiatives\nADGM Academy\nDispute Resolution\nCareers\nA platform that offers limitless opportunities and paves the way for a brighter future\nAbu Dhabi boasts first-class infrastructure and unparalleled global connectivity, making it a premier international destina",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-strategic-analysis-direct",
+      "name": "UAE FIU Strategic Analysis Guidelines",
+      "regulator": "UAE FIU",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/strategic-analysis-guidelines/",
+      "source_type": "guidance",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "fiu_eocn_document_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80,
+        "allowed_tokens": [
+          "strategic",
+          "analysis",
+          "guideline",
+          "report",
+          "pdf"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 128,
+        "normalized_hash": "59b2d5eea4d909e3d0f79f1d6b5eac4a9c6e8c9d464bda4548bd553f91ad678e",
+        "nav_shell": true,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "fiu_eocn_document_listing",
+        "adapter_name": "fiu_eocn_document_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/strategic-analysis-guidelines/"
+        },
+        "preview": "FIU/EOCN document listing items\n- Title: UAE FIU\nCategory: listing_item\nURL: https://uaefiu.gov.ae/en\nRow hash: 6c25ace12508c43d",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-nra-2024-direct",
+      "name": "UAE FIU National Risk Assessment Report 2024",
+      "regulator": "UAE FIU",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/national-risk-assessment-report-2024/",
+      "source_type": "report",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "fiu_eocn_document_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80,
+        "allowed_tokens": [
+          "national risk",
+          "risk assessment",
+          "report",
+          "2024",
+          "pdf"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 128,
+        "normalized_hash": "59b2d5eea4d909e3d0f79f1d6b5eac4a9c6e8c9d464bda4548bd553f91ad678e",
+        "nav_shell": true,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "fiu_eocn_document_listing",
+        "adapter_name": "fiu_eocn_document_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/national-risk-assessment-report-2024/"
+        },
+        "preview": "FIU/EOCN document listing items\n- Title: UAE FIU\nCategory: listing_item\nURL: https://uaefiu.gov.ae/en\nRow hash: 6c25ace12508c43d",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-press-releases-retest",
+      "name": "UAE FIU Press Releases",
+      "regulator": "UAE FIU",
+      "url": "https://uaefiu.gov.ae/en/more/media/press-releases/",
+      "source_type": "updates",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "fiu_eocn_document_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80,
+        "allowed_tokens": [
+          "aml",
+          "cft",
+          "goaml",
+          "mou",
+          "sanction",
+          "financial intelligence"
+        ]
+      },
+      "result": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 59,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 954,
+        "normalized_hash": "22342e1ba00cd5e3da7a40c2e3363e0dbee6f4f6dd54e213a266c26c5b576170",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "fiu_eocn_document_listing",
+        "adapter_name": "fiu_eocn_document_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://uaefiu.gov.ae/en/more/media/press-releases/"
+        },
+        "preview": "FIU/EOCN document listing items\n- Title: UAE FIU\nCategory: listing_item\nURL: https://uaefiu.gov.ae/en\nRow hash: 6c25ace12508c43d\n- Title: UAEFIU hosts inaugural meeting of UAE - UK “Combined Anti Money Laundering Operational Team”\nDate: 19 January 2024\nURL: https://uaefiu.gov.ae/en/more/media/press-",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-uaefiu-laws-regulations-retest",
+      "name": "UAE FIU Laws and Regulations",
+      "regulator": "UAE FIU",
+      "url": "https://www.uaefiu.gov.ae/en/Laws-Regulations/",
+      "source_type": "laws",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "fiu_eocn_document_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80,
+        "allowed_tokens": [
+          "law",
+          "regulation",
+          "decision",
+          "aml",
+          "cft"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 132,
+        "normalized_hash": "5301dfa891c64a57d3a031d153e6cc620526d86848e31adfba5a7b9b384b3976",
+        "nav_shell": true,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "fiu_eocn_document_listing",
+        "adapter_name": "fiu_eocn_document_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.uaefiu.gov.ae/en/Laws-Regulations/"
+        },
+        "preview": "FIU/EOCN document listing items\n- Title: UAE FIU\nCategory: listing_item\nURL: https://www.uaefiu.gov.ae/en\nRow hash: cc15cf821eae9841",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-cbuae-rulebook-search-aml",
+      "name": "CBUAE Rulebook AML Search",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/search?query=AML",
+      "source_type": "search",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "cbuae_document_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "LIMITED",
+        "normalized_length": 2085,
+        "normalized_hash": "2ff36acc07bc52e5ec2dbc08776910132df94219c65c45edb846035d77f87e5d",
+        "nav_shell": true,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "cbuae_document_listing",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "Solr search | CBUAE Rulebook\nSkip to main content\nSearch fields\nRevisions: Content » Body\nRevisions: Content » Rule number\nRevisions: Content » Title\nTitle\nInclude Archive\nOperator\nAll of these words\nAny of these words\nApply\nFilter by\nEntity Type\n(Restricted) Finance Companies\nActuaries\nAll Licensed",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-vara-rulebook-search-aml",
+      "name": "VARA Rulebook AML Search",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/search?query=AML",
+      "source_type": "search",
+      "requested_adapter_family": "document_listing",
+      "requested_adapter_name": "vara_pdf_listing",
+      "requested_adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 606,
+        "normalized_hash": "7d18aa099f99d669431b47aac417ab1458fae09416cccc871b2048be72d8afc0",
+        "nav_shell": true,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "unknown",
+        "source_health_risk": "medium",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "vara_pdf_listing",
+        "adapter_name": "vara_pdf_listing",
+        "adapter_used": false,
+        "adapter_config": {},
+        "preview": "Search | Virtual Assets Regulatory Authority (VARA)\nSkip to main content\nAdvanced Search\nSearch fields\nRevisions: Content » Body\nRevisions: Content » Rule number\nRevisions: Content » Title\nAll text\nTitle only\nRule number only\nExact phrase\nSearch query\nFulltext search\nHow to use boolean searches\nSear",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-rulebook-aml-current",
+      "name": "DFSA AML Rulebook Current",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/anti-money-laundering-counter-terrorist-financing-and-sanctions-module-aml",
+      "source_type": "rulebook",
+      "requested_adapter_family": "static_html",
+      "requested_adapter_name": "static_html",
+      "requested_adapter_config": {
+        "content_selector": "article, main, body",
+        "focus_keywords": [
+          "Anti-Money Laundering",
+          "AML",
+          "Sanctions"
+        ]
+      },
+      "result": {
+        "status": "NAV_SHELL_ONLY",
+        "quality_score": 0,
+        "quality_label": "POOR",
+        "normalized_length": 13,
+        "normalized_hash": "cc11d415d9326ccc4e749aed6d2d8f12a28e53d001938f6b4cf2c47a2422dad0",
+        "nav_shell": true,
+        "shallow": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "medium",
+        "source_health_risk": "low",
+        "can_save_evidence": false,
+        "failure_code": "NAV_SHELL_ONLY",
+        "failure_reason": "Extracted content is a navigation shell or collides with another source hash.",
+        "remediation_hint": "Configure a precise content_selector or adapter before marking this source ready.",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "article, main, body",
+          "url": "https://dfsaen.thomsonreuters.com/rulebook/anti-money-laundering-counter-terrorist-financing-and-sanctions-module-aml",
+          "focus_keywords": [
+            "Anti-Money Laundering",
+            "AML",
+            "Sanctions"
+          ]
+        },
+        "preview": "Access denied",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "strong_pass": false,
+        "evidence_level": "PREVIEW_ONLY"
+      }
+    }
+  ]
+}

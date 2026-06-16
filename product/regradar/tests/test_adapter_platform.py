@@ -892,6 +892,103 @@ def test_dfsa_notice_listing_adapter_extracts_financial_crime_links():
     assert "MLRO Letter" in result.text
 
 
+def test_vara_pdf_listing_extracts_rulebook_revision_updates():
+    html = """
+    <html><body><main>
+      <div class="revision item">
+        <h3>VARA Rulebook Revision Update</h3>
+        <p>Updated AML/CFT rulebook controls for virtual asset service providers.</p>
+        <a href="/sites/default/files/en_net_file_store/VARA_AML_Rulebook.pdf">Download PDF</a>
+      </div>
+      <div class="revision item">
+        <h3>Company Rulebook Update</h3>
+        <p>Regulatory framework and company rulebook changes.</p>
+        <a href="/rulebook/company-rulebook">View Details</a>
+      </div>
+      <footer><a href="/contact">Contact VARA</a></footer>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://rulebooks.vara.ae/view-revision-updates",
+        adapter_family="vara_pdf_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "vara_pdf_listing"
+    assert result.item_count == 2
+    assert "VARA Rulebook Revision Update" in result.text
+    assert "Company Rulebook Update" in result.text
+    assert "Contact VARA" not in result.text
+
+
+def test_cbuae_document_listing_extracts_rulebook_links_without_static_hash_noise():
+    html = """
+    <html><body><main>
+      <section class="rulebook-card">
+        <h3>AML/CFT Rulebook Updates</h3>
+        <p>Central Bank rulebook material for anti-money laundering and financial crime controls.</p>
+        <a href="/en/rulebook/amlcft">View</a>
+      </section>
+      <section class="rulebook-card">
+        <h3>Retail Payment Services Regulation</h3>
+        <p>Payment services and card schemes regulation for licensed financial institutions.</p>
+        <a href="/en/rulebook/312-retail-payment-services-and-card-schemes-regulation">Read more</a>
+      </section>
+      <nav><a href="/en/search">Search</a></nav>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://rulebook.centralbank.ae/en/rulebook/amlcft",
+        adapter_family="cbuae_document_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "cbuae_document_listing"
+    assert result.item_count == 2
+    assert "AML/CFT Rulebook Updates" in result.text
+    assert "Retail Payment Services Regulation" in result.text
+    assert "- Title: View" not in result.text
+    assert "- Title: Read more" not in result.text
+    assert "Search" not in result.text
+
+
+def test_dfsa_notice_listing_extracts_consultation_and_enforcement_links():
+    html = """
+    <html><body><main>
+      <article class="card">
+        <h3>Consultation Paper No.165</h3>
+        <p>Proposed changes to licensed functions and authorised individual rules.</p>
+        <a href="/your-resources/regulatory/consultation-papers/cp165">View Details</a>
+      </article>
+      <article class="card">
+        <h3>Published Enforcement Decision</h3>
+        <p>DFSA enforcement decision concerning AML controls and governance.</p>
+        <a href="/what-we-do/enforcement/published-decisions/decision-1">Read more</a>
+      </article>
+      <footer><a href="/contact">Contact</a></footer>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.dfsa.ae/your-resources/regulatory/consultation-papers",
+        adapter_family="dfsa_notice_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "dfsa_notice_listing"
+    assert result.item_count == 2
+    assert "Consultation Paper No.165" in result.text
+    assert "Published Enforcement Decision" in result.text
+    assert "- Title: View Details" not in result.text
+    assert "- Title: Read more" not in result.text
+    assert "Contact" not in result.text
+
+
 def test_source_intake_maps_structured_failure_code_for_nav_shell():
     source = {
         "source_id": "AE-test-nav-shell",

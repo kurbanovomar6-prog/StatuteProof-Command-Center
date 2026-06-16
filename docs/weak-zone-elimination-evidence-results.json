@@ -1,0 +1,964 @@
+{
+  "candidate_count": 11,
+  "reports": [
+    {
+      "source_id": "AE-vara-rulebook-updates",
+      "name": "VARA Rulebook Revision Updates",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/view-revision-updates?f_days=onchanged%3D-30+day",
+      "source_type": "rulebook_updates",
+      "adapter_family": "document_listing",
+      "adapter_name": "vara_pdf_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 2802,
+        "normalized_hash": "359b52c0488c7bbbd40c07cf015a0a9ecd8f98c9bd6e0aaddbf4087b36313977",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "vara_pdf_listing",
+        "adapter_name": "vara_pdf_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://rulebooks.vara.ae/view-revision-updates?f_days=onchanged%3D-30+day"
+        },
+        "preview": "VARA PDF/rulebook listing items\n- Title: A Category 1 VA Issuance (Example 1)\nCategory: listing_item\nURL: https://rulebooks.vara.ae/rulebook/category-1-va-issuance-example-1\nRow hash: 795606e5e3d060c6\n- Title: B Category 1 VA Issuance (Example 2)\nURL: https://rulebooks.vara.ae/rulebook/b-category-1-",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "359b52c0488c7bbbd40c07cf015a0a9ecd8f98c9bd6e0aaddbf4087b36313977",
+          "normalized_length": 2802,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-rulebook-updates/intake-20260616T064643Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "359b52c0488c7bbbd40c07cf015a0a9ecd8f98c9bd6e0aaddbf4087b36313977",
+          "normalized_length": 2802,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-rulebook-updates/intake-20260616T064650Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-vara-rulebook-updates/intake-20260616T064643Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-vara-rulebook-updates/intake-20260616T064650Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-rulebook-updates/intake-20260616T064643Z/proof.json",
+      "hash_history": [
+        "359b52c0488c7bbbd40c07cf015a0a9ecd8f98c9bd6e0aaddbf4087b36313977",
+        "359b52c0488c7bbbd40c07cf015a0a9ecd8f98c9bd6e0aaddbf4087b36313977"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88
+    },
+    {
+      "source_id": "AE-vara-compliance-risk-rulebook",
+      "name": "VARA Compliance and Risk Management Rulebook",
+      "regulator": "VARA",
+      "url": "https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook",
+      "source_type": "rulebook",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Compliance",
+          "Risk Management",
+          "Rulebook"
+        ]
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 62,
+        "quality_label": "ACCEPTABLE",
+        "normalized_length": 1694,
+        "normalized_hash": "c75a38fd30b3c5116947b3d75a5a355d2b2e86af1b2d3244699b0b8280a1d30d",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook",
+          "focus_keywords": [
+            "Compliance",
+            "Risk Management",
+            "Rulebook"
+          ]
+        },
+        "preview": "Part I – Compliance Management Introduction A. General Principles B. Compliance Management System C. Duties of the Compliance Officer D. Risk Management E. Operation Management F. Books and Records G. Audit H. Regulatory Reporting I. Regulatory Notifications J. Staff Management and Training\nPart II ",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 62,
+          "normalized_hash": "c75a38fd30b3c5116947b3d75a5a355d2b2e86af1b2d3244699b0b8280a1d30d",
+          "normalized_length": 1694,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-compliance-risk-rulebook/intake-20260616T064657Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 62,
+          "normalized_hash": "c75a38fd30b3c5116947b3d75a5a355d2b2e86af1b2d3244699b0b8280a1d30d",
+          "normalized_length": 1694,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-compliance-risk-rulebook/intake-20260616T064704Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-vara-compliance-risk-rulebook/intake-20260616T064657Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-vara-compliance-risk-rulebook/intake-20260616T064704Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-compliance-risk-rulebook/intake-20260616T064657Z/proof.json",
+      "hash_history": [
+        "c75a38fd30b3c5116947b3d75a5a355d2b2e86af1b2d3244699b0b8280a1d30d",
+        "c75a38fd30b3c5116947b3d75a5a355d2b2e86af1b2d3244699b0b8280a1d30d"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 87
+    },
+    {
+      "source_id": "AE-cbuae-amlcft-rulebook",
+      "name": "CBUAE AML/CFT Rulebook",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+      "source_type": "rulebook",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "AML",
+          "CFT",
+          "Anti-Money Laundering"
+        ]
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "quality_label": "GOOD",
+        "normalized_length": 9540,
+        "normalized_hash": "790318346eb3158bec493eb6207b0bf62146b2eb028df7fdde86f36ef9d4e6a4",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+          "focus_keywords": [
+            "AML",
+            "CFT",
+            "Anti-Money Laundering"
+          ]
+        },
+        "preview": "Anti-Money Laundering and Combating the Financing of Terrorism and Illegal Organisations Laws Federal Decree by Law No. (10) of 2025 Regarding Anti-Money Laundering, and Combating the Financing of Terrorism and Proliferation Financing Cabinet Resolution No. (134) of 2025 Regarding the Executive Regu",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 61,
+          "normalized_hash": "790318346eb3158bec493eb6207b0bf62146b2eb028df7fdde86f36ef9d4e6a4",
+          "normalized_length": 9540,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook/intake-20260616T064712Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 61,
+          "normalized_hash": "790318346eb3158bec493eb6207b0bf62146b2eb028df7fdde86f36ef9d4e6a4",
+          "normalized_length": 9540,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook/intake-20260616T064720Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook/intake-20260616T064712Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook/intake-20260616T064720Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook/intake-20260616T064712Z/proof.json",
+      "hash_history": [
+        "790318346eb3158bec493eb6207b0bf62146b2eb028df7fdde86f36ef9d4e6a4",
+        "790318346eb3158bec493eb6207b0bf62146b2eb028df7fdde86f36ef9d4e6a4"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 87
+    },
+    {
+      "source_id": "AE-cbuae-amlcft-entire-section",
+      "name": "CBUAE AML/CFT Entire Section",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+      "source_type": "rulebook",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "AML",
+          "CFT",
+          "Anti-Money Laundering"
+        ]
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 63,
+        "quality_label": "GOOD",
+        "normalized_length": 100232,
+        "normalized_hash": "2fe6370c9c59fe4407dfb22cf15c4ea74786daf9cc1cd7585a023a8e89b45c3c",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+          "focus_keywords": [
+            "AML",
+            "CFT",
+            "Anti-Money Laundering"
+          ]
+        },
+        "preview": "1.1 Purpose Article 44.11 of the Cabinet Decision No. (10) of 2019 Concerning the Implementing Regulation of Decree Law No. (20) of 2018 on Anti-Money Laundering and Combating the Financing of Terrorism and Illegal Organisations charges Supervisory Authorities with “providing Financial Institutions.",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 63,
+          "normalized_hash": "2fe6370c9c59fe4407dfb22cf15c4ea74786daf9cc1cd7585a023a8e89b45c3c",
+          "normalized_length": 100232,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section/intake-20260616T064731Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 63,
+          "normalized_hash": "2fe6370c9c59fe4407dfb22cf15c4ea74786daf9cc1cd7585a023a8e89b45c3c",
+          "normalized_length": 100232,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section/intake-20260616T064740Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section/intake-20260616T064731Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section/intake-20260616T064740Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section/intake-20260616T064731Z/proof.json",
+      "hash_history": [
+        "2fe6370c9c59fe4407dfb22cf15c4ea74786daf9cc1cd7585a023a8e89b45c3c",
+        "2fe6370c9c59fe4407dfb22cf15c4ea74786daf9cc1cd7585a023a8e89b45c3c"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 87
+    },
+    {
+      "source_id": "AE-cbuae-consumer-protection-rulebook",
+      "name": "CBUAE Consumer Protection Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+      "source_type": "rulebook",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main, article, body",
+        "focus_keywords": [
+          "Consumer Protection",
+          "Regulation"
+        ]
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "quality_label": "GOOD",
+        "normalized_length": 55212,
+        "normalized_hash": "3aa3a00e55edc46bd3f3ea401b499440124793cf69ace05a0ad2b11ef12d07a1",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "low",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "static_html",
+        "adapter_name": "static_html",
+        "adapter_used": true,
+        "adapter_config": {
+          "content_selector": "main, article, body",
+          "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+          "focus_keywords": [
+            "Consumer Protection",
+            "Regulation"
+          ]
+        },
+        "preview": "Consumer Protection Regulation C 8/2020 Effective from 25/12/2020 Status: In-Force\nIntroduction One of the Central Bank’s objectives, as mandated by the Decretal Federal Law No. 14 of 2018 Regarding the Central Bank & Organization of Licensed Financial Institutions and Activities , is to establish R",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 61,
+          "normalized_hash": "3aa3a00e55edc46bd3f3ea401b499440124793cf69ace05a0ad2b11ef12d07a1",
+          "normalized_length": 55212,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook/intake-20260616T064749Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 61,
+          "normalized_hash": "3aa3a00e55edc46bd3f3ea401b499440124793cf69ace05a0ad2b11ef12d07a1",
+          "normalized_length": 55212,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook/intake-20260616T064758Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "low",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook/intake-20260616T064749Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook/intake-20260616T064758Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook/intake-20260616T064749Z/proof.json",
+      "hash_history": [
+        "3aa3a00e55edc46bd3f3ea401b499440124793cf69ace05a0ad2b11ef12d07a1",
+        "3aa3a00e55edc46bd3f3ea401b499440124793cf69ace05a0ad2b11ef12d07a1"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 87
+    },
+    {
+      "source_id": "AE-dfsa-consultation-current",
+      "name": "DFSA Consultation Papers Current",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/your-resources/regulatory/consultation-papers",
+      "source_type": "consultations",
+      "adapter_family": "document_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "max_items": 100
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "GOOD",
+        "normalized_length": 16510,
+        "normalized_hash": "e8c0edb976af811770be2b2c8bd102de8a6e7ef142e2ba82ef61a4d3b1100ed0",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "dfsa_notice_listing",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.dfsa.ae/your-resources/regulatory/consultation-papers"
+        },
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "e8c0edb976af811770be2b2c8bd102de8a6e7ef142e2ba82ef61a4d3b1100ed0",
+          "normalized_length": 16510,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-current/intake-20260616T064807Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "e8c0edb976af811770be2b2c8bd102de8a6e7ef142e2ba82ef61a4d3b1100ed0",
+          "normalized_length": 16510,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-current/intake-20260616T064814Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-current/intake-20260616T064807Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-current/intake-20260616T064814Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-current/intake-20260616T064807Z/proof.json",
+      "hash_history": [
+        "e8c0edb976af811770be2b2c8bd102de8a6e7ef142e2ba82ef61a4d3b1100ed0",
+        "e8c0edb976af811770be2b2c8bd102de8a6e7ef142e2ba82ef61a4d3b1100ed0"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88
+    },
+    {
+      "source_id": "AE-dfsa-enforcement-decisions-current",
+      "name": "DFSA Published Enforcement Decisions",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/enforcement/published-decisions",
+      "source_type": "enforcement",
+      "adapter_family": "document_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "GOOD",
+        "normalized_length": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "dfsa_notice_listing",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.dfsa.ae/what-we-do/enforcement/published-decisions"
+        },
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+          "normalized_length": 16365,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-enforcement-decisions-current/intake-20260616T064821Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+          "normalized_length": 16365,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-enforcement-decisions-current/intake-20260616T064830Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-enforcement-decisions-current/intake-20260616T064821Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-enforcement-decisions-current/intake-20260616T064830Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-enforcement-decisions-current/intake-20260616T064821Z/proof.json",
+      "hash_history": [
+        "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88
+    },
+    {
+      "source_id": "AE-dfsa-regulatory-actions-current",
+      "name": "DFSA Enforcement Regulatory Actions",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions",
+      "source_type": "enforcement",
+      "adapter_family": "document_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "quality_label": "GOOD",
+        "normalized_length": 21491,
+        "normalized_hash": "9ca97aa68da8f5edc418c76341146d06829c7abede4c89c104080755b7959078",
+        "nav_shell": false,
+        "shallow": false,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "failure_code": "",
+        "failure_reason": "",
+        "remediation_hint": "",
+        "adapter_family": "dfsa_notice_listing",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_used": true,
+        "adapter_config": {
+          "container_selector": "body",
+          "url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions"
+        },
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "strong_pass": true,
+        "evidence_level": "PREVIEW_ONLY"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "9ca97aa68da8f5edc418c76341146d06829c7abede4c89c104080755b7959078",
+          "normalized_length": 21491,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-regulatory-actions-current/intake-20260616T064837Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "9ca97aa68da8f5edc418c76341146d06829c7abede4c89c104080755b7959078",
+          "normalized_length": 21491,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-regulatory-actions-current/intake-20260616T064845Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-regulatory-actions-current/intake-20260616T064837Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-regulatory-actions-current/intake-20260616T064845Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-regulatory-actions-current/intake-20260616T064837Z/proof.json",
+      "hash_history": [
+        "9ca97aa68da8f5edc418c76341146d06829c7abede4c89c104080755b7959078",
+        "9ca97aa68da8f5edc418c76341146d06829c7abede4c89c104080755b7959078"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88
+    },
+    {
+      "source_id": "AE-cbuae-retail-payment-services-rulebook",
+      "name": "CBUAE Retail Payment Services and Card Schemes Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/312-retail-payment-services-and-card-schemes-regulation",
+      "source_type": "regulatory",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 3457,
+        "normalized_hash": "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_family": "cbuae_document_listing",
+        "strong_pass": true,
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "preview": "CBUAE document listing items\n- Title: 3.1.2. Retail Payment Services and Card Schemes Regulation\nDate: 1/8/2022\nCategory: document\nURL: https://rulebook.centralbank.ae/sites/default/files/en_net_file_store/CBUAE_EN_4368_VER1.pdf\nDocument URL: https://rulebook.centralbank.ae/sites/default/files/en_ne",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb",
+          "normalized_length": 3457,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-retail-payment-services-rulebook/intake-20260616T064853Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb",
+          "normalized_length": 3457,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-retail-payment-services-rulebook/intake-20260616T064901Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "medium",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-retail-payment-services-rulebook/intake-20260616T064853Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-retail-payment-services-rulebook/intake-20260616T064901Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-retail-payment-services-rulebook/intake-20260616T064853Z/proof.json",
+      "hash_history": [
+        "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb",
+        "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88
+    },
+    {
+      "source_id": "AE-dfsa-consultation-paper-165",
+      "name": "DFSA Consultation Paper No.165",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/consultation-paper-no165-proposed-changes-dfsas-approach-licensed-functions-and-authorised",
+      "source_type": "regulatory",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 17129,
+        "normalized_hash": "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_family": "dfsa_notice_listing",
+        "strong_pass": true,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8",
+          "normalized_length": 17129,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-paper-165/intake-20260616T064909Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8",
+          "normalized_length": 17129,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-paper-165/intake-20260616T064918Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-paper-165/intake-20260616T064909Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-paper-165/intake-20260616T064918Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-paper-165/intake-20260616T064909Z/proof.json",
+      "hash_history": [
+        "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8",
+        "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88
+    },
+    {
+      "source_id": "AE-dfsa-notice-supervisory-review",
+      "name": "DFSA Supervisory Review Rulebook",
+      "regulator": "DFSA",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/supervisory-review-and-evaluation-process",
+      "source_type": "regulatory",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {
+        "container_selector": "body",
+        "max_items": 80
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 15356,
+        "normalized_hash": "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "duplicate_hash": false,
+        "collision_source_id": null,
+        "failure_code": "",
+        "adapter_name": "dfsa_notice_listing",
+        "adapter_family": "dfsa_notice_listing",
+        "strong_pass": true,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "DFSA notice/enforcement listing items\n- Title: AML, CTF & Sanctions Compliance\nCategory: listing_item\nURL: https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/summary\nContext: Summary Regulatory Framework Supervisory Methodology Overview of DFSA AML/CTF & Sanctions Obligations Standard-Sette",
+        "attempt_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a",
+          "normalized_length": 15356,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-notice-supervisory-review/intake-20260616T064926Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a",
+          "normalized_length": 15356,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-notice-supervisory-review/intake-20260616T064933Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_code": "",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-notice-supervisory-review/intake-20260616T064926Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-notice-supervisory-review/intake-20260616T064933Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-notice-supervisory-review/intake-20260616T064926Z/proof.json",
+      "hash_history": [
+        "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a",
+        "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88
+    }
+  ]
+}

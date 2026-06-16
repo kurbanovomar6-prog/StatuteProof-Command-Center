@@ -1,0 +1,227 @@
+{
+  "tested_count": 3,
+  "results": [
+    {
+      "source_id": "AE-cbuae-amlcft-rulebook-doclist",
+      "name": "CBUAE AML/CFT Rulebook Document Links",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+      "source": {
+        "source_id": "AE-cbuae-amlcft-rulebook-doclist",
+        "name": "CBUAE AML/CFT Rulebook Document Links",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+        "jurisdiction": "AE",
+        "category": "regulatory",
+        "enabled": false,
+        "baseline_runs_required": 2,
+        "fetch_method": "playwright",
+        "expected_min_length": 500,
+        "adapter_family": "document_listing",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 16995,
+        "normalized_hash": "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "failure_code": "",
+        "strong_pass": true,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "CBUAE document listing items\n- Title: 2. Scope of the Role-Based AML/CFT/CPF Training\nCategory: listing_item\nURL: https://rulebook.centralbank.ae/en/rulebook/2-scope-role-based-amlcftcpf-training\nRow hash: 235f5f034e8e5c36\n- Title: 3. Cross-Border Payments\nURL: https://rulebook.centralbank.ae/en/rul"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26",
+          "normalized_length": 16995,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook-doclist/intake-20260616T065332Z/proof.json",
+          "can_save_evidence": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium"
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26",
+          "normalized_length": 16995,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook-doclist/intake-20260616T065341Z/proof.json",
+          "can_save_evidence": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium"
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook-doclist/intake-20260616T065332Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook-doclist/intake-20260616T065341Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook-doclist/intake-20260616T065332Z/proof.json",
+      "hash_history": [
+        "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26",
+        "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE"
+    },
+    {
+      "source_id": "AE-cbuae-amlcft-entire-section-doclist",
+      "name": "CBUAE AML/CFT Entire Section Document Links",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+      "source": {
+        "source_id": "AE-cbuae-amlcft-entire-section-doclist",
+        "name": "CBUAE AML/CFT Entire Section Document Links",
+        "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+        "jurisdiction": "AE",
+        "category": "regulatory",
+        "enabled": false,
+        "baseline_runs_required": 2,
+        "fetch_method": "playwright",
+        "expected_min_length": 500,
+        "adapter_family": "document_listing",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 16221,
+        "normalized_hash": "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "failure_code": "",
+        "strong_pass": true,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "CBUAE document listing items\n- Title: AML-CFT Decision\nCategory: listing_item\nURL: https://rulebook.centralbank.ae/en/node/3683\nContext: 2.1.2.1 Regulatory Environment In many jurisdictions, DPMS are not required to comply with requirements related to identification of customers and reporting suspic"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0",
+          "normalized_length": 16221,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section-doclist/intake-20260616T065358Z/proof.json",
+          "can_save_evidence": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium"
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0",
+          "normalized_length": 16221,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section-doclist/intake-20260616T065409Z/proof.json",
+          "can_save_evidence": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium"
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section-doclist/intake-20260616T065358Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section-doclist/intake-20260616T065409Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section-doclist/intake-20260616T065358Z/proof.json",
+      "hash_history": [
+        "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0",
+        "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE"
+    },
+    {
+      "source_id": "AE-cbuae-consumer-protection-rulebook-doclist",
+      "name": "CBUAE Consumer Protection Regulation Document Links",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+      "source": {
+        "source_id": "AE-cbuae-consumer-protection-rulebook-doclist",
+        "name": "CBUAE Consumer Protection Regulation Document Links",
+        "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+        "jurisdiction": "AE",
+        "category": "regulatory",
+        "enabled": false,
+        "baseline_runs_required": 2,
+        "fetch_method": "playwright",
+        "expected_min_length": 500,
+        "adapter_family": "document_listing",
+        "adapter_name": "cbuae_document_listing",
+        "adapter_config": {
+          "container_selector": "body",
+          "max_items": 80
+        }
+      },
+      "no_save": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "normalized_length": 6347,
+        "normalized_hash": "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c",
+        "nav_shell": false,
+        "can_save_evidence": true,
+        "failure_code": "",
+        "strong_pass": true,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "preview": "CBUAE document listing items\n- Title: Article 121/2 of the Decretal Law\nCategory: listing_item\nURL: https://rulebook.centralbank.ae/en/node/840\nContext: Article 9: Consumer Education and Awareness 9.1 Consumer Education and Awareness 9.1.1 Introduction states: “The Central Bank and Licensed Financia"
+      },
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c",
+          "normalized_length": 6347,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook-doclist/intake-20260616T065425Z/proof.json",
+          "can_save_evidence": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium"
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "normalized_hash": "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c",
+          "normalized_length": 6347,
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook-doclist/intake-20260616T065434Z/proof.json",
+          "can_save_evidence": false,
+          "noise_risk": "low",
+          "source_health_risk": "medium"
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook-doclist/intake-20260616T065425Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook-doclist/intake-20260616T065434Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook-doclist/intake-20260616T065425Z/proof.json",
+      "hash_history": [
+        "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c",
+        "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE"
+    }
+  ]
+}

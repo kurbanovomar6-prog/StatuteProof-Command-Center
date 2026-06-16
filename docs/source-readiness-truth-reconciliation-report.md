@@ -6,17 +6,17 @@ Date: 2026-06-15
 
 The canonical customer-facing truth for the current StatuteProof UAE source pack is:
 
-**36 enabled UAE sources; 32 readiness-supported in the current registry; 4 under extraction remediation.**
+**46 enabled UAE sources; 42 readiness-supported in the current registry; 4 under extraction remediation.**
 
-The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later **13 enabled / 9 readiness-supported / 4 remediation** story was safe until three proof-backed, repeat-baseline-complete queue sources were promoted to `sources.json` on 2026-06-15; the **19 / 15 / 4** story was supported after three additional ADGM/FSRA sources passed proof, repeat baseline, mass-monitor dry-run, and agent gates. A later ADGM FSRA Guidance and Policy activation advanced the truth to **20 / 16 / 4**. On 2026-06-15, three more sources from the 151-endpoint discovery sprint advanced the truth to **23 / 19 / 4**. In the JS-heavy remediation sprint, UAE FIU Trends and Typology Reports (`AE-uaefiu-typology-reports`) passed no-save with the `fiu_eocn_document_listing` adapter (q=65), two saved evidence runs (MONITORING_CERTIFIED, hash stable), mass-monitor dry-run (`MONITOR_OK`, no change), and all six agent gates, advancing the truth to **24 / 20 / 4**. The autonomous EOCN cycle then converted `AE-eocn-news-en` from a generic listing false-positive into a source-specific `eocn_news_listing` extraction, completed two stable evidence runs, passed mass-monitor dry-run (`MONITOR_OK`), and advanced the truth to **25 / 21 / 4**. The same autonomous cycle then cleaned invalid SCA pseudo-links in `sca_listing`, certified `AE-sca-regulations-listing` with two stable evidence runs, and advanced the truth to **26 / 22 / 4**. The continuation cycle then expanded SCA FATCA/CRS document extraction and ADGM FSRA web-component listing extraction, certified `AE-sca-fatca-crs` and `AE-adgm-listing-rules` with two stable evidence runs each, verified mass-monitor dry-run `MONITOR_OK`, and advanced the truth to **28 / 24 / 4**. The batch continuation then tested 20+ candidates, fixed deterministic table-header hashing, certified five more sources (`AE-sca-corporate-governance`, `AE-adgm-dp-guidance`, `AE-adgm-fsra-enforcement`, `AE-sca-aml-cft`, and `AE-dfsa-rulebook-thomsonreuters`), and advanced the truth to **33 / 29 / 4**. The weak-zone remediation cycle then fixed generic action-link title extraction for document/listing adapters, certified `AE-uaefiu-aml-cft-laws`, `AE-uaefiu-publications-hub`, and `AE-cbuae-rulebook-revision-updates` with two stable evidence runs each, verified mass-monitor dry-run `MONITOR_OK`, and advanced the truth to **36 / 32 / 4**.
+The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later **13 enabled / 9 readiness-supported / 4 remediation** story was safe until three proof-backed, repeat-baseline-complete queue sources were promoted to `sources.json` on 2026-06-15; the **19 / 15 / 4** story was supported after three additional ADGM/FSRA sources passed proof, repeat baseline, mass-monitor dry-run, and agent gates. A later ADGM FSRA Guidance and Policy activation advanced the truth to **20 / 16 / 4**. On 2026-06-15, three more sources from the 151-endpoint discovery sprint advanced the truth to **23 / 19 / 4**. In the JS-heavy remediation sprint, UAE FIU Trends and Typology Reports (`AE-uaefiu-typology-reports`) passed no-save with the `fiu_eocn_document_listing` adapter (q=65), two saved evidence runs (MONITORING_CERTIFIED, hash stable), mass-monitor dry-run (`MONITOR_OK`, no change), and all six agent gates, advancing the truth to **24 / 20 / 4**. The autonomous EOCN cycle then converted `AE-eocn-news-en` from a generic listing false-positive into a source-specific `eocn_news_listing` extraction, completed two stable evidence runs, passed mass-monitor dry-run (`MONITOR_OK`), and advanced the truth to **25 / 21 / 4**. The same autonomous cycle then cleaned invalid SCA pseudo-links in `sca_listing`, certified `AE-sca-regulations-listing` with two stable evidence runs, and advanced the truth to **26 / 22 / 4**. The continuation cycle then expanded SCA FATCA/CRS document extraction and ADGM FSRA web-component listing extraction, certified `AE-sca-fatca-crs` and `AE-adgm-listing-rules` with two stable evidence runs each, verified mass-monitor dry-run `MONITOR_OK`, and advanced the truth to **28 / 24 / 4**. The batch continuation then tested 20+ candidates, fixed deterministic table-header hashing, certified five more sources (`AE-sca-corporate-governance`, `AE-adgm-dp-guidance`, `AE-adgm-fsra-enforcement`, `AE-sca-aml-cft`, and `AE-dfsa-rulebook-thomsonreuters`), and advanced the truth to **33 / 29 / 4**. The weak-zone remediation cycle then fixed generic action-link title extraction for document/listing adapters, certified `AE-uaefiu-aml-cft-laws`, `AE-uaefiu-publications-hub`, and `AE-cbuae-rulebook-revision-updates` with two stable evidence runs each, verified mass-monitor dry-run `MONITOR_OK`, and advanced the truth to **36 / 32 / 4**. The weak-zone elimination cycle then used official VARA, CBUAE rulebook, DFSA, and official-linked Thomson Reuters endpoints, certified ten more sources with two stable proof runs and mass-monitor `MONITOR_OK`, and advanced the truth to **46 / 42 / 4**.
 
 ## Canonical Counts
 
 | Count | Value | Basis |
 | --- | ---: | --- |
-| Total records in `sources.json` | 173 | Registry file parse after adding three proof-backed weak-zone remediation sources. |
-| Enabled UAE sources | 36 | `enabled: true` and `jurisdiction: AE`. |
-| Readiness-supported | 32 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
+| Total records in `sources.json` | 183 | Registry file parse after adding ten proof-backed weak-zone elimination sources. |
+| Enabled UAE sources | 46 | `enabled: true` and `jurisdiction: AE`. |
+| Readiness-supported | 42 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
 | Under extraction remediation | 4 | Enabled UAE registry rows with `status: remediation`. |
 | Blocked / failed | 0 | Current registry uses remediation rather than blocked for the four not-ready sources. |
 
@@ -56,6 +56,16 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 | `AE-uaefiu-aml-cft-laws` | UAE FIU AML/CFT Laws and Related Decisions | Promoted after weak-zone FIU listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
 | `AE-uaefiu-publications-hub` | UAE FIU Publications Hub | Promoted after FIU/EOCN document-listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
 | `AE-cbuae-rulebook-revision-updates` | CBUAE Rulebook Revision Updates | Promoted after official Central Bank rulebook subdomain extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-vara-rulebook-updates` | VARA Rulebook Revision Updates | Promoted after official VARA rulebook update extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-dfsa-consultation-current` | DFSA Consultation Papers Current | Promoted after current official DFSA consultation listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-dfsa-enforcement-decisions-current` | DFSA Published Enforcement Decisions | Promoted after official DFSA enforcement decision listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-dfsa-regulatory-actions-current` | DFSA Enforcement Regulatory Actions | Promoted after official DFSA regulatory action listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-cbuae-retail-payment-services-rulebook` | CBUAE Retail Payment Services and Card Schemes Regulation | Promoted after official CBUAE rulebook document-listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-dfsa-consultation-paper-165` | DFSA Consultation Paper No.165 | Promoted after official-linked Thomson Reuters DFSA consultation listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-dfsa-notice-supervisory-review` | DFSA Supervisory Review Rulebook | Promoted after official-linked Thomson Reuters DFSA rulebook extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-cbuae-amlcft-rulebook-doclist` | CBUAE AML/CFT Rulebook Document Links | Promoted after stable CBUAE document-listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-cbuae-amlcft-entire-section-doclist` | CBUAE AML/CFT Entire Section Document Links | Promoted after stable CBUAE document-listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
+| `AE-cbuae-consumer-protection-rulebook-doclist` | CBUAE Consumer Protection Regulation Document Links | Promoted after stable CBUAE document-listing extraction, proof-backed repeat baseline, mass-monitor dry-run, and agent gates. |
 
 ## Sources Under Extraction Remediation
 
@@ -68,16 +78,16 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 
 ## Which Story Is Correct?
 
-**Correct today:** 36 enabled / 32 readiness-supported / 4 under extraction remediation.
+**Correct today:** 46 enabled / 42 readiness-supported / 4 under extraction remediation.
 
 **Not correct today:** 13 enabled / 10 confirmed / 3 under extraction remediation.
 
-Reason: twenty batch/queue/discovery sources have completed proof-backed repeat baseline and mass-monitor dry-run, while DIFC Laws, the legacy DFSA configured sources, and the UAE FIU homepage remain held/remediation. A source may have meaningful extraction while still not being customer-visible ready if its registry hold, source model, evidence baseline, or activation review is incomplete.
+Reason: thirty batch/queue/discovery/weak-zone sources have completed proof-backed repeat baseline and mass-monitor dry-run, while DIFC Laws, the legacy DFSA configured sources, and the UAE FIU homepage remain held/remediation. A source may have meaningful extraction while still not being customer-visible ready if its registry hold, source model, evidence baseline, or activation review is incomplete.
 
 ## Allowed Customer-Facing Wording
 
-- "36 enabled UAE sources."
-- "32 readiness-supported in the current registry."
+- "46 enabled UAE sources."
+- "42 readiness-supported in the current registry."
 - "4 under extraction remediation."
 - "Source readiness in progress."
 - "DFSA source model under remediation."
@@ -87,9 +97,9 @@ Reason: twenty batch/queue/discovery sources have completed proof-backed repeat 
 
 ## Forbidden Wording
 
-- "All 36 sources are validated."
-- "All 36 sources are confirmed."
-- "All 36 sources are ready."
+- "All 46 sources are validated."
+- "All 46 sources are confirmed."
+- "All 46 sources are ready."
 - "10 confirmed" unless DIFC is explicitly released from remediation by Source Monitor and Evidence Trail.
 - "DFSA ready."
 - "DIFC ready" while the registry hold remains.
@@ -100,17 +110,17 @@ Reason: twenty batch/queue/discovery sources have completed proof-backed repeat 
 
 ## Code And UI Result
 
-Current public/app source tables should use the 36/32/4 model:
+Current public/app source tables should use the 46/42/4 model:
 
 - `product/regradar/web/src/components/SourceCoverageTable.jsx`
 - `product/regradar/web/src/data/appMockData.js`
-- Pricing and billing surfaces use "36 enabled" with 32 readiness-supported and 4 under remediation only where public truth is intentionally surfaced.
+- Pricing and billing surfaces use "46 enabled" with 42 readiness-supported and 4 under remediation only where public truth is intentionally surfaced.
 
-This sprint changes `sources.json` only for three additional proof-backed ADGM/FSRA activation-ready queue sources. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
+This sprint changes `sources.json` only for proof-backed, repeat-baseline-complete, mass-monitor-checked activation-ready sources. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
 
 ## Next Required Source Readiness Work
 
-1. Resolve the DFSA source model.
-2. Decide whether DIFC Laws and Regulations can leave registry hold after Source Monitor and Evidence Trail review.
-3. Decide whether the UAE FIU homepage should remain enabled as a remediation/reference source or be replaced by the circulars/publications source in customer-facing pack views.
+1. Implement direct PDF extraction for official VARA PDF rulebooks.
+2. Resolve DIFC data protection / legal-database access and selector blockers without bypassing protections.
+3. Find ADGM alternate component selectors or replacement URLs for data-protection regulatory actions and listing announcements.
 4. Add a generated source-readiness summary artifact consumed by validators and frontend source tables.

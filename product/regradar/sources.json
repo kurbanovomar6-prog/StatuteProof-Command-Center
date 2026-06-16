@@ -1899,5 +1899,195 @@
       ]
     },
     "fetch_method": "playwright"
+  },
+  {
+    "name": "VARA Rulebook Revision Updates",
+    "url": "https://rulebooks.vara.ae/view-revision-updates?f_days=onchanged%3D-30+day",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-vara-rulebook-updates",
+    "adapter_family": "document_listing",
+    "adapter_name": "vara_pdf_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-vara-rulebook-updates/intake-20260616T064643Z/proof.json",
+    "normalized_hash": "359b52c0488c7bbbd40c07cf015a0a9ecd8f98c9bd6e0aaddbf4087b36313977",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "DFSA Consultation Papers Current",
+    "url": "https://www.dfsa.ae/your-resources/regulatory/consultation-papers",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-dfsa-consultation-current",
+    "adapter_family": "document_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-current/intake-20260616T064807Z/proof.json",
+    "normalized_hash": "e8c0edb976af811770be2b2c8bd102de8a6e7ef142e2ba82ef61a4d3b1100ed0",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "DFSA Published Enforcement Decisions",
+    "url": "https://www.dfsa.ae/what-we-do/enforcement/published-decisions",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-dfsa-enforcement-decisions-current",
+    "adapter_family": "document_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-enforcement-decisions-current/intake-20260616T064821Z/proof.json",
+    "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "DFSA Enforcement Regulatory Actions",
+    "url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-dfsa-regulatory-actions-current",
+    "adapter_family": "document_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-regulatory-actions-current/intake-20260616T064837Z/proof.json",
+    "normalized_hash": "9ca97aa68da8f5edc418c76341146d06829c7abede4c89c104080755b7959078",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "CBUAE Retail Payment Services and Card Schemes Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/312-retail-payment-services-and-card-schemes-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-retail-payment-services-rulebook",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-retail-payment-services-rulebook/intake-20260616T064853Z/proof.json",
+    "normalized_hash": "d3d0f1881517e57ad862819973384a56050a08e21a116a58f5fc785a8c7944cb",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "DFSA Consultation Paper No.165",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/consultation-paper-no165-proposed-changes-dfsas-approach-licensed-functions-and-authorised",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-dfsa-consultation-paper-165",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-consultation-paper-165/intake-20260616T064909Z/proof.json",
+    "normalized_hash": "f7678e20b7c83587f1aaf6f5093c64e2588b4738a49bd0aa0f815c25e986aaf8",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "DFSA Supervisory Review Rulebook",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/supervisory-review-and-evaluation-process",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-dfsa-notice-supervisory-review",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-notice-supervisory-review/intake-20260616T064926Z/proof.json",
+    "normalized_hash": "7bdaab79a45bb1399d894ad4c7b04d0f9a8b311405f551927ec76686f2b4b21a",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "CBUAE AML/CFT Rulebook Document Links",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-amlcft-rulebook-doclist",
+    "adapter_family": "document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-rulebook-doclist/intake-20260616T065332Z/proof.json",
+    "normalized_hash": "22ee52304e6a7c1e9be50f43c6a1d894a70c56dbfa2f24b39cba7e6ec8be9c26",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "CBUAE AML/CFT Entire Section Document Links",
+    "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-amlcft-entire-section-doclist",
+    "adapter_family": "document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-amlcft-entire-section-doclist/intake-20260616T065358Z/proof.json",
+    "normalized_hash": "3b87239dd24b6cca5ba03404cdb9dc60d5c6ac3c9ef4dc357f99c45ee0d0f1c0",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
+  },
+  {
+    "name": "CBUAE Consumer Protection Regulation Document Links",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-consumer-protection-rulebook-doclist",
+    "adapter_family": "document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-consumer-protection-rulebook-doclist/intake-20260616T065425Z/proof.json",
+    "normalized_hash": "717b669a26b7d54eeb9c188d2e551cafb63327398b1e81bbb186d4ea7fa7ff6c",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 80
+    },
+    "fetch_method": "playwright"
   }
 ]
