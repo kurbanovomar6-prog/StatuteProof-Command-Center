@@ -8,39 +8,35 @@ This roadmap lists all non-active source candidates ranked by activation priorit
 
 ---
 
-## Tier P0 — Activate as Soon as Possible (Top 25)
+## Tier P0 — Activate as Soon as Possible (Top 15 — Revised)
 
-These are the highest commercial value, lowest technical risk candidates. Most can be activated with existing adapter families.
+Revised from 25 to 15 after roadmap quality audit (2026-06-17). Items moved down are in P1 or P2 below with notation.
+
+These are the highest commercial value, lowest technical risk candidates. Most can be activated with existing adapter families. All still require the full gate sequence — P0 means "attempt first," not "skip gates."
+
+**Important caution on AE-eocn-tfs:** TFS page has been moved to P1 with a high noise-risk warning. Do not activate it without a sanctions-specific parsing strategy that detects designation changes rather than raw hash diffs. Raw hash monitoring of a live sanctions list may generate excessive alerts.
 
 | # | Source ID | Regulator | Why P0 | Adapter Estimate | Gate Risk |
 |---|-----------|-----------|--------|-----------------|-----------|
-| 1 | AE-vara-activity-rulebooks-hub | VARA | Main VARA rulebook hub at rulebooks.vara.ae — supplements active PDFs | listing | Low |
-| 2 | AE-vara-guidance | VARA | Regulatory guidance — VASP MLRO need #1 | custom_element | Medium |
-| 3 | AE-vara-administrative-orders | VARA | Administrative orders — high-signal enforcement monitoring | listing | Medium |
-| 4 | AE-uaefiu-nra-2024 | UAE FIU | UAE NRA 2024 — most cited single MLRO document | pdf_listing | Low |
-| 5 | AE-uaefiu-strategic-analysis | UAE FIU | FIU strategic analysis guidelines — MLRO awareness | listing | Low |
-| 6 | AE-uaefiu-mutual-evaluation | UAE FIU | UAE FATF MER — top-level compliance context | pdf_listing | Low |
-| 7 | AE-cbuae-aml-cft | CBUAE | AML/CFT operations page — bank MLRO gap | custom_element | Medium |
-| 8 | AE-cbuae-consultations | CBUAE | CBUAE consultations — horizon scanning gap | listing | Medium |
-| 9 | AE-cbuae-circular-bank-supervision | CBUAE | Bank supervision circulars — targeted guidance | listing | Medium |
-| 10 | AE-adgm-ra-aml-guides | ADGM | RA AML/CFT guides for DNFBPs — DNFBP MLRO gap | pdf_listing | Low |
-| 11 | AE-adgm-ra-notices | ADGM | RA notices — registered entity compliance | custom_element | Low |
-| 12 | AE-adgm-media-announcements | ADGM | ADGM FSRA regulatory announcements — confirmed accessible | custom_element | Low |
-| 13 | AE-adgm-fsra-notices | ADGM | FSRA regulatory notices — formal supervisory comms | custom_element | Low |
-| 14 | AE-dfsa-guidance-notes | DFSA | DFSA guidance notes — common practitioner reference | listing | Medium |
-| 15 | AE-dfsa-rulebook-official | DFSA | DFSA laws and rules official page | listing | Medium |
-| 16 | AE-dfsa-aml-ctf-sanctions | DFSA | DFSA AML/CTF hub page | custom_element | Medium |
-| 17 | AE-sca-laws | SCA | SCA securities laws — primary legislation gap | listing | Low |
-| 18 | AE-sca-decisions | SCA | SCA board decisions — rule-making decisions | listing | Low |
-| 19 | AE-sca-regulations-amendments | SCA | SCA regulation amendments — change tracking | listing | Low |
-| 20 | AE-moec-aml-dnfbp | MoE | Ministry of Economy AML for DNFBPs | custom_element | Medium |
-| 21 | AE-difc-consultation-papers | DIFC | DIFC consultations — horizon scanning | listing | Medium |
-| 22 | AE-uaefiu-annual-reports | UAE FIU | FIU annual reports — statistics and trends | listing | Low |
-| 23 | AE-uaefiu-press-releases | UAE FIU | FIU press releases — regulatory announcements | listing | Low |
-| 24 | AE-dfsa-publications | DFSA | DFSA publications hub | listing | Medium |
-| 25 | AE-cbuae-publications | CBUAE | CBUAE publications hub | listing | Medium |
+| 1 | AE-uaefiu-nra-2024 | UAE FIU | UAE NRA 2024 — most cited single MLRO document; static PDF page; very low technical risk | pdf_listing | Low |
+| 2 | AE-vara-activity-rulebooks-hub | VARA | Main VARA rulebook hub at rulebooks.vara.ae — known domain, supplements active PDFs | listing | Low |
+| 3 | AE-adgm-ra-aml-guides | ADGM | RA AML/CFT guides for DNFBPs — PDF listing pattern known; DNFBP MLRO gap | pdf_listing | Low |
+| 4 | AE-sca-laws | SCA | SCA securities laws — primary legislation gap; known SCA listing adapter | listing | Low |
+| 5 | AE-fta-corporate-tax-guides | FTA | NEW — corporate tax guidance; FTA entirely absent from pack; expected accessible | listing | Low |
+| 6 | AE-fta-vat-public-clarifications | FTA | NEW — VAT clarifications; universal UAE obligation; expected accessible | listing | Low |
+| 7 | AE-vara-guidance | VARA | Regulatory guidance hub — VASP MLRO need #1; Playwright likely needed | custom_element | Medium |
+| 8 | AE-vara-administrative-orders | VARA | Administrative orders — high-signal VASP enforcement monitoring | listing | Medium |
+| 9 | AE-cbuae-aml-cft | CBUAE | AML/CFT operations page — bank MLRO gap; work queue candidate | custom_element | Medium |
+| 10 | AE-cbuae-consultations | CBUAE | CBUAE consultations — horizon scanning gap for largest UAE regulator | listing | Medium |
+| 11 | AE-adgm-media-announcements | ADGM | ADGM FSRA announcements — confirmed accessible in 150-report; custom_element pattern known | custom_element | Low |
+| 12 | AE-dfsa-guidance-notes | DFSA | DFSA guidance notes — most referenced DFSA practitioner resource not yet active | listing | Medium |
+| 13 | AE-dfsa-aml-ctf-sanctions | DFSA | DFSA AML/CTF hub — fills DFSA AML navigation gap | custom_element | Medium |
+| 14 | AE-sca-decisions | SCA | SCA board decisions — primary rule-making record not yet active | listing | Low |
+| 15 | AE-moec-aml-dnfbp | MoE | Ministry of Economy AML for DNFBPs — DNFBP buyer segment gap | custom_element | Medium |
 
-**Estimated outcome of P0 activation:** 79 + 25 = ~104 active sources. Closes VARA guidance, FIU NRA, CBUAE consultations, and SCA primary legislation gaps.
+**Estimated outcome of P0 activation:** 79 + 15 = ~94 active sources. Closes the FTA zero-coverage gap, VARA guidance gap, FIU NRA gap, CBUAE consultation horizon-scanning gap, and SCA primary legislation gap. This is sufficient for Tier 2 "major UAE regulator coverage" claim.
+
+**Not "complete UAE coverage."** Activating these 15 sources does not resolve all gaps. VARA AML live page, ADGM RA notices, CBUAE publications hub, customs/trade, MoJ, and UAE PDPL remain uncovered.
 
 ---
 
@@ -107,7 +103,22 @@ These are commercially valuable but have moderate technical complexity or lower 
 
 These sources add breadth or serve niche buyer segments. Activate only when P0 and P1 are complete and stable.
 
-**Categories included:**
+**Top 10 P2 targets (explicit mini-batch — activate in this order):**
+
+| # | Source ID | Adapter Estimate | Notes |
+|---|-----------|-----------------|-------|
+| 1 | AE-uaefiu-strategic-analysis | pdf_listing | Moved from P0 — still high value; FIU typology |
+| 2 | AE-uaefiu-mutual-evaluation | pdf_listing | Moved from P0 — static FATF MER document |
+| 3 | AE-adgm-ra-notices | custom_element | Moved from P0 — ADGM RA pattern established |
+| 4 | AE-difc-consultation-papers | listing | Moved from P0 — DIFC HTML pattern known |
+| 5 | AE-cbuae-publications | custom_element | Moved from P0 — Playwright needed; Umbraco CMS |
+| 6 | AE-dfsa-publications | listing | Moved from P0 — JS-heavy; test carefully |
+| 7 | AE-adgm-fsra-notices | custom_element | Moved from P0 — custom_element pattern known |
+| 8 | AE-uaefiu-annual-reports | listing | Moved from P0 — FIU listing pattern |
+| 9 | AE-sca-regulations-amendments | listing | Moved from P0 — SCA listing pattern known |
+| 10 | AE-cbuae-consumer-protection | custom_element | Work queue candidate — Playwright needed |
+
+**Remaining P2 categories (breadth expansion — no fixed order):**
 - CBUAE open data, payment systems (low commercial signal)
 - CBUAE news (high churn, low compliance signal)
 - SCA sustainable finance, fintech sandbox (niche)
@@ -123,7 +134,7 @@ These sources add breadth or serve niche buyer segments. Activate only when P0 a
 - DIFC employment law (niche)
 - All additional CBUAE and SCA subpages beyond P0/P1 set
 
-**Note:** Many P2 sources need no-save testing before gate evaluation. Do not skip the gate sequence even for P2.
+**Note:** Every P2 source requires no-save testing before gate evaluation. Do not skip the gate sequence even for P2 breadth sources.
 
 ---
 
@@ -177,23 +188,37 @@ No source bypasses any gate. P0 priority means "attempt activation first," not "
 
 | Phase | Sources | Estimated Sprint Duration |
 |-------|---------|--------------------------|
-| P0 activation (25 sources) | ~104 total active | 2–3 weeks |
-| P1 activation (50 sources) | ~145 total active | 4–6 weeks |
-| P2 activation (subset) | ~160–170 total active | 8–12 weeks |
+| P0 activation (15 sources — revised) | ~94 total active | 3–4 weeks |
+| P1 activation (50 sources) | ~135 total active | 8–12 weeks |
+| P2 top-10 mini-batch | ~145 total active | 4–6 weeks |
+| P2 remainder (breadth) | ~160–170 total active | 10–16 weeks |
 | Remediation resolution | 3–7 additional | 1–2 weeks per source |
 
-These estimates assume one person working part-time on source activation. Each source requires ~2–4 hours of no-save testing, evidence review, and gate processing.
+These estimates assume one person working part-time on source activation. Each source requires approximately 2–4 hours of no-save testing, evidence review, and gate processing for low-risk sources. JS-heavy pages (CBUAE, DFSA, VARA) requiring Playwright may take 4–8 hours per source.
+
+**P1 timeline caveat:** The 8–12 week estimate for P1 assumes existing adapter families apply. If Playwright extraction is required for CBUAE AML/CFT operations page, CBUAE consultations, or VARA guidance, each source may require custom selector development, adding 2–4 additional hours per source. Do not compress P1 below 8 weeks without Playwright infrastructure improvements.
 
 ---
 
-## What 100 Active Sources Enables Commercially
+## What ~94 Active Sources Enables Commercially (Post-P0 Sprint)
 
-At 100 active sources (P0 complete), StatuteProof can credibly position as:
-- "100+ official UAE regulatory endpoints monitored with evidence"
-- All major UAE regulators covered: CBUAE, DFSA, ADGM, VARA, UAE FIU, SCA, DIFC
-- Full AML/CFT monitoring across all major regulatory families
-- VARA regulatory guidance monitoring (P0 priority)
+At ~94 active sources (post-P0 sprint, assuming all 15 pass gates), StatuteProof can credibly position as:
+- "90+ official UAE regulatory endpoints monitored with evidence"
+- Selected official sources from all major UAE regulators: CBUAE, DFSA, ADGM, VARA, UAE FIU, SCA, DIFC, FTA
+- AML/CFT source monitoring across CBUAE, DFSA, ADGM/FSRA, UAE FIU, EOCN, and SCA (VARA AML guidance pending URL resolution)
+- VARA regulatory guidance monitoring (if AE-vara-guidance passes quality gate)
 - SCA primary legislation monitoring
 - CBUAE consultation horizon scanning
+- FTA corporate tax and VAT clarification monitoring (new — closes zero-FTA gap)
+- UAE FIU National Risk Assessment 2024 monitoring (most cited single MLRO document)
 
-This is the commercial threshold for the $399 UAE Monitor tier upgrade from the $199 founding pilot.
+**Important caveats:**
+- This is NOT "complete UAE coverage." Customs/trade, MoJ federal laws, UAE PDPL, annual reports, and labour regulation remain uncovered.
+- This is NOT "comprehensive UAE official-source monitoring." The recall rate has never been measured. Coverage of source types is uneven — regulatory guidance, sanctions live monitoring, public registers, and annual reports remain weak.
+- "All major UAE regulators covered" requires a disclaimer: "Selected sources only. Not all publications from each regulatory body."
+- VARA guidance activation is Playwright-dependent and may not pass quality gate at first attempt.
+
+**Safe commercial wording at this stage:**
+> "StatuteProof monitors 90+ official UAE regulatory source endpoints across CBUAE, DFSA, ADGM/FSRA, VARA, UAE FIU, SCA, DIFC, and FTA. Monitoring intelligence only. Selected official sources — not all publications from each body. Not legal advice. Not a guarantee of regulatory completeness."
+
+**On $399 UAE Monitor tier positioning:** Reaching ~94 active sources provides a credible foundation for $399 UAE Monitor tier positioning. However, pricing is a commercial decision made by the founder separately from source count alone. Source count alone does not automatically justify a price increase. The $399 tier claim should also reference the coverage scope qualifier, evidence-record system, and source-health transparency — not source count as a standalone metric.
