@@ -11,12 +11,6 @@ const COV_COLOR = {
   slate:   'text-slate-400 bg-slate-500/10 border-slate-500/20',
 }
 
-const SOURCE_READINESS_SUMMARY = {
-  enabled: 66,
-  supported: 62,
-  remediation: 4,
-}
-
 const REMEDIATION_SOURCE_IDS = new Set([
   'AE-dubai-financial-services-authority-dfsa',
   'AE-dfsa-notices',
@@ -205,8 +199,8 @@ function SourceReadinessCard({ navigate }) {
   )
 }
 
-// Derive summary widgets from real sources/status API response
-function buildWidgets(sourcesData) {
+// Derive summary widgets from real sources/status and sources/summary API responses
+function buildWidgets(sourcesData, sourceSummary) {
   if (!sourcesData) return null
   const { sources = [], summary = {}, last_run_at } = sourcesData
   const changed   = summary.CHANGED     || 0
@@ -218,8 +212,9 @@ function buildWidgets(sourcesData) {
     ? new Date(last_run_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }) + ' UTC'
     : 'No runs yet'
   return {
-    supportedSources: SOURCE_READINESS_SUMMARY.supported,
-    remediationSources: SOURCE_READINESS_SUMMARY.remediation,
+    enabledSources: sourceSummary?.enabled_count ?? sources.length,
+    supportedSources: sourceSummary?.readiness_supported_count ?? 0,
+    remediationSources: sourceSummary?.remediation_count ?? 0,
     lastCheck,
     changedThisWeek: changed + firstSeen,
     highRiskPending,
@@ -275,6 +270,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
   const [telegramStatus, setTelegramStatus]   = useState(null)
   const [telegramLoading, setTelegramLoading] = useState(true)
   const [sourcesData, setSourcesData]         = useState(null)
+  const [sourceSummary, setSourceSummary]     = useState(null)
   const [sourcesLoading, setSourcesLoading]   = useState(true)
   const [sourcesError, setSourcesError]       = useState('')
 
@@ -289,14 +285,18 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
 
   useEffect(() => {
     let active = true
-    sourcesApi.status('AE')
-      .then(data => { if (active) setSourcesData(data) })
+    Promise.all([sourcesApi.status('AE'), sourcesApi.summary('AE')])
+      .then(([statusData, summaryData]) => {
+        if (!active) return
+        setSourcesData(statusData)
+        setSourceSummary(summaryData)
+      })
       .catch(err => { if (active) setSourcesError(err.message || 'Could not load source status.') })
       .finally(() => { if (active) setSourcesLoading(false) })
     return () => { active = false }
   }, [])
 
-  const widgets = buildWidgets(sourcesData)
+  const widgets = buildWidgets(sourcesData, sourceSummary)
 
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
@@ -310,7 +310,11 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <StatusPill tone="cyan">Evidence-readiness review</StatusPill>
             </div>
             <h2 className="text-lg font-semibold text-white">
-              {SOURCE_READINESS_SUMMARY.supported} of {SOURCE_READINESS_SUMMARY.enabled} enabled UAE sources are readiness-supported. {SOURCE_READINESS_SUMMARY.remediation} remain under extraction remediation.
+              {sourcesError
+                ? 'Source readiness summary is unavailable right now.'
+                : sourcesLoading
+                ? 'Loading UAE source readiness summary...'
+                : `${sourceSummary?.readiness_supported_count ?? 0} of ${sourceSummary?.enabled_count ?? 0} enabled UAE sources are readiness-supported. ${sourceSummary?.remediation_count ?? 0} remain under extraction remediation.`}
             </h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
               Source activation remains subject to source readiness, evidence, repeat baseline, source-health,
@@ -319,15 +323,15 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
           </div>
           <div className="grid min-w-[280px] grid-cols-3 gap-2 text-center">
             <div className="rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-white">{SOURCE_READINESS_SUMMARY.enabled}</p>
+              <p className="sp-mono text-xl font-semibold text-white">{sourceSummary?.enabled_count ?? '—'}</p>
               <p className="text-[11px] text-slate-500">enabled</p>
             </div>
             <div className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-emerald-100">{SOURCE_READINESS_SUMMARY.supported}</p>
+              <p className="sp-mono text-xl font-semibold text-emerald-100">{sourceSummary?.readiness_supported_count ?? '—'}</p>
               <p className="text-[11px] text-emerald-100/70">readiness-supported</p>
             </div>
             <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-amber-100">{SOURCE_READINESS_SUMMARY.remediation}</p>
+              <p className="sp-mono text-xl font-semibold text-amber-100">{sourceSummary?.remediation_count ?? '—'}</p>
               <p className="text-[11px] text-amber-100/70">under extraction remediation</p>
             </div>
           </div>
@@ -353,9 +357,9 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={SOURCE_READINESS_SUMMARY.enabled}  sub="reviewed UAE source pack" />
-          <InfoCard icon={CheckCircle} tone="emerald" label="Readiness-supported" value={SOURCE_READINESS_SUMMARY.supported} sub="current registry review" />
-          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={SOURCE_READINESS_SUMMARY.remediation} sub="DFSA/DIFC/FIU extraction work" />
+          <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={widgets?.enabledSources ?? 0}  sub="reviewed UAE source pack" />
+          <InfoCard icon={CheckCircle} tone="emerald" label="Readiness-supported" value={widgets?.supportedSources ?? 0} sub="current registry review" />
+          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={widgets?.remediationSources ?? 0} sub="DFSA/DIFC/FIU extraction work" />
           <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with proof data" />
           <InfoCard icon={Bell}      tone="emerald" label="Changed sources"      value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
           <InfoCard icon={AlertTriangle} tone="amber" label="High-risk pending"  value={widgets?.highRiskPending ?? 0} sub="changes needing review" />
@@ -465,11 +469,11 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <h2 className="mb-4 text-sm font-semibold text-white">Source pack scope</h2>
               <div className="grid grid-cols-3 gap-2">
                 <div className={`rounded-lg border p-3 text-center ${COV_COLOR.emerald}`}>
-                  <span className="sp-mono text-lg font-bold">{SOURCE_READINESS_SUMMARY.supported}</span>
+                  <span className="sp-mono text-lg font-bold">{sourceSummary?.readiness_supported_count ?? '—'}</span>
                   <span className="mt-1 block text-xs">readiness-supported</span>
                 </div>
                 <div className={`rounded-lg border p-3 text-center ${COV_COLOR.amber}`}>
-                  <span className="sp-mono text-lg font-bold">{SOURCE_READINESS_SUMMARY.remediation}</span>
+                  <span className="sp-mono text-lg font-bold">{sourceSummary?.remediation_count ?? '—'}</span>
                   <span className="mt-1 block text-xs">remediation</span>
                 </div>
                 <div className={`rounded-lg border p-3 text-center ${COV_COLOR.slate}`}>

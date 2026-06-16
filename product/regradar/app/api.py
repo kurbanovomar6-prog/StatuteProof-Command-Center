@@ -244,6 +244,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_delivery_preview()
         elif path == "/api/sources/timeline":
             self._handle_source_timeline_get()
+        elif path == "/api/sources/summary":
+            self._handle_sources_summary()
         elif path == "/api/sources/status":
             self._handle_sources_status()
         elif path == "/api/sources/readiness":
@@ -258,6 +260,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_evidence_review_history_get()
         elif path == "/api/evidence/export":
             self._handle_evidence_export_get()
+        elif path == "/api/reviews/queue":
+            self._handle_reviews_queue_get()
         elif path == "/api/briefs":
             self._handle_briefs_list()
         elif path == "/api/plan":
@@ -835,6 +839,22 @@ class _Handler(BaseHTTPRequestHandler):
             logger.error("sources/status failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
+    def _handle_sources_summary(self) -> None:
+        """GET /api/sources/summary?market=AE — canonical source counts."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        market = str((params.get("market") or ["AE"])[0]).upper().strip() or "AE"
+        try:
+            from app.source_summary import build_sources_summary
+
+            self._send_json(build_sources_summary(market))
+        except Exception as exc:
+            logger.error("sources/summary failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
     def _handle_source_timeline_get(self) -> None:
         user = require_auth(self)
         if not user:
@@ -1005,6 +1025,34 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
         self._write_evidence_export(evidence_id)
+
+    def _handle_reviews_queue_get(self) -> None:
+        """GET /api/reviews/queue — saved evidence review queue."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        try:
+            from app.review_queue import build_review_queue
+
+            try:
+                limit = int((params.get("limit") or ["50"])[0])
+            except (TypeError, ValueError):
+                limit = 50
+            queue = build_review_queue(
+                market=str((params.get("market") or ["AE"])[0]).upper().strip() or "AE",
+                status=str((params.get("status") or ["pending"])[0]).strip() or "pending",
+                impact_level=str((params.get("impact_level") or [""])[0]).strip() or None,
+                source_health_status=str((params.get("source_health_status") or [""])[0]).strip() or None,
+                change_status=str((params.get("change_status") or [""])[0]).strip() or None,
+                source_id=str((params.get("source_id") or [""])[0]).strip() or None,
+                limit=limit,
+            )
+            self._send_json(queue)
+        except Exception as exc:
+            logger.error("reviews/queue failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_evidence_export_post(self) -> None:
         user = require_auth(self)

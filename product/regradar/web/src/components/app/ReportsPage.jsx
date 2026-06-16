@@ -1,88 +1,96 @@
-import { useState } from 'react'
-import { Download, ExternalLink, BarChart3 } from 'lucide-react'
-import { MOCK_REPORTS, MOCK_ALERTS } from '../../data/appMockData'
-import { getWorkspaceProfile, filterReports } from '../../data/workspaceProfile'
+import { useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-react'
 
-const RISK_DARK = {
-  HIGH:   'text-red-400   bg-red-500/15   border border-red-500/30',
-  MEDIUM: 'text-amber-400 bg-amber-500/15 border border-amber-500/30',
-  MIXED:  'text-blue-400  bg-blue-500/15  border border-blue-500/30',
-  INFO:   'text-slate-400 bg-slate-700    border border-slate-600',
+import { evidence } from '../../api'
+
+const STATUS_STYLE = {
+  CHANGED: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
+  FIRST_SEEN: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
+  UNCHANGED: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+  FAILED: 'border-rose-400/30 bg-rose-400/10 text-rose-200',
+  QUALITY_DROP: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
 }
 
-const REPORT_DETAIL = {
-  r1: {
-    summary: 'Sample source readiness review for a UAE VASP profile. Shows how mapped sources, validation status, limitations and review steps are presented before a pilot.',
-    sections: ['Source map summary', 'Validation status', 'Known limitations', 'Pilot review steps'],
-    alertIds: ['a1'],
-  },
-  r2: {
-    summary: 'Sample CBUAE / AML brief preview for banks, payment firms, fintech teams and MLROs. Shows how source proof and review gates would appear before delivery routing is enabled.',
-    sections: ['AML/CFT source layer', 'Profile relevance', 'Human review gate', 'Delivery readiness'],
-    alertIds: ['a2'],
-  },
-  r3: {
-    summary: 'Sample VARA rulebook update preview for VASP / crypto profiles. This is sample content and not a live client report.',
-    sections: ['Rulebook update', 'VASP relevance', 'Document limitation note', 'Suggested internal review'],
-    alertIds: ['a1'],
-  },
-  r4: {
-    summary: 'DIFC / DFSA source transparency sample showing readiness-supported, remediation and limited source layers for a UAE pilot profile.',
-    sections: ['DIFC / DFSA source map', 'Readiness-supported sources', 'Remediation sources', 'Limitations disclosed'],
-    alertIds: ['a3'],
-  },
-  r5: {
-    summary: 'ADGM / FSRA preview showing the readiness-supported main-source layer and circular/rulebook layers still under validation before activation.',
-    sections: ['ADGM / FSRA main source', 'Circular/rulebook validation status', 'Proof/diff validation', 'Limitations disclosed'],
-    alertIds: [],
-  },
-  r6: {
-    summary: 'FTA public clarification watch sample for UAE tax and corporate profiles. Activation requires item-level source checks.',
-    sections: ['FTA source map', 'Clarification watch', 'Item-level validation', 'Pilot setup requirement'],
-    alertIds: ['a5'],
-  },
-  r7: {
-    summary: 'UAE FIU typology brief preview for AML, MLRO, VASP and payment profiles. Human review gates any client delivery.',
-    sections: ['FIU source proof', 'AML profile relevance', 'Human review gate', 'Delivery readiness'],
-    alertIds: ['a4'],
-  },
-  r8: {
-    summary: 'Proof/diff artifact sample showing the evidence structure used to support a reviewed UAE source brief.',
-    sections: ['Source proof', 'Extraction method', 'Diff summary', 'Limitation note'],
-    alertIds: [],
-  },
+function shortHash(value) {
+  return value ? String(value).slice(0, 12) : 'not recorded'
 }
 
 export default function ReportsPage() {
-  const profile     = getWorkspaceProfile()
-  const baseReports = filterReports(MOCK_REPORTS, profile)
+  const [records, setRecords] = useState([])
+  const [selectedId, setSelectedId] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
+  const [exportState, setExportState] = useState({})
 
-  const [selectedId, setSelectedId] = useState(baseReports[0]?.id || 'r1')
-  const report = baseReports.find(r => r.id === selectedId) || baseReports[0]
-  const detail = REPORT_DETAIL[selectedId] || (report ? REPORT_DETAIL[report.id] : null)
-  const relatedAlerts = detail ? MOCK_ALERTS.filter(a => detail.alertIds.includes(a.id)) : []
+  useEffect(() => {
+    let active = true
+    evidence.list('AE', 100)
+      .then(data => {
+        if (!active) return
+        const rows = data.evidence || []
+        setRecords(rows)
+        setSelectedId(rows[0]?.evidence_record_id || '')
+      })
+      .catch(err => {
+        if (active) setError(err.message || 'Could not load evidence records.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => { active = false }
+  }, [])
+
+  const filtered = useMemo(() => records.filter(record => {
+    const haystack = [
+      record.source_name,
+      record.source_id,
+      record.official_url,
+      record.change_status,
+      record.extraction_quality,
+    ].join(' ').toLowerCase()
+    return !search || haystack.includes(search.toLowerCase())
+  }), [records, search])
+
+  const selected = records.find(record => record.evidence_record_id === selectedId) || filtered[0]
+
+  async function handleExport(record) {
+    if (!record?.evidence_record_id) return
+    setExportState(prev => ({ ...prev, [record.evidence_record_id]: { status: 'exporting', message: '' } }))
+    try {
+      const data = await evidence.exportAuditPack(record.evidence_record_id)
+      const message = data.message || 'Markdown/HTML audit pack exported.'
+      setExportState(prev => ({
+        ...prev,
+        [record.evidence_record_id]: { status: 'ok', message, export: data.export },
+      }))
+    } catch (err) {
+      setExportState(prev => ({
+        ...prev,
+        [record.evidence_record_id]: { status: 'error', message: err.message || 'Could not export audit pack.' },
+      }))
+    }
+  }
 
   return (
-    <div className="p-5 flex flex-col h-full">
-      <div className="mb-4">
-        <h1 className="text-lg font-bold text-white mb-1">Source Reports</h1>
-        <p className="text-sm text-slate-400">
-          {profile.markets.length > 0
-            ? `Sample source reports for: ${profile.markets.join(', ')}`
-            : 'Sample source reports — select markets in Settings to filter.'}
+    <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+      <div>
+        <h1 className="text-lg font-bold text-white mb-1">Audit Reports</h1>
+        <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
+          Real export-ready evidence records only. Generated audit packs are Markdown/HTML in this MVP; PDF export is not enabled yet.
         </p>
       </div>
 
-      <div className="mb-4 rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
+      <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white">Sample report outputs</h2>
+            <h2 className="text-sm font-semibold text-white">Evidence-backed report exports</h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
-              These cards show report formats used in source readiness and pilot review. Generated client reports require pilot setup and approved routing.
+              Reports are generated only from saved evidence records with proof/hash metadata. No fabricated report cards are shown.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {['Available sample', 'Generated manually', 'Requires pilot setup', 'Proof artifact'].map(label => (
+            {['Saved evidence only', 'Markdown/HTML export', 'PDF not enabled', 'Not legal advice'].map(label => (
               <span key={label} className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300">
                 {label}
               </span>
@@ -91,152 +99,144 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="flex-1 grid lg:grid-cols-[300px_1fr] gap-4 min-h-0">
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+        <input
+          type="text"
+          placeholder="Search evidence records"
+          value={search}
+          onChange={event => setSearch(event.target.value)}
+          className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2 pl-9 pr-3 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+        />
+      </div>
 
-        {/* Left: report list */}
-        <div className="flex flex-col min-h-0 gap-2 overflow-y-auto">
-          {baseReports.length === 0 && (
-            <div className="text-center py-10 px-4">
-              <p className="text-sm text-slate-400 mb-1">No reports for your selected profile yet.</p>
-              <p className="text-xs text-slate-600">Add more markets in Settings → Monitoring profile.</p>
-            </div>
-          )}
-          {baseReports.map(r => (
-            <button
-              key={r.id}
-              onClick={() => setSelectedId(r.id)}
-              className={`w-full text-left p-3.5 rounded-xl border transition-all ${
-                selectedId === r.id
-                  ? 'border-cyan-500/30 bg-slate-900 ring-1 ring-cyan-500/20'
-                  : 'border-slate-800 bg-slate-900 hover:border-slate-700'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${RISK_DARK[r.risk] || RISK_DARK.INFO}`}>{r.risk}</span>
-                <span className="text-xs text-slate-500">{r.date}</span>
-              </div>
-              <p className="text-xs font-semibold text-white leading-snug mb-1.5">{r.title}</p>
-              <p className="text-xs text-slate-500">{r.markets}</p>
-              <span className="mt-2 inline-flex rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-200">
-                {r.status}
-              </span>
-              {r.alerts > 0 && (
-                <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
-                  <span className="text-slate-400">{r.alerts} alert{r.alerts !== 1 ? 's' : ''}</span>
-                  {r.reviewItems > 0 && <span className="text-amber-400">{r.reviewItems} for review</span>}
-                </div>
-              )}
-            </button>
-          ))}
+      {loading && (
+        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-8 text-sm text-slate-400">
+          Loading report-ready evidence records...
         </div>
+      )}
 
-        {/* Right: report detail */}
-        <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl flex flex-col min-h-0 overflow-hidden">
-          {!report && (
-            <div className="flex-1 flex items-center justify-center text-center px-6 py-12">
-              <p className="text-sm text-slate-400">No report selected.</p>
-            </div>
-          )}
-          {report && detail && (<>
-          {/* Header */}
-          <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-2.5">
-              <BarChart3 className="w-4 h-4 text-cyan-400" />
-              <span className="text-sm font-semibold text-white truncate">{report.title}</span>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${RISK_DARK[report.risk] || RISK_DARK.INFO}`}>{report.risk}</span>
-              <span className="text-xs text-slate-500">{report.date}</span>
-            </div>
+      {!loading && error && (
+        <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/5 px-5 py-4">
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-400" />
+          <div>
+            <p className="text-sm font-semibold text-rose-200">Could not load report records.</p>
+            <p className="mt-1 text-xs text-rose-300/80">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && filtered.length === 0 && (
+        <div className="rounded-xl border border-slate-800 bg-slate-950/35 px-6 py-12 text-center">
+          <FileText className="mx-auto mb-3 h-8 w-8 text-slate-600" />
+          <p className="text-sm font-semibold text-white">No generated reports yet.</p>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
+            Audit report exports will appear after saved evidence records exist. This page does not display sample reports in authenticated workspaces.
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && filtered.length > 0 && (
+        <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
+          <div className="space-y-2">
+            {filtered.map(record => {
+              const status = String(record.change_status || 'UNKNOWN').toUpperCase()
+              return (
+                <button
+                  key={record.evidence_record_id}
+                  type="button"
+                  onClick={() => setSelectedId(record.evidence_record_id)}
+                  className={`w-full rounded-xl border p-3.5 text-left transition-all ${
+                    selected?.evidence_record_id === record.evidence_record_id
+                      ? 'border-cyan-500/30 bg-slate-900 ring-1 ring-cyan-500/20'
+                      : 'border-slate-800 bg-slate-900 hover:border-slate-700'
+                  }`}
+                >
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLE[status] || 'border-slate-600 bg-slate-800 text-slate-300'}`}>
+                      {status}
+                    </span>
+                    <span className="text-[11px] text-slate-500">{record.timestamp_utc || 'No timestamp'}</span>
+                  </div>
+                  <p className="text-xs font-semibold leading-snug text-white">{record.source_name || record.source_id}</p>
+                  <p className="mt-1 text-[11px] text-slate-500">Hash {shortHash(record.normalized_hash || record.content_hash)}</p>
+                </button>
+              )
+            })}
           </div>
 
-          {/* Body */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-800 text-xs">
-
-            {/* Summary */}
-            <div className="px-5 py-4">
-              <p className="text-slate-500 uppercase tracking-wide font-medium mb-1.5">Summary</p>
-              <p className="text-slate-300 leading-relaxed">{detail.summary}</p>
-            </div>
-
-            {/* Metadata */}
-            <div className="px-5 py-4 grid grid-cols-3 gap-4">
-              <div>
-                <p className="text-slate-500 mb-0.5 uppercase tracking-wide font-medium">Markets</p>
-                <p className="text-slate-200 font-medium">{report.markets}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 mb-0.5 uppercase tracking-wide font-medium">Sample items</p>
-                <p className="text-slate-200 font-medium">{report.alerts}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 mb-0.5 uppercase tracking-wide font-medium">Review items</p>
-                <p className={`font-medium ${report.reviewItems > 0 ? 'text-amber-400' : 'text-slate-400'}`}>{report.reviewItems}</p>
-              </div>
-            </div>
-
-            {/* Sections */}
-            <div className="px-5 py-4">
-              <p className="text-slate-500 uppercase tracking-wide font-medium mb-2">Report Sections</p>
-              <div className="space-y-1.5">
-                {detail.sections.map((s, i) => (
-                  <div key={i} className="flex items-center gap-2 text-slate-300">
-                    <span className="text-cyan-400 font-semibold flex-shrink-0">{i + 1}.</span>
-                    {s}
+          <div className="rounded-xl border border-slate-800 bg-[#0D1B2E]">
+            {!selected ? (
+              <div className="px-6 py-12 text-center text-sm text-slate-400">No evidence record selected.</div>
+            ) : (
+              <>
+                <div className="border-b border-slate-800 px-5 py-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Evidence record</p>
+                      <h2 className="mt-1 text-base font-semibold text-white">{selected.source_name || selected.source_id}</h2>
+                    </div>
+                    <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${STATUS_STYLE[String(selected.change_status || '').toUpperCase()] || 'border-slate-600 bg-slate-800 text-slate-300'}`}>
+                      {selected.change_status || 'UNKNOWN'}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Related alerts */}
-            {relatedAlerts.length > 0 && (
-              <div className="px-5 py-4">
-              <p className="text-slate-500 uppercase tracking-wide font-medium mb-2">Included sample previews</p>
-                <div className="space-y-2">
-                  {relatedAlerts.map(a => (
-                    <div key={a.id} className="flex items-start gap-2.5 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                      <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${RISK_DARK[a.risk]}`}>{a.risk}</span>
-                      <div>
-                        <p className="text-slate-200 font-medium">{a.title}</p>
-                        <p className="text-slate-500 text-xs mt-0.5">{a.flag} {a.market} · {a.source}</p>
-                      </div>
+                </div>
+                <div className="divide-y divide-slate-800 text-xs">
+                  {[
+                    ['Official URL', selected.official_url || 'not recorded'],
+                    ['Evidence ID', selected.evidence_record_id],
+                    ['Timestamp', selected.timestamp_utc || 'not recorded'],
+                    ['Extraction quality', selected.extraction_quality || 'UNKNOWN'],
+                    ['Normalized hash', selected.normalized_hash || selected.content_hash || 'not recorded'],
+                    ['Proof path', selected.proof_block_path || 'not recorded'],
+                    ['Diff path', selected.diff_json_path || selected.diff_md_path || 'not recorded'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="grid gap-2 px-5 py-3 sm:grid-cols-[150px_1fr]">
+                      <p className="font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+                      <p className="break-all text-slate-300">{value}</p>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Evidence */}
-            <div className="px-5 py-4">
-              <p className="text-slate-500 uppercase tracking-wide font-medium mb-2">Report provenance</p>
-              {['Sample output', 'Source proof structure', 'Human review gate', 'Limitations disclosed'].map(e => (
-                <div key={e} className="flex items-center gap-1.5 text-slate-400 mb-1">
-                  <span className="text-emerald-400 font-bold">✓</span> {e}
+                <div className="border-t border-slate-800 px-5 py-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleExport(selected)}
+                      disabled={exportState[selected.evidence_record_id]?.status === 'exporting'}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      {exportState[selected.evidence_record_id]?.status === 'exporting' ? 'Exporting...' : 'Export Markdown/HTML audit pack'}
+                    </button>
+                    {selected.official_url && (
+                      <a
+                        href={selected.official_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Open source
+                      </a>
+                    )}
+                  </div>
+                  {exportState[selected.evidence_record_id]?.message && (
+                    <p className={`mt-3 text-xs ${exportState[selected.evidence_record_id]?.status === 'ok' ? 'text-emerald-300' : 'text-rose-300'}`}>
+                      {exportState[selected.evidence_record_id].message}
+                    </p>
+                  )}
+                  <div className="mt-4 flex items-start gap-2 rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-500" />
+                    <p className="text-xs leading-relaxed text-slate-500">
+                      Monitoring intelligence only. Not legal advice. Audit exports preserve proof/hash context but do not determine compliance obligations.
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
-
-          {/* Actions */}
-          <div className="px-5 py-3.5 border-t border-slate-800 flex items-center gap-2 flex-shrink-0">
-            <button className="flex items-center gap-1.5 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors">
-              <Download className="w-3.5 h-3.5" />
-              Preview sample
-            </button>
-            <button
-              type="button"
-              disabled
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-500 border border-slate-700 bg-slate-800/70 px-3 py-2 rounded-lg cursor-not-allowed"
-              title="Generated client reports require pilot setup."
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Share link
-            </button>
-            <span className="text-xs text-slate-500">Generated client reports require pilot setup.</span>
-          </div>
-          </>)}
         </div>
-      </div>
+      )}
     </div>
   )
 }

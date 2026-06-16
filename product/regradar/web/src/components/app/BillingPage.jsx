@@ -78,8 +78,8 @@ export default function BillingPage({ planState }) {
         <Row label="Source limit" value={caps.sourceLimit > 100 ? 'Custom' : caps.sourceLimit === 0 ? 'Sample only' : String(caps.sourceLimit)} />
         <Row label="Custom source limit" value={caps.customSources > 100 ? 'Custom' : caps.customSources === 0 ? 'Not included' : `${caps.customSources} after review`} />
         <Row label="Weekly MLRO brief" value={caps.weeklyBriefs === true ? 'Included after delivery setup' : caps.weeklyBriefs === 'status_only' ? 'Source status summary' : 'Not included'} />
-        <Row label="Audit binder export" value={caps.auditExport ? 'Included' : 'Pilot roadmap'} />
-        <Row label="PDF export" value={caps.pdfExport ? 'Included' : 'Requires activation'} />
+        <Row label="Audit binder export" value={caps.auditExport ? 'Markdown/HTML included' : 'Pilot roadmap'} />
+        <Row label="PDF export" value={caps.pdfExport ? 'Included' : 'Not enabled yet'} />
         <Row label="Users" value={caps.users > 100 ? 'Custom' : String(caps.users)} />
         <Row label="Evidence retention" value={caps.retentionDays > 500 ? 'Custom' : caps.retentionDays === 0 ? 'Sample only' : `${caps.retentionDays} days`} />
         <Row label="Multiple workspaces" value={caps.multipleWorkspaces ? 'Included' : 'Pilot roadmap'} />

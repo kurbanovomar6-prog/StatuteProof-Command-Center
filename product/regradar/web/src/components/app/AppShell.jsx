@@ -9,6 +9,7 @@ const SourceLabPage   = lazy(() => import('./SourceLabPage'))
 const AlertsPage      = lazy(() => import('./AlertsPage'))
 const AIBriefPage     = lazy(() => import('./AIBriefPage'))
 const ReportsPage     = lazy(() => import('./ReportsPage'))
+const ReviewQueuePage = lazy(() => import('./ReviewQueuePage'))
 const IntegrationsPage = lazy(() => import('./IntegrationsPage'))
 const SettingsPage    = lazy(() => import('./SettingsPage'))
 const EvidencePage    = lazy(() => import('./EvidencePage'))
@@ -47,6 +48,7 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
       case 'alerts':       return <AlertsPage />
       case 'briefs':       return <AIBriefPage />
       case 'reports':      return <ReportsPage />
+      case 'review-queue': return <ReviewQueuePage />
       case 'integrations': return <IntegrationsPage />
       case 'billing':      return <BillingPage planState={planState} />
       case 'settings':     return <SettingsPage onResetWorkspace={onSignOut} planState={planState} />

@@ -82,6 +82,10 @@ export const telegramPair = {
 }
 
 export const sources = {
+  summary(market = 'AE') {
+    return authRequest(`/api/sources/summary?market=${encodeURIComponent(market)}`)
+  },
+
   status(market = 'AE') {
     return authRequest(`/api/sources/status?market=${encodeURIComponent(market)}`)
   },
@@ -116,6 +120,24 @@ export const evidence = {
       method: 'POST',
       body: JSON.stringify({ evidence_record_id: evidenceRecordId }),
     })
+  },
+}
+
+export const reviews = {
+  queue(params = {}) {
+    const search = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        search.set(key, value)
+      }
+    })
+    return authRequest(`/api/reviews/queue?${search.toString()}`)
+  },
+}
+
+export const briefs = {
+  list(market = 'AE', limit = 50) {
+    return authRequest(`/api/briefs?market=${encodeURIComponent(market)}&limit=${encodeURIComponent(limit)}`)
   },
 }
 

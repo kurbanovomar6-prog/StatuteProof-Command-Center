@@ -61,11 +61,11 @@ PLAN_CAPABILITIES = {
     "professional": {
         "live_monitoring": False,
         "manual_activation_required": True,
-        "source_limit": 13,         # 13 enabled UAE sources under evidence-readiness validation
+        "source_limit": 62,         # 62 readiness-supported UAE sources after proof/baseline gates
         "custom_sources": 2,        # requires activation
         "weekly_briefs": True,      # Telegram; email requires activation
-        "audit_export": False,      # pilot roadmap — not yet built
-        "pdf_export": False,        # requires activation
+        "audit_export": True,       # Markdown/HTML audit pack; PDF remains unavailable
+        "pdf_export": False,
         "users": 2,
         "retention_days": 180,
         "multiple_workspaces": False,
@@ -78,7 +78,7 @@ PLAN_CAPABILITIES = {
         "source_limit": 999,
         "custom_sources": 999,
         "weekly_briefs": True,
-        "audit_export": False,      # pilot roadmap
+        "audit_export": True,       # Markdown/HTML audit pack; custom scope
         "pdf_export": False,        # pilot roadmap
         "users": 999,
         "retention_days": 999,

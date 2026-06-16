@@ -1,0 +1,146 @@
+"""Global MLRO review queue built from saved evidence and assessments."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+from app.evidence_assessment import LEGAL_DISCLAIMER, load_assessments
+from app.source_health_timeline import source_health_customer_message
+
+
+_BASE_DIR = Path(__file__).parent.parent
+
+
+def build_review_queue(
+    *,
+    market: str = "AE",
+    status: str = "pending",
+    impact_level: str | None = None,
+    source_health_status: str | None = None,
+    change_status: str | None = None,
+    source_id: str | None = None,
+    limit: int = 50,
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Return review queue rows from recorded evidence and Acknowledge & Assess records."""
+    root = base_dir or _BASE_DIR
+    market_code = str(market or "AE").upper().strip() or "AE"
+    requested_status = str(status or "pending").lower().strip()
+    if requested_status not in {"pending", "assessed", "all"}:
+        requested_status = "pending"
+
+    latest_assessments = _latest_assessments_by_evidence(root)
+    rows: list[dict[str, Any]] = []
+    for run in _read_runs(root, market_code):
+        evidence_id = str(run.get("run_id") or "").strip()
+        if not evidence_id:
+            continue
+        assessment = latest_assessments.get(evidence_id)
+        pending = assessment is None
+        if requested_status == "pending" and not pending:
+            continue
+        if requested_status == "assessed" and pending:
+            continue
+
+        row_source_id = str(run.get("source_id") or "").strip()
+        row_change_status = str(run.get("change_status") or "UNKNOWN").upper()
+        row_health = _source_health_status(run)
+        row_impact = str((assessment or {}).get("impact_level") or "").strip()
+
+        if source_id and row_source_id != source_id:
+            continue
+        if change_status and row_change_status != str(change_status).upper().strip():
+            continue
+        if source_health_status and row_health != str(source_health_status).upper().strip():
+            continue
+        if impact_level and row_impact != str(impact_level).strip():
+            continue
+
+        rows.append(_queue_row(run, assessment, source_health_status=row_health, pending=pending))
+
+    rows.sort(key=lambda item: str(item.get("timestamp_utc") or ""), reverse=True)
+    safe_limit = max(1, min(int(limit or 50), 200))
+    return {
+        "ok": True,
+        "market": market_code,
+        "status": requested_status,
+        "queue": rows[:safe_limit],
+        "total": len(rows),
+        "disclaimer": LEGAL_DISCLAIMER,
+        "message": "Review queue is built from saved evidence records and Acknowledge & Assess records only.",
+    }
+
+
+def _queue_row(
+    run: dict[str, Any],
+    assessment: dict[str, Any] | None,
+    *,
+    source_health_status: str,
+    pending: bool,
+) -> dict[str, Any]:
+    evidence_id = str(run.get("run_id") or "")
+    normalized_hash = str(run.get("normalized_hash") or run.get("content_hash") or "")
+    return {
+        "evidence_record_id": evidence_id,
+        "source_id": run.get("source_id"),
+        "source_name": run.get("source_name") or run.get("name"),
+        "official_url": run.get("official_url") or run.get("final_url"),
+        "timestamp_utc": run.get("timestamp_utc") or run.get("run_at"),
+        "change_status": str(run.get("change_status") or "UNKNOWN").upper(),
+        "source_health_status": source_health_status,
+        "extraction_quality": run.get("extraction_quality") or "UNKNOWN",
+        "normalized_hash": normalized_hash,
+        "normalized_hash_short": normalized_hash[:12] if normalized_hash else "",
+        "proof_path": run.get("proof_block_path"),
+        "diff_path": run.get("diff_json_path") or run.get("diff_md_path"),
+        "assessment_status": (assessment or {}).get("assessment_status") or ("pending" if pending else "assessed"),
+        "latest_assessment_id": (assessment or {}).get("assessment_id"),
+        "impact_level": (assessment or {}).get("impact_level"),
+        "reviewer": (assessment or {}).get("reviewer_name") or (assessment or {}).get("reviewer_user_id"),
+        "reviewed_at": (assessment or {}).get("reviewed_at"),
+        "pending_review": pending,
+        "customer_safe_message": source_health_customer_message(source_health_status),
+    }
+
+
+def _latest_assessments_by_evidence(root: Path) -> dict[str, dict[str, Any]]:
+    latest: dict[str, dict[str, Any]] = {}
+    for row in load_assessments(base_dir=root):
+        evidence_id = str(row.get("evidence_record_id") or "")
+        if evidence_id:
+            latest[evidence_id] = row
+    return latest
+
+
+def _read_runs(root: Path, market: str) -> list[dict[str, Any]]:
+    path = root / "data" / "source_runs" / "source_runs.jsonl"
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if str(row.get("market") or row.get("jurisdiction") or "").upper() == market:
+            rows.append(row)
+    return rows
+
+
+def _source_health_status(run: dict[str, Any]) -> str:
+    change = str(run.get("change_status") or "").upper()
+    access = str(run.get("access_status") or "").lower()
+    quality = str(run.get("extraction_quality") or "").upper()
+    if change == "QUALITY_DROP" or quality == "FAILED":
+        return "QUALITY_DROP"
+    if change == "FAILED":
+        return "FAILED"
+    if access in {"failed", "restricted", "blocked"}:
+        return "ACCESS_BLOCKED"
+    if change == "CHANGED":
+        return "HASH_DRIFT"
+    return "MONITOR_OK"

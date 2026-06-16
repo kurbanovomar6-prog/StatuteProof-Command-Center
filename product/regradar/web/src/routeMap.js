@@ -15,6 +15,7 @@ const APP_PAGE_PATHS = {
   sources: '/app/sources',
   'source-lab': '/app/source-lab',
   evidence: '/app/evidence',
+  'review-queue': '/app/review-queue',
   alerts: '/app/alerts',
   briefs: '/app/briefs',
   reports: '/app/reports',

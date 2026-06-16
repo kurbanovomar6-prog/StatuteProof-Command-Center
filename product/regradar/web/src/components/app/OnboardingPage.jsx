@@ -19,6 +19,71 @@ const SOURCE_LAYERS = [
   'Other',
 ]
 
+const SOURCE_READINESS_PREVIEW = {
+  CBUAE: {
+    status: 'Strongest coverage',
+    detail: '27 readiness-supported sources. Best fit for CBUAE, AML/CFT, payments, consumer protection and open-finance monitoring.',
+    tone: 'emerald',
+  },
+  VARA: {
+    status: 'Limited',
+    detail: '3 readiness-supported VARA sources. Direct rulebook/PDF depth remains a disclosed remediation priority.',
+    tone: 'amber',
+  },
+  DFSA: {
+    status: 'Useful but not complete',
+    detail: 'DFSA coverage includes useful rulebook, notice, consultation and enforcement sources; some legacy DFSA models remain under remediation.',
+    tone: 'cyan',
+  },
+  'ADGM / FSRA': {
+    status: 'Strong',
+    detail: 'Strong ADGM/FSRA coverage across rulebooks, guidance, consultations, waivers, enforcement and circulars.',
+    tone: 'emerald',
+  },
+  'UAE FIU': {
+    status: 'AML/CFT useful',
+    detail: 'Useful AML/CFT laws, publications, typology and EOCN sanctions-related source layers. FIU homepage itself remains under remediation.',
+    tone: 'cyan',
+  },
+  'Ministry of Finance': {
+    status: 'Narrow',
+    detail: 'Useful for federal finance/tax-adjacent monitoring, but not a primary MLRO source layer.',
+    tone: 'slate',
+  },
+  'UAE Legislation Portal': {
+    status: 'Useful foundation',
+    detail: 'Official legislation layer is useful for legal-source monitoring but does not replace legal analysis.',
+    tone: 'cyan',
+  },
+  'DIFC Laws': {
+    status: 'Remediation',
+    detail: 'DIFC laws/regulations are disclosed as remediation/not active until source model and review gates clear.',
+    tone: 'amber',
+  },
+  'Ministry of Economy': {
+    status: 'Narrow',
+    detail: 'Useful for selected AML/DNFBP and economy-related source checks; not broad compliance coverage.',
+    tone: 'slate',
+  },
+  FTA: {
+    status: 'Limited',
+    detail: 'Tax source monitoring is limited and should be validated against your actual VAT/corporate-tax needs.',
+    tone: 'amber',
+  },
+  'Capital Market Authority / former SCA [Limited]': {
+    status: 'Limited but useful',
+    detail: 'SCA coverage includes AML/CFT, circulars/procedures, FATCA/CRS and corporate governance, but remains narrower than CBUAE.',
+    tone: 'amber',
+  },
+}
+
+const PREVIEW_TONE = {
+  emerald: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-100',
+  cyan: 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100',
+  amber: 'border-amber-400/20 bg-amber-400/10 text-amber-100',
+  slate: 'border-slate-700 bg-slate-900/70 text-slate-200',
+}
+
 function toggle(list, setList, item) {
   setList(list.includes(item) ? list.filter(i => i !== item) : [...list, item])
 }
@@ -222,6 +287,12 @@ export default function OnboardingPage({ navigate, currentUser }) {
 
               <div ref={sourcesRef}>
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">Source layers of interest</h3>
+                <div className="mb-4 rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
+                  <p className="text-sm font-semibold text-white">Source readiness preview</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                    Source coverage is validated before activation. Some source groups are under remediation.
+                  </p>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   {SOURCE_LAYERS.map(layer => (
                     <button
@@ -239,6 +310,22 @@ export default function OnboardingPage({ navigate, currentUser }) {
                       {layer}
                     </button>
                   ))}
+                </div>
+                <div className="mt-4 grid gap-3">
+                  {SOURCE_LAYERS.filter(layer => SOURCE_READINESS_PREVIEW[layer]).map(layer => {
+                    const preview = SOURCE_READINESS_PREVIEW[layer]
+                    return (
+                      <div key={layer} className={`rounded-xl border p-3 ${PREVIEW_TONE[preview.tone] || PREVIEW_TONE.slate}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm font-semibold">{layer}</p>
+                          <span className="rounded-full border border-current/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                            {preview.status}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs leading-relaxed opacity-80">{preview.detail}</p>
+                      </div>
+                    )
+                  })}
                 </div>
                 {errors.sourceLayers && (
                   <p className="text-rose-400 text-xs mt-3 flex items-center gap-1">

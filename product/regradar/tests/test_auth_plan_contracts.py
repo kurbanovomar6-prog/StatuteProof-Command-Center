@@ -46,8 +46,10 @@ class PlanIntentContractTests(unittest.TestCase):
         self.assertTrue(state["manual_activation_required"])
         self.assertEqual(state["active_capabilities"]["source_limit"], 0)
         self.assertEqual(state["active_capabilities"]["custom_sources"], 0)
-        self.assertEqual(state["requested_capabilities"]["source_limit"], 13)
+        self.assertEqual(state["requested_capabilities"]["source_limit"], 62)
         self.assertEqual(state["requested_capabilities"]["custom_sources"], 2)
+        self.assertTrue(state["requested_capabilities"]["audit_export"])
+        self.assertFalse(state["requested_capabilities"]["pdf_export"])
 
     def test_evidence_preview_has_no_requested_plan(self):
         state = _build_state("evidence_preview", None, None)
