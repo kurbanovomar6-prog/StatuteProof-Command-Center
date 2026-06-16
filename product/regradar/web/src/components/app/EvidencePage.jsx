@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, CheckCircle, Clock, Download, FileText, Hash, Loader2, Shield } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Clock, Download, FileText, Hash, History, Loader2, Shield } from 'lucide-react'
 
 import { evidence as evidenceApi } from '../../api'
 
@@ -35,12 +35,46 @@ function EvidenceCard({ record }) {
   const [assessment, setAssessment] = useState(record.assessment || null)
   const [assessmentMsg, setAssessmentMsg] = useState('')
   const [exportMsg, setExportMsg] = useState('')
+  const [reviewHistory, setReviewHistory] = useState(null)
+  const [historyLoading, setHistoryLoading] = useState(Boolean(record.evidence_record_id))
+  const [historyError, setHistoryError] = useState('')
   const [saving, setSaving] = useState(false)
   const [exporting, setExporting] = useState(false)
   const canAssess = Boolean(record.proof_block_path && record.evidence_record_id)
   const detectedDate = record.detected_at
     ? new Date(record.detected_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
     : 'Not recorded'
+
+  useEffect(() => {
+    if (!record.evidence_record_id) return
+    let active = true
+    evidenceApi.reviewHistory(record.evidence_record_id)
+      .then(data => {
+        if (!active) return
+        setReviewHistory(data)
+        if (data.latest_assessment) setAssessment(data.latest_assessment)
+      })
+      .catch(err => {
+        if (!active) return
+        setReviewHistory(null)
+        setHistoryError(err.message || 'Review history could not be loaded.')
+      })
+      .finally(() => {
+        if (active) setHistoryLoading(false)
+      })
+    return () => { active = false }
+  }, [record.evidence_record_id])
+
+  async function refreshReviewHistory() {
+    if (!record.evidence_record_id) return
+    try {
+      const data = await evidenceApi.reviewHistory(record.evidence_record_id)
+      setReviewHistory(data)
+      if (data.latest_assessment) setAssessment(data.latest_assessment)
+    } catch (err) {
+      setHistoryError(err.message || 'Review history could not be refreshed.')
+    }
+  }
 
   async function handleAssess() {
     if (!canAssess || !internalNote.trim()) return
@@ -55,6 +89,7 @@ function EvidenceCard({ record }) {
       })
       setAssessment(data.assessment)
       setAssessmentMsg('Assessment saved against the evidence record.')
+      await refreshReviewHistory()
     } catch (err) {
       setAssessmentMsg(err.message || 'Assessment could not be saved.')
     } finally {
@@ -176,6 +211,53 @@ function EvidenceCard({ record }) {
             </button>
             {assessmentMsg && <p className="text-xs text-slate-400">{assessmentMsg}</p>}
           </div>
+        )}
+      </div>
+
+      <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div>
+            <h4 className="flex items-center gap-1.5 text-xs font-semibold text-white">
+              <History className="h-3.5 w-3.5 text-[#16D9F5]" />
+              Review History
+            </h4>
+            <p className="mt-1 text-[11px] text-slate-500">Only saved evidence and recorded assessment events are shown.</p>
+          </div>
+          {reviewHistory?.total_events ? (
+            <span className="rounded-full border border-slate-700 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+              {reviewHistory.total_events} events
+            </span>
+          ) : null}
+        </div>
+        {historyLoading ? (
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Loading review history…
+          </div>
+        ) : historyError ? (
+          <p className="text-xs text-amber-300">{historyError}</p>
+        ) : reviewHistory?.events?.length ? (
+          <div className="space-y-2">
+            {reviewHistory.events.map(event => (
+              <div key={event.event_id} className="rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2">
+                <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-slate-200">{event.event_type}</span>
+                  <span className="text-[10px] text-slate-500">{event.timestamp || 'Timestamp not recorded'}</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-400">{event.customer_safe_message}</p>
+                {event.assessment_impact_level && (
+                  <p className="mt-1 text-[11px] text-emerald-300">
+                    Impact: {event.assessment_impact_level}
+                    {event.assessment_note_preview ? ` · ${event.assessment_note_preview}` : ''}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500">
+            No review history has been recorded yet. Use Acknowledge & Assess after confirming this saved evidence record.
+          </p>
         )}
       </div>
 

@@ -242,6 +242,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_delivery_logs()
         elif path == "/api/delivery/preview":
             self._handle_delivery_preview()
+        elif path == "/api/sources/timeline":
+            self._handle_source_timeline_get()
         elif path == "/api/sources/status":
             self._handle_sources_status()
         elif path == "/api/sources/readiness":
@@ -252,6 +254,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_evidence_list()
         elif path == "/api/evidence/review":
             self._handle_evidence_review_get()
+        elif path == "/api/evidence/review-history":
+            self._handle_evidence_review_history_get()
         elif path == "/api/evidence/export":
             self._handle_evidence_export_get()
         elif path == "/api/briefs":
@@ -752,6 +756,7 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             from app.source_readiness import load_market_sources
             from app.source_runs import latest_runs
+            from app.source_health_timeline import build_source_timeline
 
             all_sources = load_market_sources(market)
             enabled_sources = [s for s in all_sources if s.get("enabled", False)]
@@ -774,6 +779,9 @@ class _Handler(BaseHTTPRequestHandler):
                     run_at = str(run.get("timestamp_utc") or run.get("run_at") or "")
                     access_status = str(run.get("access_status") or "unknown")
                     extraction_quality = str(run.get("extraction_quality") or "UNKNOWN")
+                    normalized_hash = str(run.get("normalized_hash") or run.get("content_hash") or "")
+                    proof_path = str(run.get("proof_block_path") or "")
+                    last_evidence_at = run_at if proof_path else None
                     # Track most recent run timestamp across all sources
                     if run_at and (last_run_at is None or run_at > last_run_at):
                         last_run_at = run_at
@@ -782,6 +790,14 @@ class _Handler(BaseHTTPRequestHandler):
                     run_at = None
                     access_status = "unknown"
                     extraction_quality = "UNKNOWN"
+                    normalized_hash = ""
+                    proof_path = ""
+                    last_evidence_at = None
+
+                try:
+                    timeline_event_count = int(build_source_timeline(source_id, limit=200).get("total_events") or 0)
+                except Exception:
+                    timeline_event_count = 0
 
                 sources_out.append({
                     "source_id": source_id,
@@ -791,8 +807,13 @@ class _Handler(BaseHTTPRequestHandler):
                     "status": str(src.get("status") or "active"),
                     "change_status": change_status,
                     "last_run_at": run_at,
+                    "last_evidence_at": last_evidence_at,
                     "access_status": access_status,
                     "extraction_quality": extraction_quality,
+                    "normalized_hash": normalized_hash,
+                    "proof_block_path": proof_path,
+                    "timeline_event_count": timeline_event_count,
+                    "remediation_reason": str(src.get("remediation_reason") or src.get("notes") or src.get("scraper_notes") or ""),
                 })
 
             # Build summary counts
@@ -812,6 +833,31 @@ class _Handler(BaseHTTPRequestHandler):
             })
         except Exception as exc:
             logger.error("sources/status failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_source_timeline_get(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        source_id = str((params.get("source_id") or params.get("id") or [""])[0]).strip()
+        if not source_id:
+            self._send_json({"ok": False, "message": "source_id is required."}, 400)
+            return
+        try:
+            from app.source_health_timeline import build_source_timeline
+
+            try:
+                limit = int((params.get("limit") or ["100"])[0])
+            except (TypeError, ValueError):
+                limit = 100
+            timeline = build_source_timeline(source_id, limit=max(1, min(limit, 200)))
+            self._send_json(timeline)
+        except ValueError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+        except Exception as exc:
+            logger.error("source timeline load failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_evidence_list(self) -> None:
@@ -898,6 +944,27 @@ class _Handler(BaseHTTPRequestHandler):
             })
         except Exception as exc:
             logger.error("evidence review load failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_evidence_review_history_get(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        evidence_id = str((params.get("evidence_record_id") or params.get("run_id") or [""])[0]).strip()
+        if not evidence_id:
+            self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
+            return
+        try:
+            from app.source_health_timeline import build_evidence_review_history
+
+            history = build_evidence_review_history(evidence_id)
+            self._send_json(history)
+        except ValueError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+        except Exception as exc:
+            logger.error("evidence review-history load failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_evidence_assess(self) -> None:

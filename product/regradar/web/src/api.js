@@ -85,6 +85,10 @@ export const sources = {
   status(market = 'AE') {
     return authRequest(`/api/sources/status?market=${encodeURIComponent(market)}`)
   },
+
+  timeline(sourceId, limit = 100) {
+    return authRequest(`/api/sources/timeline?source_id=${encodeURIComponent(sourceId)}&limit=${encodeURIComponent(limit)}`)
+  },
 }
 
 export const evidence = {
@@ -94,6 +98,10 @@ export const evidence = {
 
   review(evidenceRecordId) {
     return authRequest(`/api/evidence/review?evidence_record_id=${encodeURIComponent(evidenceRecordId)}`)
+  },
+
+  reviewHistory(evidenceRecordId) {
+    return authRequest(`/api/evidence/review-history?evidence_record_id=${encodeURIComponent(evidenceRecordId)}`)
   },
 
   assess(body) {

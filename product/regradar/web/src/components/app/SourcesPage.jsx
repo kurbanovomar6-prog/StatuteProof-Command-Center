@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, X, Loader2, CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react'
+import { Plus, X, Loader2, CheckCircle, AlertTriangle, XCircle, Info, History, Hash } from 'lucide-react'
 import { sources as sourcesApi } from '../../api'
 import { getWorkspaceProfile } from '../../data/workspaceProfile'
 
@@ -118,7 +118,18 @@ function mapApiSource(row) {
     health: healthFromApiSource(row),
     accessStatus: row.access_status || 'unknown',
     changeStatus: row.change_status || 'NOT_RUN',
+    lastEvidenceAt: row.last_evidence_at || '',
+    normalizedHash: row.normalized_hash || '',
+    proofPath: row.proof_block_path || '',
+    timelineEventCount: Number(row.timeline_event_count || 0),
+    remediationReason: row.remediation_reason || '',
   }
+}
+
+function shortHash(value) {
+  const clean = String(value || '').replace(/^sha256:/, '')
+  if (!clean) return 'Not recorded'
+  return `sha256:${clean.slice(0, 12)}…`
 }
 
 // ── localStorage fallback (for dev mode / offline) ───────────────────────────
@@ -157,6 +168,10 @@ export default function SourcesPage({ onAddCustomSource }) {
   const [realSources, setRealSources]     = useState([])
   const [sourcesLoading, setSourcesLoading] = useState(true)
   const [sourcesError, setSourcesError]   = useState('')
+  const [timelineSource, setTimelineSource] = useState(null)
+  const [timelineData, setTimelineData]     = useState(null)
+  const [timelineLoading, setTimelineLoading] = useState(false)
+  const [timelineError, setTimelineError]   = useState('')
   const stepTimer                         = useRef(null)
 
   useEffect(() => {
@@ -330,6 +345,31 @@ export default function SourcesPage({ onAddCustomSource }) {
     }
   }
 
+  function lastEvidenceLabel(source) {
+    if (!source.lastEvidenceAt) return 'No saved evidence yet'
+    try {
+      return new Date(source.lastEvidenceAt).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
+    } catch {
+      return source.lastEvidenceAt
+    }
+  }
+
+  async function openTimeline(source) {
+    if (source.userSource) return
+    setTimelineSource(source)
+    setTimelineData(null)
+    setTimelineError('')
+    setTimelineLoading(true)
+    try {
+      const data = await sourcesApi.timeline(source.source_id || source.id)
+      setTimelineData(data)
+    } catch (err) {
+      setTimelineError(err.message || 'Could not load source timeline.')
+    } finally {
+      setTimelineLoading(false)
+    }
+  }
+
   // ── result panel helpers ──────────────────────────────────────────────────
 
   const statusLabel = testResult
@@ -433,7 +473,7 @@ export default function SourcesPage({ onAddCustomSource }) {
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-800/60 text-left">
-                  {['Source', 'Market', 'Category', 'Status', 'Extraction', 'Last checked', 'Health'].map(h => (
+                  {['Source', 'Market', 'Category', 'Status', 'Extraction', 'Last checked', 'Last evidence', 'Health', 'Timeline'].map(h => (
                     <th key={h} className="px-4 py-3 text-slate-400 font-medium whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -456,10 +496,36 @@ export default function SourcesPage({ onAddCustomSource }) {
                     </td>
                     <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.extraction}</td>
                     <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{lastCheckedLabel(s)}</td>
+                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                      <div>{lastEvidenceLabel(s)}</div>
+                      <div className="mt-1 flex items-center gap-1 text-[10px] font-mono text-slate-600">
+                        <Hash className="h-3 w-3" />
+                        {shortHash(s.normalizedHash)}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${HEALTH_STYLE[s.health] || 'text-slate-400 bg-slate-700 border-slate-600'}`}>
                         {sourceHealthLabel(s.health)}
                       </span>
+                      {s.remediationReason && s.status === 'Needs remediation' && (
+                        <p className="mt-1 max-w-[260px] truncate text-[10px] text-amber-300" title={s.remediationReason}>
+                          {s.remediationReason}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {s.userSource ? (
+                        <span className="text-[11px] text-slate-500">Validation pending</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => openTimeline(s)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/25 px-2.5 py-1.5 text-[11px] font-semibold text-cyan-200 hover:border-cyan-300/50"
+                        >
+                          <History className="h-3.5 w-3.5" />
+                          View timeline ({s.timelineEventCount})
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -473,6 +539,76 @@ export default function SourcesPage({ onAddCustomSource }) {
           </div>
         )}
       </div>
+
+      {timelineSource && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+          <div className="max-h-[86vh] w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-700 bg-[#0D1B2E] shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+              <div>
+                <h3 className="text-sm font-semibold text-white">Source health timeline</h3>
+                <p className="mt-1 text-xs text-slate-400">{timelineSource.name}</p>
+              </div>
+              <button onClick={() => setTimelineSource(null)} className="text-slate-500 hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-[70vh] overflow-y-auto px-5 py-4">
+              {timelineLoading ? (
+                <div className="py-10 text-center">
+                  <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-[#16D9F5]" />
+                  <p className="text-sm text-slate-400">Loading recorded timeline events…</p>
+                </div>
+              ) : timelineError ? (
+                <div className="rounded-lg border border-amber-400/25 bg-amber-400/5 px-4 py-3 text-xs text-amber-300">
+                  {timelineError}
+                </div>
+              ) : timelineData?.events?.length ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 text-xs text-cyan-100">
+                    {timelineData.source_health_status}: {timelineData.message}
+                  </div>
+                  {timelineData.events.slice().reverse().map(event => (
+                    <div key={event.event_id} className="rounded-lg border border-slate-800 bg-slate-950/35 px-4 py-3">
+                      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-white">{event.event_type}</span>
+                        <span className="text-[11px] text-slate-500">{event.timestamp || 'Timestamp not recorded'}</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-slate-300">{event.customer_safe_message}</p>
+                      <div className="mt-2 grid gap-2 text-[11px] text-slate-500 sm:grid-cols-2">
+                        <span>Health: {event.source_health_status || 'not recorded'}</span>
+                        <span>Hash: {shortHash(event.normalized_hash)}</span>
+                        <span className="truncate">Proof: {event.proof_path || 'not linked'}</span>
+                        <span className="truncate">Diff: {event.diff_path || 'not linked'}</span>
+                      </div>
+                      {event.remediation_reason && (
+                        <p className="mt-2 rounded-md border border-amber-400/15 bg-amber-400/5 px-2 py-1.5 text-[11px] text-amber-200">
+                          {event.remediation_reason}
+                        </p>
+                      )}
+                      {event.assessment_note_preview && (
+                        <p className="mt-2 rounded-md border border-emerald-400/15 bg-emerald-400/5 px-2 py-1.5 text-[11px] text-emerald-200">
+                          Assessment: {event.assessment_note_preview}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-10 text-center">
+                  <History className="mx-auto mb-3 h-5 w-5 text-slate-500" />
+                  <p className="font-medium text-slate-300">No timeline data yet</p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    No monitoring history has been recorded yet. StatuteProof is not showing sample timeline events in this authenticated view.
+                  </p>
+                </div>
+              )}
+              <p className="mt-4 border-t border-slate-800 pt-3 text-[10px] text-slate-600">
+                Monitoring intelligence only. Not legal advice. Hash drift and source-health events require human review before customer conclusions.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add source modal */}
       {showModal && (
