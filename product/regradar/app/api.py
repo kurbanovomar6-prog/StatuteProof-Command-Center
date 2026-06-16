@@ -250,6 +250,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_custom_sources_list()
         elif path == "/api/evidence":
             self._handle_evidence_list()
+        elif path == "/api/evidence/review":
+            self._handle_evidence_review_get()
+        elif path == "/api/evidence/export":
+            self._handle_evidence_export_get()
         elif path == "/api/briefs":
             self._handle_briefs_list()
         elif path == "/api/plan":
@@ -271,37 +275,44 @@ class _Handler(BaseHTTPRequestHandler):
     # ── POST endpoints ─────────────────────────────────────────────────────────
 
     def do_POST(self):
-        if self.path == "/api/auth/register":
+        path = urlparse(self.path).path
+        if path == "/api/auth/register":
             self._handle_auth_register()
-        elif self.path == "/api/auth/login":
+        elif path == "/api/auth/login":
             self._handle_auth_login()
-        elif self.path == "/api/auth/logout":
+        elif path == "/api/auth/logout":
             self._handle_auth_logout()
-        elif self.path == "/api/plan":
+        elif path == "/api/plan":
             self._handle_plan_set()
-        elif self.path == "/api/telegram/pair/generate":
+        elif path == "/api/telegram/pair/generate":
             self._handle_telegram_pair_generate()
-        elif self.path == "/api/telegram/pair/unlink":
+        elif path == "/api/telegram/pair/unlink":
             self._handle_telegram_pair_unlink()
-        elif self.path == "/api/telegram/test":
+        elif path == "/api/telegram/test":
             self._handle_telegram_account_test()
-        elif self.path == "/api/delivery/test-brief":
+        elif path == "/api/delivery/test-brief":
             self._handle_delivery_test_brief()
-        elif self.path == "/api/delivery/send-preview-alert":
+        elif path == "/api/delivery/send-preview-alert":
             self._handle_delivery_send_preview_alert()
-        elif self.path == "/api/settings/telegram":
+        elif path == "/api/delivery/email-test-mode":
+            self._handle_delivery_email_test_mode()
+        elif path == "/api/evidence/assess":
+            self._handle_evidence_assess()
+        elif path == "/api/evidence/export":
+            self._handle_evidence_export_post()
+        elif path == "/api/settings/telegram":
             self._disabled_endpoint()
-        elif self.path == "/api/settings/telegram/test":
+        elif path == "/api/settings/telegram/test":
             self._disabled_endpoint()
-        elif self.path == "/api/contact":
+        elif path == "/api/contact":
             self._handle_contact()
-        elif self.path == "/api/source-test":
+        elif path == "/api/source-test":
             self._handle_source_test()
-        elif self.path == "/api/custom-sources/discover":
+        elif path == "/api/custom-sources/discover":
             self._handle_custom_source_discover()
-        elif self.path == "/api/custom-sources/test":
+        elif path == "/api/custom-sources/test":
             self._handle_custom_source_test()
-        elif self.path == "/api/custom-sources":
+        elif path == "/api/custom-sources":
             self._handle_custom_sources_add()
         else:
             self._send_json({"error": "not found"}, 404)
@@ -671,6 +682,55 @@ class _Handler(BaseHTTPRequestHandler):
             logger.error("Preview alert delivery failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
+    def _handle_delivery_email_test_mode(self) -> None:
+        if self._rate_limited(_DELIVERY_TEST_BRIEF_LIMITER, "delivery_email_test_mode"):
+            return
+
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        recipient = str(body.get("recipient_email") or user.get("email") or "").strip()
+        try:
+            from datetime import timedelta
+
+            from app.email_delivery import deliver_weekly_brief_test_mode
+            from app.weekly_brief import build_weekly_brief
+
+            end = datetime.now(timezone.utc)
+            start = end - timedelta(days=7)
+            brief = build_weekly_brief(
+                client_profile={
+                    "client_id": f"user_{int(user['id'])}",
+                    "company_name": user.get("company_name") or user.get("email") or "Pilot workspace",
+                },
+                market="AE",
+                start=start,
+                end=end,
+                alerts=[],
+                demo_fixture=False,
+            )
+            result = deliver_weekly_brief_test_mode(brief, recipient_email=recipient)
+            if result.get("ok"):
+                self._send_json({
+                    "ok": True,
+                    "message": "Email test-mode payload written to local outbox. No external email was sent.",
+                    **result,
+                })
+                return
+            self._send_json({
+                "ok": False,
+                "message": result.get("error_message") or "Email test-mode delivery failed.",
+                **result,
+            }, 400)
+        except Exception as exc:
+            logger.error("Email test-mode delivery failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
     def _handle_sources_status(self) -> None:
         """
         GET /api/sources/status?market=AE
@@ -784,12 +844,21 @@ class _Handler(BaseHTTPRequestHandler):
                         if str(rec.get("market") or rec.get("jurisdiction") or "").upper() == market:
                             records.append({
                                 "run_id": rec.get("run_id"),
+                                "evidence_record_id": rec.get("run_id"),
                                 "source_id": rec.get("source_id"),
                                 "source_name": rec.get("source_name") or rec.get("name"),
+                                "official_url": rec.get("official_url") or rec.get("final_url"),
                                 "change_status": rec.get("change_status"),
+                                "access_status": rec.get("access_status"),
                                 "extraction_quality": rec.get("extraction_quality"),
                                 "extracted_chars": rec.get("extracted_chars", 0),
+                                "normalized_hash": rec.get("normalized_hash"),
+                                "raw_hash": rec.get("raw_hash"),
                                 "content_hash": rec.get("content_hash") or rec.get("normalized_hash"),
+                                "proof_block_path": rec.get("proof_block_path"),
+                                "diff_json_path": rec.get("diff_json_path"),
+                                "diff_md_path": rec.get("diff_md_path"),
+                                "snapshot_normalized_path": rec.get("snapshot_normalized_path"),
                                 "timestamp_utc": rec.get("timestamp_utc") or rec.get("run_at"),
                                 "category": rec.get("category"),
                                 "error": rec.get("error"),
@@ -805,6 +874,108 @@ class _Handler(BaseHTTPRequestHandler):
             })
         except Exception as exc:
             logger.error("evidence list failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_evidence_review_get(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        evidence_id = str((params.get("evidence_record_id") or params.get("run_id") or [""])[0]).strip()
+        if not evidence_id:
+            self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
+            return
+        try:
+            from app.evidence_assessment import latest_assessment_for
+
+            assessment = latest_assessment_for(evidence_id)
+            self._send_json({
+                "ok": True,
+                "evidence_record_id": evidence_id,
+                "assessment": assessment,
+                "disclaimer": "Monitoring intelligence only. Not legal advice.",
+            })
+        except Exception as exc:
+            logger.error("evidence review load failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_evidence_assess(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        try:
+            from app.evidence_assessment import create_assessment
+
+            assessment = create_assessment(
+                evidence_record_id=str(body.get("evidence_record_id") or body.get("run_id") or "").strip(),
+                impact_level=str(body.get("impact_level") or "").strip(),
+                internal_note=str(body.get("internal_note") or body.get("note") or "").strip(),
+                next_action=str(body.get("next_action") or "").strip(),
+                reviewer_user_id=int(user["id"]),
+                reviewer_name=str(user.get("full_name") or user.get("email") or "Reviewer"),
+            )
+            self._send_json({"ok": True, "assessment": assessment}, 201)
+        except ValueError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+        except Exception as exc:
+            logger.error("evidence assess failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_evidence_export_get(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        evidence_id = str((params.get("evidence_record_id") or params.get("run_id") or [""])[0]).strip()
+        if not evidence_id:
+            self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
+            return
+        self._write_evidence_export(evidence_id)
+
+    def _handle_evidence_export_post(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        evidence_id = str(body.get("evidence_record_id") or body.get("run_id") or "").strip()
+        if not evidence_id:
+            self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
+            return
+        self._write_evidence_export(evidence_id)
+
+    def _write_evidence_export(self, evidence_id: str) -> None:
+        try:
+            from app.audit_export import write_audit_pack
+            from app.evidence_assessment import find_evidence_record, latest_assessment_for
+
+            record = find_evidence_record(evidence_id)
+            assessment = latest_assessment_for(evidence_id)
+            paths = write_audit_pack(record, assessment=assessment)
+            self._send_json({
+                "ok": True,
+                "evidence_record_id": evidence_id,
+                "assessment_id": (assessment or {}).get("assessment_id"),
+                "export": paths,
+                "format": "md_html",
+                "pdf_available": False,
+                "message": "Markdown/HTML audit pack exported. PDF export is not enabled in this MVP.",
+                "disclaimer": "Monitoring intelligence only. Not legal advice.",
+            })
+        except ValueError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+        except Exception as exc:
+            logger.error("evidence export failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_briefs_list(self) -> None:

@@ -87,9 +87,40 @@ export const sources = {
   },
 }
 
+export const evidence = {
+  list(market = 'AE', limit = 50) {
+    return authRequest(`/api/evidence?market=${encodeURIComponent(market)}&limit=${encodeURIComponent(limit)}`)
+  },
+
+  review(evidenceRecordId) {
+    return authRequest(`/api/evidence/review?evidence_record_id=${encodeURIComponent(evidenceRecordId)}`)
+  },
+
+  assess(body) {
+    return authRequest('/api/evidence/assess', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+
+  exportAuditPack(evidenceRecordId) {
+    return authRequest('/api/evidence/export', {
+      method: 'POST',
+      body: JSON.stringify({ evidence_record_id: evidenceRecordId }),
+    })
+  },
+}
+
 export const delivery = {
   testBrief() {
     return authRequest('/api/delivery/test-brief', { method: 'POST' })
+  },
+
+  emailTestMode(recipientEmail) {
+    return authRequest('/api/delivery/email-test-mode', {
+      method: 'POST',
+      body: JSON.stringify({ recipient_email: recipientEmail }),
+    })
   },
 
   logs(limit = 20) {

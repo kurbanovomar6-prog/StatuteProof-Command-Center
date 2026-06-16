@@ -55,6 +55,9 @@ export default function IntegrationsPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [briefStatus, setBriefStatus] = useState('idle')
   const [briefMsg, setBriefMsg] = useState('')
+  const [emailRecipient, setEmailRecipient] = useState('')
+  const [emailStatus, setEmailStatus] = useState('idle')
+  const [emailMsg, setEmailMsg] = useState('')
   const [copied, setCopied] = useState(false)
 
   const activeCode = status?.active_code
@@ -146,6 +149,23 @@ export default function IntegrationsPage() {
       setBriefStatus('idle')
       setBriefMsg('')
     }, 7000)
+  }
+
+  async function handleEmailTestMode() {
+    setEmailStatus('sending')
+    setEmailMsg('')
+    try {
+      const data = await delivery.emailTestMode(emailRecipient)
+      setEmailStatus('ok')
+      setEmailMsg(data.message || `Email payload written to local outbox: ${data.outbox_path || 'path unavailable'}`)
+    } catch (err) {
+      setEmailStatus('error')
+      setEmailMsg(err.message || 'Could not write email test-mode payload.')
+    }
+    setTimeout(() => {
+      setEmailStatus('idle')
+      setEmailMsg('')
+    }, 9000)
   }
 
   async function handleUnlink() {
@@ -407,19 +427,46 @@ export default function IntegrationsPage() {
         {/* Email + Webhook stubs */}
         <div className="flex flex-col gap-4">
 
-          <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5 flex flex-col opacity-60">
+          <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5 flex flex-col">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-slate-500" />
+              <div className="w-10 h-10 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-cyan-300" />
               </div>
-              <span className="text-xs font-medium text-slate-500 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full">
-                Coming soon
+              <span className="text-xs font-medium text-cyan-200 bg-cyan-400/10 border border-cyan-400/20 px-2.5 py-1 rounded-full">
+                Test mode
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-white mb-1">Email Digest</h3>
+            <h3 className="text-sm font-semibold text-white mb-1">Email Brief Test Mode</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Weekly or daily email digests with your compliance brief summary and alert index.
+              Render a reviewed weekly brief email payload into the local outbox. No external customer email is sent.
             </p>
+            <label className="mt-4 block text-xs font-medium text-slate-400 mb-1.5">Test recipient</label>
+            <input
+              value={emailRecipient}
+              onChange={event => setEmailRecipient(event.target.value)}
+              placeholder="mlro@example.com"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-600"
+            />
+            <button
+              type="button"
+              onClick={handleEmailTestMode}
+              disabled={emailStatus === 'sending' || !emailRecipient.trim()}
+              className="mt-3 inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-400/25 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-600"
+            >
+              {emailStatus === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+              Write email payload
+            </button>
+            {emailStatus !== 'idle' && (
+              <div className="mt-3">
+                <StatusNotice type={
+                  emailStatus === 'ok' ? 'success' :
+                  emailStatus === 'error' ? 'error' :
+                  'info'
+                }>
+                  {emailStatus === 'sending' ? 'Writing email payload...' : emailMsg}
+                </StatusNotice>
+              </div>
+            )}
           </div>
 
           <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5 flex flex-col opacity-60">

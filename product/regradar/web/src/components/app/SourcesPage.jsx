@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Plus, X, Loader2, CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react'
-import { MOCK_SOURCES } from '../../data/appMockData'
-import { getWorkspaceProfile, filterSources } from '../../data/workspaceProfile'
+import { sources as sourcesApi } from '../../api'
+import { getWorkspaceProfile } from '../../data/workspaceProfile'
 
 // ── status display helpers ────────────────────────────────────────────────────
 
@@ -51,8 +51,11 @@ const INTAKE_STATUS_BG = {
 // legacy source table styles
 const HEALTH_STYLE = {
   PASS:                 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  MONITOR_OK:           'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   'Evidence confirmed': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   Review:               'text-amber-400   bg-amber-500/10   border-amber-500/20',
+  'Not yet started':     'text-slate-400   bg-slate-700      border-slate-600',
+  'Source health issue': 'text-amber-400   bg-amber-500/10   border-amber-500/20',
   Limited:              'text-slate-400   bg-slate-700      border-slate-600',
 }
 const STATUS_STYLE = {
@@ -63,9 +66,10 @@ const STATUS_STYLE = {
   Partial:          'text-slate-400',
   'Needs adapter':  'text-amber-400',
   'Needs remediation': 'text-amber-400',
+  'Monitoring not started': 'text-slate-400',
 }
 
-const FILTERS   = ['All', 'Readiness supported', 'Needs remediation', 'Limited', 'Partial', 'Needs adapter', 'User source']
+const FILTERS   = ['All', 'Readiness supported', 'Needs remediation', 'Monitoring not started', 'Limited', 'Partial', 'Needs adapter', 'User source']
 const MARKETS   = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const CATEGORIES = [
   'Central bank', 'Financial regulator', 'Crypto regulator', 'AML authority',
@@ -78,6 +82,44 @@ const TEST_STEPS = [
   'Extracting regulatory text…',
   'Evaluating extraction quality…',
 ]
+
+const REMEDIATION_SOURCE_IDS = new Set([
+  'AE-dubai-financial-services-authority-dfsa',
+  'AE-dfsa-notices',
+  'AE-difc-laws-and-regulations',
+  'AE-uae-financial-intelligence-unit-uaefiu',
+])
+
+function statusFromApiSource(row) {
+  if (REMEDIATION_SOURCE_IDS.has(row.source_id) || row.status === 'remediation') return 'Needs remediation'
+  if (row.change_status === 'FAILED' || row.change_status === 'QUALITY_DROP') return 'Needs remediation'
+  if (!row.last_run_at || row.change_status === 'NOT_RUN') return 'Monitoring not started'
+  return 'Readiness supported'
+}
+
+function healthFromApiSource(row) {
+  if (row.change_status === 'FAILED' || row.change_status === 'QUALITY_DROP') return 'Source health issue'
+  if (!row.last_run_at || row.change_status === 'NOT_RUN') return 'Not yet started'
+  return 'MONITOR_OK'
+}
+
+function mapApiSource(row) {
+  return {
+    id: row.source_id,
+    source_id: row.source_id,
+    url: row.url,
+    name: row.name || row.source_id || 'Official source',
+    market: 'UAE',
+    flag: '🇦🇪',
+    category: row.category || 'Official source',
+    status: statusFromApiSource(row),
+    extraction: row.extraction_quality || 'UNKNOWN',
+    lastChecked: row.last_run_at || '',
+    health: healthFromApiSource(row),
+    accessStatus: row.access_status || 'unknown',
+    changeStatus: row.change_status || 'NOT_RUN',
+  }
+}
 
 // ── localStorage fallback (for dev mode / offline) ───────────────────────────
 
@@ -112,6 +154,9 @@ export default function SourcesPage({ onAddCustomSource }) {
   const [saveError, setSaveError]         = useState('')
   const [stepIndex, setStepIndex]         = useState(0)
   const [customSources, setCustomSources] = useState(loadLocalCustomSources)
+  const [realSources, setRealSources]     = useState([])
+  const [sourcesLoading, setSourcesLoading] = useState(true)
+  const [sourcesError, setSourcesError]   = useState('')
   const stepTimer                         = useRef(null)
 
   useEffect(() => {
@@ -125,11 +170,31 @@ export default function SourcesPage({ onAddCustomSource }) {
     return () => clearInterval(stepTimer.current)
   }, [testPhase])
 
-  const filteredMock = filterSources(MOCK_SOURCES, profile).filter(s => {
+  useEffect(() => {
+    let active = true
+    sourcesApi.status('AE')
+      .then(data => {
+        if (!active) return
+        setRealSources(Array.isArray(data.sources) ? data.sources.map(mapApiSource) : [])
+        setSourcesError('')
+      })
+      .catch(err => {
+        if (!active) return
+        setSourcesError(err.message || 'Could not load source status.')
+        setRealSources([])
+      })
+      .finally(() => {
+        if (active) setSourcesLoading(false)
+      })
+    return () => { active = false }
+  }, [])
+
+  const filteredReal = realSources.filter(s => {
     if (filter === 'User source') return false
     if (filter === 'All') return true
     if (filter === 'Readiness supported') return sourceStatusLabel(s.status) === 'Readiness supported'
     if (filter === 'Needs remediation') return s.status === 'Needs remediation'
+    if (filter === 'Monitoring not started') return s.status === 'Monitoring not started'
     if (filter === 'Needs adapter') return s.status === 'Needs adapter' || s.extraction?.includes('adapter') || s.extraction?.includes('Geo')
     return s.status === filter
   })
@@ -142,7 +207,7 @@ export default function SourcesPage({ onAddCustomSource }) {
     return s.status === filter
   })
 
-  const allSources = [...filteredMock, ...filteredCustom.map(s => ({ ...s, userSource: true }))]
+  const allSources = [...filteredReal, ...filteredCustom.map(s => ({ ...s, userSource: true }))]
 
   function resetModal() {
     setTestPhase('idle')
@@ -256,7 +321,13 @@ export default function SourcesPage({ onAddCustomSource }) {
   }
 
   function lastCheckedLabel(source) {
-    return source.userSource ? (source.lastChecked || 'Saved') : 'Readiness snapshot'
+    if (source.userSource) return source.lastChecked || 'Saved for validation'
+    if (!source.lastChecked) return 'Monitoring not yet started'
+    try {
+      return new Date(source.lastChecked).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
+    } catch {
+      return source.lastChecked
+    }
   }
 
   // ── result panel helpers ──────────────────────────────────────────────────
@@ -345,7 +416,19 @@ export default function SourcesPage({ onAddCustomSource }) {
 
       {/* Table */}
       <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl overflow-hidden">
-        {allSources.length > 0 ? (
+        {sourcesLoading ? (
+          <div className="px-5 py-10 text-center">
+            <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-[#16D9F5]" />
+            <p className="text-sm text-slate-400 mb-1">Loading live source status…</p>
+            <p className="text-xs text-slate-600">Authenticated source map uses the API, not sample source rows.</p>
+          </div>
+        ) : sourcesError ? (
+          <div className="px-5 py-10 text-center">
+            <AlertTriangle className="mx-auto mb-3 h-5 w-5 text-amber-400" />
+            <p className="text-sm text-amber-300 mb-1">Could not load live source status.</p>
+            <p className="text-xs text-slate-600">{sourcesError}</p>
+          </div>
+        ) : allSources.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
@@ -386,7 +469,7 @@ export default function SourcesPage({ onAddCustomSource }) {
         ) : (
           <div className="px-5 py-10 text-center">
             <p className="text-sm text-slate-400 mb-1">No sources match the current filter.</p>
-            <p className="text-xs text-slate-600">Try changing your filter or test a custom source.</p>
+            <p className="text-xs text-slate-600">Try changing your filter or test a custom source. No sample sources are shown in authenticated source map.</p>
           </div>
         )}
       </div>
