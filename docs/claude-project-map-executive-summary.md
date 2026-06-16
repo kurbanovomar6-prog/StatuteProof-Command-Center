@@ -56,9 +56,9 @@ It is **not** a legal adviser, compliance certifier, or regulator partner.
 ## Current source truth (verified from sources.json + validators)
 
 ```
-46 enabled UAE sources / 42 active (readiness-supported) / 4 under remediation
+66 enabled UAE sources / 62 active (readiness-supported) / 4 under remediation
 ```
-*(Updated 2026-06-16 after weak-zone remediation activated UAE FIU AML/CFT laws, UAE FIU publications hub, and CBUAE rulebook revision updates with MONITORING_CERTIFIED evidence, stable hashes, and mass-monitor MONITOR_OK.)*
+*(Updated 2026-06-16 after the final-8 sprint activated proof-backed CBUAE/DFSA rulebook and guidance sources with MONITORING_CERTIFIED evidence, stable hashes, and mass-monitor MONITOR_OK.)*
 
 Active sources include CBUAE, VARA, DFSA subpages, ADGM/FSRA subpages, SCA
 Circulars, UAE Ministry of Finance, UAE Legislation Portal, UAE Ministry of
@@ -73,7 +73,7 @@ Remediation: DFSA main site, UAE FIU main, DIFC Laws, DFSA Regulatory Notices.
 ## What is missing
 
 1. **Dashboard and Sources page show mock data** — not wired to `sources.json` or live runs.
-2. **50 active UAE sources** — currently 46/42/4. Getting to 50 requires 8 more genuinely passing sources with real evidence + baselines. The live no-save batches show that per-source adapters work, but JS-heavy VARA, DFSA/DIFC, CBUAE non-rulebook, and ADGM alternate variants still need selector or endpoint remediation.
+2. **Diversification beyond the 50-source threshold** — currently 66/62/4. The 50-source minimum is reached, but JS-heavy VARA, DIFC, CBUAE main-site, and ADGM alternate variants still need selector, PDF, or endpoint remediation.
 3. **Alert delivery** — Telegram wiring exists but requires per-client setup.
 4. **Billing** — not implemented; plan intents recorded but no payment processing.
 5. **Custom-source activation UI** — adding a URL via Source Lab saves it as `enabled:false/pending_validation`; there is no UI for the manual review + activation step (done via CLI today).

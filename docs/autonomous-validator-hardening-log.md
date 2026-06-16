@@ -22,9 +22,9 @@ Date: 2026-06-15
 
 ## Existing Validators Updated
 
-- `tools/validate_uae_source_pack.py`: expected truth updated to 46/42/4.
-- `tools/validate_mass_source_activation_pipeline.py`: expected truth updated to 46/42/4.
-- `tools/validate_mass_monitoring_runner.py`: expected truth updated to 46/42/4.
+- `tools/validate_uae_source_pack.py`: expected truth updated to 66/62/4.
+- `tools/validate_mass_source_activation_pipeline.py`: expected truth updated to 66/62/4.
+- `tools/validate_mass_monitoring_runner.py`: expected truth updated to 66/62/4.
 - Adapter allowlists updated for `eocn_news_listing`.
 
 ## Remaining Validator Work

@@ -26,9 +26,9 @@ Newly activated in the weak-zone remediation cycle:
 - `AE-uaefiu-publications-hub`
 - `AE-cbuae-rulebook-revision-updates`
 
-Current truth after this cycle: **46 enabled / 42 readiness-supported / 4 remediation**.
+Checkpoint truth after this cycle: **36 enabled / 32 readiness-supported / 4 remediation**.
 
-The 50-source target is still not reached; 8 more activation-ready sources are required after the weak-zone elimination cycle.
+The 50-source target was still not reached; 18 more activation-ready sources were required after the weak-zone remediation cycle.
 
 ## Weak-Zone Elimination Addendum
 
@@ -45,9 +45,38 @@ The weak-zone elimination cycle after `dd51c04` investigated 31 primary official
 - `AE-cbuae-amlcft-entire-section-doclist`
 - `AE-cbuae-consumer-protection-rulebook-doclist`
 
-Current truth after this cycle: **46 enabled / 42 readiness-supported / 4 remediation**.
+Checkpoint truth after this cycle: **46 enabled / 42 readiness-supported / 4 remediation**.
 
-The 50-source target is still not reached; 8 more activation-ready sources are required.
+The 50-source target was still not reached at that checkpoint; 8 more activation-ready sources were required before the final-8 sprint.
+
+## Final-8 Activation Addendum
+
+The final-8 sprint after `2cc35b1` tested 30 primary candidates, 20 exact CBUAE rulebook candidates, and 16 extra CBUAE rulebook/guidance candidates. It activated twenty additional proof-backed sources:
+
+- `AE-cbuae-open-finance-rulebook`
+- `AE-cbuae-payment-token-services-rulebook`
+- `AE-cbuae-risk-management-rulebook`
+- `AE-cbuae-stored-value-facilities-doclist`
+- `AE-cbuae-operational-risk-regulation-doclist`
+- `AE-cbuae-market-risk-regulation-doclist`
+- `AE-cbuae-large-exposures-regulation-doclist`
+- `AE-cbuae-exchange-business-regulation-doclist`
+- `AE-cbuae-capital-adequacy-doclist`
+- `AE-cbuae-large-value-payment-systems-doclist`
+- `AE-cbuae-federal-decree-law-6-2025-doclist`
+- `AE-cbuae-country-transfer-risk-regulation-doclist`
+- `AE-cbuae-interest-rate-risk-regulation-doclist`
+- `AE-cbuae-model-management-standards-doclist`
+- `AE-cbuae-retail-payment-systems-regulation-doclist`
+- `AE-cbuae-sme-customer-protection-regulation-doclist`
+- `AE-cbuae-islamic-banks-risk-management-doclist`
+- `AE-cbuae-market-conduct-consumer-protection-doclist`
+- `AE-cbuae-proliferation-finance-guidance-doclist`
+- `AE-cbuae-tbml-transshipment-guidance-doclist`
+
+Current truth after this cycle: **66 enabled / 62 readiness-supported / 4 remediation**.
+
+The 50-source target is now reached. The next task is diversification and weak-zone cleanup, not count inflation.
 
 ## 1. Activation Counts
 
@@ -128,7 +157,7 @@ Added:
 
 ## 7. Website/App Copy Changed
 
-No frontend copy was changed. Current truth docs/config/validators were updated to 46/42/4 after weak-zone remediation.
+No frontend code was changed. Current truth docs/config/validators were updated to 66/62/4 after the final-8 activation sprint.
 
 ## 8. Batch-Onboarding Factory Status
 
@@ -136,15 +165,15 @@ Partial. The system can batch no-save-test candidates, classify failures, save p
 
 ## 9. Did We Reach 50?
 
-No. Current readiness-supported active count is 42. Reaching 50 requires 8 more proof-backed, baseline-stable, gate-passing sources.
+Yes. Current readiness-supported active count is 62, and the work queue has 50 activation-ready rows. The safe wording is: "50 activation-ready UAE official source endpoints." Do not say "60 validated sources."
 
 ## 10. Biggest Remaining Blocker
 
-The biggest remaining blockers are now narrower: direct VARA PDF extraction is not implemented in the current Playwright fetch path; DIFC pages remain selector/access blocked; ADGM alternate media/data-protection/listing components still need stable selectors or replacement URLs; and some UAE FIU routes are duplicate/shallow aliases of the activated publications hub.
+The biggest remaining blockers are now diversification blockers: direct VARA PDF extraction is not implemented in the current Playwright fetch path; DIFC pages remain selector/access blocked; ADGM alternate media/data-protection/listing components still need stable selectors or replacement URLs; and some UAE FIU routes are duplicate/shallow aliases of the activated publications hub.
 
 ## 11. Next Exact Task
 
-Execute `docs/autonomous-next-execution-prompt.md`, starting with direct official PDF extraction for VARA rulebooks, DIFC selector/access remediation, and ADGM alternate component replacement URLs.
+Execute `docs/autonomous-next-execution-prompt.md`, starting with direct official PDF extraction for VARA rulebooks, DIFC selector/access remediation, and ADGM alternate component replacement URLs. The target is diversification and operator UX, not proving the 50 minimum again.
 
 ## 12. Validation Results
 

@@ -4,9 +4,9 @@ Date: 2026-06-15
 
 ## 1. What Blocks 50?
 
-The repo now has enough candidate volume, but not enough proof-backed strong passes. The blocker is source-specific extraction on JS-heavy or stale official pages, not discovery.
+The 50-source threshold has now been reached after the final-8 sprint. The remaining blocker is no longer the minimum count; it is diversification and reducing weak-zone dependence on CBUAE rulebook alternates.
 
-Current truth: 46 enabled / 42 readiness-supported / 4 remediation. Reaching 50 requires 8 more proof-backed, baseline-stable, gate-passing sources.
+Current truth: 66 enabled / 62 readiness-supported / 4 remediation. The work queue now has 50 activation-ready rows, and `sources.json` has 62 readiness-supported active rows.
 
 ## 2. Highest Activation Potential
 
@@ -50,11 +50,11 @@ Validators correctly block fake readiness. New `validate_batch_onboarding.py` no
 
 ## 9. Next Highest-Leverage Move
 
-Fix DOM investigation and source-specific selectors or replacement URLs for ADGM Listing Authority / ADGM RA pages, then find official VARA PDF/rulebook endpoints that do not collapse to nav-shell.
+Diversify the 50+ pack: implement direct official PDF extraction for VARA rulebooks, fix ADGM alternate component selectors, and keep DIFC access/selector remediation honest.
 
 ## 10. Can The System Batch-Onboard Yet?
 
-Partial. It can batch no-save-test and classify candidates. It cannot yet batch-activate without operator review because JS-heavy sources still require source-specific selectors and duplicate hash review.
+Partial-to-yes for official rulebook/document-listing families. The system can batch no-save-test, save proof, repeat baseline, run mass-monitor dry-run, and apply gated activation. It still needs operator review for JS-heavy, PDF-only, and access-sensitive sites.
 
 ## 11. What Blocks Batch-Onboarding?
 

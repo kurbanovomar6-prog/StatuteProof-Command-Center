@@ -2089,5 +2089,345 @@
       "max_items": 80
     },
     "fetch_method": "playwright"
+  },
+  {
+    "name": "CBUAE Open Finance Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/open-finance-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-open-finance-rulebook",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-open-finance-rulebook/intake-20260616T073001Z/proof.json",
+    "normalized_hash": "e109dd47cb7be06ae5e47d6871162a12d4be8e944fcfed5b1b46c7de24f472a2",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "CBUAE Payment Token Services Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/payment-token-services-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-payment-token-services-rulebook",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-payment-token-services-rulebook/intake-20260616T073006Z/proof.json",
+    "normalized_hash": "b5106e776b8d0cadf856ad696f52c13fe4a42c97a6167103fc5476833b7efd6f",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "CBUAE Risk Management Rulebook",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/risk-management",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-risk-management-rulebook",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-risk-management-rulebook/intake-20260616T073011Z/proof.json",
+    "normalized_hash": "09d5657181d9230dccd08ab00dd7385d4dce6ae82ea573b7705f3b73cf5c9346",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Stored Value Facilities",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/stored-value-facilities",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-stored-value-facilities-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-stored-value-facilities-doclist/intake-20260616T073033Z/proof.json",
+    "normalized_hash": "d9d73274f6b6ed969611d813fb8850e488d77c73a89e14a922e0277f6a4cdb8d",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Operational Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/operational-risk-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-operational-risk-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-operational-risk-regulation-doclist/intake-20260616T073036Z/proof.json",
+    "normalized_hash": "eddea440064f61a179271632f8e60241df966683b7bd54fb61e5978d18d7d169",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Market Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/market-risk-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-market-risk-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-market-risk-regulation-doclist/intake-20260616T073039Z/proof.json",
+    "normalized_hash": "492f6a0b35a7f244468ce0de91c3f3e3da0a3f52bd9d53ef178e7a4fd326e0d7",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Large Exposures Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/large-exposures-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-large-exposures-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-exposures-regulation-doclist/intake-20260616T073042Z/proof.json",
+    "normalized_hash": "0b6cb387b1891d85fa4fc5a9fa26c2ae5dc753b7b2e85d24ffbbe9a23800ef12",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Exchange Business Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-exchange-business-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-exchange-business-regulation-doclist/intake-20260616T073046Z/proof.json",
+    "normalized_hash": "17e9c895bb7eb97a835c7360640aab53df8174fad243c197abf0a6945485f765",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Capital Adequacy",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/capital-adequacy",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-capital-adequacy-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-capital-adequacy-doclist/intake-20260616T073049Z/proof.json",
+    "normalized_hash": "1f8237e7b1e8051a77028af6f6ba9542598cf94da72a7294a959099845233b67",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Large Value Payment Systems Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/large-value-payment-systems-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-large-value-payment-systems-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-value-payment-systems-doclist/intake-20260616T073052Z/proof.json",
+    "normalized_hash": "753c04fbdc8ad4ecf1afc1e143276717fa2b6f86c29281370aa5d084adb57371",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Federal Decree Law No. 6 of 2025",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-federal-decree-law-6-2025-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-federal-decree-law-6-2025-doclist/intake-20260616T073056Z/proof.json",
+    "normalized_hash": "e040e15431058c0e03b6414d4deaa4d3d233cb28e6921c188bcf17983ed5b79b",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Country and Transfer Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/country-and-transfer-risk-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-country-transfer-risk-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-country-transfer-risk-regulation-doclist/intake-20260616T073602Z/proof.json",
+    "normalized_hash": "1f8b36a4d3b89fd8f0f0d0635c72329aa801e078fa816fe11523c94d2dfcfc11",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Interest Rate and Rate of Return Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/interest-rate-and-rate-return-risk-banking-book-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-interest-rate-risk-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-interest-rate-risk-regulation-doclist/intake-20260616T073608Z/proof.json",
+    "normalized_hash": "99b04f8639fcb9d8a12e6e660b9ef057da96f390c106d4438ae3a94be7ed66a9",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Model Management Standards",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/model-management-standards",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-model-management-standards-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-model-management-standards-doclist/intake-20260616T073613Z/proof.json",
+    "normalized_hash": "cb3b677bbdabf02255c8665873e3b3029274b67f2d11a515beae420165871f1f",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Retail Payment Systems Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/retail-payment-systems-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-retail-payment-systems-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-retail-payment-systems-regulation-doclist/intake-20260616T073617Z/proof.json",
+    "normalized_hash": "566408951e1386097b09e94086cb55793e9328e816ca11c202970b73f50e5bd0",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "SME Customer Protection Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-sme-customer-protection-regulation-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-sme-customer-protection-regulation-doclist/intake-20260616T073621Z/proof.json",
+    "normalized_hash": "ee8232ab5df6b139df0141cf15075e4d0b07701373ab0d1ae252f59d674f2d63",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Islamic Banks Risk Management Standard",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/standard-re-risk-management-requirements-islamic-banks",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-islamic-banks-risk-management-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-islamic-banks-risk-management-doclist/intake-20260616T073628Z/proof.json",
+    "normalized_hash": "dfaba2cc4ed16640f8017f5d0252974ae996394e1c558a18aa183b3062da12aa",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Market Conduct Consumer Protection",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/market-conduct-consumer-protection",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-market-conduct-consumer-protection-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-market-conduct-consumer-protection-doclist/intake-20260616T073631Z/proof.json",
+    "normalized_hash": "0d9406b00a6c35338b0df98a11818c13473bed4f522dee220a20f04ba2a61fdb",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "Proliferation Finance Guidance",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-proliferation-finance-guidance-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-proliferation-finance-guidance-doclist/intake-20260616T073635Z/proof.json",
+    "normalized_hash": "919eedeac460293d17b314479b1f7ed7e0de8ff31bcb1d3a53536301fa8bc3d0",
+    "adapter_config": {
+      "container_selector": "main"
+    }
+  },
+  {
+    "name": "TBML and Transshipment Guidance",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%E2%80%9Ctbml%E2%80%9D",
+    "jurisdiction": "AE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "active",
+    "source_id": "AE-cbuae-tbml-transshipment-guidance-doclist",
+    "adapter_family": "cbuae_document_listing",
+    "adapter_name": "cbuae_document_listing",
+    "expected_min_length": 500,
+    "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-tbml-transshipment-guidance-doclist/intake-20260616T073639Z/proof.json",
+    "normalized_hash": "1755ecf46ec5ca6279a5aea2bef0afdcf67f365e615af0ea12a45f65b951ccaf",
+    "adapter_config": {
+      "container_selector": "main"
+    }
   }
 ]

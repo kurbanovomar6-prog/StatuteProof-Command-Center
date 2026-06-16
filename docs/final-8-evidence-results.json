@@ -1,0 +1,749 @@
+{
+  "selected_count": 12,
+  "results": [
+    {
+      "source_id": "AE-cbuae-open-finance-rulebook",
+      "name": "AE-cbuae-open-finance-rulebook",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/open-finance-regulation",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "GOOD",
+      "no_save_normalized_hash": "e109dd47cb7be06ae5e47d6871162a12d4be8e944fcfed5b1b46c7de24f472a2",
+      "no_save_normalized_length": 8630,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 8630,
+          "normalized_hash": "e109dd47cb7be06ae5e47d6871162a12d4be8e944fcfed5b1b46c7de24f472a2",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-open-finance-rulebook/intake-20260616T073001Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 8630,
+          "normalized_hash": "e109dd47cb7be06ae5e47d6871162a12d4be8e944fcfed5b1b46c7de24f472a2",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-open-finance-rulebook/intake-20260616T073004Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-open-finance-rulebook/intake-20260616T073001Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-open-finance-rulebook/intake-20260616T073004Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-open-finance-rulebook/intake-20260616T073001Z/proof.json",
+      "hash_history": [
+        "e109dd47cb7be06ae5e47d6871162a12d4be8e944fcfed5b1b46c7de24f472a2",
+        "e109dd47cb7be06ae5e47d6871162a12d4be8e944fcfed5b1b46c7de24f472a2"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-payment-token-services-rulebook",
+      "name": "AE-cbuae-payment-token-services-rulebook",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/payment-token-services-regulation",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "GOOD",
+      "no_save_normalized_hash": "b5106e776b8d0cadf856ad696f52c13fe4a42c97a6167103fc5476833b7efd6f",
+      "no_save_normalized_length": 18994,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 18994,
+          "normalized_hash": "b5106e776b8d0cadf856ad696f52c13fe4a42c97a6167103fc5476833b7efd6f",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-payment-token-services-rulebook/intake-20260616T073006Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 18994,
+          "normalized_hash": "b5106e776b8d0cadf856ad696f52c13fe4a42c97a6167103fc5476833b7efd6f",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-payment-token-services-rulebook/intake-20260616T073010Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-payment-token-services-rulebook/intake-20260616T073006Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-payment-token-services-rulebook/intake-20260616T073010Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-payment-token-services-rulebook/intake-20260616T073006Z/proof.json",
+      "hash_history": [
+        "b5106e776b8d0cadf856ad696f52c13fe4a42c97a6167103fc5476833b7efd6f",
+        "b5106e776b8d0cadf856ad696f52c13fe4a42c97a6167103fc5476833b7efd6f"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-risk-management-rulebook",
+      "name": "AE-cbuae-risk-management-rulebook",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/risk-management",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "09d5657181d9230dccd08ab00dd7385d4dce6ae82ea573b7705f3b73cf5c9346",
+      "no_save_normalized_length": 2808,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 2808,
+          "normalized_hash": "09d5657181d9230dccd08ab00dd7385d4dce6ae82ea573b7705f3b73cf5c9346",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-risk-management-rulebook/intake-20260616T073011Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 2808,
+          "normalized_hash": "09d5657181d9230dccd08ab00dd7385d4dce6ae82ea573b7705f3b73cf5c9346",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-risk-management-rulebook/intake-20260616T073013Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-risk-management-rulebook/intake-20260616T073011Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-risk-management-rulebook/intake-20260616T073013Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-risk-management-rulebook/intake-20260616T073011Z/proof.json",
+      "hash_history": [
+        "09d5657181d9230dccd08ab00dd7385d4dce6ae82ea573b7705f3b73cf5c9346",
+        "09d5657181d9230dccd08ab00dd7385d4dce6ae82ea573b7705f3b73cf5c9346"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-dfsa-aml-ctf-sanctions",
+      "name": "AE-dfsa-aml-ctf-sanctions",
+      "regulator": "DFSA",
+      "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "GOOD",
+      "no_save_normalized_hash": "d66b892200dd04e8dc022bc3d2191e167c60109f0e7cba58e2e8c77e45ad856a",
+      "no_save_normalized_length": 16653,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 16653,
+          "normalized_hash": "d66b892200dd04e8dc022bc3d2191e167c60109f0e7cba58e2e8c77e45ad856a",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-aml-ctf-sanctions/intake-20260616T073023Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "dfsa_notice_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 16653,
+          "normalized_hash": "d66b892200dd04e8dc022bc3d2191e167c60109f0e7cba58e2e8c77e45ad856a",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-aml-ctf-sanctions/intake-20260616T073031Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "dfsa_notice_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-aml-ctf-sanctions/intake-20260616T073023Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-dfsa-aml-ctf-sanctions/intake-20260616T073031Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-dfsa-aml-ctf-sanctions/intake-20260616T073023Z/proof.json",
+      "hash_history": [
+        "d66b892200dd04e8dc022bc3d2191e167c60109f0e7cba58e2e8c77e45ad856a",
+        "d66b892200dd04e8dc022bc3d2191e167c60109f0e7cba58e2e8c77e45ad856a"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-stored-value-facilities-doclist",
+      "name": "Stored Value Facilities",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/stored-value-facilities",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "d9d73274f6b6ed969611d813fb8850e488d77c73a89e14a922e0277f6a4cdb8d",
+      "no_save_normalized_length": 8265,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 8265,
+          "normalized_hash": "d9d73274f6b6ed969611d813fb8850e488d77c73a89e14a922e0277f6a4cdb8d",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-stored-value-facilities-doclist/intake-20260616T073033Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 8265,
+          "normalized_hash": "d9d73274f6b6ed969611d813fb8850e488d77c73a89e14a922e0277f6a4cdb8d",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-stored-value-facilities-doclist/intake-20260616T073035Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-stored-value-facilities-doclist/intake-20260616T073033Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-stored-value-facilities-doclist/intake-20260616T073035Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-stored-value-facilities-doclist/intake-20260616T073033Z/proof.json",
+      "hash_history": [
+        "d9d73274f6b6ed969611d813fb8850e488d77c73a89e14a922e0277f6a4cdb8d",
+        "d9d73274f6b6ed969611d813fb8850e488d77c73a89e14a922e0277f6a4cdb8d"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-operational-risk-regulation-doclist",
+      "name": "Operational Risk Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/operational-risk-regulation",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "eddea440064f61a179271632f8e60241df966683b7bd54fb61e5978d18d7d169",
+      "no_save_normalized_length": 3080,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 3080,
+          "normalized_hash": "eddea440064f61a179271632f8e60241df966683b7bd54fb61e5978d18d7d169",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-operational-risk-regulation-doclist/intake-20260616T073036Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 3080,
+          "normalized_hash": "eddea440064f61a179271632f8e60241df966683b7bd54fb61e5978d18d7d169",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-operational-risk-regulation-doclist/intake-20260616T073038Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-operational-risk-regulation-doclist/intake-20260616T073036Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-operational-risk-regulation-doclist/intake-20260616T073038Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-operational-risk-regulation-doclist/intake-20260616T073036Z/proof.json",
+      "hash_history": [
+        "eddea440064f61a179271632f8e60241df966683b7bd54fb61e5978d18d7d169",
+        "eddea440064f61a179271632f8e60241df966683b7bd54fb61e5978d18d7d169"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-market-risk-regulation-doclist",
+      "name": "Market Risk Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/market-risk-regulation",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "492f6a0b35a7f244468ce0de91c3f3e3da0a3f52bd9d53ef178e7a4fd326e0d7",
+      "no_save_normalized_length": 2992,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 2992,
+          "normalized_hash": "492f6a0b35a7f244468ce0de91c3f3e3da0a3f52bd9d53ef178e7a4fd326e0d7",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-market-risk-regulation-doclist/intake-20260616T073039Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 2992,
+          "normalized_hash": "492f6a0b35a7f244468ce0de91c3f3e3da0a3f52bd9d53ef178e7a4fd326e0d7",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-market-risk-regulation-doclist/intake-20260616T073040Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-market-risk-regulation-doclist/intake-20260616T073039Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-market-risk-regulation-doclist/intake-20260616T073040Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-market-risk-regulation-doclist/intake-20260616T073039Z/proof.json",
+      "hash_history": [
+        "492f6a0b35a7f244468ce0de91c3f3e3da0a3f52bd9d53ef178e7a4fd326e0d7",
+        "492f6a0b35a7f244468ce0de91c3f3e3da0a3f52bd9d53ef178e7a4fd326e0d7"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-large-exposures-regulation-doclist",
+      "name": "Large Exposures Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/large-exposures-regulation",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "0b6cb387b1891d85fa4fc5a9fa26c2ae5dc753b7b2e85d24ffbbe9a23800ef12",
+      "no_save_normalized_length": 12408,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 12408,
+          "normalized_hash": "0b6cb387b1891d85fa4fc5a9fa26c2ae5dc753b7b2e85d24ffbbe9a23800ef12",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-exposures-regulation-doclist/intake-20260616T073042Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 12408,
+          "normalized_hash": "0b6cb387b1891d85fa4fc5a9fa26c2ae5dc753b7b2e85d24ffbbe9a23800ef12",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-exposures-regulation-doclist/intake-20260616T073044Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-exposures-regulation-doclist/intake-20260616T073042Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-exposures-regulation-doclist/intake-20260616T073044Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-exposures-regulation-doclist/intake-20260616T073042Z/proof.json",
+      "hash_history": [
+        "0b6cb387b1891d85fa4fc5a9fa26c2ae5dc753b7b2e85d24ffbbe9a23800ef12",
+        "0b6cb387b1891d85fa4fc5a9fa26c2ae5dc753b7b2e85d24ffbbe9a23800ef12"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-exchange-business-regulation-doclist",
+      "name": "Exchange Business Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "17e9c895bb7eb97a835c7360640aab53df8174fad243c197abf0a6945485f765",
+      "no_save_normalized_length": 11014,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 11014,
+          "normalized_hash": "17e9c895bb7eb97a835c7360640aab53df8174fad243c197abf0a6945485f765",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-exchange-business-regulation-doclist/intake-20260616T073046Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 11014,
+          "normalized_hash": "17e9c895bb7eb97a835c7360640aab53df8174fad243c197abf0a6945485f765",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-exchange-business-regulation-doclist/intake-20260616T073048Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-exchange-business-regulation-doclist/intake-20260616T073046Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-exchange-business-regulation-doclist/intake-20260616T073048Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-exchange-business-regulation-doclist/intake-20260616T073046Z/proof.json",
+      "hash_history": [
+        "17e9c895bb7eb97a835c7360640aab53df8174fad243c197abf0a6945485f765",
+        "17e9c895bb7eb97a835c7360640aab53df8174fad243c197abf0a6945485f765"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-capital-adequacy-doclist",
+      "name": "Capital Adequacy",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/capital-adequacy",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "1f8237e7b1e8051a77028af6f6ba9542598cf94da72a7294a959099845233b67",
+      "no_save_normalized_length": 3159,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 3159,
+          "normalized_hash": "1f8237e7b1e8051a77028af6f6ba9542598cf94da72a7294a959099845233b67",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-capital-adequacy-doclist/intake-20260616T073049Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 3159,
+          "normalized_hash": "1f8237e7b1e8051a77028af6f6ba9542598cf94da72a7294a959099845233b67",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-capital-adequacy-doclist/intake-20260616T073050Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-capital-adequacy-doclist/intake-20260616T073049Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-capital-adequacy-doclist/intake-20260616T073050Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-capital-adequacy-doclist/intake-20260616T073049Z/proof.json",
+      "hash_history": [
+        "1f8237e7b1e8051a77028af6f6ba9542598cf94da72a7294a959099845233b67",
+        "1f8237e7b1e8051a77028af6f6ba9542598cf94da72a7294a959099845233b67"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-large-value-payment-systems-doclist",
+      "name": "Large Value Payment Systems Regulation",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/large-value-payment-systems-regulation",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "753c04fbdc8ad4ecf1afc1e143276717fa2b6f86c29281370aa5d084adb57371",
+      "no_save_normalized_length": 8931,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 8931,
+          "normalized_hash": "753c04fbdc8ad4ecf1afc1e143276717fa2b6f86c29281370aa5d084adb57371",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-value-payment-systems-doclist/intake-20260616T073052Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 8931,
+          "normalized_hash": "753c04fbdc8ad4ecf1afc1e143276717fa2b6f86c29281370aa5d084adb57371",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-value-payment-systems-doclist/intake-20260616T073053Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-value-payment-systems-doclist/intake-20260616T073052Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-value-payment-systems-doclist/intake-20260616T073053Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-large-value-payment-systems-doclist/intake-20260616T073052Z/proof.json",
+      "hash_history": [
+        "753c04fbdc8ad4ecf1afc1e143276717fa2b6f86c29281370aa5d084adb57371",
+        "753c04fbdc8ad4ecf1afc1e143276717fa2b6f86c29281370aa5d084adb57371"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    },
+    {
+      "source_id": "AE-cbuae-federal-decree-law-6-2025-doclist",
+      "name": "Federal Decree Law No. 6 of 2025",
+      "regulator": "CBUAE",
+      "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and",
+      "adapter_family": "cbuae_document_listing",
+      "adapter_name": "cbuae_document_listing",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "e040e15431058c0e03b6414d4deaa4d3d233cb28e6921c188bcf17983ed5b79b",
+      "no_save_normalized_length": 14231,
+      "run_results": [
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 14231,
+          "normalized_hash": "e040e15431058c0e03b6414d4deaa4d3d233cb28e6921c188bcf17983ed5b79b",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-federal-decree-law-6-2025-doclist/intake-20260616T073056Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        },
+        {
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 65,
+          "chars_normalized": 14231,
+          "normalized_hash": "e040e15431058c0e03b6414d4deaa4d3d233cb28e6921c188bcf17983ed5b79b",
+          "evidence_written": true,
+          "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-federal-decree-law-6-2025-doclist/intake-20260616T073105Z/proof.json",
+          "can_save_evidence": false,
+          "adapter_used": true,
+          "adapter_name": "cbuae_document_listing",
+          "noise_risk": "low",
+          "source_health_risk": "medium",
+          "failure_reason": ""
+        }
+      ],
+      "certification_status": "MONITORING_CERTIFIED",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "proof_paths": [
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-federal-decree-law-6-2025-doclist/intake-20260616T073056Z/proof.json",
+        "data/source_snapshots/2026-06-16/AE/AE-cbuae-federal-decree-law-6-2025-doclist/intake-20260616T073105Z/proof.json"
+      ],
+      "proof_path": "data/source_snapshots/2026-06-16/AE/AE-cbuae-federal-decree-law-6-2025-doclist/intake-20260616T073056Z/proof.json",
+      "hash_history": [
+        "e040e15431058c0e03b6414d4deaa4d3d233cb28e6921c188bcf17983ed5b79b",
+        "e040e15431058c0e03b6414d4deaa4d3d233cb28e6921c188bcf17983ed5b79b"
+      ],
+      "hash_stable": true,
+      "evidence_level": "CERTIFIED_EVIDENCE",
+      "certification_score": 88,
+      "noise_risk": "low",
+      "source_health_risk": "medium"
+    }
+  ]
+}
