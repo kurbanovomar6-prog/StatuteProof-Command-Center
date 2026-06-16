@@ -1,0 +1,57 @@
+{
+  "activation_ready_only": true,
+  "alert_delivery_enabled": false,
+  "include_enabled_sources": false,
+  "mode": "dry-run",
+  "processed_count": 2,
+  "results": [
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "cae7770f5cfd354292b5b1b0ead14134ea5eb88a5c2f319ff1345dfc3b89efc0",
+      "previous_hash": "",
+      "proof_path": "",
+      "quality_score": 62,
+      "regulator": "ADGM/FSRA",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-adgm-legal-framework-rules",
+      "url": "https://www.adgm.com/legal-framework/rules-and-regulations"
+    },
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "aa592c78c838c8c4927f34eaeefd903a046c9482cfd460e6b581ce247613e4be",
+      "previous_hash": "",
+      "proof_path": "",
+      "quality_score": 62,
+      "regulator": "SCA",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-sca-circulars",
+      "url": "https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures"
+    }
+  ],
+  "save_proof": false,
+  "skipped": [],
+  "skipped_count": 0,
+  "source_health_counts": {
+    "HASH_COLLISION": 0,
+    "MANUAL_CHECK_REQUIRED": 0,
+    "MONITOR_DISCONNECTED": 0,
+    "MONITOR_OK": 2,
+    "NAV_SHELL_ONLY": 0,
+    "QUALITY_DROP": 0,
+    "REMEDIATION_REQUIRED": 0,
+    "SELECTOR_BROKEN": 0,
+    "SOURCE_STRUCTURE_CHANGED": 0
+  },
+  "sources_json_changed": false,
+  "warnings": []
+}

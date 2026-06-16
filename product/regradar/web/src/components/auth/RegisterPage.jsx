@@ -28,7 +28,7 @@ function AuthLayout({ children, quote }) {
           <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/35 p-4 text-xs text-slate-400">
             <div className="flex justify-between gap-3">
               <span>Readiness</span>
-              <span className="text-slate-200">15 readiness-supported / 4 under remediation</span>
+              <span className="text-slate-200">62 readiness-supported / 4 under remediation</span>
             </div>
             <div className="flex justify-between gap-3">
               <span>Activation</span>

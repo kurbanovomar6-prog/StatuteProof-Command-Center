@@ -20,8 +20,8 @@ const COV_COLOR = {
 }
 
 const SOURCE_READINESS_SUMMARY = {
-  enabled: 13,
-  supported: 9,
+  enabled: 66,
+  supported: 62,
   remediation: 4,
 }
 

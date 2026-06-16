@@ -14,8 +14,11 @@ const SOURCES = [
   { source_id: 'AE-uae-financial-intelligence-unit-uaefiu', regulator: 'UAE FIU Homepage', jurisdiction: 'UAE Federal', tier: 2, status: 'REMEDIATION' },
 ]
 
-const supportedCount = SOURCES.filter(s => s.status === 'READINESS_SUPPORTED').length
-const remediationCount = SOURCES.filter(s => s.status === 'REMEDIATION').length
+const SOURCE_TRUTH = {
+  enabled: 66,
+  readinessSupported: 62,
+  remediation: 4,
+}
 
 function StatusBadge({ status }) {
   if (status === 'READINESS_SUPPORTED') {
@@ -41,12 +44,12 @@ export default function SourceCoverageTable() {
             SAMPLE / DEMO
           </span>
           <h3 className="mt-2 text-sm font-semibold text-white">UAE source pack readiness</h3>
-          <p className="mt-1 text-xs text-slate-500">Illustrative table using current readiness framing.</p>
+          <p className="mt-1 text-xs text-slate-500">Sample rows using current readiness framing. Full registry truth is shown at right.</p>
         </div>
         <div className="text-right text-xs">
-          <p className="font-semibold text-cyan-200">{SOURCES.length} enabled</p>
-          <p className="text-emerald-200">{supportedCount} readiness-supported</p>
-          <p className="text-amber-200">{remediationCount} under extraction remediation</p>
+          <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} enabled</p>
+          <p className="text-emerald-200">{SOURCE_TRUTH.readinessSupported} readiness-supported</p>
+          <p className="text-amber-200">{SOURCE_TRUTH.remediation} under extraction remediation</p>
         </div>
       </div>
       <div className="overflow-y-auto max-h-72">
@@ -77,7 +80,7 @@ export default function SourceCoverageTable() {
         </table>
       </div>
       <div className="border-t border-slate-800 px-4 py-2 text-xs text-slate-500">
-        Remediation sources are not treated as ready until extraction quality is fixed and rerun.
+        Sample rows only. Remediation sources are not treated as ready until extraction quality is fixed and rerun.
       </div>
     </div>
   )

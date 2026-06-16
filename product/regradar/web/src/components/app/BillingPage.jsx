@@ -104,7 +104,7 @@ export default function BillingPage({ planState }) {
         <div className="bg-[#16D9F5]/5 border border-[#16D9F5]/20 rounded-xl p-4">
           <p className="text-sm font-semibold text-white mb-1">Upgrade to UAE Monitor</p>
           <p className="text-xs text-slate-400 mb-3">
-            19 enabled UAE sources under evidence-readiness review: 15 readiness-supported, 4 under extraction remediation.
+            66 enabled UAE sources: 62 readiness-supported after proof and baseline gates, 4 under extraction remediation.
             Includes high-risk review queue, weekly MLRO brief after setup, and 180-day evidence retention.
           </p>
           <div className="flex gap-2">
