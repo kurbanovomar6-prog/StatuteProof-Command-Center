@@ -44,6 +44,23 @@ function StatusNotice({ type, children }) {
   )
 }
 
+function emailStatusClass(status) {
+  if (status === 'test_mode') return 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'
+  if (status === 'ready_but_disabled') return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
+  if (status === 'production_enabled') return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
+  if (status === 'configuration_required') return 'border-amber-400/25 bg-amber-400/10 text-amber-200'
+  return 'border-slate-700 bg-slate-900 text-slate-300'
+}
+
+function emailModeLabel(state) {
+  if (!state) return 'Email readiness unknown'
+  if (state.status === 'test_mode') return 'Local outbox / test-mode'
+  if (state.status === 'ready_but_disabled') return 'Provider configured but disabled'
+  if (state.status === 'production_enabled' && state.send_enabled && state.provider_configured) return 'Production sending enabled'
+  if (state.status === 'configuration_required') return 'Configuration required'
+  return 'Email readiness unknown'
+}
+
 export default function IntegrationsPage() {
   const [status, setStatus] = useState(null)
   const [botUsername, setBotUsername] = useState('')
@@ -58,6 +75,9 @@ export default function IntegrationsPage() {
   const [emailRecipient, setEmailRecipient] = useState('')
   const [emailStatus, setEmailStatus] = useState('idle')
   const [emailMsg, setEmailMsg] = useState('')
+  const [emailReadiness, setEmailReadiness] = useState(null)
+  const [emailReadinessLoading, setEmailReadinessLoading] = useState(true)
+  const [emailConfigChecking, setEmailConfigChecking] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const activeCode = status?.active_code
@@ -77,8 +97,31 @@ export default function IntegrationsPage() {
     }
   }
 
+  async function refreshEmailReadiness() {
+    setEmailReadinessLoading(true)
+    try {
+      const data = await delivery.emailStatus()
+      setEmailReadiness(data)
+    } catch (err) {
+      setEmailReadiness({
+        ok: false,
+        status: 'configuration_required',
+        provider: 'unknown',
+        customer_safe_status: err.message || 'Could not load email readiness.',
+        missing_config: [],
+        send_enabled: false,
+        provider_configured: false,
+      })
+    } finally {
+      setEmailReadinessLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const timer = window.setTimeout(() => { refreshStatus() }, 0)
+    const timer = window.setTimeout(() => {
+      refreshStatus()
+      refreshEmailReadiness()
+    }, 0)
     return () => window.clearTimeout(timer)
   }, [])
 
@@ -158,6 +201,7 @@ export default function IntegrationsPage() {
       const data = await delivery.emailTestMode(emailRecipient)
       setEmailStatus('ok')
       setEmailMsg(data.message || `Email payload written to local outbox: ${data.outbox_path || 'path unavailable'}`)
+      await refreshEmailReadiness()
     } catch (err) {
       setEmailStatus('error')
       setEmailMsg(err.message || 'Could not write email test-mode payload.')
@@ -166,6 +210,23 @@ export default function IntegrationsPage() {
       setEmailStatus('idle')
       setEmailMsg('')
     }, 9000)
+  }
+
+  async function handleEmailConfigCheck() {
+    setEmailConfigChecking(true)
+    setEmailMsg('')
+    try {
+      const data = await delivery.emailConfigCheck()
+      setEmailReadiness(data)
+      setEmailStatus(data.status === 'configuration_required' ? 'error' : 'ok')
+      setEmailMsg(data.customer_safe_status || 'Email configuration checked.')
+    } catch (err) {
+      setEmailStatus('error')
+      setEmailMsg(err.message || 'Email configuration check failed.')
+      await refreshEmailReadiness()
+    } finally {
+      setEmailConfigChecking(false)
+    }
   }
 
   async function handleUnlink() {
@@ -436,10 +497,74 @@ export default function IntegrationsPage() {
                 Test mode
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-white mb-1">Email Brief Test Mode</h3>
+            <h3 className="text-sm font-semibold text-white mb-1">Email Brief Delivery</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Render a reviewed weekly brief email payload into the local outbox. No external customer email is sent.
+              Render a reviewed weekly brief email payload into the local outbox. Production provider readiness is visible here, but no external email is sent unless explicitly configured and enabled server-side.
             </p>
+            <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/45 p-3">
+              {emailReadinessLoading ? (
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Loading email readiness...
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Current mode</p>
+                      <p className="mt-0.5 text-xs font-semibold text-slate-200">{emailModeLabel(emailReadiness)}</p>
+                    </div>
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${emailStatusClass(emailReadiness?.status)}`}>
+                      {emailReadiness?.status || 'unknown'}
+                    </span>
+                  </div>
+                  <dl className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <dt className="text-slate-500">Provider</dt>
+                      <dd className="text-slate-300">{emailReadiness?.provider || 'local_outbox'}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-slate-500">External send</dt>
+                      <dd className={emailReadiness?.send_enabled && emailReadiness?.provider_configured ? 'text-emerald-300' : 'text-slate-300'}>
+                        {emailReadiness?.send_enabled && emailReadiness?.provider_configured ? 'Enabled by server config' : 'Disabled'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-slate-500">From</dt>
+                      <dd className="break-all text-slate-300">{emailReadiness?.from_email || 'Not configured'}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-slate-500">Last status</dt>
+                      <dd className="text-slate-300">{emailReadiness?.last_delivery_status?.status || 'No delivery status yet'}</dd>
+                    </div>
+                  </dl>
+                  {emailReadiness?.missing_config?.length ? (
+                    <div>
+                      <p className="mb-1 text-[11px] font-semibold text-amber-300">Missing configuration</p>
+                      <div className="flex flex-wrap gap-1">
+                        {emailReadiness.missing_config.map(item => (
+                          <span key={item} className="rounded border border-amber-400/25 bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-200">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  <p className="text-[11px] leading-relaxed text-slate-500">
+                    {emailReadiness?.customer_safe_status || 'Email delivery status is not available.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleEmailConfigCheck}
+                    disabled={emailConfigChecking}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {emailConfigChecking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                    Check provider config
+                  </button>
+                </div>
+              )}
+            </div>
             <label className="mt-4 block text-xs font-medium text-slate-400 mb-1.5">Test recipient</label>
             <input
               value={emailRecipient}
@@ -456,6 +581,9 @@ export default function IntegrationsPage() {
               {emailStatus === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
               Write email payload
             </button>
+            <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+              Test-mode writes a local payload and delivery-status row. No provider secrets are shown in the dashboard. Monitoring intelligence only. Not legal advice.
+            </p>
             {emailStatus !== 'idle' && (
               <div className="mt-3">
                 <StatusNotice type={

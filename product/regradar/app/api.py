@@ -242,6 +242,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_delivery_logs()
         elif path == "/api/delivery/preview":
             self._handle_delivery_preview()
+        elif path == "/api/delivery/email-status":
+            self._handle_delivery_email_status()
         elif path == "/api/sources/timeline":
             self._handle_source_timeline_get()
         elif path == "/api/sources/summary":
@@ -304,6 +306,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_delivery_send_preview_alert()
         elif path == "/api/delivery/email-test-mode":
             self._handle_delivery_email_test_mode()
+        elif path == "/api/delivery/email-config-check":
+            self._handle_delivery_email_config_check()
         elif path == "/api/evidence/assess":
             self._handle_evidence_assess()
         elif path == "/api/evidence/export":
@@ -737,6 +741,34 @@ class _Handler(BaseHTTPRequestHandler):
             }, 400)
         except Exception as exc:
             logger.error("Email test-mode delivery failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_delivery_email_status(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            from app.email_delivery import build_email_status_response
+
+            self._send_json(build_email_status_response())
+        except Exception as exc:
+            logger.error("Email status failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_delivery_email_config_check(self) -> None:
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            from app.email_delivery import record_email_config_check
+
+            result = record_email_config_check()
+            status_code = 200 if result.get("status") != "configuration_required" else 400
+            self._send_json(result, status_code)
+        except Exception as exc:
+            logger.error("Email config check failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_sources_status(self) -> None:

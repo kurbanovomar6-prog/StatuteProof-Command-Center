@@ -146,11 +146,19 @@ export const delivery = {
     return authRequest('/api/delivery/test-brief', { method: 'POST' })
   },
 
+  emailStatus() {
+    return authRequest('/api/delivery/email-status')
+  },
+
   emailTestMode(recipientEmail) {
     return authRequest('/api/delivery/email-test-mode', {
       method: 'POST',
       body: JSON.stringify({ recipient_email: recipientEmail }),
     })
+  },
+
+  emailConfigCheck() {
+    return authRequest('/api/delivery/email-config-check', { method: 'POST' })
   },
 
   logs(limit = 20) {

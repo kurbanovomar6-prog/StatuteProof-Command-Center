@@ -22,7 +22,7 @@ Implemented:
 
 Remaining future work:
 
-- Production email provider/send configuration.
+- Production external email sending.
 - VARA direct official PDF/rulebook extraction.
 - DIFC selector/access remediation.
 - 7/30/90-day source reliability charts.
@@ -89,14 +89,17 @@ The queue is built only from saved source-run evidence and Acknowledge & Assess 
 
 ## 7. Email Status
 
-Test-mode only.
+Readiness controls implemented after the ideal-product trust workflow sprint.
 
-No production email sending was added. Current customer-safe status:
+Current customer-safe status:
 
-- safe local outbox/test-mode exists;
-- external email delivery requires explicit future provider configuration.
+- safe local outbox/test-mode remains the default;
+- provider config validation exists for SMTP/Postmark/SendGrid;
+- email status and config-check APIs exist;
+- Integrations UI shows provider mode, missing config, disabled/enabled state, and last delivery status;
+- external sending remains disabled unless explicitly configured and enabled server-side.
 
-See `docs/production-email-delivery-next-step.md`.
+See `docs/production-email-readiness-final-report.md`.
 
 ## 8. PDF Status
 
@@ -150,11 +153,11 @@ The founding pilot can now be demoed without the most obvious authenticated mock
 
 Improved but still partial.
 
-The Review Queue and PDF audit-pack export materially improve the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy buyers, but production email, VARA depth, and DIFC remediation remain important before broader self-serve sales.
+The Review Queue, PDF audit-pack export, and email readiness controls materially improve the UAE Monitor workflow. $399 is more defensible for CBUAE/AML/payments-heavy buyers, but real production email sending, VARA depth, and DIFC remediation remain important before broader self-serve sales.
 
 ## 14. Remaining Blockers
 
-- Production email not real.
+- Production external email sending not enabled.
 - VARA source depth too thin.
 - DIFC still not active.
 - No long-range source reliability charts.
@@ -162,11 +165,11 @@ The Review Queue and PDF audit-pack export materially improve the UAE Monitor wo
 
 ## 15. Next Exact Product Task
 
-Implement real PDF audit-pack export from the existing HTML audit pack using Playwright print-to-PDF, with tests proving the file exists and contains proof/hash/source/disclaimer metadata.
+Improve VARA direct official PDF/rulebook source depth, starting with direct official VARA rulebook PDFs and stable PDF/hash extraction.
 
 ## 16. Next Exact Sales Task
 
-Run one $199 pilot demo using the new Review Queue with a real saved evidence record and one Acknowledge & Assess record. Ask the MLRO whether the queue fields match their internal compliance review file.
+Run one $199 pilot demo using a real saved evidence record, Acknowledge & Assess, Review Queue, generated PDF audit pack, and email readiness status. Ask whether the MLRO expects real weekly email delivery during the pilot or accepts founder-led/test-mode delivery while provider setup is completed.
 
 ## 17. Validation Result
 

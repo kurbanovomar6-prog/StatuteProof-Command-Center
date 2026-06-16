@@ -45,7 +45,9 @@ def main() -> int:
         "/api/evidence/assess",
         "/api/evidence/review",
         "/api/evidence/export",
+        "/api/delivery/email-status",
         "/api/delivery/email-test-mode",
+        "/api/delivery/email-config-check",
     ]
     for route in expected_api_routes:
         if route not in api:
