@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Bash(python3 tools/validate_workspace.py)",
+      "Bash(python3 tools/validate_uae_source_pack.py)",
+      "Bash(python3 tools/validate_uae_source_universe_candidates.py)",
+      "Bash(python3 tools/validate_uae_coverage_claims.py)",
+      "Bash(python3 tools/validate_uae_50_working_sources.py)",
+      "Bash(python3 tools/validate_batch_onboarding.py)",
+      "Bash(python3 tools/validate_codex_skills.py)",
+      "Bash(python3 tools/validate_difc_source_remediation.py)",
+      "Bash(python3 tools/validate_email_delivery_readiness.py)",
+      "Bash(python3 tools/validate_final_remediation_activation.py)",
+      "Bash(python3 tools/validate_mass_monitoring_runner.py)",
+      "Bash(python3 tools/validate_mass_source_activation_pipeline.py)",
+      "Bash(python3 tools/validate_mvp_trust_workflow.py)",
+      "Bash(python3 tools/validate_no_authenticated_mock_data.py)",
+      "Bash(python3 tools/validate_parser_quality.py)",
+      "Bash(python3 tools/validate_pdf_audit_export.py)",
+      "Bash(python3 tools/validate_plan_pricing_consistency.py)",
+      "Bash(python3 tools/validate_review_queue.py)",
+      "Bash(python3 tools/validate_source_activation_pipeline.py)",
+      "Bash(python3 tools/validate_source_discovery_engine.py)",
+      "Bash(python3 tools/validate_source_health_timeline.py)",
+      "Bash(python3 tools/validate_vara_source_depth.py)",
+      "Bash(python3 -m pytest product/regradar/tests -q)",
+      "Bash(python3 -m pytest product/regradar/tests -q --tb=short)",
+      "Bash(python3 -m pytest product/regradar/tests -q --tb=line)"
+    ]
+  }
+}
