@@ -1,12 +1,7 @@
 {
   "version": "2026-06-15.autonomous-cycle-3",
   "purpose": "Master tracker for proof-gated UAE 50-source activation. Candidate/no-save/evidence states are not customer-visible ready.",
-  "current_public_truth": {
-    "enabled_uae_sources": 75,
-    "readiness_supported": 72,
-    "remediation": 3,
-    "customer_copy": "75 enabled UAE sources; 72 readiness-supported; 3 under extraction remediation."
-  },
+  "current_public_truth": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
   "definition": "activation_ready requires official/public source, strong no-save, meaningful non-shell extraction, unique hash, reviewed noise/source-health risk, proof, repeat baseline, agent gates, validators, and safe sources.json activation.",
   "targets": [
     {
@@ -4649,9 +4644,10 @@
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "hold"
       },
-      "activation_status": "remediation",
+      "activation_status": "rejected",
       "activation_blocker": "Not activation-ready under agent-gated standard.",
-      "next_action": "continue_source_remediation_or_validation"
+      "next_action": "continue_source_remediation_or_validation",
+      "remediation_reason": "Stale DFSA notices URL returned page-not-found/nav-shell; replaced by AE-dfsa-annual-aml-reports."
     },
     {
       "target_id": "AE-difc-consultation-papers",
@@ -5161,9 +5157,10 @@
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "hold"
       },
-      "activation_status": "remediation",
+      "activation_status": "rejected",
       "activation_blocker": "Not activation-ready under agent-gated standard.",
-      "next_action": "continue_source_remediation_or_validation"
+      "next_action": "continue_source_remediation_or_validation",
+      "remediation_reason": "Stale DFSA URL returned page-not-found/nav-shell; replaced by AE-dfsa-annual-reports."
     },
     {
       "target_id": "AE-eocn-news-en",
@@ -8354,7 +8351,8 @@
       },
       "activation_status": "remediation",
       "activation_blocker": "Not activation-ready under agent-gated standard.",
-      "next_action": "continue_source_remediation_or_validation"
+      "next_action": "continue_source_remediation_or_validation",
+      "remediation_reason": "Generic FIU homepage remains shallow; replacements tested but not activation-ready."
     },
     {
       "target_id": "AE-uae-elaws-moj",
@@ -11482,7 +11480,7 @@
     "no_save_passed_count": 96,
     "evidence_saved_count": 4,
     "baseline_complete_count": 7,
-    "remediation_count": 3,
+    "remediation_count": 1,
     "blocked_count": 1,
     "rejected_count": 0,
     "target_count": 33,
@@ -11495,8 +11493,9 @@
     ],
     "batch_onboarding_status": "post-50 diversification: DIFC official source remediation activated four proof-backed DIFC sources.",
     "enabled_count": 79,
-    "readiness_supported_count": 76,
-    "current_truth": "79 enabled / 76 readiness-supported / 3 remediation"
+    "readiness_supported_count": 78,
+    "current_truth": "79 enabled / 78 readiness-supported / 1 remediation",
+    "last_final_remediation_update_at": "2026-06-17T12:52:30Z"
   },
   "sources": [
     {
@@ -11988,6 +11987,36 @@
       "priority": "high",
       "activation_potential": "high",
       "blocker": "none_after_difc_remediation"
+    },
+    {
+      "source_id": "AE-dfsa-annual-reports",
+      "target_id": "AE-dfsa-annual-reports",
+      "title": "DFSA Annual Reports",
+      "official_url": "https://www.dfsa.ae/your-resources/publications-reports/annual-report",
+      "activation_status": "activation_ready",
+      "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/normalized.txt",
+      "normalized_hash": "5ac1b92a2d6cb782b2f5ec076c39866019568b99c712299662d0e36b8c17348e",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "last_monitor_status": "MONITOR_OK"
+    },
+    {
+      "source_id": "AE-dfsa-annual-aml-reports",
+      "target_id": "AE-dfsa-annual-aml-reports",
+      "title": "DFSA Annual Anti-Money Laundering Reports",
+      "official_url": "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports",
+      "activation_status": "activation_ready",
+      "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/normalized.txt",
+      "normalized_hash": "693cf380283f665545f0a20de732d6363efbdcf7fa3abba9fab782dfbc9f98b1",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "last_monitor_status": "MONITOR_OK"
     }
   ]
 }

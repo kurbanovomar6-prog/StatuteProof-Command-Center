@@ -7,8 +7,8 @@ Work only inside `/Users/kurbnovomar/StatuteProof-Command-Center`.
 Current verified truth:
 
 - 79 enabled UAE sources.
-- 76 readiness-supported active sources.
-- 3 under extraction remediation.
+- 78 readiness-supported active sources.
+- 1 under extraction remediation.
 - 50-source minimum has been reached.
 - DIFC coverage improved with 8 proof-backed official legal/data-protection sources.
 - Complete DIFC coverage is not claimed.
@@ -79,7 +79,7 @@ Tests required:
 Validators required:
 
 - Add `tools/validate_source_reliability_charts.py`.
-- Validator must check backend helper/API, frontend visibility, no fake history, no overclaims, and source truth 79 / 76 / 3.
+- Validator must check backend helper/API, frontend visibility, no fake history, no overclaims, and source truth 79 / 78 / 1.
 
 Run validation:
 

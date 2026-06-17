@@ -7,7 +7,7 @@ Sprint goal: Map the complete known UAE official regulatory source universe (200
 
 ## 1. Purpose
 
-StatuteProof currently has 79 enabled UAE sources (76 readiness-supported, 3 remediation). This sprint maps the full potential universe of official UAE regulatory and compliance-relevant endpoints — including already-active sources, candidates at various stages, and rejected sources with documented reasons — to give the product a defensible 200+ source research baseline and a clear activation roadmap.
+StatuteProof currently has 79 enabled UAE sources (78 readiness-supported, 1 remediation). This sprint maps the full potential universe of official UAE regulatory and compliance-relevant endpoints — including already-active sources, candidates at various stages, and rejected sources with documented reasons — to give the product a defensible 200+ source research baseline and a clear activation roadmap.
 
 This is a research and planning document. Nothing in this sprint activates monitoring. All source activation requires the full gate sequence: no-save preview → evidence save → repeat baseline → mass-monitor dry-run → 6-agent review gate.
 

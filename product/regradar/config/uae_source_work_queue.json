@@ -2615,7 +2615,7 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "remediation",
+      "activation_decision": "rejected",
       "adapter_config": {
         "container_selector": "main",
         "exclude_selectors": [
@@ -2634,67 +2634,63 @@
         "title_selector": "a, h2, h3, h4",
         "url_selector": "a[href]"
       },
-      "adapter_failure_reason": "",
+      "adapter_failure_reason": "Original URL returned page-not-found/nav-shell output in final remediation no-save test.",
       "adapter_family": "listing",
       "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
-      "adapter_status": "configured_pending_selector_review",
+      "adapter_remediation_hint": "Replaced by AE-dfsa-annual-aml-reports.",
+      "adapter_status": "live_test_failed",
       "adapter_version": "adapter-platform-1.0",
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
-      "blocker": "Not activation-ready under agent-gated standard.",
+      "blocker": "Stale/generic remediation endpoint replaced by stronger official endpoint.",
       "can_activate": false,
       "code_architect_gate": {
-        "adapter_or_code_notes": "Adapter or selector review required.",
-        "reason": "Adapter or selector review required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-aml-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
-      "current_state": "remediation",
+      "current_state": "rejected",
       "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No complete activation evidence available.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-aml-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
       "extraction_strategy": "adapter:listing",
       "final_activation_gate": {
-        "reason": "Source remains under extraction remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "remediation"
+        "status": "rejected",
+        "reason": "Stale/generic endpoint replaced by AE-dfsa-annual-aml-reports.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "last_adapter_test_at": null,
       "legal_language_gate": {
-        "allowed_wording": "Under extraction remediation.",
-        "forbidden_wording": "ready, validated, monitored",
-        "reason": "Allowed wording: under extraction remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
+        "status": "pass",
+        "reason": "Allowed wording: replaced/disabled remediation endpoint, not active.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
-      "next_action": "continue_source_remediation_or_validation",
-      "noise_risk": "unknown",
+      "next_action": "Use AE-dfsa-annual-aml-reports; do not count this stale endpoint as active.",
+      "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
-        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
+        "status": "pass",
+        "reason": "Replacement endpoint AE-dfsa-annual-aml-reports is commercially stronger.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "proof_path": null,
       "qa_critic_gate": {
-        "reason": "Remediation source cannot count as working.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-aml-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "regulator": "DFSA Regulatory Notices",
       "selector": null,
-      "source_health_risk": "unknown",
+      "source_health_risk": "high",
       "source_id": "AE-dfsa-notices",
       "source_monitor_gate": {
-        "reason": "Source requires selector, adapter, or URL remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-aml-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "source_type": "financial_regulator",
       "url": "https://www.dfsa.ae/regulation/notices-public-registers",
@@ -3600,69 +3596,65 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "remediation",
+      "activation_decision": "rejected",
       "adapter_config": {},
-      "adapter_failure_reason": "No explicit adapter family configured yet.",
+      "adapter_failure_reason": "Original URL returned page-not-found/nav-shell output in final remediation no-save test.",
       "adapter_family": null,
       "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "not_configured",
+      "adapter_remediation_hint": "Replaced by AE-dfsa-annual-reports.",
+      "adapter_status": "live_test_failed",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
-      "blocker": "Not activation-ready under agent-gated standard.",
+      "blocker": "Stale/generic remediation endpoint replaced by stronger official endpoint.",
       "can_activate": false,
       "code_architect_gate": {
-        "adapter_or_code_notes": "Adapter or selector review required.",
-        "reason": "Adapter or selector review required.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
-      "current_state": "remediation",
+      "current_state": "rejected",
       "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No complete activation evidence available.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "expected_extraction_strategy": "static_html",
       "expected_min_length": null,
       "extraction_strategy": "static_html",
       "final_activation_gate": {
-        "reason": "Source remains under extraction remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "remediation"
+        "status": "rejected",
+        "reason": "Stale/generic endpoint replaced by AE-dfsa-annual-reports.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "last_adapter_test_at": null,
       "legal_language_gate": {
-        "allowed_wording": "Under extraction remediation.",
-        "forbidden_wording": "ready, validated, monitored",
-        "reason": "Allowed wording: under extraction remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
+        "status": "pass",
+        "reason": "Allowed wording: replaced/disabled remediation endpoint, not active.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
-      "next_action": "continue_source_remediation_or_validation",
-      "noise_risk": "unknown",
+      "next_action": "Use AE-dfsa-annual-reports; do not count this stale endpoint as active.",
+      "noise_risk": "high",
       "priority": "P0",
       "product_manager_gate": {
-        "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
+        "status": "pass",
+        "reason": "Replacement endpoint AE-dfsa-annual-reports is commercially stronger.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "proof_path": null,
       "qa_critic_gate": {
-        "reason": "Remediation source cannot count as working.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "regulator": "Dubai Financial Services Authority (DFSA)",
       "selector": null,
-      "source_health_risk": "unknown",
+      "source_health_risk": "high",
       "source_id": "AE-dubai-financial-services-authority-dfsa",
       "source_monitor_gate": {
-        "reason": "Source requires selector, adapter, or URL remediation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "hold",
+        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
       },
       "source_type": "financial_regulator",
       "url": "https://www.dfsa.ae/rules-and-standards",
@@ -5069,15 +5061,15 @@
     {
       "activation_decision": "remediation",
       "adapter_config": {},
-      "adapter_failure_reason": "No explicit adapter family configured yet.",
+      "adapter_failure_reason": "NRA page is a single-document LIMITED preview; direct PDF returned HTTP 403; strategic-analysis route returned Error404/nav-shell; annual-report route appears to alias existing publications/typologies.",
       "adapter_family": null,
       "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
+      "adapter_remediation_hint": "Do not activate homepage; continue with official FIU document endpoint research.",
       "adapter_status": "not_configured",
       "adapter_version": null,
       "baseline_runs_completed": 0,
       "baseline_runs_required": 2,
-      "blocker": "Not activation-ready under agent-gated standard.",
+      "blocker": "Generic FIU homepage remains shallow; candidate replacements either 403, nav-shell, or likely duplicate active FIU publication sources.",
       "can_activate": false,
       "code_architect_gate": {
         "adapter_or_code_notes": "Adapter or selector review required.",
@@ -5108,8 +5100,8 @@
         "reviewed_at": "2026-06-14T15:55:00Z",
         "status": "pass"
       },
-      "next_action": "continue_source_remediation_or_validation",
-      "noise_risk": "unknown",
+      "next_action": "Find a distinct official FIU endpoint with multiple meaningful documents or accessible PDF text before activation.",
+      "noise_risk": "medium",
       "priority": "P0",
       "product_manager_gate": {
         "reason": "Existing UAE source registry entry; must be migrated through agent-gated readiness before counting toward the 50-source pack.",
@@ -5124,7 +5116,7 @@
       },
       "regulator": "UAE Financial Intelligence Unit (UAEFIU)",
       "selector": null,
-      "source_health_risk": "unknown",
+      "source_health_risk": "high",
       "source_id": "AE-uae-financial-intelligence-unit-uaefiu",
       "source_monitor_gate": {
         "reason": "Source requires selector, adapter, or URL remediation.",
@@ -11102,15 +11094,171 @@
       "selector": null,
       "wait_selector": null,
       "priority": "P1"
+    },
+    {
+      "source_id": "AE-dfsa-annual-reports",
+      "regulator": "DFSA Annual Reports",
+      "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-report",
+      "source_type": "financial_regulator",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_and_review_queue_visibility",
+      "expected_extraction_strategy": "adapter:pdf_listing",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "main",
+        "sort_items": true
+      },
+      "extraction_strategy": "adapter:pdf_listing",
+      "last_adapter_test_at": "2026-06-17T12:52:30Z",
+      "adapter_status": "activation_ready",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "",
+      "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/normalized.txt",
+      "normalized_hash": "5ac1b92a2d6cb782b2f5ec076c39866019568b99c712299662d0e36b8c17348e",
+      "quality_score": 65,
+      "quality_label": "ACCEPTABLE",
+      "monitor_status": "MONITOR_OK",
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_run_at": "2026-06-17T12:52:30Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Source Monitor gate passed: official DFSA public PDF listing, not nav-shell, stable hash, MONITOR_OK.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Evidence Trail gate passed: proof path exists, normalized hash reproduced, two baseline runs complete.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "QA/Critic gate passed: no-save, saved evidence, repeat baseline, and dry-run monitor checks passed.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Legal Language gate passed: source can be described only as monitoring intelligence, not legal advice or complete coverage.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Code Architect gate passed: existing pdf_listing adapter/config is sufficient; no validator weakening.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Product Manager gate passed: DFSA annual/AML report listings are commercially useful to MLRO/CCO buyers.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof-backed extraction, repeat baseline, source-health review, noise review, and mass-monitor dry-run passed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
+      }
+    },
+    {
+      "source_id": "AE-dfsa-annual-aml-reports",
+      "regulator": "DFSA Annual Anti-Money Laundering Reports",
+      "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports",
+      "source_type": "aml",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_and_review_queue_visibility",
+      "expected_extraction_strategy": "adapter:pdf_listing",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "main",
+        "sort_items": true
+      },
+      "extraction_strategy": "adapter:pdf_listing",
+      "last_adapter_test_at": "2026-06-17T12:52:30Z",
+      "adapter_status": "activation_ready",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "",
+      "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/normalized.txt",
+      "normalized_hash": "693cf380283f665545f0a20de732d6363efbdcf7fa3abba9fab782dfbc9f98b1",
+      "quality_score": 62,
+      "quality_label": "ACCEPTABLE",
+      "monitor_status": "MONITOR_OK",
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_run_at": "2026-06-17T12:52:30Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Source Monitor gate passed: official DFSA public PDF listing, not nav-shell, stable hash, MONITOR_OK.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Evidence Trail gate passed: proof path exists, normalized hash reproduced, two baseline runs complete.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "QA/Critic gate passed: no-save, saved evidence, repeat baseline, and dry-run monitor checks passed.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Legal Language gate passed: source can be described only as monitoring intelligence, not legal advice or complete coverage.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Code Architect gate passed: existing pdf_listing adapter/config is sufficient; no validator weakening.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Product Manager gate passed: DFSA annual/AML report listings are commercially useful to MLRO/CCO buyers.",
+        "reviewed_at": "2026-06-17T12:52:30Z",
+        "blocking_issues": []
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof-backed extraction, repeat baseline, source-health review, noise review, and mass-monitor dry-run passed.",
+        "reviewed_at": "2026-06-17T12:52:30Z"
+      }
     }
   ],
   "summary": {
-    "activation_ready_count": 58,
+    "activation_ready_count": 60,
     "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
-    "baseline_complete_count": 59,
+    "baseline_complete_count": 61,
     "baseline_pending_count": 2,
     "blocked_count": 21,
     "candidate_count": 27,
@@ -11140,32 +11288,33 @@
     },
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready queue entries count toward the queue-specific 50 working-source target; public truth is reconciled separately from sources.json.",
-    "proof_backed_count": 59,
-    "public_source_truth_after": "79 enabled UAE sources / 76 readiness-supported / 3 under extraction remediation",
+    "proof_backed_count": 61,
+    "public_source_truth_after": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 0,
-    "remediation_count": 19,
+    "remediation_count": 1,
     "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
     "total_entries": 127,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
-    "source_activation_platform_note": "Auto DOM Investigator, adapter catalog, structured failure codes, Source Lab controls, and validators are in place. VARA PDF depth sprint added 6 proof-backed official VARA rulebook PDF sources; DIFC remediation added 8 proof-backed official DIFC legal/data-protection sources; public truth is now 79/76/3.",
+    "source_activation_platform_note": "Final remediation sprint replaced two stale DFSA remediation endpoints with proof-backed official DFSA PDF-listing sources; FIU homepage remains honestly held.",
     "last_autonomous_cycle_update_at": "2026-06-15T21:22:00Z",
     "last_weak_zone_remediation_update_at": "2026-06-16T06:12:00Z",
     "last_weak_zone_elimination_update_at": "2026-06-16T00:00:00Z",
     "last_final_8_activation_update_at": "2026-06-16T00:00:00Z",
-    "public_source_truth_after_validation": "79 enabled UAE sources / 76 readiness-supported / 3 under extraction remediation",
+    "public_source_truth_after_validation": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
     "last_updated_at": "2026-06-16T18:36:18Z",
     "enabled_count": 79,
-    "readiness_supported_count": 76,
-    "current_truth": "79 enabled / 76 readiness-supported / 3 remediation",
-    "difc_remediation_update_at": "2026-06-16T18:36:18Z"
+    "readiness_supported_count": 78,
+    "current_truth": "79 enabled / 78 readiness-supported / 1 remediation",
+    "difc_remediation_update_at": "2026-06-16T18:36:18Z",
+    "last_final_remediation_update_at": "2026-06-17T12:52:30Z"
   },
   "version": 1,
-  "public_source_truth_after_validation": "79 enabled UAE sources / 76 readiness-supported / 3 under extraction remediation",
-  "public_source_truth_after": "79 enabled UAE sources / 76 readiness-supported / 3 under extraction remediation",
+  "public_source_truth_after_validation": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
+  "public_source_truth_after": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
   "enabled_count": 79,
-  "readiness_supported_count": 76,
-  "remediation_count": 3,
-  "current_truth": "79 enabled / 76 readiness-supported / 3 remediation"
+  "readiness_supported_count": 78,
+  "remediation_count": 1,
+  "current_truth": "79 enabled / 78 readiness-supported / 1 remediation"
 }

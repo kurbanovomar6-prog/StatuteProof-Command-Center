@@ -2,7 +2,7 @@
 
 Date: 2026-06-17
 Based on: uae_source_universe_candidates.json (203 records)
-Current state: 79 active / 76 readiness-supported / 3 remediation
+Current state: 79 enabled / 78 readiness-supported / 1 remediation
 
 This roadmap lists all non-active source candidates ranked by activation priority. No source should be activated without passing the full gate sequence: no-save preview → evidence save → repeat baseline → mass-monitor dry-run → 6-agent review gate.
 

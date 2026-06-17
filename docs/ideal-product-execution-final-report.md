@@ -53,7 +53,7 @@ The endpoint returns:
 - latest run timestamp;
 - disclaimer.
 
-The current registry truth is now 79 enabled / 76 readiness-supported / 3 remediation after the VARA PDF source-depth sprint and DIFC selector/access remediation.
+The current registry truth is now 79 enabled / 78 readiness-supported / 1 remediation after the VARA PDF source-depth sprint, DIFC selector/access remediation, and final DFSA remediation replacement sprint.
 
 ## 5. Plan / Pricing Consistency Status
 
@@ -67,7 +67,7 @@ Current implemented pricing:
 
 Backend `plan.py` and frontend `planCapabilities.js` now agree that UAE Monitor has:
 
-- 76 readiness-supported source limit;
+- 78 readiness-supported source limit;
 - 180-day retention;
 - Markdown/HTML audit export available;
 - PDF audit pack export enabled for saved evidence records.
@@ -126,13 +126,13 @@ Added `product/regradar/tests/test_ideal_product_workflow.py`.
 
 Coverage:
 
-- current source summary truth returns 79 / 76 / 3;
+- current source summary truth returns 79 / 78 / 1;
 - temp registry summary counts;
 - Review Queue pending evidence;
 - Review Queue assessed evidence;
 - Review Queue empty state has no fake rows.
 
-Updated `product/regradar/tests/test_auth_plan_contracts.py` for the 76-source UAE Monitor contract.
+Updated `product/regradar/tests/test_auth_plan_contracts.py` for the 78-source UAE Monitor contract.
 
 ## 11. Validators Added
 

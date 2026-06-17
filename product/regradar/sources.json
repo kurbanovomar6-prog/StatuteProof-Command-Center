@@ -508,16 +508,18 @@
     "url": "https://www.dfsa.ae/rules-and-standards",
     "jurisdiction": "AE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "remediation",
+    "enabled": false,
+    "status": "replaced",
     "source_id": "AE-dubai-financial-services-authority-dfsa",
-    "notes": "DFSA rules and standards — under extraction remediation; not treated as confirmed until Playwright extraction is verified against meaningful non-navigation content.",
+    "notes": "Disabled from customer-visible pack on 2026-06-17. The original DFSA rules-and-standards URL returned page-not-found/nav-shell output and duplicated known shell hash. Replaced by AE-dfsa-annual-reports for a stable official DFSA document-listing source.",
     "tier": "1",
     "fetch_method": "playwright",
     "wait_for_selector": "main",
     "content_selector": "main",
     "expected_min_length": 3000,
-    "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13."
+    "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13.",
+    "replacement_source_id": "AE-dfsa-annual-reports",
+    "replacement_reason": "Current URL returns DFSA page-not-found/nav-shell output; replaced with official DFSA Annual Reports PDF listing after proof/baseline/MONITOR_OK gates."
   },
   {
     "source_id": "AE-dfsa-financial-crime-mlro-letters",
@@ -703,7 +705,7 @@
     "enabled": true,
     "status": "remediation",
     "source_id": "AE-uae-financial-intelligence-unit-uaefiu",
-    "notes": "UAE FIU homepage — under extraction remediation due shallow homepage extraction. Prefer AE-uaefiu-circulars for publication monitoring.",
+    "notes": "UAE FIU homepage remains under remediation: generic homepage/shallow source. Tested replacements in this sprint: NRA page was single-document LIMITED preview and direct PDF returned HTTP 403; strategic-analysis route returned Error404/nav-shell; annual-report route looked like a publications/typology alias and may duplicate active FIU publication sources. Keep remediation until a distinct official FIU endpoint passes proof, repeat baseline, MONITOR_OK, and gates.",
     "tier": "3"
   },
   {
@@ -1477,15 +1479,17 @@
     "url": "https://www.dfsa.ae/regulation/notices-public-registers",
     "jurisdiction": "AE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "remediation",
+    "enabled": false,
+    "status": "replaced",
     "tier": "1",
-    "notes": "DFSA notices, decisions, and consultations — under extraction remediation; not treated as confirmed until content extraction and hash uniqueness are verified.",
+    "notes": "Disabled from customer-visible pack on 2026-06-17. The original DFSA notices URL returned page-not-found/nav-shell output. Replaced by AE-dfsa-annual-aml-reports after proof/baseline/MONITOR_OK gates.",
     "fetch_method": "playwright",
     "wait_for_selector": "main",
     "content_selector": "main",
     "expected_min_length": 3000,
-    "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13."
+    "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13.",
+    "replacement_source_id": "AE-dfsa-annual-aml-reports",
+    "replacement_reason": "Current URL returns DFSA page-not-found/nav-shell output; AML reports endpoint is a stronger official DFSA PDF listing."
   },
   {
     "source_id": "AE-adgm-fsra-rules",
@@ -2661,5 +2665,55 @@
     "proof_path": "data/source_snapshots/2026-06-16/AE/AE-difc-companies-law-2018/intake-20260616T182204Z/proof.json",
     "normalized_hash": "9a3aeae973b0ce63f6cbeaba4a513b6db0b7aa698a95bb354560ba580b67bcc9",
     "notes": "Official DIFC legal database Companies Law detail page. Activated after rendered extraction, two stable proof-backed baselines, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only; not legal advice. Not a claim of complete DIFC coverage."
+  },
+  {
+    "source_id": "AE-dfsa-annual-reports",
+    "name": "DFSA Annual Reports",
+    "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-report",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active",
+    "tier": "2",
+    "adapter_family": "pdf_listing",
+    "adapter_name": "pdf_listing",
+    "adapter_config": {
+      "container_selector": "main",
+      "sort_items": true
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "baseline_runs_completed": 2,
+    "normalized_hash": "5ac1b92a2d6cb782b2f5ec076c39866019568b99c712299662d0e36b8c17348e",
+    "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/normalized.txt",
+    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_run_at": "2026-06-17T12:52:30Z",
+    "notes": "Activated 2026-06-17 as replacement for stale DFSA rules-and-standards remediation endpoint. Official DFSA annual-report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice."
+  },
+  {
+    "source_id": "AE-dfsa-annual-aml-reports",
+    "name": "DFSA Annual Anti-Money Laundering Reports",
+    "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "active",
+    "tier": "2",
+    "adapter_family": "pdf_listing",
+    "adapter_name": "pdf_listing",
+    "adapter_config": {
+      "container_selector": "main",
+      "sort_items": true
+    },
+    "expected_min_length": 500,
+    "baseline_runs_required": 2,
+    "baseline_runs_completed": 2,
+    "normalized_hash": "693cf380283f665545f0a20de732d6363efbdcf7fa3abba9fab782dfbc9f98b1",
+    "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/normalized.txt",
+    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_run_at": "2026-06-17T12:52:30Z",
+    "notes": "Activated 2026-06-17 as replacement for stale generic DFSA notices remediation endpoint. Official DFSA AML report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice."
   }
 ]

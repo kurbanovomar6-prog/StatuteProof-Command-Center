@@ -11,7 +11,7 @@ Legal safety: Every claim tier must be used exactly as written, without embellis
 **Definition:** A factual count of enabled and readiness-supported sources.
 
 **Safe wording:**
-> "79 enabled UAE official-source endpoints. 76 readiness-supported. 3 under extraction remediation."
+> "79 enabled UAE official-source endpoints. 78 readiness-supported. 1 under extraction remediation."
 
 **Why it is safe:**
 - These are exact counts directly verifiable in sources.json.
@@ -105,7 +105,7 @@ Legal safety: Every claim tier must be used exactly as written, without embellis
 4. SCA primary securities legislation is active.
 5. FTA has at least one active source (currently 0 active).
 6. CBUAE consultations are active.
-7. All 76 readiness-supported sources have documented proof records.
+7. All 78 readiness-supported sources have documented proof records.
 8. Source-health trend monitoring is demonstrated.
 9. Legal-safe wording is in place.
 

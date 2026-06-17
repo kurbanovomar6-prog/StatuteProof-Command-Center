@@ -61,11 +61,11 @@ const PLANS_DATA = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    purpose: 'MLRO or CCO at a UAE-regulated firm. 79 enabled UAE official-source endpoints: 76 readiness-supported after proof and baseline gates, 3 under extraction remediation.',
+    purpose: 'MLRO or CCO at a UAE-regulated firm. 79 enabled UAE official-source endpoints: 78 readiness-supported after proof and baseline gates, 1 under extraction remediation.',
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '79 enabled; 76 readiness-supported, 3 under extraction remediation' },
+      { label: 'Official UAE sources', value: '79 enabled; 78 readiness-supported, 1 under extraction remediation' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },
@@ -144,7 +144,7 @@ const FAQS = [
   },
   {
     q: 'Why does UAE Monitor say "readiness-supported"?',
-    a: 'We currently have 79 enabled UAE official-source endpoints. The latest registry review keeps 76 sources readiness-supported after proof and baseline gates, with 3 sources under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
+    a: 'We currently have 79 enabled UAE official-source endpoints. The latest registry review keeps 78 sources readiness-supported after proof and baseline gates, with 1 source under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
   },
 ]
 

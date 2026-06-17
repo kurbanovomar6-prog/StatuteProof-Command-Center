@@ -14,7 +14,7 @@ Legend:
 
 | # | Proposed Claim | Safe? | Why | Required Evidence | Safer Wording |
 |---|---------------|-------|-----|-------------------|---------------|
-| 1 | "76 readiness-supported UAE sources" | **SAFE** | Exact count from sources.json; factual and verifiable | sources.json enabled=true, status=active | "76 readiness-supported UAE official-source endpoints as of [date]" |
+| 1 | "78 readiness-supported UAE sources" | **SAFE** | Exact count from sources.json; factual and verifiable | sources.json enabled=true, status=active | "78 readiness-supported UAE official-source endpoints as of [date]" |
 | 2 | "79 enabled UAE sources" | **SAFE** | Exact enabled count from sources.json | sources.json enabled=true count | "79 enabled UAE official-source endpoints" |
 | 3 | "200+ official-source candidates mapped" | **SAFE** | 203 records in uae_source_universe_candidates.json; "mapped" ≠ "monitored" | uae_source_universe_candidates.json; validator passes | "StatuteProof has mapped 200+ official or officially linked UAE regulatory source candidates for pipeline research" |
 | 4 | "Major UAE regulator coverage" | **CONDITIONAL** | All 8 named regulators have ≥5 active sources. But VARA guidance is broken, SCA lacks primary legislation. | All 8 regulators verified in sources.json; disclaimer required | "StatuteProof monitors selected official sources from major UAE regulatory bodies including CBUAE, DFSA, ADGM/FSRA, VARA, UAE FIU, EOCN, SCA, and DIFC. Selected sources only — not all publications from each body." |
@@ -41,7 +41,7 @@ Legend:
 
 Use these in any customer-facing context without modification:
 
-1. "79 enabled UAE official-source endpoints. 76 readiness-supported."
+1. "79 enabled UAE official-source endpoints. 78 readiness-supported."
 2. "Monitoring intelligence only. Not legal advice."
 3. "Not a guarantee of regulatory completeness."
 4. "Source monitoring may be affected by access restrictions, website changes, and publication delays."

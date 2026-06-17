@@ -89,8 +89,8 @@ SAVED_BASELINE_FIELDS = {
 }
 ADGM_FSRA_SCA_PREFIXES = ("AE-adgm", "AE-sca")
 EXPECTED_ENABLED_UAE_SOURCES = 79
-EXPECTED_READINESS_SUPPORTED = 76
-EXPECTED_REMEDIATION = 3
+EXPECTED_READINESS_SUPPORTED = 78
+EXPECTED_REMEDIATION = 1
 EXPECTED_CUSTOMER_COPY = (
     f"{EXPECTED_ENABLED_UAE_SOURCES} enabled UAE sources; "
     f"{EXPECTED_READINESS_SUPPORTED} readiness-supported; "
@@ -343,7 +343,7 @@ def main() -> int:
                 fail(errors, "Top-40 validation summary tested_count does not match tested candidates.")
             if validation_summary.get("sources_json_changed") is not False:
                 fail(errors, "Top-40 validation summary must not claim sources.json changed in this sprint.")
-            if validation_summary.get("public_truth_after_validation") != "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation":
+            if validation_summary.get("public_truth_after_validation") != EXPECTED_CUSTOMER_COPY:
                 fail(errors, "Top-40 validation summary must preserve current public source truth.")
             if validation_summary.get("readiness_supported_no_save_count", 0) >= 40:
                 fail(errors, "Validator refuses 40+ readiness claim without a separate source-readiness evidence report.")
@@ -355,7 +355,7 @@ def main() -> int:
         else:
             if selector_summary.get("sources_json_changed") is not False:
                 fail(errors, "ADGM/FSRA + SCA remediation summary must not claim sources.json changed.")
-            if selector_summary.get("public_truth_after_validation") != "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation":
+            if selector_summary.get("public_truth_after_validation") != EXPECTED_CUSTOMER_COPY:
                 fail(errors, "ADGM/FSRA + SCA remediation summary must preserve current public source truth.")
             if selector_summary.get("tested_count", 0) < 1:
                 fail(errors, "ADGM/FSRA + SCA remediation summary must record tested candidates.")
@@ -371,7 +371,7 @@ def main() -> int:
                 fail(errors, "Saved baseline summary must be scoped to exactly four checks.")
             if saved_summary.get("sources_json_changed") is not False:
                 fail(errors, "Saved baseline summary must not claim sources.json changed.")
-            if saved_summary.get("public_truth_after_validation") != "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation":
+            if saved_summary.get("public_truth_after_validation") != EXPECTED_CUSTOMER_COPY:
                 fail(errors, "Saved baseline summary must preserve current public source truth.")
             if int(saved_summary.get("monitoring_ready_count") or 0) != 0:
                 fail(errors, "Saved baseline summary must not claim monitoring-ready sources from this sprint.")

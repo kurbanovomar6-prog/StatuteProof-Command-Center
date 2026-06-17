@@ -1,12 +1,12 @@
 {
   "version": "2026-06-16",
-  "purpose": "Comprehensive UAE official regulatory source universe for StatuteProof monitoring pipeline research. 200+ candidate records covering all major UAE regulators and compliance-relevant domains. This file is for research and planning only \u2014 it does not activate monitoring.",
-  "warning": "Do not activate any source without full gate passage: no-save preview \u2192 evidence save \u2192 repeat baseline \u2192 mass-monitor dry-run \u2192 6-agent review gate. Do not claim this represents complete UAE regulatory coverage.",
+  "purpose": "Comprehensive UAE official regulatory source universe for StatuteProof monitoring pipeline research. 200+ candidate records covering all major UAE regulators and compliance-relevant domains. This file is for research and planning only — it does not activate monitoring.",
+  "warning": "Do not activate any source without full gate passage: no-save preview → evidence save → repeat baseline → mass-monitor dry-run → 6-agent review gate. Do not claim this represents complete UAE regulatory coverage.",
   "current_active_truth": {
     "enabled_sources": 79,
-    "readiness_supported": 76,
-    "remediation": 3,
-    "last_verified": "2026-06-16",
+    "readiness_supported": 78,
+    "remediation": 1,
+    "last_verified": "2026-06-17",
     "source_of_truth": "product/regradar/sources.json"
   },
   "taxonomy_categories": {
@@ -29,20 +29,21 @@
     "rejected": "Source has been explicitly excluded with a documented reason. Do not add to sources.json."
   },
   "priority_definitions": {
-    "P0": "Activate immediately \u2014 highest commercial relevance, lowest technical risk.",
-    "P1": "Activate soon \u2014 high commercial relevance, manageable technical risk.",
-    "P2": "Activate when capacity allows \u2014 useful coverage but lower urgency.",
-    "P3": "Niche or low-priority \u2014 activate only for specific customer segments.",
-    "reject": "Do not activate \u2014 documented rejection reason applies."
+    "P0": "Activate immediately — highest commercial relevance, lowest technical risk.",
+    "P1": "Activate soon — high commercial relevance, manageable technical risk.",
+    "P2": "Activate when capacity allows — useful coverage but lower urgency.",
+    "P3": "Niche or low-priority — activate only for specific customer segments.",
+    "reject": "Do not activate — documented rejection reason applies."
   },
   "universe_summary": {
     "total_candidates": 171,
     "already_active": 79,
-    "candidate": 88,
+    "candidate": 87,
     "remediation": 4,
     "blocked": 0,
     "total_rejected": 32,
-    "grand_total": 203
+    "grand_total": 203,
+    "rejected": 32
   },
   "candidates": [
     {
@@ -60,7 +61,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "Central Dubai virtual asset regulator homepage \u2014 anchor source for all VARA updates.",
+      "why_it_matters": "Central Dubai virtual asset regulator homepage — anchor source for all VARA updates.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "custom_element",
@@ -87,7 +88,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "Public enforcement actions \u2014 high-signal for VASP compliance breaches and precedents.",
+      "why_it_matters": "Public enforcement actions — high-signal for VASP compliance breaches and precedents.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -141,7 +142,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "Compliance and Risk activity rulebook PDF \u2014 direct regulatory obligation source.",
+      "why_it_matters": "Compliance and Risk activity rulebook PDF — direct regulatory obligation source.",
       "update_frequency_guess": "low",
       "parsing_risk": "PDF",
       "adapter_family_guess": "pdf_listing",
@@ -276,7 +277,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "Foundational VARA VA Regulations 2023 \u2014 master regulatory instrument.",
+      "why_it_matters": "Foundational VARA VA Regulations 2023 — master regulatory instrument.",
       "update_frequency_guess": "low",
       "parsing_risk": "PDF",
       "adapter_family_guess": "pdf_listing",
@@ -303,7 +304,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA regulatory framework index \u2014 JS-heavy, needed Playwright.",
+      "why_it_matters": "VARA regulatory framework index — JS-heavy, needed Playwright.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "custom_element",
@@ -357,7 +358,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA AML/CFT rulebook page \u2014 directly relevant to MLRO obligations.",
+      "why_it_matters": "VARA AML/CFT rulebook page — directly relevant to MLRO obligations.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "pdf_listing",
@@ -384,7 +385,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA rulebooks listing page \u2014 index of all activity rulebooks.",
+      "why_it_matters": "VARA rulebooks listing page — index of all activity rulebooks.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -411,7 +412,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA licensed entity public register \u2014 high-value for VASP due diligence.",
+      "why_it_matters": "VARA licensed entity public register — high-value for VASP due diligence.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -438,7 +439,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA regulatory announcements and news \u2014 secondary to enforcement/rulebook monitoring.",
+      "why_it_matters": "VARA regulatory announcements and news — secondary to enforcement/rulebook monitoring.",
       "update_frequency_guess": "high",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -465,7 +466,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA guidance documents and interpretations \u2014 supplements rulebook monitoring.",
+      "why_it_matters": "VARA guidance documents and interpretations — supplements rulebook monitoring.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -492,7 +493,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA licensing conditions and requirements \u2014 relevant for VASP licence holders.",
+      "why_it_matters": "VARA licensing conditions and requirements — relevant for VASP licence holders.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -519,7 +520,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "Administrative orders \u2014 regulatory directives to specific VASPs.",
+      "why_it_matters": "Administrative orders — regulatory directives to specific VASPs.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -546,7 +547,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "Main VARA rulebooks portal \u2014 tracks all current and historical rulebook versions.",
+      "why_it_matters": "Main VARA rulebooks portal — tracks all current and historical rulebook versions.",
       "update_frequency_guess": "medium",
       "parsing_risk": "rulebook_hub",
       "adapter_family_guess": "listing",
@@ -573,7 +574,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "VARA market oversight section \u2014 supervision reports and market monitoring.",
+      "why_it_matters": "VARA market oversight section — supervision reports and market monitoring.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -600,7 +601,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "Central UAE financial intelligence unit \u2014 anchor for AML/CFT and goAML guidance.",
+      "why_it_matters": "Central UAE financial intelligence unit — anchor for AML/CFT and goAML guidance.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "static",
@@ -610,7 +611,7 @@
       "in_work_queue": true,
       "no_save_candidate": false,
       "discovery_method": "sources_json",
-      "notes": ""
+      "notes": "Enabled in sources.json for transparent remediation, but not readiness-supported: live Source Lab classified homepage as NAV_SHELL_ONLY/quality 0; do not claim active readiness."
     },
     {
       "source_id": "AE-uaefiu-circulars",
@@ -627,7 +628,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "FIU circulars and publications \u2014 primary MLRO regulatory update source.",
+      "why_it_matters": "FIU circulars and publications — primary MLRO regulatory update source.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -654,7 +655,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "FIU typology reports \u2014 ML/TF risk patterns; essential for MLRO awareness.",
+      "why_it_matters": "FIU typology reports — ML/TF risk patterns; essential for MLRO awareness.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -681,7 +682,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "AML/CFT primary legislation \u2014 federal decrees, cabinet resolutions, ministerial decisions.",
+      "why_it_matters": "AML/CFT primary legislation — federal decrees, cabinet resolutions, ministerial decisions.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -708,7 +709,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "Aggregated FIU publications \u2014 typologies, annual reports, strategic analysis, guidance.",
+      "why_it_matters": "Aggregated FIU publications — typologies, annual reports, strategic analysis, guidance.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -735,7 +736,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "EOCN sanctions and AML/CFT framework legislation \u2014 Cabinet decisions, laws, circulars.",
+      "why_it_matters": "EOCN sanctions and AML/CFT framework legislation — Cabinet decisions, laws, circulars.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -762,7 +763,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "EOCN regulatory news \u2014 sanctions designations, AML/CFT policy announcements.",
+      "why_it_matters": "EOCN regulatory news — sanctions designations, AML/CFT policy announcements.",
       "update_frequency_guess": "high",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -789,7 +790,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "FIU annual reports \u2014 STR statistics, sector analysis, trend data.",
+      "why_it_matters": "FIU annual reports — STR statistics, sector analysis, trend data.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -816,7 +817,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "UAE NRA 2024 \u2014 sector-level ML/TF risk scores; directly relevant to MLRO risk assessment.",
+      "why_it_matters": "UAE NRA 2024 — sector-level ML/TF risk scores; directly relevant to MLRO risk assessment.",
       "update_frequency_guess": "low",
       "parsing_risk": "PDF",
       "adapter_family_guess": "pdf_listing",
@@ -843,7 +844,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "FIU press releases \u2014 regulatory announcements, enforcement news, goAML updates.",
+      "why_it_matters": "FIU press releases — regulatory announcements, enforcement news, goAML updates.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -870,7 +871,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "Strategic analysis methodologies \u2014 useful for MLRO STR/SAR quality review.",
+      "why_it_matters": "Strategic analysis methodologies — useful for MLRO STR/SAR quality review.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -897,7 +898,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "UAE FATF MER \u2014 top-level AML/CFT framework assessment; critical compliance context.",
+      "why_it_matters": "UAE FATF MER — top-level AML/CFT framework assessment; critical compliance context.",
       "update_frequency_guess": "low",
       "parsing_risk": "PDF",
       "adapter_family_guess": "pdf_listing",
@@ -924,7 +925,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "goAML public guidance \u2014 STR/SAR reporting system documentation.",
+      "why_it_matters": "goAML public guidance — STR/SAR reporting system documentation.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -951,7 +952,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "FIU sector awareness materials \u2014 AML/CFT awareness notices and sector guidance.",
+      "why_it_matters": "FIU sector awareness materials — AML/CFT awareness notices and sector guidance.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -978,7 +979,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "EOCN TFS/UN sanctions framework page \u2014 regulatory basis for UAE sanctions monitoring.",
+      "why_it_matters": "EOCN TFS/UN sanctions framework page — regulatory basis for UAE sanctions monitoring.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "static",
@@ -1005,7 +1006,7 @@
         "CCO",
         "VASP"
       ],
-      "why_it_matters": "FIU open data \u2014 statistical datasets on STR/SAR volumes by sector.",
+      "why_it_matters": "FIU open data — statistical datasets on STR/SAR volumes by sector.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -1032,7 +1033,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 anchor.",
+      "why_it_matters": "CBUAE official regulatory source — anchor.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1059,7 +1060,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 regulations hub.",
+      "why_it_matters": "CBUAE official regulatory source — regulations hub.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1086,7 +1087,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 rulebook change tracker.",
+      "why_it_matters": "CBUAE official regulatory source — rulebook change tracker.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1113,7 +1114,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 rulebook section.",
+      "why_it_matters": "CBUAE official regulatory source — rulebook section.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1140,7 +1141,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 AML/CFT rulebook.",
+      "why_it_matters": "CBUAE official regulatory source — AML/CFT rulebook.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1167,7 +1168,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 AML/CFT section.",
+      "why_it_matters": "CBUAE official regulatory source — AML/CFT section.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1194,7 +1195,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 consumer protection.",
+      "why_it_matters": "CBUAE official regulatory source — consumer protection.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1221,7 +1222,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 open finance.",
+      "why_it_matters": "CBUAE official regulatory source — open finance.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1248,7 +1249,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 crypto/payment tokens.",
+      "why_it_matters": "CBUAE official regulatory source — crypto/payment tokens.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1275,7 +1276,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 risk management.",
+      "why_it_matters": "CBUAE official regulatory source — risk management.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1302,7 +1303,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 SVF regulation.",
+      "why_it_matters": "CBUAE official regulatory source — SVF regulation.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1329,7 +1330,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 operational risk.",
+      "why_it_matters": "CBUAE official regulatory source — operational risk.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1356,7 +1357,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 market risk.",
+      "why_it_matters": "CBUAE official regulatory source — market risk.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1383,7 +1384,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 large exposures.",
+      "why_it_matters": "CBUAE official regulatory source — large exposures.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1410,7 +1411,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 exchange business / remittance.",
+      "why_it_matters": "CBUAE official regulatory source — exchange business / remittance.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1437,7 +1438,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 capital adequacy / Basel.",
+      "why_it_matters": "CBUAE official regulatory source — capital adequacy / Basel.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1464,7 +1465,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 LVPS.",
+      "why_it_matters": "CBUAE official regulatory source — LVPS.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1491,7 +1492,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 primary CBUAE legislation.",
+      "why_it_matters": "CBUAE official regulatory source — primary CBUAE legislation.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1518,7 +1519,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 country risk.",
+      "why_it_matters": "CBUAE official regulatory source — country risk.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1545,7 +1546,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 IRRBB.",
+      "why_it_matters": "CBUAE official regulatory source — IRRBB.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1572,7 +1573,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 model risk.",
+      "why_it_matters": "CBUAE official regulatory source — model risk.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1599,7 +1600,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 payment systems.",
+      "why_it_matters": "CBUAE official regulatory source — payment systems.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1626,7 +1627,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 SME protection.",
+      "why_it_matters": "CBUAE official regulatory source — SME protection.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1653,7 +1654,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 Islamic finance.",
+      "why_it_matters": "CBUAE official regulatory source — Islamic finance.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1680,7 +1681,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 market conduct.",
+      "why_it_matters": "CBUAE official regulatory source — market conduct.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1707,7 +1708,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 proliferation finance / CBUAE MLRO.",
+      "why_it_matters": "CBUAE official regulatory source — proliferation finance / CBUAE MLRO.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1734,7 +1735,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE official regulatory source \u2014 TBML / trade finance AML.",
+      "why_it_matters": "CBUAE official regulatory source — TBML / trade finance AML.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -1761,7 +1762,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE AML/CFT operations \u2014 guidance, circulars, and regime updates.",
+      "why_it_matters": "CBUAE AML/CFT operations — guidance, circulars, and regime updates.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "custom_element",
@@ -1788,7 +1789,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE consultation papers \u2014 horizon scanning for upcoming rule changes.",
+      "why_it_matters": "CBUAE consultation papers — horizon scanning for upcoming rule changes.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -1815,7 +1816,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE publications \u2014 research, reports, statistics, regulatory papers.",
+      "why_it_matters": "CBUAE publications — research, reports, statistics, regulatory papers.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -1842,7 +1843,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE news \u2014 regulatory announcements and press releases.",
+      "why_it_matters": "CBUAE news — regulatory announcements and press releases.",
       "update_frequency_guess": "high",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -1869,7 +1870,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "Consumer protection section \u2014 guidance, complaints, regulatory updates.",
+      "why_it_matters": "Consumer protection section — guidance, complaints, regulatory updates.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "custom_element",
@@ -1896,7 +1897,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE licensed entity register \u2014 relevant for counterparty due diligence.",
+      "why_it_matters": "CBUAE licensed entity register — relevant for counterparty due diligence.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -1923,7 +1924,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE payment systems overview \u2014 oversight of payment infrastructure.",
+      "why_it_matters": "CBUAE payment systems overview — oversight of payment infrastructure.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "custom_element",
@@ -1950,7 +1951,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE open data \u2014 statistical datasets on banking, insurance, payments.",
+      "why_it_matters": "CBUAE open data — statistical datasets on banking, insurance, payments.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -1977,7 +1978,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE insurance supervision \u2014 rulebooks, circulars, insurance sector regulation.",
+      "why_it_matters": "CBUAE insurance supervision — rulebooks, circulars, insurance sector regulation.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "custom_element",
@@ -2004,7 +2005,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE financial stability reports \u2014 systemic risk assessment published annually.",
+      "why_it_matters": "CBUAE financial stability reports — systemic risk assessment published annually.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2031,7 +2032,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE bank supervision circulars \u2014 targeted guidance to banks, payment institutions.",
+      "why_it_matters": "CBUAE bank supervision circulars — targeted guidance to banks, payment institutions.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2058,7 +2059,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE FinTech regulatory framework \u2014 sandbox, innovation hub, fintech policies.",
+      "why_it_matters": "CBUAE FinTech regulatory framework — sandbox, innovation hub, fintech policies.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "custom_element",
@@ -2085,7 +2086,7 @@
         "Fintech CCO",
         "Insurance Compliance"
       ],
-      "why_it_matters": "CBUAE NSFR regulation \u2014 liquidity standard for banks.",
+      "why_it_matters": "CBUAE NSFR regulation — liquidity standard for banks.",
       "update_frequency_guess": "low",
       "parsing_risk": "rulebook_doclist",
       "adapter_family_guess": "listing",
@@ -2115,13 +2116,13 @@
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
-      "activation_status": "already_active",
+      "activation_status": "rejected",
       "priority": "P0",
-      "in_sources_json": true,
+      "in_sources_json": false,
       "in_work_queue": true,
       "no_save_candidate": false,
       "discovery_method": "sources_json",
-      "notes": ""
+      "notes": "Original DFSA rules-and-standards URL was disabled/replaced after final remediation: page-not-found/nav-shell output."
     },
     {
       "source_id": "AE-dfsa-financial-crime-mlro-letters",
@@ -2176,11 +2177,11 @@
       "notes": ""
     },
     {
-      "source_id": "AE-dfsa-notices",
+      "source_id": "AE-dfsa-annual-aml-reports",
       "regulator": "DFSA",
       "category": "D-DFSA",
-      "title": "DFSA Notices and Public Registers",
-      "url": "https://www.dfsa.ae/regulation/notices-public-registers",
+      "title": "DFSA Annual AML Reports",
+      "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports",
       "official_status": "official",
       "jurisdiction": "DIFC / DFSA",
       "buyer_relevance_tags": [
@@ -2194,7 +2195,7 @@
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
       "activation_status": "already_active",
-      "priority": "P1",
+      "priority": "P0",
       "in_sources_json": true,
       "in_work_queue": true,
       "no_save_candidate": false,
@@ -2371,7 +2372,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA publications \u2014 consultation papers, policy statements, guidance notes, annual reports.",
+      "why_it_matters": "DFSA publications — consultation papers, policy statements, guidance notes, annual reports.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2397,7 +2398,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA licensed entity register \u2014 authorised firms, individuals, endorsements.",
+      "why_it_matters": "DFSA licensed entity register — authorised firms, individuals, endorsements.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2423,7 +2424,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA laws and rules index \u2014 official rulebook entry point.",
+      "why_it_matters": "DFSA laws and rules index — official rulebook entry point.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2449,7 +2450,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA AML/CTF supervision and sanctions overview \u2014 hub page for financial crime compliance.",
+      "why_it_matters": "DFSA AML/CTF supervision and sanctions overview — hub page for financial crime compliance.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "custom_element",
@@ -2475,7 +2476,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA consultation papers \u2014 upcoming rule changes and policy developments.",
+      "why_it_matters": "DFSA consultation papers — upcoming rule changes and policy developments.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2492,7 +2493,7 @@
       "regulator": "DFSA",
       "category": "D-DFSA",
       "title": "DFSA Annual Reports",
-      "url": "https://www.dfsa.ae/your-resources/publications/annual-reports",
+      "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-report",
       "official_status": "official",
       "jurisdiction": "DIFC / DFSA",
       "buyer_relevance_tags": [
@@ -2501,14 +2502,14 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA annual reports \u2014 regulatory priorities, supervision statistics, market data.",
+      "why_it_matters": "DFSA annual reports — regulatory priorities, supervision statistics, market data.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
-      "activation_status": "candidate",
-      "priority": "P2",
-      "in_sources_json": false,
-      "in_work_queue": false,
+      "activation_status": "already_active",
+      "priority": "P1",
+      "in_sources_json": true,
+      "in_work_queue": true,
       "no_save_candidate": true,
       "discovery_method": "domain_crawl",
       "notes": ""
@@ -2527,7 +2528,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA policy statements \u2014 regulatory positions and interpretative guidance.",
+      "why_it_matters": "DFSA policy statements — regulatory positions and interpretative guidance.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2553,7 +2554,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA guidance notes \u2014 practical compliance guidance for DFSA-regulated firms.",
+      "why_it_matters": "DFSA guidance notes — practical compliance guidance for DFSA-regulated firms.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "listing",
@@ -2579,7 +2580,7 @@
         "Legal Counsel",
         "Compliance Manager"
       ],
-      "why_it_matters": "DFSA supervisory risk appetite \u2014 regulatory priorities for examination cycles.",
+      "why_it_matters": "DFSA supervisory risk appetite — regulatory priorities for examination cycles.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS/Umbraco",
       "adapter_family_guess": "static",
@@ -2876,7 +2877,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM FSRA regulatory notices \u2014 formal supervisory communications.",
+      "why_it_matters": "ADGM FSRA regulatory notices — formal supervisory communications.",
       "update_frequency_guess": "medium",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "custom_element",
@@ -2930,7 +2931,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM FSRA regulatory announcements \u2014 confirmed accessible in 150-report sprint.",
+      "why_it_matters": "ADGM FSRA regulatory announcements — confirmed accessible in 150-report sprint.",
       "update_frequency_guess": "high",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "custom_element",
@@ -2984,7 +2985,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM ODP hub \u2014 data protection laws, guidance, regulatory actions index.",
+      "why_it_matters": "ADGM ODP hub — data protection laws, guidance, regulatory actions index.",
       "update_frequency_guess": "low",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "custom_element",
@@ -3011,7 +3012,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM RA notices for registered entities \u2014 DNFBP relevant.",
+      "why_it_matters": "ADGM RA notices for registered entities — DNFBP relevant.",
       "update_frequency_guess": "medium",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "custom_element",
@@ -3038,7 +3039,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM RA AML/CFT sector guides for DNFBPs \u2014 PDF listing, high MLRO relevance.",
+      "why_it_matters": "ADGM RA AML/CFT sector guides for DNFBPs — PDF listing, high MLRO relevance.",
       "update_frequency_guess": "low",
       "parsing_risk": "PDF",
       "adapter_family_guess": "pdf_listing",
@@ -3092,7 +3093,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "Federal legislation as applied in ADGM \u2014 UAE laws referenced in ADGM legal framework.",
+      "why_it_matters": "Federal legislation as applied in ADGM — UAE laws referenced in ADGM legal framework.",
       "update_frequency_guess": "low",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "listing",
@@ -3119,7 +3120,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM Companies Office circulars \u2014 corporate governance and companies law updates.",
+      "why_it_matters": "ADGM Companies Office circulars — corporate governance and companies law updates.",
       "update_frequency_guess": "medium",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "custom_element",
@@ -3146,7 +3147,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM FSRA rulebook via alternate FSRA domain \u2014 may have different content structure.",
+      "why_it_matters": "ADGM FSRA rulebook via alternate FSRA domain — may have different content structure.",
       "update_frequency_guess": "medium",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "listing",
@@ -3173,7 +3174,7 @@
         "Compliance Manager",
         "DNFBP"
       ],
-      "why_it_matters": "ADGM listing authority announcements \u2014 listed securities regulatory updates.",
+      "why_it_matters": "ADGM listing authority announcements — listed securities regulatory updates.",
       "update_frequency_guess": "medium",
       "parsing_risk": "custom_element",
       "adapter_family_guess": "listing",
@@ -3335,7 +3336,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA regulation amendments \u2014 amendment tracking for issued regulations.",
+      "why_it_matters": "SCA regulation amendments — amendment tracking for issued regulations.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS-filtered",
       "adapter_family_guess": "listing",
@@ -3389,7 +3390,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA enforcement data \u2014 violations and violator register, open data.",
+      "why_it_matters": "SCA enforcement data — violations and violator register, open data.",
       "update_frequency_guess": "medium",
       "parsing_risk": "table",
       "adapter_family_guess": "table",
@@ -3416,7 +3417,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA primary securities legislation \u2014 federal laws and SCA founding decree.",
+      "why_it_matters": "SCA primary securities legislation — federal laws and SCA founding decree.",
       "update_frequency_guess": "low",
       "parsing_risk": "listing",
       "adapter_family_guess": "listing",
@@ -3443,7 +3444,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA board decisions \u2014 formal rule-making and regulatory decisions.",
+      "why_it_matters": "SCA board decisions — formal rule-making and regulatory decisions.",
       "update_frequency_guess": "medium",
       "parsing_risk": "listing",
       "adapter_family_guess": "listing",
@@ -3470,7 +3471,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA sustainable finance framework \u2014 ESG and sustainability disclosure obligations.",
+      "why_it_matters": "SCA sustainable finance framework — ESG and sustainability disclosure obligations.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS-filtered",
       "adapter_family_guess": "listing",
@@ -3497,7 +3498,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA fintech sandbox regulations \u2014 relevant for securities fintech applicants.",
+      "why_it_matters": "SCA fintech sandbox regulations — relevant for securities fintech applicants.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS-filtered",
       "adapter_family_guess": "static",
@@ -3524,7 +3525,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA news and announcements \u2014 regulatory press releases.",
+      "why_it_matters": "SCA news and announcements — regulatory press releases.",
       "update_frequency_guess": "high",
       "parsing_risk": "JS-filtered",
       "adapter_family_guess": "listing",
@@ -3551,7 +3552,7 @@
         "Asset Manager",
         "Broker"
       ],
-      "why_it_matters": "SCA investment fund regulations \u2014 fund manager and fund obligations.",
+      "why_it_matters": "SCA investment fund regulations — fund manager and fund obligations.",
       "update_frequency_guess": "low",
       "parsing_risk": "JS-filtered",
       "adapter_family_guess": "listing",
@@ -3812,7 +3813,7 @@
         "MLRO",
         "Compliance Manager"
       ],
-      "why_it_matters": "DIFC consultation papers \u2014 upcoming law and regulation changes.",
+      "why_it_matters": "DIFC consultation papers — upcoming law and regulation changes.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "listing",
@@ -3838,7 +3839,7 @@
         "MLRO",
         "Compliance Manager"
       ],
-      "why_it_matters": "DIFC data protection regulatory hub \u2014 law, guidance, supervision overview.",
+      "why_it_matters": "DIFC data protection regulatory hub — law, guidance, supervision overview.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "listing",
@@ -3864,7 +3865,7 @@
         "MLRO",
         "Compliance Manager"
       ],
-      "why_it_matters": "DIFC Financial Crime Authority \u2014 AML/CFT and sanctions supervision for DIFC.",
+      "why_it_matters": "DIFC Financial Crime Authority — AML/CFT and sanctions supervision for DIFC.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "listing",
@@ -3890,7 +3891,7 @@
         "MLRO",
         "Compliance Manager"
       ],
-      "why_it_matters": "DIFC Courts publicly published judgments \u2014 relevant for compliance and legal precedent.",
+      "why_it_matters": "DIFC Courts publicly published judgments — relevant for compliance and legal precedent.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "listing",
@@ -3916,7 +3917,7 @@
         "MLRO",
         "Compliance Manager"
       ],
-      "why_it_matters": "DIFC insurance regulatory section \u2014 insurance firm compliance.",
+      "why_it_matters": "DIFC insurance regulatory section — insurance firm compliance.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "listing",
@@ -4010,7 +4011,7 @@
       "source_id": "AE-uae-legislation-aml",
       "regulator": "UAE Legislation",
       "category": "H-Federal",
-      "title": "UAE Legislation Portal \u2014 AML/CFT Decrees",
+      "title": "UAE Legislation Portal — AML/CFT Decrees",
       "url": "https://uaelegislation.gov.ae/en/legislations?subject=16",
       "official_status": "official",
       "jurisdiction": "UAE Federal",
@@ -4020,7 +4021,7 @@
         "CCO",
         "MLRO"
       ],
-      "why_it_matters": "AML/CFT federal legislation \u2014 federal decrees, cabinet resolutions on AML/CFT.",
+      "why_it_matters": "AML/CFT federal legislation — federal decrees, cabinet resolutions on AML/CFT.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4036,7 +4037,7 @@
       "source_id": "AE-uae-legislation-financial",
       "regulator": "UAE Legislation",
       "category": "H-Federal",
-      "title": "UAE Legislation Portal \u2014 Financial Laws",
+      "title": "UAE Legislation Portal — Financial Laws",
       "url": "https://uaelegislation.gov.ae/en/legislations?subject=1",
       "official_status": "official",
       "jurisdiction": "UAE Federal",
@@ -4046,7 +4047,7 @@
         "CCO",
         "MLRO"
       ],
-      "why_it_matters": "UAE financial legislation \u2014 banking, financial services, insurance federal laws.",
+      "why_it_matters": "UAE financial legislation — banking, financial services, insurance federal laws.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4072,7 +4073,7 @@
         "CCO",
         "MLRO"
       ],
-      "why_it_matters": "MoJ e-laws portal \u2014 searchable federal law database.",
+      "why_it_matters": "MoJ e-laws portal — searchable federal law database.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "table",
@@ -4098,7 +4099,7 @@
         "CCO",
         "MLRO"
       ],
-      "why_it_matters": "MoE AML supervision for DNFBPs \u2014 circulars, guidance, inspection reports.",
+      "why_it_matters": "MoE AML supervision for DNFBPs — circulars, guidance, inspection reports.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "custom_element",
@@ -4124,7 +4125,7 @@
         "CCO",
         "MLRO"
       ],
-      "why_it_matters": "MoJ federal laws registry \u2014 primary UAE legislation index.",
+      "why_it_matters": "MoJ federal laws registry — primary UAE legislation index.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4176,7 +4177,7 @@
         "CCO",
         "MLRO"
       ],
-      "why_it_matters": "MoE publications \u2014 sector reports and regulatory publications.",
+      "why_it_matters": "MoE publications — sector reports and regulatory publications.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "listing",
@@ -4192,7 +4193,7 @@
       "source_id": "AE-uae-legislation-commercial",
       "regulator": "UAE Legislation",
       "category": "H-Federal",
-      "title": "UAE Legislation Portal \u2014 Commercial Laws",
+      "title": "UAE Legislation Portal — Commercial Laws",
       "url": "https://uaelegislation.gov.ae/en/legislations?subject=7",
       "official_status": "official",
       "jurisdiction": "UAE Federal",
@@ -4202,7 +4203,7 @@
         "CCO",
         "MLRO"
       ],
-      "why_it_matters": "UAE commercial legislation \u2014 companies law, commercial transactions, commercial registry.",
+      "why_it_matters": "UAE commercial legislation — companies law, commercial transactions, commercial registry.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4228,7 +4229,7 @@
         "Compliance Manager",
         "Legal Counsel"
       ],
-      "why_it_matters": "UAE Federal Tax Authority \u2014 VAT, corporate tax, excise tax regulation.",
+      "why_it_matters": "UAE Federal Tax Authority — VAT, corporate tax, excise tax regulation.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "static",
@@ -4254,7 +4255,7 @@
         "Compliance Manager",
         "Legal Counsel"
       ],
-      "why_it_matters": "FTA corporate tax public clarifications and guides \u2014 CT implementation for regulated entities.",
+      "why_it_matters": "FTA corporate tax public clarifications and guides — CT implementation for regulated entities.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4280,7 +4281,7 @@
         "Compliance Manager",
         "Legal Counsel"
       ],
-      "why_it_matters": "FTA VAT public clarifications \u2014 authoritative VAT technical guidance.",
+      "why_it_matters": "FTA VAT public clarifications — authoritative VAT technical guidance.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4306,7 +4307,7 @@
         "Compliance Manager",
         "Legal Counsel"
       ],
-      "why_it_matters": "FTA VAT technical guides \u2014 comprehensive VAT compliance reference.",
+      "why_it_matters": "FTA VAT technical guides — comprehensive VAT compliance reference.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4332,7 +4333,7 @@
         "Compliance Manager",
         "Legal Counsel"
       ],
-      "why_it_matters": "FTA CbCR regulations \u2014 OECD BEPS CBC reporting obligations.",
+      "why_it_matters": "FTA CbCR regulations — OECD BEPS CBC reporting obligations.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4358,7 +4359,7 @@
         "Compliance Manager",
         "Legal Counsel"
       ],
-      "why_it_matters": "FTA excise tax framework \u2014 relevant for goods import compliance.",
+      "why_it_matters": "FTA excise tax framework — relevant for goods import compliance.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4384,7 +4385,7 @@
         "Compliance Manager",
         "Legal Counsel"
       ],
-      "why_it_matters": "FTA news and regulatory announcements \u2014 tax authority press releases.",
+      "why_it_matters": "FTA news and regulatory announcements — tax authority press releases.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4436,7 +4437,7 @@
         "MLRO",
         "Free Zone Entity"
       ],
-      "why_it_matters": "DFM market rules \u2014 exchange-level trading regulations, listing requirements.",
+      "why_it_matters": "DFM market rules — exchange-level trading regulations, listing requirements.",
       "update_frequency_guess": "medium",
       "parsing_risk": "JS/SPA",
       "adapter_family_guess": "listing",
@@ -4446,7 +4447,7 @@
       "in_work_queue": false,
       "no_save_candidate": true,
       "discovery_method": "150_report",
-      "notes": "Timeout in 150-report \u2014 likely JS SPA, needs Playwright."
+      "notes": "Timeout in 150-report — likely JS SPA, needs Playwright."
     },
     {
       "source_id": "AE-tdra-regulations",
@@ -4462,7 +4463,7 @@
         "MLRO",
         "Free Zone Entity"
       ],
-      "why_it_matters": "TDRA regulations \u2014 telecommunications and digital governance regulations.",
+      "why_it_matters": "TDRA regulations — telecommunications and digital governance regulations.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4488,7 +4489,7 @@
         "MLRO",
         "Free Zone Entity"
       ],
-      "why_it_matters": "UAE federal data protection authority \u2014 PDPL regulations and guidance.",
+      "why_it_matters": "UAE federal data protection authority — PDPL regulations and guidance.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4514,7 +4515,7 @@
         "MLRO",
         "Free Zone Entity"
       ],
-      "why_it_matters": "Dubai Land Department AML \u2014 real estate AML obligations for DNFBP real estate agents.",
+      "why_it_matters": "Dubai Land Department AML — real estate AML obligations for DNFBP real estate agents.",
       "update_frequency_guess": "medium",
       "parsing_risk": "HTML/JS",
       "adapter_family_guess": "custom_element",
@@ -4540,7 +4541,7 @@
         "MLRO",
         "Free Zone Entity"
       ],
-      "why_it_matters": "MENAFATF MER statements \u2014 regional AML/CFT standards and UAE-specific mutual evaluation context.",
+      "why_it_matters": "MENAFATF MER statements — regional AML/CFT standards and UAE-specific mutual evaluation context.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4566,7 +4567,7 @@
         "MLRO",
         "Free Zone Entity"
       ],
-      "why_it_matters": "SAIF Zone free zone regulations \u2014 relevant for Sharjah-based DNFBP entities.",
+      "why_it_matters": "SAIF Zone free zone regulations — relevant for Sharjah-based DNFBP entities.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4592,7 +4593,7 @@
         "MLRO",
         "Free Zone Entity"
       ],
-      "why_it_matters": "Ajman Free Zone Authority regulations \u2014 compliance for Ajman-based entities.",
+      "why_it_matters": "Ajman Free Zone Authority regulations — compliance for Ajman-based entities.",
       "update_frequency_guess": "low",
       "parsing_risk": "HTML",
       "adapter_family_guess": "listing",
@@ -4609,37 +4610,37 @@
     {
       "source_id": "AE-vara-company-rulebook-old",
       "url": "https://www.vara.ae/en/regulatory-framework/company-rulebook/",
-      "reject_reason": "URL 404 \u2014 path changed after VARA site redesign. Superseded by PDF sources.",
+      "reject_reason": "URL 404 — path changed after VARA site redesign. Superseded by PDF sources.",
       "category": "A-VARA"
     },
     {
       "source_id": "AE-vara-aml-cft-rulebook-old",
       "url": "https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/",
-      "reject_reason": "URL 404 \u2014 path changed after VARA site redesign. Superseded by PDF sources.",
+      "reject_reason": "URL 404 — path changed after VARA site redesign. Superseded by PDF sources.",
       "category": "A-VARA"
     },
     {
       "source_id": "AE-vara-rulebooks-old",
       "url": "https://www.vara.ae/en/regulatory-framework/rulebooks/",
-      "reject_reason": "URL 404 \u2014 path changed. Use rulebooks.vara.ae domain instead.",
+      "reject_reason": "URL 404 — path changed. Use rulebooks.vara.ae domain instead.",
       "category": "A-VARA"
     },
     {
       "source_id": "AE-vara-social-media",
       "url": "https://twitter.com/VARAdubai",
-      "reject_reason": "Social media \u2014 not an official regulatory source.",
+      "reject_reason": "Social media — not an official regulatory source.",
       "category": "A-VARA"
     },
     {
       "source_id": "AE-uaefiu-goaml-login",
       "url": "https://goaml.uaefiu.gov.ae/",
-      "reject_reason": "Login-only portal \u2014 private reporting system, not accessible for monitoring.",
+      "reject_reason": "Login-only portal — private reporting system, not accessible for monitoring.",
       "category": "B-FIU-EOCN"
     },
     {
       "source_id": "AE-eocn-arabic-only",
       "url": "https://www.eocn.gov.ae/ar-ae/",
-      "reject_reason": "Arabic-only EOCN site \u2014 English endpoints preferred.",
+      "reject_reason": "Arabic-only EOCN site — English endpoints preferred.",
       "category": "B-FIU-EOCN"
     },
     {
@@ -4651,7 +4652,7 @@
     {
       "source_id": "AE-cbuae-sitemap",
       "url": "https://www.centralbank.ae/sitemap.xml",
-      "reject_reason": "Sitemap returns 403 \u2014 not accessible.",
+      "reject_reason": "Sitemap returns 403 — not accessible.",
       "category": "C-CBUAE"
     },
     {
@@ -4663,19 +4664,19 @@
     {
       "source_id": "AE-dfsa-sitemap",
       "url": "https://www.dfsa.ae/sitemap.xml",
-      "reject_reason": "Sitemap returns 403 \u2014 not accessible.",
+      "reject_reason": "Sitemap returns 403 — not accessible.",
       "category": "D-DFSA"
     },
     {
       "source_id": "AE-dfsa-about",
       "url": "https://www.dfsa.ae/about",
-      "reject_reason": "Corporate/about page \u2014 no regulatory content.",
+      "reject_reason": "Corporate/about page — no regulatory content.",
       "category": "D-DFSA"
     },
     {
       "source_id": "AE-adgm-about",
       "url": "https://www.adgm.com/about",
-      "reject_reason": "Corporate/about page \u2014 no regulatory content.",
+      "reject_reason": "Corporate/about page — no regulatory content.",
       "category": "E-ADGM"
     },
     {
@@ -4687,7 +4688,7 @@
     {
       "source_id": "AE-sca-homepage-only",
       "url": "https://www.sca.gov.ae/",
-      "reject_reason": "SCA homepage \u2014 superseded by specific subpages.",
+      "reject_reason": "SCA homepage — superseded by specific subpages.",
       "category": "F-SCA"
     },
     {
@@ -4699,13 +4700,13 @@
     {
       "source_id": "AE-difc-old-domain",
       "url": "https://www.difc.ae/",
-      "reject_reason": "Old DIFC domain \u2014 use difc.com canonical domain.",
+      "reject_reason": "Old DIFC domain — use difc.com canonical domain.",
       "category": "G-DIFC"
     },
     {
       "source_id": "AE-difc-about",
       "url": "https://www.difc.com/about/",
-      "reject_reason": "Corporate/about page \u2014 no regulatory content.",
+      "reject_reason": "Corporate/about page — no regulatory content.",
       "category": "G-DIFC"
     },
     {
@@ -4717,19 +4718,19 @@
     {
       "source_id": "AE-moj-homepage-only",
       "url": "https://www.moj.gov.ae/",
-      "reject_reason": "MoJ homepage \u2014 superseded by specific subpages.",
+      "reject_reason": "MoJ homepage — superseded by specific subpages.",
       "category": "H-Federal"
     },
     {
       "source_id": "AE-uae-legislation-arabic",
       "url": "https://uaelegislation.gov.ae/ar/",
-      "reject_reason": "Arabic-only legislation portal \u2014 English endpoints preferred.",
+      "reject_reason": "Arabic-only legislation portal — English endpoints preferred.",
       "category": "H-Federal"
     },
     {
       "source_id": "AE-fta-etax-portal",
       "url": "https://eservices.tax.gov.ae/",
-      "reject_reason": "FTA eTax portal \u2014 login required, private filing system.",
+      "reject_reason": "FTA eTax portal — login required, private filing system.",
       "category": "I-Tax"
     },
     {
@@ -4741,43 +4742,43 @@
     {
       "source_id": "AE-adx-regulation",
       "url": "https://www.adx.ae/English/Regulation/Pages/rules.aspx",
-      "reject_reason": "403 access blocked \u2014 confirmed inaccessible in 150-report.",
+      "reject_reason": "403 access blocked — confirmed inaccessible in 150-report.",
       "category": "J-FreeZone"
     },
     {
       "source_id": "AE-adx-sitemap",
       "url": "https://adx.ae/sitemap.xml",
-      "reject_reason": "SSL certificate error \u2014 site inaccessible in 150-report.",
+      "reject_reason": "SSL certificate error — site inaccessible in 150-report.",
       "category": "J-FreeZone"
     },
     {
       "source_id": "AE-dfm-timeout",
       "url": "https://dfm.ae/en/market/market-rules",
-      "reject_reason": "Timeout confirmed in 150-report \u2014 JS SPA, needs Playwright investigation before adding as candidate.",
+      "reject_reason": "Timeout confirmed in 150-report — JS SPA, needs Playwright investigation before adding as candidate.",
       "category": "J-FreeZone"
     },
     {
       "source_id": "AE-dmcc-free-zone-rules-404",
       "url": "https://www.dmcc.ae/free-zone-rules-and-regulations",
-      "reject_reason": "404 confirmed in 150-report \u2014 URL no longer valid.",
+      "reject_reason": "404 confirmed in 150-report — URL no longer valid.",
       "category": "J-FreeZone"
     },
     {
       "source_id": "AE-dmcc-compliance-404",
       "url": "https://www.dmcc.ae/compliance",
-      "reject_reason": "404 confirmed in 150-report \u2014 URL no longer valid.",
+      "reject_reason": "404 confirmed in 150-report — URL no longer valid.",
       "category": "J-FreeZone"
     },
     {
       "source_id": "AE-dmcc-aml-404",
       "url": "https://www.dmcc.ae/operations/anti-money-laundering",
-      "reject_reason": "404 confirmed in 150-report \u2014 URL no longer valid.",
+      "reject_reason": "404 confirmed in 150-report — URL no longer valid.",
       "category": "J-FreeZone"
     },
     {
       "source_id": "AE-met-gov-down",
       "url": "https://www.met.gov.ae/en/services/anti-money-laundering",
-      "reject_reason": "ECONNREFUSED \u2014 site not responding (confirmed in 150-report).",
+      "reject_reason": "ECONNREFUSED — site not responding (confirmed in 150-report).",
       "category": "J-FreeZone"
     },
     {
@@ -4795,7 +4796,7 @@
     {
       "source_id": "AE-sa-cma-wrong-country",
       "url": "https://cma.org.sa/",
-      "reject_reason": "Saudi CMA \u2014 wrong country, not UAE.",
+      "reject_reason": "Saudi CMA — wrong country, not UAE.",
       "category": "J-FreeZone"
     }
   ]

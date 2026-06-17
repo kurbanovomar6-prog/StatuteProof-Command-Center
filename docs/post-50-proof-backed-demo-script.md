@@ -10,7 +10,7 @@ Show an MLRO prospect that StatuteProof is not just a website checker. It monito
 
 ## Opening
 
-"StatuteProof monitors public official or officially linked UAE sources that are technically accessible and permitted to monitor. Today the UAE pack has 79 enabled official-source endpoints, with 76 readiness-supported after proof, baseline, source-health, noise, and review gates. Three remain under extraction remediation. This is monitoring intelligence only, not legal advice."
+"StatuteProof monitors public official or officially linked UAE sources that are technically accessible and permitted to monitor. Today the UAE pack has 79 enabled official-source endpoints, with 78 readiness-supported after proof, baseline, source-health, noise, and review gates. One remains under extraction remediation. This is monitoring intelligence only, not legal advice."
 
 ## Show Source Coverage
 

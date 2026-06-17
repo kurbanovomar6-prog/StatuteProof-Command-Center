@@ -12,13 +12,13 @@ Mission: Turn the UAE source universe roadmap into an evidence-grade coverage pr
 | Metric | Value | Source |
 |--------|-------|--------|
 | Enabled sources | **79** | sources.json enabled=true |
-| Readiness-supported sources | **76** | sources.json status=active or readiness_supported |
-| Remediation sources | **3** | sources.json status=remediation |
+| Readiness-supported sources | **78** | sources.json status=active or readiness_supported |
+| Remediation sources | **1** | sources.json status=remediation |
 | Universe candidates mapped | **171** | uae_source_universe_candidates.json candidates array |
 | Rejected and documented | **32** | uae_source_universe_candidates.json rejected array |
 | Grand total universe records | **203** | uae_source_universe_candidates.json |
 
-These numbers are the authoritative source of truth as of 2026-06-17. Any public claim about source counts must use exactly these numbers or a subset. Round numbers are not acceptable as standalone figures ("80+" or "100+" is not acceptable — "79" and "76" are the only safe exact counts).
+These numbers are the authoritative source of truth as of 2026-06-17. Any public claim about source counts must use exactly these numbers or a subset. Round numbers are not acceptable as standalone figures ("80+" or "100+" is not acceptable — "79" and "78" are the only safe exact counts).
 
 ---
 
@@ -26,14 +26,14 @@ These numbers are the authoritative source of truth as of 2026-06-17. Any public
 
 | Tier | Claim | Safe Today? |
 |------|-------|------------|
-| Tier 0 | "79 enabled / 76 readiness-supported UAE official-source endpoints" | **YES — use now** |
+| Tier 0 | "79 enabled / 78 readiness-supported UAE official-source endpoints" | **YES — use now** |
 | Tier 1 | "200+ official-source candidates mapped" | **YES — use now** |
 | Tier 2 | "Major UAE regulator coverage" (with disclaimer) | **YES — conditional, requires disclaimer** |
 | Tier 3 | "Comprehensive UAE official-source monitoring" | **NO — 6 specific P0 activations required first** |
 | Tier 4 | "Complete UAE coverage" | **NO — never claimable in current state; 6+ months minimum** |
 
 **Current safe positioning statement:**
-> "StatuteProof monitors selected public official UAE regulatory sources — 79 active endpoints across major UAE financial regulators — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."
+> "StatuteProof monitors selected public official UAE regulatory sources — 79 enabled endpoints, including 78 readiness-supported sources across major UAE financial regulators — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."
 
 ---
 
@@ -42,7 +42,7 @@ These numbers are the authoritative source of truth as of 2026-06-17. Any public
 | Regulator | Active Sources | Coverage Verdict | Gap |
 |-----------|---------------|-----------------|-----|
 | CBUAE | 27 | **Strong** ✅ | Consultations, AML/CFT ops page not active |
-| DFSA | 10 | **Adequate** ✅ | Guidance notes, policy statements not active |
+| DFSA | 12 | **Adequate** ✅ | Guidance notes, policy statements not active |
 | ADGM/FSRA | 10 | **Adequate** ✅ | RA AML guides, RA notices not active |
 | DIFC | 8 | **Adequate** ✅ | Financial Crime Authority, courts not active |
 | VARA | 9 | **Partial** ⚠️ | Guidance hub + AML/CFT live page broken URLs |
@@ -76,7 +76,7 @@ These numbers are the authoritative source of truth as of 2026-06-17. Any public
 | Licensing Conditions | ~3 | **Partial** | VARA licensing conditions not active |
 | Public Registers | 1 | **Weak** | DFSA, VARA, SCA registers not active |
 | Sanctions / TFS | 1 | **Weak** ⚠️ | Live TFS designation page blocked (noise risk) |
-| Annual Reports / NRA | 0 | **Not covered** ⚠️ | FIU NRA 2024 is most cited MLRO document |
+| Annual Reports / NRA | 2 | **Partial** ⚠️ | DFSA annual/AML reports active; FIU NRA 2024 is still not active |
 | Tax Guidance | 0 | **Not covered** ❌ | Entire FTA category uncovered |
 | Courts / Legal Database | 1 | **Partial** | DIFC only; MoJ not active |
 
@@ -143,7 +143,7 @@ The following claims were found in prior versions of roadmap documents and have 
 ## 8. Safe Wording Library (Use These Exactly)
 
 ### Always-safe phrases (no modification needed):
-1. "79 enabled UAE official-source endpoints. 76 readiness-supported."
+1. "79 enabled UAE official-source endpoints. 78 readiness-supported."
 2. "Monitoring intelligence only. Not legal advice."
 3. "Not a guarantee of regulatory completeness."
 4. "StatuteProof has mapped 200+ official UAE regulatory source candidates across major financial, AML/CFT, virtual asset, securities, and financial free-zone regulatory domains."
