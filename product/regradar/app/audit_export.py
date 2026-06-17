@@ -1,15 +1,25 @@
-"""Audit-pack export for evidence-backed review records."""
+"""Audit-pack export for evidence-backed review records.
+
+Includes period-based Audit Vault: bundles all evidence packs for a date range
+and set of source IDs into a single ZIP archive with a manifest.json.
+"""
 
 from __future__ import annotations
 
 import html
 import json
+import logging
 import re
-from datetime import datetime, timezone
+import sqlite3
+import zipfile
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from app.config import DB_PATH
 from app.evidence_assessment import LEGAL_DISCLAIMER
+
+logger = logging.getLogger(__name__)
 
 
 _BASE_DIR = Path(__file__).parent.parent
@@ -215,6 +225,242 @@ def build_audit_pack_export_response(
         "message": "Markdown/HTML audit pack exported.",
         "disclaimer": LEGAL_DISCLAIMER,
     }
+
+
+def validate_date_range(date_from: str, date_to: str) -> tuple[bool, str]:
+    """Validate a YYYY-MM-DD date range for the audit vault.
+
+    Rules checked:
+    - Both strings must be valid YYYY-MM-DD format.
+    - date_from must not be after date_to.
+    - Neither date may be in the future.
+    - Neither date may be more than 2 years in the past.
+
+    Returns
+    -------
+    tuple[bool, str]
+        (True, "") on success, (False, error_message) on failure.
+    """
+    try:
+        d_from = date.fromisoformat(str(date_from or "").strip())
+    except ValueError:
+        return False, f"date_from '{date_from}' is not a valid YYYY-MM-DD date."
+    try:
+        d_to = date.fromisoformat(str(date_to or "").strip())
+    except ValueError:
+        return False, f"date_to '{date_to}' is not a valid YYYY-MM-DD date."
+
+    today = date.today()
+    two_years_ago = date(today.year - 2, today.month, today.day)
+
+    if d_from > d_to:
+        return False, "date_from must not be after date_to."
+    if d_from > today:
+        return False, "date_from must not be in the future."
+    if d_to > today:
+        return False, "date_to must not be in the future."
+    if d_from < two_years_ago:
+        return False, "date_from must not be more than 2 years in the past."
+
+    return True, ""
+
+
+def build_period_audit_vault(
+    source_ids: list[str],
+    date_from: str,
+    date_to: str,
+    output_dir: Path | None = None,
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Bundle all audit packs for source_ids within a date range into a ZIP archive.
+
+    Parameters
+    ----------
+    source_ids:
+        Non-empty list of source IDs (matched against the ``url`` column via source
+        run JSONL files). If empty, returns an error.
+    date_from:
+        Start of date range, inclusive, YYYY-MM-DD format.
+    date_to:
+        End of date range, inclusive, YYYY-MM-DD format.
+    output_dir:
+        Directory for the ZIP archive. Defaults to product/regradar/data/audit_vaults/.
+    base_dir:
+        Override for the product root (used in tests).
+
+    Returns
+    -------
+    dict
+        {"status": "ok", "vault_path": str, "record_count": int, ...} on success.
+        {"status": "empty", ...} when no records match.
+        {"status": "error", "message": str} on failure.
+        Never raises.
+    """
+    try:
+        root = base_dir or _BASE_DIR
+
+        # Validate inputs
+        if not source_ids:
+            return {"status": "error", "message": "source_ids must be a non-empty list."}
+
+        valid, err = validate_date_range(date_from, date_to)
+        if not valid:
+            return {"status": "error", "message": err}
+
+        vault_dir = output_dir or (root / "data" / "audit_vaults")
+        vault_dir.mkdir(parents=True, exist_ok=True)
+
+        # Collect run records from source_runs.jsonl for the given sources + date range
+        records = _fetch_runs_for_vault(root, source_ids, date_from, date_to)
+
+        if not records:
+            return {
+                "status": "empty",
+                "record_count": 0,
+                "message": "No records found for the specified period and sources.",
+            }
+
+        # Generate individual audit packs
+        manifest: list[dict[str, Any]] = []
+        pack_paths: list[Path] = []
+
+        for rec in records:
+            try:
+                pack_result = write_audit_pack(rec, base_dir=root)
+                pack_filename = str(Path(pack_result.get("md_path", "")).name or "")
+                manifest.append({
+                    "source_id": rec.get("source_id") or "",
+                    "run_id": rec.get("run_id") or "",
+                    "risk_level": rec.get("risk_level") or "UNKNOWN",
+                    "detected_at": rec.get("timestamp_utc") or rec.get("run_at") or "",
+                    "pack_filename": pack_filename,
+                })
+                # Collect all generated files for this pack
+                for key in ("md_path", "html_path", "pdf_path", "metadata_path"):
+                    rel = pack_result.get(key)
+                    if rel:
+                        candidate = (root / rel).resolve()
+                        if candidate.exists():
+                            pack_paths.append(candidate)
+            except Exception as exc:
+                logger.warning("build_period_audit_vault: skipping record %s: %s", rec.get("run_id"), exc)
+
+        if not manifest:
+            return {
+                "status": "empty",
+                "record_count": 0,
+                "message": "No records found for the specified period and sources.",
+            }
+
+        # Write manifest.json to a temp location then include in ZIP
+        timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        zip_name = f"audit_vault_{date_from}_{date_to}_{timestamp_str}.zip"
+        zip_path = vault_dir / zip_name
+
+        manifest_data = {
+            "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "date_from": date_from,
+            "date_to": date_to,
+            "source_ids": sorted(set(source_ids)),
+            "record_count": len(manifest),
+            "legal_disclaimer": LEGAL_DISCLAIMER,
+            "records": manifest,
+        }
+        manifest_json = json.dumps(manifest_data, ensure_ascii=False, indent=2, sort_keys=True)
+
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("manifest.json", manifest_json)
+            for pack_path in pack_paths:
+                arcname = f"packs/{pack_path.name}"
+                zf.write(pack_path, arcname=arcname)
+
+        return {
+            "status": "ok",
+            "vault_path": str(zip_path.resolve()),
+            "record_count": len(manifest),
+            "source_count": len({m["source_id"] for m in manifest}),
+            "date_from": date_from,
+            "date_to": date_to,
+            "manifest": manifest,
+        }
+
+    except Exception as exc:
+        logger.error("build_period_audit_vault: unexpected error: %s", exc)
+        return {"status": "error", "message": str(exc)}
+
+
+def _fetch_runs_for_vault(
+    root: Path,
+    source_ids: list[str],
+    date_from: str,
+    date_to: str,
+) -> list[dict[str, Any]]:
+    """Return run records matching source_ids and date range.
+
+    First tries source_runs.jsonl; falls back to documents DB if no JSONL exists.
+    """
+    wanted_ids = set(str(s).strip() for s in source_ids if s)
+    date_to_end = f"{date_to}T23:59:59"
+
+    # Try JSONL source runs first
+    runs_path = root / "data" / "source_runs" / "source_runs.jsonl"
+    if runs_path.exists():
+        matching: list[dict[str, Any]] = []
+        for line in runs_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            sid = str(row.get("source_id") or "").strip()
+            if sid not in wanted_ids:
+                continue
+            ts = str(row.get("timestamp_utc") or row.get("run_at") or "")
+            if ts and ts >= date_from and ts <= date_to_end:
+                matching.append(row)
+        if matching:
+            return matching
+
+    # Fallback: documents DB (maps url→source for basic lookup)
+    if not Path(DB_PATH).exists():
+        return []
+    try:
+        conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        try:
+            rows = conn.execute(
+                """
+                SELECT url, risk_level, risk_reason, created_at, content_hash
+                FROM documents
+                WHERE created_at >= ? AND created_at <= ?
+                ORDER BY created_at ASC
+                """,
+                (date_from, date_to_end),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            return []
+        finally:
+            conn.close()
+
+        result: list[dict[str, Any]] = []
+        for row in rows:
+            url = str(row["url"] or "")
+            # Include if url contains any of the wanted source_ids
+            if any(sid in url for sid in wanted_ids):
+                result.append({
+                    "run_id": f"db-{row['content_hash'][:12]}",
+                    "source_id": url,
+                    "official_url": url,
+                    "timestamp_utc": row["created_at"],
+                    "risk_level": row["risk_level"] or "LOW",
+                    "content_hash": row["content_hash"] or "",
+                    "change_status": "CHANGED",
+                })
+        return result
+    except Exception as exc:
+        logger.warning("_fetch_runs_for_vault DB fallback error: %s", exc)
+        return []
 
 
 def _render_html_pdf(html_doc: str, pdf_path: Path) -> None:

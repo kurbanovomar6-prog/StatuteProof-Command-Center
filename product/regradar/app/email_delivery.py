@@ -1,8 +1,17 @@
-"""Safe email brief delivery test mode.
+"""StatuteProof email delivery — monitoring brief dispatch with multi-provider support.
 
-No SMTP or external delivery happens here. The MVP writes a complete email
-payload to a local outbox and records delivery status so the reviewed brief
-pipeline can be tested end-to-end without contacting customers.
+Supports local_outbox (safe default), smtp, sendgrid, and postmark providers.
+Production sending is gated by STATUTEPROOF_EMAIL_SEND_ENABLED=true.
+
+Required ENV for production email delivery:
+  STATUTEPROOF_EMAIL_PROVIDER     = sendgrid | postmark | smtp | local_outbox (default: local_outbox)
+  STATUTEPROOF_EMAIL_SEND_ENABLED = true   (must be explicitly "true" to send externally)
+  STATUTEPROOF_EMAIL_FROM         = noreply@statuteproof.com
+  STATUTEPROOF_EMAIL_REPLY_TO     = support@statuteproof.com
+  STATUTEPROOF_EMAIL_SENDER_NAME  = StatuteProof Monitoring
+  SENDGRID_API_KEY                = (required for sendgrid provider)
+  POSTMARK_SERVER_TOKEN           = (required for postmark provider)
+  SMTP_HOST / SMTP_PORT / SMTP_USERNAME / SMTP_PASSWORD  = (required for smtp provider)
 """
 
 from __future__ import annotations
@@ -296,6 +305,253 @@ def latest_email_delivery_status(base_dir: Path | None = None) -> dict[str, Any]
             continue
         last = _safe_status_row(row)
     return last
+
+
+def build_monitoring_brief_email(
+    brief_markdown: str,
+    source_name: str,
+    risk_level: str,
+    client_name: str = "",
+    client_email: str = "",
+) -> dict[str, Any]:
+    """Build a monitoring brief email payload dict ready for delivery.
+
+    Both body_text and body_html include the mandatory LEGAL_DISCLAIMER.
+    If brief_markdown already contains the disclaimer, it is not duplicated.
+
+    Parameters
+    ----------
+    brief_markdown:
+        The monitoring brief content in Markdown format.
+    source_name:
+        Name of the monitored source (used in the subject line).
+    risk_level:
+        Risk level string, e.g. "HIGH", "MEDIUM", "LOW", "NON_MATERIAL".
+    client_name:
+        Optional client name for personalisation.
+    client_email:
+        Recipient email address.
+
+    Returns
+    -------
+    dict
+        Email payload with keys: to, subject, body_text, body_html, disclaimer_included.
+    """
+    source_name_safe = str(source_name or "Source").strip()
+    risk_level_safe = str(risk_level or "").strip().upper()
+
+    subject = f"[StatuteProof] Monitoring Brief — {source_name_safe} ({risk_level_safe})"
+
+    # Build plain-text body
+    body_text = str(brief_markdown or "").strip()
+    if LEGAL_DISCLAIMER not in body_text:
+        body_text = body_text + "\n\n" + LEGAL_DISCLAIMER + "\n"
+
+    # Build HTML body
+    greeting = f"<p>Dear {_esc_html(client_name)},</p>\n" if client_name else ""
+    md_html = _brief_markdown_to_html(brief_markdown)
+    disclaimer_html = f"<hr><p style='font-size:.85em;color:#555;'>{_esc_html(LEGAL_DISCLAIMER)}</p>"
+    if LEGAL_DISCLAIMER in (brief_markdown or ""):
+        body_html = (
+            "<!doctype html><html><head><meta charset='utf-8'></head><body>"
+            + greeting + md_html
+            + "</body></html>"
+        )
+    else:
+        body_html = (
+            "<!doctype html><html><head><meta charset='utf-8'></head><body>"
+            + greeting + md_html + disclaimer_html
+            + "</body></html>"
+        )
+
+    return {
+        "to": str(client_email or "").strip(),
+        "subject": subject,
+        "body_text": body_text,
+        "body_html": body_html,
+        "disclaimer_included": True,
+    }
+
+
+def deliver_brief_email(
+    payload: dict[str, Any],
+    *,
+    source_id: str = "",
+    env: Mapping[str, str] | None = None,
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Dispatch a monitoring brief email using the configured provider.
+
+    Routes to local outbox, sendgrid, postmark, or smtp based on ENV config.
+    Writes to outbox when send is not enabled. Never raises.
+
+    Parameters
+    ----------
+    payload:
+        Output of ``build_monitoring_brief_email()``.
+    source_id:
+        Source identifier for outbox filename.
+    env:
+        Optional ENV override (used in tests).
+    base_dir:
+        Optional base dir override (used in tests).
+
+    Returns
+    -------
+    dict
+        Delivery result with ``status`` key.
+    """
+    try:
+        root = base_dir or _BASE_DIR
+        config = validate_email_provider_config(env=env)
+        provider = config["provider"]
+        send_enabled = config.get("send_enabled", False)
+        from_email = config.get("from_email") or "noreply@statuteproof.com"
+        sender_name = config.get("sender_name") or "StatuteProof Monitoring"
+
+        outbox_dir = root / "data" / "outbox"
+        outbox_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        safe_sid = re.sub(r"[^a-zA-Z0-9_-]", "-", str(source_id or "unknown"))[:60]
+        outbox_filename = f"brief_{safe_sid}_{timestamp}.json"
+        outbox_path = outbox_dir / outbox_filename
+
+        def _write_outbox(reason: str = "") -> dict[str, Any]:
+            outbox_dir.mkdir(parents=True, exist_ok=True)
+            entry = {**payload, "source_id": source_id, "queued_at": timestamp, "provider": provider}
+            outbox_path.write_text(
+                json.dumps(entry, ensure_ascii=False, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+            result: dict[str, Any] = {"status": "queued_local", "outbox_path": str(outbox_path)}
+            if reason:
+                result["reason"] = reason
+            return result
+
+        if provider == "local_outbox":
+            return _write_outbox()
+
+        if not send_enabled:
+            return _write_outbox(reason="send_not_enabled")
+
+        # ── SendGrid ──────────────────────────────────────────────────────────
+        if provider == "sendgrid":
+            source_env = env if env is not None else os.environ
+            api_key = str(source_env.get("SENDGRID_API_KEY") or "").strip()
+            import urllib.request as _urllib_req
+            import urllib.error as _urllib_err
+            sg_body = json.dumps({
+                "personalizations": [{"to": [{"email": payload["to"]}]}],
+                "from": {"email": from_email, "name": sender_name},
+                "subject": payload["subject"],
+                "content": [
+                    {"type": "text/plain", "value": payload["body_text"]},
+                    {"type": "text/html", "value": payload["body_html"]},
+                ],
+            }).encode("utf-8")
+            req = _urllib_req.Request(
+                "https://api.sendgrid.com/v3/mail/send",
+                data=sg_body,
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+            try:
+                with _urllib_req.urlopen(req, timeout=15) as resp:
+                    message_id = resp.headers.get("X-Message-Id", "")
+                return {"status": "sent", "provider": "sendgrid", "message_id": message_id}
+            except _urllib_err.HTTPError as exc:
+                return {"status": "error", "message": f"SendGrid HTTP {exc.code}: {exc.reason}"}
+
+        # ── Postmark ──────────────────────────────────────────────────────────
+        if provider == "postmark":
+            source_env = env if env is not None else os.environ
+            token = str(source_env.get("POSTMARK_SERVER_TOKEN") or "").strip()
+            import urllib.request as _urllib_req
+            import urllib.error as _urllib_err
+            pm_body = json.dumps({
+                "From": f"{sender_name} <{from_email}>",
+                "To": payload["to"],
+                "Subject": payload["subject"],
+                "TextBody": payload["body_text"],
+                "HtmlBody": payload["body_html"],
+            }).encode("utf-8")
+            req = _urllib_req.Request(
+                "https://api.postmarkapp.com/email",
+                data=pm_body,
+                headers={
+                    "X-Postmark-Server-Token": token,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                method="POST",
+            )
+            try:
+                import json as _json
+                with _urllib_req.urlopen(req, timeout=15) as resp:
+                    resp_data = _json.loads(resp.read().decode("utf-8"))
+                message_id = str(resp_data.get("MessageID") or "")
+                return {"status": "sent", "provider": "postmark", "message_id": message_id}
+            except _urllib_err.HTTPError as exc:
+                return {"status": "error", "message": f"Postmark HTTP {exc.code}: {exc.reason}"}
+
+        # ── SMTP ──────────────────────────────────────────────────────────────
+        if provider == "smtp":
+            import smtplib
+            import email.mime.multipart as _mime_mp
+            import email.mime.text as _mime_text
+            source_env = env if env is not None else os.environ
+            smtp_host = str(source_env.get("SMTP_HOST") or "").strip()
+            smtp_port = int(source_env.get("SMTP_PORT") or 465)
+            smtp_user = str(source_env.get("SMTP_USERNAME") or "").strip()
+            smtp_pass = str(source_env.get("SMTP_PASSWORD") or "").strip()
+            msg = _mime_mp.MIMEMultipart("alternative")
+            msg["Subject"] = payload["subject"]
+            msg["From"] = f"{sender_name} <{from_email}>"
+            msg["To"] = payload["to"]
+            msg.attach(_mime_text.MIMEText(payload["body_text"], "plain", "utf-8"))
+            msg.attach(_mime_text.MIMEText(payload["body_html"], "html", "utf-8"))
+            with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15) as server:
+                server.login(smtp_user, smtp_pass)
+                server.sendmail(from_email, [payload["to"]], msg.as_string())
+            return {"status": "sent", "provider": "smtp"}
+
+        # Unknown provider fallback
+        return _write_outbox(reason="send_not_enabled")
+
+    except Exception as exc:
+        return {"status": "error", "message": str(exc)}
+
+
+def _brief_markdown_to_html(markdown: str) -> str:
+    """Convert brief markdown to simple HTML paragraphs (no external deps)."""
+    import html as _html_mod
+    lines = str(markdown or "").splitlines()
+    parts: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("# "):
+            parts.append(f"<h1>{_html_mod.escape(stripped[2:])}</h1>")
+        elif stripped.startswith("## "):
+            parts.append(f"<h2>{_html_mod.escape(stripped[3:])}</h2>")
+        elif stripped.startswith("- "):
+            parts.append(f"<li>{_html_mod.escape(stripped[2:])}</li>")
+        else:
+            import re as _re
+            escaped = _html_mod.escape(stripped)
+            escaped = _re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
+            parts.append(f"<p>{escaped}</p>")
+    return "\n".join(parts)
+
+
+def _esc_html(text: str) -> str:
+    """HTML-escape a string."""
+    import html as _html_mod
+    return _html_mod.escape(str(text or ""))
 
 
 def _subject_for_brief(brief: dict[str, Any]) -> str:

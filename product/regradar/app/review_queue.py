@@ -1,16 +1,25 @@
-"""Global MLRO review queue built from saved evidence and assessments."""
+"""Global MLRO review queue built from saved evidence and assessments.
+
+Includes accountability logging: reviewers can record an action taken
+(accepted / not_applicable / escalated) against any review record, creating
+a non-repudiation audit trail for compliance purposes.
+"""
 
 from __future__ import annotations
 
+import fcntl
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
-from app.evidence_assessment import LEGAL_DISCLAIMER, load_assessments
+from app.evidence_assessment import LEGAL_DISCLAIMER, load_assessments, now_utc
 from app.source_health_timeline import source_health_customer_message
 
+logger = logging.getLogger(__name__)
 
 _BASE_DIR = Path(__file__).parent.parent
+_VALID_ACTIONS = {"accepted", "not_applicable", "escalated"}
 
 
 def build_review_queue(
@@ -80,8 +89,11 @@ def _queue_row(
     source_health_status: str,
     pending: bool,
 ) -> dict[str, Any]:
+    """Build a single review queue row, including accountability fields."""
     evidence_id = str(run.get("run_id") or "")
     normalized_hash = str(run.get("normalized_hash") or run.get("content_hash") or "")
+    # Load the latest accountability action for this record (if any)
+    action_record = _latest_action_for(evidence_id)
     return {
         "evidence_record_id": evidence_id,
         "source_id": run.get("source_id"),
@@ -102,6 +114,11 @@ def _queue_row(
         "reviewed_at": (assessment or {}).get("reviewed_at"),
         "pending_review": pending,
         "customer_safe_message": source_health_customer_message(source_health_status),
+        # Accountability fields
+        "action_taken": action_record.get("action") if action_record else None,
+        "action_user_id": action_record.get("user_id") if action_record else None,
+        "action_reason": action_record.get("reason") if action_record else None,
+        "action_timestamp": action_record.get("action_timestamp") if action_record else None,
     }
 
 
@@ -144,3 +161,110 @@ def _source_health_status(run: dict[str, Any]) -> str:
     if change == "CHANGED":
         return "HASH_DRIFT"
     return "MONITOR_OK"
+
+
+# ── Accountability logging ─────────────────────────────────────────────────────
+
+def record_review_action(
+    record_id: str,
+    action: str,
+    user_id: str,
+    reason: str = "",
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Record an accountability action taken by a reviewer on a review record.
+
+    Parameters
+    ----------
+    record_id:
+        The evidence_record_id of the review item being actioned.
+    action:
+        One of "accepted", "not_applicable", "escalated".
+    user_id:
+        Non-empty identifier for the reviewer (email or user ID).
+    reason:
+        Optional free-text reason; truncated to 500 chars.
+    base_dir:
+        Override for the data directory (used in tests).
+
+    Returns
+    -------
+    dict
+        {"status": "ok", ...} on success or {"status": "error", "message": ...} on failure.
+        Never raises.
+    """
+    try:
+        record_id = str(record_id or "").strip()
+        action = str(action or "").strip().lower()
+        user_id = str(user_id or "").strip()
+        reason = str(reason or "").strip()[:500]
+
+        if not record_id:
+            return {"status": "error", "message": "record_id is required."}
+        if action not in _VALID_ACTIONS:
+            return {
+                "status": "error",
+                "message": f"Invalid action '{action}'. Must be one of: {sorted(_VALID_ACTIONS)}.",
+            }
+        if not user_id:
+            return {"status": "error", "message": "user_id is required."}
+
+        action_timestamp = now_utc()
+        root = base_dir or _BASE_DIR
+        log_path = root / "data" / "review_actions" / "review_actions.jsonl"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
+        entry: dict[str, Any] = {
+            "record_id": record_id,
+            "action": action,
+            "user_id": user_id,
+            "reason": reason,
+            "action_timestamp": action_timestamp,
+        }
+
+        with log_path.open("a", encoding="utf-8") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            try:
+                fh.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
+            finally:
+                fcntl.flock(fh, fcntl.LOCK_UN)
+
+        logger.info("Review action recorded: %s → %s by %s", record_id, action, user_id)
+        return {
+            "status": "ok",
+            "record_id": record_id,
+            "action": action,
+            "action_timestamp": action_timestamp,
+        }
+
+    except Exception as exc:
+        logger.error("record_review_action error: %s", exc)
+        return {"status": "error", "message": str(exc)}
+
+
+def _latest_action_for(
+    record_id: str,
+    base_dir: Path | None = None,
+) -> dict[str, Any] | None:
+    """Return the most recent accountability action for a given record_id, or None."""
+    root = base_dir or _BASE_DIR
+    log_path = root / "data" / "review_actions" / "review_actions.jsonl"
+    if not log_path.exists():
+        return None
+    wanted = str(record_id or "").strip()
+    if not wanted:
+        return None
+    last: dict[str, Any] | None = None
+    try:
+        for line in log_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if str(row.get("record_id") or "") == wanted:
+                last = row
+    except Exception as exc:
+        logger.warning("_latest_action_for: could not read log: %s", exc)
+    return last

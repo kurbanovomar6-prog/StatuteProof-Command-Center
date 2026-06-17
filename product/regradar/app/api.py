@@ -270,6 +270,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_plan_get()
         elif path == "/api/settings/telegram":
             self._disabled_endpoint()
+        elif path == "/api/reports/monthly-assurance":
+            self._handle_monthly_assurance_report()
+        elif path == "/api/email/delivery-status":
+            self._handle_email_delivery_status()
         elif path in ("/api/health", "/api/"):
             self._send_json({"status": "ok", "service": "StatuteProof API"})
         else:
@@ -326,6 +330,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_custom_source_test()
         elif path == "/api/custom-sources":
             self._handle_custom_sources_add()
+        elif path == "/api/review/action":
+            self._handle_review_action()
+        elif path == "/api/audit/vault":
+            self._handle_audit_vault()
         else:
             self._send_json({"error": "not found"}, 404)
 
@@ -1770,6 +1778,111 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             logger.error("custom-sources add error: %s: %s", type(exc).__name__, exc)
             self._send_json({"ok": False, "message": "Failed to add source."}, 500)
+
+    # ── GET /api/reports/monthly-assurance ────────────────────────────────────
+
+    def _handle_monthly_assurance_report(self) -> None:
+        """Return a monthly monitoring assurance report as JSON (markdown or PDF)."""
+        from app.monthly_assurance_report import compute_monthly_stats, render_assurance_report_markdown, generate_monthly_report_pdf
+        parsed = urlparse(self.path)
+        qs = parse_qs(parsed.query)
+        now = datetime.now(timezone.utc)
+        try:
+            year = int((qs.get("year") or [str(now.year)])[0])
+            month = int((qs.get("month") or [str(now.month)])[0])
+        except (ValueError, IndexError):
+            self._send_json({"status": "error", "message": "Invalid year or month."}, 400)
+            return
+        source_ids_raw = (qs.get("source_ids") or [""])[0]
+        source_ids = [s.strip() for s in source_ids_raw.split(",") if s.strip()] or None
+        client_name = (qs.get("client_name") or [""])[0]
+        fmt = ((qs.get("format") or ["markdown"])[0]).lower().strip()
+        try:
+            stats = compute_monthly_stats(source_ids, year, month)
+            if fmt == "pdf":
+                pdf_path = generate_monthly_report_pdf(stats, client_name=client_name)
+                self._send_json({"status": "ok", "report_path": str(pdf_path)})
+            else:
+                report = render_assurance_report_markdown(stats, client_name=client_name)
+                self._send_json({"status": "ok", "report": report, "stats": stats})
+        except Exception as exc:
+            logger.error("monthly-assurance error: %s", exc)
+            self._send_json({"status": "error", "message": str(exc)}, 500)
+
+    # ── GET /api/email/delivery-status ────────────────────────────────────────
+
+    def _handle_email_delivery_status(self) -> None:
+        """Return email provider configuration status (read-only, no auth required)."""
+        from app.email_delivery import validate_email_provider_config
+        try:
+            config = validate_email_provider_config()
+            self._send_json({"status": "ok", **config})
+        except Exception as exc:
+            logger.error("email delivery-status error: %s", exc)
+            self._send_json({"status": "error", "message": str(exc)}, 500)
+
+    # ── POST /api/review/action ───────────────────────────────────────────────
+
+    def _handle_review_action(self) -> None:
+        """Record an accountability action on a review queue item."""
+        from app.review_queue import record_review_action
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        record_id = str(body.get("record_id") or "").strip()
+        action = str(body.get("action") or "").strip()
+        user_id = str(body.get("user_id") or "").strip()
+        reason = str(body.get("reason") or "").strip()
+        if not record_id or not action or not user_id:
+            self._send_json({"ok": False, "message": "record_id, action, and user_id are required."}, 400)
+            return
+        try:
+            result = record_review_action(record_id, action, user_id, reason=reason)
+            if result.get("status") == "error":
+                self._send_json({"ok": False, **result}, 400)
+            else:
+                self._send_json({"ok": True, **result})
+        except Exception as exc:
+            logger.error("review action error: %s", exc)
+            self._send_json({"ok": False, "message": str(exc)}, 500)
+
+    # ── POST /api/audit/vault ─────────────────────────────────────────────────
+
+    def _handle_audit_vault(self) -> None:
+        """Build a period-based audit vault ZIP from matching evidence records."""
+        from app.audit_export import build_period_audit_vault, validate_date_range
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        source_ids = body.get("source_ids")
+        date_from = str(body.get("date_from") or "").strip()
+        date_to = str(body.get("date_to") or "").strip()
+        if not source_ids or not isinstance(source_ids, list):
+            self._send_json({"ok": False, "message": "source_ids must be a non-empty list."}, 400)
+            return
+        valid, err = validate_date_range(date_from, date_to)
+        if not valid:
+            self._send_json({"ok": False, "message": err}, 400)
+            return
+        try:
+            result = build_period_audit_vault(source_ids, date_from, date_to)
+            if result.get("status") == "error":
+                self._send_json({"ok": False, **result}, 500)
+            elif result.get("status") == "empty":
+                self._send_json({"ok": False, **result}, 404)
+            else:
+                self._send_json({"ok": True, **result})
+        except Exception as exc:
+            logger.error("audit vault error: %s", exc)
+            self._send_json({"ok": False, "message": str(exc)}, 500)
 
 
 def run_server(host: str = "127.0.0.1", port: int = 5001) -> None:
