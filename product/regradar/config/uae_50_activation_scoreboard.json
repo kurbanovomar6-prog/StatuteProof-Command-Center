@@ -11472,11 +11472,851 @@
       "activation_status": "activation_ready",
       "activation_blocker": "",
       "next_action": "include_in_monitoring_scope_with_disclosed limitations"
+    },
+    {
+      "target_id": "AE-dfsa-annual-aml-reports",
+      "source_id": "AE-dfsa-annual-aml-reports",
+      "regulator": "DFSA",
+      "title": "DFSA Annual Anti-Money Laundering Reports",
+      "official_url": "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports",
+      "official_status": "official_or_officially_linked",
+      "source_type": "aml",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-17T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "693cf380283f665545f0a20de732d6363efbdcf7fa3abba9fab782dfbc9f98b1",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125139Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "693cf380283f665545f0a20de732d6363efbdcf7fa3abba9fab782dfbc9f98b1",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-dfsa-annual-reports",
+      "source_id": "AE-dfsa-annual-reports",
+      "regulator": "DFSA",
+      "title": "DFSA Annual Reports",
+      "official_url": "https://www.dfsa.ae/your-resources/publications-reports/annual-report",
+      "official_status": "official_or_officially_linked",
+      "source_type": "financial_regulator",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-17T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "5ac1b92a2d6cb782b2f5ec076c39866019568b99c712299662d0e36b8c17348e",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125139Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "5ac1b92a2d6cb782b2f5ec076c39866019568b99c712299662d0e36b8c17348e",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-difc-companies-law-2018",
+      "source_id": "AE-difc-companies-law-2018",
+      "regulator": "DIFC",
+      "title": "DIFC Companies Law 2018",
+      "official_url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/companies-law-difc-law-no-5-2018",
+      "official_status": "official_or_officially_linked",
+      "source_type": "legal_database",
+      "buyer_relevance": [],
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "9a3aeae973b0ce63f6cbeaba4a513b6db0b7aa698a95bb354560ba580b67bcc9",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-companies-law-2018/intake-20260616T182127Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "9a3aeae973b0ce63f6cbeaba4a513b6db0b7aa698a95bb354560ba580b67bcc9",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-difc-data-protection-guidance",
+      "source_id": "AE-difc-data-protection-guidance",
+      "regulator": "DIFC",
+      "title": "DIFC Data Protection Guidance",
+      "official_url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/guidance",
+      "official_status": "official_or_officially_linked",
+      "source_type": "data_protection_guidance",
+      "buyer_relevance": [],
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "de25f8c5e0ee3fc4e011ca2b829e8f2ee86f6008f5326419aaa13110f839e650",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-guidance/intake-20260616T182049Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "de25f8c5e0ee3fc4e011ca2b829e8f2ee86f6008f5326419aaa13110f839e650",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-difc-data-protection-law-2020",
+      "source_id": "AE-difc-data-protection-law-2020",
+      "regulator": "DIFC",
+      "title": "DIFC Data Protection Law 2020",
+      "official_url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/data-protection-law-difc-law-no-5-2020",
+      "official_status": "official_or_officially_linked",
+      "source_type": "legal_database",
+      "buyer_relevance": [],
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "0d1f16591c75e0221abfe4d12ac087fc2976970c97cee0a25fab05dae22fa666",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-law-2020/intake-20260616T182126Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "0d1f16591c75e0221abfe4d12ac087fc2976970c97cee0a25fab05dae22fa666",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-difc-data-protection-regulation-10",
+      "source_id": "AE-difc-data-protection-regulation-10",
+      "regulator": "DIFC",
+      "title": "DIFC Data Protection Regulation 10",
+      "official_url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+      "official_status": "official_or_officially_linked",
+      "source_type": "data_protection_regulatory",
+      "buyer_relevance": [],
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "aae352726964b6bb2acbb52e2fca88d24bd44213f7105af42cf20411d3a3b4ff",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-data-protection-regulation-10/intake-20260616T182050Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "aae352726964b6bb2acbb52e2fca88d24bd44213f7105af42cf20411d3a3b4ff",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-vara-broker-dealer-rulebook-pdf",
+      "source_id": "AE-vara-broker-dealer-rulebook-pdf",
+      "regulator": "VARA",
+      "title": "VARA Broker-Dealer Services Rulebook PDF",
+      "official_url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_226_VER20250519.pdf",
+      "official_status": "official_or_officially_linked",
+      "source_type": "regulatory",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_document",
+      "adapter_name": "pdf_document",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "b0e6d901933fa5ae47d9be1528614c2af7c456856e336977b0699170f3ef4022",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-vara-broker-dealer-rulebook-pdf/intake-20260616T124719Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "b0e6d901933fa5ae47d9be1528614c2af7c456856e336977b0699170f3ef4022",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-vara-compliance-risk-rulebook-pdf",
+      "source_id": "AE-vara-compliance-risk-rulebook-pdf",
+      "regulator": "VARA",
+      "title": "VARA Compliance and Risk Management Rulebook PDF",
+      "official_url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_123_VER20250519.pdf",
+      "official_status": "official_or_officially_linked",
+      "source_type": "regulatory",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_document",
+      "adapter_name": "pdf_document",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "ddcac4b703d4a663dc87edd277eb1a37cc035be01d4edcecfc97d60b5733b9ee",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-vara-compliance-risk-rulebook-pdf/intake-20260616T124716Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "ddcac4b703d4a663dc87edd277eb1a37cc035be01d4edcecfc97d60b5733b9ee",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-vara-lending-borrowing-rulebook-pdf",
+      "source_id": "AE-vara-lending-borrowing-rulebook-pdf",
+      "regulator": "VARA",
+      "title": "VARA Lending and Borrowing Services Rulebook PDF",
+      "official_url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_279_VER20250519.pdf",
+      "official_status": "official_or_officially_linked",
+      "source_type": "regulatory",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_document",
+      "adapter_name": "pdf_document",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "7f46134727e025243cbe3eb64476346df5eedd0df16047a0c84b6d474d7a1efd",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-vara-lending-borrowing-rulebook-pdf/intake-20260616T124720Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "7f46134727e025243cbe3eb64476346df5eedd0df16047a0c84b6d474d7a1efd",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-vara-technology-information-rulebook-pdf",
+      "source_id": "AE-vara-technology-information-rulebook-pdf",
+      "regulator": "VARA",
+      "title": "VARA Technology and Information Rulebook PDF",
+      "official_url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_169_VER20250519.pdf",
+      "official_status": "official_or_officially_linked",
+      "source_type": "regulatory",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_document",
+      "adapter_name": "pdf_document",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "f2608a8c416fb3b0d837ff76b6333d3a2cbe7ac150c59b03ac7c5cadce342ec4",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-vara-technology-information-rulebook-pdf/intake-20260616T124717Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "f2608a8c416fb3b0d837ff76b6333d3a2cbe7ac150c59b03ac7c5cadce342ec4",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-vara-va-issuance-rulebook-pdf",
+      "source_id": "AE-vara-va-issuance-rulebook-pdf",
+      "regulator": "VARA",
+      "title": "VARA Virtual Asset Issuance Rulebook PDF",
+      "official_url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_293_VER20250519.pdf",
+      "official_status": "official_or_officially_linked",
+      "source_type": "regulatory",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_document",
+      "adapter_name": "pdf_document",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "3e70112f2d199503b9a272af31fdba53df38e4dc49dd11959717b296ad6cc579",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-vara-va-issuance-rulebook-pdf/intake-20260616T124718Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "3e70112f2d199503b9a272af31fdba53df38e4dc49dd11959717b296ad6cc579",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
+    },
+    {
+      "target_id": "AE-vara-va-regulations-2023-pdf",
+      "source_id": "AE-vara-va-regulations-2023-pdf",
+      "regulator": "VARA",
+      "title": "VARA Virtual Assets and Related Activities Regulations 2023 PDF",
+      "official_url": "https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_18_VER992_2.pdf",
+      "official_status": "official_or_officially_linked",
+      "source_type": "regulatory",
+      "buyer_relevance": [],
+      "adapter_family": "pdf_document",
+      "adapter_name": "pdf_document",
+      "adapter_config": {},
+      "no_save_status": "passed",
+      "no_save_last_run_at": "2026-06-16T00:00:00Z",
+      "no_save_quality_score": 65,
+      "no_save_normalized_hash": "3f7dab27b727e2887f38348ef8951615e1942203055c6b9c841b08e3a891dc30",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "evidence_status": "proof_saved",
+      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-vara-va-regulations-2023-pdf/intake-20260616T124721Z/proof.json",
+      "raw_hash": "",
+      "normalized_hash": "3f7dab27b727e2887f38348ef8951615e1942203055c6b9c841b08e3a891dc30",
+      "normalized_text_path": "",
+      "baseline_status": "complete",
+      "baseline_run_count": 2,
+      "baseline_stability": "stable_or_accepted",
+      "noise_risk": "low",
+      "noise_control_status": "accepted",
+      "source_health_risk": "low",
+      "source_health_control_status": "accepted",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Activated with proof artifact, baseline, and evidence record in commit 2faa15b (feat: remediate final UAE source readiness gaps 2026-06-17). All gate criteria met: proof_saved, baseline_complete, noise_risk=low.",
+        "reviewed_at": "2026-06-17",
+        "blocking_issues": []
+      },
+      "activation_status": "activation_ready",
+      "activation_blocker": "",
+      "next_action": "monitor_with_mass_runner"
     }
   ],
   "summary": {
     "total_target_sources": 145,
-    "activation_ready_count": 4,
+    "activation_ready_count": 78,
     "no_save_passed_count": 96,
     "evidence_saved_count": 4,
     "baseline_complete_count": 7,
