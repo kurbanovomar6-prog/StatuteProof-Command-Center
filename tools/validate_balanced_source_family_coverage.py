@@ -100,8 +100,8 @@ def main() -> int:
 
     if "sources activated in this mapping phase: 0" not in lower_final:
         errors.append("Final universe report must state that zero sources were activated in mapping phase.")
-    if "candidate-only" in lower_final and "fta" not in lower_final:
-        errors.append("Final universe report should disclose FTA candidate-only status.")
+    if "fta" in lower_final and "25 proof-backed fta" not in lower_final:
+        errors.append("Final universe report should disclose the later 25 proof-backed FTA activation.")
 
     if errors:
         for error in errors[:80]:

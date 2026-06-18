@@ -292,6 +292,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "vara_pdf_listing",
         "difc_legal_database",
         "uae_legal_database",
+        "fta_tax_listing",
         "register",
         "sitemap_feed",
         "public_json_api",
@@ -309,6 +310,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "vara_pdf_listing",
         "difc_legal_database",
         "uae_legal_database",
+        "fta_tax_listing",
     }
     if family in document_families:
         return bool(result.get("adapter_used")) and item_count >= 2 and chars >= 500
@@ -560,6 +562,7 @@ def run_source_intake(
                 wait_for_selector=wait_selector,
                 content_selector=content_selector,
                 force_playwright=(fetch_method == "playwright"),
+                prefer_requests_on_low_content=str(adapter_family or adapter_name or "").lower() == "fta_tax_listing",
             )
         except Exception as exc:
             if wait_selector or content_selector or fetch_method == "playwright":

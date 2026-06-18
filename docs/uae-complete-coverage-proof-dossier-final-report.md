@@ -2,10 +2,10 @@
 
 Date: 2026-06-17
 Analyst roles: CTO + QA/Critic + Legal Language + Product Manager + Source Monitor
-Input files: sources.json (122 enabled after 2026-06-18 FTA/ADGM repair and weak-family bulk activation), uae_source_universe_candidates.json (203 records), 7 dossier analysis docs
+Input files: sources.json (147 enabled after 2026-06-18 FTA/ADGM repair, weak-family bulk activation, and FTA PDF activation), uae_source_universe_candidates.json (203 records), 7 dossier analysis docs
 Mission: Turn the UAE source universe roadmap into an evidence-grade coverage proof and later record proof-backed source activation without false claims.
 
-2026-06-18 update: the dirty 87 enabled / 86 active claim was rejected. Two ADGM sources passed no-save, proof, 2/2 baseline, mass-monitor `MONITOR_OK`, and agent gates. Five FTA sub-pages and the ADGM dedicated regulatory-alerts page were demoted to candidates because they did not pass meaningful extraction gates. A later weak-family bulk sprint activated 41 DFSA/DIFC/Ministry of Economy sources after proof, repeat baseline, mass-monitor `MONITOR_OK`, and no dry-run hash drift. Current source truth is therefore 122 enabled / 121 monitoring-active / 1 remediation.
+2026-06-18 update: the dirty 87 enabled / 86 active claim was rejected. Two ADGM sources passed no-save, proof, 2/2 baseline, mass-monitor `MONITOR_OK`, and agent gates. Five FTA sub-pages and the ADGM dedicated regulatory-alerts page were demoted to candidates because they did not pass meaningful extraction gates. A later weak-family bulk sprint activated 41 DFSA/DIFC/Ministry of Economy sources after proof, repeat baseline, mass-monitor `MONITOR_OK`, and no dry-run hash drift. A later FTA PDF sprint activated 25 direct official FTA tax PDFs after no-save, proof-backed repeat baseline, mass-monitor `MONITOR_OK`, and review gates. Current source truth is therefore 147 enabled / 146 monitoring-active / 1 remediation.
 
 ---
 
@@ -13,14 +13,14 @@ Mission: Turn the UAE source universe roadmap into an evidence-grade coverage pr
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| Enabled sources | **122** | sources.json enabled=true |
-| Monitoring-active sources | **121** | sources.json status=active or readiness_supported |
+| Enabled sources | **147** | sources.json enabled=true |
+| Monitoring-active sources | **146** | sources.json status=active or readiness_supported |
 | Remediation sources | **1** | sources.json status=remediation |
 | Universe candidates mapped | **171** | uae_source_universe_candidates.json candidates array |
 | Rejected and documented | **32** | uae_source_universe_candidates.json rejected array |
 | Grand total universe records | **203** | uae_source_universe_candidates.json |
 
-These numbers are the authoritative source of truth as of 2026-06-18. Any public claim about source counts must use exactly these numbers or a clearly scoped subset. Round-number claims are not acceptable as standalone figures; use "122 enabled" and "121 monitoring-active" when exact counts are shown.
+These numbers are the authoritative source of truth as of 2026-06-18. Any public claim about source counts must use exactly these numbers or a clearly scoped subset. Round-number claims are not acceptable as standalone figures; use "147 enabled" and "146 monitoring-active" when exact counts are shown.
 
 ---
 
@@ -28,14 +28,14 @@ These numbers are the authoritative source of truth as of 2026-06-18. Any public
 
 | Tier | Claim | Safe Today? |
 |------|-------|------------|
-| Tier 0 | "122 enabled / 121 monitoring-active UAE official-source endpoints" | **YES — use now** |
+| Tier 0 | "147 enabled / 146 monitoring-active UAE official-source endpoints" | **YES — use now** |
 | Tier 1 | "200+ official-source candidates mapped" | **YES — use now** |
 | Tier 2 | "Major UAE regulator coverage" (with disclaimer) | **YES — conditional, requires disclaimer** |
 | Tier 3 | "Comprehensive UAE official-source monitoring" | **NO — 6 specific P0 activations required first** |
 | Tier 4 | "Complete UAE coverage" | **NO — never claimable in current state; 6+ months minimum** |
 
 **Current safe positioning statement:**
-> "StatuteProof monitors selected public official UAE regulatory sources — 122 enabled endpoints, including 121 monitoring-active sources across major UAE financial regulators — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."
+> "StatuteProof monitors selected public official UAE regulatory sources — 147 enabled endpoints, including 146 monitoring-active sources across major UAE financial, tax, AML/CFT, and legal/regulatory source families — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."
 
 ---
 
@@ -51,7 +51,7 @@ These numbers are the authoritative source of truth as of 2026-06-18. Any public
 | UAE FIU | 4 active + 1 remediation | **Weak/Partial** ⚠️ | NRA 2024 not active; homepage remains remediation |
 | EOCN | 3 | **Weak** ⚠️ | TFS live designation page not active (noise risk) |
 | SCA | 5 | **Partial** ⚠️ | Primary securities laws not active |
-| FTA | 0 | **Not covered** ❌ | Zero active sources (VAT, corporate tax gap) |
+| FTA | 25 | **Strong for selected direct official tax PDFs** ✅ | Listing-page pagination, tax services, and non-PDF FTA pages still candidate/adapter work |
 | Ministry of Justice | 0 | **Not covered** ❌ | Zero active sources |
 | Ministry of Economy | 7 | **Partial** | DNFBP/AML depth improved; still below 10 active endpoints |
 | UAE Data Office / PDPL | 0 | **Not covered** ❌ | Federal PDPL has zero coverage |
@@ -79,7 +79,7 @@ These numbers are the authoritative source of truth as of 2026-06-18. Any public
 | Public Registers | 1 | **Weak** | DFSA, VARA, SCA registers not active |
 | Sanctions / TFS | 1 | **Weak** ⚠️ | Live TFS designation page blocked (noise risk) |
 | Annual Reports / NRA | 2 | **Partial** ⚠️ | DFSA annual/AML reports active; FIU NRA 2024 is still not active |
-| Tax Guidance | 0 | **Not covered** ❌ | Entire FTA category uncovered |
+| Tax Guidance | 25 | **Strong for selected direct official FTA PDFs** ✅ | Broader FTA listing pages are still candidate/adapter work |
 | Courts / Legal Database | 1 | **Partial** | DIFC only; MoJ not active |
 
 **Most commercially critical type gaps:** Regulatory guidance (Type 4), Tax guidance (Type 14), Annual Reports/NRA (Type 12), CBUAE consultations (Type 6), Sanctions live monitoring (Type 8).
@@ -104,7 +104,7 @@ These numbers are the authoritative source of truth as of 2026-06-18. Any public
 |-------|-----|--------|
 | VASP MLRO | VARA guidance and AML/CFT live page broken — cannot demo VARA regulatory guidance monitoring | AE-vara-guidance, AE-vara-activity-rulebooks-hub |
 | Securities CCO (SCA-licensed) | Primary securities legislation not active | AE-sca-laws, AE-sca-decisions |
-| Tax compliance / CFO | Zero FTA sources — cannot offer any tax monitoring | AE-fta-corporate-tax-guides, AE-fta-vat-public-clarifications |
+| Tax compliance / CFO | Selected FTA tax PDF monitoring exists, but listing pages and broader tax operations remain incomplete | FTA listing/pagination adapters, additional VAT/corporate/excise guides |
 | DNFBP MLRO | ADGM RA AML guides and MoE AML DNFBP not active | AE-adgm-ra-aml-guides, AE-moec-aml-dnfbp |
 | Legal counsel | MoJ e-laws not active; consultation papers incomplete | AE-uaefiu-nra-2024 (NRA is primary MLRO research doc) |
 | Free zone entity compliance | Zero active free zone sources (DMCC, DFM, ADX) | P1 items; not blocking for core use case |
@@ -145,7 +145,7 @@ The following claims were found in prior versions of roadmap documents and have 
 ## 8. Safe Wording Library (Use These Exactly)
 
 ### Always-safe phrases (no modification needed):
-1. "122 enabled UAE official-source endpoints. 121 monitoring-active."
+1. "147 enabled UAE official-source endpoints. 146 monitoring-active."
 2. "Monitoring intelligence only. Not legal advice."
 3. "Not a guarantee of regulatory completeness."
 4. "StatuteProof has mapped 200+ official UAE regulatory source candidates across major financial, AML/CFT, virtual asset, securities, and financial free-zone regulatory domains."
@@ -323,4 +323,4 @@ Validator: tools/validate_uae_coverage_claims.py — checks all docs, forbidden 
 
 ---
 
-*Original dossier completed on 2026-06-17 without source activation. Updated on 2026-06-18 after FTA/ADGM truth repair: sources.json now records 122 enabled / 121 monitoring-active / 1 remediation. FTA remains candidate-only until a future endpoint passes proof, repeat baseline, and MONITOR_OK gates.*
+*Original dossier completed on 2026-06-17 without source activation. Updated on 2026-06-18 after FTA/ADGM truth repair, weak-family bulk activation, and FTA PDF activation: sources.json now records 147 enabled / 146 monitoring-active / 1 remediation. FTA direct official PDF monitoring is active for 25 proof-backed endpoints; broader FTA listing pages remain candidate/adapter work until they pass proof, repeat baseline, and MONITOR_OK gates.*

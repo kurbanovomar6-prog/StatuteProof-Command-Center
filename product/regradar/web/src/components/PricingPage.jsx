@@ -65,7 +65,7 @@ const PLANS_DATA = [
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '121 monitoring-active sources; FTA tax pages remain candidates until item-level extraction passes' },
+      { label: 'Official UAE sources', value: '146 monitoring-active sources; 25 direct official FTA tax PDFs included' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },
@@ -144,7 +144,7 @@ const FAQS = [
   },
   {
     q: 'Which regulators are covered on the UAE Monitor plan?',
-    a: 'Monitoring-active coverage includes VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU, Executive Office for AML/CFT, DIFC laws and data protection, UAE Legislation Portal, Ministry of Finance, SCA, and related official public sources. FTA tax pages are candidates under item-level extraction remediation and are not counted as monitoring-active.',
+    a: 'Monitoring-active coverage includes VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU, Executive Office for AML/CFT, DIFC laws and data protection, UAE Legislation Portal, Ministry of Finance, SCA, 25 direct official FTA tax PDFs, and related official public sources. Broader FTA listing pages remain candidate/adapter work.',
   },
 ]
 

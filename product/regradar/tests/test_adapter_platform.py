@@ -1032,6 +1032,128 @@ def test_uae_legal_database_adapter_rejects_nav_shell():
     assert result.failure_reason
 
 
+def test_fta_tax_listing_adapter_extracts_legislation_rows():
+    html = """
+    <html><body>
+      <main class="mainContent">
+        <div class="commonTableNew">
+          <div class="row headerTable"><div class="col-md-7">Name</div><div>Download</div></div>
+          <div class="row">
+            <div class="col-md-7">
+              <div class="d-flex">Cabinet Decision No. 74 of 2023 on Executive Regulation of Tax Procedures and amendments <span class="newicon">New</span></div>
+              <div class="row no-gutters">
+                <div class="col-md-6"><span class="lastmodifiedDateCaption">Issue Date :</span><span class="lastmodifiedDate">Apr 01, 2026</span></div>
+                <div class="col-md-6"><span class="lastmodifiedDateCaption">Publish Date :</span><span class="lastmodifiedDate">Apr 03, 2026</span></div>
+              </div>
+              <span class="tag_category">Federal Tax Procedures</span>
+            </div>
+            <div class="col-md-5">
+              <div class="downloadlinks"><a href="/Datafolder/Files/Pdf/2026/legislation/cabinet-decision-74.pdf"><img alt="pdf" /><p>510 KB</p></a></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-7">
+              <div class="d-flex">Ministerial Decision No. 173 of 2025 On Depreciation Adjustments for Corporate Tax</div>
+              <div class="row no-gutters">
+                <div class="col-md-6"><span class="lastmodifiedDateCaption">Issue Date :</span><span class="lastmodifiedDate">Jun 23, 2025</span></div>
+                <div class="col-md-6"><span class="lastmodifiedDateCaption">Publish Date :</span><span class="lastmodifiedDate">Jan 08, 2026</span></div>
+              </div>
+              <span class="tag_category">Corporate Tax</span>
+            </div>
+            <div class="col-md-5">
+              <div class="downloadlinks"><a href="https://tax.gov.ae/Datafolder/Files/Legislation/2026/min-decision-173.pdf"><img alt="pdf" /><p>227 KB</p></a></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://tax.gov.ae/en/legislation.aspx",
+        adapter_family="fta_tax_listing",
+        adapter_name="fta_tax_listing",
+    )
+
+    assert result.adapter_name == "fta_tax_listing"
+    assert result.item_count == 2
+    assert "Cabinet Decision No. 74 of 2023" in result.text
+    assert "Ministerial Decision No. 173 of 2025" in result.text
+    assert "Federal Tax Procedures" in result.text
+    assert "Document URL: https://tax.gov.ae/Datafolder/Files/Pdf/2026/legislation/cabinet-decision-74.pdf" in result.text
+    assert "Row hash:" in result.text
+
+
+def test_fta_tax_listing_adapter_rejects_nav_shell():
+    result = extract_with_adapter(
+        "<html><body><nav>Home Search Contact</nav><main><a href='/contact'>Contact</a></main></body></html>",
+        url="https://tax.gov.ae/en/legislation.aspx",
+        adapter_family="fta_tax_listing",
+        adapter_name="fta_tax_listing",
+    )
+
+    assert result.item_count == 0
+    assert result.failure_reason
+
+
+def test_source_intake_fta_tax_listing_passes_preview_only():
+    html = """
+    <html><body><main class="mainContent"><div class="commonTableNew">
+      <div class="row"><div class="col-md-7"><div class="d-flex">Federal Decree-Law No. 47 of 2022 on Corporate Tax</div><span class="lastmodifiedDateCaption">Publish Date :</span><span class="lastmodifiedDate">Dec 09, 2022</span><span class="tag_category">Corporate Tax</span></div><div class="downloadlinks"><a href="/files/corporate-tax-law.pdf">PDF 1200 KB</a></div></div>
+      <div class="row"><div class="col-md-7"><div class="d-flex">VAT Executive Regulation Cabinet Decision</div><span class="lastmodifiedDateCaption">Publish Date :</span><span class="lastmodifiedDate">Jan 01, 2024</span><span class="tag_category">VAT</span></div><div class="downloadlinks"><a href="/files/vat-executive-regulation.pdf">PDF 860 KB</a></div></div>
+      <div class="row"><div class="col-md-7"><div class="d-flex">Excise Tax Cabinet Decision</div><span class="lastmodifiedDateCaption">Publish Date :</span><span class="lastmodifiedDate">Feb 01, 2024</span><span class="tag_category">Excise Tax</span></div><div class="downloadlinks"><a href="/files/excise-tax-decision.pdf">PDF 430 KB</a></div></div>
+      <div class="row"><div class="col-md-7"><div class="d-flex">FTA Decision on Clarifications and Directives</div><span class="lastmodifiedDateCaption">Publish Date :</span><span class="lastmodifiedDate">Mar 25, 2026</span><span class="tag_category">Federal Tax Authority</span></div><div class="downloadlinks"><a href="/files/fta-clarifications-directives.pdf">PDF 545 KB</a></div></div>
+      <div class="row"><div class="col-md-7"><div class="d-flex">Cabinet Decision on Executive Regulation of Tax Procedures</div><span class="lastmodifiedDateCaption">Publish Date :</span><span class="lastmodifiedDate">Apr 03, 2026</span><span class="tag_category">Federal Tax Procedures</span></div><div class="downloadlinks"><a href="/files/tax-procedures-executive-regulation.pdf">PDF 510 KB</a></div></div>
+    </div></main></body></html>
+    """
+    source = {
+        "source_id": "AE-fta-tax-listing-test",
+        "name": "FTA Tax Listing Test",
+        "url": "https://tax.gov.ae/en/legislation.aspx",
+        "adapter_family": "fta_tax_listing",
+        "adapter_name": "fta_tax_listing",
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["adapter_family"] == "fta_tax_listing"
+    assert result["structured_adapter_content"] is True
+    assert result["can_save_evidence"] is True
+    assert result["can_activate_monitoring"] is False
+    assert result["evidence_written"] is False
+
+
+def test_fiu_eocn_document_listing_extracts_legal_decisions():
+    html = """
+    <html><body><main>
+      <article>
+        <h3>Cabinet Decision No. 134 of 2025 Executive Regulation</h3>
+        <p>Executive regulation for Federal Decree-Law No. 10 of 2025 regarding anti-money laundering, terrorism financing, and proliferation financing.</p>
+        <a href="/API/Upload/DownloadFile?FileID=abc">Download</a>
+      </article>
+      <article>
+        <h3>Federal Decree-Law No. 10 of 2025 regarding AML/CFT</h3>
+        <p>Federal law for anti-money laundering and combating financing of terrorism.</p>
+        <a href="/laws-regulations-listing/federal-decree-law-no-10-of-2025">Read more</a>
+      </article>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.eocn.gov.ae/en-us/laws-regulations-listing",
+        adapter_family="fiu_eocn_document_listing",
+        adapter_name="fiu_eocn_document_listing",
+    )
+
+    assert result.item_count == 2
+    assert "Cabinet Decision No. 134 of 2025" in result.text
+    assert "Federal Decree-Law No. 10 of 2025" in result.text
+
+
 def test_source_intake_uae_legal_database_passes_preview_only():
     html = """
     <html><body><main>

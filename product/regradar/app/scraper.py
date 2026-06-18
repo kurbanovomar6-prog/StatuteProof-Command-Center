@@ -387,6 +387,7 @@ def fetch_page_with_config(
     wait_for_selector: str | None = None,
     content_selector: str | None = None,
     force_playwright: bool = False,
+    prefer_requests_on_low_content: bool = False,
 ) -> str:
     """
     Fetch `url` with optional per-source Playwright config.
@@ -400,6 +401,11 @@ def fetch_page_with_config(
     Falls back to fetch_page() when no per-source config is set.
     """
     needs_playwright = force_playwright or bool(wait_for_selector) or bool(content_selector)
+
+    if not needs_playwright and prefer_requests_on_low_content:
+        requests_html = _fetch_via_requests(url)
+        if requests_html:
+            return requests_html
 
     if not needs_playwright:
         return fetch_page(url)

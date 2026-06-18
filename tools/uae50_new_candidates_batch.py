@@ -150,6 +150,7 @@ RECO_MAP = {
     "static_html": ("static_html", "static_html"),
     "sitemap_feed": ("sitemap_feed", "sitemap_feed"),
     "public_json_api": ("public_json_api", "public_json_api"),
+    "fta_tax_listing": ("fta_tax_listing", "fta_tax_listing"),
 }
 
 

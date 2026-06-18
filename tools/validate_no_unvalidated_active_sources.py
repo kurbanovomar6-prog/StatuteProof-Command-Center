@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REGRADAR_ROOT = ROOT / "product/regradar"
 SOURCES_FILE = REGRADAR_ROOT / "sources.json"
 BULK_ACTIVATION_SET = ROOT / "docs/weak-family-final-activation-set.json"
+WEAK_FAMILY_25_SET = ROOT / "docs/weak-family-25-each-final-activation-set.json"
 
 STRICT_EIGHT_SOURCE_IDS = {
     "AE-fta-tax-legislation-listing",
@@ -38,7 +39,7 @@ EXPECTED_ACTIVE = {
 
 EXPECTED_CANDIDATES = STRICT_EIGHT_SOURCE_IDS - set(EXPECTED_ACTIVE)
 
-EXPECTED_COUNTS = (122, 121, 1)
+EXPECTED_COUNTS = (147, 146, 1)
 
 CLAIM_SCAN_PATHS = [
     ROOT / "README.md",
@@ -116,6 +117,14 @@ def main() -> int:
             for row in bulk_data.get("final", [])
             if isinstance(row, dict) and row.get("source_id")
         }
+    fta_final_ids: set[str] = set()
+    if WEAK_FAMILY_25_SET.exists():
+        fta_data = json.loads(WEAK_FAMILY_25_SET.read_text(encoding="utf-8"))
+        fta_final_ids = {
+            str(row.get("source_id"))
+            for row in fta_data.get("specs", [])
+            if isinstance(row, dict) and row.get("source_id")
+        }
 
     enabled_ae = [
         source for source in sources
@@ -163,6 +172,8 @@ def main() -> int:
 
     if len(bulk_final_ids) != 41:
         errors.append(f"Expected 41 weak-family bulk activations, got {len(bulk_final_ids)}")
+    if len(fta_final_ids) != 25:
+        errors.append(f"Expected 25 FTA weak-family 25-each activations, got {len(fta_final_ids)}")
 
     for sid in sorted(bulk_final_ids):
         source = by_id.get(sid)
@@ -171,6 +182,30 @@ def main() -> int:
             continue
         if source.get("enabled") is not True or source.get("status") != "active":
             errors.append(f"{sid} must be enabled active after proof-backed bulk activation")
+        if int(source.get("baseline_runs_completed") or 0) < 2:
+            errors.append(f"{sid} requires baseline_runs_completed >= 2")
+        if source.get("last_monitor_status") != "MONITOR_OK":
+            errors.append(f"{sid} requires last_monitor_status=MONITOR_OK")
+        if not source.get("normalized_hash"):
+            errors.append(f"{sid} requires normalized_hash")
+        if not _artifact_exists(str(source.get("proof_path") or "")):
+            errors.append(f"{sid} proof_path missing or nonexistent")
+        if not _artifact_exists(str(source.get("normalized_text_path") or "")):
+            errors.append(f"{sid} normalized_text_path missing or nonexistent")
+        notes = str(source.get("notes") or "").lower()
+        for marker in ("monitoring intelligence only", "not legal advice", "monitor_ok"):
+            if marker not in notes:
+                errors.append(f"{sid} notes missing legal/gate marker: {marker}")
+
+    for sid in sorted(fta_final_ids):
+        source = by_id.get(sid)
+        if not source:
+            errors.append(f"Missing FTA weak-family active source: {sid}")
+            continue
+        if source.get("enabled") is not True or source.get("status") != "active":
+            errors.append(f"{sid} must be enabled active after proof-backed FTA activation")
+        if source.get("adapter_name") != "pdf_document" or source.get("adapter_family") != "pdf_document":
+            errors.append(f"{sid} must use pdf_document adapter")
         if int(source.get("baseline_runs_completed") or 0) < 2:
             errors.append(f"{sid} requires baseline_runs_completed >= 2")
         if source.get("last_monitor_status") != "MONITOR_OK":
@@ -224,9 +259,10 @@ def main() -> int:
         return 1
 
     print("validate_no_unvalidated_active_sources: PASS")
-    print("Source truth: 122 enabled / 121 monitoring-active / 1 remediation")
+    print("Source truth: 147 enabled / 146 monitoring-active / 1 remediation")
     print("Eight-row repair: 2 active, 6 candidates, 0 unvalidated active rows")
     print("Weak-family bulk activation: 41 active, 0 unvalidated active rows")
+    print("FTA weak-family activation: 25 active, 0 unvalidated active rows")
     return 0
 
 

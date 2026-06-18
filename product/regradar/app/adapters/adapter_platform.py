@@ -701,7 +701,27 @@ class FiuEocnDocumentListingAdapter(DocumentListingAdapter):
     family = "fiu_eocn_document_listing"
     name = "fiu_eocn_document_listing"
     heading = "FIU/EOCN document listing items"
-    allowed_tokens = ("fiu", "goaml", "aml", "cft", "sanction", "tfs", "typolog", "publication", "guidance", "report")
+    allowed_tokens = (
+        "fiu",
+        "goaml",
+        "aml",
+        "cft",
+        "sanction",
+        "tfs",
+        "typolog",
+        "publication",
+        "guidance",
+        "report",
+        "law",
+        "regulation",
+        "decree",
+        "decision",
+        "cabinet",
+        "ministerial",
+        "proliferation",
+        "terrorism",
+        "financing",
+    )
 
 
 class UaeLegalDatabaseAdapter(DocumentListingAdapter):
@@ -736,6 +756,115 @@ class UaeLegalDatabaseAdapter(DocumentListingAdapter):
         "economic substance",
         "data protection",
     )
+
+
+class FtaTaxListingAdapter(BaseHtmlAdapter):
+    family = "fta_tax_listing"
+    name = "fta_tax_listing"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        config = config or {}
+        soup = _soup(
+            html,
+            config.get("exclude_selectors") or ["header", "nav", "footer", ".search", "script", "style", "iframe"],
+        )
+        container_selector = str(config.get("container_selector") or ".mainContent .commonTableNew, .commonTableNew").strip()
+        container = soup.select_one(container_selector) if container_selector else soup
+        if not container:
+            return self._empty("FTA tax listing container was not found.", "Review .commonTableNew selector or keep source as candidate.")
+
+        row_selector = str(config.get("item_selector") or ":scope > .row").strip()
+        rows = list(container.select(row_selector)) if row_selector else list(container.find_all("div", class_="row", recursive=False))
+        if not rows:
+            rows = list(container.find_all("div", class_="row", recursive=False))
+
+        max_items = int(config.get("max_items") or 80)
+        items: list[dict] = []
+        seen: set[str] = set()
+        for row in rows:
+            row_classes = set(row.get("class") or [])
+            if "headerTable" in row_classes:
+                continue
+            left = row.select_one(".col-md-7") or row
+            title_node = left.select_one(".d-flex") or left.select_one("h1, h2, h3, h4, a") or left
+            title = _clean(title_node.get_text(" ", strip=True), limit=360)
+            title = re.sub(r"\bNew\b$", "", title, flags=re.I).strip()
+            if _is_noise_title(title) or title.lower() in {"name", "download", "comments", "rate"}:
+                continue
+
+            category_node = left.select_one(".tag_category") or row.select_one(".tag_category")
+            category = _clean(category_node.get_text(" ", strip=True), limit=140) if category_node else ""
+            dates: dict[str, str] = {}
+            for date_block in left.select(".lastmodifiedDateCaption"):
+                label = _clean(date_block.get_text(" ", strip=True), limit=80).rstrip(":").lower()
+                value_node = date_block.find_next_sibling(class_="lastmodifiedDate")
+                value = _clean(value_node.get_text(" ", strip=True), limit=80) if value_node else ""
+                if label and value:
+                    dates[label] = value
+
+            link_node = row.select_one(".downloadlinks a[href]") or row.select_one("a[href$='.pdf'], a[href*='.pdf']")
+            item_url = ""
+            if link_node:
+                href = (link_node.get("href") or "").strip()
+                if href and not href.startswith(("javascript:", "#", "mailto:", "tel:")):
+                    item_url = urljoin(url, href)
+
+            context = _node_text(row, separator=" ", limit=900)
+            combined = f"{title} {category} {context}".lower()
+            if not any(token in combined for token in (
+                "tax",
+                "vat",
+                "excise",
+                "corporate",
+                "cabinet",
+                "decision",
+                "decree",
+                "federal",
+                "clarification",
+                "guide",
+                "legislation",
+                "refund",
+                "procedure",
+            )):
+                continue
+
+            key = f"{title.lower()}|{item_url.lower()}|{dates.get('publish date', '').lower()}"
+            if key in seen:
+                continue
+            seen.add(key)
+            item = {
+                "title": title,
+                "date": dates.get("publish date") or dates.get("issue date") or _extract_date(context),
+                "url": item_url or url,
+                "document_url": item_url if item_url.lower().endswith(".pdf") else "",
+                "category": category or "tax_listing_item",
+                "raw_text_snippet": context,
+            }
+            if dates.get("issue date"):
+                item["issue_date"] = dates["issue date"]
+            if dates.get("publish date"):
+                item["publish_date"] = dates["publish date"]
+            item["row_hash"] = _row_hash(title, item.get("date"), item.get("url"), category, context)
+            items.append(item)
+            if len(items) >= max_items:
+                break
+
+        if bool(config.get("sort_items", True)):
+            items.sort(key=lambda row: ((row.get("date") or ""), (row.get("title") or ""), (row.get("url") or "")))
+
+        if not items:
+            return self._empty("No FTA tax listing items were isolated.", "Review FTA listing selectors or keep source as remediation.")
+
+        return AdapterResult(
+            text=_format_items("FTA tax listing items", items),
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            items=items,
+            noise_risk="medium" if len(items) < 5 else "low",
+            source_health_risk="medium",
+            metadata={"container_selector": container_selector, "item_selector": row_selector, "url": url},
+        )
 
 
 class EocnNewsListingAdapter(BaseHtmlAdapter):
@@ -1042,6 +1171,7 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "dfsa_notice_listing": DfsaNoticeListingAdapter(),
     "difc_legal_database": DifcLegalDatabaseAdapter(),
     "uae_legal_database": UaeLegalDatabaseAdapter(),
+    "fta_tax_listing": FtaTaxListingAdapter(),
     "sca_listing": ScaListingAdapter(),
     "dfsa_rulebook": RulebookModuleAdapter(),
     "cbuae_document_listing": CbuaeDocumentListingAdapter(),

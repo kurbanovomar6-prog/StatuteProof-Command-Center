@@ -104,6 +104,7 @@ def build_activation_entry(spec: dict, now: str) -> dict:
 
 
 def slug_to_status_entry(spec: dict) -> dict:
+    last_monitor_status = spec.get("last_monitor_status") or "MONITOR_OK"
     entry = {
         "name": spec["name"],
         "url": spec["url"],
@@ -115,8 +116,23 @@ def slug_to_status_entry(spec: dict) -> dict:
         "adapter_family": spec["adapter_family"],
         "adapter_name": spec["adapter_name"],
         "expected_min_length": spec.get("expected_min_length", 500),
+        "baseline_runs_required": int(spec.get("baseline_runs_required", 2)),
+        "baseline_runs_completed": int(spec["baseline_runs_completed"]),
         "proof_path": spec["proof_path"],
+        "normalized_text_path": spec["normalized_text_path"],
         "normalized_hash": spec.get("no_save_normalized_hash"),
+        "last_monitor_status": last_monitor_status,
+        "last_monitor_quality_score": spec.get("last_monitor_quality_score") or spec.get("no_save_quality_score"),
+        "last_monitor_hash": spec.get("last_monitor_hash") or spec.get("no_save_normalized_hash"),
+        "last_checked_at": spec.get("last_checked_at"),
+        "noise_risk": spec.get("noise_risk", "low"),
+        "source_health_risk": spec.get("source_health_risk", "medium"),
+        "tier": spec.get("tier", "2"),
+        "notes": spec.get("notes") or (
+            "Activated after no-save pass, proof-backed repeat baseline, "
+            "mass-monitor dry-run MONITOR_OK, and review gates. "
+            "Monitoring intelligence only. Not legal advice."
+        ),
     }
     if spec.get("adapter_config"):
         entry["adapter_config"] = spec.get("adapter_config")
@@ -172,8 +188,14 @@ def main() -> int:
         if not sp.get("proof_path"):
             print(f"REFUSE {sp.get('source_id')}: missing proof_path", file=sys.stderr)
             return 2
+        if not sp.get("normalized_text_path"):
+            print(f"REFUSE {sp.get('source_id')}: missing normalized_text_path", file=sys.stderr)
+            return 2
         if int(sp.get("baseline_runs_completed") or 0) < int(sp.get("baseline_runs_required", 2)):
             print(f"REFUSE {sp.get('source_id')}: incomplete baseline", file=sys.stderr)
+            return 2
+        if (sp.get("last_monitor_status") or "MONITOR_OK") != "MONITOR_OK":
+            print(f"REFUSE {sp.get('source_id')}: last_monitor_status must be MONITOR_OK", file=sys.stderr)
             return 2
 
     wq = json.loads(WORK_QUEUE.read_text(encoding="utf-8"))

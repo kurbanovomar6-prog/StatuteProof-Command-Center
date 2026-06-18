@@ -256,6 +256,8 @@ def _adapter_for_source_type(source_type: str, url: str = "", title: str = "") -
         return "sca_listing", "sca_listing"
     if "centralbank" in joined or "cbuae" in joined:
         return "cbuae_document_listing", "cbuae_document_listing"
+    if "tax.gov.ae" in joined or "federal tax authority" in joined:
+        return "fta_tax_listing", "fta_tax_listing"
     if "adgm" in joined:
         return "adgm_fsra_listing", "adgm_fsra_listing"
     if "dfsa" in joined:

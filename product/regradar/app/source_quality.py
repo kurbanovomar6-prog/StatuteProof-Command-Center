@@ -93,7 +93,9 @@ def _regulatory_density(text: str) -> float:
         "laundering", "terrorism", "financing", "proliferation", "sanctions",
         "typology", "typologies", "risk", "assessment", "report", "reports",
         "suspicious", "transaction", "reporting", "intelligence", "eocn",
-        "fiu", "tfs",
+        "fiu", "tfs", "tax", "vat", "excise", "corporate", "taxable",
+        "refund", "refunds", "clarification", "clarifications", "procedure",
+        "procedures", "decree", "cabinet", "ministerial",
     }
     hits = sum(1 for w in words if w.lower() in regulatory_terms)
     return min(1.0, hits / max(1, len(words)) * 20)

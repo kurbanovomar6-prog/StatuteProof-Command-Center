@@ -22,7 +22,7 @@ SOURCES = ROOT / "product/regradar/sources.json"
 FINAL_REPORT = ROOT / "docs/uae-1000-source-expansion-final-report.md"
 BULK_ACTIVATION_SET = ROOT / "docs/weak-family-final-activation-set.json"
 
-EXPECTED_TRUTH = (122, 121, 1)
+EXPECTED_TRUTH = (147, 146, 1)
 REQUIRED_FIELDS = {
     "source_id",
     "regulator_source_owner",
@@ -191,7 +191,7 @@ def main() -> int:
     print(f"- Candidates: {summary.get('total_candidates')}")
     print(f"- Rejected: {summary.get('total_rejected')}")
     print("- Top-250 queue present")
-    print("- sources.json truth checked: 122/121/1")
+    print("- sources.json truth checked: 147/146/1")
     return 0
 
 

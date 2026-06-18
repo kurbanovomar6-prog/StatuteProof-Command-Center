@@ -2,11 +2,11 @@
   "version": "2026-06-14",
   "purpose": "Research-only UAE official source pack candidates. This file does not activate monitoring and must not be marketed as validated coverage.",
   "current_customer_truth": {
-    "enabled_uae_sources": 122,
-    "readiness_supported": 121,
+    "enabled_uae_sources": 147,
+    "readiness_supported": 146,
     "remediation": 1,
-    "customer_copy": "122 enabled UAE sources; 121 monitoring-active; 1 remediation. Monitoring intelligence only. Not legal advice.",
-    "monitoring_active": 121
+    "customer_copy": "147 enabled UAE sources; 146 monitoring-active; 1 remediation",
+    "monitoring_active": 146
   },
   "status_definitions": {
     "candidate": "Official or officially linked candidate, not yet tested.",
@@ -4360,7 +4360,7 @@
     "low_source_health_risk_count": 0,
     "medium_source_health_risk_count": 3,
     "high_source_health_risk_count": 37,
-    "public_truth_after_validation": "122 enabled UAE sources; 121 monitoring-active; 1 remediation",
+    "public_truth_after_validation": "147 enabled UAE sources; 146 monitoring-active; 1 remediation",
     "sources_json_changed": false,
     "accepted_default_pack_count": 2
   },
@@ -4373,7 +4373,7 @@
     "remediation_count": 3,
     "blocked_count": 1,
     "sources_json_changed": false,
-    "public_truth_after_validation": "122 enabled UAE sources; 121 monitoring-active; 1 remediation"
+    "public_truth_after_validation": "147 enabled UAE sources; 146 monitoring-active; 1 remediation"
   },
   "last_adgm_fsra_sca_saved_baseline": {
     "tested_at": "2026-06-14T15:30:28Z",
@@ -4385,7 +4385,7 @@
     "baseline_pending_count": 3,
     "remediation_count": 1,
     "sources_json_changed": false,
-    "public_truth_after_validation": "122 enabled UAE sources; 121 monitoring-active; 1 remediation",
+    "public_truth_after_validation": "147 enabled UAE sources; 146 monitoring-active; 1 remediation",
     "notes": "SCA AML/CFT failed save mode with NAV_SHELL_ONLY despite previous no-save result. Evidence artifacts are local runtime files and remain gitignored."
   },
   "last_uae_50_agent_gated_sprint": {
@@ -4401,10 +4401,10 @@
   "sources": [],
   "summary": {
     "activation_ready_count": 10,
-    "enabled_count": 122,
-    "readiness_supported_count": 121,
+    "enabled_count": 147,
+    "readiness_supported_count": 146,
     "remediation_count": 1,
-    "current_truth": "122 enabled / 121 monitoring-active / 1 remediation",
-    "current_source_truth": "122 enabled / 121 monitoring-active / 1 remediation"
+    "current_truth": "147 enabled / 146 monitoring-active / 1 remediation",
+    "current_source_truth": "147 enabled / 146 monitoring-active / 1 remediation"
   }
 }

@@ -58,11 +58,11 @@ const PLANS = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    desc: '122 enabled UAE official-source endpoints, including 121 monitoring-active after proof and baseline gates. Full evidence workflow with high-risk review queue.',
+    desc: '147 enabled UAE official-source endpoints, including 146 monitoring-active after proof and baseline gates. Full evidence workflow with high-risk review queue.',
     cta: 'Upgrade to UAE Monitor',
     ctaStyle: 'primary',
     features: [
-      '121 monitoring-active UAE sources',
+      '146 monitoring-active UAE sources',
       'VARA / CBUAE / DFSA / ADGM / UAE FIU source pack',
       'Evidence records + full diff view',
       'High-risk review queue',

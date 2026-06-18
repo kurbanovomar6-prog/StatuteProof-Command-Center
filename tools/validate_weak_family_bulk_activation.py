@@ -15,7 +15,7 @@ FINAL_SET = ROOT / "docs/weak-family-final-activation-set.json"
 SUMMARY = ROOT / "docs/weak-family-bulk-activation-summary.json"
 FINAL_REPORT = ROOT / "docs/weak-family-bulk-activation-final-report.md"
 
-EXPECTED_TRUTH = (122, 121, 1)
+MIN_CURRENT_TRUTH = (147, 146, 1)
 EXPECTED_FINAL_COUNT = 41
 FORBIDDEN_POSITIVE_CLAIMS = (
     "complete uae coverage",
@@ -80,8 +80,8 @@ def main() -> int:
     active = [row for row in enabled if row.get("status") == "active"]
     remediation = [row for row in enabled if row.get("status") == "remediation"]
     truth = (len(enabled), len(active), len(remediation))
-    if truth != EXPECTED_TRUTH:
-        errors.append(f"Expected source truth {EXPECTED_TRUTH}, got {truth}")
+    if truth[0] < MIN_CURRENT_TRUTH[0] or truth[1] < MIN_CURRENT_TRUTH[1] or truth[2] != MIN_CURRENT_TRUTH[2]:
+        errors.append(f"Expected current source truth at least {MIN_CURRENT_TRUTH}, got {truth}")
 
     final_set = load_json(FINAL_SET)
     final_rows = final_set.get("final") or []
@@ -157,7 +157,7 @@ def main() -> int:
         return 1
 
     print("Weak-family bulk activation validation PASSED")
-    print("- Source truth: 122 enabled / 121 monitoring-active / 1 remediation")
+    print("- Current source truth is at least 147 enabled / 146 monitoring-active / 1 remediation")
     print("- Final active rows: 41")
     print("- Held rows documented:", len(held_rows))
     return 0

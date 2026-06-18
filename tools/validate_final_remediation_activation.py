@@ -2,8 +2,8 @@
 """Validate the final UAE remediation activation sprint.
 
 This validator protects the honest remediation lineage after the later FTA/ADGM
-truth repair:
-122 enabled UAE sources / 121 monitoring-active / 1 remediation.
+truth repair and later proof-backed activations:
+147 enabled UAE sources / 146 monitoring-active / 1 remediation.
 
 It is intentionally narrow. It verifies the two newly activated DFSA
 replacement endpoints and the one remaining FIU remediation source instead of
@@ -26,7 +26,7 @@ SOURCE_RUNS_FILE = REGRADAR_ROOT / "data/source_runs/source_runs.jsonl"
 FINAL_REPORT = ROOT / "docs/final-remediation-activation-final-report.md"
 TRUTH_REPORT = ROOT / "docs/source-readiness-truth-reconciliation-report.md"
 
-EXPECTED_COUNTS = (122, 121, 1)
+EXPECTED_COUNTS = (147, 146, 1)
 
 NEW_ACTIVE_SOURCES = {
     "AE-dfsa-annual-reports": {
@@ -290,8 +290,8 @@ def main() -> int:
 
     if TRUTH_REPORT.exists():
         truth_text = TRUTH_REPORT.read_text(encoding="utf-8")
-        if "122 enabled / 121 monitoring-active / 1" not in truth_text:
-            fail(errors, "Truth reconciliation report must include current 122/121/1 wording")
+        if "147 enabled / 146 monitoring-active / 1" not in truth_text:
+            fail(errors, "Truth reconciliation report must include current 147/146/1 wording")
 
     for path in iter_scan_files():
         try:
@@ -308,7 +308,7 @@ def main() -> int:
         return 1
 
     print("Final remediation activation validation PASSED")
-    print("- Source truth: 122 enabled / 121 monitoring-active / 1 remediation")
+    print("- Source truth: 147 enabled / 146 monitoring-active / 1 remediation")
     print("- Newly active replacements checked:", ", ".join(sorted(NEW_ACTIVE_SOURCES)))
     print("- Remaining remediation checked:", REMAINING_REMEDIATION)
     return 0
