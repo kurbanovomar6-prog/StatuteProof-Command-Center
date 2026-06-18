@@ -704,6 +704,40 @@ class FiuEocnDocumentListingAdapter(DocumentListingAdapter):
     allowed_tokens = ("fiu", "goaml", "aml", "cft", "sanction", "tfs", "typolog", "publication", "guidance", "report")
 
 
+class UaeLegalDatabaseAdapter(DocumentListingAdapter):
+    family = "uae_legal_database"
+    name = "uae_legal_database"
+    heading = "UAE legal/regulatory listing items"
+    allowed_tokens = (
+        "law",
+        "laws",
+        "legislation",
+        "legal",
+        "regulation",
+        "regulations",
+        "decree",
+        "decision",
+        "resolution",
+        "cabinet",
+        "ministerial",
+        "federal",
+        "aml",
+        "cft",
+        "anti-money",
+        "financial crime",
+        "sanction",
+        "tax",
+        "agreement",
+        "circular",
+        "notice",
+        "companies",
+        "consumer protection",
+        "competition",
+        "economic substance",
+        "data protection",
+    )
+
+
 class EocnNewsListingAdapter(BaseHtmlAdapter):
     family = "eocn_news_listing"
     name = "eocn_news_listing"
@@ -1007,6 +1041,7 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "adgm_fsra_listing": AdgmFsraListingAdapter(),
     "dfsa_notice_listing": DfsaNoticeListingAdapter(),
     "difc_legal_database": DifcLegalDatabaseAdapter(),
+    "uae_legal_database": UaeLegalDatabaseAdapter(),
     "sca_listing": ScaListingAdapter(),
     "dfsa_rulebook": RulebookModuleAdapter(),
     "cbuae_document_listing": CbuaeDocumentListingAdapter(),

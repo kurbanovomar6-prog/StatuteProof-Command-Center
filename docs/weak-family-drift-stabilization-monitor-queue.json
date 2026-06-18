@@ -1,0 +1,49 @@
+{
+  "sources": [
+    {
+      "source_id": "AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19",
+      "name": "AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19",
+      "regulator": "DIFC",
+      "jurisdiction": "AE",
+      "url": "https://www.difc.com/whats-on/insights/why-regulation-essential-fintech-success",
+      "source_type": "official_source",
+      "activation_status": "activation_ready",
+      "current_state": "activation_ready",
+      "can_activate": true,
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main, article, .content, .main-content, body"
+      },
+      "expected_min_length": 500,
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202622Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202622Z/normalized.txt",
+      "normalized_hash": "2ae43934a05abcb97261922824d3caffe34f9c7095f1501fd77bee644e219257"
+    },
+    {
+      "source_id": "AE-added-en-grow-regulations-63dfab49",
+      "name": "AE-added-en-grow-regulations-63dfab49",
+      "regulator": "Abu Dhabi DED",
+      "jurisdiction": "AE",
+      "url": "https://www.added.gov.ae/en/grow/regulations",
+      "source_type": "official_source",
+      "activation_status": "activation_ready",
+      "current_state": "activation_ready",
+      "can_activate": true,
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main, article, .content, .main-content, body"
+      },
+      "expected_min_length": 500,
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202627Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202627Z/normalized.txt",
+      "normalized_hash": "2caadbbdcd56d1792ac2918da5b726d289eca5613a72833c44fced2b722f1a67"
+    }
+  ],
+  "summary": {}
+}

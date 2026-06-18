@@ -1,0 +1,57 @@
+{
+  "mode": "dry-run",
+  "activation_ready_only": true,
+  "include_enabled_sources": false,
+  "alert_delivery_enabled": false,
+  "save_proof": false,
+  "sources_json_changed": false,
+  "processed_count": 2,
+  "skipped_count": 0,
+  "results": [
+    {
+      "source_id": "AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19",
+      "url": "https://www.difc.com/whats-on/insights/why-regulation-essential-fintech-success",
+      "regulator": "DIFC",
+      "source_health_status": "MONITOR_OK",
+      "quality_score": 60,
+      "normalized_hash": "23f545f79db31773b8b5e51c92d734ead81c307b7cbd59667cc79f1e0daca5e6",
+      "previous_hash": "2ae43934a05abcb97261922824d3caffe34f9c7095f1501fd77bee644e219257",
+      "change_detected": true,
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "proof_path": "",
+      "evidence_written": false,
+      "alert_sent": false
+    },
+    {
+      "source_id": "AE-added-en-grow-regulations-63dfab49",
+      "url": "https://www.added.gov.ae/en/grow/regulations",
+      "regulator": "Abu Dhabi DED",
+      "source_health_status": "MONITOR_OK",
+      "quality_score": 60,
+      "normalized_hash": "a8a95042204b6c594b307e7b53f7ff0068c299a81c76c6f4c66f637169389ce7",
+      "previous_hash": "2caadbbdcd56d1792ac2918da5b726d289eca5613a72833c44fced2b722f1a67",
+      "change_detected": true,
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "proof_path": "",
+      "evidence_written": false,
+      "alert_sent": false
+    }
+  ],
+  "skipped": [],
+  "source_health_counts": {
+    "MANUAL_CHECK_REQUIRED": 0,
+    "NAV_SHELL_ONLY": 0,
+    "MONITOR_DISCONNECTED": 0,
+    "REMEDIATION_REQUIRED": 0,
+    "SELECTOR_BROKEN": 0,
+    "MONITOR_OK": 2,
+    "HASH_COLLISION": 0,
+    "SOURCE_STRUCTURE_CHANGED": 0,
+    "QUALITY_DROP": 0
+  },
+  "warnings": []
+}

@@ -2435,65 +2435,46 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "blocked",
-      "adapter_config": {
-        "container_selector": "main",
-        "exclude_selectors": [
-          "nav",
-          "footer",
-          "form",
-          ".search",
-          "script",
-          "style",
-          "noscript"
-        ],
-        "item_selector": "article, li, tr, .item, .card, a[href]",
-        "max_items": 100,
-        "sort_items": true,
-        "title_selector": "a, h2, h3, h4",
-        "url_selector": "a[href]"
-      },
+      "activation_decision": "activation_ready",
+      "adapter_config": {},
       "adapter_failure_reason": "",
-      "adapter_family": "listing",
-      "adapter_name": "listing",
-      "adapter_remediation_hint": "Review DOM and refine listing adapter selectors before save/baseline.",
-      "adapter_status": "configured_pending_selector_review",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline.",
+      "adapter_status": "activation_ready",
       "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 0,
+      "baseline_runs_completed": 2,
       "baseline_runs_required": 2,
-      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
-      "can_activate": false,
+      "blocker": "",
+      "can_activate": true,
       "code_architect_gate": {
-        "adapter_or_code_notes": "Do not bypass access controls.",
-        "reason": "May require alternative official URL or access-safe source model.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "current_state": "blocked",
+      "current_state": "activation_ready",
       "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No acceptable proof/baseline path for blocked source.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "fail"
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
       },
-      "expected_extraction_strategy": "blocked",
-      "expected_min_length": null,
-      "extraction_strategy": "adapter:listing",
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "extraction_strategy": "adapter:dfsa_notice_listing",
       "final_activation_gate": {
-        "reason": "Access/source-health blockers prevent activation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "blocked"
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "last_adapter_test_at": null,
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
       "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
-        "allowed_wording": "Blocked or under remediation.",
-        "forbidden_wording": "ready, validated, monitored",
-        "reason": "Allowed wording: blocked or remediation required only.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "next_action": "continue_source_remediation_or_validation",
+      "next_action": "monitor_with_source_health_visibility",
       "no_save_adapter_name": null,
       "no_save_adapter_used": null,
       "no_save_duplicate_hash": null,
@@ -2506,31 +2487,40 @@
       "no_save_readiness_status": "SKIPPED",
       "no_save_remediation_hint": "",
       "no_save_tested": false,
-      "noise_risk": "high",
-      "priority": "P1",
+      "noise_risk": "low",
+      "priority": "P0",
       "product_manager_gate": {
-        "reason": "Consultations give early warning before rule changes are finalized.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "proof_path": null,
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-consultation-papers/intake-20260618T203158Z/proof.json",
       "qa_critic_gate": {
-        "reason": "Blocked source cannot count as working.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "fail"
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
       "regulator": "DFSA",
       "selector": null,
-      "source_health_risk": "high",
+      "source_health_risk": "low",
       "source_id": "AE-dfsa-consultation-papers",
       "source_monitor_gate": {
-        "reason": "Blocked or access-restricted source; do not monitor.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "fail"
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "source_type": "consultation",
+      "source_type": "consultation / notice",
       "url": "https://www.dfsa.ae/your-resources/publications/consultation-papers",
-      "wait_selector": null
+      "wait_selector": null,
+      "name": "DFSA — Consultation Papers",
+      "source_family": "DFSA",
+      "activation_status": "active",
+      "quality_score": 65,
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-consultation-papers/intake-20260618T203158Z/normalized.txt",
+      "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z"
     },
     {
       "activation_decision": "blocked",
@@ -2893,49 +2883,48 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "blocked",
-      "adapter_config": {},
-      "adapter_failure_reason": "No explicit adapter family configured yet.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Select an adapter family during the next Source Lab remediation pass.",
-      "adapter_status": "live_test_failed",
-      "adapter_version": null,
-      "baseline_runs_completed": 0,
+      "activation_decision": "activation_ready",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "adapter_failure_reason": "",
+      "adapter_family": "dfsa_rulebook",
+      "adapter_name": "dfsa_rulebook",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline.",
+      "adapter_status": "activation_ready",
+      "adapter_version": "adapter-platform-1.0",
+      "baseline_runs_completed": 2,
       "baseline_runs_required": 2,
-      "blocker": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
-      "can_activate": false,
+      "blocker": "",
+      "can_activate": true,
       "code_architect_gate": {
-        "adapter_or_code_notes": "Do not bypass access controls.",
-        "reason": "May require alternative official URL or access-safe source model.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "current_state": "blocked",
+      "current_state": "activation_ready",
       "evidence_trail_gate": {
-        "proof_paths_checked": false,
-        "reason": "No acceptable proof/baseline path for blocked source.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "fail"
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
       },
-      "expected_extraction_strategy": "blocked",
-      "expected_min_length": null,
-      "extraction_strategy": "blocked",
+      "expected_extraction_strategy": "adapter:dfsa_rulebook",
+      "expected_min_length": 500,
+      "extraction_strategy": "adapter:dfsa_rulebook",
       "final_activation_gate": {
-        "reason": "Access/source-health blockers prevent activation.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "blocked"
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "last_adapter_test_at": null,
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
       "last_no_save_test_at": "2026-06-14T19:59:07Z",
       "legal_language_gate": {
-        "allowed_wording": "Blocked or under remediation.",
-        "forbidden_wording": "ready, validated, monitored",
-        "reason": "Allowed wording: blocked or remediation required only.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "pass"
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "next_action": "continue_source_remediation_or_validation",
+      "next_action": "monitor_with_source_health_visibility",
       "no_save_adapter_name": "",
       "no_save_adapter_used": false,
       "no_save_duplicate_hash": false,
@@ -2948,31 +2937,40 @@
       "no_save_readiness_status": "BLOCKED",
       "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
       "no_save_tested": true,
-      "noise_risk": "high",
+      "noise_risk": "low",
       "priority": "P0",
       "product_manager_gate": {
-        "reason": "DFSA rules are central obligations for DIFC-authorised firms.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "hold"
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "proof_path": null,
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-rulebook-official/intake-20260618T203128Z/proof.json",
       "qa_critic_gate": {
-        "reason": "Blocked source cannot count as working.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "fail"
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
       "regulator": "DFSA",
       "selector": null,
-      "source_health_risk": "high",
+      "source_health_risk": "low",
       "source_id": "AE-dfsa-rulebook-official",
       "source_monitor_gate": {
-        "reason": "Blocked or access-restricted source; do not monitor.",
-        "reviewed_at": "2026-06-14T15:55:00Z",
-        "status": "fail"
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "source_type": "rulebook",
+      "source_type": "rulebook / regulation",
       "url": "https://www.dfsa.ae/your-resources/regulatory/laws-and-rules",
-      "wait_selector": null
+      "wait_selector": null,
+      "name": "DFSA — Rulebook Official",
+      "source_family": "DFSA",
+      "activation_status": "active",
+      "quality_score": 62,
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-rulebook-official/intake-20260618T203128Z/normalized.txt",
+      "normalized_hash": "b1342652d2c6c2c61a7eefb43257e71939827725c0da2a5ccd458f6487d7fc30",
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "b1342652d2c6c2c61a7eefb43257e71939827725c0da2a5ccd458f6487d7fc30",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z"
     },
     {
       "source_id": "AE-dfsa-rulebook-thomsonreuters",
@@ -3596,69 +3594,79 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "rejected",
+      "activation_decision": "activation_ready",
       "adapter_config": {},
-      "adapter_failure_reason": "Original URL returned page-not-found/nav-shell output in final remediation no-save test.",
-      "adapter_family": null,
-      "adapter_name": null,
-      "adapter_remediation_hint": "Replaced by AE-dfsa-annual-reports.",
-      "adapter_status": "live_test_failed",
-      "adapter_version": null,
-      "baseline_runs_completed": 0,
+      "adapter_failure_reason": "",
+      "adapter_family": "listing",
+      "adapter_name": "listing",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline.",
+      "adapter_status": "activation_ready",
+      "adapter_version": "adapter-platform-1.0",
+      "baseline_runs_completed": 2,
       "baseline_runs_required": 2,
-      "blocker": "Stale/generic remediation endpoint replaced by stronger official endpoint.",
-      "can_activate": false,
+      "blocker": "",
+      "can_activate": true,
       "code_architect_gate": {
-        "status": "hold",
-        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
-        "reviewed_at": "2026-06-17T12:52:30Z"
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "current_state": "rejected",
+      "current_state": "activation_ready",
       "evidence_trail_gate": {
-        "status": "hold",
-        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
-        "reviewed_at": "2026-06-17T12:52:30Z"
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
       },
-      "expected_extraction_strategy": "static_html",
-      "expected_min_length": null,
-      "extraction_strategy": "static_html",
+      "expected_extraction_strategy": "adapter:listing",
+      "expected_min_length": 500,
+      "extraction_strategy": "adapter:listing",
       "final_activation_gate": {
-        "status": "rejected",
-        "reason": "Stale/generic endpoint replaced by AE-dfsa-annual-reports.",
-        "reviewed_at": "2026-06-17T12:52:30Z"
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "last_adapter_test_at": null,
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
       "legal_language_gate": {
         "status": "pass",
-        "reason": "Allowed wording: replaced/disabled remediation endpoint, not active.",
-        "reviewed_at": "2026-06-17T12:52:30Z"
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "next_action": "Use AE-dfsa-annual-reports; do not count this stale endpoint as active.",
-      "noise_risk": "high",
+      "next_action": "monitor_with_source_health_visibility",
+      "noise_risk": "low",
       "priority": "P0",
       "product_manager_gate": {
         "status": "pass",
-        "reason": "Replacement endpoint AE-dfsa-annual-reports is commercially stronger.",
-        "reviewed_at": "2026-06-17T12:52:30Z"
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "proof_path": null,
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dubai-financial-services-authority-dfsa/intake-20260618T201702Z/proof.json",
       "qa_critic_gate": {
-        "status": "hold",
-        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
-        "reviewed_at": "2026-06-17T12:52:30Z"
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "regulator": "Dubai Financial Services Authority (DFSA)",
+      "regulator": "DFSA",
       "selector": null,
-      "source_health_risk": "high",
+      "source_health_risk": "low",
       "source_id": "AE-dubai-financial-services-authority-dfsa",
       "source_monitor_gate": {
-        "status": "hold",
-        "reason": "Stale remediation source replaced by AE-dfsa-annual-reports; no active claim allowed.",
-        "reviewed_at": "2026-06-17T12:52:30Z"
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
       },
-      "source_type": "financial_regulator",
+      "source_type": "rulebook / regulation",
       "url": "https://www.dfsa.ae/rules-and-standards",
-      "wait_selector": null
+      "wait_selector": null,
+      "name": "DFSA Rules and Standards",
+      "source_family": "DFSA",
+      "activation_status": "active",
+      "quality_score": 65,
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dubai-financial-services-authority-dfsa/intake-20260618T201702Z/normalized.txt",
+      "normalized_hash": "341c0cf1d28d5cef0f5c71b7a69d8d1934772e986cfe8c37bcbb358ad9d2d4d1",
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "341c0cf1d28d5cef0f5c71b7a69d8d1934772e986cfe8c37bcbb358ad9d2d4d1",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z"
     },
     {
       "activation_decision": "candidate",
@@ -11250,17 +11258,2813 @@
         "reason": "Proof-backed extraction, repeat baseline, source-health review, noise review, and mass-monitor dry-run passed.",
         "reviewed_at": "2026-06-17T12:52:30Z"
       }
+    },
+    {
+      "source_id": "AE-moet-aml-170b7988",
+      "name": "Ministry of Economy — AML",
+      "url": "https://www.moet.gov.ae/aml",
+      "source_family": "Ministry of Economy / DNFBP AML",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "uae_legal_database",
+      "adapter_name": "uae_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:uae_legal_database",
+      "extraction_strategy": "adapter:uae_legal_database",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-aml-170b7988/intake-20260618T201422Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-moet-aml-170b7988/intake-20260618T201422Z/normalized.txt",
+      "normalized_hash": "414f356d7587ea3429109d01cbf5a5043ee2ec7795159dd0e79d9ef4ab146da8",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "414f356d7587ea3429109d01cbf5a5043ee2ec7795159dd0e79d9ef4ab146da8",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "UAE Ministry of Economy / DNFBP AML",
+      "source_type": "law / regulation / AML guidance",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-moet-auditing-accounts-legislations-84d91bc4",
+      "name": "Ministry of Economy — Auditing Accounts Legislations",
+      "url": "https://www.moet.gov.ae/auditing-accounts-legislations",
+      "source_family": "Ministry of Economy / DNFBP AML",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "uae_legal_database",
+      "adapter_name": "uae_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:uae_legal_database",
+      "extraction_strategy": "adapter:uae_legal_database",
+      "expected_min_length": 500,
+      "quality_score": 61,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-auditing-accounts-legislations-84d91bc4/intake-20260618T201428Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-moet-auditing-accounts-legislations-84d91bc4/intake-20260618T201428Z/normalized.txt",
+      "normalized_hash": "3142d9e9005b815fe3d3ee73c2985db174d74d257681cee664b6e63f2c3b4338",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "3142d9e9005b815fe3d3ee73c2985db174d74d257681cee664b6e63f2c3b4338",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "UAE Ministry of Economy / DNFBP AML",
+      "source_type": "law / regulation / AML guidance",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-moet-economic-substance-regulations-a5b9825b",
+      "name": "Ministry of Economy — Economic Substance Regulations",
+      "url": "https://www.moet.gov.ae/economic-substance-regulations",
+      "source_family": "Ministry of Economy / DNFBP AML",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "uae_legal_database",
+      "adapter_name": "uae_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:uae_legal_database",
+      "extraction_strategy": "adapter:uae_legal_database",
+      "expected_min_length": 500,
+      "quality_score": 61,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-economic-substance-regulations-a5b9825b/intake-20260618T201442Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-moet-economic-substance-regulations-a5b9825b/intake-20260618T201442Z/normalized.txt",
+      "normalized_hash": "9b57e55c69b6e39038a949ea001e54f1a7d6cdd7d1cee789413f010e77fc5d5c",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "9b57e55c69b6e39038a949ea001e54f1a7d6cdd7d1cee789413f010e77fc5d5c",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "UAE Ministry of Economy / DNFBP AML",
+      "source_type": "law / regulation / AML guidance",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-moet-registering-companies-in-goaml-c83375da",
+      "name": "Ministry of Economy — Registering Companies In goAML",
+      "url": "https://www.moet.gov.ae/registering-companies-in-goaml",
+      "source_family": "Ministry of Economy / DNFBP AML",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "uae_legal_database",
+      "adapter_name": "uae_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:uae_legal_database",
+      "extraction_strategy": "adapter:uae_legal_database",
+      "expected_min_length": 500,
+      "quality_score": 60,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-registering-companies-in-goaml-c83375da/intake-20260618T201449Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-moet-registering-companies-in-goaml-c83375da/intake-20260618T201449Z/normalized.txt",
+      "normalized_hash": "dcb1112fad8b9f6390dbf25fd5e2d6653f40f56798d81dc645266ff29483c2f6",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "dcb1112fad8b9f6390dbf25fd5e2d6653f40f56798d81dc645266ff29483c2f6",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "UAE Ministry of Economy / DNFBP AML",
+      "source_type": "law / regulation / AML guidance",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-moet-regulation-of-business-fd17959e",
+      "name": "Ministry of Economy — Regulation Of Business",
+      "url": "https://www.moet.gov.ae/regulation-of-business",
+      "source_family": "Ministry of Economy / DNFBP AML",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "uae_legal_database",
+      "adapter_name": "uae_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:uae_legal_database",
+      "extraction_strategy": "adapter:uae_legal_database",
+      "expected_min_length": 500,
+      "quality_score": 61,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-regulation-of-business-fd17959e/intake-20260618T201455Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-moet-regulation-of-business-fd17959e/intake-20260618T201455Z/normalized.txt",
+      "normalized_hash": "c9eaabfae87c5f01555d20d794a4127791a3adc1f883b53c688cb9cb639a2305",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "c9eaabfae87c5f01555d20d794a4127791a3adc1f883b53c688cb9cb639a2305",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "UAE Ministry of Economy / DNFBP AML",
+      "source_type": "law / regulation / AML guidance",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-moet-regulation-of-competition-ba53cc4c",
+      "name": "Ministry of Economy — Regulation Of Competition",
+      "url": "https://www.moet.gov.ae/regulation-of-competition",
+      "source_family": "Ministry of Economy / DNFBP AML",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "uae_legal_database",
+      "adapter_name": "uae_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:uae_legal_database",
+      "extraction_strategy": "adapter:uae_legal_database",
+      "expected_min_length": 500,
+      "quality_score": 61,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-regulation-of-competition-ba53cc4c/intake-20260618T201503Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-moet-regulation-of-competition-ba53cc4c/intake-20260618T201503Z/normalized.txt",
+      "normalized_hash": "6ef5ad13f2a3ce89a13bf82545f91f2e5968df65fc4c0fe7d8899992b74c8687",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "6ef5ad13f2a3ce89a13bf82545f91f2e5968df65fc4c0fe7d8899992b74c8687",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "UAE Ministry of Economy / DNFBP AML",
+      "source_type": "law / regulation / AML guidance",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-moet-targeted-financial-sanctions-586d6f96",
+      "name": "Ministry of Economy — Targeted Financial Sanctions",
+      "url": "https://www.moet.gov.ae/targeted-financial-sanctions",
+      "source_family": "Ministry of Economy / DNFBP AML",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "uae_legal_database",
+      "adapter_name": "uae_legal_database",
+      "adapter_config": {
+        "container_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:uae_legal_database",
+      "extraction_strategy": "adapter:uae_legal_database",
+      "expected_min_length": 500,
+      "quality_score": 62,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-targeted-financial-sanctions-586d6f96/intake-20260618T201509Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-moet-targeted-financial-sanctions-586d6f96/intake-20260618T201509Z/normalized.txt",
+      "normalized_hash": "cea72a7590745a32e86523213cbd92cab48c2a9539d8ab83b4fb6d0d801e377a",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "cea72a7590745a32e86523213cbd92cab48c2a9539d8ab83b4fb6d0d801e377a",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "UAE Ministry of Economy / DNFBP AML",
+      "source_type": "law / regulation / AML guidance",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendment-dfsa-forms-3-5b23279e",
+      "name": "DFSA — News Notice Amendment DFSA Forms 3",
+      "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-3",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-3-5b23279e/intake-20260618T201521Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-3-5b23279e/intake-20260618T201521Z/normalized.txt",
+      "normalized_hash": "b138e834c7fd42974853bd99c93975d063ed7d2b8f028be26fef0a148a68b573",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "b138e834c7fd42974853bd99c93975d063ed7d2b8f028be26fef0a148a68b573",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendment-dfsa-forms-4-238b095a",
+      "name": "DFSA — News Notice Amendment DFSA Forms 4",
+      "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-4",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-4-238b095a/intake-20260618T201526Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-4-238b095a/intake-20260618T201526Z/normalized.txt",
+      "normalized_hash": "7b35b9447fef235bcad9eafac532c68caebfeae51992944ccda54789c7010258",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "7b35b9447fef235bcad9eafac532c68caebfeae51992944ccda54789c7010258",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendment-dfsa-forms-5-87f5ab7b",
+      "name": "DFSA — News Notice Amendment DFSA Forms 5",
+      "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-5",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-5-87f5ab7b/intake-20260618T201531Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-5-87f5ab7b/intake-20260618T201531Z/normalized.txt",
+      "normalized_hash": "540688cb8779be290fa53a6dd95d95e8ffd29125622047cffb41c161e9747740",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "540688cb8779be290fa53a6dd95d95e8ffd29125622047cffb41c161e9747740",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendment-dfsa-forms-6-516f99a2",
+      "name": "DFSA — News Notice Amendment DFSA Forms 6",
+      "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-6",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-6-516f99a2/intake-20260618T201536Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-6-516f99a2/intake-20260618T201536Z/normalized.txt",
+      "normalized_hash": "a9456285dce4b419a1add3ab287b14dc43ad6e390e8886a7d34dc02fd5d763f2",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "a9456285dce4b419a1add3ab287b14dc43ad6e390e8886a7d34dc02fd5d763f2",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-1-c8efa9bf",
+      "name": "DFSA — News Notice Amendments 1",
+      "url": "https://www.dfsa.ae/news/notice-amendments-1",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-1-c8efa9bf/intake-20260618T201546Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-1-c8efa9bf/intake-20260618T201546Z/normalized.txt",
+      "normalized_hash": "db08859cdedd15262979606f2361010dc38fccaa8d1d444a2133bf190cc4325e",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "db08859cdedd15262979606f2361010dc38fccaa8d1d444a2133bf190cc4325e",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-3fadbb97",
+      "name": "DFSA — News Notice Amendments",
+      "url": "https://www.dfsa.ae/news/notice-amendments",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-3fadbb97/intake-20260618T201551Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-3fadbb97/intake-20260618T201551Z/normalized.txt",
+      "normalized_hash": "0c312e5a1ec4bf2425dbbd3c2fb1e8c0fb1301db99d0c230651a62f07123dd06",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "0c312e5a1ec4bf2425dbbd3c2fb1e8c0fb1301db99d0c230651a62f07123dd06",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-dfsa-forms-1-7eb3ddbd",
+      "name": "DFSA — News Notice Amendments DFSA Forms 1",
+      "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-1",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-1-7eb3ddbd/intake-20260618T201556Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-1-7eb3ddbd/intake-20260618T201556Z/normalized.txt",
+      "normalized_hash": "1d1729fbc7be87d30eacfa11804da38cd399f42e139537c5607ecca5fd4713d1",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "1d1729fbc7be87d30eacfa11804da38cd399f42e139537c5607ecca5fd4713d1",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-dfsa-forms-2-26da0ea8",
+      "name": "DFSA — News Notice Amendments DFSA Forms 2",
+      "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-2",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-2-26da0ea8/intake-20260618T201602Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-2-26da0ea8/intake-20260618T201602Z/normalized.txt",
+      "normalized_hash": "7c58ce373a09776ab56c67bd0e5bae2140dd33226c483f38086c85d5f73e2f3c",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "7c58ce373a09776ab56c67bd0e5bae2140dd33226c483f38086c85d5f73e2f3c",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-dfsa-forms-3-6a085fc2",
+      "name": "DFSA — News Notice Amendments DFSA Forms 3",
+      "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-3",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-3-6a085fc2/intake-20260618T201608Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-3-6a085fc2/intake-20260618T201608Z/normalized.txt",
+      "normalized_hash": "dcb7357a39c377ab223834ffc62a178f45b8ba7e7bba69d69e6a24893bcfb21e",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "dcb7357a39c377ab223834ffc62a178f45b8ba7e7bba69d69e6a24893bcfb21e",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-dfsa-forms-4-871a906a",
+      "name": "DFSA — News Notice Amendments DFSA Forms 4",
+      "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-4",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-4-871a906a/intake-20260618T201613Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-4-871a906a/intake-20260618T201613Z/normalized.txt",
+      "normalized_hash": "ffef69fa564a1fc9d5ccfb60a931e630dfdbe505e091375e530f56916a313263",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "ffef69fa564a1fc9d5ccfb60a931e630dfdbe505e091375e530f56916a313263",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-dfsa-forms-fdd4d828",
+      "name": "DFSA — News Notice Amendments DFSA Forms",
+      "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-fdd4d828/intake-20260618T201619Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-fdd4d828/intake-20260618T201619Z/normalized.txt",
+      "normalized_hash": "1f1c7725e26d4dec93510be2700ef301d4d8c23c4d21b7b87b0a6127b4fc892b",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "1f1c7725e26d4dec93510be2700ef301d4d8c23c4d21b7b87b0a6127b4fc892b",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-legislation-b5739a79",
+      "name": "DFSA — News Notice Amendments Legislation",
+      "url": "https://www.dfsa.ae/news/notice-amendments-legislation",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-legislation-b5739a79/intake-20260618T201624Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-legislation-b5739a79/intake-20260618T201624Z/normalized.txt",
+      "normalized_hash": "f70917ec3b4f4011bb565c2034b27713c40c49e64c8503e799c974cc2ae77804",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "f70917ec3b4f4011bb565c2034b27713c40c49e64c8503e799c974cc2ae77804",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-difc-business-aml-cft-991d9543",
+      "name": "DIFC — Business AML CFT",
+      "url": "https://www.difc.com/business/aml-cft",
+      "source_family": "DIFC",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:static_html",
+      "extraction_strategy": "adapter:static_html",
+      "expected_min_length": 500,
+      "quality_score": 61,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-business-aml-cft-991d9543/intake-20260618T201748Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-business-aml-cft-991d9543/intake-20260618T201748Z/normalized.txt",
+      "normalized_hash": "49115a92f39fb82f9e5dd2c26ec9e9b8857be0491712f6e46079b48ab46c1ed2",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "49115a92f39fb82f9e5dd2c26ec9e9b8857be0491712f6e46079b48ab46c1ed2",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DIFC",
+      "source_type": "legal / regulatory page",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-difc-business-economic-substance-regulations-05c9f19b",
+      "name": "DIFC — Business Economic Substance Regulations",
+      "url": "https://www.difc.com/business/economic-substance-regulations",
+      "source_family": "DIFC",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:static_html",
+      "extraction_strategy": "adapter:static_html",
+      "expected_min_length": 500,
+      "quality_score": 62,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-business-economic-substance-regulations-05c9f19b/intake-20260618T201752Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-business-economic-substance-regulations-05c9f19b/intake-20260618T201752Z/normalized.txt",
+      "normalized_hash": "7f77afec4c4c8b2d8f30db75bb77b57987d8ec0bfe36f70c9830edbda1e193eb",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "7f77afec4c4c8b2d8f30db75bb77b57987d8ec0bfe36f70c9830edbda1e193eb",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DIFC",
+      "source_type": "legal / regulatory page",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-difc-whats-on-insights-difc-data-protection-law-pioneers-6615d880",
+      "name": "DIFC — Whats On Insights DIFC Data Protection Law Pioneers",
+      "url": "https://www.difc.com/whats-on/insights/difc-data-protection-law-pioneers",
+      "source_family": "DIFC",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:static_html",
+      "extraction_strategy": "adapter:static_html",
+      "expected_min_length": 500,
+      "quality_score": 62,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-difc-data-protection-law-pioneers-6615d880/intake-20260618T201755Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-difc-data-protection-law-pioneers-6615d880/intake-20260618T201755Z/normalized.txt",
+      "normalized_hash": "d370c3fe4df31bdac5c7cf3c78aa717076b3104ce5e239541e841b5536e827a4",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "d370c3fe4df31bdac5c7cf3c78aa717076b3104ce5e239541e841b5536e827a4",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DIFC",
+      "source_type": "legal / regulatory page",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-difc-whats-on-news-difc-arbitration-law-consultation-684af25c",
+      "name": "DIFC — Whats On News DIFC Arbitration Law Consultation",
+      "url": "https://www.difc.com/whats-on/news/difc-arbitration-law-consultation",
+      "source_family": "DIFC",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "adapter_config": {
+        "content_selector": "main"
+      },
+      "expected_extraction_strategy": "adapter:static_html",
+      "extraction_strategy": "adapter:static_html",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-news-difc-arbitration-law-consultation-684af25c/intake-20260618T201803Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-news-difc-arbitration-law-consultation-684af25c/intake-20260618T201803Z/normalized.txt",
+      "normalized_hash": "df5f8e3cda6924917df086fdbfc46759dde3bb837bd2e760204d3924293723d3",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "df5f8e3cda6924917df086fdbfc46759dde3bb837bd2e760204d3924293723d3",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DIFC",
+      "source_type": "legal / regulatory page",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-relation-cp90-1ea4f448",
+      "name": "DFSA — News Notice Relation CP90",
+      "url": "https://www.dfsa.ae/news/notice-relation-cp90",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-relation-cp90-1ea4f448/intake-20260618T203238Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-relation-cp90-1ea4f448/intake-20260618T203238Z/normalized.txt",
+      "normalized_hash": "2eca7ace03c4526c91b6d40f5d137eecea0c625be9c6a25ef1a21e6bf04cf11e",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "2eca7ace03c4526c91b6d40f5d137eecea0c625be9c6a25ef1a21e6bf04cf11e",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-discussion-paper-67ac395d",
+      "name": "DFSA — News Notice Discussion Paper",
+      "url": "https://www.dfsa.ae/news/notice-discussion-paper",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-discussion-paper-67ac395d/intake-20260618T203243Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-discussion-paper-67ac395d/intake-20260618T203243Z/normalized.txt",
+      "normalized_hash": "7e913c7ceee32c9ad0d09c874573cc5fc21f5f0e3edbd9fd95fca11f1fa2e923",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "7e913c7ceee32c9ad0d09c874573cc5fc21f5f0e3edbd9fd95fca11f1fa2e923",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-consultation-paper-26232647",
+      "name": "DFSA — News Notice Consultation Paper",
+      "url": "https://www.dfsa.ae/news/notice-consultation-paper",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-26232647/intake-20260618T203254Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-26232647/intake-20260618T203254Z/normalized.txt",
+      "normalized_hash": "ca344c2a5a26aa9697361579025b0c6aa94945d4ed7024e227ba94d34e9faf67",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "ca344c2a5a26aa9697361579025b0c6aa94945d4ed7024e227ba94d34e9faf67",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "consultation / notice",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-rulebook-f3b17fd6",
+      "name": "DFSA — News Notice Amendments Rulebook",
+      "url": "https://www.dfsa.ae/news/notice-amendments-rulebook",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-f3b17fd6/intake-20260618T203308Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-f3b17fd6/intake-20260618T203308Z/normalized.txt",
+      "normalized_hash": "6885ccf87220f3dd6d1f6d3dbe0eeea812a5cf3a35e7554ee0c080addc5c9992",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "6885ccf87220f3dd6d1f6d3dbe0eeea812a5cf3a35e7554ee0c080addc5c9992",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "rulebook / regulation",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-consultation-paper-1-0fd2727d",
+      "name": "DFSA — News Notice Consultation Paper 1",
+      "url": "https://www.dfsa.ae/news/notice-consultation-paper-1",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-1-0fd2727d/intake-20260618T203313Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-1-0fd2727d/intake-20260618T203313Z/normalized.txt",
+      "normalized_hash": "ab4d6b065b8e6ecced79210be577245122d15c7c39f2e71b22554663b8e6c87d",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "ab4d6b065b8e6ecced79210be577245122d15c7c39f2e71b22554663b8e6c87d",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "consultation / notice",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-consultation-paper-2-ce31d49f",
+      "name": "DFSA — News Notice Consultation Paper 2",
+      "url": "https://www.dfsa.ae/news/notice-consultation-paper-2",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-2-ce31d49f/intake-20260618T203318Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-2-ce31d49f/intake-20260618T203318Z/normalized.txt",
+      "normalized_hash": "396ce351ef697d82a677d1860ad2c926fa41e1b6708abb3df438869af68c7985",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "396ce351ef697d82a677d1860ad2c926fa41e1b6708abb3df438869af68c7985",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "consultation / notice",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-consultation-release-128d0518",
+      "name": "DFSA — News Notice Consultation Release",
+      "url": "https://www.dfsa.ae/news/notice-consultation-release",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-release-128d0518/intake-20260618T203323Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-release-128d0518/intake-20260618T203323Z/normalized.txt",
+      "normalized_hash": "6e4a26ea5bb89cc11e697f1103d06646af879cd9306e54e74b44d34e9b14de8c",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "6e4a26ea5bb89cc11e697f1103d06646af879cd9306e54e74b44d34e9b14de8c",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "consultation / notice",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-rulebook-1-a3b7e98d",
+      "name": "DFSA — News Notice Amendments Rulebook 1",
+      "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-1",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-1-a3b7e98d/intake-20260618T203329Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-1-a3b7e98d/intake-20260618T203329Z/normalized.txt",
+      "normalized_hash": "6f59b09bd4bf976ee29b7323ec68cc1749b2eab10297dfb52f2cf5f0b2778cd5",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "6f59b09bd4bf976ee29b7323ec68cc1749b2eab10297dfb52f2cf5f0b2778cd5",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "rulebook / regulation",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-rulebook-2-51efcaf3",
+      "name": "DFSA — News Notice Amendments Rulebook 2",
+      "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-2",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-2-51efcaf3/intake-20260618T203333Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-2-51efcaf3/intake-20260618T203333Z/normalized.txt",
+      "normalized_hash": "d460aaee08f8f2e5c8fdbce55745de806fa0195b323926e23fc0d2d4546197c5",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "d460aaee08f8f2e5c8fdbce55745de806fa0195b323926e23fc0d2d4546197c5",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "rulebook / regulation",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-rulebook-3-5fb25116",
+      "name": "DFSA — News Notice Amendments Rulebook 3",
+      "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-3",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-3-5fb25116/intake-20260618T203338Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-3-5fb25116/intake-20260618T203338Z/normalized.txt",
+      "normalized_hash": "18719be9e51afd4ea732ed93932b74c1d7eaf090551df9e244ceb4d076ca18eb",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "18719be9e51afd4ea732ed93932b74c1d7eaf090551df9e244ceb4d076ca18eb",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "rulebook / regulation",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-rulebook-4-532da6ec",
+      "name": "DFSA — News Notice Amendments Rulebook 4",
+      "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-4",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-4-532da6ec/intake-20260618T203343Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-4-532da6ec/intake-20260618T203343Z/normalized.txt",
+      "normalized_hash": "4dce369f8f1b34aabc644e9f1121c1cd8980a15bb954674e4636d01629062d64",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "4dce369f8f1b34aabc644e9f1121c1cd8980a15bb954674e4636d01629062d64",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "rulebook / regulation",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-rulebook-5-2fceb723",
+      "name": "DFSA — News Notice Amendments Rulebook 5",
+      "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-5",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-5-2fceb723/intake-20260618T203348Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-5-2fceb723/intake-20260618T203348Z/normalized.txt",
+      "normalized_hash": "ad1fb6161020e30ba1d54ca2bf4b78eb7f9e9538841ecbb6cfc2bd84376d6bca",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "ad1fb6161020e30ba1d54ca2bf4b78eb7f9e9538841ecbb6cfc2bd84376d6bca",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "rulebook / regulation",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-amendments-rulebook-6-077b65fb",
+      "name": "DFSA — News Notice Amendments Rulebook 6",
+      "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-6",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-6-077b65fb/intake-20260618T203353Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-6-077b65fb/intake-20260618T203353Z/normalized.txt",
+      "normalized_hash": "122b827f224a2fd4cccc92d557959caf058c8a456595fd942a6542c621723798",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "122b827f224a2fd4cccc92d557959caf058c8a456595fd942a6542c621723798",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "rulebook / regulation",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-call-evidence-release-0e8f9854",
+      "name": "DFSA — News Notice Call Evidence Release",
+      "url": "https://www.dfsa.ae/news/notice-call-evidence-release",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-call-evidence-release-0e8f9854/intake-20260618T203359Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-call-evidence-release-0e8f9854/intake-20260618T203359Z/normalized.txt",
+      "normalized_hash": "141f162ce494f967acdc45149a19ca8039128f9cb6e1170787175facb6e99822",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "141f162ce494f967acdc45149a19ca8039128f9cb6e1170787175facb6e99822",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "notice / rulebook amendment",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
+    },
+    {
+      "source_id": "AE-dfsa-news-notice-consultation-release-1-f752cf93",
+      "name": "DFSA — News Notice Consultation Release 1",
+      "url": "https://www.dfsa.ae/news/notice-consultation-release-1",
+      "source_family": "DFSA",
+      "priority": "P0",
+      "current_state": "activation_ready",
+      "activation_decision": "activation_ready",
+      "activation_status": "active",
+      "can_activate": true,
+      "adapter_status": "activation_ready",
+      "adapter_family": "dfsa_notice_listing",
+      "adapter_name": "dfsa_notice_listing",
+      "adapter_config": {},
+      "expected_extraction_strategy": "adapter:dfsa_notice_listing",
+      "extraction_strategy": "adapter:dfsa_notice_listing",
+      "expected_min_length": 500,
+      "quality_score": 65,
+      "noise_risk": "low",
+      "source_health_risk": "low",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-release-1-f752cf93/intake-20260618T203404Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-release-1-f752cf93/intake-20260618T203404Z/normalized.txt",
+      "normalized_hash": "a98bc9c860c76f8ec6a6f3e2f5574ff4a0aa703a0b7d9f56cb9e10c141ce69a0",
+      "baseline_runs_required": 2,
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_hash": "a98bc9c860c76f8ec6a6f3e2f5574ff4a0aa703a0b7d9f56cb9e10c141ce69a0",
+      "last_monitor_dry_run_at": "2026-06-18T20:35:36Z",
+      "blocker": "",
+      "next_action": "monitor_with_source_health_visibility",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Mass-monitor dry-run returned MONITOR_OK with no hash drift.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Proof path, normalized text path, normalized hash, and 2/2 baseline runs recorded.",
+        "reviewed_at": "2026-06-18T20:45:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "No nav-shell, shallow, duplicate latest hash, or changed dry-run result in final activation set.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Customer wording remains monitoring intelligence only, not legal advice.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Adds useful DFSA/DIFC/MoE official-source monitoring depth without claiming complete UAE coverage.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Uses configured adapter family and existing proof/baseline/mass-monitor pipeline.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "No-save, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates passed.",
+        "reviewed_at": "2026-06-18T20:45:00Z"
+      },
+      "regulator": "DFSA",
+      "source_type": "consultation / notice",
+      "adapter_version": "adapter-platform-1.0",
+      "last_adapter_test_at": "2026-06-18T20:45:00Z",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated after proof-backed weak-family bulk sprint; monitor with source-health timeline."
     }
   ],
   "summary": {
-    "activation_ready_count": 60,
+    "activation_ready_count": 101,
     "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
-    "baseline_complete_count": 61,
+    "baseline_complete_count": 102,
     "baseline_pending_count": 2,
-    "blocked_count": 21,
+    "blocked_count": 19,
     "candidate_count": 27,
     "did_reach_50_working_sources": true,
     "generated_at": "2026-06-14T15:55:00Z",
@@ -11288,13 +14092,13 @@
     },
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready queue entries count toward the queue-specific 50 working-source target; public truth is reconciled separately from sources.json.",
-    "proof_backed_count": 61,
-    "public_source_truth_after": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
+    "proof_backed_count": 102,
+    "public_source_truth_after": "122 enabled UAE sources; 121 monitoring-active; 1 remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
-    "rejected_count": 0,
-    "remediation_count": 1,
+    "rejected_count": 1,
+    "remediation_count": 17,
     "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
-    "total_entries": 127,
+    "total_entries": 167,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
     "source_activation_platform_note": "Final remediation sprint replaced two stale DFSA remediation endpoints with proof-backed official DFSA PDF-listing sources; FIU homepage remains honestly held.",
@@ -11302,19 +14106,21 @@
     "last_weak_zone_remediation_update_at": "2026-06-16T06:12:00Z",
     "last_weak_zone_elimination_update_at": "2026-06-16T00:00:00Z",
     "last_final_8_activation_update_at": "2026-06-16T00:00:00Z",
-    "public_source_truth_after_validation": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
+    "public_source_truth_after_validation": "122 enabled UAE sources; 121 monitoring-active; 1 remediation",
     "last_updated_at": "2026-06-16T18:36:18Z",
-    "enabled_count": 79,
-    "readiness_supported_count": 78,
-    "current_truth": "81 enabled / 80 monitoring-active / 1 remediation",
+    "enabled_count": 122,
+    "readiness_supported_count": 121,
+    "current_truth": "122 enabled / 121 monitoring-active / 1 remediation",
     "difc_remediation_update_at": "2026-06-16T18:36:18Z",
-    "last_final_remediation_update_at": "2026-06-17T12:52:30Z"
+    "last_final_remediation_update_at": "2026-06-17T12:52:30Z",
+    "last_weak_family_bulk_activation_update_at": "2026-06-18T20:45:00Z",
+    "weak_family_bulk_activation_note": "41 proof-backed DFSA/DIFC/Ministry of Economy sources activated after no-save, repeat baseline, mass-monitor MONITOR_OK, and gates."
   },
   "version": 1,
-  "public_source_truth_after_validation": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
-  "public_source_truth_after": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
-  "enabled_count": 79,
-  "readiness_supported_count": 78,
+  "public_source_truth_after_validation": "122 enabled UAE sources / 121 monitoring-active / 1 remediation",
+  "public_source_truth_after": "122 enabled UAE sources / 121 monitoring-active / 1 remediation",
+  "enabled_count": 122,
+  "readiness_supported_count": 121,
   "remediation_count": 1,
-  "current_truth": "81 enabled / 80 monitoring-active / 1 remediation"
+  "current_truth": "122 enabled UAE sources / 121 monitoring-active / 1 remediation"
 }

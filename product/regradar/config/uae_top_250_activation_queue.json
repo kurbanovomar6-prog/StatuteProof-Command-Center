@@ -23,7 +23,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "ADGM/FSRA candidate with law / legislation value; selected for proof-gated no-save testing only."
+      "reason_selected": "ADGM/FSRA candidate with law / legislation value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "QUALITY_DROP,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 2,
@@ -77,7 +80,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "ADGM/FSRA candidate with guidance / publication value; selected for proof-gated no-save testing only."
+      "reason_selected": "ADGM/FSRA candidate with guidance / publication value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 5,
@@ -185,7 +191,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DIFC candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DIFC candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-business-economic-substance-regulations-05c9f19b/intake-20260618T201752Z/proof.json",
+      "normalized_hash": "7f77afec4c4c8b2d8f30db75bb77b57987d8ec0bfe36f70c9830edbda1e193eb",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 11,
@@ -311,7 +325,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DIFC candidate with law / legislation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DIFC candidate with law / legislation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-difc-data-protection-law-pioneers-6615d880/intake-20260618T201755Z/proof.json",
+      "normalized_hash": "d370c3fe4df31bdac5c7cf3c78aa717076b3104ce5e239541e841b5536e827a4",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 18,
@@ -329,7 +351,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DIFC candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DIFC candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 19,
@@ -473,7 +498,15 @@
         "adapter_guess": "legal_database"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with law / legislation value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with law / legislation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-auditing-accounts-legislations-84d91bc4/intake-20260618T201428Z/proof.json",
+      "normalized_hash": "3142d9e9005b815fe3d3ee73c2985db174d74d257681cee664b6e63f2c3b4338",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 27,
@@ -545,7 +578,10 @@
         "adapter_guess": "legal_database"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with law / legislation value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with law / legislation value; selected for proof-gated no-save testing only.",
+      "status": "candidate",
+      "activation_status": "held_duplicate",
+      "hold_reason": "duplicate latest monitor hash"
     },
     {
       "rank": 31,
@@ -581,7 +617,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-economic-substance-regulations-a5b9825b/intake-20260618T201442Z/proof.json",
+      "normalized_hash": "9b57e55c69b6e39038a949ea001e54f1a7d6cdd7d1cee789413f010e77fc5d5c",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 33,
@@ -653,7 +697,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-regulation-of-business-fd17959e/intake-20260618T201455Z/proof.json",
+      "normalized_hash": "c9eaabfae87c5f01555d20d794a4127791a3adc1f883b53c688cb9cb639a2305",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 37,
@@ -671,7 +723,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-regulation-of-competition-ba53cc4c/intake-20260618T201503Z/proof.json",
+      "normalized_hash": "6ef5ad13f2a3ce89a13bf82545f91f2e5968df65fc4c0fe7d8899992b74c8687",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 38,
@@ -1175,7 +1235,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "ADGM/FSRA candidate with law / legislation value; selected for proof-gated no-save testing only."
+      "reason_selected": "ADGM/FSRA candidate with law / legislation value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 66,
@@ -1193,7 +1256,10 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "ADGM/FSRA candidate with enforcement / alert value; selected for proof-gated no-save testing only."
+      "reason_selected": "ADGM/FSRA candidate with enforcement / alert value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 67,
@@ -1211,7 +1277,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "ADGM/FSRA candidate with tax value; selected for proof-gated no-save testing only."
+      "reason_selected": "ADGM/FSRA candidate with tax value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "QUALITY_DROP,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 68,
@@ -1265,7 +1334,10 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with enforcement / alert value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with enforcement / alert value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 71,
@@ -1301,7 +1373,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 73,
@@ -1319,7 +1394,10 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with enforcement / alert value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with enforcement / alert value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 74,
@@ -2579,7 +2657,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with public register value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with public register value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-registering-companies-in-goaml-c83375da/intake-20260618T201449Z/proof.json",
+      "normalized_hash": "dcb1112fad8b9f6390dbf25fd5e2d6653f40f56798d81dc645266ff29483c2f6",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 144,
@@ -2687,7 +2773,10 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "VARA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "VARA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "QUALITY_DROP,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 150,
@@ -2705,7 +2794,10 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 151,
@@ -2759,7 +2851,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-3-5b23279e/intake-20260618T201521Z/proof.json",
+      "normalized_hash": "b138e834c7fd42974853bd99c93975d063ed7d2b8f028be26fef0a148a68b573",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 154,
@@ -2777,7 +2877,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-4-238b095a/intake-20260618T201526Z/proof.json",
+      "normalized_hash": "7b35b9447fef235bcad9eafac532c68caebfeae51992944ccda54789c7010258",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 155,
@@ -2795,7 +2903,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-5-87f5ab7b/intake-20260618T201531Z/proof.json",
+      "normalized_hash": "540688cb8779be290fa53a6dd95d95e8ffd29125622047cffb41c161e9747740",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 156,
@@ -2813,7 +2929,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendment-dfsa-forms-6-516f99a2/intake-20260618T201536Z/proof.json",
+      "normalized_hash": "a9456285dce4b419a1add3ab287b14dc43ad6e390e8886a7d34dc02fd5d763f2",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 157,
@@ -2831,7 +2955,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-3fadbb97/intake-20260618T201551Z/proof.json",
+      "normalized_hash": "0c312e5a1ec4bf2425dbbd3c2fb1e8c0fb1301db99d0c230651a62f07123dd06",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 158,
@@ -2849,7 +2981,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-1-c8efa9bf/intake-20260618T201546Z/proof.json",
+      "normalized_hash": "db08859cdedd15262979606f2361010dc38fccaa8d1d444a2133bf190cc4325e",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 159,
@@ -2867,7 +3007,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-fdd4d828/intake-20260618T201619Z/proof.json",
+      "normalized_hash": "1f1c7725e26d4dec93510be2700ef301d4d8c23c4d21b7b87b0a6127b4fc892b",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 160,
@@ -2885,7 +3033,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-1-7eb3ddbd/intake-20260618T201556Z/proof.json",
+      "normalized_hash": "1d1729fbc7be87d30eacfa11804da38cd399f42e139537c5607ecca5fd4713d1",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 161,
@@ -2903,7 +3059,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-2-26da0ea8/intake-20260618T201602Z/proof.json",
+      "normalized_hash": "7c58ce373a09776ab56c67bd0e5bae2140dd33226c483f38086c85d5f73e2f3c",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 162,
@@ -2921,7 +3085,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-3-6a085fc2/intake-20260618T201608Z/proof.json",
+      "normalized_hash": "dcb7357a39c377ab223834ffc62a178f45b8ba7e7bba69d69e6a24893bcfb21e",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 163,
@@ -2939,7 +3111,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-dfsa-forms-4-871a906a/intake-20260618T201613Z/proof.json",
+      "normalized_hash": "ffef69fa564a1fc9d5ccfb60a931e630dfdbe505e091375e530f56916a313263",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 164,
@@ -2957,7 +3137,15 @@
         "adapter_guess": "legal_database"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-legislation-b5739a79/intake-20260618T201624Z/proof.json",
+      "normalized_hash": "f70917ec3b4f4011bb565c2034b27713c40c49e64c8503e799c974cc2ae77804",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 165,
@@ -2975,7 +3163,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-f3b17fd6/intake-20260618T203308Z/proof.json",
+      "normalized_hash": "6885ccf87220f3dd6d1f6d3dbe0eeea812a5cf3a35e7554ee0c080addc5c9992",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 166,
@@ -2993,7 +3189,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-1-a3b7e98d/intake-20260618T203329Z/proof.json",
+      "normalized_hash": "6f59b09bd4bf976ee29b7323ec68cc1749b2eab10297dfb52f2cf5f0b2778cd5",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 167,
@@ -3011,7 +3215,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-2-51efcaf3/intake-20260618T203333Z/proof.json",
+      "normalized_hash": "d460aaee08f8f2e5c8fdbce55745de806fa0195b323926e23fc0d2d4546197c5",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 168,
@@ -3029,7 +3241,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-3-5fb25116/intake-20260618T203338Z/proof.json",
+      "normalized_hash": "18719be9e51afd4ea732ed93932b74c1d7eaf090551df9e244ceb4d076ca18eb",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 169,
@@ -3047,7 +3267,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-4-532da6ec/intake-20260618T203343Z/proof.json",
+      "normalized_hash": "4dce369f8f1b34aabc644e9f1121c1cd8980a15bb954674e4636d01629062d64",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 170,
@@ -3065,7 +3293,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-5-2fceb723/intake-20260618T203348Z/proof.json",
+      "normalized_hash": "ad1fb6161020e30ba1d54ca2bf4b78eb7f9e9538841ecbb6cfc2bd84376d6bca",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 171,
@@ -3083,7 +3319,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-amendments-rulebook-6-077b65fb/intake-20260618T203353Z/proof.json",
+      "normalized_hash": "122b827f224a2fd4cccc92d557959caf058c8a456595fd942a6542c621723798",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 172,
@@ -3101,7 +3345,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-call-evidence-release-0e8f9854/intake-20260618T203359Z/proof.json",
+      "normalized_hash": "141f162ce494f967acdc45149a19ca8039128f9cb6e1170787175facb6e99822",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 173,
@@ -3119,7 +3371,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-26232647/intake-20260618T203254Z/proof.json",
+      "normalized_hash": "ca344c2a5a26aa9697361579025b0c6aa94945d4ed7024e227ba94d34e9faf67",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 174,
@@ -3137,7 +3397,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-1-0fd2727d/intake-20260618T203313Z/proof.json",
+      "normalized_hash": "ab4d6b065b8e6ecced79210be577245122d15c7c39f2e71b22554663b8e6c87d",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 175,
@@ -3155,7 +3423,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-paper-2-ce31d49f/intake-20260618T203318Z/proof.json",
+      "normalized_hash": "396ce351ef697d82a677d1860ad2c926fa41e1b6708abb3df438869af68c7985",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 176,
@@ -3173,7 +3449,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-release-128d0518/intake-20260618T203323Z/proof.json",
+      "normalized_hash": "6e4a26ea5bb89cc11e697f1103d06646af879cd9306e54e74b44d34e9b14de8c",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 177,
@@ -3191,7 +3475,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with consultation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-consultation-release-1-f752cf93/intake-20260618T203404Z/proof.json",
+      "normalized_hash": "a98bc9c860c76f8ec6a6f3e2f5574ff4a0aa703a0b7d9f56cb9e10c141ce69a0",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 178,
@@ -3209,7 +3501,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-discussion-paper-67ac395d/intake-20260618T203243Z/proof.json",
+      "normalized_hash": "7e913c7ceee32c9ad0d09c874573cc5fc21f5f0e3edbd9fd95fca11f1fa2e923",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 179,
@@ -3227,7 +3527,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with circular / notice value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-news-notice-relation-cp90-1ea4f448/intake-20260618T203238Z/proof.json",
+      "normalized_hash": "2eca7ace03c4526c91b6d40f5d137eecea0c625be9c6a25ef1a21e6bf04cf11e",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 180,
@@ -3245,7 +3553,15 @@
         "adapter_guess": "listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dubai-financial-services-authority-dfsa/intake-20260618T201702Z/proof.json",
+      "normalized_hash": "341c0cf1d28d5cef0f5c71b7a69d8d1934772e986cfe8c37bcbb358ad9d2d4d1",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 181,
@@ -3299,7 +3615,15 @@
         "adapter_guess": "table_listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DIFC candidate with consultation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DIFC candidate with consultation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-news-difc-arbitration-law-consultation-684af25c/intake-20260618T201803Z/proof.json",
+      "normalized_hash": "df5f8e3cda6924917df086fdbfc46759dde3bb837bd2e760204d3924293723d3",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 184,
@@ -3479,7 +3803,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "ADGM/FSRA candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "ADGM/FSRA candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 194,
@@ -3497,7 +3824,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "ADGM/FSRA candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "ADGM/FSRA candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 195,
@@ -3515,7 +3845,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "QUALITY_DROP,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 196,
@@ -3587,7 +3920,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DIFC candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "DIFC candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-business-aml-cft-991d9543/intake-20260618T201748Z/proof.json",
+      "normalized_hash": "49115a92f39fb82f9e5dd2c26ec9e9b8857be0491712f6e46079b48ab46c1ed2",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 200,
@@ -3713,7 +4054,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-aml-170b7988/intake-20260618T201422Z/proof.json",
+      "normalized_hash": "414f356d7587ea3429109d01cbf5a5043ee2ec7795159dd0e79d9ef4ab146da8",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 207,
@@ -3749,7 +4098,15 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "Ministry of Economy / DNFBP AML candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "Ministry of Economy / DNFBP AML candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-moet-targeted-financial-sanctions-586d6f96/intake-20260618T201509Z/proof.json",
+      "normalized_hash": "cea72a7590745a32e86523213cbd92cab48c2a9539d8ab83b4fb6d0d801e377a",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 209,
@@ -3767,7 +4124,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 210,
@@ -3785,7 +4145,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with official page / listing value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with official page / listing value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 211,
@@ -3929,7 +4292,10 @@
         "adapter_guess": "static_html"
       },
       "activation_potential": "high",
-      "reason_selected": "Abu Dhabi DED candidate with rulebook / regulation value; selected for proof-gated no-save testing only."
+      "reason_selected": "Abu Dhabi DED candidate with rulebook / regulation value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 219,
@@ -4055,7 +4421,10 @@
         "adapter_guess": "listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with guidance / publication value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with guidance / publication value; selected for proof-gated no-save testing only.",
+      "status": "remediation",
+      "activation_status": "held",
+      "hold_reason": "NAV_SHELL_ONLY,changed_on_dry_run,monitor_hash_mismatch"
     },
     {
       "rank": 226,
@@ -4073,7 +4442,15 @@
         "adapter_guess": "listing"
       },
       "activation_potential": "high",
-      "reason_selected": "DFSA candidate with law / legislation value; selected for proof-gated no-save testing only."
+      "reason_selected": "DFSA candidate with law / legislation value; selected for proof-gated no-save testing only.",
+      "status": "active",
+      "activation_status": "active",
+      "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-rulebook-official/intake-20260618T203128Z/proof.json",
+      "normalized_hash": "b1342652d2c6c2c61a7eefb43257e71939827725c0da2a5ccd458f6487d7fc30",
+      "baseline_runs_completed": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_activation_reviewed_at": "2026-06-18T20:45:00Z",
+      "activation_note": "Activated after proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
     },
     {
       "rank": 227,

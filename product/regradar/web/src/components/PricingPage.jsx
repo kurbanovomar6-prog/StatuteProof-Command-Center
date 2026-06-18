@@ -65,7 +65,7 @@ const PLANS_DATA = [
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '80 monitoring-active sources; FTA tax pages remain candidates until item-level extraction passes' },
+      { label: 'Official UAE sources', value: '121 monitoring-active sources; FTA tax pages remain candidates until item-level extraction passes' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },

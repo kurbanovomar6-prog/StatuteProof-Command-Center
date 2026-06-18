@@ -989,6 +989,94 @@ def test_dfsa_notice_listing_extracts_consultation_and_enforcement_links():
     assert "Contact" not in result.text
 
 
+def test_uae_legal_database_adapter_extracts_legislation_cards():
+    html = """
+    <html><body><main>
+      <article class="legislation-card">
+        <h3>Federal Decree-Law No. 10 of 2025 on Anti-Money Laundering</h3>
+        <p>Federal legislation covering AML/CFT and proliferation financing controls.</p>
+        <a href="/en/laws-and-legislation/aml-cft-2025.pdf">View details</a>
+      </article>
+      <article class="legislation-card">
+        <h3>Cabinet Decision No. 134 of 2025 Executive Regulation</h3>
+        <p>Executive regulation for federal AML/CFT law.</p>
+        <a href="/en/laws-and-legislation/cabinet-decision-134-2025">Read more</a>
+      </article>
+      <footer><a href="/contact">Contact</a></footer>
+    </main></body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.moj.gov.ae/en/laws-and-legislation/latest-legislations-and-laws.aspx",
+        adapter_family="uae_legal_database",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "uae_legal_database"
+    assert result.item_count == 2
+    assert "Federal Decree-Law No. 10 of 2025" in result.text
+    assert "Cabinet Decision No. 134 of 2025" in result.text
+    assert "- Title: View details" not in result.text
+    assert "Contact" not in result.text
+
+
+def test_uae_legal_database_adapter_rejects_nav_shell():
+    result = extract_with_adapter(
+        "<html><body><nav>Home Search Contact</nav><main><a href='/contact'>Contact</a></main></body></html>",
+        url="https://www.moj.gov.ae/en/laws-and-legislation.aspx",
+        adapter_family="uae_legal_database",
+    )
+
+    assert result.item_count == 0
+    assert result.failure_reason
+
+
+def test_source_intake_uae_legal_database_passes_preview_only():
+    html = """
+    <html><body><main>
+      <section class="card">
+        <h3>Companies Law Federal Decree-Law No. 32 of 2021</h3>
+        <p>Federal commercial companies legislation relevant to regulated UAE firms.</p>
+        <a href="/en/laws-and-legislation/companies-law">View</a>
+      </section>
+      <section class="card">
+        <h3>Economic Substance Regulations</h3>
+        <p>Regulatory obligations and reporting expectations for UAE entities.</p>
+        <a href="/en/laws-and-legislation/economic-substance-regulations">Read more</a>
+      </section>
+      <section class="card">
+        <h3>Anti-Money Laundering and Combatting Terrorism Financing Law</h3>
+        <p>Federal AML/CFT law for financial crime, sanctions, and regulatory compliance controls.</p>
+        <a href="/en/laws-and-legislation/anti-money-laundering-law">Read more</a>
+      </section>
+      <section class="card">
+        <h3>Consumer Protection Regulations and Compliance Controls</h3>
+        <p>Federal consumer protection obligations relevant to regulated firms, disclosure, complaints, and market conduct.</p>
+        <a href="/en/laws-and-legislation/consumer-protection-regulations">View details</a>
+      </section>
+    </main></body></html>
+    """
+    source = {
+        "source_id": "AE-uae-legal-database-test",
+        "name": "UAE Legal Database Test",
+        "url": "https://www.moj.gov.ae/en/laws-and-legislation.aspx",
+        "adapter_family": "uae_legal_database",
+        "adapter_name": "uae_legal_database",
+        "adapter_config": {"container_selector": "main"},
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["adapter_family"] == "uae_legal_database"
+    assert result["structured_adapter_content"] is True
+    assert result["can_save_evidence"] is True
+    assert result["can_activate_monitoring"] is False
+    assert result["evidence_written"] is False
+
+
 def test_source_intake_maps_structured_failure_code_for_nav_shell():
     source = {
         "source_id": "AE-test-nav-shell",

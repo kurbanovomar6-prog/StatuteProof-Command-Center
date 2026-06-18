@@ -291,6 +291,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "eocn_news_listing",
         "vara_pdf_listing",
         "difc_legal_database",
+        "uae_legal_database",
         "register",
         "sitemap_feed",
         "public_json_api",
@@ -307,6 +308,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "eocn_news_listing",
         "vara_pdf_listing",
         "difc_legal_database",
+        "uae_legal_database",
     }
     if family in document_families:
         return bool(result.get("adapter_used")) and item_count >= 2 and chars >= 500

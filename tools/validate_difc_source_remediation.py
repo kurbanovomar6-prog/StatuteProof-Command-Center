@@ -153,7 +153,7 @@ def main() -> int:
     ]
     active = [source for source in enabled_ae if source.get("status") == "active"]
     remediation = [source for source in enabled_ae if source.get("status") == "remediation"]
-    if (len(enabled_ae), len(active), len(remediation)) != (81, 80, 1):
+    if (len(enabled_ae), len(active), len(remediation)) != (122, 121, 1):
         errors.append(
             "Source truth mismatch after DIFC remediation: "
             f"{len(enabled_ae)} enabled / {len(active)} active / {len(remediation)} remediation"

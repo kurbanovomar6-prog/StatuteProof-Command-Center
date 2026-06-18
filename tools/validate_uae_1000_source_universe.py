@@ -20,8 +20,9 @@ UNIVERSE = ROOT / "product/regradar/config/uae_1000_source_universe_candidates.j
 TOP250 = ROOT / "product/regradar/config/uae_top_250_activation_queue.json"
 SOURCES = ROOT / "product/regradar/sources.json"
 FINAL_REPORT = ROOT / "docs/uae-1000-source-expansion-final-report.md"
+BULK_ACTIVATION_SET = ROOT / "docs/weak-family-final-activation-set.json"
 
-EXPECTED_TRUTH = (81, 80, 1)
+EXPECTED_TRUTH = (122, 121, 1)
 REQUIRED_FIELDS = {
     "source_id",
     "regulator_source_owner",
@@ -107,6 +108,14 @@ def main() -> int:
 
     universe = load_json(UNIVERSE)
     top = load_json(TOP250)
+    allowed_active_ids: set[str] = set()
+    if BULK_ACTIVATION_SET.exists():
+        bulk_data = load_json(BULK_ACTIVATION_SET)
+        allowed_active_ids = {
+            str(row.get("source_id"))
+            for row in bulk_data.get("final", [])
+            if isinstance(row, dict) and row.get("source_id")
+        }
     candidates = universe.get("candidates") or []
     rejected = universe.get("rejected") or []
     summary = universe.get("universe_summary") or {}
@@ -146,7 +155,7 @@ def main() -> int:
         if url in urls:
             errors.append(f"Duplicate candidate official_url: {url}")
         urls.add(url)
-        if row.get("status") == "active":
+        if row.get("status") == "active" and sid not in allowed_active_ids:
             errors.append(f"Universe candidate must not be marked active: {sid}")
 
     for idx, row in enumerate(rejected, start=1):
@@ -182,7 +191,7 @@ def main() -> int:
     print(f"- Candidates: {summary.get('total_candidates')}")
     print(f"- Rejected: {summary.get('total_rejected')}")
     print("- Top-250 queue present")
-    print("- sources.json truth preserved: 81/80/1")
+    print("- sources.json truth checked: 122/121/1")
     return 0
 
 

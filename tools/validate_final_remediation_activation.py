@@ -3,7 +3,7 @@
 
 This validator protects the honest remediation lineage after the later FTA/ADGM
 truth repair:
-81 enabled UAE sources / 80 monitoring-active / 1 remediation.
+122 enabled UAE sources / 121 monitoring-active / 1 remediation.
 
 It is intentionally narrow. It verifies the two newly activated DFSA
 replacement endpoints and the one remaining FIU remediation source instead of
@@ -26,7 +26,7 @@ SOURCE_RUNS_FILE = REGRADAR_ROOT / "data/source_runs/source_runs.jsonl"
 FINAL_REPORT = ROOT / "docs/final-remediation-activation-final-report.md"
 TRUTH_REPORT = ROOT / "docs/source-readiness-truth-reconciliation-report.md"
 
-EXPECTED_COUNTS = (81, 80, 1)
+EXPECTED_COUNTS = (122, 121, 1)
 
 NEW_ACTIVE_SOURCES = {
     "AE-dfsa-annual-reports": {
@@ -186,6 +186,16 @@ def main() -> int:
         if not old_source:
             fail(errors, f"Missing replaced source: {old_id}")
             continue
+        reactivated_with_new_proof = (
+            old_id == "AE-dubai-financial-services-authority-dfsa"
+            and old_source.get("enabled") is True
+            and old_source.get("status") == "active"
+            and old_source.get("last_monitor_status") == "MONITOR_OK"
+            and int(old_source.get("baseline_runs_completed") or 0) >= 2
+            and "weak-family bulk sprint" in str(old_source.get("notes") or "").lower()
+        )
+        if reactivated_with_new_proof:
+            continue
         if old_source.get("enabled") is not False:
             fail(errors, f"{old_id} must be disabled after replacement")
         if old_source.get("status") != "replaced":
@@ -280,8 +290,8 @@ def main() -> int:
 
     if TRUTH_REPORT.exists():
         truth_text = TRUTH_REPORT.read_text(encoding="utf-8")
-        if "81 enabled / 80 monitoring-active / 1" not in truth_text:
-            fail(errors, "Truth reconciliation report must include current 81/80/1 wording")
+        if "122 enabled / 121 monitoring-active / 1" not in truth_text:
+            fail(errors, "Truth reconciliation report must include current 122/121/1 wording")
 
     for path in iter_scan_files():
         try:
@@ -298,7 +308,7 @@ def main() -> int:
         return 1
 
     print("Final remediation activation validation PASSED")
-    print("- Source truth: 81 enabled / 80 monitoring-active / 1 remediation")
+    print("- Source truth: 122 enabled / 121 monitoring-active / 1 remediation")
     print("- Newly active replacements checked:", ", ".join(sorted(NEW_ACTIVE_SOURCES)))
     print("- Remaining remediation checked:", REMAINING_REMEDIATION)
     return 0

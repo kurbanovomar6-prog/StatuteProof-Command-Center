@@ -1,0 +1,92 @@
+{
+  "started_at": "2026-06-18T20:26:19Z",
+  "results": [
+    {
+      "source_id": "AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19",
+      "source_family": "DIFC",
+      "url": "https://www.difc.com/whats-on/insights/why-regulation-essential-fintech-success",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "runs": [
+        {
+          "run_no": 1,
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 60,
+          "normalized_hash": "2ae43934a05abcb97261922824d3caffe34f9c7095f1501fd77bee644e219257",
+          "normalized_length": 2719,
+          "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202620Z/proof.json",
+          "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202620Z/normalized.txt",
+          "certification_status": "MONITORING_CERTIFIED",
+          "baseline_runs_completed": 3
+        },
+        {
+          "run_no": 2,
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 60,
+          "normalized_hash": "2ae43934a05abcb97261922824d3caffe34f9c7095f1501fd77bee644e219257",
+          "normalized_length": 2719,
+          "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202622Z/proof.json",
+          "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202622Z/normalized.txt",
+          "certification_status": "MONITORING_CERTIFIED",
+          "baseline_runs_completed": 4
+        }
+      ],
+      "baseline_complete": true,
+      "latest_run": {
+        "run_no": 2,
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 60,
+        "normalized_hash": "2ae43934a05abcb97261922824d3caffe34f9c7095f1501fd77bee644e219257",
+        "normalized_length": 2719,
+        "proof_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202622Z/proof.json",
+        "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-difc-whats-on-insights-why-regulation-essential-fintech-success-99d7bb19/intake-20260618T202622Z/normalized.txt",
+        "certification_status": "MONITORING_CERTIFIED",
+        "baseline_runs_completed": 4
+      }
+    },
+    {
+      "source_id": "AE-added-en-grow-regulations-63dfab49",
+      "source_family": "Abu Dhabi DED",
+      "url": "https://www.added.gov.ae/en/grow/regulations",
+      "adapter_family": "static_html",
+      "adapter_name": "static_html",
+      "runs": [
+        {
+          "run_no": 1,
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 60,
+          "normalized_hash": "2caadbbdcd56d1792ac2918da5b726d289eca5613a72833c44fced2b722f1a67",
+          "normalized_length": 2166,
+          "proof_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202624Z/proof.json",
+          "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202624Z/normalized.txt",
+          "certification_status": "MONITORING_CERTIFIED",
+          "baseline_runs_completed": 3
+        },
+        {
+          "run_no": 2,
+          "status": "CONFIRMED_ACCESSIBLE",
+          "quality_score": 60,
+          "normalized_hash": "2caadbbdcd56d1792ac2918da5b726d289eca5613a72833c44fced2b722f1a67",
+          "normalized_length": 2166,
+          "proof_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202627Z/proof.json",
+          "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202627Z/normalized.txt",
+          "certification_status": "MONITORING_CERTIFIED",
+          "baseline_runs_completed": 4
+        }
+      ],
+      "baseline_complete": true,
+      "latest_run": {
+        "run_no": 2,
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 60,
+        "normalized_hash": "2caadbbdcd56d1792ac2918da5b726d289eca5613a72833c44fced2b722f1a67",
+        "normalized_length": 2166,
+        "proof_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202627Z/proof.json",
+        "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-added-en-grow-regulations-63dfab49/intake-20260618T202627Z/normalized.txt",
+        "certification_status": "MONITORING_CERTIFIED",
+        "baseline_runs_completed": 4
+      }
+    }
+  ],
+  "finished_at": "2026-06-18T20:26:28Z"
+}
