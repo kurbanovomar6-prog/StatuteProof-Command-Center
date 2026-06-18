@@ -21,7 +21,7 @@ function buildSummaryText(company, markets, topics, delivery) {
     'Requested setup:',
     `Configure a regulatory watchlist focused on ${tNames.toLowerCase()} across ${mNames}.`,
     '',
-    'Note: Actual pilot setup depends on readiness-supported official sources and access limitations per market.',
+    'Note: Actual pilot setup depends on publicly accessible official sources and access limitations per market.',
   ].join('\n')
 }
 
@@ -174,7 +174,7 @@ function WatchlistPreview({ companyType, selectedMarkets, selectedTopics, select
               <div>
                 <p className="text-[10px] font-semibold text-amber-400/80 uppercase tracking-wide mb-1">Coverage limitations</p>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  This preview is illustrative. Actual pilot setup depends on readiness-supported official sources and access limitations per market.
+                  This preview is illustrative. Actual pilot setup depends on publicly accessible official sources and access limitations per market.
                   {markets.some(m => m.note) && (
                     <span className="block mt-1 text-amber-400/70">
                       * {markets.filter(m => m.note).map(m => `${m.label}: ${m.note}`).join(' · ')}
@@ -309,7 +309,7 @@ export default function ClientWatchlistBuilder({ onRequestPilot = () => {} }) {
                 ))}
               </div>
               <p className="text-[11px] text-slate-600 mt-3">
-                Market availability depends on readiness-supported official sources and access limitations.
+                Market availability depends on publicly accessible official sources and access limitations.
               </p>
             </div>
 

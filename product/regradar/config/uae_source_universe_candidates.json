@@ -3,10 +3,10 @@
   "purpose": "Comprehensive UAE official regulatory source universe for StatuteProof monitoring pipeline research. 200+ candidate records covering all major UAE regulators and compliance-relevant domains. This file is for research and planning only — it does not activate monitoring.",
   "warning": "Do not activate any source without full gate passage: no-save preview → evidence save → repeat baseline → mass-monitor dry-run → 6-agent review gate. Do not claim this represents complete UAE regulatory coverage.",
   "current_active_truth": {
-    "enabled_sources": 79,
-    "readiness_supported": 78,
+    "enabled_sources": 81,
+    "readiness_supported": 80,
     "remediation": 1,
-    "last_verified": "2026-06-17",
+    "last_verified": "2026-06-18",
     "source_of_truth": "product/regradar/sources.json"
   },
   "taxonomy_categories": {

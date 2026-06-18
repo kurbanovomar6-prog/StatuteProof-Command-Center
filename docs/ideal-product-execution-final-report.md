@@ -53,7 +53,7 @@ The endpoint returns:
 - latest run timestamp;
 - disclaimer.
 
-The current registry truth is now 79 enabled / 78 readiness-supported / 1 remediation after the VARA PDF source-depth sprint, DIFC selector/access remediation, and final DFSA remediation replacement sprint.
+The current registry truth is now 81 enabled / 80 monitoring-active / 1 remediation after the VARA PDF source-depth sprint, DIFC selector/access remediation, final DFSA remediation replacement sprint, and FTA/ADGM eight-row truth repair.
 
 ## 5. Plan / Pricing Consistency Status
 
@@ -67,7 +67,7 @@ Current implemented pricing:
 
 Backend `plan.py` and frontend `planCapabilities.js` now agree that UAE Monitor has:
 
-- 78 readiness-supported source limit;
+- 80 monitoring-active source limit;
 - 180-day retention;
 - Markdown/HTML audit export available;
 - PDF audit pack export enabled for saved evidence records.

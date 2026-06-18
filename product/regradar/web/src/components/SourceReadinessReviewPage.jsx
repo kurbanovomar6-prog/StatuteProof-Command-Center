@@ -170,9 +170,9 @@ export default function SourceReadinessReviewPage({ onBack }) {
             </p>
             <div className="mx-auto mt-6 grid max-w-lg grid-cols-3 gap-2 text-center">
               {[
-                ['66', 'enabled'],
-                ['76', 'readiness-supported'],
-                ['3', 'under extraction remediation'],
+                ['81', 'UAE sources enabled'],
+                ['80', 'monitoring-active'],
+                ['7', 'licence profiles covered'],
               ].map(([value, label]) => (
                 <div key={label} className="sp-panel-muted px-3 py-2">
                   <p className="sp-mono text-xl font-semibold text-white">{value}</p>
@@ -302,7 +302,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
           {/* What to expect */}
           <div className="mt-8 grid sm:grid-cols-3 gap-4">
             {[
-              { title: 'Source map', body: 'We identify which official UAE sources are readiness-supported, under validation, under extraction remediation, or limited for your profile.' },
+              { title: 'Source map', body: 'We identify which official UAE sources are monitoring-active, on the roadmap, or have access restrictions — for your specific licence profile.' },
               { title: 'Honest about limits', body: 'We disclose sources that have access restrictions, geo-blocking, or extraction issues.' },
               { title: 'Not legal advice', body: 'This is monitoring intelligence only. Consult qualified professionals for legal and compliance decisions.' },
             ].map(item => (

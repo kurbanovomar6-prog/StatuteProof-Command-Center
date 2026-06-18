@@ -9,7 +9,7 @@ const PLANS = [
     period: '',
     badge: 'Start here',
     highlight: false,
-    desc: 'See which UAE regulatory sources are readiness-supported, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring.',
+    desc: 'See which UAE regulatory sources are monitoring-active, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring.',
     cta: 'Request source review',
     ctaStyle: 'secondary',
     features: [
@@ -58,11 +58,11 @@ const PLANS = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    desc: '79 enabled UAE official-source endpoints, including 78 readiness-supported after proof and baseline gates. Full evidence workflow with high-risk review queue.',
+    desc: '81 enabled UAE official-source endpoints, including 80 monitoring-active after proof and baseline gates. Full evidence workflow with high-risk review queue.',
     cta: 'Upgrade to UAE Monitor',
     ctaStyle: 'primary',
     features: [
-      '78 readiness-supported UAE sources',
+      '80 monitoring-active UAE sources',
       'VARA / CBUAE / DFSA / ADGM / UAE FIU source pack',
       'Evidence records + full diff view',
       'High-risk review queue',

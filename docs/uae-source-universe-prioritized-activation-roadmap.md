@@ -2,7 +2,7 @@
 
 Date: 2026-06-17
 Based on: uae_source_universe_candidates.json (203 records)
-Current state: 79 enabled / 78 readiness-supported / 1 remediation
+Current state: 81 enabled / 80 monitoring-active / 1 remediation after the 2026-06-18 FTA/ADGM eight-row truth repair. FTA rows remain candidates until item-level extraction passes evidence gates.
 
 This roadmap lists all non-active source candidates ranked by activation priority. No source should be activated without passing the full gate sequence: no-save preview → evidence save → repeat baseline → mass-monitor dry-run → 6-agent review gate.
 

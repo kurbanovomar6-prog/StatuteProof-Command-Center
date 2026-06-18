@@ -2,6 +2,8 @@
 
 Date: 2026-06-17
 
+2026-06-18 update: a later FTA/ADGM truth repair superseded the public source count in this historical report. Current truth is 81 enabled UAE sources / 80 monitoring-active / 1 remediation. Five FTA rows and one ADGM regulatory-alerts row remain candidates, not active, because they did not pass extraction/evidence gates.
+
 ## 1. Starting Truth
 
 79 enabled UAE sources / 76 readiness-supported / 3 remediation.
@@ -83,7 +85,7 @@ Positive. The product no longer carries two enabled DFSA remediation rows that p
 
 ## 17. Legal-Safe Claim After This Task
 
-"StatuteProof currently has 79 enabled UAE official-source endpoints, including 78 readiness-supported sources after proof, baseline, source-health, noise, and review gates. One source remains under extraction remediation. Monitoring intelligence only. Not legal advice."
+"StatuteProof currently has 81 enabled UAE official-source endpoints, including 80 monitoring-active sources after proof, baseline, source-health, noise, and review gates. One source remains under technical review. Monitoring intelligence only. Not legal advice."
 
 Do not say complete UAE coverage, all sources ready, perfect parsing, guaranteed compliance, or never miss updates.
 
@@ -97,4 +99,4 @@ Find a distinct official UAE FIU endpoint that is not a homepage shell, not a du
 
 ## 20. Next Exact Sales Task
 
-Update demo language to say: "The enabled UAE pack is 78 readiness-supported plus one transparent remediation source; unresolved remediation is visible rather than hidden."
+Update demo language to say: "The enabled UAE pack is 80 monitoring-active sources plus one transparent technical-review source; unresolved source risk is visible rather than hidden."

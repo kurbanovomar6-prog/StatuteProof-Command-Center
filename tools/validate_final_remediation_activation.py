@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Validate the final UAE remediation activation sprint.
 
-This validator protects the honest ending state of the sprint:
-79 enabled UAE sources / 78 readiness-supported / 1 remediation.
+This validator protects the honest remediation lineage after the later FTA/ADGM
+truth repair:
+81 enabled UAE sources / 80 monitoring-active / 1 remediation.
 
 It is intentionally narrow. It verifies the two newly activated DFSA
 replacement endpoints and the one remaining FIU remediation source instead of
@@ -25,7 +26,7 @@ SOURCE_RUNS_FILE = REGRADAR_ROOT / "data/source_runs/source_runs.jsonl"
 FINAL_REPORT = ROOT / "docs/final-remediation-activation-final-report.md"
 TRUTH_REPORT = ROOT / "docs/source-readiness-truth-reconciliation-report.md"
 
-EXPECTED_COUNTS = (79, 78, 1)
+EXPECTED_COUNTS = (81, 80, 1)
 
 NEW_ACTIVE_SOURCES = {
     "AE-dfsa-annual-reports": {
@@ -267,7 +268,7 @@ def main() -> int:
     if FINAL_REPORT.exists():
         final_text = FINAL_REPORT.read_text(encoding="utf-8")
         required_snippets = [
-            "79 enabled UAE sources / 78 readiness-supported / 1 remediation",
+            "81 enabled UAE sources / 80 monitoring-active / 1 remediation",
             "## 14. Did We Reach 79/79/0?",
             "No.",
             "UAE FIU",
@@ -279,8 +280,8 @@ def main() -> int:
 
     if TRUTH_REPORT.exists():
         truth_text = TRUTH_REPORT.read_text(encoding="utf-8")
-        if "79 enabled / 78 readiness-supported / 1" not in truth_text:
-            fail(errors, "Truth reconciliation report must include current 79/78/1 wording")
+        if "81 enabled / 80 monitoring-active / 1" not in truth_text:
+            fail(errors, "Truth reconciliation report must include current 81/80/1 wording")
 
     for path in iter_scan_files():
         try:
@@ -297,7 +298,7 @@ def main() -> int:
         return 1
 
     print("Final remediation activation validation PASSED")
-    print("- Source truth: 79 enabled / 78 readiness-supported / 1 remediation")
+    print("- Source truth: 81 enabled / 80 monitoring-active / 1 remediation")
     print("- Newly active replacements checked:", ", ".join(sorted(NEW_ACTIVE_SOURCES)))
     print("- Remaining remediation checked:", REMAINING_REMEDIATION)
     return 0

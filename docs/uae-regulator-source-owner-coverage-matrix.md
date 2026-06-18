@@ -1,9 +1,9 @@
 # UAE Regulator / Source Owner Coverage Matrix
 
-Date: 2026-06-17
-Based on: uae_source_universe_candidates.json (203 records), sources.json (79 enabled)
+Date: 2026-06-18
+Based on: uae_source_universe_candidates.json (203 records), sources.json (81 enabled)
 
-All counts are as of 2026-06-17. "Active" = enabled and readiness-supported in sources.json. "Candidate" = in universe JSON but not yet enabled.
+All counts are as of 2026-06-18. "Active" = enabled and monitoring-active in sources.json. "Candidate" = in universe JSON but not yet enabled.
 
 ---
 
@@ -36,7 +36,7 @@ All counts are as of 2026-06-17. "Active" = enabled and readiness-supported in s
 | Required for complete UAE coverage | YES |
 | Next proof needed | Activate AE-cbuae-consultations via no-save preview (already in work queue as candidate). This closes the CBUAE horizon-scanning gap. |
 
-**Commentary:** CBUAE is the strongest-covered regulator. 27 active sources cover AML/CFT, consumer protection, payments, capital adequacy, liquidity, market risk, operational risk, Islamic banking, open finance, and more. The remaining gaps (consultations, AML/CFT operations page) are addressable in the next sprint. CBUAE concentration (35.5% of pack) is commercially useful but should not be inflated further without adding breadth elsewhere first.
+**Commentary:** CBUAE is the strongest-covered regulator. 27 active sources cover AML/CFT, consumer protection, payments, capital adequacy, liquidity, market risk, operational risk, Islamic banking, open finance, and more. The remaining gaps (consultations, AML/CFT operations page) are addressable in the next sprint. CBUAE concentration (33.8% of monitoring-active pack) is commercially useful but should not be inflated further without adding breadth elsewhere first.
 
 ---
 

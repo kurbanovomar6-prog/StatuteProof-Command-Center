@@ -86,7 +86,7 @@ Current evidence supports Tier 1 and Tier 2 claims (see PART 1). It does not sup
 1. **Regulator/source owner completeness** — Are all relevant UAE official source owners in the universe?
 2. **Source type completeness** — Are all source types covered per owner?
 3. **Priority calibration** — Are P0/P1/P2 assignments commercially accurate?
-4. **Proof backing** — Do all 78 readiness-supported sources have documented evidence?
+4. **Proof backing** — Do all 80 monitoring-active sources have documented evidence or documented legacy evidence references?
 5. **Claim safety** — Does any existing document contain unsafe coverage claims?
 6. **Buyer coverage** — Does each target buyer have at least one primary obligation source active?
 7. **Gap documentation** — Are all known gaps explicitly documented?

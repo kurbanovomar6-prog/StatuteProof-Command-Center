@@ -2,10 +2,10 @@
   "version": "2026-06-14",
   "purpose": "Research-only UAE official source pack candidates. This file does not activate monitoring and must not be marketed as validated coverage.",
   "current_customer_truth": {
-    "enabled_uae_sources": 79,
-    "readiness_supported": 78,
+    "enabled_uae_sources": 81,
+    "readiness_supported": 80,
     "remediation": 1,
-    "customer_copy": "79 enabled UAE sources; 78 readiness-supported; 1 under extraction remediation."
+    "customer_copy": "81 enabled UAE sources; 80 monitoring-active; 1 remediation."
   },
   "status_definitions": {
     "candidate": "Official or officially linked candidate, not yet tested.",
@@ -4359,7 +4359,7 @@
     "low_source_health_risk_count": 0,
     "medium_source_health_risk_count": 3,
     "high_source_health_risk_count": 37,
-    "public_truth_after_validation": "79 enabled UAE sources; 78 readiness-supported; 1 under extraction remediation",
+    "public_truth_after_validation": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
     "sources_json_changed": false,
     "accepted_default_pack_count": 2
   },
@@ -4372,7 +4372,7 @@
     "remediation_count": 3,
     "blocked_count": 1,
     "sources_json_changed": false,
-    "public_truth_after_validation": "79 enabled UAE sources; 78 readiness-supported; 1 under extraction remediation"
+    "public_truth_after_validation": "81 enabled UAE sources; 80 monitoring-active; 1 remediation"
   },
   "last_adgm_fsra_sca_saved_baseline": {
     "tested_at": "2026-06-14T15:30:28Z",
@@ -4384,7 +4384,7 @@
     "baseline_pending_count": 3,
     "remediation_count": 1,
     "sources_json_changed": false,
-    "public_truth_after_validation": "79 enabled UAE sources; 78 readiness-supported; 1 under extraction remediation",
+    "public_truth_after_validation": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
     "notes": "SCA AML/CFT failed save mode with NAV_SHELL_ONLY despite previous no-save result. Evidence artifacts are local runtime files and remain gitignored."
   },
   "last_uae_50_agent_gated_sprint": {
@@ -4403,6 +4403,6 @@
     "enabled_count": 79,
     "readiness_supported_count": 78,
     "remediation_count": 1,
-    "current_truth": "79 enabled / 78 readiness-supported / 1 remediation"
+    "current_truth": "81 enabled / 80 monitoring-active / 1 remediation"
   }
 }

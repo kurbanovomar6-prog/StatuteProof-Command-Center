@@ -22,7 +22,7 @@ const SOURCE_LAYERS = [
 const SOURCE_READINESS_PREVIEW = {
   CBUAE: {
     status: 'Strongest coverage',
-    detail: '27 readiness-supported sources. Best fit for CBUAE, AML/CFT, payments, consumer protection and open-finance monitoring.',
+    detail: '27 monitoring-active sources. Best fit for CBUAE, AML/CFT, payments, consumer protection and open-finance monitoring.',
     tone: 'emerald',
   },
   VARA: {
@@ -57,7 +57,7 @@ const SOURCE_READINESS_PREVIEW = {
   },
   'DIFC Laws': {
     status: 'Improved',
-    detail: 'DIFC laws/regulations now include readiness-supported official legal/database sources, but end-to-end DIFC source scope is not claimed.',
+    detail: 'DIFC laws/regulations now include monitoring-active official legal sources, but end-to-end DIFC source scope is not claimed.',
     tone: 'cyan',
   },
   'Ministry of Economy': {
@@ -395,7 +395,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                 <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 <p className="text-emerald-400/90 text-sm">
                   Your profile helps determine which UAE source layers are relevant.
-                  Only readiness-supported sources can move toward monitoring, and limitations are disclosed before pilot delivery.
+                  Only monitoring-active sources can move toward monitoring, and limitations are disclosed before pilot delivery.
                   You can update your settings any time from the dashboard.
                 </p>
               </div>

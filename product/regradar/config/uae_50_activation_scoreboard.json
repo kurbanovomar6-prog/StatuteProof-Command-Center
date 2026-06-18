@@ -1,7 +1,7 @@
 {
   "version": "2026-06-15.autonomous-cycle-3",
   "purpose": "Master tracker for proof-gated UAE 50-source activation. Candidate/no-save/evidence states are not customer-visible ready.",
-  "current_public_truth": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
+  "current_public_truth": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
   "definition": "activation_ready requires official/public source, strong no-save, meaningful non-shell extraction, unique hash, reviewed noise/source-health risk, proof, repeat baseline, agent gates, validators, and safe sources.json activation.",
   "targets": [
     {
@@ -12334,7 +12334,7 @@
     "batch_onboarding_status": "post-50 diversification: DIFC official source remediation activated four proof-backed DIFC sources.",
     "enabled_count": 79,
     "readiness_supported_count": 78,
-    "current_truth": "79 enabled / 78 readiness-supported / 1 remediation",
+    "current_truth": "81 enabled / 80 monitoring-active / 1 remediation",
     "last_final_remediation_update_at": "2026-06-17T12:52:30Z"
   },
   "sources": [

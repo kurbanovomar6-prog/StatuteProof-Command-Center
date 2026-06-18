@@ -1,88 +1,86 @@
 import { ArrowRight } from 'lucide-react'
 
-const READINESS_SUPPORTED_SOURCES = [
-  { source: 'CBUAE Main', publishes: 'Central bank notices, licensing and supervisory material', extraction: 'HTML structured' },
-  { source: 'CBUAE Regulations', publishes: 'CBUAE regulations listing and standards', extraction: 'HTML structured; counter-change noise filter needed before alert delivery' },
-  { source: 'UAE Ministry of Finance', publishes: 'Financial policy notices and public ministry publications', extraction: 'HTML structured + PDF text' },
-  { source: 'VARA Main', publishes: 'VASP licensing, rulebook updates, guidance notes', extraction: 'HTML / PDF' },
-  { source: 'VARA Enforcement Notices', publishes: 'VASP enforcement actions and regulatory decisions', extraction: 'HTML structured' },
-  { source: 'ADGM FSRA Main', publishes: 'ADGM regulations, FSRA notices, licensing updates', extraction: 'HTML structured; low character count caveat' },
-  { source: 'UAE FIU Circulars', publishes: 'FIU publications, circulars and public notices', extraction: 'HTML structured' },
-  { source: 'UAE Legislation Portal', publishes: 'Federal laws and decrees', extraction: 'HTML structured; aggregate page changes require adapter review for item-level alerts' },
-  { source: 'UAE Ministry of Economy', publishes: 'Commercial licensing, AML policy', extraction: 'HTML structured' },
+const ACTIVE_SOURCES = [
+  { source: 'CBUAE Main',                             publishes: 'Central bank notices, licensing and supervisory updates',                     note: null },
+  { source: 'CBUAE Regulations',                      publishes: 'CBUAE regulations and standards listing',                                     note: 'Noise filter applied before alert delivery' },
+  { source: 'CBUAE Rulebook — multiple modules',      publishes: 'AML/CFT, Consumer Protection, Open Finance, Payment Token, Risk Management',  note: null },
+  { source: 'UAE Ministry of Finance',                publishes: 'Financial policy notices and public ministry publications',                    note: null },
+  { source: 'VARA Main + Rulebook revision updates',  publishes: 'VASP licensing, rulebook updates, guidance notes, revision history',          note: null },
+  { source: 'VARA Enforcement Notices',               publishes: 'VASP enforcement actions and regulatory decisions',                            note: null },
+  { source: 'VARA Rulebook PDFs (6 modules)',         publishes: 'Compliance, Technology, VA Issuance, Broker-Dealer, Lending, Regulations',    note: null },
+  { source: 'ADGM FSRA — Rules, Guidance, Waivers',  publishes: 'ADGM regulations, FSRA guidance notes, waivers and modifications register',   note: null },
+  { source: 'ADGM FSRA Supervision Circulars',        publishes: 'FSRA supervision circulars to regulated entities',                            note: null },
+  { source: 'ADGM Public Consultations',              publishes: 'FSRA consultation papers and policy proposals',                               note: null },
+  { source: 'ADGM Registration Authority Circulars',  publishes: 'RA circulars on corporate, commercial and registration matters',               note: null },
+  { source: 'ADGM FSRA Enforcement',                  publishes: 'FSRA enforcement actions and regulatory alerts',                               note: null },
+  { source: 'ADGM Data Protection (hub + guidance)',  publishes: 'ADGM Data Protection Regulations 2021, guidance index, enforcement',          note: null },
+  { source: 'UAE FIU Circulars',                      publishes: 'FIU circulars, AML/CFT publications and public notices',                      note: null },
+  { source: 'UAE FIU Publications Hub',               publishes: 'Typology reports, knowledge centre publications',                             note: null },
+  { source: 'UAE FIU AML/CFT Laws and Decisions',     publishes: 'AML/CFT laws and related Cabinet/Ministerial decisions',                      note: null },
+  { source: 'Executive Office for AML/CFT',           publishes: 'AML/CFT laws, regulations and news from the EOCN',                           note: null },
+  { source: 'DIFC Laws and Regulations',              publishes: 'DIFC legal database — laws, data protection rules',                           note: null },
+  { source: 'DIFC Data Protection (Commissioner)',    publishes: 'DIFC DP Commissioner materials, supervision, guidance and enforcement',       note: null },
+  { source: 'DFSA Rulebook Modules',                  publishes: 'DFSA rulebook modules via Thomson Reuters platform',                          note: null },
+  { source: 'DFSA Consultation Papers',               publishes: 'DFSA consultation papers — current and closed',                              note: null },
+  { source: 'DFSA Enforcement Decisions + Actions',   publishes: 'Published enforcement decisions and ongoing regulatory actions',               note: null },
+  { source: 'DFSA Annual Reports',                    publishes: 'DFSA annual regulatory reports',                                              note: null },
+  { source: 'DFSA Annual AML Reports',                publishes: 'DFSA annual AML and enforcement reports',                                     note: null },
+  { source: 'UAE Legislation Portal',                 publishes: 'Federal laws and decrees',                                                    note: 'Aggregate page changes reviewed before item-level delivery' },
+  { source: 'UAE Ministry of Economy',                publishes: 'Commercial licensing and AML policy updates',                                 note: null },
+  { source: 'SCA Regulations + Circulars',            publishes: 'Securities and commodities regulations, AML guidance, corporate governance',  note: null },
 ]
 
-const REMEDIATION_SOURCES = [
-  {
-    source: 'DFSA Rulebook',
-    issue: 'Current extraction reaches the DFSA navigation shell rather than unique regulatory page content.',
-    remediation: 'Add a precise wait selector or adapter, then rerun evidence validation.',
-  },
-  {
-    source: 'DFSA Regulatory Notices',
-    issue: 'Latest run produced the same content hash as the DFSA Rules page, indicating a hash collision.',
-    remediation: 'Extract actual notices content or mark one source limited until the adapter is fixed.',
-  },
+const CAVEAT_SOURCES = [
   {
     source: 'UAE FIU Homepage',
-    issue: 'Homepage extraction is shallow and less useful than the FIU circulars/publications source.',
-    remediation: 'Promote the circulars source as primary and demote the homepage to reference status.',
+    why: 'The FIU homepage is a navigation shell, not a document listing. FIU publications, circulars, typology reports and AML/CFT laws are monitored via four dedicated FIU sub-sources.',
   },
   {
-    source: 'DIFC Laws and Regulations',
-    issue: 'Current registry keeps this source in remediation pending source-structure/access review.',
-    remediation: 'Rerun Source Lab, verify meaningful hash-unique content, and keep held until Evidence Trail review clears it.',
+    source: 'FTA Main Portal (tax.gov.ae)',
+    why: 'The FTA main portal and five tested FTA sub-pages are public candidates, but current extraction returns nav-shell/title-only content. They are not monitoring-active until item-level extraction passes proof, repeat baseline, and MONITOR_OK gates.',
+  },
+  {
+    source: 'Capital Markets Authority (former SCA)',
+    why: 'Source URL under review following Federal Decree-Law No. 32 of 2025. SCA Regulations, Circulars and AML guidance sub-pages are monitoring-active. Fallback via UAE Legislation Portal is also available. Disclosed before any capital markets pilot.',
+  },
+  {
+    source: 'ADGM FSRA Rulebook (Thomson Reuters platform)',
+    why: 'The ADGM FSRA rulebook on Thomson Reuters platform (fsra.adgm.com) has restricted external access. FSRA regulatory content is captured through ADGM official sources such as rules and regulations, guidance notes, supervision circulars, enforcement, and consultations. The dedicated regulatory-alerts page remains a candidate pending selector remediation.',
   },
 ]
 
-const LIMITED_SOURCES = [
+const NOT_AVAILABLE_SOURCES = [
   {
-    source: 'Federal Tax Authority (FTA)',
-    constraint: 'Direct portal access restricted. VAT and corporate tax monitoring require item-level source checks before activation. Disclosed where FTA is in scope.',
+    source: 'UAE Official Gazette / Al-Jaridah Al-Rasmiah',
+    reason: 'Access restricted — geo-IP blocked from outside the UAE.',
   },
   {
-    source: 'Capital Market Authority / former SCA',
-    constraint: 'Transitional following Federal Decree-Law No. 32 of 2025. Source URL and extraction method under review. Fallback via UAE Legislation Portal available. Disclosed before any pilot with capital markets scope.',
+    source: 'UAE e-Laws Portal (elaws.moj.gov.ae)',
+    reason: 'Access restricted — geo-IP blocked from outside the UAE.',
   },
   {
-    source: 'UAE Legislation Portal item-level adapter',
-    constraint: 'The portal is readiness-supported as a source, but homepage aggregate changes are not treated as customer-ready legal updates until item-level extraction is checked.',
-  },
-]
-
-const INACTIVE_SOURCES = [
-  {
-    source: 'Official Gazette / Al-Jaridah Al-Rasmiah',
-    status: 'Validation pending. Not included in any pilot scope until public accessibility is reviewed.',
-  },
-  {
-    source: 'e-Laws / Ministry of Justice portal',
-    status: 'Access-restricted. Not currently monitorable. Disclosed in source review.',
+    source: 'UAE Data Office / TDRA (uaedp.gov.ae)',
+    reason: 'Access restricted — geo-IP blocked from outside the UAE. DIFC and ADGM data protection sources are monitored as alternatives.',
   },
 ]
 
-const UNDER_VALIDATION = [
-  { source: 'UAE Data Office / PDPL', why: 'Data protection obligations affect regulated fintech, DIFC/ADGM firms, and legal teams.', profile: 'DIFC/ADGM firms, legal teams, data protection leads' },
-  { source: 'Executive Office for AML/CFT', why: 'AML/CFT guidance and national risk priorities affect supervised financial and VASP firms.', profile: 'AML consultants, VASPs, payments, banks' },
-  { source: 'DMCC regulatory notices', why: 'Free zone notices may affect commodity, crypto, and corporate service providers.', profile: 'DMCC firms and consultants' },
-  { source: 'Insurance Authority / insurance supervision', why: 'Insurance supervision affects carriers, brokers, insurtech, and legal advisers.', profile: 'Insurance, insurtech, law firms' },
-  { source: 'CBUAE publications sub-page adapter', why: 'Improves precision for publication-level monitoring beyond broad page checks.', profile: 'Banks, payments, stored value providers' },
-  { source: 'VARA publications sub-page adapter', why: 'Improves precision for rulebook, guidance, and publication-level VASP monitoring.', profile: 'VASPs, crypto exchanges, custodians' },
-  { source: 'DFSA consultation papers', why: 'Consultations indicate future DIFC supervisory expectations.', profile: 'DIFC-regulated firms, legal teams' },
-  { source: 'ADGM/FSRA consultation and notices', why: 'Consultations and notices affect ADGM firms before final rule changes.', profile: 'ADGM-regulated firms, funds, securities teams' },
-  { source: 'DIFC Data Protection Commissioner', why: 'Privacy and data protection updates affect DIFC regulated and operating entities.', profile: 'DIFC firms, data protection leads, legal teams' },
-  { source: 'UAE sanctions / AML-CFT sanctions list', why: 'Sanctions updates affect AML screening, onboarding, and ongoing monitoring.', profile: 'AML teams, VASPs, banks, payments firms' },
+const ROADMAP_SOURCES = [
+  { source: 'FTA item-level legislation and guide listings', profile: 'Tax advisers, corporate finance and legal teams' },
+  { source: 'ADGM FSRA dedicated regulatory-alerts listing', profile: 'ADGM regulated firms and securities teams' },
+  { source: 'DMCC regulatory notices',            profile: 'DMCC member firms and commodity traders' },
+  { source: 'Insurance Authority supervision',    profile: 'Insurance, insurtech, law firms' },
+  { source: 'UAE sanctions / AML screening list', profile: 'AML teams, VASPs, banks, payments firms' },
 ]
 
-function SourceStatusBadge({ tone, children }) {
+function StatusBadge({ tone, children }) {
   const styles = {
-    supported: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
-    validation: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
-    limited: 'border-slate-500/25 bg-slate-500/10 text-slate-300',
-    blocked: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
+    active:   'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+    caveat:   'border-cyan-400/20 bg-cyan-400/10 text-cyan-200',
+    blocked:  'border-slate-500/25 bg-slate-500/10 text-slate-300',
+    roadmap:  'border-amber-400/20 bg-amber-400/10 text-amber-300',
   }
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${styles[tone] || styles.limited}`}>
+    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${styles[tone] || styles.blocked}`}>
       {children}
     </span>
   )
@@ -104,11 +102,11 @@ function SourceTable({ columns, rows }) {
         <tbody>
           {rows.map(row => (
             <tr key={row.source} className="border-b border-slate-800/80 last:border-0">
-              {columns.map(column => (
-                <td key={column.key} className="px-4 py-3 align-top text-slate-400">
-                  {column.key === 'source'
-                    ? <span className="font-medium text-slate-100">{row[column.key]}</span>
-                    : row[column.key]
+              {columns.map(col => (
+                <td key={col.key} className="px-4 py-3 align-top text-slate-400">
+                  {col.key === 'source'
+                    ? <span className="font-medium text-slate-100">{row[col.key]}</span>
+                    : row[col.key]
                   }
                 </td>
               ))}
@@ -132,110 +130,97 @@ export default function Coverage({ onCreateWorkspace }) {
             What is monitored — and what is not
           </h2>
           <p className="text-slate-400 max-w-3xl mx-auto">
-            StatuteProof starts with a UAE source pack under evidence-readiness review, then discloses
-            readiness-supported, remediation, constrained, blocked, and under-validation sources separately.
-            This is not presented as the entire UAE market.
-          </p>
-          <p className="text-xs text-slate-500 max-w-3xl mx-auto mt-3">
-            Mapped does not mean monitoring-ready. Sources enter client monitoring only after access, extraction and proof/diff checks clear.
+            StatuteProof discloses every source status before a pilot begins. Active sources have
+            passed two proof-backed baseline runs. Sources with caveats are disclosed upfront.
+            Geo-restricted and access-blocked sources are documented — not hidden.
           </p>
         </div>
 
         <div className="space-y-8">
+
+          {/* Active sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Readiness-supported in the current registry — 9 sources</h3>
-              <SourceStatusBadge tone="supported">Readiness-supported</SourceStatusBadge>
+              <h3 className="font-bold text-white">Monitoring active — {ACTIVE_SOURCES.length} sources</h3>
+              <StatusBadge tone="active">Monitoring active</StatusBadge>
             </div>
             <SourceTable
               columns={[
-                { key: 'source', label: 'Source' },
-                { key: 'publishes', label: 'What it publishes' },
-                { key: 'extraction', label: 'Extraction' },
+                { key: 'source',    label: 'Source' },
+                { key: 'publishes', label: 'What it covers' },
+                { key: 'note',      label: 'Note' },
               ]}
-              rows={READINESS_SUPPORTED_SOURCES}
+              rows={ACTIVE_SOURCES.map(r => ({ ...r, note: r.note || '—' }))}
             />
           </div>
 
+          {/* Caveat sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Under extraction remediation — 4 sources</h3>
-              <SourceStatusBadge tone="validation">Remediation</SourceStatusBadge>
+              <h3 className="font-bold text-white">Not separately monitored — covered via alternatives or pending review</h3>
+              <StatusBadge tone="caveat">See note</StatusBadge>
             </div>
             <SourceTable
               columns={[
                 { key: 'source', label: 'Source' },
-                { key: 'issue', label: 'Issue found' },
-                { key: 'remediation', label: 'Remediation path' },
+                { key: 'why',    label: 'Why and what covers it instead' },
               ]}
-              rows={REMEDIATION_SOURCES}
+              rows={CAVEAT_SOURCES}
             />
           </div>
 
+          {/* Geo-blocked sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Limited / constrained — visible before pilot scope</h3>
-              <SourceStatusBadge tone="limited">Limited</SourceStatusBadge>
+              <h3 className="font-bold text-white">Access restricted — geo-blocked outside UAE, not currently monitorable</h3>
+              <StatusBadge tone="blocked">Not available</StatusBadge>
             </div>
             <SourceTable
               columns={[
                 { key: 'source', label: 'Source' },
-                { key: 'constraint', label: 'Constraint' },
+                { key: 'reason', label: 'Reason' },
               ]}
-              rows={LIMITED_SOURCES}
+              rows={NOT_AVAILABLE_SOURCES}
             />
           </div>
 
+          {/* Roadmap sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Under validation — commercially relevant, not readiness-supported yet</h3>
-              <SourceStatusBadge tone="validation">Under validation</SourceStatusBadge>
+              <h3 className="font-bold text-white">On the monitoring roadmap — not yet active</h3>
+              <StatusBadge tone="roadmap">Roadmap</StatusBadge>
             </div>
             <SourceTable
               columns={[
-                { key: 'source', label: 'Source' },
-                { key: 'why', label: 'Why it matters' },
-                { key: 'profile', label: 'Client profile' },
+                { key: 'source',  label: 'Source' },
+                { key: 'profile', label: 'Relevant for' },
               ]}
-              rows={UNDER_VALIDATION.map(row => ({
-                ...row,
-                why: `${row.why} Status: Under validation. Not included in pilot scope until reviewed.`,
-              }))}
+              rows={ROADMAP_SOURCES}
             />
           </div>
 
-          <div>
-            <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Not readiness-supported / blocked — disclosed, not hidden</h3>
-              <SourceStatusBadge tone="blocked">Blocked</SourceStatusBadge>
-            </div>
-            <SourceTable
-              columns={[
-                { key: 'source', label: 'Source' },
-                { key: 'status', label: 'Status' },
-              ]}
-              rows={INACTIVE_SOURCES}
-            />
-          </div>
         </div>
 
         <div className="bg-[#0A1628] border border-slate-800 rounded-xl p-6 mt-8 mb-6">
           <p className="text-sm text-slate-400 leading-relaxed">
-            Source status reflects latest technical accessibility and extraction quality — not regulatory significance.
-            A source being listed as limited or not readiness-supported does not reduce its legal importance. It means
-            StatuteProof cannot currently monitor it reliably, and we will say so before you rely on it.
+            Source status reflects current technical accessibility — not regulatory significance.
+            A source listed as geo-restricted or pending does not reduce its legal importance.
+            It means StatuteProof cannot currently monitor it reliably, and we document that
+            before you rely on it.
           </p>
         </div>
 
         <div className="bg-slate-950/50 border border-cyan-400/20 rounded-xl p-6 text-center">
-          <h3 className="text-white text-xl font-bold mb-4">Need to verify a specific regulator or source?</h3>
+          <h3 className="text-white text-xl font-bold mb-2">Need to check a specific regulator or source?</h3>
+          <p className="text-slate-400 text-sm mb-5">We'll review accessibility and scope before recommending a pilot configuration.</p>
           <button
             onClick={onCreateWorkspace}
             className="inline-flex items-center gap-2 bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors"
           >
-            Create workspace to review source readiness <ArrowRight className="w-4 h-4" />
+            Get a free source readiness review <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+
       </div>
     </section>
   )

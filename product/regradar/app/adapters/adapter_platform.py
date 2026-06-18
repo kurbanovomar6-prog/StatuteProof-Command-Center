@@ -96,6 +96,21 @@ def _clean(value: str | None, *, limit: int | None = None) -> str:
     return text
 
 
+def _clean_pdf_document_text(value: str | None, *, limit: int | None = None) -> str:
+    """Normalize extracted PDF text while preserving headings and line breaks."""
+    raw = str(value or "").replace("\r\n", "\n").replace("\r", "\n").replace("\u00a0", " ")
+    lines: list[str] = []
+    for raw_line in raw.split("\n"):
+        line = _SPACE_RE.sub(" ", raw_line).strip()
+        if not line:
+            continue
+        lines.append(line)
+    text = "\n".join(lines) if lines else _clean(value)
+    if limit and len(text) > limit:
+        return text[: limit - 1].rstrip() + "..."
+    return text
+
+
 def _row_hash(*parts: str | None) -> str:
     payload = "|".join(_clean(part) for part in parts)
     return hashlib.sha256(payload.encode("utf-8", errors="replace")).hexdigest()[:16]
@@ -792,7 +807,7 @@ class PdfDocumentAdapter(BaseHtmlAdapter):
     name = "pdf_document"
 
     def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
-        text = _clean(html)
+        text = _clean_pdf_document_text(html)
         if len(text) < int((config or {}).get("min_chars") or 500):
             return self._empty("PDF text is too shallow for monitoring.", "Use a better PDF extractor or mark scanned/OCR-needed PDF as remediation.")
         return AdapterResult(
@@ -802,7 +817,11 @@ class PdfDocumentAdapter(BaseHtmlAdapter):
             extraction_strategy=f"adapter:{self.name}",
             noise_risk="low",
             source_health_risk="medium",
-            metadata={"url": url, "pdf_text_chars": len(text)},
+            metadata={
+                "url": url,
+                "pdf_text_chars": len(text),
+                "line_count": len([line for line in text.splitlines() if line.strip()]),
+            },
         )
 
 
@@ -865,6 +884,12 @@ class AdgmFsraListingAdapter(DocumentListingAdapter):
         "regulation",
         "consultation",
         "circular",
+        "alert",
+        "alerts",
+        "notice",
+        "notices",
+        "warning",
+        "enforcement",
         "market",
         "prospectus",
         "listing",

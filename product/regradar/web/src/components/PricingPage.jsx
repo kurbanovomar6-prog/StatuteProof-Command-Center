@@ -11,7 +11,7 @@ const PLANS_DATA = [
     period: '',
     badge: 'Start here',
     highlight: false,
-    purpose: 'See which UAE regulatory sources are readiness-supported, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring included.',
+    purpose: 'See which official UAE sources are monitoring-active, which have access limits, and which are outside current scope — for your licence profile. No live monitoring included.',
     cta: 'Request source readiness review',
     ctaPrimary: false,
     features: [
@@ -61,11 +61,11 @@ const PLANS_DATA = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    purpose: 'MLRO or CCO at a UAE-regulated firm. 79 enabled UAE official-source endpoints: 78 readiness-supported after proof and baseline gates, 1 under extraction remediation.',
+    purpose: 'For MLROs and CCOs at UAE-regulated firms. Selected official UAE regulatory sources across VARA, CBUAE, DFSA, ADGM/FSRA, FIU, DIFC and related public sources — with evidence on every run.',
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '79 enabled; 78 readiness-supported, 1 under extraction remediation' },
+      { label: 'Official UAE sources', value: '80 monitoring-active sources; FTA tax pages remain candidates until item-level extraction passes' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },
@@ -123,16 +123,16 @@ const FAQS = [
     a: 'No. StatuteProof provides official-source regulatory monitoring intelligence. Reports are for information and compliance review support only. They do not constitute legal advice, regulatory advice, or compliance determination. Consult qualified legal or compliance professionals before making regulatory decisions.',
   },
   {
-    q: 'What does "evidence-readiness validation" mean?',
-    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: whether it is publicly accessible, extractable, and producing reliable text diffs. Sources that clear readiness checks are marked readiness-supported. Sources with access, content, or extraction issues are marked limited, blocked, or remediation required.',
+    q: 'How do you verify a source is actually monitored?',
+    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: is it publicly accessible, can we extract text reliably, and does the diff produce meaningful output? Sources that pass are marked monitoring-active. Sources with access issues, geo-blocking, or unreliable extraction are disclosed before your pilot — not after a gap.',
   },
   {
     q: 'Can I add my own sources?',
-    a: 'Yes — on the UAE Monitor and Consultant plans. Custom public sources require a source readiness check before monitoring begins. We document access quality, extraction method, and known limitations for each source.',
+    a: 'Yes — on the UAE Monitor and Consultant plans. Custom public sources require a source readiness check before monitoring begins. We document access quality, extraction method, and any known limitations before activating.',
   },
   {
-    q: 'What happens if a source fails?',
-    a: 'Source failures are documented in your evidence records. Access status (readiness-supported / limited / blocked) is tracked per source. You are notified when a source becomes unavailable, and the limitation is recorded in your audit trail.',
+    q: 'What happens if a source goes down or becomes inaccessible?',
+    a: 'Source failures are logged in your evidence records. Every failed or degraded run is surfaced — it is never silently dropped. You are notified when a source becomes unavailable, and the limitation is recorded in your audit trail.',
   },
   {
     q: 'Can consultants use it for multiple clients?',
@@ -143,8 +143,8 @@ const FAQS = [
     a: 'No. During the founding pilot, billing is manually activated after source readiness review and pilot confirmation. No payment method is stored until billing is formally set up. You will receive advance notice before any charges.',
   },
   {
-    q: 'Why does UAE Monitor say "readiness-supported"?',
-    a: 'We currently have 79 enabled UAE official-source endpoints. The latest registry review keeps 78 sources readiness-supported after proof and baseline gates, with 1 source under extraction remediation. Before we commit to monitoring a source for your workspace, we run a readiness check and document the result.',
+    q: 'Which regulators are covered on the UAE Monitor plan?',
+    a: 'Monitoring-active coverage includes VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU, Executive Office for AML/CFT, DIFC laws and data protection, UAE Legislation Portal, Ministry of Finance, SCA, and related official public sources. FTA tax pages are candidates under item-level extraction remediation and are not counted as monitoring-active.',
   },
 ]
 

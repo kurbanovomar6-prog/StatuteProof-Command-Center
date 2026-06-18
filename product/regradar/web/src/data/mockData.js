@@ -9,9 +9,9 @@ export const sourceHealthRows = [
   { id: 8,  name: 'DIFC Laws and Regulations',   jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
   { id: 9,  name: 'UAE Legislation Portal',      jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
   { id: 10, name: 'UAE Ministry of Economy',     jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
-  { id: 11, name: 'DFSA Rulebook',               jurisdiction: 'AE', flag: '🇦🇪', access: 'Limited',    quality: 'remediation', status: 'remediation', verdict: 'REVIEW' },
-  { id: 12, name: 'DFSA Regulatory Notices',     jurisdiction: 'AE', flag: '🇦🇪', access: 'Limited',    quality: 'remediation', status: 'remediation', verdict: 'REVIEW' },
-  { id: 13, name: 'UAE FIU Homepage',            jurisdiction: 'AE', flag: '🇦🇪', access: 'Limited',    quality: 'remediation', status: 'remediation', verdict: 'REVIEW' },
+  { id: 11, name: 'DFSA Annual Reports',          jurisdiction: 'AE', flag: '🇦🇪', access: 'Active',                 quality: 'monitoring_active', status: 'monitoring_active', verdict: 'ACTIVE' },
+  { id: 12, name: 'DFSA Annual AML Reports',     jurisdiction: 'AE', flag: '🇦🇪', access: 'Active',                 quality: 'monitoring_active', status: 'monitoring_active', verdict: 'ACTIVE' },
+  { id: 13, name: 'UAE FIU Homepage',            jurisdiction: 'AE', flag: '🇦🇪', access: 'Covered via sub-sources', quality: 'sub_sources',       status: 'sub_sources',       verdict: 'COVERED' },
 ]
 
 export const riskTrendData = [
@@ -25,14 +25,14 @@ export const riskTrendData = [
 ]
 
 export const features = [
-  { icon: 'Search',        title: 'Official-source monitoring',      desc: 'StatuteProof monitors configured official regulator, legal, finance, free zone, and AML/CFT sources after readiness checks and source access validation.' },
-  { icon: 'FileText',      title: 'Source-backed compliance briefs', desc: 'Every detected change produces a structured brief: what changed, which official source produced it, and what your profile requires next.' },
-  { icon: 'Globe',         title: 'Documented extraction methods',    desc: 'HTML structured content, PDF text, or page snapshots are recorded per source so limitations are visible.' },
-  { icon: 'MessageSquare', title: 'Profile-scoped alert delivery',    desc: 'Alerts are scoped to the regulators and business activities that apply to your licence type and risk exposure.' },
-  { icon: 'BarChart2',     title: 'Source readiness reporting',       desc: 'Source checks show readiness-supported, limited, and blocked sources before a pilot begins, with access restrictions documented.' },
-  { icon: 'BrainCircuit',  title: 'Client-specific source profiles',  desc: 'Configure the exact regulators, jurisdictions, and compliance topics relevant to your business. No irrelevant sources.' },
-  { icon: 'Languages',     title: 'English compliance briefs',        desc: 'Official source content is converted into concise English briefs while preserving proof back to the original source.' },
-  { icon: 'ShieldCheck',   title: 'Evidence trail on every alert',    desc: 'Every alert includes source URL, timestamp, delta status, extraction quality, evidence snippet, and known limitations.' },
+  { icon: 'Search',        title: 'Official-source monitoring',      desc: 'Your monitored UAE regulatory sources are checked on a defined schedule — CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, and more. When something changes on an official portal, you know about it from the source, not from a peer.' },
+  { icon: 'FileText',      title: 'Source-backed compliance briefs', desc: 'Every detected change produces a structured brief: what changed, which official source published it, and what your licence profile requires next. No raw text dumps — a brief you can act on.' },
+  { icon: 'Globe',         title: 'Documented extraction methods',    desc: 'You see exactly how each source is monitored — HTML, PDF, or page snapshot — and any known limitations are disclosed upfront. If a source has restricted access, that is documented before your pilot begins.' },
+  { icon: 'MessageSquare', title: 'Profile-scoped alert delivery',    desc: 'Alerts are filtered to the regulators and business activities relevant to your licence type. A VARA update does not reach a payments firm with no virtual asset exposure.' },
+  { icon: 'BarChart2',     title: 'Source readiness reporting',       desc: 'Before monitoring begins, you receive a clear view of which UAE regulatory sources are accessible, which are PDF-primary, and which are currently out of scope. No surprises after sign-off.' },
+  { icon: 'BrainCircuit',  title: 'Client-specific source profiles',  desc: 'Configure the exact regulators, jurisdictions, and compliance topics relevant to your business. No noise from sources that do not apply to your licence type.' },
+  { icon: 'Languages',     title: 'English compliance briefs',        desc: 'Official source content from Arabic or mixed-language portals is summarised in English briefs, with a direct link back to the original source so you can verify the primary text.' },
+  { icon: 'ShieldCheck',   title: 'Evidence trail on every alert',    desc: 'Every alert carries a source URL, timestamp, change delta, extraction quality rating, and evidence snippet. When your board asks how a change was caught, you have a documented record.' },
 ]
 
 export const coverage = [
@@ -50,9 +50,9 @@ export const coverage = [
       { name: 'DIFC Laws and Regulations', status: 'readiness_supported' },
       { name: 'UAE Legislation Portal', status: 'readiness_supported' },
       { name: 'UAE Ministry of Economy', status: 'readiness_supported' },
-      { name: 'DFSA Rulebook', status: 'remediation' },
-      { name: 'DFSA Regulatory Notices', status: 'remediation' },
-      { name: 'UAE FIU Homepage', status: 'remediation' },
+      { name: 'DFSA Annual Reports', status: 'monitoring_active' },
+      { name: 'DFSA Annual AML Reports', status: 'monitoring_active' },
+      { name: 'UAE FIU Homepage', status: 'sub_sources' },
     ],
   },
 ]
@@ -65,7 +65,7 @@ export const pricingPlans = [
     highlight: false,
     badge: 'Start here',
     ctaType: 'source_review',
-    desc: 'A no-cost review of which UAE regulatory sources are technically accessible, extractable, limited, or blocked for your compliance profile.',
+    desc: 'Before committing to monitoring, know exactly which UAE regulatory sources are accessible for your licence type, what content can be extracted, and what is currently out of scope.',
     features: [
       'UAE source pack readiness view',
       'Extraction quality and failure reasons',
@@ -82,7 +82,7 @@ export const pricingPlans = [
     highlight: false,
     ctaType: 'plan',
     routePlan: 'starter_pilot',
-    desc: 'First paid plan for early users. Up to 3 official UAE sources, evidence records, basic diff view, and weekly source status summary. Manually activated.',
+    desc: 'For a compliance officer who wants to monitor 3 core UAE sources with full evidence records. Manually activated after source readiness review.',
     features: [
       '1 regulatory profile',
       'Up to 3 official UAE sources',
@@ -101,11 +101,11 @@ export const pricingPlans = [
     badge: 'Recommended',
     ctaType: 'plan',
     routePlan: 'professional',
-    desc: 'MLRO or CCO workspace for the UAE pack. 79 enabled official-source endpoints: 78 readiness-supported after proof and baseline gates, 1 under extraction remediation.',
+    desc: 'Selected official UAE regulatory source pack across VARA, CBUAE, DFSA, ADGM, FIU, DIFC and related public authorities. Built for an MLRO who needs evidence that regulatory changes were tracked.',
     features: [
-      '78 readiness-supported UAE sources',
-      'High-risk review queue',
-      'Weekly MLRO brief requires activation',
+      '80 monitoring-active official-source endpoints',
+      'Priority review queue for high-risk changes',
+      'Weekly monitoring brief (activation required)',
       'Up to 2 custom sources after review',
       '180-day evidence retention',
       '2 users',
@@ -118,7 +118,7 @@ export const pricingPlans = [
     period: '',
     highlight: false,
     ctaType: 'consultant',
-    desc: 'For advisory firms managing multiple UAE-regulated clients. Custom scope, custom retention, and consultant workflows are reviewed manually.',
+    desc: 'For advisory firms with multiple UAE-regulated clients. Custom scope and retention reviewed per engagement.',
     features: [
       'Custom source scope',
       'Consultant workflow review',

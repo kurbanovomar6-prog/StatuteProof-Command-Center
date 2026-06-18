@@ -10,22 +10,22 @@ The source pack is credible enough for an internal demo and a cautious MLRO pros
 
 | Metric | Count |
 | --- | ---: |
-| Enabled UAE sources | 79 |
-| Readiness-supported UAE sources | 78 |
+| Enabled UAE sources | 81 |
+| Monitoring-active UAE sources | 80 |
 | Under extraction remediation | 1 |
 
 ## Sources By Regulator
 
-| Regulator / group | Readiness-supported count | Share |
+| Regulator / group | Monitoring-active count | Share |
 | --- | ---: | ---: |
-| CBUAE | 27 | 34.6% |
-| DFSA/DIFC | 18 | 23.1% |
-| ADGM/FSRA | 10 | 12.8% |
-| VARA | 9 | 11.5% |
-| UAE FIU / EOCN / AML | 6 | 7.7% |
-| SCA | 5 | 6.4% |
+| CBUAE | 27 | 33.8% |
+| DFSA/DIFC | 18 | 22.5% |
+| ADGM/FSRA | 12 | 15.0% |
+| VARA | 9 | 11.2% |
+| UAE FIU / EOCN / AML | 7 | 8.8% |
+| SCA | 4 | 5.0% |
 | Federal / legislation / tax | 3 | 3.8% |
-| Total | 78 | 100.0% |
+| Total | 80 | 100.0% |
 
 ## Sources By Source Type
 
@@ -34,16 +34,16 @@ The source pack is credible enough for an internal demo and a cautious MLRO pros
 | Rulebook / module | 37 |
 | Law / regulation | 13 |
 | General regulatory page | 7 |
-| Document / PDF listing | 8 |
+| Document / PDF listing | 9 |
 | Enforcement / sanctions | 5 |
 | Guidance / policy | 4 |
-| Notice / circular / letter | 2 |
+| Notice / circular / letter | 3 |
 | Consultation | 1 |
 | Register / waiver | 1 |
 
 ## Concentration Risk
 
-CBUAE concentration is **27 / 78 = 34.6%**.
+CBUAE concentration is **27 / 80 = 33.8%**.
 
 This is commercially useful for banking, payments, AML/CFT, consumer protection, open finance, and prudential monitoring. It is still visibly concentrated, but the DIFC remediation sprint reduced the imbalance and made the pack more credible for DIFC/legal-framework conversations. A general UAE compliance buyer will still expect stronger ADGM alternate page, SCA, and FIU/EOCN breadth before a higher-priced UAE Monitor plan feels fully balanced.
 
@@ -74,7 +74,7 @@ The pack is no longer a source-count toy. It has proof-backed, baseline-tested, 
 
 Safe customer-facing wording:
 
-"StatuteProof currently has 79 enabled UAE official-source endpoints, including 78 readiness-supported sources after proof, baseline, source-health, noise, and review gates. One source remains under extraction remediation. Monitoring intelligence only, not legal advice."
+"StatuteProof currently has 81 enabled UAE official-source endpoints, including 80 monitoring-active sources after proof, baseline, source-health, noise, and review gates. One source remains under remediation. FTA tax pages are candidates, not monitoring-active. Monitoring intelligence only, not legal advice."
 
 Do not say:
 

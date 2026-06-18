@@ -1,20 +1,29 @@
-import { ArrowRight } from 'lucide-react'
+import { MapPin, ScanLine, FileText, ShieldCheck } from 'lucide-react'
 
-const steps = [
+const STEPS = [
   {
     n: '01',
-    title: 'Official sources are checked and normalized.',
-    desc: 'Configured official sources are checked on a defined schedule, then normalized into comparable snapshots with extraction quality recorded.',
+    icon: MapPin,
+    title: 'We map your regulatory scope',
+    desc: 'You tell us which UAE regulators apply to your licence type — DFSA, CBUAE, VARA, SCA, or others. We match those to the official sources we monitor and confirm which are active before your pilot begins.',
   },
   {
     n: '02',
-    title: 'Changes are compared against prior snapshots.',
-    desc: 'Each run produces a delta status and a proof trail, so changed, unchanged, failed, and quality-drop states are visible before review.',
+    icon: ScanLine,
+    title: 'We monitor the official sources',
+    desc: 'StatuteProof checks each configured official source on a defined schedule and records a timestamped evidence snapshot every monitoring run. Source access status, extraction method, and quality score are logged on every check.',
   },
   {
     n: '03',
-    title: 'Reviewed briefs are delivered with source proof and limitations.',
-    desc: 'Client-facing briefs are prepared only after relevance and review gates, with official URLs, timestamps, extraction notes, and limitations attached.',
+    icon: FileText,
+    title: 'When something changes, you get a brief',
+    desc: 'Detected changes produce a structured monitoring brief: what changed, which official source, when it was detected, and a risk tier. Briefs require human review by your compliance team before any compliance action is taken.',
+  },
+  {
+    n: '04',
+    icon: ShieldCheck,
+    title: 'Your evidence trail is preserved',
+    desc: 'Every monitoring run produces a cryptographic hash, a stored snapshot, and a diff record. Your compliance team can demonstrate that a source was tracked, when it was checked, and exactly what was captured.',
   },
 ]
 
@@ -23,45 +32,43 @@ export default function HowItWorks() {
     <section className="py-20 bg-[#07111F]" id="how-it-works">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
-        <div className="text-center mb-12">
-          <div className="mb-4 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200">
-            Source proof workflow
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-3">From official source to structured brief</h2>
-          <p className="text-slate-400 max-w-xl mx-auto">
-            A monitored update is useful only when your team can verify where it came from, what changed, and what limits apply.
+        <div className="text-center mb-14">
+          <span className="sp-kicker">
+            How it works
+          </span>
+          <h2 className="text-3xl font-bold text-white mb-3 mt-4">
+            From regulatory scope to evidence trail
+          </h2>
+          <p className="text-slate-400 max-w-xl mx-auto text-sm leading-relaxed">
+            StatuteProof is built around one question your auditor will eventually ask: can you show what you were monitoring, when you checked it, and what it said?
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {['FIRST_SEEN', 'UNCHANGED', 'CHANGED', 'QUALITY_DROP', 'FAILED'].map(status => (
-            <span key={status} className="text-[10px] font-semibold tracking-wide bg-slate-950/50 border border-slate-800 text-slate-400 rounded-full px-3 py-1">
-              {status}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex flex-col md:flex-row items-start gap-0">
-          {steps.map((step, i) => (
-            <div key={step.n} className="flex flex-col md:flex-row items-start flex-1">
-              <div className="flex-1 bg-[#0A1628] rounded-xl border border-slate-800 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)] w-full">
-                <div className="w-9 h-9 rounded-lg bg-cyan-400/10 border border-cyan-300/30 flex items-center justify-center mb-4">
-                  <span className="text-cyan-200 text-xs font-bold">{step.n}</span>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {STEPS.map((step) => {
+            const Icon = step.icon
+            return (
+              <div
+                key={step.n}
+                className="sp-panel flex flex-col"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-4 h-4 text-cyan-300" />
+                  </div>
+                  <span className="text-[11px] font-bold text-cyan-400/60 tracking-widest">{step.n}</span>
                 </div>
-                <h3 className="font-semibold text-white mb-2 text-sm">{step.title}</h3>
+                <h3 className="font-semibold text-white text-sm mb-2 leading-snug">{step.title}</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">{step.desc}</p>
               </div>
+            )
+          })}
+        </div>
 
-              {i < steps.length - 1 && (
-                <div className="hidden md:flex items-center px-2 pt-8 flex-shrink-0 text-cyan-300/40">
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-              )}
-              {i < steps.length - 1 && (
-                <div className="md:hidden w-px h-6 bg-slate-800 mx-auto my-1" />
-              )}
-            </div>
-          ))}
+        <div className="mt-10 text-center">
+          <p className="text-[11px] text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            StatuteProof monitoring briefs require human review before any compliance or regulatory action. Not legal advice.
+          </p>
         </div>
 
       </div>

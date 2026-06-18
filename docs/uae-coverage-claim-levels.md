@@ -1,6 +1,6 @@
 # UAE Coverage Claim Levels
 
-Date: 2026-06-17
+Date: 2026-06-18
 Purpose: Define safe claim tiers for UAE regulatory source monitoring coverage.
 Legal safety: Every claim tier must be used exactly as written, without embellishment.
 
@@ -8,10 +8,10 @@ Legal safety: Every claim tier must be used exactly as written, without embellis
 
 ## Tier 0 — Source Count Claim (SAFE — use today)
 
-**Definition:** A factual count of enabled and readiness-supported sources.
+**Definition:** A factual count of enabled and monitoring-active sources.
 
 **Safe wording:**
-> "79 enabled UAE official-source endpoints. 78 readiness-supported. 1 under extraction remediation."
+> "81 enabled UAE official-source endpoints. 80 monitoring-active. 1 under technical review."
 
 **Why it is safe:**
 - These are exact counts directly verifiable in sources.json.
@@ -105,7 +105,7 @@ Legal safety: Every claim tier must be used exactly as written, without embellis
 4. SCA primary securities legislation is active.
 5. FTA has at least one active source (currently 0 active).
 6. CBUAE consultations are active.
-7. All 78 readiness-supported sources have documented proof records.
+7. All 80 monitoring-active sources have documented proof records or documented legacy evidence references.
 8. Source-health trend monitoring is demonstrated.
 9. Legal-safe wording is in place.
 
@@ -177,4 +177,4 @@ Legal safety: Every claim tier must be used exactly as written, without embellis
 
 ## Correct Positioning Statement (Use This)
 
-> "StatuteProof monitors selected public official UAE regulatory sources — 79 active endpoints across major UAE financial regulators — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."
+> "StatuteProof monitors selected public official UAE regulatory sources — 81 enabled endpoints, including 80 monitoring-active endpoints across major UAE financial regulators — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."

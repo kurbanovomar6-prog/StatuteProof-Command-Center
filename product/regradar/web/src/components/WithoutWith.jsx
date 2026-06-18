@@ -10,24 +10,24 @@ const withoutItems = [
 ]
 
 const withItems = [
-  'Scheduled checks against readiness-supported official UAE regulatory sources',
-  'Timestamped run record for each source check',
-  'Detected changes flagged for human review with source diff',
-  'Source-backed alert draft with official URL and proof trail',
-  'Client profile filtering applied before delivery',
-  'Human review gate before any client-facing brief',
-  'Weekly evidence-backed brief, with limitations disclosed',
+  'Scheduled checks against 79 official UAE regulatory sources — no manual portal visits',
+  'Timestamped evidence record for every source check: what was captured, when, by which source',
+  'Detected changes flagged for your team with a clear before/after diff',
+  'Structured monitoring brief with the official source URL and hash-verified evidence',
+  'Alerts scoped to the regulators that apply to your licence type',
+  'Human review required before any brief reaches your compliance team',
+  'Weekly monitoring summary with limitations documented per source',
 ]
 
 const workflow = [
-  'Official source',
-  'extraction quality check',
-  'normalized snapshot',
-  'diff/proof',
-  'alert draft',
-  'client relevance filtering',
-  'human review',
-  'weekly brief',
+  'Official source checked',
+  'Change detected',
+  'Evidence record stored',
+  'Before/after diff created',
+  'Brief drafted',
+  'Scoped to your profile',
+  'Human review',
+  'Delivered to your team',
 ]
 
 function BulletList({ items, tone }) {

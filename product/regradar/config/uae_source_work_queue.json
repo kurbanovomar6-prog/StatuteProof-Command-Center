@@ -11289,7 +11289,7 @@
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready queue entries count toward the queue-specific 50 working-source target; public truth is reconciled separately from sources.json.",
     "proof_backed_count": 61,
-    "public_source_truth_after": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
+    "public_source_truth_after": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 0,
     "remediation_count": 1,
@@ -11302,19 +11302,19 @@
     "last_weak_zone_remediation_update_at": "2026-06-16T06:12:00Z",
     "last_weak_zone_elimination_update_at": "2026-06-16T00:00:00Z",
     "last_final_8_activation_update_at": "2026-06-16T00:00:00Z",
-    "public_source_truth_after_validation": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
+    "public_source_truth_after_validation": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
     "last_updated_at": "2026-06-16T18:36:18Z",
     "enabled_count": 79,
     "readiness_supported_count": 78,
-    "current_truth": "79 enabled / 78 readiness-supported / 1 remediation",
+    "current_truth": "81 enabled / 80 monitoring-active / 1 remediation",
     "difc_remediation_update_at": "2026-06-16T18:36:18Z",
     "last_final_remediation_update_at": "2026-06-17T12:52:30Z"
   },
   "version": 1,
-  "public_source_truth_after_validation": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
-  "public_source_truth_after": "79 enabled UAE sources / 78 readiness-supported / 1 under extraction remediation",
+  "public_source_truth_after_validation": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
+  "public_source_truth_after": "81 enabled UAE sources; 80 monitoring-active; 1 remediation",
   "enabled_count": 79,
   "readiness_supported_count": 78,
   "remediation_count": 1,
-  "current_truth": "79 enabled / 78 readiness-supported / 1 remediation"
+  "current_truth": "81 enabled / 80 monitoring-active / 1 remediation"
 }

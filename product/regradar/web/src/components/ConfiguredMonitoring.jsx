@@ -17,13 +17,13 @@ const PROFILES = [
     icon: Building2,
     title: 'DIFC-regulated firms',
     sources: 'Primary regulators: DFSA, DIFC Laws, UAE FIU',
-    scope: 'Alert focus after readiness review: DIFC primary and subsidiary legislation, plus DFSA rulebook/notices only after selector and hash remediation are cleared. UAE FIU is scoped only when a usable publications source clears readiness review.',
+    scope: 'Alert focus after readiness review: DIFC primary and subsidiary legislation, plus DFSA rulebook and enforcement modules. UAE FIU is scoped only when a usable publications source clears readiness review.',
   },
   {
     icon: BriefcaseBusiness,
     title: 'ADGM-regulated firms',
     sources: 'Primary regulators: ADGM / FSRA, UAE FIU',
-    scope: 'Alert focus after readiness review: ADGM/FSRA main-source updates and ADGM legislative context. FSRA rulebook/circular layers stay outside readiness-supported scope until source readiness checks clear. Not included by default: CBUAE, DFSA, VARA.',
+    scope: 'Alert focus after readiness review: ADGM/FSRA main-source updates and ADGM legislative context. FSRA rulebook/circular layers stay outside monitoring-active scope until source readiness checks clear. Not included by default: CBUAE, DFSA, VARA.',
   },
   {
     icon: FileSearch,
@@ -76,7 +76,7 @@ export default function ConfiguredMonitoring() {
         <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-6">
           <p className="text-sm text-slate-400 leading-relaxed max-w-4xl mx-auto text-center">
             Every pilot starts with a source readiness review that maps your specific regulators — and
-            documents which sources are readiness-supported, which have access limitations, and what your alert scope
+            documents which sources are monitoring-active, which have access limitations, and what your alert scope
             will be. No shared alert stream. No irrelevant sources.
           </p>
         </div>

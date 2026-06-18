@@ -1,7 +1,7 @@
 // Plan definitions — no Stripe, no payment processing.
 // Billing is manually activated for founding pilots after source readiness review.
 // Prices: Founding Pilot $199/mo | UAE Monitor $399/mo | Consultant custom
-// Source count: 79 enabled UAE sources, 78 readiness-supported after proof/baseline gates (as of 2026-06)
+// Source count: 81 enabled UAE sources, 80 monitoring-active after proof/baseline gates
 
 export const PLAN_NAMES = {
   EVIDENCE_PREVIEW: 'evidence_preview',
@@ -75,7 +75,7 @@ export const PLAN_CAPABILITIES = {
   },
   professional: {
     liveMonitoring: true,
-    sourceLimit: 78,           // 78 readiness-supported UAE sources after proof/baseline gates
+    sourceLimit: 80,           // 80 monitoring-active UAE sources after proof/baseline gates
     customSources: 2,          // requires activation
     weeklyBriefs: true,        // Telegram; email requires_activation
     auditExport: true,

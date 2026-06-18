@@ -1,6 +1,6 @@
 # UAE Coverage Public Claim Safety Table
 
-Date: 2026-06-17
+Date: 2026-06-18
 Purpose: Definitive reference for what can and cannot be claimed publicly about StatuteProof UAE coverage.
 
 Legend:
@@ -14,13 +14,13 @@ Legend:
 
 | # | Proposed Claim | Safe? | Why | Required Evidence | Safer Wording |
 |---|---------------|-------|-----|-------------------|---------------|
-| 1 | "78 readiness-supported UAE sources" | **SAFE** | Exact count from sources.json; factual and verifiable | sources.json enabled=true, status=active | "78 readiness-supported UAE official-source endpoints as of [date]" |
-| 2 | "79 enabled UAE sources" | **SAFE** | Exact enabled count from sources.json | sources.json enabled=true count | "79 enabled UAE official-source endpoints" |
+| 1 | "80 monitoring-active UAE sources" | **SAFE** | Exact count from sources.json; factual and verifiable | sources.json enabled=true, status=active | "80 monitoring-active UAE official-source endpoints as of 2026-06-18" |
+| 2 | "81 enabled UAE sources" | **SAFE** | Exact enabled count from sources.json | sources.json enabled=true count | "81 enabled UAE official-source endpoints" |
 | 3 | "200+ official-source candidates mapped" | **SAFE** | 203 records in uae_source_universe_candidates.json; "mapped" ≠ "monitored" | uae_source_universe_candidates.json; validator passes | "StatuteProof has mapped 200+ official or officially linked UAE regulatory source candidates for pipeline research" |
 | 4 | "Major UAE regulator coverage" | **CONDITIONAL** | All 8 named regulators have ≥5 active sources. But VARA guidance is broken, SCA lacks primary legislation. | All 8 regulators verified in sources.json; disclaimer required | "StatuteProof monitors selected official sources from major UAE regulatory bodies including CBUAE, DFSA, ADGM/FSRA, VARA, UAE FIU, EOCN, SCA, and DIFC. Selected sources only — not all publications from each body." |
 | 5 | "Broad UAE compliance monitoring" | **CONDITIONAL** | "Broad" is safe if followed by scope qualifier. Not safe as standalone claim. | Disclaimer required; source count context required | "StatuteProof provides broad UAE official-source monitoring across major financial, AML/CFT, virtual asset, securities, and financial free-zone regulatory families. Monitoring intelligence only — not legal advice." |
-| 6 | "Comprehensive UAE official-source universe" | **NO** (current state) / **CONDITIONAL** (post-P0 sprint) | VARA guidance broken; SCA laws missing; FTA 0 active; CBUAE consultations missing. After P0 sprint resolves those 6 gaps, conditional use is acceptable with disclaimer. | 6 specific P0 activations required; disclaimer required | After P0 sprint: "StatuteProof monitors selected official sources across all major UAE financial regulatory families. Coverage notes and source-health status shown transparently." |
-| 7 | "Complete UAE coverage" | **NO** | 0 FTA sources; VARA guidance broken; MoJ not active; customs not mapped; recall rate not measured; <3 months monitoring history. Never acceptable as standalone claim. | Never achievable as standalone claim | Replace with: "Selected UAE official-source monitoring. Coverage scope and source-health shown transparently. Not comprehensive. Not guaranteed." |
+| 6 | "Comprehensive UAE official-source universe" | **NO** (current state) / **CONDITIONAL** (post-P0 sprint) | VARA guidance remains incomplete; SCA laws are limited; FTA pages are candidate-only; CBUAE consultations are not active. After P0 sprint resolves those gaps, conditional use is acceptable with disclaimer. | Specific P0 activations required; disclaimer required | After P0 sprint: "StatuteProof monitors selected official sources across all major UAE financial regulatory families. Coverage notes and source-health status shown transparently." |
+| 7 | "Complete UAE coverage" | **NO** | FTA is candidate-only; VARA guidance is incomplete; MoJ/customs coverage is thin; recall rate is not measured; <3 months monitoring history. Never acceptable as standalone claim. | Never achievable as standalone claim | Replace with: "Selected UAE official-source monitoring. Coverage scope and source-health shown transparently. Not comprehensive. Not guaranteed." |
 | 8 | "All UAE regulatory updates" | **NO** | "All" implies 100% recall rate. Not measured. Not achievable. | Never achievable | Replace with: "Monitoring selected official UAE regulatory sources. StatuteProof does not capture all regulatory publications and does not guarantee completeness." |
 | 9 | "Never miss updates" | **NO** | Absolute claim. Cannot be supported by any source monitoring system. Forbidden phrase per CLAUDE.md. | Never achievable | Replace with: "Designed to detect changes to monitored official sources. Source monitoring may be affected by access restrictions, website changes, PDF formatting changes, and publication delays." |
 | 10 | "Monitoring intelligence only" | **SAFE** | Accurate descriptor of the product's scope. No legal advice implied. | Use exactly as written | "Monitoring intelligence only. Not legal advice." |
@@ -32,7 +32,7 @@ Legend:
 | 16 | "CBUAE certified" or "DFSA certified" | **NO** | StatuteProof has no regulatory certification. Forbidden phrase per CLAUDE.md. | Not achievable | Remove entirely. |
 | 17 | "Prevent fines" or "avoid penalties" | **NO** | Causal compliance claim. Cannot be supported. Forbidden phrase. | Not achievable | Remove entirely. |
 | 18 | "Replace lawyers" or "replace compliance professionals" | **NO** | False claim. StatuteProof supplements, not replaces. Forbidden phrase. | Not achievable | "StatuteProof supplements, not replaces, qualified legal counsel, MLROs, and compliance professionals." |
-| 19 | "79 sources covering all key compliance areas" | **NO** | "All key" is an overstatement. FTA (tax), customs, VARA guidance, MoJ are not covered. | Cannot be supported | Replace with: "79 active sources across major UAE financial, AML/CFT, virtual asset, securities, and financial free-zone regulatory bodies." |
+| 19 | "81 sources covering all key compliance areas" | **NO** | "All key" is an overstatement. FTA is candidate-only; customs, VARA guidance, and MoJ remain thin. | Cannot be supported | Replace with: "81 enabled sources across major UAE financial, AML/CFT, virtual asset, securities, and financial free-zone regulatory bodies." |
 | 20 | "Guaranteed compliance" | **NO** | Absolute guarantee claim. Forbidden phrase. | Not achievable | Remove entirely. Replace with disclaimer. |
 
 ---
@@ -41,7 +41,7 @@ Legend:
 
 Use these in any customer-facing context without modification:
 
-1. "79 enabled UAE official-source endpoints. 78 readiness-supported."
+1. "81 enabled UAE official-source endpoints. 80 monitoring-active."
 2. "Monitoring intelligence only. Not legal advice."
 3. "Not a guarantee of regulatory completeness."
 4. "Source monitoring may be affected by access restrictions, website changes, and publication delays."

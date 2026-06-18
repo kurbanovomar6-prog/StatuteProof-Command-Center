@@ -1,7 +1,7 @@
 # UAE Source Type Coverage Matrix
 
-Date: 2026-06-17
-Based on: sources.json (79 enabled), uae_source_universe_candidates.json, post-50-source-distribution-audit.md
+Date: 2026-06-18
+Based on: sources.json (81 enabled), uae_source_universe_candidates.json, post-50-source-distribution-audit.md
 
 This matrix evaluates UAE regulatory source coverage by source type across all active and candidate sources.
 

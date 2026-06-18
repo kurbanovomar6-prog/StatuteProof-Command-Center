@@ -80,7 +80,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
             onClick={onSourceReview}
             className="sp-btn-primary min-h-10 px-5 py-2 text-sm"
           >
-            Request Source Review
+            Get free source review
           </button>
         </div>
 
@@ -135,7 +135,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
               onClick={() => { setOpen(false); onSourceReview?.() }}
               className="text-sm font-bold bg-[#16D9F5] hover:bg-[#0EC8E4] text-[#07111F] py-2.5 rounded-lg text-center transition-colors"
             >
-              Request Source Review
+              Get free source review
             </button>
           </div>
         </div>

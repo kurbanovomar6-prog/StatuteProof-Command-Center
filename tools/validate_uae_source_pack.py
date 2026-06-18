@@ -88,13 +88,13 @@ SAVED_BASELINE_FIELDS = {
     "can_activate_monitoring",
 }
 ADGM_FSRA_SCA_PREFIXES = ("AE-adgm", "AE-sca")
-EXPECTED_ENABLED_UAE_SOURCES = 79
-EXPECTED_READINESS_SUPPORTED = 78
+EXPECTED_ENABLED_UAE_SOURCES = 81
+EXPECTED_READINESS_SUPPORTED = 80
 EXPECTED_REMEDIATION = 1
 EXPECTED_CUSTOMER_COPY = (
     f"{EXPECTED_ENABLED_UAE_SOURCES} enabled UAE sources; "
-    f"{EXPECTED_READINESS_SUPPORTED} readiness-supported; "
-    f"{EXPECTED_REMEDIATION} under extraction remediation"
+    f"{EXPECTED_READINESS_SUPPORTED} monitoring-active; "
+    f"{EXPECTED_REMEDIATION} remediation"
 )
 CLAIM_SCAN_PATHS = [
     ROOT / "README.md",
@@ -160,8 +160,8 @@ def main() -> int:
     customer_copy = str(truth.get("customer_copy", "")).lower()
     if (
         f"{EXPECTED_ENABLED_UAE_SOURCES} enabled" not in customer_copy
-        or f"{EXPECTED_READINESS_SUPPORTED} readiness-supported" not in customer_copy
-        or f"{EXPECTED_REMEDIATION} under extraction remediation" not in customer_copy
+        or f"{EXPECTED_READINESS_SUPPORTED} monitoring-active" not in customer_copy
+        or f"{EXPECTED_REMEDIATION} remediation" not in customer_copy
     ):
         fail(errors, f"Customer truth copy must preserve {EXPECTED_CUSTOMER_COPY} wording.")
     if "validated" in customer_copy:
@@ -422,7 +422,7 @@ def main() -> int:
     print(
         "Current customer truth preserved: "
         f"{EXPECTED_ENABLED_UAE_SOURCES} enabled / "
-        f"{EXPECTED_READINESS_SUPPORTED} readiness-supported / "
+        f"{EXPECTED_READINESS_SUPPORTED} monitoring-active / "
         f"{EXPECTED_REMEDIATION} remediation."
     )
     return 0

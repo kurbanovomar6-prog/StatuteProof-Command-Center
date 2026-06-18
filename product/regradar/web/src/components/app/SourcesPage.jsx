@@ -418,7 +418,7 @@ export default function SourcesPage({ onAddCustomSource }) {
             <h2 className="text-sm font-semibold text-white mb-1">Sources are checked before monitoring activates.</h2>
             <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
               StatuteProof tests public official sources for accessibility, extraction quality, and content depth.
-              Sources are marked readiness-supported only when meaningful regulatory text is extracted and hashed.
+              Sources are marked monitoring-active only when meaningful regulatory text is extracted and hashed.
               Custom sources are saved for readiness review — monitoring is not activated automatically.
             </p>
           </div>
