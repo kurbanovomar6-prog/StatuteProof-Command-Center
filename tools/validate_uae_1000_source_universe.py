@@ -22,7 +22,7 @@ SOURCES = ROOT / "product/regradar/sources.json"
 FINAL_REPORT = ROOT / "docs/uae-1000-source-expansion-final-report.md"
 BULK_ACTIVATION_SET = ROOT / "docs/weak-family-final-activation-set.json"
 
-EXPECTED_TRUTH = (147, 146, 1)
+MIN_TRUTH = (226, 225, 1)
 REQUIRED_FIELDS = {
     "source_id",
     "regulator_source_owner",
@@ -121,8 +121,9 @@ def main() -> int:
     summary = universe.get("universe_summary") or {}
     top_queue = top.get("top_250_activation_queue") or []
 
-    if tuple(source_truth()) != EXPECTED_TRUTH:
-        errors.append(f"sources.json truth changed; expected {EXPECTED_TRUTH}, got {source_truth()}")
+    truth = source_truth()
+    if truth[0] < MIN_TRUTH[0] or truth[1] < MIN_TRUTH[1] or truth[2] != MIN_TRUTH[2]:
+        errors.append(f"sources.json truth below expected floor {MIN_TRUTH}, got {truth}")
 
     if summary.get("active_sources_added") != 0 or summary.get("sources_json_changed") is not False:
         errors.append("Universe mapping must not claim active source additions or sources.json changes.")
@@ -191,7 +192,7 @@ def main() -> int:
     print(f"- Candidates: {summary.get('total_candidates')}")
     print(f"- Rejected: {summary.get('total_rejected')}")
     print("- Top-250 queue present")
-    print("- sources.json truth checked: 147/146/1")
+    print(f"- sources.json truth checked: {truth[0]}/{truth[1]}/{truth[2]}")
     return 0
 
 

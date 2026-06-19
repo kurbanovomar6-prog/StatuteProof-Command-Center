@@ -88,10 +88,10 @@ def main() -> int:
 
     strong_rows = [
         line for line in score_text.splitlines()
-        if "| Strong |" in line and not re.search(r"\|\s*(2[0-9]|[3-9][0-9])\s*\|", line)
+        if "| Strong |" in line and not re.search(r"\|\s*(2[5-9]|[3-9][0-9])\s*\|", line)
     ]
     if strong_rows:
-        errors.append("Scorecard may label a family Strong without 20+ active endpoints.")
+        errors.append("Scorecard may label a family Strong without 25+ active endpoints.")
 
     lower_final = final_text.lower()
     for forbidden in ("complete uae coverage", "guaranteed compliance", "perfect parsing", "never miss updates"):

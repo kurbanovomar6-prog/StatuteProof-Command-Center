@@ -3,8 +3,8 @@
   "purpose": "Candidate/rejection map for future proof-gated activation. Not active monitoring.",
   "warning": "Candidates are not monitoring-active. Do not add to sources.json as active without proof, repeat baseline, MONITOR_OK, and gates.",
   "current_verified_truth": {
-    "enabled_uae_sources": 81,
-    "monitoring_active": 80,
+    "enabled_uae_sources": 226,
+    "monitoring_active": 225,
     "remediation": 1
   },
   "source_family_target_model": {
@@ -291,8 +291,9 @@
     "sources_json_changed": false,
     "discovery_basis": "official sitemaps, official HTML navigation, and existing StatuteProof source universe records",
     "disclaimer": "Monitoring intelligence only. Not legal advice. Selected public official sources only.",
-    "active_sources_added_after_mapping_phase": 41,
-    "current_source_truth_after_bulk_activation": "122 enabled / 121 monitoring-active / 1 remediation"
+    "active_sources_added_after_mapping_phase": 145,
+    "current_source_truth_after_bulk_activation": "122 enabled / 121 monitoring-active / 1 remediation",
+    "current_source_truth_after_weak_family_completion": "226 enabled / 225 monitoring-active / 1 remediation"
   },
   "fetch_stats": {
     "CBUAE": {

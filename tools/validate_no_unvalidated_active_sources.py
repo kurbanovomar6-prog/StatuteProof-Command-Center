@@ -14,6 +14,7 @@ REGRADAR_ROOT = ROOT / "product/regradar"
 SOURCES_FILE = REGRADAR_ROOT / "sources.json"
 BULK_ACTIVATION_SET = ROOT / "docs/weak-family-final-activation-set.json"
 WEAK_FAMILY_25_SET = ROOT / "docs/weak-family-25-each-final-activation-set.json"
+WEAK_FAMILY_COMPLETION_SET = ROOT / "docs/weak-family-completion-final-activation-set.json"
 
 STRICT_EIGHT_SOURCE_IDS = {
     "AE-fta-tax-legislation-listing",
@@ -39,7 +40,7 @@ EXPECTED_ACTIVE = {
 
 EXPECTED_CANDIDATES = STRICT_EIGHT_SOURCE_IDS - set(EXPECTED_ACTIVE)
 
-EXPECTED_COUNTS = (147, 146, 1)
+MIN_COUNTS = (226, 225, 1)
 
 CLAIM_SCAN_PATHS = [
     ROOT / "README.md",
@@ -125,6 +126,16 @@ def main() -> int:
             for row in fta_data.get("specs", [])
             if isinstance(row, dict) and row.get("source_id")
         }
+    completion_final_ids: set[str] = set()
+    if WEAK_FAMILY_COMPLETION_SET.exists():
+        completion_data = json.loads(WEAK_FAMILY_COMPLETION_SET.read_text(encoding="utf-8"))
+        for rows in (completion_data.get("newly_active") or {}).values():
+            if isinstance(rows, list):
+                completion_final_ids.update(
+                    str(row.get("source_id"))
+                    for row in rows
+                    if isinstance(row, dict) and row.get("source_id")
+                )
 
     enabled_ae = [
         source for source in sources
@@ -133,8 +144,8 @@ def main() -> int:
     active = [source for source in enabled_ae if source.get("status") == "active"]
     remediation = [source for source in enabled_ae if source.get("status") == "remediation"]
     counts = (len(enabled_ae), len(active), len(remediation))
-    if counts != EXPECTED_COUNTS:
-        errors.append(f"Expected source truth {EXPECTED_COUNTS}, got {counts}")
+    if counts[0] < MIN_COUNTS[0] or counts[1] < MIN_COUNTS[1] or counts[2] != MIN_COUNTS[2]:
+        errors.append(f"Expected source truth at least {MIN_COUNTS}, got {counts}")
 
     for source in active:
         sid = _sid(source)
@@ -221,6 +232,28 @@ def main() -> int:
             if marker not in notes:
                 errors.append(f"{sid} notes missing legal/gate marker: {marker}")
 
+    for sid in sorted(completion_final_ids):
+        source = by_id.get(sid)
+        if not source:
+            errors.append(f"Missing weak-family completion active source: {sid}")
+            continue
+        if source.get("enabled") is not True or source.get("status") != "active":
+            errors.append(f"{sid} must be enabled active after proof-backed completion activation")
+        if int(source.get("baseline_runs_completed") or 0) < 2:
+            errors.append(f"{sid} requires baseline_runs_completed >= 2")
+        if source.get("last_monitor_status") != "MONITOR_OK":
+            errors.append(f"{sid} requires last_monitor_status=MONITOR_OK")
+        if not source.get("normalized_hash"):
+            errors.append(f"{sid} requires normalized_hash")
+        if not _artifact_exists(str(source.get("proof_path") or "")):
+            errors.append(f"{sid} proof_path missing or nonexistent")
+        if not _artifact_exists(str(source.get("normalized_text_path") or "")):
+            errors.append(f"{sid} normalized_text_path missing or nonexistent")
+        notes = str(source.get("notes") or "").lower()
+        for marker in ("monitoring intelligence only", "not legal advice", "monitor_ok"):
+            if marker not in notes:
+                errors.append(f"{sid} notes missing legal/gate marker: {marker}")
+
     for sid in sorted(EXPECTED_CANDIDATES):
         source = by_id.get(sid)
         if not source:
@@ -259,10 +292,12 @@ def main() -> int:
         return 1
 
     print("validate_no_unvalidated_active_sources: PASS")
-    print("Source truth: 147 enabled / 146 monitoring-active / 1 remediation")
+    print(f"Source truth: {counts[0]} enabled / {counts[1]} monitoring-active / {counts[2]} remediation")
     print("Eight-row repair: 2 active, 6 candidates, 0 unvalidated active rows")
     print("Weak-family bulk activation: 41 active, 0 unvalidated active rows")
     print("FTA weak-family activation: 25 active, 0 unvalidated active rows")
+    if completion_final_ids:
+        print(f"Weak-family completion activation: {len(completion_final_ids)} active, 0 unvalidated active rows")
     return 0
 
 

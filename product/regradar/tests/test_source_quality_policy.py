@@ -94,3 +94,66 @@ def test_fiu_typology_listing_titles_count_as_regulatory_density():
     )
 
     assert report["components"]["regulatory_content_density"] >= 5
+
+
+def test_virtual_asset_and_capital_market_language_counts_as_regulatory_density():
+    text = (
+        "VARA rulebook requirements for virtual asset service providers, "
+        "licensed activities, custody services, exchange services, advisory services, "
+        "market conduct, client asset safeguards, securities markets, commodities "
+        "markets, public joint stock companies, prospectus disclosures, and issuer "
+        "obligations. "
+    ) * 20
+
+    report = build_quality_score(
+        url="https://rulebooks.vara.ae/rulebook/virtual-assets-and-related-activities-regulations-2023",
+        fetch_success=True,
+        normalized_text=text,
+        normalized_hash="a" * 64,
+        canonical_url="https://rulebooks.vara.ae/rulebook/virtual-assets-and-related-activities-regulations-2023",
+        provider_confidence="explicit_adapter",
+    )
+
+    assert report["components"]["regulatory_content_density"] >= 5
+
+
+def test_virtual_asset_marketing_guidance_language_counts_as_regulatory_density():
+    text = (
+        "VARA marketing guidance for virtual asset services, promotions, "
+        "advertisements, client communications, token issuance, exchange services, "
+        "custody services, advisory services, virtual asset service providers, "
+        "market conduct, administrative orders, investor protection, risk warnings, "
+        "and disclosure obligations. "
+    ) * 20
+
+    report = build_quality_score(
+        url="https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_388_VER1.pdf",
+        fetch_success=True,
+        normalized_text=text,
+        normalized_hash="a" * 64,
+        canonical_url="https://rulebooks.vara.ae/sites/default/files/en_net_file_store/VARA_EN_388_VER1.pdf",
+        provider_confidence="explicit_adapter",
+    )
+
+    assert report["components"]["regulatory_content_density"] >= 5
+
+
+def test_company_auditor_and_economic_substance_language_counts_as_regulatory_density():
+    text = (
+        "Ministry of Economy legislation for companies, commercial agencies, "
+        "auditors, auditing accounts, beneficial owner registers, economic "
+        "substance regulations, competition controls, consumer protection, "
+        "cooperative associations, corporate governance, and compliance "
+        "obligations. "
+    ) * 20
+
+    report = build_quality_score(
+        url="https://www.moet.gov.ae/companies-legislations",
+        fetch_success=True,
+        normalized_text=text,
+        normalized_hash="a" * 64,
+        canonical_url="https://www.moet.gov.ae/companies-legislations",
+        provider_confidence="explicit_adapter",
+    )
+
+    assert report["components"]["regulatory_content_density"] >= 5

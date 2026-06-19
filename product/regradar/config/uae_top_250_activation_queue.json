@@ -1,8 +1,8 @@
 {
   "version": "2026-06-18-top-250-v1",
   "current_verified_truth": {
-    "enabled_uae_sources": 81,
-    "monitoring_active": 80,
+    "enabled_uae_sources": 226,
+    "monitoring_active": 225,
     "remediation": 1
   },
   "warning": "Queue only. No activation without gates.",

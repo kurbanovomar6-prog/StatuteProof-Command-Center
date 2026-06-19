@@ -41,6 +41,7 @@ def main() -> int:
     ap.add_argument("--adapter-config-json", default="{}")
     ap.add_argument("--wait-for-selector", default="")
     ap.add_argument("--content-selector", default="")
+    ap.add_argument("--fetch-method", default="playwright")
     ap.add_argument("--runs", type=int, default=2)
     ap.add_argument("--baseline-required", type=int, default=2)
     args = ap.parse_args()
@@ -53,9 +54,10 @@ def main() -> int:
         "jurisdiction": args.jurisdiction,
         "category": args.category,
         "enabled": False,
-        "fetch_method": "playwright",
         "baseline_runs_required": args.baseline_required,
     }
+    if args.fetch_method and args.fetch_method != "auto":
+        source["fetch_method"] = args.fetch_method
     if args.adapter_family:
         source["adapter_family"] = args.adapter_family
     if args.adapter_name:

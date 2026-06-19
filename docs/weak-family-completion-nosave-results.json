@@ -1,0 +1,110 @@
+{
+  "date": "2026-06-19",
+  "documented_probe_rows": 294,
+  "documented_strong_pass_rows": 106,
+  "note": "Counts include repeated focused no-save passes during adapter tuning; active count is lower because duplicates, drift, access blocks, and hard blockers were held.",
+  "artifacts": [
+    {
+      "artifact": "/tmp/difc_static_focused_nosave.json",
+      "family": "DIFC",
+      "tested_count": 35,
+      "strong_pass_count": 15
+    },
+    {
+      "artifact": "/tmp/difc_sitemap_focused_nosave.json",
+      "family": "DIFC",
+      "tested_count": 35,
+      "strong_pass_count": 0
+    },
+    {
+      "artifact": "/tmp/difc_workqueue_nosave.json",
+      "family": "DIFC",
+      "tested_count": 4,
+      "strong_pass_count": 0
+    },
+    {
+      "artifact": "/tmp/adgm_static_focused_nosave.json",
+      "family": "ADGM/FSRA",
+      "tested_count": 40,
+      "strong_pass_count": 26
+    },
+    {
+      "artifact": "/tmp/vara_direct_pdf_nosave.json",
+      "family": "VARA",
+      "tested_count": 14,
+      "strong_pass_count": 13
+    },
+    {
+      "artifact": "/tmp/vara_extra_pdf_nosave.json",
+      "family": "VARA",
+      "tested_count": 3,
+      "strong_pass_count": 2
+    },
+    {
+      "artifact": "/tmp/vara_rulebook_unfocused_nosave.json",
+      "family": "VARA",
+      "tested_count": 33,
+      "strong_pass_count": 8
+    },
+    {
+      "artifact": "/tmp/moe_direct_pdf_nosave.json",
+      "family": "Ministry of Economy / DNFBP AML",
+      "tested_count": 40,
+      "strong_pass_count": 37
+    },
+    {
+      "artifact": "/tmp/fiu_eocn_universe_nosave.json",
+      "family": "UAE FIU / EOCN",
+      "tested_count": 29,
+      "strong_pass_count": 3
+    },
+    {
+      "artifact": "/tmp/weak_family_pdf_nosave.json",
+      "family": "SCA / UAE FIU / legal PDFs",
+      "tested_count": 43,
+      "strong_pass_count": 0
+    },
+    {
+      "artifact": "/tmp/uaefiu_pdf_nosave.json",
+      "family": "UAE FIU",
+      "tested_count": 10,
+      "strong_pass_count": 0
+    },
+    {
+      "artifact": "/tmp/sca_workqueue_nosave.json",
+      "family": "SCA",
+      "tested_count": 6,
+      "strong_pass_count": 2
+    },
+    {
+      "artifact": "/tmp/sca_beta_regulations_nosave.json",
+      "family": "SCA",
+      "tested_count": 1,
+      "strong_pass_count": 0
+    },
+    {
+      "artifact": "/tmp/sca_beta_circulars_nosave.json",
+      "family": "SCA",
+      "tested_count": 1,
+      "strong_pass_count": 0
+    }
+  ],
+  "hard_blockers": {
+    "SCA": {
+      "ending_active": 5,
+      "target": 25,
+      "blocker": "Official SCA primary domains redirect to robots-disallowed uaecma.gov.ae, beta pages did not produce enough strong monitorable endpoints, and UAE legislation download URLs returned Cloudflare/403 to the project fetcher."
+    },
+    "UAE FIU": {
+      "ending_active": 6,
+      "target": 25,
+      "blocker": "UAE FIU homepage/robots are Cloudflare/403 to the project fetcher; direct media PDFs discovered through public search returned 403 under the project fetch policy, so only annual reports and press releases passed full gates."
+    },
+    "EOCN / sanctions / TFS": {
+      "ending_active": 23,
+      "target": 25,
+      "blocker": "EOCN and uaeiec official domains disallow broad automated fetching; remaining MoE AML/TFS candidates were duplicate normalized hashes or noisy designation-list style sources."
+    }
+  },
+  "disclaimer": "Monitoring intelligence only. Not legal advice."
+}

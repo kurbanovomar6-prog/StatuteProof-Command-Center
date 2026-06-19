@@ -1,27 +1,29 @@
 # Source Readiness Truth Reconciliation Report
 
 Date: 2026-06-15
-Updated: 2026-06-18
+Updated: 2026-06-19
 
 ## Executive Decision
 
 The canonical customer-facing truth for the current StatuteProof UAE source pack is:
 
-**147 enabled UAE sources; 146 monitoring-active in the current registry; 1 remediation source.**
+**226 enabled UAE sources; 225 monitoring-active in the current registry; 1 remediation source.**
 
 2026-06-18 update: the dirty **87 enabled / 86 active / 1 remediation** claim was rejected. Two ADGM rows (`AE-adgm-fsra-supervision-circulars` and `AE-adgm-data-protection-regulations-2021-pdf`) passed no-save, proof, 2/2 baseline, mass-monitor `MONITOR_OK`, and agent gates. Five FTA rows plus `AE-adgm-fsra-regulatory-alerts` were demoted to disabled candidates because they did not pass meaningful extraction gates.
 
 2026-06-18 later update: the weak-family bulk activation sprint tested 213 candidate runs, held nav-shell/quality-drop/drift/duplicate candidates, and activated 41 proof-backed sources after no-save, two baseline runs, mass-monitor `MONITOR_OK`, no hash drift, and review gates. A later FTA PDF sprint tested 27 official FTA PDFs, held 2 weak/problematic documents, and activated 25 proof-backed direct official FTA tax PDFs after no-save, two stable baseline runs, mass-monitor `MONITOR_OK`, no hash drift, and review gates. Current truth is now **147 enabled / 146 monitoring-active / 1 remediation**. This is not a complete UAE coverage claim; weak families remain visible in the source-family scorecard.
 
-The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later activation history advanced through proof-backed CBUAE, DFSA, VARA, DIFC, ADGM, UAE FIU, EOCN, SCA, and Ministry of Economy batches. The weak-family bulk sprint activated 41 additional DFSA/DIFC/Ministry of Economy sources from stable proof-backed runs, advancing the truth to **122 / 121 / 1**. The FTA PDF sprint then activated 25 direct official FTA tax PDFs from stable proof-backed runs and mass-monitor `MONITOR_OK`, advancing the truth to **147 / 146 / 1**. The UAE FIU homepage remains remediation because its live extraction is a navigation/search/language shell and tested replacements were shallow, blocked, stale, or duplicate-prone.
+2026-06-19 update: the weak-family completion sprint activated 79 further proof-backed sources across DIFC, ADGM/FSRA, VARA, Ministry of Economy / DNFBP AML, MoE-owned AML/TFS documents, and two UAE FIU listing endpoints. Each newly active row carries source ID, proof path, normalized text path, normalized hash, 2/2 baseline, `MONITOR_OK`, and legal-safe notes. Current truth is now **226 enabled / 225 monitoring-active / 1 remediation**. SCA, direct UAE FIU PDF/media expansion, and direct EOCN/UAEIEC expansion remain below the 25-source target because of robots, access, duplicate, and noise blockers.
+
+The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later activation history advanced through proof-backed CBUAE, DFSA, VARA, DIFC, ADGM, UAE FIU, EOCN, SCA, Ministry of Economy, and FTA batches. The weak-family bulk sprint activated 41 additional DFSA/DIFC/Ministry of Economy sources from stable proof-backed runs, advancing the truth to **122 / 121 / 1**. The FTA PDF sprint then activated 25 direct official FTA tax PDFs from stable proof-backed runs and mass-monitor `MONITOR_OK`, advancing the truth to **147 / 146 / 1**. The weak-family completion sprint activated 79 further proof-backed rows, advancing the truth to **226 / 225 / 1**. The UAE FIU homepage remains remediation because its live extraction is a navigation/search/language shell and tested replacements were shallow, blocked, stale, or duplicate-prone.
 
 ## Canonical Counts
 
 | Count | Value | Basis |
 | --- | ---: | --- |
-| Total records in `sources.json` | 291 | Registry file parse after FTA PDF activation. |
-| Enabled UAE sources | 147 | `enabled: true` and `jurisdiction: AE`. |
-| Monitoring-active | 146 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
+| Total records in `sources.json` | 370 | Registry file parse after weak-family completion activation. |
+| Enabled UAE sources | 226 | `enabled: true` and `jurisdiction: AE`. |
+| Monitoring-active | 225 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
 | Under extraction remediation | 1 | Enabled UAE registry row with `status: remediation`. |
 | Blocked / failed | 0 | Current registry uses remediation rather than blocked for the one not-ready enabled source. |
 
@@ -172,7 +174,7 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 
 ## Which Story Is Correct?
 
-**Correct today:** 147 enabled / 146 monitoring-active / 1 remediation.
+**Correct today:** 226 enabled / 225 monitoring-active / 1 remediation.
 
 **Not correct today:** 13 enabled / 10 confirmed / 3 under extraction remediation.
 
@@ -180,8 +182,8 @@ Reason: the final-8 sprint moved the registry and work queue over the 50-source 
 
 ## Allowed Customer-Facing Wording
 
-- "147 enabled UAE sources."
-- "146 monitoring-active in the current registry."
+- "226 enabled UAE sources."
+- "225 monitoring-active in the current registry."
 - "50 activation-ready UAE official source endpoints."
 - "Each activation-ready source passed proof, baseline, source-health, noise, and review gates."
 - "1 remediation source."
@@ -193,9 +195,9 @@ Reason: the final-8 sprint moved the registry and work queue over the 50-source 
 
 ## Forbidden Wording
 
-- "All 147 sources are validated."
-- "All 147 sources are confirmed."
-- "All 147 sources are ready."
+- "All 226 sources are validated."
+- "All 226 sources are confirmed."
+- "All 226 sources are ready."
 - "87 enabled / 86 active."
 - "DFSA ready."
 - "End-to-end DIFC source coverage."
@@ -206,11 +208,11 @@ Reason: the final-8 sprint moved the registry and work queue over the 50-source 
 
 ## Code And UI Result
 
-Current public/app source tables should use the 147/146/1 model:
+Current public/app source tables should use the 226/225/1 model:
 
 - `product/regradar/web/src/components/SourceCoverageTable.jsx`
 - `product/regradar/web/src/data/appMockData.js`
-- Pricing and billing surfaces use "147 enabled" with 146 monitoring-active and 1 remediation only where public truth is intentionally surfaced.
+- Pricing and billing surfaces use "226 enabled" with 225 monitoring-active and 1 remediation only where public truth is intentionally surfaced.
 
 This sprint changes `sources.json` only for proof-backed, repeat-baseline-complete, mass-monitor-checked activation-ready sources. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
 

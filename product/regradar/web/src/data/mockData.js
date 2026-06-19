@@ -103,7 +103,7 @@ export const pricingPlans = [
     routePlan: 'professional',
     desc: 'Selected official UAE regulatory source pack across VARA, CBUAE, DFSA, ADGM, FIU, DIFC and related public authorities. Built for an MLRO who needs evidence that regulatory changes were tracked.',
     features: [
-      '146 monitoring-active official-source endpoints',
+      '225 monitoring-active official-source endpoints',
       'Priority review queue for high-risk changes',
       'Weekly monitoring brief (activation required)',
       'Up to 2 custom sources after review',

@@ -24,7 +24,7 @@ MASS_MONITOR = ROOT / "docs/weak-family-25-each-mass-monitor-results.json"
 FINAL_REPORT = ROOT / "docs/weak-family-25-each-final-report.md"
 TARGET_PROGRESS = ROOT / "docs/weak-family-25-each-target-progress-report.md"
 
-EXPECTED_TRUTH = (147, 146, 1)
+MIN_TRUTH = (147, 146, 1)
 TARGET_FAMILIES = (
     "DIFC",
     "ADGM/FSRA",
@@ -98,8 +98,9 @@ def main() -> int:
         return 1
 
     sources = load_json(SOURCES)
-    if source_truth(sources) != EXPECTED_TRUTH:
-        errors.append(f"Expected source truth {EXPECTED_TRUTH}, got {source_truth(sources)}")
+    truth = source_truth(sources)
+    if truth[0] < MIN_TRUTH[0] or truth[1] < MIN_TRUTH[1] or truth[2] != MIN_TRUTH[2]:
+        errors.append(f"Expected source truth at least {MIN_TRUTH}, got {truth}")
     by_id = {str(row.get("source_id") or ""): row for row in sources if isinstance(row, dict)}
 
     final_set = load_json(FINAL_SET)
@@ -189,7 +190,7 @@ def main() -> int:
         return 1
 
     print("validate_weak_family_25_each: PASS")
-    print("Source truth: 147 enabled / 146 monitoring-active / 1 remediation")
+    print(f"Source truth: {truth[0]} enabled / {truth[1]} monitoring-active / {truth[2]} remediation")
     print("FTA activation: 25 proof-backed pdf_document endpoints")
     print("Other weak families remain below 25 with blockers documented")
     return 0

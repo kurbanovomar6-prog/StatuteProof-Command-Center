@@ -170,8 +170,8 @@ export default function SourceReadinessReviewPage({ onBack }) {
             </p>
             <div className="mx-auto mt-6 grid max-w-lg grid-cols-3 gap-2 text-center">
               {[
-                ['81', 'UAE sources enabled'],
-                ['80', 'monitoring-active'],
+                ['226', 'UAE sources enabled'],
+                ['225', 'monitoring-active'],
                 ['7', 'licence profiles covered'],
               ].map(([value, label]) => (
                 <div key={label} className="sp-panel-muted px-3 py-2">

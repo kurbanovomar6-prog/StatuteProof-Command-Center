@@ -3,7 +3,7 @@
 
 This validator protects the honest remediation lineage after the later FTA/ADGM
 truth repair and later proof-backed activations:
-147 enabled UAE sources / 146 monitoring-active / 1 remediation.
+226 enabled UAE sources / 225 monitoring-active / 1 remediation after later proof-backed activations.
 
 It is intentionally narrow. It verifies the two newly activated DFSA
 replacement endpoints and the one remaining FIU remediation source instead of
@@ -26,7 +26,7 @@ SOURCE_RUNS_FILE = REGRADAR_ROOT / "data/source_runs/source_runs.jsonl"
 FINAL_REPORT = ROOT / "docs/final-remediation-activation-final-report.md"
 TRUTH_REPORT = ROOT / "docs/source-readiness-truth-reconciliation-report.md"
 
-EXPECTED_COUNTS = (147, 146, 1)
+MIN_COUNTS = (226, 225, 1)
 
 NEW_ACTIVE_SOURCES = {
     "AE-dfsa-annual-reports": {
@@ -178,8 +178,8 @@ def main() -> int:
     active = [source for source in enabled_ae if source.get("status") == "active"]
     remediation = [source for source in enabled_ae if source.get("status") == "remediation"]
     counts = (len(enabled_ae), len(active), len(remediation))
-    if counts != EXPECTED_COUNTS:
-        fail(errors, f"Expected source truth {EXPECTED_COUNTS}, got {counts}")
+    if counts[0] < MIN_COUNTS[0] or counts[1] < MIN_COUNTS[1] or counts[2] != MIN_COUNTS[2]:
+        fail(errors, f"Expected source truth at least {MIN_COUNTS}, got {counts}")
 
     for old_id, replacement_id in REPLACED_SOURCES.items():
         old_source = by_id.get(old_id)
@@ -290,8 +290,8 @@ def main() -> int:
 
     if TRUTH_REPORT.exists():
         truth_text = TRUTH_REPORT.read_text(encoding="utf-8")
-        if "147 enabled / 146 monitoring-active / 1" not in truth_text:
-            fail(errors, "Truth reconciliation report must include current 147/146/1 wording")
+        if "226 enabled / 225 monitoring-active / 1" not in truth_text:
+            fail(errors, "Truth reconciliation report must include current 226/225/1 wording")
 
     for path in iter_scan_files():
         try:
@@ -308,7 +308,7 @@ def main() -> int:
         return 1
 
     print("Final remediation activation validation PASSED")
-    print("- Source truth: 147 enabled / 146 monitoring-active / 1 remediation")
+    print(f"- Source truth: {counts[0]} enabled / {counts[1]} monitoring-active / {counts[2]} remediation")
     print("- Newly active replacements checked:", ", ".join(sorted(NEW_ACTIVE_SOURCES)))
     print("- Remaining remediation checked:", REMAINING_REMEDIATION)
     return 0

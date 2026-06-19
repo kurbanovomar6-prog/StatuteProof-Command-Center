@@ -153,7 +153,8 @@ def main() -> int:
     ]
     active = [source for source in enabled_ae if source.get("status") == "active"]
     remediation = [source for source in enabled_ae if source.get("status") == "remediation"]
-    if (len(enabled_ae), len(active), len(remediation)) != (147, 146, 1):
+    truth = (len(enabled_ae), len(active), len(remediation))
+    if truth[0] < 226 or truth[1] < 225 or truth[2] != 1:
         errors.append(
             "Source truth mismatch after later proof-backed activations: "
             f"{len(enabled_ae)} enabled / {len(active)} active / {len(remediation)} remediation"

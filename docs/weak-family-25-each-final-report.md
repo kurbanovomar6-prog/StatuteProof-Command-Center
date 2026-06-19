@@ -105,4 +105,4 @@ Add 7/30/90-day source reliability trend charts for monitoring-active sources.
 
 ## 17. Next Exact Sales Task
 
-Update demo language to: “147 enabled UAE official-source endpoints, 146 monitoring-active, including 25 direct official FTA tax PDFs. Selected sources only. Monitoring intelligence only. Not legal advice.”
+Superseded by the 2026-06-19 weak-family completion truth: “226 enabled UAE official-source endpoints, 225 monitoring-active. Selected sources only. Monitoring intelligence only. Not legal advice.”

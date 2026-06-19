@@ -19,7 +19,7 @@ This checklist is the parser/source-intake gate before a source, parser change, 
 - Do not imply all enabled sources are ready.
 - Do not imply regulator endorsement, legal advice, guaranteed compliance, perfect parsing, or complete coverage.
 - Do not show raw internal `PASS`, `Validated`, or activation-like `Active` labels in customer-facing source tables.
-- Current UAE source story: 147 enabled UAE sources, 146 monitoring-active in the current registry, 1 remediation source.
+- Current UAE source story: 226 enabled UAE sources, 225 monitoring-active in the current registry, 1 remediation source.
 - Remediation source in the current registry: UAE FIU Homepage.
 
 ## Source Readiness Checklist
