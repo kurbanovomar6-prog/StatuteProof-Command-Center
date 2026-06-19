@@ -1,0 +1,467 @@
+{
+  "schema_version": "1.0",
+  "allowed_statuses": [
+    "proposed",
+    "accepted",
+    "in_progress",
+    "blocked",
+    "review_source_monitor",
+    "review_evidence",
+    "review_qa",
+    "review_legal",
+    "review_product",
+    "done",
+    "rejected"
+  ],
+  "tasks": [
+    {
+      "task_id": "evidence-validator-hardening",
+      "title": "Harden fresh-alert evidence validators",
+      "status": "accepted",
+      "owner_agent": "Code Architect",
+      "reviewer_agents": [
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "cross_project",
+      "files_allowed_to_touch": [
+        "tools/validate_fresh_signal_sources.py",
+        "tools/validate_source_monitoring_modes.py",
+        "tools/validate_daily_checkable_sources.py",
+        "product/regradar/tests/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*",
+        "product/regradar/data/source_snapshots/",
+        "product/regradar/data/source_runs/source_runs.jsonl"
+      ],
+      "objective": "Fail if fresh-alert sources lack proof artifacts, normalized paths, hashes, baseline runs, daily metadata, or MONITOR_OK.",
+      "acceptance_criteria": [
+        "Every fresh_alert source is checked for source_id, proof_path, normalized_text_path, normalized_hash, baseline_runs_completed >= 2, recommended_check_frequency daily, alert_eligible true, and last_monitor_status MONITOR_OK.",
+        "Validator fails stale static/homepage/remediation/candidate sources counted as fresh-alert monitoring.",
+        "Validator reports exact source_id failures."
+      ],
+      "evidence_required": [
+        "Validator output",
+        "Representative failing fixture or registry sample",
+        "QA review"
+      ],
+      "validation_commands": [
+        "python3 tools/validate_fresh_signal_sources.py",
+        "python3 tools/validate_source_monitoring_modes.py",
+        "python3 tools/validate_daily_checkable_sources.py",
+        "python3 -m pytest product/regradar/tests -q"
+      ],
+      "blocker": "",
+      "next_handoff_agent": "Evidence Trail",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "customer-claim-truth-cleanup",
+      "title": "Clean stale customer-facing source claims",
+      "status": "accepted",
+      "owner_agent": "Product Manager",
+      "reviewer_agents": [
+        "Legal Language",
+        "QA / Critic"
+      ],
+      "source_family": "cross_project",
+      "files_allowed_to_touch": [
+        "product/regradar/web/src/",
+        "product/regradar/app/plan.py",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*",
+        "product/regradar/sources.json"
+      ],
+      "objective": "Replace stale broad monitoring claims with fresh-alert/evidence-library/candidate/remediation truth.",
+      "acceptance_criteria": [
+        "No customer-facing copy uses legacy active count as fresh-alert monitoring count.",
+        "No complete UAE coverage or complete family coverage claim appears.",
+        "SCA, FIU, MoJ/Gazette, and MoF limitations are explicit where mentioned."
+      ],
+      "evidence_required": [
+        "Legal Language approval",
+        "QA claim scan",
+        "Frontend validation if UI files change"
+      ],
+      "validation_commands": [
+        "python3 tools/validate_uae_coverage_claims.py",
+        "python3 tools/validate_plan_pricing_consistency.py"
+      ],
+      "blocker": "",
+      "next_handoff_agent": "Legal Language",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "source-summary-fresh-alert-counting",
+      "title": "Make source summary count fresh-alert eligibility separately",
+      "status": "proposed",
+      "owner_agent": "Code Architect",
+      "reviewer_agents": [
+        "Product Manager",
+        "QA / Critic"
+      ],
+      "source_family": "cross_project",
+      "files_allowed_to_touch": [
+        "product/regradar/app/source_summary.py",
+        "product/regradar/tests/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*",
+        "product/regradar/data/"
+      ],
+      "objective": "Separate legacy active counts from fresh_alert, evidence_library, candidate, and remediation mode counts.",
+      "acceptance_criteria": [
+        "Summary exposes fresh_alert count independently from enabled/active count.",
+        "Evidence-library and remediation sources cannot inflate fresh-alert totals."
+      ],
+      "evidence_required": [
+        "Unit tests for count categories",
+        "QA review"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests -q",
+        "python3 tools/validate_source_monitoring_modes.py"
+      ],
+      "blocker": "",
+      "next_handoff_agent": "QA / Critic",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "vara-final-source-to-25",
+      "title": "Find one more proof-backed VARA fresh-alert source",
+      "status": "proposed",
+      "owner_agent": "Source Monitor",
+      "reviewer_agents": [
+        "Code Architect",
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "VARA",
+      "files_allowed_to_touch": [
+        "product/regradar/app/adapters/",
+        "product/regradar/tests/",
+        "product/regradar/sources.json",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Bring VARA from 24 to 25 fresh_alert MONITOR_OK sources without using static pages.",
+      "acceptance_criteria": [
+        "Candidate is official/public and daily-checkable.",
+        "No-save passes with quality >= 60 and structured item extraction.",
+        "Proof, normalized text, stable hash, baseline >= 2, and MONITOR_OK are present."
+      ],
+      "evidence_required": [
+        "No-save result",
+        "Proof path",
+        "Baseline result",
+        "Mass-monitor dry-run MONITOR_OK"
+      ],
+      "validation_commands": [
+        "python3 tools/validate_fresh_signal_25_per_family.py",
+        "python3 tools/validate_fresh_signal_sources.py"
+      ],
+      "blocker": "Regulatory notices scored 59 and unlicensed VASP page was nav-shell in the previous pass.",
+      "next_handoff_agent": "Code Architect",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "dfsa-publication-listing-adapter",
+      "title": "Build DFSA publication and guidance listing adapter",
+      "status": "proposed",
+      "owner_agent": "Code Architect",
+      "reviewer_agents": [
+        "Source Monitor",
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "DFSA",
+      "files_allowed_to_touch": [
+        "product/regradar/app/adapters/",
+        "product/regradar/tests/",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Stop DFSA guidance/publication/policy pages collapsing to homepage/nav-shell extraction.",
+      "acceptance_criteria": [
+        "Adapter extracts titles, URLs, and dates or publication context from official DFSA pages.",
+        "Static individual news detail pages remain evidence_library only.",
+        "Fixture tests reject homepage shell content."
+      ],
+      "evidence_required": [
+        "Fixture tests",
+        "No-save results before activation"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests/test_adapter_platform.py -q",
+        "python3 tools/validate_no_static_sources_as_alerts.py"
+      ],
+      "blocker": "Guidance, publications, and policy pages returned Go-to-Homepage nav-shell under current extraction.",
+      "next_handoff_agent": "Source Monitor",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "sca-table-download-adapter",
+      "title": "Build SCA table/download adapter",
+      "status": "proposed",
+      "owner_agent": "Code Architect",
+      "reviewer_agents": [
+        "Source Monitor",
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "SCA",
+      "files_allowed_to_touch": [
+        "product/regradar/app/adapters/",
+        "product/regradar/tests/",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Extract real SCA laws, decisions, regulations, circulars, or download rows without counting nav shell.",
+      "acceptance_criteria": [
+        "Adapter extracts at least three meaningful official items from fixture.",
+        "Arabic/English duplicates are handled honestly.",
+        "Nav-shell fixture remains blocked."
+      ],
+      "evidence_required": [
+        "SCA fixture tests",
+        "Public endpoint blocker classification"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests/test_adapter_platform.py -q",
+        "python3 tools/validate_fresh_signal_sources.py"
+      ],
+      "blocker": "SCA regulations listing remained NAV_SHELL_ONLY in previous live probes.",
+      "next_handoff_agent": "Source Monitor",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "fiu-circulars-public-source-investigation",
+      "title": "Investigate public UAE FIU circular sources",
+      "status": "proposed",
+      "owner_agent": "Source Monitor",
+      "reviewer_agents": [
+        "Code Architect",
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "UAE FIU",
+      "files_allowed_to_touch": [
+        "docs/",
+        "product/regradar/config/",
+        "product/regradar/app/adapters/",
+        "product/regradar/tests/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Prove whether UAE FIU has public circular endpoints that can be monitored without goAML or private portals.",
+      "acceptance_criteria": [
+        "goAML remains blocked/private.",
+        "Public circular endpoint is either activated through gates or documented as unavailable.",
+        "Duplicate FIU publication aliases are not counted as new sources."
+      ],
+      "evidence_required": [
+        "Research log",
+        "No-save output or blocker classification"
+      ],
+      "validation_commands": [
+        "python3 tools/validate_fresh_signal_sources.py",
+        "python3 tools/validate_uae_coverage_claims.py"
+      ],
+      "blocker": "FIU circulars page remains nav-shell and public FIU universe appears small.",
+      "next_handoff_agent": "Code Architect",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "difc-consultation-listing-adapter",
+      "title": "Build DIFC consultation/legal listing adapter",
+      "status": "proposed",
+      "owner_agent": "Code Architect",
+      "reviewer_agents": [
+        "Source Monitor",
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "DIFC",
+      "files_allowed_to_touch": [
+        "product/regradar/app/adapters/",
+        "product/regradar/tests/",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Isolate DIFC consultation cards/PDF rows and legal listings without business/laws navigation overcapture.",
+      "acceptance_criteria": [
+        "Adapter extracts meaningful consultation/listing rows.",
+        "Quality gate passes without nav-heavy content.",
+        "Old whats-on/news detail pages remain evidence_library."
+      ],
+      "evidence_required": [
+        "Fixture tests",
+        "No-save report"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests/test_adapter_platform.py -q",
+        "python3 tools/validate_no_static_sources_as_alerts.py"
+      ],
+      "blocker": "DIFC consultation page scored q59 because current extraction still includes navigation.",
+      "next_handoff_agent": "Source Monitor",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "mof-document-publication-adapter",
+      "title": "Build MoF document and publication adapter",
+      "status": "proposed",
+      "owner_agent": "Code Architect",
+      "reviewer_agents": [
+        "Source Monitor",
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "MoF",
+      "files_allowed_to_touch": [
+        "product/regradar/app/adapters/",
+        "product/regradar/tests/",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Grow MoF from one medium-signal publications hub into specific official publication, decision, and legal/tax document endpoints.",
+      "acceptance_criteria": [
+        "Generic MoF homepage remains evidence_library only.",
+        "Adapter extracts itemized document rows with stable titles/links.",
+        "Only official/public useful MoF endpoints are considered."
+      ],
+      "evidence_required": [
+        "MoF fixture tests",
+        "Source Monitor research log"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests/test_adapter_platform.py -q",
+        "python3 tools/validate_fresh_signal_sources.py"
+      ],
+      "blocker": "Only MoF publications hub is currently a fresh-alert source; generic homepage is excluded.",
+      "next_handoff_agent": "Source Monitor",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "moj-gazette-official-alternative-research",
+      "title": "Research official MoJ/Gazette alternatives",
+      "status": "proposed",
+      "owner_agent": "Source Monitor",
+      "reviewer_agents": [
+        "Code Architect",
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "source_family": "MoJ/Gazette",
+      "files_allowed_to_touch": [
+        "docs/",
+        "product/regradar/config/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Find official accessible MoJ/Gazette/legal update endpoints without bypassing WAF/access controls.",
+      "acceptance_criteria": [
+        "Current WAF/nav-shell blockers are documented.",
+        "Any proposed alternative is official/public and unauthenticated.",
+        "No source is activated without proof/baseline/MONITOR_OK."
+      ],
+      "evidence_required": [
+        "Official-source research log",
+        "HTTP/DOM/PDF blocker classification"
+      ],
+      "validation_commands": [
+        "python3 tools/validate_uae_coverage_claims.py",
+        "python3 tools/validate_fresh_signal_sources.py"
+      ],
+      "blocker": "MoJ/Gazette is 0/25 and current pages are nav-shell or WAF/access remediation.",
+      "next_handoff_agent": "Code Architect",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "task_id": "ruflo-safe-tooling-intake",
+      "title": "Review Ruflo safe adoption path",
+      "status": "accepted",
+      "owner_agent": "Security/Tooling Auditor",
+      "reviewer_agents": [
+        "Code Architect",
+        "QA / Critic",
+        "Chief of Staff"
+      ],
+      "source_family": "tooling",
+      "files_allowed_to_touch": [
+        "docs/ruflo-tooling-intake-policy.md",
+        "docs/ruflo-safe-adoption-report.md"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*",
+        ".claude/settings.json",
+        ".claude/mcp.json",
+        ".githooks/",
+        ".claude-flow/"
+      ],
+      "objective": "Keep Ruflo adoption safe by documenting useful ideas and blocking full install until explicit approval.",
+      "acceptance_criteria": [
+        "Full Ruflo install is not performed.",
+        "Unsafe features and safe subset are documented.",
+        "No hooks, daemon, MCP memory, or broad agent pack is enabled."
+      ],
+      "evidence_required": [
+        "Tooling intake report",
+        "QA review"
+      ],
+      "validation_commands": [
+        "git status --short"
+      ],
+      "blocker": "",
+      "next_handoff_agent": "Chief of Staff",
+      "notes": [],
+      "created_at": "2026-06-19T00:00:00Z",
+      "updated_at": "2026-06-19T00:00:00Z"
+    }
+  ]
+}
