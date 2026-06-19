@@ -17,6 +17,23 @@ def is_ae_source(source: dict) -> bool:
     return source.get("jurisdiction") == "AE" or source_id.startswith("AE-")
 
 
+STATIC_OR_HOMEPAGE_TOKENS = (
+    "/whats-on/",
+    "/media/announcements/",
+    "/news/notice-",
+    "/test/",
+    "/login",
+    "/signup",
+)
+
+
+def is_static_or_homepage_url(url: str) -> bool:
+    folded = url.lower()
+    if folded.rstrip("/").count("/") <= 2:
+        return True
+    return any(token in folded for token in STATIC_OR_HOMEPAGE_TOKENS)
+
+
 def main() -> int:
     sources = json.loads(SOURCES.read_text())
     failures: list[str] = []
@@ -30,6 +47,22 @@ def main() -> int:
 
     for source in fresh:
         source_id = source.get("source_id") or source.get("url")
+        url = str(source.get("url") or "")
+        if source.get("last_monitor_status") != "MONITOR_OK":
+            failures.append(f"{source_id}: daily fresh_alert lacks MONITOR_OK")
+        for field in ("proof_path", "normalized_text_path", "normalized_hash"):
+            if not source.get(field):
+                failures.append(f"{source_id}: daily fresh_alert missing {field}")
+        baseline_completed = int(source.get("baseline_runs_completed") or 0)
+        baseline_required = max(2, int(source.get("baseline_runs_required") or 2))
+        if baseline_completed < baseline_required:
+            failures.append(
+                f"{source_id}: baseline {baseline_completed}/{baseline_required} is incomplete"
+            )
+        if source.get("alert_eligible") is not True:
+            failures.append(f"{source_id}: daily fresh_alert must be alert_eligible")
+        if is_static_or_homepage_url(url):
+            failures.append(f"{source_id}: static/detail/homepage URL cannot be daily fresh_alert")
         if source.get("recommended_check_frequency") != "daily":
             failures.append(f"{source_id}: expected recommended_check_frequency=daily")
         for field in ("fresh_signal_type", "expected_update_pattern", "customer_alert_policy"):

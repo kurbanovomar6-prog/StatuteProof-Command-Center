@@ -17,7 +17,7 @@
     {
       "task_id": "evidence-validator-hardening",
       "title": "Harden fresh-alert evidence validators",
-      "status": "accepted",
+      "status": "review_evidence",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Evidence Trail",
@@ -55,9 +55,18 @@
       ],
       "blocker": "",
       "next_handoff_agent": "Evidence Trail",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-19T20:03:12Z",
+          "note": "Agent Council wave 1: Code Architect owns validator hardening; Evidence Trail and QA must review before any sales claims."
+        },
+        {
+          "created_at": "2026-06-19T20:21:44Z",
+          "note": "Code Architect validator hardening patch landed locally; coordinator narrowed goAML blocking to avoid rejecting official MoE goAML documents. Fresh signal, monitoring mode, and daily validators now pass. Next gate: Evidence Trail review."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:21:44Z"
     },
     {
       "task_id": "customer-claim-truth-cleanup",
@@ -96,9 +105,18 @@
       ],
       "blocker": "",
       "next_handoff_agent": "Legal Language",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-19T20:03:12Z",
+          "note": "Agent Council wave 1: Product + Legal + QA must remove stale 225/238-style fresh monitoring claims and family overclaims."
+        },
+        {
+          "created_at": "2026-06-19T20:21:44Z",
+          "note": "Returned to accepted: wait for evidence-validator-hardening review before UI/customer copy edits."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:21:44Z"
     },
     {
       "task_id": "source-summary-fresh-alert-counting",
@@ -141,7 +159,7 @@
     {
       "task_id": "vara-final-source-to-25",
       "title": "Find one more proof-backed VARA fresh-alert source",
-      "status": "proposed",
+      "status": "accepted",
       "owner_agent": "Source Monitor",
       "reviewer_agents": [
         "Code Architect",
@@ -179,12 +197,12 @@
       "next_handoff_agent": "Code Architect",
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:03:12Z"
     },
     {
       "task_id": "dfsa-publication-listing-adapter",
       "title": "Build DFSA publication and guidance listing adapter",
-      "status": "proposed",
+      "status": "accepted",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Source Monitor",
@@ -219,12 +237,12 @@
       "next_handoff_agent": "Source Monitor",
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:03:12Z"
     },
     {
       "task_id": "sca-table-download-adapter",
       "title": "Build SCA table/download adapter",
-      "status": "proposed",
+      "status": "accepted",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Source Monitor",
@@ -259,12 +277,12 @@
       "next_handoff_agent": "Source Monitor",
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:03:12Z"
     },
     {
       "task_id": "fiu-circulars-public-source-investigation",
       "title": "Investigate public UAE FIU circular sources",
-      "status": "proposed",
+      "status": "accepted",
       "owner_agent": "Source Monitor",
       "reviewer_agents": [
         "Code Architect",
@@ -300,12 +318,12 @@
       "next_handoff_agent": "Code Architect",
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:03:12Z"
     },
     {
       "task_id": "difc-consultation-listing-adapter",
       "title": "Build DIFC consultation/legal listing adapter",
-      "status": "proposed",
+      "status": "accepted",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Source Monitor",
@@ -340,12 +358,12 @@
       "next_handoff_agent": "Source Monitor",
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:03:12Z"
     },
     {
       "task_id": "mof-document-publication-adapter",
       "title": "Build MoF document and publication adapter",
-      "status": "proposed",
+      "status": "accepted",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Source Monitor",
@@ -380,12 +398,12 @@
       "next_handoff_agent": "Source Monitor",
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:03:12Z"
     },
     {
       "task_id": "moj-gazette-official-alternative-research",
       "title": "Research official MoJ/Gazette alternatives",
-      "status": "proposed",
+      "status": "accepted",
       "owner_agent": "Source Monitor",
       "reviewer_agents": [
         "Code Architect",
@@ -419,7 +437,7 @@
       "next_handoff_agent": "Code Architect",
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T20:03:12Z"
     },
     {
       "task_id": "ruflo-safe-tooling-intake",

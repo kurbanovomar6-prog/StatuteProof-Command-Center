@@ -17,16 +17,21 @@ def is_ae_source(source: dict) -> bool:
     return source.get("jurisdiction") == "AE" or source_id.startswith("AE-")
 
 
-def is_static_detail_url(url: str) -> bool:
+STATIC_OR_HOMEPAGE_TOKENS = (
+    "/whats-on/",
+    "/media/announcements/",
+    "/news/notice-",
+    "/test/",
+    "/login",
+    "/signup",
+)
+
+
+def is_static_or_homepage_url(url: str) -> bool:
     folded = url.lower()
-    return any(
-        token in folded
-        for token in (
-            "/whats-on/",
-            "/media/announcements/",
-            "/news/notice-",
-        )
-    )
+    if folded.rstrip("/").count("/") <= 2:
+        return True
+    return any(token in folded for token in STATIC_OR_HOMEPAGE_TOKENS)
 
 
 def main() -> int:
@@ -60,7 +65,7 @@ def main() -> int:
         if not source.get("customer_alert_policy"):
             failures.append(f"{source_id}: fresh_alert lacks customer_alert_policy")
         baseline_completed = int(source.get("baseline_runs_completed") or 0)
-        baseline_required = int(source.get("baseline_runs_required") or 2)
+        baseline_required = max(2, int(source.get("baseline_runs_required") or 2))
         if baseline_completed < baseline_required:
             failures.append(
                 f"{source_id}: baseline {baseline_completed}/{baseline_required} is incomplete"
@@ -71,10 +76,8 @@ def main() -> int:
             failures.append(
                 f"{source_id}: fresh_alert must be Tier A/B, got {source.get('commercial_signal_tier')!r}"
             )
-        if is_static_detail_url(url):
-            failures.append(f"{source_id}: static detail URL cannot be fresh_alert ({url})")
-        if url.rstrip("/").count("/") <= 2:
-            failures.append(f"{source_id}: generic root URL cannot be fresh_alert ({url})")
+        if is_static_or_homepage_url(url):
+            failures.append(f"{source_id}: static/detail/homepage URL cannot be fresh_alert ({url})")
 
     if failures:
         print("validate_fresh_signal_sources: FAIL")

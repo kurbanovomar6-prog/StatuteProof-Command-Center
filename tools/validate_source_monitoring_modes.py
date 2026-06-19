@@ -26,11 +26,26 @@ FORBIDDEN_COPY = (
     "legal advice platform",
     "legal advice service",
 )
+STATIC_OR_HOMEPAGE_TOKENS = (
+    "/whats-on/",
+    "/media/announcements/",
+    "/news/notice-",
+    "/test/",
+    "/login",
+    "/signup",
+)
 
 
 def is_ae_source(source: dict) -> bool:
     source_id = str(source.get("source_id") or "")
     return source.get("jurisdiction") == "AE" or source_id.startswith("AE-")
+
+
+def is_static_or_homepage_url(url: str) -> bool:
+    folded = url.lower()
+    if folded.rstrip("/").count("/") <= 2:
+        return True
+    return any(token in folded for token in STATIC_OR_HOMEPAGE_TOKENS)
 
 
 def main() -> int:
@@ -48,8 +63,24 @@ def main() -> int:
             failures.append(f"{source_id}: missing alert_eligible")
         if mode != "fresh_alert" and source.get("alert_eligible") is True:
             failures.append(f"{source_id}: non-fresh mode {mode!r} cannot be alert_eligible")
-        if mode == "fresh_alert" and source.get("alert_eligible") is not True:
-            failures.append(f"{source_id}: fresh_alert must set alert_eligible=true")
+        if mode == "fresh_alert":
+            if source.get("alert_eligible") is not True:
+                failures.append(f"{source_id}: fresh_alert must set alert_eligible=true")
+            if source.get("last_monitor_status") != "MONITOR_OK":
+                failures.append(f"{source_id}: fresh_alert lacks MONITOR_OK")
+            for field in ("proof_path", "normalized_text_path", "normalized_hash"):
+                if not source.get(field):
+                    failures.append(f"{source_id}: fresh_alert missing {field}")
+            baseline_completed = int(source.get("baseline_runs_completed") or 0)
+            baseline_required = max(2, int(source.get("baseline_runs_required") or 2))
+            if baseline_completed < baseline_required:
+                failures.append(
+                    f"{source_id}: baseline {baseline_completed}/{baseline_required} is incomplete"
+                )
+            if source.get("recommended_check_frequency") != "daily":
+                failures.append(f"{source_id}: fresh_alert lacks recommended_check_frequency=daily")
+            if is_static_or_homepage_url(str(source.get("url") or "")):
+                failures.append(f"{source_id}: static/detail/homepage URL cannot be fresh_alert")
         if mode == "remediation" and source.get("fresh_signal_class") != "REMEDIATION":
             failures.append(f"{source_id}: remediation mode must use fresh_signal_class=REMEDIATION")
 

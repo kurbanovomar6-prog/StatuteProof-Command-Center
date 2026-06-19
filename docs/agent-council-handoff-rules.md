@@ -61,3 +61,26 @@ Chief of Staff may not:
 - override QA on no-ship findings;
 - override Legal Language on unsafe claims;
 - override Product Manager on sellability.
+
+## Runtime Dispatch Policy
+
+The Codex subagent runtime can enforce a thread limit. Treat that as an operating constraint, not a product failure.
+
+Rules:
+
+- Do not launch every council role at once.
+- Run agents in waves of one to three active agents.
+- Give write ownership to at most one worker per file set.
+- Use read-only reviewers in parallel only when they do not need the same write scope.
+- Wait for each wave to return a final status before launching the next wave.
+- If an agent hangs, do not keep launching more agents into the limit; record the blocker and continue with the next safe handoff.
+- Record task status in `product/regradar/config/agent_council_tasks.json` before and after each wave.
+
+Recommended waves:
+
+1. Truth wave: Code Architect, Evidence Trail, QA / Critic.
+2. Claim wave: Product Manager, Legal Language, QA / Critic.
+3. Source wave: Source Monitor plus one Adapter Worker for one source family.
+4. Sales wave: ICP Lead Research, Product Manager, Outreach Writer after Legal approval.
+
+This lets all roles participate without relying on unsafe full-swarm concurrency.
