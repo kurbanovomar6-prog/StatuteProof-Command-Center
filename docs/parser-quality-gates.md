@@ -19,7 +19,7 @@ This checklist is the parser/source-intake gate before a source, parser change, 
 - Do not imply all enabled sources are ready.
 - Do not imply regulator endorsement, legal advice, guaranteed compliance, perfect parsing, or complete coverage.
 - Do not show raw internal `PASS`, `Validated`, or activation-like `Active` labels in customer-facing source tables.
-- Current UAE source story for customer fresh monitoring: 232 enabled UAE sources, 162 fresh-alert eligible, 61 evidence-library, 6 candidate, 3 remediation.
+- Current UAE source story for customer fresh monitoring: 238 enabled UAE sources, 168 fresh-alert eligible, 61 evidence-library, 6 candidate, 3 remediation.
 - Legacy active/enabled rows are not the same as customer fresh-alert monitoring.
 - Remediation sources in the current fresh-signal model: UAE FIU Homepage, UAE Legislation Portal, and remaining SCA remediation source.
 

@@ -76,7 +76,7 @@ The pack is no longer a source-count toy. It has proof-backed, baseline-tested m
 
 Safe customer-facing wording:
 
-"StatuteProof currently has 232 enabled UAE official-source endpoints, including 231 legacy monitoring-active sources and 162 fresh-alert eligible daily monitors after proof, baseline, source-health, noise, and review gates. One legacy registry source remains under remediation. Selected sources only. Monitoring intelligence only, not legal advice."
+"StatuteProof currently has 238 enabled UAE official-source endpoints, including 237 legacy monitoring-active sources and 168 fresh-alert eligible daily monitors after proof, baseline, source-health, noise, and review gates. One legacy registry source remains under remediation. Selected sources only. Monitoring intelligence only, not legal advice."
 
 Do not say:
 

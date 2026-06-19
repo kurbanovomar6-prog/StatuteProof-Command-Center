@@ -948,6 +948,101 @@ class VaraPdfListingAdapter(DocumentListingAdapter):
     allowed_tokens = ("rulebook", "aml", "cft", "company", "enforcement", "order", "regulatory", "framework", "virtual asset")
 
 
+class VaraNewsListingAdapter(BaseHtmlAdapter):
+    family = "vara_news_listing"
+    name = "vara_news_listing"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        config = config or {}
+        soup = _soup(
+            html,
+            config.get("exclude_selectors") or ["header", "nav", "footer", ".search", "script", "style", "noscript"],
+        )
+        container_selector = str(config.get("container_selector") or "section.bg-bg-2 .container, main").strip()
+        container = soup.select_one(container_selector) if container_selector else soup
+        if not container:
+            container = soup.select_one("main") or soup.body or soup
+
+        cards = [
+            node for node in container.select("div")
+            if "border-b-bg-5" in " ".join(node.get("class") or []) and "bg-white" in " ".join(node.get("class") or [])
+        ]
+        if not cards:
+            cards = [node for node in container.select("article, li, .card, .item") if node.select_one("a[href]")]
+
+        items: list[dict] = []
+        seen: set[str] = set()
+        max_items = int(config.get("max_items") or 80)
+        for card in cards:
+            context = _node_text(card, separator=" ", limit=900)
+            if not context:
+                continue
+            date = _extract_date(context)
+            title_source = context
+            if date and date in title_source:
+                title_source = title_source.split(date, 1)[1]
+            title_source = re.split(r"\b(?:Download PDF|Download The PF NRA|Read More)\b", title_source, maxsplit=1, flags=re.I)[0]
+            title = _clean(title_source, limit=260)
+            if _is_noise_title(title):
+                continue
+
+            links = []
+            for anchor in card.select("a[href]"):
+                href = (anchor.get("href") or "").strip()
+                if not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
+                    continue
+                if "/en/news/" not in href and "media.umbraco.io" not in href and ".pdf" not in href.lower():
+                    continue
+                links.append(urljoin(url, href))
+            if not links:
+                continue
+
+            for item_url in links:
+                key = f"{title.lower()}|{date.lower()}|{item_url.lower()}"
+                if key in seen:
+                    continue
+                seen.add(key)
+                is_document = ".pdf" in item_url.lower()
+                item = {
+                    "title": title,
+                    "date": date,
+                    "url": item_url,
+                    "document_url": item_url if is_document else "",
+                    "category": "document" if is_document else "news_or_notice",
+                    "raw_text_snippet": context,
+                }
+                item["row_hash"] = _row_hash(title, date, item_url, item["category"])
+                items.append(item)
+                if len(items) >= max_items:
+                    break
+            if len(items) >= max_items:
+                break
+
+        if bool(config.get("sort_items", True)):
+            items.sort(key=lambda row: ((row.get("date") or ""), (row.get("title") or ""), (row.get("url") or "")))
+
+        if not items:
+            return self._empty(
+                "No VARA news/circular listing items were isolated.",
+                "Review VARA card selectors or treat the source as remediation.",
+            )
+
+        return AdapterResult(
+            text=_format_items("VARA news, circular, and publication listing items", items),
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            items=items,
+            noise_risk="medium" if len(items) < 5 else "low",
+            source_health_risk="medium",
+            metadata={
+                "container_selector": container_selector,
+                "card_count": len(cards),
+                "url": url,
+            },
+        )
+
+
 class PdfListingAdapter(DocumentListingAdapter):
     family = "pdf_listing"
     name = "pdf_listing"
@@ -1178,6 +1273,7 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "fiu_eocn_document_listing": FiuEocnDocumentListingAdapter(),
     "eocn_news_listing": EocnNewsListingAdapter(),
     "vara_pdf_listing": VaraPdfListingAdapter(),
+    "vara_news_listing": VaraNewsListingAdapter(),
 }
 
 
@@ -1202,7 +1298,7 @@ def extract_with_adapter(
             adapter_name=adapter_name or "",
             extraction_strategy=f"adapter:{key}" if key else "",
             failure_reason=f"Unknown adapter: {key}" if key else "No adapter configured.",
-            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, vara_pdf_listing, or difc_legal_database.",
+            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, vara_pdf_listing, vara_news_listing, or difc_legal_database.",
             source_health_risk="medium",
         )
     try:

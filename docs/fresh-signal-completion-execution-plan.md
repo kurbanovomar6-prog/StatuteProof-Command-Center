@@ -13,7 +13,7 @@ Clean-state gate passed on 2026-06-19. At the start of the fresh-signal completi
 | MONITOR_OK | 149 | Confirmed-live monitoring sources in current audit |
 | Proof-backed snapshots | 216 | Sources with proof paths in current audit |
 
-At the start of that pass, `sources.json` had no `monitoring_mode` or `alert_eligible` fields on the then-226 enabled UAE rows. The later fresh-source expansion superseded this with the current 232 enabled / 162 fresh-alert source model.
+At the start of that pass, `sources.json` had no `monitoring_mode` or `alert_eligible` fields on the then-226 enabled UAE rows. The later fresh-source expansion superseded this with the current 238 enabled / 168 fresh-alert source model.
 
 ## Family Truth Table
 

@@ -628,6 +628,44 @@ def test_vara_pdf_listing_uses_rulebook_card_heading_for_generic_buttons():
     assert "- Title: Read more" not in result.text
 
 
+def test_vara_news_listing_extracts_titles_from_cards_with_generic_download_buttons():
+    html = """
+    <html><body>
+      <header><a href="/en/contact">Contact</a></header>
+      <section class="bg-bg-2">
+        <div class="container">
+          <div class="flex flex-col border-b-2 border-b-bg-5 bg-white md:flex-row">
+            <div>
+              12 Jun 2026 VARA publishes AML/CFT Business Risk Assessment Guidance
+              <a href="https://media.umbraco.io/dwtc/vara-amlctf-business-risk-assessment-guidance.pdf">Download PDF</a>
+            </div>
+          </div>
+          <div class="flex flex-col border-b-2 border-b-bg-5 bg-white md:flex-row">
+            <div>
+              1 Jun 2026 Publication of UAE Proliferation Financing National Risk Assessment (PF NRA) 2026 and Required Actions
+              <a href="https://media.umbraco.io/dwtc/vasp-circular-pf-nra-2026.pdf">Download PDF</a>
+              <a href="/en/news/vara-publishes-pf-nra-guidance/">Read More</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.vara.ae/en/news",
+        adapter_family="vara_news_listing",
+    )
+
+    assert result.adapter_name == "vara_news_listing"
+    assert result.item_count == 3
+    assert "VARA publishes AML/CFT Business Risk Assessment Guidance" in result.text
+    assert "Publication of UAE Proliferation Financing National Risk Assessment" in result.text
+    assert "- Title: Download PDF" not in result.text
+    assert "Contact" not in result.text
+
+
 def test_cbuae_document_listing_uses_heading_for_generic_download_links():
     html = """
     <html><body><main>

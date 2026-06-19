@@ -3,7 +3,7 @@
 
 This validator protects the honest remediation lineage after the later FTA/ADGM
 truth repair and later proof-backed activations:
-232 enabled UAE sources / 231 monitoring-active / 1 remediation after later proof-backed activations.
+238 enabled UAE sources / 237 monitoring-active / 1 remediation after later proof-backed activations.
 
 It is intentionally narrow. It verifies the two newly activated DFSA
 replacement endpoints and the one remaining FIU remediation source instead of
@@ -290,8 +290,8 @@ def main() -> int:
 
     if TRUTH_REPORT.exists():
         truth_text = TRUTH_REPORT.read_text(encoding="utf-8")
-        if "232 enabled / 231 monitoring-active / 1" not in truth_text:
-            fail(errors, "Truth reconciliation report must include current 232/231/1 wording")
+        if "238 enabled / 237 monitoring-active / 1" not in truth_text:
+            fail(errors, "Truth reconciliation report must include current 238/237/1 wording")
 
     for path in iter_scan_files():
         try:

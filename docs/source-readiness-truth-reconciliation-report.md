@@ -7,23 +7,23 @@ Updated: 2026-06-19
 
 The canonical customer-facing truth for the current StatuteProof UAE source pack is:
 
-**232 enabled UAE sources; 231 monitoring-active in the current registry; 1 legacy remediation source.**
+**238 enabled UAE sources; 237 monitoring-active in the current registry; 1 legacy remediation source.**
 
 2026-06-18 update: the dirty **87 enabled / 86 active / 1 remediation** claim was rejected. Two ADGM rows (`AE-adgm-fsra-supervision-circulars` and `AE-adgm-data-protection-regulations-2021-pdf`) passed no-save, proof, 2/2 baseline, mass-monitor `MONITOR_OK`, and agent gates. Five FTA rows plus `AE-adgm-fsra-regulatory-alerts` were demoted to disabled candidates because they did not pass meaningful extraction gates.
 
 2026-06-18 later update: the weak-family bulk activation sprint tested 213 candidate runs, held nav-shell/quality-drop/drift/duplicate candidates, and activated 41 proof-backed sources after no-save, two baseline runs, mass-monitor `MONITOR_OK`, no hash drift, and review gates. A later FTA PDF sprint tested 27 official FTA PDFs, held 2 weak/problematic documents, and activated 25 proof-backed direct official FTA tax PDFs after no-save, two stable baseline runs, mass-monitor `MONITOR_OK`, no hash drift, and review gates. Current truth is now **147 enabled / 146 monitoring-active / 1 remediation**. This is not a complete UAE coverage claim; weak families remain visible in the source-family scorecard.
 
-2026-06-19 update: the weak-family completion sprint activated 79 further proof-backed sources across DIFC, ADGM/FSRA, VARA, Ministry of Economy / DNFBP AML, MoE-owned AML/TFS documents, and two UAE FIU listing endpoints. Each newly active row carries source ID, proof path, normalized text path, normalized hash, 2/2 baseline, `MONITOR_OK`, and legal-safe notes. Current truth is now **232 enabled / 231 monitoring-active / 1 legacy remediation** after the fresh-source expansion added six proof-backed fresh-alert sources. SCA, direct UAE FIU PDF/media expansion, and direct EOCN/UAEIEC expansion remain below the 25-source target because of robots, access, duplicate, and noise blockers.
+2026-06-19 update: the weak-family completion sprint activated 79 further proof-backed sources across DIFC, ADGM/FSRA, VARA, Ministry of Economy / DNFBP AML, MoE-owned AML/TFS documents, and two UAE FIU listing endpoints. Each newly active row carries source ID, proof path, normalized text path, normalized hash, 2/2 baseline, `MONITOR_OK`, and legal-safe notes. Current truth is now **238 enabled / 237 monitoring-active / 1 legacy remediation** after the fresh-source expansion added six proof-backed fresh-alert sources and the next completion pass added six more proof-backed fresh-alert sources. EOCN/TFS selected-source monitoring reached 25; VARA, DFSA, DIFC, ADGM/FSRA, UAE FIU, SCA, MoJ/Gazette, and MoF remain below the 25-source target because of official-source limits, nav-shell, access, duplicate, and adapter blockers.
 
-The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later activation history advanced through proof-backed CBUAE, DFSA, VARA, DIFC, ADGM, UAE FIU, EOCN, SCA, Ministry of Economy, and FTA batches. The weak-family bulk sprint activated 41 additional DFSA/DIFC/Ministry of Economy sources from stable proof-backed runs, advancing the truth to **122 / 121 / 1**. The FTA PDF sprint then activated 25 direct official FTA tax PDFs from stable proof-backed runs and mass-monitor `MONITOR_OK`, advancing the truth to **147 / 146 / 1**. The weak-family completion sprint activated 79 further proof-backed rows, advancing the truth to **226 / 225 / 1**. The fresh-source expansion then added six proof-backed fresh-alert sources, advancing the legacy registry truth to **232 / 231 / 1**. The UAE FIU homepage remains remediation because its live extraction is a navigation/search/language shell and tested replacements were shallow, blocked, stale, or duplicate-prone.
+The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe today. The later activation history advanced through proof-backed CBUAE, DFSA, VARA, DIFC, ADGM, UAE FIU, EOCN, SCA, Ministry of Economy, and FTA batches. The weak-family bulk sprint activated 41 additional DFSA/DIFC/Ministry of Economy sources from stable proof-backed runs, advancing the truth to **122 / 121 / 1**. The FTA PDF sprint then activated 25 direct official FTA tax PDFs from stable proof-backed runs and mass-monitor `MONITOR_OK`, advancing the truth to **147 / 146 / 1**. The weak-family completion sprint activated 79 further proof-backed rows, advancing the truth to **226 / 225 / 1**. The fresh-source expansion then added six proof-backed fresh-alert sources, advancing the legacy registry truth to **232 / 231 / 1**. The next fresh-source completion pass added six more proof-backed rows, advancing the legacy registry truth to **238 / 237 / 1** and the fresh-alert daily-monitor truth to **168**. The UAE FIU homepage remains remediation because its live extraction is a navigation/search/language shell and tested replacements were shallow, blocked, stale, or duplicate-prone.
 
 ## Canonical Counts
 
 | Count | Value | Basis |
 | --- | ---: | --- |
-| Total records in `sources.json` | 376 | Registry file parse after fresh-source expansion activation. |
-| Enabled UAE sources | 232 | `enabled: true` and `jurisdiction: AE`. |
-| Monitoring-active | 231 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
+| Total records in `sources.json` | 382 | Registry file parse after fresh-source completion-next activation. |
+| Enabled UAE sources | 238 | `enabled: true` and `jurisdiction: AE`. |
+| Monitoring-active | 237 | Enabled UAE registry rows with `status: active`, excluding held/remediation rows. |
 | Under extraction remediation | 1 | Enabled UAE registry row with `status: remediation`. |
 | Blocked / failed | 0 | Current registry uses remediation rather than blocked for the one not-ready enabled source. |
 
@@ -174,42 +174,42 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 
 ## Fresh-Signal Addendum — 2026-06-19
 
-Fresh-alert monitoring truth after the 25-per-family execution pass:
+Fresh-alert monitoring truth after the 25-per-family execution pass and next completion pass:
 
-- Enabled UAE sources: 232
-- Fresh-alert eligible sources: 162
+- Enabled UAE sources: 238
+- Fresh-alert eligible sources: 168
 - Evidence-library-only sources: 61
 - Candidate/pending validation: 6
 - Remediation: 3
-- Overall MONITOR_OK sources: 216, including evidence-library records.
+- Overall MONITOR_OK sources: 222, including evidence-library records.
 
-Important: the legacy “monitoring-active” registry count is not the same as customer-relevant fresh-alert monitoring. Customer-facing fresh monitoring claims must use the 162 fresh-alert count, not 232 enabled or 231 legacy active.
+Important: the legacy “monitoring-active” registry count is not the same as customer-relevant fresh-alert monitoring. Customer-facing fresh monitoring claims must use the 168 fresh-alert count, not 238 enabled or 237 legacy active.
 
 Families currently Strong Fresh Signal:
 
 - CBUAE
+- EOCN/TFS selected-source monitoring
 - FTA
 - MoE/DNFBP AML
 
 Families still below the 25-source Strong Fresh Signal threshold:
 
-- VARA: 23
-- DFSA: 15
+- VARA: 24
+- DFSA: 16
 - DIFC: 10
-- ADGM/FSRA: 8
+- ADGM/FSRA: 10
 - UAE FIU: 5
-- EOCN/TFS: 24
 - SCA: 5
 - MoJ/Gazette: 0
-- MoF: 0
+- MoF: 1
 
 See `docs/fresh-signal-25-per-family-final-report.md` for the current customer-safe source truth.
 
 ## Which Story Is Correct?
 
-**Correct legacy registry story:** 232 enabled / 231 active-or-enabled rows / 1 legacy remediation.
+**Correct legacy registry story:** 238 enabled / 237 active-or-enabled rows / 1 legacy remediation.
 
-**Correct fresh-signal story:** 232 enabled / 162 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation.
+**Correct fresh-signal story:** 238 enabled / 168 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation.
 
 **Not correct today:** 13 enabled / 10 confirmed / 3 under extraction remediation.
 
@@ -217,8 +217,8 @@ Reason: the final-8 sprint moved the registry and work queue over the 50-source 
 
 ## Allowed Customer-Facing Wording
 
-- "232 enabled UAE sources."
-- "231 monitoring-active in the current registry."
+- "238 enabled UAE sources."
+- "237 monitoring-active in the current registry."
 - "50 activation-ready UAE official source endpoints."
 - "Each activation-ready source passed proof, baseline, source-health, noise, and review gates."
 - "1 remediation source."
@@ -230,9 +230,9 @@ Reason: the final-8 sprint moved the registry and work queue over the 50-source 
 
 ## Forbidden Wording
 
-- "All 232 sources are validated."
-- "All 232 sources are confirmed."
-- "All 232 sources are ready."
+- "All 238 sources are validated."
+- "All 238 sources are confirmed."
+- "All 238 sources are ready."
 - "87 enabled / 86 active."
 - "DFSA ready."
 - "End-to-end DIFC source coverage."
@@ -243,11 +243,11 @@ Reason: the final-8 sprint moved the registry and work queue over the 50-source 
 
 ## Code And UI Result
 
-Current public/app source tables should use the 232/231/1 legacy registry model only when clearly separated from fresh-alert claims:
+Current public/app source tables should use the 238/237/1 legacy registry model only when clearly separated from fresh-alert claims:
 
 - `product/regradar/web/src/components/SourceCoverageTable.jsx`
 - `product/regradar/web/src/data/appMockData.js`
-- Pricing and billing surfaces use "232 enabled" with 231 monitoring-active and 1 remediation only where public truth is intentionally surfaced and separated from fresh-alert claims.
+- Pricing and billing surfaces use "238 enabled" with 237 monitoring-active and 1 remediation only where public truth is intentionally surfaced and separated from fresh-alert claims.
 
 This sprint changes `sources.json` only for proof-backed, repeat-baseline-complete, mass-monitor-checked activation-ready sources. Future changes should derive source IDs and counts from one generated registry summary rather than duplicating constants in frontend/docs.
 
@@ -270,3 +270,16 @@ The follow-on expansion added six unique fresh-alert sources after no-save, two 
 - `AE-eocn-tfs`
 
 This improved DFSA to 15 fresh-alert sources, EOCN/TFS to 24, and SCA to 5. It did not make every family Strong.
+
+### Fresh Source Completion Next Addendum — 2026-06-19
+
+The next completion pass added six more unique fresh-alert sources after no-save, two saved evidence runs, stable baseline hash, duplicate/static-detail review, and mass-monitor dry-run `MONITOR_OK`:
+
+- `AE-uaeiec-news-listing-next`
+- `AE-vara-news-circulars-listing`
+- `AE-dfsa-laws-rules-2dee8ba9`
+- `AE-adgm-adgm-courts-legislation-and-procedures-66abfd89`
+- `AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695`
+- `AE-mof-publications-and-releases`
+
+This moved EOCN/TFS selected-source monitoring to 25, VARA to 24, DFSA to 16, ADGM/FSRA to 10, and MoF to 1. It does not claim complete UAE coverage or complete family coverage.

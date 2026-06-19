@@ -4,7 +4,7 @@ Date: 2026-06-19
 
 Labels: Strong = 25+ proof-backed active endpoints; Good = 10-24; Partial = 5-9; Weak = 1-4; Missing = 0. Source-family labels describe depth, not legal completeness.
 
-Current fresh-signal truth: 232 enabled UAE sources / 162 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
+Current fresh-signal truth: 238 enabled UAE sources / 168 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
 
 Fresh-signal overlay after the 25-per-family pass:
 
@@ -13,15 +13,15 @@ Fresh-signal overlay after the 25-per-family pass:
 | CBUAE | 25 | Strong | 0 |
 | FTA / Tax | 25 | Strong | 0 |
 | Ministry of Economy / DNFBP AML | 42 | Strong | 0 |
-| VARA | 23 | Good | 2 |
-| EOCN / sanctions / TFS | 24 | Good | 1 |
-| DFSA | 15 | Good | 10 |
+| VARA | 24 | Good | 1 |
+| EOCN / sanctions / TFS | 25 | Strong selected-source | 0 |
+| DFSA | 16 | Good | 9 |
 | DIFC | 10 | Good | 15 |
-| ADGM/FSRA | 8 | Partial | 17 |
+| ADGM/FSRA | 10 | Good | 15 |
 | UAE FIU | 5 | Partial | 20 |
 | SCA | 5 | Weak | 20 |
 | Ministry of Justice / UAE Legislation / Gazette | 0 | Missing | 25 |
-| Ministry of Finance | 0 | Missing | 25 |
+| Ministry of Finance | 1 | Weak | 24 |
 
 The legacy table below is retained for source-universe depth context. Do not use legacy active counts as fresh-alert monitoring claims.
 
@@ -34,7 +34,7 @@ The legacy table below is retained for source-universe depth context. Do not use
 | VARA | 25 | 25 | 0 | 31 | 7 | Strong | 8.0 | 8 | Target reached with 16 added direct official VARA PDF/rulebook/regulation endpoints. Next: guidance/admin orders if they pass gates. |
 | SCA | 6 | 6 | 0 | 15 | 4 | Partial | 3.0 | 6 | Below target after adding SCA FinTech Regulatory Sandbox. Next: permission-safe SCA download/document adapter and official endpoint confirmation; do not bypass robots/access controls. |
 | UAE FIU | 7 | 6 | 1 | 16 | 1 | Partial | 3.0 | 5 | Below target. Two listing endpoints were added; direct FIU media PDFs remain blocked under the project fetch policy. |
-| EOCN / sanctions / TFS | 24 | 24 | 0 | 20 | 4 | Good | 7.5 | 8 | Below 25 target by 1 after adding UAEIEC laws/regulations listing and EOCN UN/TFS page. Direct EOCN/UAEIEC expansion remains constrained by small public universe and noise risk. |
+| EOCN / sanctions / TFS | 25 | 25 | 0 | 20 | 4 | Strong selected-source | 8 | 8 | Reached 25 after adding UAEIEC news listing. This remains selected-source monitoring across direct EOCN/UAEIEC and MoE-owned TFS support, not a complete sanctions coverage claim. |
 | FTA / Tax | 25 | 25 | 0 | 77 | 70 | Strong | 8 | 7 | Direct official FTA PDF corpus now has 25 proof-backed active endpoints. Next: activate FTA listing pages only after item-level pagination/filter extraction passes gates. |
 | Ministry of Economy / DNFBP AML | 26 | 26 | 0 | 35 | 20 | Strong | 8.0 | 8 | Target reached for direct DNFBP/MoE AML sources. MoE-owned AML/TFS documents also strengthen the EOCN/TFS-relevant family, without claiming complete MoE coverage. |
 | Ministry of Justice / UAE Legislation / Gazette | 1 | 1 | 0 | 70 | 29 | Weak | 0.5 | 4 | `AE-ai-legislation-511679d1`, `AE-elawyer-signup-a979f83b`, `AE-moj-ar-about-moj-judicial-training-institute-laws-and-legislation-aspx-3579a2bc`, `AE-moj-ar-about-moj-union-supreme-court-e-services-laws-of-union-supreme-court-aspx-677651f6`, `AE-moj-ar-laws-and-legislation-aspx-b60d2907`, `AE-moj-ar-laws-and-legislation-anti-money-laundering-and-combatting-terrorism-financing-aspx-08cdebef`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-aspx-f12a87ea`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-6fe3558c`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-3569166b`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-4910ca15` |
