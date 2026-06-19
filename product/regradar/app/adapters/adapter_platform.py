@@ -51,6 +51,7 @@ _GENERIC_NAV_TITLES = {
     "download",
     "download pdf",
     "open",
+    "go to homepage",
 }
 
 
@@ -129,7 +130,12 @@ def _extract_date(text: str | None) -> str:
 
 def _is_noise_title(title: str | None) -> bool:
     cleaned = _clean(title).lower()
-    return not cleaned or cleaned in _GENERIC_NAV_TITLES or len(cleaned) < 4
+    if not cleaned or cleaned in _GENERIC_NAV_TITLES or len(cleaned) < 4:
+        return True
+    remainder = cleaned
+    for generic_title in sorted(_GENERIC_NAV_TITLES, key=len, reverse=True):
+        remainder = remainder.replace(generic_title, " ")
+    return not re.sub(r"[\s:;,\-_/|.]+", "", remainder)
 
 
 def _ancestor_context_node(node):
@@ -951,6 +957,9 @@ class VaraPdfListingAdapter(DocumentListingAdapter):
 class VaraNewsListingAdapter(BaseHtmlAdapter):
     family = "vara_news_listing"
     name = "vara_news_listing"
+    heading = "VARA news, circular, and publication listing items"
+    allowed_link_tokens = ("/en/news/", "media.umbraco.io", ".pdf")
+    category = "news_or_notice"
 
     def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
         config = config or {}
@@ -991,7 +1000,8 @@ class VaraNewsListingAdapter(BaseHtmlAdapter):
                 href = (anchor.get("href") or "").strip()
                 if not href or href.startswith(("#", "mailto:", "tel:", "javascript:")):
                     continue
-                if "/en/news/" not in href and "media.umbraco.io" not in href and ".pdf" not in href.lower():
+                href_lower = href.lower()
+                if not any(token in href_lower for token in self.allowed_link_tokens):
                     continue
                 links.append(urljoin(url, href))
             if not links:
@@ -1008,7 +1018,7 @@ class VaraNewsListingAdapter(BaseHtmlAdapter):
                     "date": date,
                     "url": item_url,
                     "document_url": item_url if is_document else "",
-                    "category": "document" if is_document else "news_or_notice",
+                    "category": "document" if is_document else self.category,
                     "raw_text_snippet": context,
                 }
                 item["row_hash"] = _row_hash(title, date, item_url, item["category"])
@@ -1028,7 +1038,7 @@ class VaraNewsListingAdapter(BaseHtmlAdapter):
             )
 
         return AdapterResult(
-            text=_format_items("VARA news, circular, and publication listing items", items),
+            text=_format_items(self.heading, items),
             adapter_family=self.family,
             adapter_name=self.name,
             extraction_strategy=f"adapter:{self.name}",
@@ -1040,6 +1050,101 @@ class VaraNewsListingAdapter(BaseHtmlAdapter):
                 "card_count": len(cards),
                 "url": url,
             },
+        )
+
+
+class VaraEnforcementListingAdapter(VaraNewsListingAdapter):
+    family = "vara_enforcement_listing"
+    name = "vara_enforcement_listing"
+    heading = "VARA enforcement and regulatory notice listing items"
+    allowed_link_tokens = (
+        "/en/enforcement/",
+        "/en/regulations/regulatory-notices",
+        "media.umbraco.io",
+        ".pdf",
+    )
+    category = "enforcement_or_regulatory_notice"
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        config = config or {}
+        table_result = self._extract_enforcement_table(html, url=url, config=config)
+        if table_result.items:
+            return table_result
+        return super().extract(html, url=url, config=config)
+
+    def _extract_enforcement_table(self, html: str, *, url: str, config: dict) -> AdapterResult:
+        soup = _soup(
+            html,
+            config.get("exclude_selectors") or ["header", "nav", "footer", ".search", "script", "style", "noscript"],
+        )
+        table_selector = str(config.get("table_selector") or "table").strip()
+        table = soup.select_one(table_selector) if table_selector else soup.select_one("table")
+        if not table:
+            return self._empty(
+                "No VARA enforcement table was isolated.",
+                "Review VARA enforcement table selector or use the card listing fallback.",
+            )
+
+        header_cells = table.select("thead th")
+        if not header_cells:
+            header_cells = table.select("tr th")
+        headers = [_clean(cell.get_text(" ", strip=True), limit=160) for cell in header_cells]
+        items: list[dict] = []
+        seen: set[str] = set()
+        for tr in table.select("tbody tr") or table.select("tr"):
+            cells = tr.select("td")
+            if not cells:
+                continue
+            row: dict[str, str] = {}
+            fallback_values: list[str] = []
+            for index, cell in enumerate(cells):
+                label = _clean(cell.get("data-label") or (headers[index] if index < len(headers) else ""), limit=160)
+                value = _node_text(cell, separator=" ", limit=700)
+                if not value:
+                    continue
+                fallback_values.append(value)
+                if label:
+                    row[label] = value
+            title = row.get("Full Name of Entity") or (fallback_values[0] if fallback_values else "")
+            date = row.get("Date") or _extract_date(" ".join(fallback_values))
+            category = row.get("Category") or self.category
+            detail = row.get("Detail") or ""
+            notice_type = row.get("Type of Enforcement Notice") or ""
+            if _is_noise_title(title):
+                continue
+            key = f"{title.lower()}|{date.lower()}|{category.lower()}|{detail.lower()}|{notice_type.lower()}"
+            if key in seen:
+                continue
+            seen.add(key)
+            context_parts = [
+                f"Detail: {detail}" if detail else "",
+                f"Notice type: {notice_type}" if notice_type else "",
+            ]
+            item = {
+                "title": title,
+                "date": date,
+                "category": category,
+                "enforcement_notice_type": notice_type,
+                "raw_text_snippet": " | ".join(part for part in context_parts if part),
+            }
+            item["row_hash"] = _row_hash(title, date, category, detail, notice_type)
+            items.append(item)
+
+        if not items:
+            return self._empty(
+                "No VARA enforcement table rows were isolated.",
+                "Review VARA enforcement table labels or treat the source as remediation.",
+            )
+
+        return AdapterResult(
+            text=_format_items(self.heading, items),
+            adapter_family=self.family,
+            adapter_name=self.name,
+            extraction_strategy=f"adapter:{self.name}",
+            items=items,
+            noise_risk="low" if len(items) >= 5 else "medium",
+            source_health_risk="medium",
+            metadata={"table_selector": table_selector, "headers": headers, "url": url},
         )
 
 
@@ -1274,6 +1379,7 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "eocn_news_listing": EocnNewsListingAdapter(),
     "vara_pdf_listing": VaraPdfListingAdapter(),
     "vara_news_listing": VaraNewsListingAdapter(),
+    "vara_enforcement_listing": VaraEnforcementListingAdapter(),
 }
 
 
@@ -1298,7 +1404,7 @@ def extract_with_adapter(
             adapter_name=adapter_name or "",
             extraction_strategy=f"adapter:{key}" if key else "",
             failure_reason=f"Unknown adapter: {key}" if key else "No adapter configured.",
-            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, vara_pdf_listing, vara_news_listing, or difc_legal_database.",
+            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, vara_pdf_listing, vara_news_listing, vara_enforcement_listing, or difc_legal_database.",
             source_health_risk="medium",
         )
     try:

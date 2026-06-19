@@ -2,7 +2,7 @@
 
 Date: 2026-06-19
 
-Current verified ending truth after fresh-source expansion: **238 enabled UAE sources / 237 monitoring-active / 1 remediation** in the legacy registry, with **168 fresh-alert eligible daily monitors**. Monitoring intelligence only. Not legal advice.
+Current verified ending truth after VARA enforcement activation: **238 enabled UAE sources / 237 monitoring-active / 1 remediation** in the legacy registry, with **169 fresh-alert eligible daily monitors**. Monitoring intelligence only. Not legal advice.
 
 | Family | Starting active | Target | New active | Ending active | Gap remaining | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |

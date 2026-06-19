@@ -11,7 +11,7 @@ const PLANS_DATA = [
     period: '',
     badge: 'Start here',
     highlight: false,
-    purpose: 'See which official UAE sources are monitoring-active, which have access limits, and which are outside current scope — for your licence profile. No live monitoring included.',
+    purpose: 'See which official UAE sources are fresh-alert eligible, which have access limits, and which are outside current scope — for your licence profile. No live monitoring included.',
     cta: 'Request source readiness review',
     ctaPrimary: false,
     features: [
@@ -61,11 +61,11 @@ const PLANS_DATA = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    purpose: 'For MLROs and CCOs at UAE-regulated firms. Selected official UAE regulatory sources across VARA, CBUAE, DFSA, ADGM/FSRA, FIU, DIFC and related public sources — with evidence on every run.',
+    purpose: 'For MLROs and CCOs at UAE-regulated firms. Selected fresh-alert eligible official UAE sources across VARA, CBUAE, DFSA, ADGM/FSRA, FIU, DIFC and related public sources — with evidence on each configured run.',
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '225 monitoring-active sources; selected official UAE endpoints only' },
+      { label: 'Official UAE sources', value: '169 fresh-alert eligible sources; selected official UAE endpoints only' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },
@@ -124,7 +124,7 @@ const FAQS = [
   },
   {
     q: 'How do you verify a source is actually monitored?',
-    a: 'Before live monitoring begins, we run a source readiness check on each UAE regulatory source: is it publicly accessible, can we extract text reliably, and does the diff produce meaningful output? Sources that pass are marked monitoring-active. Sources with access issues, geo-blocking, or unreliable extraction are disclosed before your pilot — not after a gap.',
+    a: 'Before monitoring begins, we run a source readiness check on each UAE regulatory source: is it publicly accessible, can we extract text reliably, and does the diff produce meaningful output? Sources that pass are marked fresh-alert eligible. Sources with access issues, geo-blocking, or unreliable extraction are disclosed before your pilot — not after a gap.',
   },
   {
     q: 'Can I add my own sources?',
@@ -144,7 +144,7 @@ const FAQS = [
   },
   {
     q: 'Which regulators are covered on the UAE Monitor plan?',
-    a: 'Monitoring-active coverage includes VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU, Executive Office for AML/CFT, DIFC laws and data protection, UAE Legislation Portal, Ministry of Finance, SCA, 25 direct official FTA tax PDFs, and related official public sources. Broader FTA listing pages remain candidate/adapter work.',
+    a: 'Selected-source monitoring includes fresh-alert eligible sources across VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU public sources, Executive Office for AML/CFT, DIFC laws and data protection, Ministry of Finance, SCA, FTA tax PDFs, and related official public sources. MoJ/UAE legislation/gazette sources remain remediation or research, and broader FTA listing pages remain candidate/adapter work.',
   },
 ]
 

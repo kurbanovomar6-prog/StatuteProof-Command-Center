@@ -21,15 +21,27 @@ def build_sources_summary(market: str = "AE", *, base_dir: Path | None = None) -
         if str(item.get("jurisdiction") or "").upper() == market_code
     ]
     enabled_sources = [item for item in market_sources if bool(item.get("enabled"))]
-    readiness_supported = [
+    mode_counts = {
+        "fresh_alert": 0,
+        "evidence_library": 0,
+        "candidate": 0,
+        "remediation": 0,
+    }
+    for item in enabled_sources:
+        mode = str(item.get("monitoring_mode") or "").lower().strip()
+        if mode in mode_counts:
+            mode_counts[mode] += 1
+
+    fresh_alert_sources = [
+        item
+        for item in enabled_sources
+        if str(item.get("monitoring_mode") or "").lower().strip() == "fresh_alert"
+        and item.get("alert_eligible") is True
+    ]
+    legacy_active = [
         item
         for item in enabled_sources
         if str(item.get("status") or "active").lower() == "active"
-    ]
-    remediation = [
-        item
-        for item in enabled_sources
-        if str(item.get("status") or "").lower() == "remediation"
     ]
 
     runs = _read_runs(root, market_code)
@@ -47,11 +59,20 @@ def build_sources_summary(market: str = "AE", *, base_dir: Path | None = None) -
         "ok": True,
         "market": market_code,
         "enabled_count": len(enabled_sources),
-        "readiness_supported_count": len(readiness_supported),
-        "remediation_count": len(remediation),
+        "readiness_supported_count": len(fresh_alert_sources),
+        "fresh_alert_count": len(fresh_alert_sources),
+        "evidence_library_count": mode_counts["evidence_library"],
+        "candidate_count": mode_counts["candidate"],
+        "remediation_count": mode_counts["remediation"],
+        "legacy_active_count": len(legacy_active),
+        "monitoring_mode_counts": mode_counts,
         "monitored_count": len(monitored_ids),
         "last_run_at": last_run_at,
-        "source_truth": f"{len(enabled_sources)} enabled / {len(readiness_supported)} readiness-supported / {len(remediation)} remediation",
+        "source_truth": (
+            f"{len(enabled_sources)} enabled / {len(fresh_alert_sources)} fresh-alert eligible / "
+            f"{mode_counts['evidence_library']} evidence-library / {mode_counts['candidate']} candidate / "
+            f"{mode_counts['remediation']} remediation"
+        ),
         "disclaimer": "Monitoring intelligence only. Not legal advice.",
     }
 

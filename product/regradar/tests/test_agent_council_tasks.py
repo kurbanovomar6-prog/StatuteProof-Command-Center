@@ -22,6 +22,9 @@ REQUIRED_TASK_IDS = {
     "difc-consultation-listing-adapter",
     "mof-document-publication-adapter",
     "moj-gazette-official-alternative-research",
+    "canonical-evidence-record-generator",
+    "evidence-record-validator",
+    "risk-brief-eligibility-gate",
     "ruflo-safe-tooling-intake",
 }
 

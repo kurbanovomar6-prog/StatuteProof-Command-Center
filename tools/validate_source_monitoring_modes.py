@@ -12,9 +12,21 @@ import json
 import sys
 from pathlib import Path
 
+try:
+    from tools.fresh_alert_validator_common import (
+        validate_baseline_runs,
+        validate_fresh_alert_artifacts,
+    )
+except ModuleNotFoundError:  # pragma: no cover - direct script execution
+    from fresh_alert_validator_common import (
+        validate_baseline_runs,
+        validate_fresh_alert_artifacts,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "product/regradar/sources.json"
+REGRADAR_ROOT = ROOT / "product/regradar"
 ALLOWED_MODES = {"fresh_alert", "evidence_library", "remediation", "candidate"}
 FORBIDDEN_COPY = (
     "complete uae coverage",
@@ -68,15 +80,8 @@ def main() -> int:
                 failures.append(f"{source_id}: fresh_alert must set alert_eligible=true")
             if source.get("last_monitor_status") != "MONITOR_OK":
                 failures.append(f"{source_id}: fresh_alert lacks MONITOR_OK")
-            for field in ("proof_path", "normalized_text_path", "normalized_hash"):
-                if not source.get(field):
-                    failures.append(f"{source_id}: fresh_alert missing {field}")
-            baseline_completed = int(source.get("baseline_runs_completed") or 0)
-            baseline_required = max(2, int(source.get("baseline_runs_required") or 2))
-            if baseline_completed < baseline_required:
-                failures.append(
-                    f"{source_id}: baseline {baseline_completed}/{baseline_required} is incomplete"
-                )
+            failures.extend(validate_fresh_alert_artifacts(source, REGRADAR_ROOT))
+            failures.extend(validate_baseline_runs(source, str(source_id)))
             if source.get("recommended_check_frequency") != "daily":
                 failures.append(f"{source_id}: fresh_alert lacks recommended_check_frequency=daily")
             if is_static_or_homepage_url(str(source.get("url") or "")):

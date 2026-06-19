@@ -22,6 +22,8 @@ def _write_sources(base: Path) -> None:
                     "jurisdiction": "AE",
                     "enabled": True,
                     "status": "active",
+                    "monitoring_mode": "fresh_alert",
+                    "alert_eligible": True,
                 },
                 {
                     "source_id": "AE-remediation-one",
@@ -30,6 +32,8 @@ def _write_sources(base: Path) -> None:
                     "jurisdiction": "AE",
                     "enabled": True,
                     "status": "remediation",
+                    "monitoring_mode": "remediation",
+                    "alert_eligible": False,
                 },
                 {
                     "source_id": "AE-disabled-one",
@@ -38,6 +42,8 @@ def _write_sources(base: Path) -> None:
                     "jurisdiction": "AE",
                     "enabled": False,
                     "status": "active",
+                    "monitoring_mode": "fresh_alert",
+                    "alert_eligible": True,
                 },
             ]
         ),
@@ -86,8 +92,12 @@ class IdealProductWorkflowTests(unittest.TestCase):
 
         self.assertTrue(summary["ok"])
         self.assertEqual(summary["enabled_count"], 238)
-        self.assertEqual(summary["readiness_supported_count"], 237)
-        self.assertEqual(summary["remediation_count"], 1)
+        self.assertEqual(summary["readiness_supported_count"], 169)
+        self.assertEqual(summary["fresh_alert_count"], 169)
+        self.assertEqual(summary["evidence_library_count"], 61)
+        self.assertEqual(summary["candidate_count"], 5)
+        self.assertEqual(summary["remediation_count"], 3)
+        self.assertIn("169 fresh-alert eligible", summary["source_truth"])
         self.assertIn("Not legal advice", summary["disclaimer"])
 
     def test_source_summary_uses_registry_and_run_history(self):
@@ -100,6 +110,9 @@ class IdealProductWorkflowTests(unittest.TestCase):
 
             self.assertEqual(summary["enabled_count"], 2)
             self.assertEqual(summary["readiness_supported_count"], 1)
+            self.assertEqual(summary["fresh_alert_count"], 1)
+            self.assertEqual(summary["evidence_library_count"], 0)
+            self.assertEqual(summary["candidate_count"], 0)
             self.assertEqual(summary["remediation_count"], 1)
             self.assertEqual(summary["monitored_count"], 1)
             self.assertEqual(summary["last_run_at"], "2026-06-16T09:00:00+00:00")

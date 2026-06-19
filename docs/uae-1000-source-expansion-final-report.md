@@ -48,4 +48,4 @@ Add 7/30/90-day source reliability trend charts for monitoring-active sources.
 
 ## 8. Next Exact Sales Task
 
-Use the current 238/237/1 legacy registry truth only when separated from the 168 fresh-alert daily-monitor claim. Say StatuteProof monitors selected proof-backed official UAE endpoints, while SCA, UAE FIU, direct EOCN/UAEIEC, MoJ/Gazette, MoF, privacy, markets, customs, courts, and some free-zone-adjacent families remain disclosed gaps until they pass item-level extraction gates.
+Use the current 238/237/1 legacy registry truth only when separated from the 169 fresh-alert daily-monitor claim. Say StatuteProof monitors selected proof-backed official UAE endpoints, while SCA, UAE FIU, direct EOCN/UAEIEC, MoJ/Gazette, MoF, privacy, markets, customs, courts, and some free-zone-adjacent families remain disclosed gaps until they pass item-level extraction gates.

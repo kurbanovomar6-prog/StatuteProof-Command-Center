@@ -292,7 +292,7 @@ Do not use any of the following:
 
 **For detailed proposals:** "Our UAE monitoring universe covers 138 Tier A regulatory sources (primary regulations, rulebooks, circulars, enforcement actions) and 19 Tier B sources (official context and indexes). SCA, EOCN direct portal, and UAE Legislation Portal are in active remediation and not yet included in our confirmed coverage count."
 
-**For VASP clients:** "We have 24 confirmed VARA sources including all major VARA rulebook PDFs and the revision updates index. CBUAE payment token and AML/CFT rulebook modules are baselined and monitoring."
+**For VASP clients:** "We have 25 selected-source VARA fresh-alert monitors, including rulebook PDFs, revision updates, publications, and the official enforcement table. This is selected-source monitoring, not complete VARA coverage."
 
 **For MLRO clients:** "We monitor MoE DNFBP circulars (42 MONITOR_OK), DFSA AML notices (MONITOR_OK), ADGM financial crime prevention (MONITOR_OK), and UAE FIU annual reports and press releases. FIU circulars page is in validation."
 

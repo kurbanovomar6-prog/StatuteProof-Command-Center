@@ -7,9 +7,21 @@ import json
 import sys
 from pathlib import Path
 
+try:
+    from tools.fresh_alert_validator_common import (
+        validate_baseline_runs,
+        validate_fresh_alert_artifacts,
+    )
+except ModuleNotFoundError:  # pragma: no cover - direct script execution
+    from fresh_alert_validator_common import (
+        validate_baseline_runs,
+        validate_fresh_alert_artifacts,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "product/regradar/sources.json"
+REGRADAR_ROOT = ROOT / "product/regradar"
 
 
 def is_ae_source(source: dict) -> bool:
@@ -50,12 +62,7 @@ def main() -> int:
         url = str(source.get("url") or "")
         if source.get("last_monitor_status") != "MONITOR_OK":
             failures.append(f"{source_id}: fresh_alert lacks MONITOR_OK")
-        if not source.get("proof_path"):
-            failures.append(f"{source_id}: fresh_alert lacks proof_path")
-        if not source.get("normalized_text_path"):
-            failures.append(f"{source_id}: fresh_alert lacks normalized_text_path")
-        if not source.get("normalized_hash"):
-            failures.append(f"{source_id}: fresh_alert lacks normalized_hash")
+        failures.extend(validate_fresh_alert_artifacts(source, REGRADAR_ROOT))
         if source.get("recommended_check_frequency") != "daily":
             failures.append(f"{source_id}: fresh_alert lacks recommended_check_frequency=daily")
         if not source.get("fresh_signal_type"):
@@ -64,12 +71,7 @@ def main() -> int:
             failures.append(f"{source_id}: fresh_alert lacks expected_update_pattern")
         if not source.get("customer_alert_policy"):
             failures.append(f"{source_id}: fresh_alert lacks customer_alert_policy")
-        baseline_completed = int(source.get("baseline_runs_completed") or 0)
-        baseline_required = max(2, int(source.get("baseline_runs_required") or 2))
-        if baseline_completed < baseline_required:
-            failures.append(
-                f"{source_id}: baseline {baseline_completed}/{baseline_required} is incomplete"
-            )
+        failures.extend(validate_baseline_runs(source, str(source_id)))
         if source.get("alert_eligible") is not True:
             failures.append(f"{source_id}: fresh_alert must be alert_eligible")
         if source.get("commercial_signal_tier") not in {"A", "B"}:

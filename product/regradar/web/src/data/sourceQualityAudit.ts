@@ -11,11 +11,11 @@ export const SOURCE_QUALITY_SUMMARY = {
   remediation: 3,
   excludeReview: 0,
   commerciallyMeaningful: 174, // tierA + tierB
-  confirmedLiveMonitorOk: 222, // all MONITOR_OK sources, including static evidence-library pages
-  freshAlertEligible: 168, // tierA/B + proof + baseline + MONITOR_OK + alert_eligible
+  sourceLevelMonitorOk: 223, // all MONITOR_OK sources, including static evidence-library pages
+  freshAlertEligible: 169, // tierA/B + proof + baseline + MONITOR_OK + alert_eligible
   evidenceLibraryOnly: 61, // official/static or low future-change signal, not fresh alerts
-  pendingFreshSignalValidation: 6, // tierA/B candidates without confirmed fresh-alert MONITOR_OK
-  withProofPath: 228, // sources with a proof_path recorded
+  pendingFreshSignalValidation: 5, // tierA/B candidates without confirmed fresh-alert MONITOR_OK
+  withProofPath: 229, // sources with a proof_path recorded
 } as const
 
 export const FAMILY_QUALITY = [
@@ -35,9 +35,9 @@ export const FAMILY_QUALITY = [
     tierB: 0,
     tierC: 1,
     remediation: 0,
-    monitorOkCount: 24,
+    monitorOkCount: 25,
     totalEnabled: 26,
-    notes: '24 VARA sources now have fresh-alert MONITOR_OK, including rulebook PDFs, revision updates, and the official news/circulars/publications listing. VARA regulatory notices and unlicensed VASP enforcement pages still need adapter work; VARA is one short of Strong Fresh Signal.',
+    notes: '25 VARA sources now have fresh-alert MONITOR_OK, including rulebook PDFs, revision updates, the official news/circulars/publications listing, and the selected enforcement table source. This is selected-source monitoring, not complete VARA coverage.',
   },
   {
     family: 'DFSA',
@@ -193,14 +193,14 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  'StatuteProof has 168 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 19, 2026.',
+  'StatuteProof has 169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 19, 2026.',
   'StatuteProof also maintains an evidence library of official/static UAE source snapshots that may support audit packs but are not counted as fresh-alert monitoring.',
-  '222 enabled UAE sources have MONITOR_OK status overall; 168 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
+  '223 enabled UAE sources have MONITOR_OK status overall; 169 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
   'Our CBUAE rulebook monitoring includes 25 fresh-alert eligible official rulebook/regulatory sources with MONITOR_OK and proof-backed baselines.',
-  'Our VARA monitoring includes 24 confirmed-live official VARA rulebook, circular, publication, and regulatory sources, with regulatory notices/enforcement still pending adapter validation.',
+  'Our VARA monitoring includes 25 confirmed-live selected official VARA rulebook, circular, publication, regulatory, and enforcement-table sources; this is not complete VARA coverage.',
   'Our MoE DNFBP monitoring covers 43 sources including DNFBP guidelines, AML circulars from 2021 to 2026, high-risk jurisdiction updates, TFS-related cabinet decisions, and sector-specific supplemental guidance.',
   'Our FTA monitoring covers 22 confirmed-live sources including UAE Cabinet Decisions, FTA Decisions, Ministerial Decisions, VAT and Corporate Tax guides, and interpretive clarifications.',
-  'StatuteProof maintains cryptographic evidence records — including SHA-256 hashes and timestamped proof files — for 228 of 238 enabled UAE regulatory source snapshots.',
+  'StatuteProof maintains source-level proof files — including SHA-256 hashes and timestamps — for 229 of 238 enabled UAE regulatory source snapshots; this is not customer risk-brief eligibility.',
   'SCA monitoring has 5 proof-backed fresh-alert sources; broader SCA family monitoring remains below Strong until additional official sources reach MONITOR_OK.',
 ] as const
 
@@ -222,6 +222,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: '168 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, proof records, hashes, and baseline confirmation',
-  recommendedDetailedClaim: '174 commercially meaningful UAE official sources mapped; 168 currently fresh-alert eligible, 6 pending fresh-signal validation, and 61 retained as evidence-library/static references',
+  recommendedSalesClaim: '169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, source-level proof files, hashes, and baseline confirmation',
+  recommendedDetailedClaim: '174 commercially meaningful UAE official sources mapped; 169 currently fresh-alert eligible, 5 pending fresh-signal validation, and 61 retained as evidence-library/static references',
 } as const

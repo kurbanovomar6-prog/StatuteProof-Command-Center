@@ -127,8 +127,8 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
 
           <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
             {[
-              ['226', 'UAE sources enabled'],
-              ['225', 'monitoring-active'],
+              ['238', 'UAE source records'],
+              ['168', 'fresh-alert eligible'],
               ['Selected', 'licence profiles mapped'],
             ].map(([value, label]) => (
               <div key={label} className="sp-panel-muted px-4 py-3">

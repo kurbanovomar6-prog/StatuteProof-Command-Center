@@ -35,7 +35,7 @@ These numbers are the authoritative legacy registry source of truth as of 2026-0
 | Tier 4 | "Complete UAE coverage" | **NO — never claimable in current state; 6+ months minimum** |
 
 **Current safe positioning statement:**
-> "StatuteProof monitors selected public official UAE regulatory sources — 238 enabled endpoints, including 237 legacy monitoring-active sources and 168 fresh-alert eligible daily monitors — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."
+> "StatuteProof monitors selected public official UAE regulatory sources — 238 enabled endpoints, including 237 legacy monitoring-active sources and 169 fresh-alert eligible daily monitors — and provides evidence-backed monitoring intelligence, source-health visibility, and compliance review support. Monitoring intelligence only. Not legal advice. Not a guarantee of regulatory completeness."
 
 ---
 
@@ -145,7 +145,7 @@ The following claims were found in prior versions of roadmap documents and have 
 ## 8. Safe Wording Library (Use These Exactly)
 
 ### Always-safe phrases (no modification needed):
-1. "238 enabled UAE official-source endpoints. 237 monitoring-active in the legacy registry; 168 fresh-alert eligible daily monitors."
+1. "238 enabled UAE official-source endpoints. 237 monitoring-active in the legacy registry; 169 fresh-alert eligible daily monitors."
 2. "Monitoring intelligence only. Not legal advice."
 3. "Not a guarantee of regulatory completeness."
 4. "StatuteProof has mapped 200+ official UAE regulatory source candidates across major financial, AML/CFT, virtual asset, securities, and financial free-zone regulatory domains."
@@ -323,4 +323,4 @@ Validator: tools/validate_uae_coverage_claims.py — checks all docs, forbidden 
 
 ---
 
-*Original dossier completed on 2026-06-17 without source activation. Updated on 2026-06-18 after FTA/ADGM truth repair, weak-family bulk activation, and FTA PDF activation. Updated again on 2026-06-19 after weak-family completion and fresh-source expansion: sources.json now records 238 enabled / 237 monitoring-active / 1 remediation in the legacy registry, with 168 fresh-alert eligible daily monitors. FTA, CBUAE, and MoE/DNFBP now have at least 25 selected proof-backed fresh-alert endpoints; SCA, UAE FIU, MoJ/Gazette, MoF, and several direct EOCN/UAEIEC paths remain disclosed gaps.*
+*Original dossier completed on 2026-06-17 without source activation. Updated on 2026-06-18 after FTA/ADGM truth repair, weak-family bulk activation, and FTA PDF activation. Updated again on 2026-06-19 after weak-family completion, fresh-source expansion, and VARA enforcement-table activation: sources.json now records 238 enabled / 237 monitoring-active / 1 remediation in the legacy registry, with 169 fresh-alert eligible daily monitors. FTA, CBUAE, VARA, EOCN/TFS, and MoE/DNFBP now have at least 25 selected proof-backed fresh-alert endpoints; SCA, UAE FIU, MoJ/Gazette, MoF, and several direct EOCN/UAEIEC paths remain disclosed gaps.*

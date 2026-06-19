@@ -77,7 +77,7 @@ No additional weak family reached 25 in this pass.
 
 ## 8. Families Still Below 25
 
-- VARA: 24/25 after adding the VARA news/circular/publication listing. Needs one more official fresh endpoint or a VARA notices/admin-order adapter.
+- VARA: 25/25 after adding the proof-backed official enforcement table source. This is selected-source monitoring, not complete VARA coverage.
 - DFSA: 15/25. Needs more unique official listing/rulebook/enforcement/consultation endpoints and better duplicate-hash isolation.
 - DIFC: 10/25. Needs live legal/database/data-protection/consultation listing adapters or accessible official asset/PDF indexes.
 - ADGM/FSRA: 8/25. Needs ADGM component adapter refinement; two candidates failed mass-monitor selector verification.
@@ -115,7 +115,7 @@ Updated:
 
 ## 11. Customer-Safe Claims Now Allowed
 
-- “StatuteProof has 168 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, baseline confirmation, and daily-check metadata.”
+- “StatuteProof has 169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, baseline confirmation, and daily-check metadata.”
 - “EOCN/TFS selected-source monitoring has 25 proof-backed fresh-alert sources, but this is not complete sanctions/TFS coverage.”
 - “DFSA monitoring has 15 proof-backed fresh-alert sources after adding official legal resources, innovation, and enforcement endpoints.”
 - “SCA monitoring has 5 proof-backed fresh-alert sources; broader SCA coverage remains under remediation.”
@@ -144,9 +144,9 @@ Update the Sources/Coverage UI to show family-level progress toward Strong Fresh
 
 ## 15. Next Exact Sales Task
 
-Use the 168 fresh-alert claim only. Do not sell complete UAE coverage or complete family coverage.
+Use the 169 fresh-alert claim only. Do not sell complete UAE coverage or complete family coverage.
 
 
 ## Completion-Next Addendum
 
-A later completion pass added six more proof-backed fresh-alert sources, bringing current fresh-alert count to 168 and current legacy registry truth to 238 enabled / 237 monitoring-active / 1 remediation. EOCN/TFS selected-source monitoring is now 25/25; VARA is 24/25; DFSA is 16/25; ADGM/FSRA is 10/25; MoF is 1/25. Complete UAE coverage and complete family coverage remain forbidden claims.
+A later completion pass and VARA enforcement-table activation added proof-backed fresh-alert sources, bringing current fresh-alert count to 169 and current legacy registry truth to 238 enabled / 237 monitoring-active / 1 remediation. EOCN/TFS and VARA selected-source monitoring are now 25/25; DFSA is 16/25; ADGM/FSRA is 10/25; MoF is 1/25. Complete UAE coverage and complete family coverage remain forbidden claims.

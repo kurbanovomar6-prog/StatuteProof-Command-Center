@@ -21,13 +21,13 @@ const SOURCE_LAYERS = [
 
 const SOURCE_READINESS_PREVIEW = {
   CBUAE: {
-    status: 'Strongest coverage',
-    detail: '27 monitoring-active sources. Best fit for CBUAE, AML/CFT, payments, consumer protection and open-finance monitoring.',
+    status: 'Strong selected-source',
+    detail: '25 fresh-alert eligible CBUAE rulebook/regulatory sources. Best fit for CBUAE, AML/CFT, payments, consumer protection and open-finance monitoring.',
     tone: 'emerald',
   },
   VARA: {
-    status: 'Improved but not complete',
-    detail: '9 active VARA sources, including direct official rulebook PDFs for core VASP domains. Coverage is stronger, but not complete VARA coverage.',
+    status: 'Strong selected-source',
+    detail: '25 fresh-alert eligible VARA sources, including rulebook PDFs, revision updates, publications, and the official enforcement table. Selected-source depth, not complete VARA coverage.',
     tone: 'cyan',
   },
   DFSA: {
@@ -36,8 +36,8 @@ const SOURCE_READINESS_PREVIEW = {
     tone: 'cyan',
   },
   'ADGM / FSRA': {
-    status: 'Strong',
-    detail: 'Strong ADGM/FSRA coverage across rulebooks, guidance, consultations, waivers, enforcement and circulars.',
+    status: 'Good selected-source',
+    detail: '10 fresh-alert eligible ADGM/FSRA sources across legal/document listings and selected regulatory sources, with rulebook gaps disclosed.',
     tone: 'emerald',
   },
   'UAE FIU': {
@@ -51,13 +51,13 @@ const SOURCE_READINESS_PREVIEW = {
     tone: 'slate',
   },
   'UAE Legislation Portal': {
-    status: 'Useful foundation',
-    detail: 'Official legislation layer is useful for legal-source monitoring but does not replace legal analysis.',
-    tone: 'cyan',
+    status: 'Remediation',
+    detail: 'High-value federal legislation source remains blocked by WAF/access issues and is not sold as monitored.',
+    tone: 'amber',
   },
   'DIFC Laws': {
     status: 'Improved',
-    detail: 'DIFC laws/regulations now include monitoring-active official legal sources, but end-to-end DIFC source scope is not claimed.',
+    detail: 'DIFC laws/regulations include selected fresh-alert eligible legal sources, but end-to-end DIFC source scope is not claimed.',
     tone: 'cyan',
   },
   'Ministry of Economy': {
@@ -395,7 +395,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                 <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 <p className="text-emerald-400/90 text-sm">
                   Your profile helps determine which UAE source layers are relevant.
-                  Only monitoring-active sources can move toward monitoring, and limitations are disclosed before pilot delivery.
+                  Only fresh-alert eligible sources can move toward monitoring, and limitations are disclosed before pilot delivery.
                   You can update your settings any time from the dashboard.
                 </p>
               </div>

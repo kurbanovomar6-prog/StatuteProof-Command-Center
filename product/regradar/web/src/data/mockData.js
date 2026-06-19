@@ -5,9 +5,9 @@ export const sourceHealthRows = [
   { id: 4,  name: 'VARA Main',                   jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
   { id: 5,  name: 'VARA Enforcement Notices',    jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
   { id: 6,  name: 'ADGM FSRA Main',              jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
-  { id: 7,  name: 'UAE FIU Circulars',           jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
+  { id: 7,  name: 'UAE FIU Publications Hub',    jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
   { id: 8,  name: 'DIFC Laws and Regulations',   jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
-  { id: 9,  name: 'UAE Legislation Portal',      jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
+  { id: 9,  name: 'UAE Legislation Portal',      jurisdiction: 'AE', flag: '🇦🇪', access: 'Remediation', quality: 'underReview', status: 'underReview', verdict: 'REVIEW' },
   { id: 10, name: 'UAE Ministry of Economy',     jurisdiction: 'AE', flag: '🇦🇪', access: 'Accessible', quality: 'readiness_supported', status: 'readiness_supported', verdict: 'READINESS' },
   { id: 11, name: 'DFSA Annual Reports',          jurisdiction: 'AE', flag: '🇦🇪', access: 'Active',                 quality: 'monitoring_active', status: 'monitoring_active', verdict: 'ACTIVE' },
   { id: 12, name: 'DFSA Annual AML Reports',     jurisdiction: 'AE', flag: '🇦🇪', access: 'Active',                 quality: 'monitoring_active', status: 'monitoring_active', verdict: 'ACTIVE' },
@@ -26,13 +26,13 @@ export const riskTrendData = [
 
 export const features = [
   { icon: 'Search',        title: 'Official-source monitoring',      desc: 'Your monitored UAE regulatory sources are checked on a defined schedule — CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, and more. When something changes on an official portal, you know about it from the source, not from a peer.' },
-  { icon: 'FileText',      title: 'Source-backed compliance briefs', desc: 'Every detected change produces a structured brief: what changed, which official source published it, and what your licence profile requires next. No raw text dumps — a brief you can act on.' },
+  { icon: 'FileText',      title: 'Source-backed compliance briefs', desc: 'Detected changes can produce a structured brief for human review: what changed, which official source published it, and what your team may need to review. No raw text dumps.' },
   { icon: 'Globe',         title: 'Documented extraction methods',    desc: 'You see exactly how each source is monitored — HTML, PDF, or page snapshot — and any known limitations are disclosed upfront. If a source has restricted access, that is documented before your pilot begins.' },
   { icon: 'MessageSquare', title: 'Profile-scoped alert delivery',    desc: 'Alerts are filtered to the regulators and business activities relevant to your licence type. A VARA update does not reach a payments firm with no virtual asset exposure.' },
   { icon: 'BarChart2',     title: 'Source readiness reporting',       desc: 'Before monitoring begins, you receive a clear view of which UAE regulatory sources are accessible, which are PDF-primary, and which are currently out of scope. No surprises after sign-off.' },
   { icon: 'BrainCircuit',  title: 'Client-specific source profiles',  desc: 'Configure the exact regulators, jurisdictions, and compliance topics relevant to your business. No noise from sources that do not apply to your licence type.' },
   { icon: 'Languages',     title: 'English compliance briefs',        desc: 'Official source content from Arabic or mixed-language portals is summarised in English briefs, with a direct link back to the original source so you can verify the primary text.' },
-  { icon: 'ShieldCheck',   title: 'Evidence trail on every alert',    desc: 'Every alert carries a source URL, timestamp, change delta, extraction quality rating, and evidence snippet. When your board asks how a change was caught, you have a documented record.' },
+  { icon: 'ShieldCheck',   title: 'Evidence trail on alerts',         desc: 'Alerts include a source URL, timestamp, change delta, extraction quality rating, and evidence snippet when the run produces approved alert material.' },
 ]
 
 export const coverage = [
@@ -46,9 +46,9 @@ export const coverage = [
       { name: 'VARA Main', status: 'readiness_supported' },
       { name: 'VARA Enforcement Notices', status: 'readiness_supported' },
       { name: 'ADGM FSRA Main', status: 'readiness_supported' },
-      { name: 'UAE FIU Circulars', status: 'readiness_supported' },
+      { name: 'UAE FIU Publications Hub', status: 'readiness_supported' },
       { name: 'DIFC Laws and Regulations', status: 'readiness_supported' },
-      { name: 'UAE Legislation Portal', status: 'readiness_supported' },
+      { name: 'UAE Legislation Portal', status: 'underReview' },
       { name: 'UAE Ministry of Economy', status: 'readiness_supported' },
       { name: 'DFSA Annual Reports', status: 'monitoring_active' },
       { name: 'DFSA Annual AML Reports', status: 'monitoring_active' },
@@ -103,7 +103,7 @@ export const pricingPlans = [
     routePlan: 'professional',
     desc: 'Selected official UAE regulatory source pack across VARA, CBUAE, DFSA, ADGM, FIU, DIFC and related public authorities. Built for an MLRO who needs evidence that regulatory changes were tracked.',
     features: [
-      '225 monitoring-active official-source endpoints',
+      '169 fresh-alert eligible official-source endpoints',
       'Priority review queue for high-risk changes',
       'Weekly monitoring brief (activation required)',
       'Up to 2 custom sources after review',

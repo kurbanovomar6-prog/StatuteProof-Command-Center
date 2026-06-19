@@ -84,10 +84,9 @@ const TEST_STEPS = [
 ]
 
 const REMEDIATION_SOURCE_IDS = new Set([
-  'AE-dubai-financial-services-authority-dfsa',
-  'AE-dfsa-notices',
-  'AE-difc-laws-and-regulations',
+  'AE-uae-legislation-portal',
   'AE-uae-financial-intelligence-unit-uaefiu',
+  'AE-sca-regulations-listing',
 ])
 
 function statusFromApiSource(row) {
@@ -418,7 +417,7 @@ export default function SourcesPage({ onAddCustomSource }) {
             <h2 className="text-sm font-semibold text-white mb-1">Sources are checked before monitoring activates.</h2>
             <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
               StatuteProof tests public official sources for accessibility, extraction quality, and content depth.
-              Sources are marked monitoring-active only when meaningful regulatory text is extracted and hashed.
+              Sources are marked fresh-alert eligible only when meaningful regulatory text is extracted and hashed.
               Custom sources are saved for readiness review — monitoring is not activated automatically.
             </p>
           </div>

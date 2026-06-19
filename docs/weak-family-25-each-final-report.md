@@ -105,4 +105,4 @@ Add 7/30/90-day source reliability trend charts for monitoring-active sources.
 
 ## 17. Next Exact Sales Task
 
-Superseded by the 2026-06-19 fresh-source expansion truth: “238 enabled UAE official-source endpoints, 237 monitoring-active in the legacy registry, and 168 fresh-alert eligible daily monitors. Selected sources only. Monitoring intelligence only. Not legal advice.”
+Superseded by the 2026-06-19 VARA enforcement activation truth: “238 enabled UAE official-source endpoints, 237 monitoring-active in the legacy registry, and 169 fresh-alert eligible daily monitors. Selected sources only. Monitoring intelligence only. Not legal advice.”

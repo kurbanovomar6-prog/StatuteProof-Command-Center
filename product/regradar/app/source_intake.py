@@ -289,6 +289,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "cbuae_document_listing",
         "fiu_eocn_document_listing",
         "eocn_news_listing",
+        "vara_enforcement_listing",
         "vara_pdf_listing",
         "difc_legal_database",
         "uae_legal_database",

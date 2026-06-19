@@ -15,7 +15,7 @@
 ## 2. Ending Counts by Family
 
 - EOCN/TFS: 25
-- VARA: 24
+- VARA: 25
 - DFSA: 16
 - DIFC: 10
 - ADGM/FSRA: 10
@@ -36,7 +36,7 @@
 
 ## 5. Newly Active Source IDs by Family
 - EOCN/TFS: `AE-uaeiec-news-listing-next`
-- VARA: `AE-vara-news-circulars-listing`
+- VARA: `AE-vara-news-circulars-listing`, `AE-vara-enforcement`
 - DFSA: `AE-dfsa-laws-rules-2dee8ba9`
 - ADGM/FSRA: `AE-adgm-adgm-courts-legislation-and-procedures-66abfd89`, `AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695`
 - MoF: `AE-mof-publications-and-releases`
@@ -44,10 +44,10 @@
 ## 6. Families Now >=25
 
 - EOCN/TFS: 25 fresh-alert daily monitors
+- VARA: 25 selected-source fresh-alert daily monitors
 
 ## 7. Families Still Below 25 and Exact Blocker
 
-- VARA: 24/25. One clean VARA news/circulars listing was activated. Regulatory notices scored 59 without structured items; unlicensed VASPs remained nav-shell. Need targeted VARA regulatory-notice/enforcement register adapter or another official listing endpoint.
 - DFSA: 16/25. DFSA laws/rules listing activated. Guidance/publication/policy pages returned Go-to-Homepage nav-shell under current public DOM. Need DFSA publication adapter or alternate official listing endpoints.
 - DIFC: 10/25. No new DIFC source passed in this pass. Consultation page remained q59 and still included navigation; needs DIFC legal/database selector work or official asset listing alternatives.
 - ADGM/FSRA: 10/25. Two ADGM legal/courts listing sources activated as medium-signal ADGM legal sources. FSRA guidance/RA notices still need selector/adapter work to avoid nav-shell/quality drop.
@@ -77,9 +77,9 @@
 - Existing fresh-signal validators retained; no validator was weakened.
 
 ## 11. Customer-Safe Claims Now Allowed
-- “StatuteProof has 168 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata as of June 19, 2026.”
+- “StatuteProof has 169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata as of June 19, 2026.”
 - “EOCN/TFS selected-source monitoring now has 25 proof-backed fresh-alert daily monitors, including direct EOCN/UAEIEC and MoE-owned TFS-related official sources. This is selected-source monitoring, not complete sanctions coverage.”
-- “VARA selected-source monitoring has 24 proof-backed fresh-alert daily monitors; it is still one short of the 25-source Strong threshold.”
+- “VARA selected-source monitoring has 25 proof-backed fresh-alert daily monitors, including the official enforcement table source. This is selected-source monitoring, not complete VARA coverage.”
 - “MoF now has 1 medium-signal official publication hub monitor; MoF is not strong yet.”
 
 ## 12. Claims Still Forbidden
@@ -90,10 +90,10 @@
 - Legal advice, guaranteed compliance, perfect parsing, regulator certification, or never-miss-update claims.
 
 ## 13. Next Exact Source Task
-Build targeted adapters for VARA regulatory notices/unlicensed VASPs, DFSA publication listings, SCA regulations tables, and MoJ/Gazette legal listings; then rerun proof/baseline/MONITOR_OK only for passes.
+Build targeted adapters for DFSA publication listings, SCA regulations tables, DIFC consultations, MoF publication pages, FIU circular candidates, and MoJ/Gazette legal listings; then rerun proof/baseline/MONITOR_OK only for passes.
 
 ## 14. Next Exact Product Task
 Update source coverage UI to distinguish Strong selected-source families from families that are still Partial/Weak and show blockers without implying complete UAE coverage.
 
 ## 15. Next Exact Sales Task
-Use 168 fresh-alert monitors as the broad pilot-safe number; lead with CBUAE, FTA, MoE/DNFBP, and EOCN/TFS selected-source strengths while disclosing VARA/DFSA/DIFC/ADGM/FIU/SCA/MoJ/MoF limits.
+Use 169 fresh-alert monitors as the broad pilot-safe number; lead with CBUAE, VARA, FTA, MoE/DNFBP, and EOCN/TFS selected-source strengths while disclosing DFSA/DIFC/ADGM/FIU/SCA/MoJ/MoF limits.

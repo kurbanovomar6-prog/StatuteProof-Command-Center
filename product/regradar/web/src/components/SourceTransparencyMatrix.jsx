@@ -3,7 +3,7 @@ import { ArrowRight, FileSearch, ShieldCheck } from 'lucide-react'
 const MATRIX_ROWS = [
   {
     category: 'Central bank / financial regulation',
-    sourceCount: '15+ sources active',
+    sourceCount: '25 fresh-alert eligible',
     statusTone: 'active',
     whatWeMonitor: 'CBUAE rulebook modules (AML/CFT, Consumer Protection, Open Finance, Payments, Risk Management), licensing updates, policy notices',
     limitation: null,
@@ -11,23 +11,23 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Virtual assets (VARA)',
-    sourceCount: '10+ sources active',
+    sourceCount: '24 fresh-alert eligible',
     statusTone: 'active',
-    whatWeMonitor: 'VARA licensing rules, enforcement notices, all six VARA rulebook PDFs, revision update history',
+    whatWeMonitor: 'VARA licensing rules, selected official notices, rulebook PDFs, revision update history',
     limitation: null,
-    whatThisMeans: 'VARA rulebook updates, enforcement actions and regulatory changes are tracked across all modules.',
+    whatThisMeans: 'VARA rulebook updates and selected official source changes are tracked; regulatory notices/enforcement pages still need adapter validation.',
   },
   {
     category: 'DIFC / DFSA',
-    sourceCount: '11 sources active',
+    sourceCount: '26 fresh-alert eligible across DIFC/DFSA',
     statusTone: 'active',
     whatWeMonitor: 'DIFC laws, data protection, DFSA rulebook modules, consultation papers, enforcement decisions and annual reports',
     limitation: null,
-    whatThisMeans: 'Full DIFC regulatory scope — laws, data protection, DFSA rulebooks, enforcement, and consultations.',
+    whatThisMeans: 'Selected DIFC/DFSA source monitoring covers laws, data protection, and DFSA listing sources; static detail pages remain evidence-library only.',
   },
   {
     category: 'ADGM / FSRA',
-    sourceCount: '10+ sources active',
+    sourceCount: '10 fresh-alert eligible',
     statusTone: 'active',
     whatWeMonitor: 'ADGM FSRA rules, guidance, waivers, supervision circulars, public consultations, Registration Authority circulars, data protection, enforcement',
     limitation: 'FSRA rulebook on the Thomson Reuters platform has restricted external access. The dedicated regulatory-alerts page is a candidate pending selector remediation.',
@@ -35,23 +35,23 @@ const MATRIX_ROWS = [
   },
   {
     category: 'AML / FIU / sanctions',
-    sourceCount: '8 sources active',
+    sourceCount: 'Selected-source AML depth',
     statusTone: 'active',
-    whatWeMonitor: 'UAE FIU circulars, publications hub, typology reports, AML/CFT laws; Executive Office for AML/CFT (EOCN) laws and news; SCA and CBUAE AML guidance',
+    whatWeMonitor: 'UAE FIU public sources excluding circulars, publications hub, typology reports, AML/CFT laws; Executive Office for AML/CFT (EOCN) laws and news; selected SCA and CBUAE AML guidance',
     limitation: null,
-    whatThisMeans: 'Full AML monitoring scope — FIU, EOCN, and regulator-specific AML guidance across CBUAE, VARA, DFSA and SCA.',
+    whatThisMeans: 'Selected-source AML monitoring is strong in some families, but FIU circulars and broader SCA remain adapter/remediation work.',
   },
   {
     category: 'Tax / corporate',
-    sourceCount: '2 sources active + FTA candidates',
+    sourceCount: 'FTA strong; MoF narrow',
     statusTone: 'partial',
-    whatWeMonitor: 'Ministry of Finance and UAE Legislation Portal. FTA legislation, VAT guides, Corporate Tax guides and media centre remain candidate sources.',
+    whatWeMonitor: 'Ministry of Finance publications and direct FTA tax PDFs. Broader FTA listing pages remain candidate sources.',
     limitation: 'Five FTA sub-pages failed 2026-06-18 no-save checks with nav-shell/title-only extraction. They need item-level extraction before activation.',
-    whatThisMeans: 'MoF policy and federal legislation are monitored. FTA tax depth is not yet production-ready and is disclosed before any tax-heavy pilot.',
+    whatThisMeans: 'FTA direct PDF monitoring is strong, while MoF remains narrow and federal legislation/gazette sources remain remediation or research.',
   },
   {
     category: 'Data protection',
-    sourceCount: '8+ sources active',
+    sourceCount: 'Selected-source depth',
     statusTone: 'caveat',
     whatWeMonitor: 'DIFC Commissioner of Data Protection, DIFC DP guidance and enforcement, ADGM Office of Data Protection, ADGM DP regulations and guidance index',
     limitation: 'UAE federal PDPL (TDRA / uaedp.gov.ae) is geo-IP restricted from outside the UAE — not currently monitorable.',
@@ -59,11 +59,11 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Legislation / gazettes',
-    sourceCount: '2 sources active',
+    sourceCount: '0 fresh-alert eligible',
     statusTone: 'caveat',
-    whatWeMonitor: 'UAE Legislation Portal federal law updates; UAE Ministry of Economy federal publications',
+    whatWeMonitor: 'No MoJ/UAE legislation/gazette source is fresh-alert eligible today. Related Ministry of Economy documents are separate AML/DNFBP support sources.',
     limitation: 'Official Gazette (Al-Jaridah Al-Rasmiah) and UAE e-Laws Portal (elaws.moj.gov.ae) are geo-restricted outside the UAE.',
-    whatThisMeans: 'Federal legislation on the UAE Legislation Portal is monitored. Gazette and e-Laws Portal access is geo-restricted — documented, not hidden.',
+    whatThisMeans: 'Federal legislation/gazette monitoring is not sold as ready until an official accessible route passes proof and baseline gates.',
   },
 ]
 
@@ -74,7 +74,7 @@ const BADGE_STYLES = {
 }
 
 const BADGE_LABELS = {
-  active: 'Monitoring active',
+  active: 'Fresh-alert eligible',
   caveat: 'Active with caveats — see detail',
   partial: 'Partially active — geo-restricted sources not available',
 }
@@ -111,7 +111,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
               Pilot transparency
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
-              Every pilot includes a source coverage report showing which sources are active, which have caveats, and which are outside current scope.
+              Every pilot includes a source-scope report showing which sources are fresh-alert eligible, which have caveats, and which are outside current scope.
             </p>
           </div>
         </div>

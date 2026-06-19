@@ -23,19 +23,19 @@ const PROFILES = [
     icon: BriefcaseBusiness,
     title: 'ADGM-regulated firms',
     sources: 'Primary regulators: ADGM / FSRA, UAE FIU',
-    scope: 'Alert focus after readiness review: ADGM/FSRA main-source updates and ADGM legislative context. FSRA rulebook/circular layers stay outside monitoring-active scope until source readiness checks clear. Not included by default: CBUAE, DFSA, VARA.',
+    scope: 'Alert focus after readiness review: ADGM/FSRA main-source updates and ADGM legislative context. FSRA rulebook/circular layers stay outside fresh-alert scope until source readiness checks clear. Not included by default: CBUAE, DFSA, VARA.',
   },
   {
     icon: FileSearch,
     title: 'AML and compliance consultants',
-    sources: 'Primary regulators: UAE FIU, CBUAE, UAE Ministry of Economy, VARA where relevant',
-    scope: 'Alert focus: UAE FIU typologies and guidance, CBUAE AML/CFT compliance notices, UAE Ministry of Economy beneficial ownership and AML policy, and VARA AML guidance where relevant. Multi-client consultants can request separate monitoring profiles.',
+    sources: 'Primary regulators: UAE FIU, CBUAE, UAE Ministry of Economy, selected SCA/DFSA sources',
+    scope: 'Alert focus: UAE FIU typologies and guidance, CBUAE AML/CFT compliance notices, UAE Ministry of Economy beneficial ownership and AML policy, and selected SCA/DFSA AML/CFT guidance where relevant. Multi-client consultants can request separate monitoring profiles.',
   },
   {
     icon: Scale,
     title: 'Capital markets and law firms',
     sources: 'Primary regulators: Capital Market Authority / former SCA, UAE Legislation Portal, Ministry of Finance, DIFC Laws',
-    scope: 'Alert focus: capital markets updates, federal decrees, Ministry of Finance financial markets notices, and DIFC Laws changes. Coverage note: Capital Market Authority source currently has limited accessibility, with fallback via UAE Legislation Portal and Ministry of Finance disclosed before pilot setup.',
+    scope: 'Alert focus: selected capital markets updates, Ministry of Finance financial markets notices, and DIFC Laws changes. Source note: SCA remains narrow and the UAE Legislation Portal is remediation, so federal-law alternatives must be confirmed before pilot setup.',
   },
 ]
 
@@ -76,7 +76,7 @@ export default function ConfiguredMonitoring() {
         <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-6">
           <p className="text-sm text-slate-400 leading-relaxed max-w-4xl mx-auto text-center">
             Every pilot starts with a source readiness review that maps your specific regulators — and
-            documents which sources are monitoring-active, which have access limitations, and what your alert scope
+            documents which sources are fresh-alert eligible, which have access limitations, and what your alert scope
             will be. No shared alert stream. No irrelevant sources.
           </p>
         </div>

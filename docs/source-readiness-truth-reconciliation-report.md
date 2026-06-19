@@ -183,7 +183,7 @@ Fresh-alert monitoring truth after the 25-per-family execution pass and next com
 - Remediation: 3
 - Overall MONITOR_OK sources: 222, including evidence-library records.
 
-Important: the legacy “monitoring-active” registry count is not the same as customer-relevant fresh-alert monitoring. Customer-facing fresh monitoring claims must use the 168 fresh-alert count, not 238 enabled or 237 legacy active.
+Important: the legacy “monitoring-active” registry count is not the same as customer-relevant fresh-alert monitoring. Customer-facing fresh monitoring claims must use the 169 fresh-alert count, not 238 enabled or 237 legacy active.
 
 Families currently Strong Fresh Signal:
 
@@ -194,7 +194,7 @@ Families currently Strong Fresh Signal:
 
 Families still below the 25-source Strong Fresh Signal threshold:
 
-- VARA: 24
+- VARA: 25
 - DFSA: 16
 - DIFC: 10
 - ADGM/FSRA: 10
@@ -209,7 +209,7 @@ See `docs/fresh-signal-25-per-family-final-report.md` for the current customer-s
 
 **Correct legacy registry story:** 238 enabled / 237 active-or-enabled rows / 1 legacy remediation.
 
-**Correct fresh-signal story:** 238 enabled / 168 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation.
+**Correct fresh-signal story:** 238 enabled / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation.
 
 **Not correct today:** 13 enabled / 10 confirmed / 3 under extraction remediation.
 

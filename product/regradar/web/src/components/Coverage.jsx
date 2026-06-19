@@ -14,7 +14,7 @@ const ACTIVE_SOURCES = [
   { source: 'ADGM Registration Authority Circulars',  publishes: 'RA circulars on corporate, commercial and registration matters',               note: null },
   { source: 'ADGM FSRA Enforcement',                  publishes: 'FSRA enforcement actions and regulatory alerts',                               note: null },
   { source: 'ADGM Data Protection (hub + guidance)',  publishes: 'ADGM Data Protection Regulations 2021, guidance index, enforcement',          note: null },
-  { source: 'UAE FIU Circulars',                      publishes: 'FIU circulars, AML/CFT publications and public notices',                      note: null },
+  { source: 'UAE FIU Publications Hub',               publishes: 'FIU publications, typology reports and public notices',                      note: 'FIU circulars page remains candidate/nav-shell' },
   { source: 'UAE FIU Publications Hub',               publishes: 'Typology reports, knowledge centre publications',                             note: null },
   { source: 'UAE FIU AML/CFT Laws and Decisions',     publishes: 'AML/CFT laws and related Cabinet/Ministerial decisions',                      note: null },
   { source: 'Executive Office for AML/CFT',           publishes: 'AML/CFT laws, regulations and news from the EOCN',                           note: null },
@@ -25,23 +25,26 @@ const ACTIVE_SOURCES = [
   { source: 'DFSA Enforcement Decisions + Actions',   publishes: 'Published enforcement decisions and ongoing regulatory actions',               note: null },
   { source: 'DFSA Annual Reports',                    publishes: 'DFSA annual regulatory reports',                                              note: null },
   { source: 'DFSA Annual AML Reports',                publishes: 'DFSA annual AML and enforcement reports',                                     note: null },
-  { source: 'UAE Legislation Portal',                 publishes: 'Federal laws and decrees',                                                    note: 'Aggregate page changes reviewed before item-level delivery' },
   { source: 'UAE Ministry of Economy',                publishes: 'Commercial licensing and AML policy updates',                                 note: null },
-  { source: 'SCA Regulations + Circulars',            publishes: 'Securities and commodities regulations, AML guidance, corporate governance',  note: null },
+  { source: 'SCA selected sources',                   publishes: 'Limited SCA proof-backed sources, including sandbox and selected guidance',    note: 'Broader SCA regulations listing still needs adapter remediation' },
 ]
 
 const CAVEAT_SOURCES = [
   {
     source: 'UAE FIU Homepage',
-    why: 'The FIU homepage is a navigation shell, not a document listing. FIU publications, circulars, typology reports and AML/CFT laws are monitored via four dedicated FIU sub-sources.',
+    why: 'The FIU homepage is a navigation shell, not a document listing. FIU annual reports, press releases, typology reports, AML/CFT laws, and publications hub have fresh-alert coverage; FIU circulars remain candidate/nav-shell.',
   },
   {
     source: 'FTA Main Portal (tax.gov.ae)',
-    why: 'The FTA main portal and five tested FTA sub-pages are public candidates, but current extraction returns nav-shell/title-only content. They are not monitoring-active until item-level extraction passes proof, repeat baseline, and MONITOR_OK gates.',
+    why: 'The FTA main portal and five tested FTA sub-pages are public candidates, but current extraction returns nav-shell/title-only content. They are not fresh-alert eligible until item-level extraction passes proof, repeat baseline, and MONITOR_OK gates.',
   },
   {
     source: 'Capital Markets Authority (former SCA)',
-    why: 'Source URL under review following Federal Decree-Law No. 32 of 2025. SCA Regulations, Circulars and AML guidance sub-pages are monitoring-active. Fallback via UAE Legislation Portal is also available. Disclosed before any capital markets pilot.',
+    why: 'SCA has 5 proof-backed fresh-alert eligible sources. Broader SCA regulations/circulars monitoring remains below Strong and needs adapter remediation before broader capital-markets claims.',
+  },
+  {
+    source: 'UAE Legislation Portal',
+    why: 'High-value federal legislation source remains in remediation due to WAF/access issues. It is not sold as monitored until an official accessible route passes proof and baseline gates.',
   },
   {
     source: 'ADGM FSRA Rulebook (Thomson Reuters platform)',
@@ -141,8 +144,8 @@ export default function Coverage({ onCreateWorkspace }) {
           {/* Active sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Monitoring active — {ACTIVE_SOURCES.length} sources</h3>
-              <StatusBadge tone="active">Monitoring active</StatusBadge>
+              <h3 className="font-bold text-white">Fresh-alert eligible examples — {ACTIVE_SOURCES.length} sources</h3>
+              <StatusBadge tone="active">Fresh-alert eligible</StatusBadge>
             </div>
             <SourceTable
               columns={[

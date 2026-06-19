@@ -372,6 +372,117 @@ def test_sca_listing_adapter_keeps_aspnet_form_wrapped_content():
     assert "Search Services" not in result.text
 
 
+def test_vara_enforcement_listing_adapter_extracts_enforcement_cards():
+    html = """
+    <html><body>
+      <header>VARA Search Contact</header>
+      <main>
+        <article class="card">
+          <p>20 June 2026</p>
+          <h3>Unlicensed VASP Enforcement Notice</h3>
+          <p>VARA publishes enforcement actions and notices for virtual asset service providers.</p>
+          <a href="/en/enforcement/unlicensed-vasps/">Read More</a>
+        </article>
+        <article class="card">
+          <p>15 June 2026</p>
+          <h3>Regulatory Notice on Market Conduct</h3>
+          <p>Official regulatory notice for licensed virtual asset activities.</p>
+          <a href="/en/regulations/regulatory-notices/market-conduct/">Read More</a>
+        </article>
+      </main>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.vara.ae/en/enforcement/",
+        adapter_family="vara_enforcement_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "vara_enforcement_listing"
+    assert result.item_count == 2
+    assert "Unlicensed VASP Enforcement Notice" in result.text
+    assert "Regulatory Notice on Market Conduct" in result.text
+    assert "Read More" not in result.text
+    assert all(item.get("row_hash") for item in result.items)
+
+
+def test_vara_enforcement_listing_adapter_extracts_enforcement_table():
+    html = """
+    <html><body>
+      <main>
+        <table>
+          <thead>
+            <tr>
+              <th>Full Name of Entity</th>
+              <th>Date</th>
+              <th>Category</th>
+              <th>Detail</th>
+              <th>Type of Enforcement Notice</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Full Name of Entity">Vesta Prime Portal Co. L.L.C.</td>
+              <td data-label="Date">2026/01/13</td>
+              <td data-label="Category"><div>Unlicensed activities</div></td>
+              <td data-label="Detail"><div>A. Advertising and Marketing virtual asset activities in Dubai</div></td>
+              <td data-label="Type of Enforcement Notice"><div>Cease-and-Desist Orders</div><div>Financial Penalties</div></td>
+            </tr>
+            <tr>
+              <td data-label="Full Name of Entity">The Open Network Foundation</td>
+              <td data-label="Date">2025/07/24</td>
+              <td data-label="Category"><div>Regulatory breaches</div></td>
+              <td data-label="Detail"><div>A. Breaches of the VARA Marketing Regulations</div></td>
+              <td data-label="Type of Enforcement Notice"><div>Public Statement</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.vara.ae/en/enforcement/",
+        adapter_family="vara_enforcement_listing",
+        adapter_config={"table_selector": "table"},
+    )
+
+    assert result.adapter_name == "vara_enforcement_listing"
+    assert result.item_count == 2
+    assert result.items[0]["title"] == "Vesta Prime Portal Co. L.L.C."
+    assert result.items[0]["date"] == "2026/01/13"
+    assert result.items[0]["category"] == "Unlicensed activities"
+    assert "Cease-and-Desist Orders Financial Penalties" in result.items[0]["raw_text_snippet"]
+    assert "The Open Network Foundation" in result.text
+    assert all(item.get("row_hash") for item in result.items)
+
+
+def test_vara_enforcement_listing_adapter_rejects_homepage_shell():
+    html = """
+    <html><body>
+      <main>
+        <article class="card">
+          <h3>Go to Homepage</h3>
+          <a href="/en/enforcement/">Go to Homepage</a>
+        </article>
+      </main>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.vara.ae/en/enforcement/",
+        adapter_family="vara_enforcement_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.item_count == 0
+    assert result.failure_reason
+
+
 def test_sca_listing_adapter_extracts_fatca_crs_document_links():
     html = """
     <html><body>
@@ -1233,6 +1344,37 @@ def test_source_intake_uae_legal_database_passes_preview_only():
     assert result["adapter_family"] == "uae_legal_database"
     assert result["structured_adapter_content"] is True
     assert result["can_save_evidence"] is True
+    assert result["can_activate_monitoring"] is False
+    assert result["evidence_written"] is False
+
+
+def test_source_intake_vara_enforcement_listing_passes_preview_only():
+    html = """
+    <html><body><main><table>
+      <thead><tr><th>Full Name of Entity</th><th>Date</th><th>Category</th><th>Detail</th><th>Type of Enforcement Notice</th></tr></thead>
+      <tbody>
+        <tr><td data-label="Full Name of Entity">Vesta Prime Portal Co. L.L.C.</td><td data-label="Date">2026/01/13</td><td data-label="Category">Unlicensed activities</td><td data-label="Detail">Advertising and marketing virtual asset activities in Dubai</td><td data-label="Type of Enforcement Notice">Cease-and-Desist Orders Financial Penalties</td></tr>
+        <tr><td data-label="Full Name of Entity">UAEC Digital Fintech FZCO</td><td data-label="Date">2025/08/27</td><td data-label="Category">Unlicensed activities</td><td data-label="Detail">Engaging in unlicensed virtual asset activities in Dubai</td><td data-label="Type of Enforcement Notice">Cease-and-Desist Orders Financial Penalties</td></tr>
+        <tr><td data-label="Full Name of Entity">The Open Network Foundation</td><td data-label="Date">2025/07/24</td><td data-label="Category">Regulatory breaches</td><td data-label="Detail">Breaches of the VARA Marketing Regulations</td><td data-label="Type of Enforcement Notice">Public Statement</td></tr>
+      </tbody>
+    </table></main></body></html>
+    """
+    source = {
+        "source_id": "AE-vara-enforcement-test",
+        "name": "VARA Enforcement Test",
+        "url": "https://www.vara.ae/en/enforcement/",
+        "adapter_family": "vara_enforcement_listing",
+        "adapter_name": "vara_enforcement_listing",
+        "adapter_config": {"table_selector": "table"},
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["adapter_family"] == "vara_enforcement_listing"
+    assert result["structured_adapter_content"] is True
+    assert result["nav_shell_detected"] is False
     assert result["can_activate_monitoring"] is False
     assert result["evidence_written"] is False
 

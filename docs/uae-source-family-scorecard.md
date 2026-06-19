@@ -2,9 +2,9 @@
 
 Date: 2026-06-19
 
-Labels: Strong = 25+ proof-backed active endpoints; Good = 10-24; Partial = 5-9; Weak = 1-4; Missing = 0. Source-family labels describe depth, not legal completeness.
+Fresh-signal labels: Strong = 25+ fresh-alert eligible endpoints; Good = 10-24; Partial = 5-9; Weak = 1-4; Missing = 0. Source-family labels describe selected-source depth, not legal completeness.
 
-Current fresh-signal truth: 238 enabled UAE sources / 168 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
+Current fresh-signal truth: 238 enabled UAE sources / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
 
 Fresh-signal overlay after the 25-per-family pass:
 
@@ -13,7 +13,7 @@ Fresh-signal overlay after the 25-per-family pass:
 | CBUAE | 25 | Strong | 0 |
 | FTA / Tax | 25 | Strong | 0 |
 | Ministry of Economy / DNFBP AML | 42 | Strong | 0 |
-| VARA | 24 | Good | 1 |
+| VARA | 25 | Strong selected-source | 0 |
 | EOCN / sanctions / TFS | 25 | Strong selected-source | 0 |
 | DFSA | 16 | Good | 9 |
 | DIFC | 10 | Good | 15 |
@@ -23,9 +23,9 @@ Fresh-signal overlay after the 25-per-family pass:
 | Ministry of Justice / UAE Legislation / Gazette | 0 | Missing | 25 |
 | Ministry of Finance | 1 | Weak | 24 |
 
-The legacy table below is retained for source-universe depth context. Do not use legacy active counts as fresh-alert monitoring claims.
+The legacy table below is retained for source-universe depth context only. Its legacy active counts come from older `status=active` fields and must not be used as customer-facing monitoring, fresh-alert, or coverage claims.
 
-| Family | Enabled | Active | Remediation | Candidates mapped | Top-250 | Label | Depth /10 | Trust /10 | Next 10 endpoints |
+| Family | Enabled | Legacy active (not fresh-alert) | Remediation | Candidates mapped | Top-250 | Legacy depth label | Depth /10 | Trust /10 | Next 10 endpoints |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |
 | CBUAE | 27 | 27 | 0 | 40 | 0 | Strong | 10 | 8 | None mapped yet |
 | DFSA | 43 | 43 | 0 | 104 | 49 | Strong | 10 | 8 | `AE-dfsa-ar-laws-rules-1a83ae44`, `AE-dfsa-ar-laws-rules-legal-resources-72e01f1f`, `AE-dfsa-laws-rules-2dee8ba9`, `AE-dfsa-laws-rules-legal-resources-3dc15494`, `AE-dfsa-ar-innovation-1e65603c`, `AE-dfsa-ar-what-we-do-enforcement-f0487f7a`, `AE-dfsa-innovation-59c1dc61`, `AE-dfsa-news-reminder-rulebook-amendments-e6e4718a`, `AE-dfsa-what-we-do-enforcement-1a837c50`, `AE-dfsa-news-notice-amendment-dfsa-forms-adabf2e1` |

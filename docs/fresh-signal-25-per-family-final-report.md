@@ -51,7 +51,7 @@ No customer emails or customer alerts were sent.
 
 ## 6. Families Still Not Strong And Exact Blocker
 
-- VARA: 24 fresh-alert sources after adding the official VARA news/circular/publication listing. Regulatory notices and unlicensed VASP enforcement still need adapter work. Needs one more official endpoint.
+- VARA: 25 fresh-alert sources after adding the proof-backed official enforcement table source. This is selected-source monitoring, not complete VARA coverage.
 - DFSA: 16 fresh-alert sources after adding DFSA Laws and Rules. Static individual notice pages and duplicate-hash publication pages cannot count. Guidance/publication/policy pages still collapse to nav-shell under current public DOM.
 - DIFC: 10 fresh-alert sources. Static whats-on/news pages cannot count. Needs more legal/database/data-protection/consultation/publication listing endpoints.
 - ADGM/FSRA: 10 fresh-alert sources after adding two medium-signal ADGM Courts legal/document listings. Some FSRA candidates still fail `QUALITY_DROP` or nav-shell and need adapter refinement.
@@ -143,10 +143,10 @@ Static detail pages remain excluded from fresh-alert claims.
 
 Allowed:
 
-- “StatuteProof has 168 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, baseline confirmation, and daily-check metadata.”
+- “StatuteProof has 169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, baseline confirmation, and daily-check metadata.”
 - “CBUAE rulebook monitoring includes 25 fresh-alert official rulebook/regulatory sources.”
 - “FTA and MoE/DNFBP AML remain Strong Fresh Signal families.”
-- “VARA has 24 confirmed fresh-alert sources and remains one short of the 25-source Strong threshold.”
+- “VARA has 25 confirmed selected-source fresh-alert sources, including the official enforcement table source. This is not complete VARA coverage.”
 - “SCA has 5 confirmed fresh-alert sources; broader SCA coverage remains under remediation.”
 
 ## 18. Claims Still Forbidden
@@ -219,7 +219,7 @@ Update the frontend Sources/Coverage UI so customers can see:
 
 Use only the updated safe claim:
 
-“168 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.”
+“169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.”
 
 Do not sell complete UAE coverage or complete family coverage.
 
@@ -251,7 +251,7 @@ A follow-on completion pass added six more proof-backed `fresh_alert` sources af
 Updated family truth after this addendum:
 
 - EOCN/TFS: 25, Strong selected-source monitoring. This does not claim complete sanctions/TFS coverage.
-- VARA: 24, one short of the 25-source Strong threshold.
+- VARA: 25 selected-source fresh-alert monitors; Strong threshold reached without claiming complete VARA coverage.
 - DFSA: 16.
 - DIFC: 10.
 - ADGM/FSRA: 10.
@@ -260,4 +260,4 @@ Updated family truth after this addendum:
 - MoJ/Gazette: 0.
 - MoF: 1.
 
-Current pilot-safe count: 168 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.
+Current pilot-safe count: 169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.

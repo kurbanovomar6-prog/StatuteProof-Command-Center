@@ -45,8 +45,8 @@ const SOURCES = [
     source_id: 'AE-uaefiu-circulars',
     regulator: 'UAE FIU Circulars',
     coverageArea: 'AML/CFT circulars & notices',
-    status: 'ACTIVE',
-    caveat: null,
+    status: 'PENDING',
+    caveat: 'Circulars page remains candidate/nav-shell; FIU publications hub is separate',
   },
   {
     source_id: 'AE-difc-laws-and-regulations',
@@ -59,8 +59,8 @@ const SOURCES = [
     source_id: 'AE-uae-legislation-portal',
     regulator: 'UAE Legislation Portal',
     coverageArea: 'UAE federal legislation',
-    status: 'CAVEAT',
-    caveat: 'WAF access constraints; aggregate changes reviewed before delivery',
+    status: 'PENDING',
+    caveat: 'WAF/access constraints; not fresh-alert eligible',
   },
   {
     source_id: 'AE-uae-ministry-of-economy',
@@ -93,9 +93,9 @@ const SOURCES = [
 ]
 
 const SOURCE_TRUTH = {
-  enabled: 122,
-  readinessSupported: 121,
-  remediation: 1,
+  enabled: 238,
+  readinessSupported: 168,
+  remediation: 3,
 }
 
 const LAST_CHECKED = '2026-06-18'
@@ -104,14 +104,14 @@ function StatusBadge({ status }) {
   if (status === 'ACTIVE') {
     return (
       <span className="inline-flex items-center rounded-md border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-200">
-        Monitoring active
+        Fresh-alert eligible
       </span>
     )
   }
   if (status === 'CAVEAT') {
     return (
       <span className="inline-flex items-center gap-1 rounded-md border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-200">
-        <span>&#9888;</span> Active — see caveat
+        <span>&#9888;</span> Limited — see caveat
       </span>
     )
   }
@@ -136,8 +136,8 @@ export default function SourceCoverageTable() {
           </p>
         </div>
         <div className="text-right text-xs">
-          <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} UAE official sources tracked</p>
-          <p className="text-emerald-200">{SOURCE_TRUTH.readinessSupported} monitoring active</p>
+          <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} UAE source records tracked</p>
+          <p className="text-emerald-200">{SOURCE_TRUTH.readinessSupported} fresh-alert eligible</p>
           <p className="text-amber-200">{SOURCE_TRUTH.remediation} under technical review</p>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function SourceCoverageTable() {
       </div>
 
       <div className="border-t border-slate-800 px-4 py-2.5 text-xs text-slate-500">
-        Monitoring active means we have at least two confirmed baseline evidence runs with stable content hashes. Sources under technical review are not delivered to clients.
+        Fresh-alert eligible means we have at least two confirmed baseline evidence runs with stable content hashes. Sources under technical review are not delivered to clients.
       </div>
     </div>
   )

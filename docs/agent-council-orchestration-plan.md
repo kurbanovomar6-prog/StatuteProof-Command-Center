@@ -39,7 +39,7 @@ The old "10 agents maximum" rule is deprecated for orchestration planning. It sh
 Current truth from the June 19 fresh-signal reports:
 
 - 238 enabled UAE sources.
-- 168 fresh-alert eligible sources.
+- 169 fresh-alert eligible sources.
 - 61 evidence-library sources.
 - 6 candidate sources.
 - 3 remediation-mode sources.

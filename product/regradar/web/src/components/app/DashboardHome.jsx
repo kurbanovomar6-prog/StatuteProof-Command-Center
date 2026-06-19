@@ -12,10 +12,9 @@ const COV_COLOR = {
 }
 
 const REMEDIATION_SOURCE_IDS = new Set([
-  'AE-dubai-financial-services-authority-dfsa',
-  'AE-dfsa-notices',
-  'AE-difc-laws-and-regulations',
+  'AE-uae-legislation-portal',
   'AE-uae-financial-intelligence-unit-uaefiu',
+  'AE-sca-regulations-listing',
 ])
 
 function StatusPill({ tone = 'slate', children }) {
@@ -117,7 +116,7 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
     { label: 'Account created', detail: 'Signed-in workspace account', status: 'Complete', tone: 'emerald' },
     { label: 'Profile saved', detail: hasProfile ? profileLabel(profile) : 'Add markets and licence profile', status: hasProfile ? 'Complete' : 'Pending', tone: hasProfile ? 'emerald' : 'amber', action: 'settings' },
     { label: 'Telegram connected', detail: connected ? 'Account pairing confirmed' : 'Connect Telegram in Integrations', status: connected ? 'Complete' : telegramLoading ? 'Checking' : 'Pending', tone: connected ? 'emerald' : 'amber', action: 'integrations' },
-    { label: 'Source map reviewed', detail: 'Review monitoring-active, limited, and access-restricted sources', status: 'Needs review', tone: 'amber', action: 'sources' },
+    { label: 'Source map reviewed', detail: 'Review fresh-alert eligible, limited, and access-restricted sources', status: 'Needs review', tone: 'amber', action: 'sources' },
     { label: 'First reviewed brief', detail: 'Use email test-mode or Telegram preview only after review gates pass', status: 'Test mode', tone: 'slate', action: 'briefs' },
   ]
 
@@ -314,7 +313,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                 ? 'Source readiness summary is unavailable right now.'
                 : sourcesLoading
                 ? 'Loading UAE source readiness summary...'
-                : `${sourceSummary?.readiness_supported_count ?? 0} of ${sourceSummary?.enabled_count ?? 0} enabled UAE sources are monitoring-active.`}
+                : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} of ${sourceSummary?.enabled_count ?? 0} enabled UAE source records are fresh-alert eligible.`}
             </h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
               Source activation remains subject to source readiness, evidence, repeat baseline, source-health,
@@ -328,11 +327,11 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
             </div>
             <div className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2">
               <p className="sp-mono text-xl font-semibold text-emerald-100">{sourceSummary?.readiness_supported_count ?? '—'}</p>
-              <p className="text-[11px] text-emerald-100/70">monitoring-active</p>
+              <p className="text-[11px] text-emerald-100/70">fresh-alert</p>
             </div>
             <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-amber-100">{sourceSummary?.remediation_count ?? '—'}</p>
-              <p className="text-[11px] text-amber-100/70">under review</p>
+              <p className="sp-mono text-xl font-semibold text-amber-100">{(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'}</p>
+              <p className="text-[11px] text-amber-100/70">candidate/remediation</p>
             </div>
           </div>
         </div>
@@ -359,7 +358,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={widgets?.enabledSources ?? 0}  sub="reviewed UAE source pack" />
           <InfoCard icon={CheckCircle} tone="emerald" label="Readiness-supported" value={widgets?.supportedSources ?? 0} sub="current registry review" />
-          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={widgets?.remediationSources ?? 0} sub="DFSA/DIFC/FIU extraction work" />
+          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={widgets?.remediationSources ?? 0} sub="UAE Legislation, FIU homepage, SCA listing" />
           <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with proof data" />
           <InfoCard icon={Bell}      tone="emerald" label="Changed sources"      value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
           <InfoCard icon={AlertTriangle} tone="amber" label="High-risk pending"  value={widgets?.highRiskPending ?? 0} sub="changes needing review" />
@@ -469,12 +468,12 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <h2 className="mb-4 text-sm font-semibold text-white">Source pack scope</h2>
               <div className="grid grid-cols-3 gap-2">
                 <div className={`rounded-lg border p-3 text-center ${COV_COLOR.emerald}`}>
-                  <span className="sp-mono text-lg font-bold">{sourceSummary?.readiness_supported_count ?? '—'}</span>
-                  <span className="mt-1 block text-xs">monitoring-active</span>
+                  <span className="sp-mono text-lg font-bold">{sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? '—'}</span>
+                  <span className="mt-1 block text-xs">fresh-alert</span>
                 </div>
                 <div className={`rounded-lg border p-3 text-center ${COV_COLOR.amber}`}>
-                  <span className="sp-mono text-lg font-bold">{sourceSummary?.remediation_count ?? '—'}</span>
-                  <span className="mt-1 block text-xs">remediation</span>
+                  <span className="sp-mono text-lg font-bold">{sourceSummary?.evidence_library_count ?? '—'}</span>
+                  <span className="mt-1 block text-xs">evidence-library</span>
                 </div>
                 <div className={`rounded-lg border p-3 text-center ${COV_COLOR.slate}`}>
                   <span className="sp-mono text-lg font-bold">Scoped</span>

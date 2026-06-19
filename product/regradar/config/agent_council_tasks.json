@@ -17,7 +17,7 @@
     {
       "task_id": "evidence-validator-hardening",
       "title": "Harden fresh-alert evidence validators",
-      "status": "review_evidence",
+      "status": "done",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Evidence Trail",
@@ -28,7 +28,8 @@
         "tools/validate_fresh_signal_sources.py",
         "tools/validate_source_monitoring_modes.py",
         "tools/validate_daily_checkable_sources.py",
-        "product/regradar/tests/"
+        "product/regradar/tests/",
+        "tools/fresh_alert_validator_common.py"
       ],
       "files_forbidden_to_touch": [
         ".env",
@@ -54,7 +55,7 @@
         "python3 -m pytest product/regradar/tests -q"
       ],
       "blocker": "",
-      "next_handoff_agent": "Evidence Trail",
+      "next_handoff_agent": "Product Manager",
       "notes": [
         {
           "created_at": "2026-06-19T20:03:12Z",
@@ -63,15 +64,23 @@
         {
           "created_at": "2026-06-19T20:21:44Z",
           "note": "Code Architect validator hardening patch landed locally; coordinator narrowed goAML blocking to avoid rejecting official MoE goAML documents. Fresh signal, monitoring mode, and daily validators now pass. Next gate: Evidence Trail review."
+        },
+        {
+          "created_at": "2026-06-19T20:53:53Z",
+          "note": "Evidence Trail re-gate PASS for registry validator hardening: fresh-alert source-truth claims are validator-safe; canonical evidence-record and risk-brief gates remain blocked until evidence-record.json/schema validation exists. Current count after VARA enforcement activation is 169."
+        },
+        {
+          "created_at": "2026-06-19T20:53:53Z",
+          "note": "QA re-gate approved moving evidence-validator-hardening to done after including the new shared helper. Validators now require source_id, existing proof/normalized artifacts, complete proof fields, SHA-256 format, recomputed normalized hash, safe baseline parsing, daily metadata, baseline >= 2, alert_eligible, and MONITOR_OK."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:21:44Z"
+      "updated_at": "2026-06-19T20:53:53Z"
     },
     {
       "task_id": "customer-claim-truth-cleanup",
       "title": "Clean stale customer-facing source claims",
-      "status": "accepted",
+      "status": "done",
       "owner_agent": "Product Manager",
       "reviewer_agents": [
         "Legal Language",
@@ -104,7 +113,7 @@
         "python3 tools/validate_plan_pricing_consistency.py"
       ],
       "blocker": "",
-      "next_handoff_agent": "Legal Language",
+      "next_handoff_agent": "Source Monitor",
       "notes": [
         {
           "created_at": "2026-06-19T20:03:12Z",
@@ -113,15 +122,31 @@
         {
           "created_at": "2026-06-19T20:21:44Z",
           "note": "Returned to accepted: wait for evidence-validator-hardening review before UI/customer copy edits."
+        },
+        {
+          "created_at": "2026-06-19T21:09:29Z",
+          "note": "Product Manager identified stale 225/226 monitoring-active copy across plan, auth, pricing, dashboard preview, source readiness, source packs, onboarding, and dashboard summary surfaces."
+        },
+        {
+          "created_at": "2026-06-19T21:09:29Z",
+          "note": "Legal Language provided safe wording: selected sources only; monitoring intelligence only; not legal advice or completeness guarantee. Current source truth after VARA enforcement activation is 238 enabled UAE source records; 169 fresh-alert eligible; 61 evidence-library/static; 5 candidate; 3 remediation."
+        },
+        {
+          "created_at": "2026-06-19T21:09:29Z",
+          "note": "Coordinator implemented agreed cleanup and source_summary fix: customer-facing readiness_supported_count now maps to fresh-alert eligible rather than legacy status=active; plan source limit updated to 169 after VARA enforcement activation; visible 225/226 claims removed from current app surfaces."
+        },
+        {
+          "created_at": "2026-06-19T21:16:31Z",
+          "note": "QA final Phase 2 re-gate SHIP: no P0/P1 stale claim findings remain. Current app surfaces no longer use legacy 225/226 monitoring-active claims; source_summary uses fresh-alert/evidence-library/candidate/remediation buckets; plan/pricing validator expects 169."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:21:44Z"
+      "updated_at": "2026-06-19T21:16:31Z"
     },
     {
       "task_id": "source-summary-fresh-alert-counting",
       "title": "Make source summary count fresh-alert eligibility separately",
-      "status": "proposed",
+      "status": "done",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Product Manager",
@@ -130,7 +155,8 @@
       "source_family": "cross_project",
       "files_allowed_to_touch": [
         "product/regradar/app/source_summary.py",
-        "product/regradar/tests/"
+        "product/regradar/tests/",
+        "product/regradar/tests/test_ideal_product_workflow.py"
       ],
       "files_forbidden_to_touch": [
         ".env",
@@ -152,14 +178,23 @@
       ],
       "blocker": "",
       "next_handoff_agent": "QA / Critic",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-19T21:09:29Z",
+          "note": "Implemented with customer-claim cleanup: source summary now exposes fresh_alert_count, evidence_library_count, candidate_count, remediation_count, legacy_active_count, and source_truth using monitoring_mode."
+        },
+        {
+          "created_at": "2026-06-19T21:16:31Z",
+          "note": "QA final Phase 2 re-gate SHIP: no P0/P1 stale claim findings remain. Current app surfaces no longer use legacy 225/226 monitoring-active claims; source_summary uses fresh-alert/evidence-library/candidate/remediation buckets; plan/pricing validator expects 169."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-19T21:16:31Z"
     },
     {
       "task_id": "vara-final-source-to-25",
       "title": "Find one more proof-backed VARA fresh-alert source",
-      "status": "accepted",
+      "status": "done",
       "owner_agent": "Source Monitor",
       "reviewer_agents": [
         "Code Architect",
@@ -193,11 +228,28 @@
         "python3 tools/validate_fresh_signal_25_per_family.py",
         "python3 tools/validate_fresh_signal_sources.py"
       ],
-      "blocker": "Regulatory notices scored 59 and unlicensed VASP page was nav-shell in the previous pass.",
-      "next_handoff_agent": "Code Architect",
-      "notes": [],
+      "blocker": "",
+      "next_handoff_agent": "DFSA publication/listing adapter",
+      "notes": [
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Implemented `vara_enforcement_listing` adapter with table fallback for official VARA enforcement rows. Live no-save on AE-vara-enforcement extracted 37 rows with quality 61, CONFIRMED_ACCESSIBLE, and can_save_for_validation=true."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Saved latest activation anchor at data/source_snapshots/2026-06-19/AE/AE-vara-enforcement/intake-20260619T213128Z/proof.json with normalized hash 95f3217b868b55b8fee8aeccdf6997b359dc0d6dc099ff6d1cd369325829fd5e. Repeat baseline and temporary mass-monitor dry-run returned MONITOR_OK."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Evidence Trail PASS for activation evidence; QA PASS after registry/work-queue reconciliation; Product and Legal approved selected-source wording. Source moved from candidate to fresh_alert in sources.json. Current truth: 238 enabled / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Risk-brief use remains blocked until canonical evidence-record.json packages and risk-brief eligibility gate exist. No complete VARA coverage, legal advice, or guaranteed compliance claim is allowed."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:03:12Z"
+      "updated_at": "2026-06-19T21:31:28Z"
     },
     {
       "task_id": "dfsa-publication-listing-adapter",
@@ -438,6 +490,165 @@
       "notes": [],
       "created_at": "2026-06-19T00:00:00Z",
       "updated_at": "2026-06-19T20:03:12Z"
+    },
+    {
+      "task_id": "canonical-evidence-record-generator",
+      "title": "Generate canonical evidence-record.json packages",
+      "status": "accepted",
+      "owner_agent": "Evidence Trail",
+      "reviewer_agents": [
+        "Code Architect",
+        "Risk + Brief Pipeline",
+        "QA / Critic"
+      ],
+      "source_family": "cross_project",
+      "files_allowed_to_touch": [
+        "product/regradar/app/",
+        "product/regradar/tests/",
+        "docs/evidence-record-spec.md",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Create canonical evidence-record.json packages from source runs only after proof, hash, normalized text, source_id, and path integrity are verified.",
+      "acceptance_criteria": [
+        "Evidence records include immutable record ID, source_id, run_id, canonical URL, timestamps, artifact paths, SHA-256 hashes, normalized text hash, proof path, diff paths where available, source health, extraction quality, limitations, and legal-safe disclaimer.",
+        "Generator refuses incomplete source-run snapshots and does not create customer risk-brief eligibility by itself.",
+        "Storage path is deterministic and separate from raw source snapshots."
+      ],
+      "evidence_required": [
+        "Fixture with a complete source run",
+        "Fixture with missing proof/hash/path refusal",
+        "Evidence Trail review"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests -q",
+        "python3 tools/validate_fresh_signal_sources.py"
+      ],
+      "blocker": "No canonical evidence-record.json package exists yet; source snapshot proof.json is monitoring evidence only.",
+      "next_handoff_agent": "Code Architect",
+      "notes": [
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Created after VARA activation exposed the distinction between source snapshot proof and canonical risk-brief evidence records."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Evidence Trail Phase 5 design: current VARA proof.json is BLOCK for customer risk briefs because it lacks schema_version, record_id, record_status, nested source/run/content/files/integrity/review blocks, canonical sha256: hashes, previous normalized artifact for non-FIRST_SEEN runs, and evidence-record.json."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Recommended storage: append-only evidence/{regulator_slug}/{source_id}/{run_id}/ with raw.html, snapshot.html, current.normalized.txt, previous.normalized.txt, metadata.json, and evidence-record.json. Do not migrate or rewrite source_snapshots; create derived backfill packages only when needed."
+        }
+      ],
+      "created_at": "2026-06-19T21:31:28Z",
+      "updated_at": "2026-06-19T21:31:28Z"
+    },
+    {
+      "task_id": "evidence-record-validator",
+      "title": "Validate canonical evidence records before brief use",
+      "status": "accepted",
+      "owner_agent": "Evidence Trail",
+      "reviewer_agents": [
+        "QA / Critic",
+        "Risk + Brief Pipeline"
+      ],
+      "source_family": "cross_project",
+      "files_allowed_to_touch": [
+        "tools/",
+        "product/regradar/tests/",
+        "docs/evidence-record-spec.md"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Block incomplete, mutable, mismatched, or non-canonical evidence records from risk-brief pipelines.",
+      "acceptance_criteria": [
+        "Validator recomputes artifact hashes from disk and fails mismatches.",
+        "Validator requires source_id, record_id, run_id, proof path, normalized path, normalized hash, source URL, timestamps, evidence level, and legal-safe disclaimer.",
+        "Validator reports exact missing/mismatched fields and does not pass source snapshots that lack evidence-record.json."
+      ],
+      "evidence_required": [
+        "Failing fixtures",
+        "Passing canonical fixture",
+        "QA review"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests -q",
+        "python3 tools/validate_fresh_signal_sources.py"
+      ],
+      "blocker": "Requires schemas/evidence-record.schema.json and canonical evidence package contract.",
+      "next_handoff_agent": "Risk + Brief Pipeline",
+      "notes": [
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Evidence Trail Phase 5 validator requirements: require canonical evidence-record.json; reject FAILED/QUALITY_DROP complete records; recompute current normalized SHA-256 with sha256: prefix; require previous normalized file/hash for non-FIRST_SEEN; require diff.txt for CHANGED only; require integrity.hash_verified=true, integrity_status=VERIFIED, verified_at, and review fields."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "First implementation task: create schemas/evidence-record.schema.json from docs/evidence-record-spec.md, then add a validator test showing current VARA proof.json fails because it is not canonical evidence-record.json."
+        }
+      ],
+      "created_at": "2026-06-19T21:31:28Z",
+      "updated_at": "2026-06-19T21:31:28Z"
+    },
+    {
+      "task_id": "risk-brief-eligibility-gate",
+      "title": "Gate risk briefs on canonical evidence records",
+      "status": "accepted",
+      "owner_agent": "Risk + Brief Pipeline",
+      "reviewer_agents": [
+        "Evidence Trail",
+        "Legal Language",
+        "QA / Critic"
+      ],
+      "source_family": "cross_project",
+      "files_allowed_to_touch": [
+        "product/regradar/app/",
+        "product/regradar/tests/",
+        "docs/risk-scoring-guide.md",
+        "docs/"
+      ],
+      "files_forbidden_to_touch": [
+        ".env",
+        ".env.*"
+      ],
+      "objective": "Enforce no-evidence-no-brief: customer risk briefs require canonical evidence records and risk inputs, not source snapshots alone.",
+      "acceptance_criteria": [
+        "Brief pipeline refuses records without canonical evidence-record.json and validator PASS.",
+        "Risk scoring requires affected entity/topic, source family, change type, confidence, severity rationale, evidence record IDs, and legal-safe limitations.",
+        "Generated brief copy states monitoring intelligence only and not legal advice."
+      ],
+      "evidence_required": [
+        "Brief refusal fixture without canonical evidence",
+        "Brief eligibility fixture with validated canonical evidence",
+        "Legal Language review"
+      ],
+      "validation_commands": [
+        "python3 -m pytest product/regradar/tests -q",
+        "python3 tools/validate_uae_coverage_claims.py"
+      ],
+      "blocker": "Requires canonical evidence generator and validator; current source_runs-only records must BLOCK risk briefs.",
+      "next_handoff_agent": "Evidence Trail",
+      "notes": [
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Risk + Brief Pipeline Phase 5 design: no-evidence-no-brief means missing or non-complete evidence_record_status/record_status returns BLOCK, not a risk score or draft. Human review flag does not cure missing evidence."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Exact next task: implement build_risk_brief_inputs(evidence_record_id, base_dir) that loads canonical evidence-record.json, requires record_status=complete, rejects FAILED/QUALITY_DROP and CHANGED without diff, verifies proof/snapshot/normalized paths and hashes, extracts risk inputs, and blocks current source_runs-only records."
+        },
+        {
+          "created_at": "2026-06-19T21:31:28Z",
+          "note": "Legal boundary for future brief copy: evidence-backed compliance intelligence for human review only; no legal advice, legal opinion, compliance certification, regulator approval, guaranteed update capture, guaranteed compliance, prevention of fines, or automated compliance decisions."
+        }
+      ],
+      "created_at": "2026-06-19T21:31:28Z",
+      "updated_at": "2026-06-19T21:31:28Z"
     },
     {
       "task_id": "ruflo-safe-tooling-intake",

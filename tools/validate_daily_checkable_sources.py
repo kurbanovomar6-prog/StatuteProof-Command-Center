@@ -7,9 +7,21 @@ import json
 import sys
 from pathlib import Path
 
+try:
+    from tools.fresh_alert_validator_common import (
+        validate_baseline_runs,
+        validate_fresh_alert_artifacts,
+    )
+except ModuleNotFoundError:  # pragma: no cover - direct script execution
+    from fresh_alert_validator_common import (
+        validate_baseline_runs,
+        validate_fresh_alert_artifacts,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "product/regradar/sources.json"
+REGRADAR_ROOT = ROOT / "product/regradar"
 
 
 def is_ae_source(source: dict) -> bool:
@@ -50,15 +62,8 @@ def main() -> int:
         url = str(source.get("url") or "")
         if source.get("last_monitor_status") != "MONITOR_OK":
             failures.append(f"{source_id}: daily fresh_alert lacks MONITOR_OK")
-        for field in ("proof_path", "normalized_text_path", "normalized_hash"):
-            if not source.get(field):
-                failures.append(f"{source_id}: daily fresh_alert missing {field}")
-        baseline_completed = int(source.get("baseline_runs_completed") or 0)
-        baseline_required = max(2, int(source.get("baseline_runs_required") or 2))
-        if baseline_completed < baseline_required:
-            failures.append(
-                f"{source_id}: baseline {baseline_completed}/{baseline_required} is incomplete"
-            )
+        failures.extend(validate_fresh_alert_artifacts(source, REGRADAR_ROOT))
+        failures.extend(validate_baseline_runs(source, str(source_id)))
         if source.get("alert_eligible") is not True:
             failures.append(f"{source_id}: daily fresh_alert must be alert_eligible")
         if is_static_or_homepage_url(url):

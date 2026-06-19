@@ -7,9 +7,9 @@ const PACKS = [
     bestFor: 'Exchanges, brokers, custodians, token projects and VASP compliance teams',
     coverage: 'strong',
     layers: [
-      { text: 'VARA rulebooks, revision updates and enforcement notices', status: 'active' },
+      { text: 'VARA rulebooks, revision updates and selected official listings', status: 'active' },
       { text: 'VARA Virtual Asset regulations and compliance rulebook PDFs', status: 'active' },
-      { text: 'UAE FIU circulars, AML/CFT laws and typology reports', status: 'active' },
+      { text: 'UAE FIU public sources excluding circulars, AML/CFT laws and typology reports', status: 'active' },
       { text: 'DIFC Laws covering digital asset activity', status: 'active' },
       { text: 'CBUAE Payment Token Services Regulation', status: 'active' },
     ],
@@ -21,9 +21,9 @@ const PACKS = [
     coverage: 'strong',
     layers: [
       { text: 'CBUAE regulations, notices and supervisory materials', status: 'active' },
-      { text: 'UAE FIU AML/CFT circulars and publications', status: 'active' },
+      { text: 'UAE FIU AML/CFT publications and laws; circulars remain candidate', status: 'active' },
       { text: 'UAE Ministry of Finance policy updates', status: 'active' },
-      { text: 'UAE Legislation Portal federal law updates', status: 'active' },
+      { text: 'UAE Legislation Portal federal law updates', status: 'pending' },
     ],
     caveat: 'FTA clarifications require item-level review before activation.',
   },
@@ -32,7 +32,7 @@ const PACKS = [
     bestFor: 'DIFC regulated firms, funds, advisers, law firms and compliance consultants',
     coverage: 'strong',
     layers: [
-      { text: 'DIFC Laws and Regulations — full legal database', status: 'active' },
+      { text: 'DIFC Laws and Regulations — selected legal database sources', status: 'active' },
       { text: 'DIFC Data Protection — Commissioner, guidance and enforcement', status: 'active' },
       { text: 'DFSA Annual Reports and Annual AML Reports', status: 'active' },
       { text: 'DFSA consultation papers and enforcement decisions', status: 'active' },
@@ -58,11 +58,11 @@ const PACKS = [
     bestFor: 'MLROs, AML consultants, onboarding teams and regulated financial firms',
     coverage: 'strong',
     layers: [
-      { text: 'UAE FIU circulars, notices and publications hub', status: 'active' },
+      { text: 'UAE FIU publications hub; circulars remain candidate', status: 'active' },
       { text: 'UAE FIU typology reports and knowledge centre', status: 'active' },
       { text: 'UAE FIU AML/CFT laws and related decisions', status: 'active' },
       { text: 'Executive Office for AML/CFT — laws and news', status: 'active' },
-      { text: 'SCA, CBUAE and VARA AML guidance', status: 'active' },
+      { text: 'Selected SCA, CBUAE and DFSA AML/CFT guidance', status: 'active' },
     ],
     caveat: null,
   },
@@ -72,12 +72,12 @@ const PACKS = [
     coverage: 'partial',
     layers: [
       { text: 'UAE Ministry of Finance policy updates', status: 'active' },
-      { text: 'UAE Legislation Portal federal law updates', status: 'active' },
+      { text: 'UAE Legislation Portal federal law updates', status: 'pending' },
       { text: 'FTA — all tax legislation listing', status: 'pending' },
       { text: 'FTA — VAT guides, references and clarifications', status: 'pending' },
       { text: 'FTA — Corporate Tax guides and media centre', status: 'pending' },
     ],
-    caveat: 'FTA sub-pages are public candidates, but the current extraction returns nav-shell/title-only content. They are not counted as monitoring-active until item-level extraction passes proof and baseline gates.',
+    caveat: 'FTA sub-pages are public candidates, but the current extraction returns nav-shell/title-only content. They are not counted as fresh-alert eligible until item-level extraction passes proof and baseline gates.',
   },
   {
     profile: 'Data Protection',
@@ -89,15 +89,15 @@ const PACKS = [
       { text: 'ADGM Data Protection Regulations 2021 (updated PDF)', status: 'active' },
       { text: 'UAE federal PDPL (TDRA / UAE Data Office)', status: 'geo_blocked' },
     ],
-    caveat: 'DIFC and ADGM data protection sources are monitoring-active where proof-backed. UAE federal PDPL site (TDRA) is geo-IP restricted from outside the UAE — documented, not hidden.',
+    caveat: 'DIFC and ADGM data protection sources are fresh-alert eligible where proof-backed. UAE federal PDPL site (TDRA) is geo-IP restricted from outside the UAE — documented, not hidden.',
   },
 ]
 
 const COVERAGE_CONFIG = {
-  strong:  { label: 'Strong coverage',   badge: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300', bar: 'bg-emerald-400', width: 'w-[92%]' },
-  good:    { label: 'Good coverage',     badge: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',         bar: 'bg-cyan-400',    width: 'w-[72%]' },
-  partial: { label: 'Partial coverage',  badge: 'border-amber-400/25 bg-amber-400/10 text-amber-300',      bar: 'bg-amber-400',   width: 'w-[50%]' },
-  limited: { label: 'Limited coverage',  badge: 'border-rose-400/25 bg-rose-400/10 text-rose-300',         bar: 'bg-rose-400',    width: 'w-[25%]' },
+  strong:  { label: 'Strong selected-source', badge: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300', bar: 'bg-emerald-400', width: 'w-[92%]' },
+  good:    { label: 'Good selected-source',   badge: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',         bar: 'bg-cyan-400',    width: 'w-[72%]' },
+  partial: { label: 'Partial selected-source', badge: 'border-amber-400/25 bg-amber-400/10 text-amber-300',     bar: 'bg-amber-400',   width: 'w-[50%]' },
+  limited: { label: 'Limited selected-source', badge: 'border-rose-400/25 bg-rose-400/10 text-rose-300',        bar: 'bg-rose-400',    width: 'w-[25%]' },
 }
 
 const LAYER_DOT = {
@@ -137,7 +137,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
             What's monitored for your regulatory profile
           </h2>
           <p className="text-slate-400">
-            Each pack shows exactly which sources are monitoring-active, which are on the roadmap,
+            Each pack shows exactly which sources are fresh-alert eligible, which are on the roadmap,
             and where gaps exist — before you commit to a pilot.
           </p>
         </div>
@@ -146,7 +146,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
         <div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-slate-500">
           <span className="font-semibold uppercase tracking-wide">Key:</span>
           {[
-            ['bg-emerald-400', 'Monitoring active'],
+            ['bg-emerald-400', 'Fresh-alert eligible'],
             ['bg-amber-400',   'Roadmap / pending'],
             ['bg-slate-600',   'Outside current scope'],
             ['bg-rose-400',    'Geo-restricted'],
