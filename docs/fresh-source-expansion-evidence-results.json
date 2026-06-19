@@ -1,0 +1,755 @@
+[
+  {
+    "source_id": "AE-dfsa-guidance-notes",
+    "name": "DFSA Guidance Notes",
+    "family": "DFSA",
+    "source_type": "guidance / publication",
+    "url": "https://www.dfsa.ae/your-resources/publications/guidance-notes",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/hash_chain.json",
+          "diff_json_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/diff.json",
+          "diff_md_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/diff.md",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163916Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 16365,
+    "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-guidance-notes/intake-20260619T163924Z/normalized.txt",
+    "baseline_runs_completed": 4,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-dfsa-laws-rules-legal-resources-3dc15494",
+    "name": "DFSA Laws and Rules Legal Resources",
+    "family": "DFSA",
+    "source_type": "law / legislation",
+    "url": "https://www.dfsa.ae/laws-rules/legal-resources",
+    "adapter_family": "dfsa_rulebook",
+    "adapter_name": "dfsa_rulebook",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 62,
+        "chars_normalized": 1258,
+        "normalized_hash": "5a3dfe36349a78e119d47db8cb377b1a5a610454ce76dd0afd2d9390cb3afc42",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163933Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 62,
+        "chars_normalized": 1258,
+        "normalized_hash": "5a3dfe36349a78e119d47db8cb377b1a5a610454ce76dd0afd2d9390cb3afc42",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 62,
+    "chars_normalized": 1258,
+    "normalized_hash": "5a3dfe36349a78e119d47db8cb377b1a5a610454ce76dd0afd2d9390cb3afc42",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "medium",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-dfsa-innovation-59c1dc61",
+    "name": "DFSA Innovation and Testing Licence Updates",
+    "family": "DFSA",
+    "source_type": "regulatory innovation",
+    "url": "https://www.dfsa.ae/innovation",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 17177,
+        "normalized_hash": "666acff55b5b4900b7fbfca95057868e7875f549c8b6b7c7948b4629be0e63c8",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T163951Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 17177,
+        "normalized_hash": "666acff55b5b4900b7fbfca95057868e7875f549c8b6b7c7948b4629be0e63c8",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 17177,
+    "normalized_hash": "666acff55b5b4900b7fbfca95057868e7875f549c8b6b7c7948b4629be0e63c8",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-dfsa-what-we-do-enforcement-1a837c50",
+    "name": "DFSA Enforcement Overview and Updates",
+    "family": "DFSA",
+    "source_type": "enforcement / alert",
+    "url": "https://www.dfsa.ae/what-we-do/enforcement",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16643,
+        "normalized_hash": "460a2a00cf0976540b7f67320ffe1829412ec46ea02e7a1a8fbcfe882f6de0ca",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/hash_chain.json",
+          "diff_json_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/diff.json",
+          "diff_md_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/diff.md",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164008Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16643,
+        "normalized_hash": "460a2a00cf0976540b7f67320ffe1829412ec46ea02e7a1a8fbcfe882f6de0ca",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 16643,
+    "normalized_hash": "460a2a00cf0976540b7f67320ffe1829412ec46ea02e7a1a8fbcfe882f6de0ca",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/normalized.txt",
+    "baseline_runs_completed": 4,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-dfsa-publications",
+    "name": "DFSA Publications Hub",
+    "family": "DFSA",
+    "source_type": "guidance / publication",
+    "url": "https://www.dfsa.ae/your-resources/publications",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164024Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 16365,
+    "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-publications/intake-20260619T164032Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-dfsa-policy-statements",
+    "name": "DFSA Policy Statements",
+    "family": "DFSA",
+    "source_type": "guidance / publication",
+    "url": "https://www.dfsa.ae/your-resources/publications/policy-statements",
+    "adapter_family": "dfsa_notice_listing",
+    "adapter_name": "dfsa_notice_listing",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164040Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 16365,
+        "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 16365,
+    "normalized_hash": "d3e3019f133df7ebbe452357d5398f399775bfde12ab4b45eb6275906462afd7",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-policy-statements/intake-20260619T164048Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-adgm-adgm-courts-legislation-and-procedures-66abfd89",
+    "name": "ADGM Courts Legislation and Procedures",
+    "family": "ADGM/FSRA",
+    "source_type": "law / legislation",
+    "url": "https://www.adgm.com/adgm-courts/legislation-and-procedures",
+    "adapter_family": "adgm_fsra_listing",
+    "adapter_name": "adgm_fsra_listing",
+    "adapter_config": {
+      "container_selector": "adgm-page, main, body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 9714,
+        "normalized_hash": "5d1d32dd304de3ca465d20ae4a9a1b40a89828c6b70285b5eccd0b18ae90b441",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164058Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 9714,
+        "normalized_hash": "5d1d32dd304de3ca465d20ae4a9a1b40a89828c6b70285b5eccd0b18ae90b441",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 9714,
+    "normalized_hash": "5d1d32dd304de3ca465d20ae4a9a1b40a89828c6b70285b5eccd0b18ae90b441",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-legislation-and-procedures-66abfd89/intake-20260619T164108Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695",
+    "name": "ADGM Courts Forms Fees and Guides",
+    "family": "ADGM/FSRA",
+    "source_type": "guidance / publication",
+    "url": "https://www.adgm.com/adgm-courts/forms-fees-and-guides",
+    "adapter_family": "adgm_fsra_listing",
+    "adapter_name": "adgm_fsra_listing",
+    "adapter_config": {
+      "container_selector": "adgm-page, main, body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "chars_normalized": 35949,
+        "normalized_hash": "7073f9831858151ee9b637b990c2f9de11d28e97552ea2d02e6a0ab479eb43be",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164118Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "chars_normalized": 35949,
+        "normalized_hash": "7073f9831858151ee9b637b990c2f9de11d28e97552ea2d02e6a0ab479eb43be",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 61,
+    "chars_normalized": 35949,
+    "normalized_hash": "7073f9831858151ee9b637b990c2f9de11d28e97552ea2d02e6a0ab479eb43be",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-adgm-adgm-courts-forms-fees-and-guides-a3b9d695/intake-20260619T164128Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-sca-fintech-sandbox",
+    "name": "SCA FinTech Regulatory Sandbox",
+    "family": "SCA",
+    "source_type": "rulebook / regulation",
+    "url": "https://www.sca.gov.ae/en/regulations/fintech-regulatory-sandbox",
+    "adapter_family": "sca_listing",
+    "adapter_name": "sca_listing",
+    "adapter_config": {
+      "container_selector": "main, body",
+      "candidate_scan_limit": 800,
+      "max_items": 120
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "chars_normalized": 1164,
+        "normalized_hash": "a0a6b0f0aaf5d9255a2071a846ebb3e2afd4f61b226c831165a468a65529df5c",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164145Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 61,
+        "chars_normalized": 1164,
+        "normalized_hash": "a0a6b0f0aaf5d9255a2071a846ebb3e2afd4f61b226c831165a468a65529df5c",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 61,
+    "chars_normalized": 1164,
+    "normalized_hash": "a0a6b0f0aaf5d9255a2071a846ebb3e2afd4f61b226c831165a468a65529df5c",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-sca-fintech-sandbox/intake-20260619T164202Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-uaeiec-en-us-laws-regulations-listing-00a71863",
+    "name": "UAE IEC / EOCN Laws and Regulations Listing",
+    "family": "EOCN/TFS",
+    "source_type": "rulebook / regulation",
+    "url": "https://www.uaeiec.gov.ae/en-us/laws-regulations-listing",
+    "adapter_family": "fiu_eocn_document_listing",
+    "adapter_name": "fiu_eocn_document_listing",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 3647,
+        "normalized_hash": "dcf5d521265e554c26df71b138cf4cc2b4f32e7557ce5b7a235cb2c212cbfd30",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164240Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 3647,
+        "normalized_hash": "dcf5d521265e554c26df71b138cf4cc2b4f32e7557ce5b7a235cb2c212cbfd30",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 3647,
+    "normalized_hash": "dcf5d521265e554c26df71b138cf4cc2b4f32e7557ce5b7a235cb2c212cbfd30",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-uaeiec-en-us-laws-regulations-listing-00a71863/intake-20260619T164318Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  },
+  {
+    "source_id": "AE-eocn-tfs",
+    "name": "EOCN UN Sanctions/TFS Page",
+    "family": "EOCN/TFS",
+    "source_type": "sanctions / TFS",
+    "url": "https://www.eocn.gov.ae/en-us/un-page",
+    "adapter_family": "fiu_eocn_document_listing",
+    "adapter_name": "fiu_eocn_document_listing",
+    "adapter_config": {
+      "container_selector": "body",
+      "max_items": 100
+    },
+    "fetch_method": "playwright",
+    "runs": [
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 60406,
+        "normalized_hash": "dad35f8b37f3cfc7746e92b5a58f13cbe753eb8f2305de13f6ee735bd3df85ca",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164357Z/proof.json"
+        },
+        "failure_reason": ""
+      },
+      {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "quality_score": 65,
+        "chars_normalized": 60406,
+        "normalized_hash": "dad35f8b37f3cfc7746e92b5a58f13cbe753eb8f2305de13f6ee735bd3df85ca",
+        "proof_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/proof.json",
+        "evidence_paths": {
+          "snapshot_raw_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/raw.txt",
+          "snapshot_normalized_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/normalized.txt",
+          "snapshot_pdf_text_path": null,
+          "snapshot_metadata_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/metadata.json",
+          "provider_report_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/provider_report.json",
+          "quality_report_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/quality_report.json",
+          "certification_report_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/certification_report.json",
+          "hash_chain_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/hash_chain.json",
+          "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/proof.json"
+        },
+        "failure_reason": ""
+      }
+    ],
+    "status": "CONFIRMED_ACCESSIBLE",
+    "quality_score": 65,
+    "chars_normalized": 60406,
+    "normalized_hash": "dad35f8b37f3cfc7746e92b5a58f13cbe753eb8f2305de13f6ee735bd3df85ca",
+    "proof_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/proof.json",
+    "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-eocn-tfs/intake-20260619T164436Z/normalized.txt",
+    "baseline_runs_completed": 2,
+    "baseline_runs_required": 2,
+    "can_save_evidence": false,
+    "nav_shell": false,
+    "duplicate_hash": false,
+    "noise_risk": "low",
+    "source_health_risk": "medium",
+    "failure_reason": ""
+  }
+]

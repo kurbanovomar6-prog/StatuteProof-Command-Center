@@ -21,16 +21,16 @@ FINAL_REPORT = ROOT / "docs/weak-family-completion-25-final-report.md"
 TARGET_PROGRESS = ROOT / "docs/weak-family-completion-target-progress-report.md"
 NO_SAVE = ROOT / "docs/weak-family-completion-nosave-results.json"
 
-EXPECTED_TRUTH = (226, 225, 1)
+EXPECTED_TRUTH = (232, 231, 1)
 TARGET = 25
 EXPECTED_FAMILY_COUNTS = {
     "DIFC": 25,
     "ADGM/FSRA": 25,
     "VARA": 25,
     "Ministry of Economy / DNFBP AML": 26,
-    "SCA": 5,
+    "SCA": 6,
     "UAE FIU": 6,
-    "EOCN / sanctions / TFS": 22,
+    "EOCN / sanctions / TFS": 23,
 }
 BELOW_TARGET_BLOCKERS = {
     "SCA": ("robots", "blocked", "download"),

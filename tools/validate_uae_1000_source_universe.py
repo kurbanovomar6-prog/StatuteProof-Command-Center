@@ -22,7 +22,7 @@ SOURCES = ROOT / "product/regradar/sources.json"
 FINAL_REPORT = ROOT / "docs/uae-1000-source-expansion-final-report.md"
 BULK_ACTIVATION_SET = ROOT / "docs/weak-family-final-activation-set.json"
 
-MIN_TRUTH = (226, 225, 1)
+MIN_TRUTH = (232, 231, 1)
 REQUIRED_FIELDS = {
     "source_id",
     "regulator_source_owner",

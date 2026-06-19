@@ -105,4 +105,4 @@ Add 7/30/90-day source reliability trend charts for monitoring-active sources.
 
 ## 17. Next Exact Sales Task
 
-Superseded by the 2026-06-19 weak-family completion truth: “226 enabled UAE official-source endpoints, 225 monitoring-active. Selected sources only. Monitoring intelligence only. Not legal advice.”
+Superseded by the 2026-06-19 fresh-source expansion truth: “232 enabled UAE official-source endpoints, 231 monitoring-active in the legacy registry, and 162 fresh-alert eligible daily monitors. Selected sources only. Monitoring intelligence only. Not legal advice.”

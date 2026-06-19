@@ -1,7 +1,7 @@
 {
   "date": "2026-06-19",
   "starting_truth": "147 enabled / 146 monitoring-active / 1 remediation",
-  "ending_truth": "226 enabled / 225 monitoring-active / 1 remediation",
+  "ending_truth": "232 enabled / 231 monitoring-active / 1 remediation",
   "newly_active_count": 79,
   "newly_active": {
     "ADGM/FSRA": [

@@ -2,7 +2,7 @@
 
 ## Current Truth
 
-Clean-state gate passed on 2026-06-19. The latest source-signal audit reports 226 enabled UAE sources:
+Clean-state gate passed on 2026-06-19. At the start of the fresh-signal completion pass, the source-signal audit reported 226 enabled UAE sources:
 
 | Signal tier | Count | Meaning |
 |---|---:|---|
@@ -13,7 +13,7 @@ Clean-state gate passed on 2026-06-19. The latest source-signal audit reports 22
 | MONITOR_OK | 149 | Confirmed-live monitoring sources in current audit |
 | Proof-backed snapshots | 216 | Sources with proof paths in current audit |
 
-`sources.json` currently has no `monitoring_mode` or `alert_eligible` fields on the 226 enabled UAE rows. That means customer-facing code cannot yet distinguish fresh-alert sources from static evidence-library sources.
+At the start of that pass, `sources.json` had no `monitoring_mode` or `alert_eligible` fields on the then-226 enabled UAE rows. The later fresh-source expansion superseded this with the current 232 enabled / 162 fresh-alert source model.
 
 ## Family Truth Table
 

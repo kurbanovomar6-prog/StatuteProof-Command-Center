@@ -61,7 +61,9 @@ def belongs_to(source: dict, family: str) -> bool:
     if family == "EOCN/TFS":
         return (
             "eocn.gov.ae" in url
+            or "uaeiec.gov.ae" in url
             or "eocn" in source_id
+            or "uaeiec" in source_id
             or source_id.startswith("ae-moet-targeted-financial-sanctions")
             or ("moet-dnfbp" in source_id and ("tfs" in text or "sanction" in text))
         )

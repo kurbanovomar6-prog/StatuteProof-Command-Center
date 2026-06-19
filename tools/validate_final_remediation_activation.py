@@ -3,7 +3,7 @@
 
 This validator protects the honest remediation lineage after the later FTA/ADGM
 truth repair and later proof-backed activations:
-226 enabled UAE sources / 225 monitoring-active / 1 remediation after later proof-backed activations.
+232 enabled UAE sources / 231 monitoring-active / 1 remediation after later proof-backed activations.
 
 It is intentionally narrow. It verifies the two newly activated DFSA
 replacement endpoints and the one remaining FIU remediation source instead of
@@ -26,7 +26,7 @@ SOURCE_RUNS_FILE = REGRADAR_ROOT / "data/source_runs/source_runs.jsonl"
 FINAL_REPORT = ROOT / "docs/final-remediation-activation-final-report.md"
 TRUTH_REPORT = ROOT / "docs/source-readiness-truth-reconciliation-report.md"
 
-MIN_COUNTS = (226, 225, 1)
+MIN_COUNTS = (232, 231, 1)
 
 NEW_ACTIVE_SOURCES = {
     "AE-dfsa-annual-reports": {
@@ -290,8 +290,8 @@ def main() -> int:
 
     if TRUTH_REPORT.exists():
         truth_text = TRUTH_REPORT.read_text(encoding="utf-8")
-        if "226 enabled / 225 monitoring-active / 1" not in truth_text:
-            fail(errors, "Truth reconciliation report must include current 226/225/1 wording")
+        if "232 enabled / 231 monitoring-active / 1" not in truth_text:
+            fail(errors, "Truth reconciliation report must include current 232/231/1 wording")
 
     for path in iter_scan_files():
         try:

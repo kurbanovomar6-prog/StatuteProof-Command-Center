@@ -4,18 +4,18 @@
 
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: '2026-06-19',
-  totalEnabled: 226,
-  tierA: 141,
+  totalEnabled: 232,
+  tierA: 147,
   tierB: 21,
   tierC: 61,
   remediation: 3,
   excludeReview: 0,
-  commerciallyMeaningful: 162, // tierA + tierB
-  confirmedLiveMonitorOk: 210, // all MONITOR_OK sources, including static evidence-library pages
-  freshAlertEligible: 156, // tierA/B + proof + baseline + MONITOR_OK + alert_eligible
+  commerciallyMeaningful: 168, // tierA + tierB
+  confirmedLiveMonitorOk: 216, // all MONITOR_OK sources, including static evidence-library pages
+  freshAlertEligible: 162, // tierA/B + proof + baseline + MONITOR_OK + alert_eligible
   evidenceLibraryOnly: 61, // official/static or low future-change signal, not fresh alerts
   pendingFreshSignalValidation: 6, // tierA/B candidates without confirmed fresh-alert MONITOR_OK
-  withProofPath: 216, // sources with a proof_path recorded
+  withProofPath: 222, // sources with a proof_path recorded
 } as const
 
 export const FAMILY_QUALITY = [
@@ -41,13 +41,13 @@ export const FAMILY_QUALITY = [
   },
   {
     family: 'DFSA',
-    tierA: 10,
+    tierA: 13,
     tierB: 2,
     tierC: 28,
     remediation: 0,
-    monitorOkCount: 39,
-    totalEnabled: 40,
-    notes: '12 DFSA fresh-alert sources now have MONITOR_OK, including financial crime/MLRO, AML rulebook, rulebook modules, consultations, enforcement decisions, regulatory actions, and supervisory review. 28 individual/static pages remain evidence-library and are not fresh-alert monitoring.',
+    monitorOkCount: 42,
+    totalEnabled: 43,
+    notes: '15 DFSA fresh-alert sources now have MONITOR_OK after adding legal resources, innovation, and enforcement overview sources. 28 individual/static pages remain evidence-library and duplicate-hash publication pages are not counted as new fresh-alert monitors.',
   },
   {
     family: 'DIFC',
@@ -91,13 +91,13 @@ export const FAMILY_QUALITY = [
   },
   {
     family: 'SCA',
-    tierA: 3,
+    tierA: 4,
     tierB: 1,
     tierC: 1,
     remediation: 1,
-    monitorOkCount: 4,
-    totalEnabled: 6,
-    notes: '4 SCA sources are fresh-alert eligible after proof, repeat baseline, and mass-monitor dry-run MONITOR_OK: AML/CFT, FATCA/CRS, corporate governance, and circulars/rules/procedures. Broader SCA family remains below Strong; regulations listing still failed nav-shell.',
+    monitorOkCount: 5,
+    totalEnabled: 7,
+    notes: '5 SCA sources are fresh-alert eligible after proof, repeat baseline, and mass-monitor dry-run MONITOR_OK, including the FinTech Regulatory Sandbox page. Broader SCA family remains below Strong; regulations listing still failed nav-shell.',
   },
   {
     family: 'UAE_FIU',
@@ -111,13 +111,13 @@ export const FAMILY_QUALITY = [
   },
   {
     family: 'EOCN',
-    tierA: 21,
+    tierA: 23,
     tierB: 1,
     tierC: 0,
     remediation: 0,
-    monitorOkCount: 22,
-    totalEnabled: 22,
-    notes: '22 EOCN/TFS-related sources now have MONITOR_OK, including 2 direct EOCN sources and 20 MoE-owned TFS/supporting sources. Still below the 25-source Strong threshold and direct EOCN coverage remains partial.',
+    monitorOkCount: 24,
+    totalEnabled: 24,
+    notes: '24 EOCN/TFS-related sources now have MONITOR_OK, including direct EOCN and UAEIEC laws/regulations sources plus MoE-owned TFS/supporting sources. Still one source below the 25-source Strong threshold and direct EOCN coverage remains partial.',
   },
   {
     family: 'MoF',
@@ -144,7 +144,7 @@ export const FAMILY_QUALITY = [
 export const KNOWN_LIMITATIONS = [
   {
     source: 'SCA (Securities and Commodities Authority)',
-    limitation: '4 SCA sources have proof-backed MONITOR_OK, but SCA remains below the 25-source Strong Fresh Signal threshold. SCA regulations listing still failed nav-shell and needs adapter remediation.',
+    limitation: '5 SCA sources have proof-backed MONITOR_OK, but SCA remains below the 25-source Strong Fresh Signal threshold. SCA regulations listing still failed nav-shell and needs adapter remediation.',
     impact: 'remediation',
     clientsAffected: ['securities_capital_markets', 'investment_funds', 'listed_companies'],
   },
@@ -156,7 +156,7 @@ export const KNOWN_LIMITATIONS = [
   },
   {
     source: 'EOCN — Direct Portal',
-    limitation: '2 direct EOCN sources now have MONITOR_OK. EOCN/TFS has 22 fresh-alert sources and remains below the 25-source Strong threshold, with much of the TFS support still coming through MoE-owned documents.',
+    limitation: 'Direct EOCN/UAEIEC sources improved. EOCN/TFS has 24 fresh-alert sources and remains one source below the 25-source Strong threshold, with some TFS support still coming through MoE-owned documents.',
     impact: 'partial_coverage',
     clientsAffected: ['sanctions_tfs', 'aml_mlro', 'vasp_crypto', 'dnfbp'],
   },
@@ -193,21 +193,21 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  'StatuteProof has 156 fresh-alert eligible UAE official-source monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 2026.',
+  'StatuteProof has 162 fresh-alert eligible UAE official-source monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 2026.',
   'StatuteProof also maintains an evidence library of official/static UAE source snapshots that may support audit packs but are not counted as fresh-alert monitoring.',
-  '210 enabled UAE sources have MONITOR_OK status overall; 156 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
+  '216 enabled UAE sources have MONITOR_OK status overall; 162 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
   'Our CBUAE rulebook monitoring includes 25 fresh-alert eligible official rulebook/regulatory sources with MONITOR_OK and proof-backed baselines.',
   'Our VARA monitoring includes 23 confirmed-live official VARA rulebook and regulatory sources, with enforcement still pending adapter validation.',
   'Our MoE DNFBP monitoring covers 43 sources including DNFBP guidelines, AML circulars from 2021 to 2026, high-risk jurisdiction updates, TFS-related cabinet decisions, and sector-specific supplemental guidance.',
   'Our FTA monitoring covers 22 confirmed-live sources including UAE Cabinet Decisions, FTA Decisions, Ministerial Decisions, VAT and Corporate Tax guides, and interpretive clarifications.',
-  'StatuteProof maintains cryptographic evidence records — including SHA-256 hashes and timestamped proof files — for 216 of 226 enabled UAE regulatory source snapshots.',
-  'SCA monitoring has 4 proof-backed fresh-alert sources; broader SCA family monitoring remains below Strong until additional official sources reach MONITOR_OK.',
+  'StatuteProof maintains cryptographic evidence records — including SHA-256 hashes and timestamped proof files — for 222 of 232 enabled UAE regulatory source snapshots.',
+  'SCA monitoring has 5 proof-backed fresh-alert sources; broader SCA family monitoring remains below Strong until additional official sources reach MONITOR_OK.',
 ] as const
 
 export const FORBIDDEN_CLAIMS = [
-  '226 monitored UAE regulatory sources — implies all 226 are producing live monitoring intelligence; 61 are static/evidence-library and 3 are in remediation.',
-  'Full SCA coverage or we monitor the SCA broadly — only 4 SCA sources are fresh-alert eligible.',
-  'Complete UAE sanctions/TFS monitoring — EOCN/TFS is improved but still below the 25-source Strong threshold.',
+  '232 monitored UAE regulatory sources — implies all 232 are producing live monitoring intelligence; 61 are static/evidence-library and 3 are in remediation.',
+  'Full SCA coverage or we monitor the SCA broadly — only 5 SCA sources are fresh-alert eligible.',
+  'Complete UAE sanctions/TFS monitoring — EOCN/TFS is improved to 24 but still below the 25-source Strong threshold.',
   'UAE FIU circulars are monitored — the FIU circulars page still failed nav-shell.',
   'We never miss a regulatory update — no source monitoring product can guarantee this.',
   'Guarantee compliance — forbidden under StatuteProof product rules.',
@@ -222,6 +222,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: '156 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, and baseline confirmation',
-  recommendedDetailedClaim: '162 commercially meaningful UAE official sources mapped; 156 currently fresh-alert eligible, 6 pending fresh-signal validation, and 61 retained as evidence-library/static references',
+  recommendedSalesClaim: '162 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, and baseline confirmation',
+  recommendedDetailedClaim: '168 commercially meaningful UAE official sources mapped; 162 currently fresh-alert eligible, 6 pending fresh-signal validation, and 61 retained as evidence-library/static references',
 } as const

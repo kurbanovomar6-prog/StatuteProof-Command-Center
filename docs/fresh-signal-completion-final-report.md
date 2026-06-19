@@ -109,7 +109,7 @@ This includes old/static DFSA notice pages, DIFC whats-on pages, ADGM announceme
 
 ## 12. Customer-Safe Claims Now Allowed
 
-- “StatuteProof has 156 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.”
+- Superseded by the fresh-source expansion: “StatuteProof has 162 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.”
 - “StatuteProof also maintains an evidence library of official/static UAE source snapshots that are not counted as fresh-alert monitoring.”
 - “CBUAE rulebook monitoring includes 25 fresh-alert official rulebook/regulatory sources.”
 - “SCA monitoring has 4 proof-backed fresh-alert sources; broader SCA monitoring remains below Strong.”
@@ -158,4 +158,4 @@ Update the Sources and Coverage UI to show separate counts:
 
 ## 20. Next Exact Sales Task
 
-Use “156 fresh-alert eligible official-source monitors” in pilot conversations, not “226 monitored sources.”
+Use “162 fresh-alert eligible official-source monitors” in pilot conversations, not “232 monitored sources.”

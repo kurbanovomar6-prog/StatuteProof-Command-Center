@@ -7,7 +7,7 @@ Validates the UAE Coverage Proof Dossier for:
 - Roadmap does not contain unsafe absolute coverage claims (as positive claims)
 - No forbidden phrases appear as positive claims in dossier documents
 - "complete UAE coverage" appears only in negative/conditional/gap contexts
-- Current source truth (226 enabled / 225 monitoring-active / 1 remediation) is intact after proof-backed activations
+- Current source truth (232 enabled / 231 monitoring-active / 1 remediation) is intact after proof-backed activations
 - sources.json changes remain proof-backed and validator-gated
 - uae_source_universe_candidates.json was not modified (grand_total preserved)
 - Roadmap P0 section reflects revised 15-source list (not 25)
@@ -305,9 +305,9 @@ if roadmap_text:
 
 # ── Check 7: sources.json integrity ───────────────────────────────────────────
 
-print("\nCheck 7: sources.json integrity — 226 enabled / 225 monitoring-active / 1 remediation...")
-EXPECTED_ENABLED = 226
-EXPECTED_READINESS = 225
+print("\nCheck 7: sources.json integrity — 232 enabled / 231 monitoring-active / 1 remediation...")
+EXPECTED_ENABLED = 232
+EXPECTED_READINESS = 231
 EXPECTED_REMEDIATION = 1
 
 try:

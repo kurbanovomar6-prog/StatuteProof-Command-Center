@@ -8,7 +8,9 @@ Date: 2026-06-19
 
 ## 2. Ending Truth
 
-226 enabled UAE sources / 225 monitoring-active / 1 remediation.
+226 enabled UAE sources / 225 monitoring-active / 1 remediation before the fresh-source expansion.
+
+Fresh-source expansion addendum: 232 enabled UAE sources / 231 monitoring-active / 1 remediation in the legacy registry, with 162 fresh-alert eligible daily monitors.
 
 ## 3-5. Family Target Table
 

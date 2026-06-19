@@ -11,8 +11,8 @@ The source pack is credible enough for an MLRO prospect demo and a controlled pa
 
 | Metric | Count |
 | --- | ---: |
-| Enabled UAE sources | 226 |
-| Monitoring-active UAE sources | 225 |
+| Enabled UAE sources | 232 |
+| Monitoring-active UAE sources | 231 |
 | Under extraction remediation | 1 |
 
 ## Sources By Regulator
@@ -45,7 +45,7 @@ These are source-family views, not mutually exclusive accounting buckets. A sour
 
 ## Concentration Risk
 
-CBUAE concentration is **27 / 225 = 12.0%**.
+CBUAE concentration is **27 / 231 = 11.7%**.
 
 This is commercially useful for banking, payments, AML/CFT, consumer protection, open finance, prudential monitoring, selected tax-document monitoring, DIFC/DFSA, ADGM/FSRA, VARA, and MoE/DNFBP monitoring. The largest concentration remains DFSA/DIFC. The pack is still not evenly balanced because SCA, UAE FIU, direct EOCN/UAEIEC, MoJ/Gazette, markets/exchanges, customs, courts, and federal privacy remain thin or candidate-only.
 
@@ -62,7 +62,7 @@ Risk rating: **medium concentration risk, now DFSA/DIFC-heavy rather than CBUAE-
 
 ## Brutally Honest Assessment
 
-The pack is no longer a source-count toy. It has proof-backed, baseline-tested monitoring across 225 active UAE endpoints, and validators now protect source truth. DIFC, ADGM/FSRA, VARA, MoE/DNFBP AML, and FTA now meet the 25-source depth threshold. But it is not yet a perfectly balanced UAE regulatory monitoring product. The next highest-value work is targeted SCA, UAE FIU, direct EOCN/UAEIEC, MoJ/Gazette, and federal privacy adapters.
+The pack is no longer a source-count toy. It has proof-backed, baseline-tested monitoring across 231 active UAE endpoints, and validators now protect source truth. The fresh-alert subset is narrower: 162 daily-checkable sources are eligible for customer update alerts. CBUAE, MoE/DNFBP AML, and FTA meet the 25-source fresh-signal threshold. But it is not yet a perfectly balanced UAE regulatory monitoring product. The next highest-value work is targeted SCA, UAE FIU, direct EOCN/UAEIEC, MoJ/Gazette, MoF, and federal privacy adapters.
 
 ## Weakest Commercial Zones
 
@@ -76,7 +76,7 @@ The pack is no longer a source-count toy. It has proof-backed, baseline-tested m
 
 Safe customer-facing wording:
 
-"StatuteProof currently has 226 enabled UAE official-source endpoints, including 225 monitoring-active sources after proof, baseline, source-health, noise, and review gates. One source remains under remediation. Selected sources only. Monitoring intelligence only, not legal advice."
+"StatuteProof currently has 232 enabled UAE official-source endpoints, including 231 legacy monitoring-active sources and 162 fresh-alert eligible daily monitors after proof, baseline, source-health, noise, and review gates. One legacy registry source remains under remediation. Selected sources only. Monitoring intelligence only, not legal advice."
 
 Do not say:
 

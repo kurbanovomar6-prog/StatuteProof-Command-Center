@@ -4,7 +4,7 @@ Date: 2026-06-18
 
 ## 1. Eight-Row Repair Result
 
-The eight-row FTA/ADGM dirty source truth was repaired before universe mapping. Final verified truth after the eight-row repair was 81 enabled / 80 monitoring-active / 1 remediation. Six unvalidated rows were demoted to candidates. A later proof-backed weak-family activation sprint advanced truth to 122 enabled / 121 monitoring-active / 1 remediation. A later FTA PDF activation sprint added 25 proof-backed FTA tax endpoints after no-save, two proof-backed baseline runs, mass-monitor `MONITOR_OK`, and review gates, advancing truth to 147 enabled / 146 monitoring-active / 1 remediation. The weak-family completion sprint then added 79 proof-backed sources, advancing current truth to 226 enabled / 225 monitoring-active / 1 remediation.
+The eight-row FTA/ADGM dirty source truth was repaired before universe mapping. Final verified truth after the eight-row repair was 81 enabled / 80 monitoring-active / 1 remediation. Six unvalidated rows were demoted to candidates. A later proof-backed weak-family activation sprint advanced truth to 122 enabled / 121 monitoring-active / 1 remediation. A later FTA PDF activation sprint added 25 proof-backed FTA tax endpoints after no-save, two proof-backed baseline runs, mass-monitor `MONITOR_OK`, and review gates, advancing truth to 147 enabled / 146 monitoring-active / 1 remediation. The weak-family completion sprint then added 79 proof-backed sources, and the fresh-source expansion added 6 further proof-backed fresh-alert sources, advancing current legacy registry truth to 232 enabled / 231 monitoring-active / 1 remediation.
 
 ## 2. Universe Mapping Result
 
@@ -48,4 +48,4 @@ Add 7/30/90-day source reliability trend charts for monitoring-active sources.
 
 ## 8. Next Exact Sales Task
 
-Use the current 226/225/1 truth in demos. Say StatuteProof monitors selected proof-backed official UAE endpoints, while SCA, UAE FIU, direct EOCN/UAEIEC, MoJ/Gazette, privacy, markets, customs, courts, and some free-zone-adjacent families remain disclosed gaps until they pass item-level extraction gates.
+Use the current 232/231/1 legacy registry truth only when separated from the 162 fresh-alert daily-monitor claim. Say StatuteProof monitors selected proof-backed official UAE endpoints, while SCA, UAE FIU, direct EOCN/UAEIEC, MoJ/Gazette, MoF, privacy, markets, customs, courts, and some free-zone-adjacent families remain disclosed gaps until they pass item-level extraction gates.

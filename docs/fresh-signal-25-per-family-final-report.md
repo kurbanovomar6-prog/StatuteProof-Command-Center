@@ -13,16 +13,16 @@ Date: 2026-06-19
 
 ## 2. Ending Source Truth
 
-- Enabled UAE sources: 226
-- Fresh-alert eligible sources: 156
-- Overall MONITOR_OK sources: 210
+- Enabled UAE sources: 232
+- Fresh-alert eligible sources: 162
+- Overall MONITOR_OK sources: 216
 - Evidence-library-only sources: 61
 - Candidate/pending validation: 6
 - Remediation: 3
 
 ## 3. What Changed
 
-This sprint converted or confirmed 60 sources as daily-checkable `fresh_alert` sources after proof, repeat baseline, and mass-monitor dry-run `MONITOR_OK`.
+This sprint and the follow-on fresh-source expansion converted or confirmed 66 sources as daily-checkable `fresh_alert` sources after proof, repeat baseline, and mass-monitor dry-run `MONITOR_OK`.
 
 No customer emails or customer alerts were sent.
 
@@ -32,12 +32,12 @@ No customer emails or customer alerts were sent.
 |---|---:|---:|---:|---|
 | CBUAE | 0 | 25 | 25 | Strong |
 | VARA | 16 | 23 | 25 | Good, still short by 2 |
-| DFSA | 5 | 12 | 25 | Partial |
+| DFSA | 5 | 15 | 25 | Partial |
 | DIFC | 3 | 10 | 25 | Partial |
 | ADGM/FSRA | 2 | 8 | 25 | Partial |
 | UAE FIU | 2 | 5 | 25 | Weak |
-| EOCN/TFS | 18 | 22 | 25 | Good, still short by 3 |
-| SCA | 1 | 4 | 25 | Weak |
+| EOCN/TFS | 18 | 24 | 25 | Good, still short by 1 |
+| SCA | 1 | 5 | 25 | Weak |
 | MoJ/Gazette | 0 | 0 | 25 | Blocked |
 | MoF | 0 | 0 | 25 | Weak |
 | FTA | 25 | 25 | 25 | Strong |
@@ -52,18 +52,18 @@ No customer emails or customer alerts were sent.
 ## 6. Families Still Not Strong And Exact Blocker
 
 - VARA: 23 fresh-alert sources. Enforcement page failed nav-shell. Needs enforcement/admin-order listing adapter or two more official endpoints.
-- DFSA: 12 fresh-alert sources. Static individual notice pages cannot count. Needs more official listing/rulebook/enforcement/consultation endpoints.
+- DFSA: 15 fresh-alert sources after adding legal resources, innovation, and enforcement overview sources. Static individual notice pages and duplicate-hash publication pages cannot count. Needs more unique official listing/rulebook/enforcement/consultation endpoints.
 - DIFC: 10 fresh-alert sources. Static whats-on/news pages cannot count. Needs more legal/database/data-protection/consultation/publication listing endpoints.
 - ADGM/FSRA: 8 fresh-alert sources. Some candidates failed `QUALITY_DROP` or nav-shell. Needs adapter refinement and more official endpoints.
 - UAE FIU: 5 fresh-alert sources. FIU circulars failed nav-shell. Public FIU universe may be smaller than 25; goAML remains forbidden.
-- EOCN/TFS: 22 fresh-alert sources. Direct EOCN now has 2 MONITOR_OK sources, but broad TFS family is still below 25.
-- SCA: 4 fresh-alert sources. Regulations listing failed nav-shell. Needs better SCA listing/table adapter and more official endpoints.
+- EOCN/TFS: 24 fresh-alert sources after adding the UAEIEC laws/regulations listing and EOCN UN/TFS page. The family remains one source below the 25-source Strong threshold.
+- SCA: 5 fresh-alert sources after adding the SCA FinTech Regulatory Sandbox page. Regulations listing still failed nav-shell. Needs better SCA listing/table adapter and more official endpoints.
 - MoJ/Gazette: 0 fresh-alert sources. UAE legislation portal remains access/WAF remediation. Needs official alternative endpoint research.
 - MoF: 0 fresh-alert sources. Current MoF source is generic homepage/evidence-library. Needs specific official decision/news/document listing endpoints.
 
 ## 7. Daily-Checkable Source Count
 
-- Daily-checkable fresh-alert sources after this pass: 156
+- Daily-checkable fresh-alert sources after this pass: 162
 
 All fresh-alert sources now carry:
 
@@ -76,11 +76,11 @@ All fresh-alert sources now carry:
 
 - CBUAE: 25
 - VARA: 7
-- EOCN/TFS: 2 direct EOCN sources
+- EOCN/TFS: 4 direct/official EOCN or UAEIEC-linked TFS sources after the expansion
 - UAE FIU: 3
-- SCA: 3
+- SCA: 4
 - ADGM/FSRA: 6
-- DFSA: 7
+- DFSA: 10
 - DIFC: 7
 
 Detailed source IDs are in `docs/fresh-signal-25-per-family-final-activation-set.json`.
@@ -123,7 +123,7 @@ Batch records reviewed in this pass: 68.
 
 ## 13. Evidence Saved
 
-Sources activated or confirmed with proof/baseline/MONITOR_OK in this pass: 60.
+Sources activated or confirmed with proof/baseline/MONITOR_OK across this pass and follow-on expansion: 66.
 
 ## 14. Baseline Complete
 
@@ -143,11 +143,11 @@ Static detail pages remain excluded from fresh-alert claims.
 
 Allowed:
 
-- “StatuteProof has 156 fresh-alert eligible UAE official-source monitors with MONITOR_OK status, proof records, hashes, baseline confirmation, and daily-check metadata.”
+- “StatuteProof has 162 fresh-alert eligible UAE official-source monitors with MONITOR_OK status, proof records, hashes, baseline confirmation, and daily-check metadata.”
 - “CBUAE rulebook monitoring includes 25 fresh-alert official rulebook/regulatory sources.”
 - “FTA and MoE/DNFBP AML remain Strong Fresh Signal families.”
 - “VARA has 23 confirmed fresh-alert sources and remains two short of the 25-source Strong threshold.”
-- “SCA has 4 confirmed fresh-alert sources; broader SCA coverage remains under remediation.”
+- “SCA has 5 confirmed fresh-alert sources; broader SCA coverage remains under remediation.”
 
 ## 18. Claims Still Forbidden
 
@@ -199,7 +199,7 @@ Improved but not fully ready for a 9/10 broad UAE Monitor claim. The product is 
 Run a targeted weak-family discovery + adapter sprint for:
 
 1. VARA enforcement/admin orders: find or build two more official fresh-alert endpoints.
-2. EOCN/TFS: find or build three more official TFS/sanctions endpoints or prove the official public universe limit.
+2. EOCN/TFS: find or build one more official TFS/sanctions endpoint or prove the official public universe limit.
 3. SCA: build a stronger regulations/listing/table adapter and research more SCA official endpoints.
 4. UAE FIU: build FIU circulars adapter and prove whether 25 public endpoints exist.
 5. MoJ/Gazette and MoF: research official alternatives and build access-safe adapters.
@@ -219,6 +219,19 @@ Update the frontend Sources/Coverage UI so customers can see:
 
 Use only the updated safe claim:
 
-“156 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.”
+“162 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.”
 
 Do not sell complete UAE coverage or complete family coverage.
+
+## Follow-On Fresh Source Expansion Addendum
+
+After this report was first written, a targeted fresh-source expansion added six unique `fresh_alert` sources after no-save, two evidence runs, repeat baseline, duplicate/static-detail review, and mass-monitor dry-run `MONITOR_OK`:
+
+- `AE-dfsa-laws-rules-legal-resources-3dc15494`
+- `AE-dfsa-innovation-59c1dc61`
+- `AE-dfsa-what-we-do-enforcement-1a837c50`
+- `AE-sca-fintech-sandbox`
+- `AE-uaeiec-en-us-laws-regulations-listing-00a71863`
+- `AE-eocn-tfs`
+
+Held despite technical no-save passes: DFSA guidance/publication/policy pages with duplicate normalized hashes, DFSA `/test/` URLs, static DFSA news detail, wrong-family MoE candidate, FIU static/single-report pages, and ADGM pages that failed mass-monitor selector verification.
