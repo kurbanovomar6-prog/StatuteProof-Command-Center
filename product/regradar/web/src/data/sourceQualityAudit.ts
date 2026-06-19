@@ -5,13 +5,16 @@
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: '2026-06-19',
   totalEnabled: 226,
-  tierA: 136,
+  tierA: 137,
   tierB: 21,
   tierC: 60,
-  remediation: 9,
+  remediation: 8,
   excludeReview: 0,
-  commerciallyMeaningful: 157, // tierA + tierB
-  confirmedLiveMonitorOk: 149, // sources with last_monitor_status = MONITOR_OK
+  commerciallyMeaningful: 158, // tierA + tierB
+  confirmedLiveMonitorOk: 150, // all MONITOR_OK sources, including static evidence-library pages
+  freshAlertEligible: 96, // tierA/B + proof + baseline + MONITOR_OK + alert_eligible
+  evidenceLibraryOnly: 60, // official/static or low future-change signal, not fresh alerts
+  pendingFreshSignalValidation: 61, // tierA/B candidates without confirmed fresh-alert MONITOR_OK
   withProofPath: 216, // sources with a proof_path recorded
 } as const
 
@@ -88,13 +91,13 @@ export const FAMILY_QUALITY = [
   },
   {
     family: 'SCA',
-    tierA: 0,
+    tierA: 1,
     tierB: 0,
     tierC: 0,
-    remediation: 5,
-    monitorOkCount: 0,
+    remediation: 4,
+    monitorOkCount: 1,
     totalEnabled: 5,
-    notes: 'Full remediation. 5 SCA sources have proof paths and normalized hashes but zero MONITOR_OK runs. Known 403/robot restriction history. Cannot claim SCA monitoring in sales until MONITOR_OK confirmed.',
+    notes: 'One SCA AML/CFT source is fresh-alert eligible after sca_listing proof, repeat baseline, and mass-monitor dry-run MONITOR_OK. Four SCA sources remain remediation/candidate and cannot be claimed as SCA family coverage.',
   },
   {
     family: 'UAE_FIU',
@@ -141,7 +144,7 @@ export const FAMILY_QUALITY = [
 export const KNOWN_LIMITATIONS = [
   {
     source: 'SCA (Securities and Commodities Authority)',
-    limitation: '5 sources have proof paths and baseline hashes but zero MONITOR_OK runs. Known 403/robot restriction history. sca_listing adapter activated 2026-06-15 but live monitoring not yet confirmed.',
+    limitation: '1 SCA AML/CFT source has proof-backed MONITOR_OK via the sca_listing adapter. 4 SCA sources remain under remediation/candidate status and are not counted as SCA family coverage.',
     impact: 'remediation',
     clientsAffected: ['securities_capital_markets', 'investment_funds', 'listed_companies'],
   },
@@ -190,18 +193,19 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  'StatuteProof monitors 138 UAE official regulatory sources at the regulation, rulebook, and circular level — including CBUAE rulebook modules, VARA rulebook PDFs, DFSA enforcement notices, ADGM guidance, MoE DNFBP circulars, and FTA tax legislation.',
-  'We have 149 confirmed-live UAE regulatory monitoring sources with MONITOR_OK status and cryptographic evidence records as of June 2026.',
-  'Our VARA monitoring covers the full suite of VARA rulebook PDFs across all licensed service categories plus the VARA revision updates index and enforcement notices.',
+  'StatuteProof has 96 fresh-alert eligible UAE official-source monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 2026.',
+  'StatuteProof also maintains an evidence library of official/static UAE source snapshots that may support audit packs but are not counted as fresh-alert monitoring.',
+  '150 enabled UAE sources have MONITOR_OK status overall; 96 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
+  'Our VARA monitoring includes 16 confirmed-live official VARA rulebook and regulatory sources, with additional VARA sources pending fresh-alert validation.',
   'Our MoE DNFBP monitoring covers 43 sources including DNFBP guidelines, AML circulars from 2021 to 2026, high-risk jurisdiction updates, TFS-related cabinet decisions, and sector-specific supplemental guidance.',
   'Our FTA monitoring covers 22 confirmed-live sources including UAE Cabinet Decisions, FTA Decisions, Ministerial Decisions, VAT and Corporate Tax guides, and interpretive clarifications.',
   'StatuteProof maintains cryptographic evidence records — including SHA-256 hashes and timestamped proof files — for 216 of 226 enabled UAE regulatory source snapshots.',
-  'SCA regulatory pages are in our monitoring pipeline with confirmed baseline snapshots; live monitoring confirmation is in progress.',
+  'SCA AML/CFT monitoring has one proof-backed fresh-alert source; broader SCA family monitoring remains under remediation until additional sources reach MONITOR_OK.',
 ] as const
 
 export const FORBIDDEN_CLAIMS = [
   '226 monitored UAE regulatory sources — implies all 226 are producing live monitoring intelligence; 60 are static and 9 are in remediation.',
-  'Full SCA coverage or we monitor the SCA — SCA has zero MONITOR_OK on any source.',
+  'Full SCA coverage or we monitor the SCA broadly — only one SCA AML/CFT source is fresh-alert eligible.',
   'Complete UAE sanctions/TFS monitoring or EOCN monitoring is live — EOCN direct portal has zero MONITOR_OK.',
   'UAE FIU circulars are monitored — the FIU circulars page has no MONITOR_OK.',
   'We never miss a regulatory update — no source monitoring product can guarantee this.',
@@ -218,6 +222,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: '149 confirmed-live UAE regulatory monitoring sources (Tier A+B, MONITOR_OK)',
-  recommendedDetailedClaim: '138 Tier A regulatory sources plus 19 Tier B sources — 157 commercially meaningful UAE monitoring endpoints',
+  recommendedSalesClaim: '96 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, and baseline confirmation',
+  recommendedDetailedClaim: '158 commercially meaningful UAE official sources mapped; 96 currently fresh-alert eligible, 61 pending fresh-signal validation, and 60 retained as evidence-library/static references',
 } as const

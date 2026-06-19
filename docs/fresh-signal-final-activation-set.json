@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-06-19T14:30:25Z",
+  "newly_fresh_alert": [
+    {
+      "source_id": "AE-sca-aml-cft",
+      "family": "SCA",
+      "url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+      "proof_path": "data/source_snapshots/2026-06-19/AE/AE-sca-aml-cft/intake-20260619T143025Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-sca-aml-cft/intake-20260619T143025Z/normalized.txt",
+      "normalized_hash": "e5709af71ecda2e41656880068dd4d1290f67d2d1064de9e4b11bb1550cd2328",
+      "baseline_runs_completed": 4,
+      "baseline_runs_required": 2,
+      "mass_monitor_dry_run_status": "MONITOR_OK",
+      "quality_score": 65,
+      "adapter_name": "sca_listing",
+      "decision": "fresh_alert",
+      "customer_safe_note": "One SCA AML/CFT source is fresh-alert eligible. Broader SCA monitoring remains under remediation."
+    }
+  ],
+  "held_after_no_save": [
+    "AE-sca-circulars-rules-procedures",
+    "AE-sca-regulations-listing",
+    "AE-sca-fatca-crs",
+    "AE-sca-corporate-governance",
+    "AE-eocn-laws-regulations-en",
+    "AE-eocn-news-en",
+    "AE-uaefiu-typology-reports",
+    "AE-uaefiu-aml-cft-laws",
+    "AE-uaefiu-publications-hub"
+  ]
+}

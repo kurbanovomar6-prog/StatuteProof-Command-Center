@@ -15,10 +15,14 @@ from app.adapters.base import SourceAdapter
 from app.adapters.cbr import CBRAdapter
 from app.adapters.minfin import MinfinAdapter
 from app.adapters.rosfinmonitoring import RosfinmonitoringAdapter
+from app.adapters.uae_cbuae_rulebook import CBUAERulebookAdapter
+from app.adapters.uae_fsra_circulars import FSRACircularsAdapter
 
 logger = logging.getLogger(__name__)
 
 _ADAPTERS: list[SourceAdapter] = [
+    CBUAERulebookAdapter(),
+    FSRACircularsAdapter(),
     CBRAdapter(),
     MinfinAdapter(),
     RosfinmonitoringAdapter(),

@@ -15,7 +15,9 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from app.adapters.base import SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
+from app.parser import extract_text
 
 DEFAULT_FSRA_CIRCULARS_URL = (
     "https://www.adgm.com/operating-in-adgm/additional-obligations-of-"
@@ -217,3 +219,82 @@ def extract_fsra_circular_items(
         "extraction_status": "ok" if items else "empty",
         "limitation_notes": limitations,
     }
+
+
+class FSRACircularsAdapter(SourceAdapter):
+    """Production adapter for public ADGM/FSRA circular and listing pages."""
+
+    name = "uae_fsra_circulars"
+
+    def can_handle(self, url: str, source: dict | None = None) -> bool:
+        try:
+            parsed = urlparse(url)
+        except Exception:
+            return False
+        host = parsed.netloc.lower()
+        path = parsed.path.lower()
+        if not host.endswith("adgm.com"):
+            return False
+        source_id = str((source or {}).get("source_id") or "").lower()
+        adapter_name = str((source or {}).get("adapter_name") or "").lower()
+        return (
+            "supervision/circulars" in path
+            or "regulatory-alerts" in path
+            or "public-consultations" in path
+            or "guidance" in path
+            or "ra-circular" in source_id
+            or adapter_name == "adgm_fsra_listing"
+        )
+
+    def fetch_content(self, url: str, source: dict | None = None) -> str | None:
+        if "supervision/circulars" in url.lower():
+            listing = self._fetch_circular_listing(url)
+            if listing:
+                return listing
+        return self._fetch_generic_adgm_listing(url)
+
+    def _fetch_circular_listing(self, url: str) -> str | None:
+        result = extract_fsra_circular_items(url)
+        items = result.get("items") or []
+        if not items:
+            return None
+        blocks = [
+            "ADGM FSRA circular listing",
+            f"Source page: {result.get('source_page_url') or url}",
+        ]
+        for item in items:
+            blocks.append(
+                "\n".join(
+                    [
+                        f"Title: {item.get('title') or 'Untitled FSRA item'}",
+                        f"Date: {item.get('date') or 'not stated'}",
+                        f"URL: {item.get('url') or ''}",
+                        f"Document URL: {item.get('document_url') or ''}",
+                        f"Hash: {item.get('row_hash') or ''}",
+                        f"Context: {item.get('raw_text_snippet') or ''}",
+                    ]
+                )
+            )
+        return "\n\n".join(blocks)
+
+    def _fetch_generic_adgm_listing(self, url: str) -> str | None:
+        try:
+            response = requests.get(
+                url,
+                headers=_HEADERS,
+                timeout=HTTP_TIMEOUT_S,
+                allow_redirects=True,
+            )
+        except Exception:
+            return None
+        if response.status_code != 200:
+            return None
+        text = extract_text(response.text) or ""
+        if len(text) < 500:
+            soup = BeautifulSoup(response.text, "html.parser")
+            for tag in soup(["script", "style", "noscript", "nav", "footer", "header"]):
+                tag.decompose()
+            text = _clean_text(soup.get_text("\n", strip=True))
+        if len(text) < 500:
+            return None
+        return f"ADGM FSRA official listing\n\nURL: {url}\n\n{text}"

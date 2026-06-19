@@ -15,7 +15,9 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from app.adapters.base import SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
+from app.parser import extract_text
 
 DEFAULT_CBUAE_RULEBOOK_UPDATES_URL = (
     "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day"
@@ -196,3 +198,63 @@ def extract_cbuae_rulebook_update_items(
         "extraction_status": "ok" if rows else "empty",
         "limitation_notes": limitations,
     }
+
+
+class CBUAERulebookAdapter(SourceAdapter):
+    """Production adapter for public CBUAE Rulebook pages and revision listings."""
+
+    name = "uae_cbuae_rulebook"
+
+    def can_handle(self, url: str, source: dict | None = None) -> bool:
+        return _is_cbuae_rulebook_url(url)
+
+    def fetch_content(self, url: str, source: dict | None = None) -> str | None:
+        """Return stable monitorable text for CBUAE Rulebook URLs."""
+        if "view-revision-updates" in url:
+            return self._fetch_revision_listing(url)
+        return self._fetch_rulebook_page(url)
+
+    def _fetch_revision_listing(self, url: str) -> str | None:
+        result = extract_cbuae_rulebook_update_items(url)
+        rows = result.get("items") or []
+        if not rows:
+            return None
+        blocks = [
+            "CBUAE Rulebook revision updates",
+            f"Source page: {result.get('source_page_url') or url}",
+        ]
+        for row in rows:
+            blocks.append(
+                "\n".join(
+                    [
+                        f"Title: {row.get('title') or 'Untitled update'}",
+                        f"Date: {row.get('date') or 'not stated'}",
+                        f"URL: {row.get('url') or ''}",
+                        f"Hash: {row.get('row_hash') or ''}",
+                        f"Context: {row.get('raw_text_snippet') or ''}",
+                    ]
+                )
+            )
+        return "\n\n".join(blocks)
+
+    def _fetch_rulebook_page(self, url: str) -> str | None:
+        try:
+            response = requests.get(
+                url,
+                headers=_HEADERS,
+                timeout=HTTP_TIMEOUT_S,
+                allow_redirects=True,
+            )
+        except Exception:
+            return None
+        if response.status_code != 200:
+            return None
+        text = extract_text(response.text) or ""
+        if len(text) < 500:
+            soup = BeautifulSoup(response.text, "html.parser")
+            for tag in soup(["script", "style", "noscript", "nav", "footer", "header"]):
+                tag.decompose()
+            text = _clean(soup.get_text("\n", strip=True))
+        if len(text) < 500:
+            return None
+        return f"CBUAE Rulebook source\n\nURL: {url}\n\n{text}"
