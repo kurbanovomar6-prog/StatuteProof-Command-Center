@@ -1,0 +1,41 @@
+{
+  "mode": "dry-run",
+  "activation_ready_only": true,
+  "include_enabled_sources": true,
+  "alert_delivery_enabled": false,
+  "save_proof": false,
+  "sources_json_changed": false,
+  "processed_count": 1,
+  "skipped_count": 0,
+  "results": [
+    {
+      "source_id": "AE-dfsa-rulebook-thomsonreuters",
+      "url": "https://dfsaen.thomsonreuters.com/rulebook/rulebook-modules",
+      "regulator": "DFSA Rulebook Modules",
+      "source_health_status": "MONITOR_OK",
+      "quality_score": 65,
+      "normalized_hash": "e637fa31009fd4ff458035b0ebc603c10e8bc1049b9c9da984ba489f8d62d35a",
+      "previous_hash": "",
+      "change_detected": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "remediation_hint": "",
+      "proof_path": "",
+      "evidence_written": false,
+      "alert_sent": false
+    }
+  ],
+  "skipped": [],
+  "source_health_counts": {
+    "NAV_SHELL_ONLY": 0,
+    "SELECTOR_BROKEN": 0,
+    "MANUAL_CHECK_REQUIRED": 0,
+    "SOURCE_STRUCTURE_CHANGED": 0,
+    "MONITOR_DISCONNECTED": 0,
+    "MONITOR_OK": 1,
+    "HASH_COLLISION": 0,
+    "QUALITY_DROP": 0,
+    "REMEDIATION_REQUIRED": 0
+  },
+  "warnings": []
+}

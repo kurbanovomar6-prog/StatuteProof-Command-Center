@@ -47,8 +47,18 @@ def main() -> int:
             failures.append(f"{source_id}: fresh_alert lacks MONITOR_OK")
         if not source.get("proof_path"):
             failures.append(f"{source_id}: fresh_alert lacks proof_path")
+        if not source.get("normalized_text_path"):
+            failures.append(f"{source_id}: fresh_alert lacks normalized_text_path")
         if not source.get("normalized_hash"):
             failures.append(f"{source_id}: fresh_alert lacks normalized_hash")
+        if source.get("recommended_check_frequency") != "daily":
+            failures.append(f"{source_id}: fresh_alert lacks recommended_check_frequency=daily")
+        if not source.get("fresh_signal_type"):
+            failures.append(f"{source_id}: fresh_alert lacks fresh_signal_type")
+        if not source.get("expected_update_pattern"):
+            failures.append(f"{source_id}: fresh_alert lacks expected_update_pattern")
+        if not source.get("customer_alert_policy"):
+            failures.append(f"{source_id}: fresh_alert lacks customer_alert_policy")
         baseline_completed = int(source.get("baseline_runs_completed") or 0)
         baseline_required = int(source.get("baseline_runs_required") or 2)
         if baseline_completed < baseline_required:

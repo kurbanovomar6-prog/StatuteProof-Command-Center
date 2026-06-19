@@ -1,10 +1,29 @@
 # UAE Source Family Scorecard
 
-Date: 2026-06-18
+Date: 2026-06-19
 
 Labels: Strong = 25+ proof-backed active endpoints; Good = 10-24; Partial = 5-9; Weak = 1-4; Missing = 0. Source-family labels describe depth, not legal completeness.
 
-Current truth: 226 enabled UAE sources / 225 monitoring-active / 1 remediation. Monitoring intelligence only. Not legal advice.
+Current fresh-signal truth: 226 enabled UAE sources / 156 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
+
+Fresh-signal overlay after the 25-per-family pass:
+
+| Family | Fresh Alert MONITOR_OK | Fresh-Signal Label | Gap To 25 |
+| --- | ---: | --- | ---: |
+| CBUAE | 25 | Strong | 0 |
+| FTA / Tax | 25 | Strong | 0 |
+| Ministry of Economy / DNFBP AML | 42 | Strong | 0 |
+| VARA | 23 | Good | 2 |
+| EOCN / sanctions / TFS | 22 | Good | 3 |
+| DFSA | 12 | Good | 13 |
+| DIFC | 10 | Good | 15 |
+| ADGM/FSRA | 8 | Partial | 17 |
+| UAE FIU | 5 | Partial | 20 |
+| SCA | 4 | Weak | 21 |
+| Ministry of Justice / UAE Legislation / Gazette | 0 | Missing | 25 |
+| Ministry of Finance | 0 | Missing | 25 |
+
+The legacy table below is retained for source-universe depth context. Do not use legacy active counts as fresh-alert monitoring claims.
 
 | Family | Enabled | Active | Remediation | Candidates mapped | Top-250 | Label | Depth /10 | Trust /10 | Next 10 endpoints |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |

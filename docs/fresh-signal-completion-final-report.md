@@ -91,27 +91,28 @@ This includes old/static DFSA notice pages, DIFC whats-on pages, ADGM announceme
 
 ## 10. Families Now Strong
 
+- CBUAE
 - FTA
 - MoE/DNFBP AML
 
 ## 11. Families Still Not Strong
 
-- CBUAE: adapter registered and no-save works, but proof/baseline/MONITOR_OK not completed.
-- VARA: 16 fresh-alert confirmed, 9 pending.
-- DFSA: useful but still needs static page demotion to be reflected across all product copy and additional key-source validation.
-- DIFC: useful but still partial.
-- ADGM/FSRA: adapter registered but still partial.
-- SCA: 1 source fresh-alert; family not strong.
-- UAE FIU: no-save promising; proof/baseline pending.
-- EOCN: no-save promising; proof/baseline pending.
+- VARA: 23 fresh-alert confirmed, 2 still needed for Strong.
+- DFSA: 12 fresh-alert confirmed; static page archive remains evidence-library.
+- DIFC: 10 fresh-alert confirmed; static whats-on/news archive remains evidence-library.
+- ADGM/FSRA: 8 fresh-alert confirmed; some candidates held for QUALITY_DROP/nav-shell.
+- SCA: 4 sources fresh-alert; family not strong.
+- UAE FIU: 5 sources fresh-alert; circulars page still nav-shell.
+- EOCN/TFS: 22 sources fresh-alert including 2 direct EOCN sources; still below 25.
 - MoJ/Gazette: still access remediation.
 - MoF: generic homepage still weak; needs specific official pages.
 
 ## 12. Customer-Safe Claims Now Allowed
 
-- “StatuteProof has 96 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, and baseline confirmation.”
+- “StatuteProof has 156 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, baseline confirmation, and daily-check metadata.”
 - “StatuteProof also maintains an evidence library of official/static UAE source snapshots that are not counted as fresh-alert monitoring.”
-- “SCA AML/CFT has one proof-backed fresh-alert source; broader SCA monitoring remains under remediation.”
+- “CBUAE rulebook monitoring includes 25 fresh-alert official rulebook/regulatory sources.”
+- “SCA monitoring has 4 proof-backed fresh-alert sources; broader SCA monitoring remains below Strong.”
 
 ## 13. Claims Still Forbidden
 
@@ -119,7 +120,6 @@ This includes old/static DFSA notice pages, DIFC whats-on pages, ADGM announceme
 - “Complete SCA coverage.”
 - “We monitor SCA” as a broad family claim.
 - “Complete UAE sanctions/TFS monitoring.”
-- “CBUAE rulebook monitoring is live.”
 - “UAE FIU circulars are monitored.”
 - “Never miss updates.”
 - “Guaranteed compliance.”
@@ -145,7 +145,7 @@ Improved but not enough for a 9/10 product. The fresh-alert count is honest now,
 
 ## 18. Next Exact Source Task
 
-Run proof/baseline/mass-monitor activation for EOCN and FIU pages that already passed no-save via Playwright, then run CBUAE rulebook proof/baseline using the newly registered adapter.
+Run the next targeted weak-family adapter/discovery sprint for VARA enforcement, EOCN/TFS remaining gap, SCA regulations, UAE FIU circulars, MoJ/Gazette, and MoF.
 
 ## 19. Next Exact Product Task
 
@@ -158,4 +158,4 @@ Update the Sources and Coverage UI to show separate counts:
 
 ## 20. Next Exact Sales Task
 
-Use “96 fresh-alert eligible official-source monitors” in pilot conversations, not “226 monitored sources.”
+Use “156 fresh-alert eligible official-source monitors” in pilot conversations, not “226 monitored sources.”

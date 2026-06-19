@@ -172,9 +172,44 @@ The earlier **13 enabled / 10 confirmed / 3 remediation** story is not safe toda
 | `AE-fta-corporate-tax-legislation` | Candidate / disabled | None | Listing-page extraction is now understood via `fta_tax_listing`, but direct official PDF endpoints are the active monitored objects. |
 | `AE-adgm-fsra-regulatory-alerts` | Candidate / disabled | None | Official/public page, but current selector isolated no alert rows and remained nav-shell-like. |
 
+## Fresh-Signal Addendum — 2026-06-19
+
+Fresh-alert monitoring truth after the 25-per-family execution pass:
+
+- Enabled UAE sources: 226
+- Fresh-alert eligible sources: 156
+- Evidence-library-only sources: 61
+- Candidate/pending validation: 6
+- Remediation: 3
+- Overall MONITOR_OK sources: 210, including evidence-library records.
+
+Important: the legacy “monitoring-active” registry count is not the same as customer-relevant fresh-alert monitoring. Customer-facing fresh monitoring claims must use the 156 fresh-alert count, not 226 enabled or 225 legacy active.
+
+Families currently Strong Fresh Signal:
+
+- CBUAE
+- FTA
+- MoE/DNFBP AML
+
+Families still below the 25-source Strong Fresh Signal threshold:
+
+- VARA: 23
+- DFSA: 12
+- DIFC: 10
+- ADGM/FSRA: 8
+- UAE FIU: 5
+- EOCN/TFS: 22
+- SCA: 4
+- MoJ/Gazette: 0
+- MoF: 0
+
+See `docs/fresh-signal-25-per-family-final-report.md` for the current customer-safe source truth.
+
 ## Which Story Is Correct?
 
-**Correct today:** 226 enabled / 225 monitoring-active / 1 remediation.
+**Correct legacy registry story:** 226 enabled / 225 active-or-enabled rows / 1 legacy remediation.
+
+**Correct fresh-signal story:** 226 enabled / 156 fresh-alert eligible / 61 evidence-library / 6 candidate / 3 remediation.
 
 **Not correct today:** 13 enabled / 10 confirmed / 3 under extraction remediation.
 

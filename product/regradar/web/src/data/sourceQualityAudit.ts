@@ -5,16 +5,16 @@
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: '2026-06-19',
   totalEnabled: 226,
-  tierA: 137,
+  tierA: 141,
   tierB: 21,
-  tierC: 60,
-  remediation: 8,
+  tierC: 61,
+  remediation: 3,
   excludeReview: 0,
-  commerciallyMeaningful: 158, // tierA + tierB
-  confirmedLiveMonitorOk: 150, // all MONITOR_OK sources, including static evidence-library pages
-  freshAlertEligible: 96, // tierA/B + proof + baseline + MONITOR_OK + alert_eligible
-  evidenceLibraryOnly: 60, // official/static or low future-change signal, not fresh alerts
-  pendingFreshSignalValidation: 61, // tierA/B candidates without confirmed fresh-alert MONITOR_OK
+  commerciallyMeaningful: 162, // tierA + tierB
+  confirmedLiveMonitorOk: 210, // all MONITOR_OK sources, including static evidence-library pages
+  freshAlertEligible: 156, // tierA/B + proof + baseline + MONITOR_OK + alert_eligible
+  evidenceLibraryOnly: 61, // official/static or low future-change signal, not fresh alerts
+  pendingFreshSignalValidation: 6, // tierA/B candidates without confirmed fresh-alert MONITOR_OK
   withProofPath: 216, // sources with a proof_path recorded
 } as const
 
@@ -25,9 +25,9 @@ export const FAMILY_QUALITY = [
     tierB: 1,
     tierC: 1,
     remediation: 0,
-    monitorOkCount: 0,
+    monitorOkCount: 25,
     totalEnabled: 27,
-    notes: '25 CBUAE rulebook regulation pages (Tier A) and 1 regulations listing (Tier B). Zero MONITOR_OK runs recorded on rulebook pages — all are baselines in progress. CBUAE homepage is Tier C (generic).',
+    notes: '25 CBUAE rulebook/regulatory sources now have fresh-alert MONITOR_OK after adapter-aligned proof, repeat baseline, and mass-monitor dry-run. CBUAE homepage remains Tier C evidence-library and the generic regulations page remains candidate/held.',
   },
   {
     family: 'VARA',
@@ -35,29 +35,29 @@ export const FAMILY_QUALITY = [
     tierB: 0,
     tierC: 1,
     remediation: 0,
-    monitorOkCount: 16,
+    monitorOkCount: 23,
     totalEnabled: 25,
-    notes: '24 Tier A sources including all major VARA rulebook PDFs and revision updates index plus enforcement notices. 16 MONITOR_OK confirmed. VARA homepage is Tier C (JS SPA degrades to 62c).',
+    notes: '23 VARA sources now have fresh-alert MONITOR_OK, including rulebook PDFs and revision updates. VARA enforcement still failed as nav-shell and homepage remains Tier C; VARA is close but not yet Strong Fresh Signal.',
   },
   {
     family: 'DFSA',
-    tierA: 11,
+    tierA: 10,
     tierB: 2,
-    tierC: 27,
+    tierC: 28,
     remediation: 0,
-    monitorOkCount: 32,
+    monitorOkCount: 39,
     totalEnabled: 40,
-    notes: '27 of 40 are individual static DFSA /news/notice-* pages that will never meaningfully change — Tier C. 11 genuine Tier A sources: rulebook platform, enforcement, AML notices, consultations.',
+    notes: '12 DFSA fresh-alert sources now have MONITOR_OK, including financial crime/MLRO, AML rulebook, rulebook modules, consultations, enforcement decisions, regulatory actions, and supervisory review. 28 individual/static pages remain evidence-library and are not fresh-alert monitoring.',
   },
   {
     family: 'DIFC',
-    tierA: 9,
-    tierB: 1,
+    tierA: 10,
+    tierB: 0,
     tierC: 15,
     remediation: 0,
-    monitorOkCount: 17,
+    monitorOkCount: 24,
     totalEnabled: 25,
-    notes: '13 individual whats-on news pages are Tier C static archive. 9 genuine Tier A: specific DIFC law pages, data protection pages, legal notices, AML/CFT, economic substance. 1 near-duplicate URL flagged.',
+    notes: '10 DIFC fresh-alert sources now have MONITOR_OK, including laws/regulations and data protection legal pages. 15 whats-on/news/static detail pages remain evidence-library and are not counted as fresh alerts.',
   },
   {
     family: 'ADGM_FSRA',
@@ -65,9 +65,9 @@ export const FAMILY_QUALITY = [
     tierB: 1,
     tierC: 14,
     remediation: 0,
-    monitorOkCount: 15,
+    monitorOkCount: 21,
     totalEnabled: 25,
-    notes: '13 individual ADGM announcement pages are Tier C static. 10 genuine Tier A: rules/regulations listing, consultations, guidance, enforcement, AML/cybercrime, RA circulars, listing authority, supervision circulars, data protection guidance and PDF.',
+    notes: '8 ADGM/FSRA fresh-alert sources now have MONITOR_OK. Several candidates remain held due to QUALITY_DROP or nav-shell, while 14 individual announcements remain evidence-library.',
   },
   {
     family: 'MoE_DNFBP',
@@ -91,13 +91,13 @@ export const FAMILY_QUALITY = [
   },
   {
     family: 'SCA',
-    tierA: 1,
-    tierB: 0,
-    tierC: 0,
-    remediation: 4,
-    monitorOkCount: 1,
-    totalEnabled: 5,
-    notes: 'One SCA AML/CFT source is fresh-alert eligible after sca_listing proof, repeat baseline, and mass-monitor dry-run MONITOR_OK. Four SCA sources remain remediation/candidate and cannot be claimed as SCA family coverage.',
+    tierA: 3,
+    tierB: 1,
+    tierC: 1,
+    remediation: 1,
+    monitorOkCount: 4,
+    totalEnabled: 6,
+    notes: '4 SCA sources are fresh-alert eligible after proof, repeat baseline, and mass-monitor dry-run MONITOR_OK: AML/CFT, FATCA/CRS, corporate governance, and circulars/rules/procedures. Broader SCA family remains below Strong; regulations listing still failed nav-shell.',
   },
   {
     family: 'UAE_FIU',
@@ -105,19 +105,19 @@ export const FAMILY_QUALITY = [
     tierB: 6,
     tierC: 0,
     remediation: 1,
-    monitorOkCount: 2,
+    monitorOkCount: 5,
     totalEnabled: 7,
-    notes: '2 MONITOR_OK confirmed (annual reports, press releases). FIU circulars, typology reports, and AML/CFT laws pages have no MONITOR_OK — downgraded to Tier B pending confirmation. Homepage in remediation.',
+    notes: '5 UAE FIU sources now have fresh-alert MONITOR_OK: annual reports, press releases, typology reports, AML/CFT laws, and publications hub. FIU circulars remain nav-shell/candidate and the homepage remains remediation.',
   },
   {
     family: 'EOCN',
-    tierA: 0,
-    tierB: 0,
+    tierA: 21,
+    tierB: 1,
     tierC: 0,
-    remediation: 2,
-    monitorOkCount: 0,
-    totalEnabled: 2,
-    notes: 'Full remediation. EOCN is UAE TFS/sanctions authority. Two sources with proof paths, zero MONITOR_OK. Direct access constraints. Partial coverage via 16 MoE DNFBP eocn_tfs documents (all MONITOR_OK).',
+    remediation: 0,
+    monitorOkCount: 22,
+    totalEnabled: 22,
+    notes: '22 EOCN/TFS-related sources now have MONITOR_OK, including 2 direct EOCN sources and 20 MoE-owned TFS/supporting sources. Still below the 25-source Strong threshold and direct EOCN coverage remains partial.',
   },
   {
     family: 'MoF',
@@ -144,26 +144,26 @@ export const FAMILY_QUALITY = [
 export const KNOWN_LIMITATIONS = [
   {
     source: 'SCA (Securities and Commodities Authority)',
-    limitation: '1 SCA AML/CFT source has proof-backed MONITOR_OK via the sca_listing adapter. 4 SCA sources remain under remediation/candidate status and are not counted as SCA family coverage.',
+    limitation: '4 SCA sources have proof-backed MONITOR_OK, but SCA remains below the 25-source Strong Fresh Signal threshold. SCA regulations listing still failed nav-shell and needs adapter remediation.',
     impact: 'remediation',
     clientsAffected: ['securities_capital_markets', 'investment_funds', 'listed_companies'],
   },
   {
     source: 'UAE FIU — Circulars and Notices Page',
-    limitation: 'uaefiu.gov.ae/en/Publications/ has no MONITOR_OK. Annual reports and press releases are confirmed working. FIU circulars page access has had download constraint history.',
+    limitation: '5 UAE FIU public sources have MONITOR_OK, but the FIU circulars page still failed nav-shell and cannot be claimed as monitored.',
     impact: 'partial_coverage',
     clientsAffected: ['aml_mlro', 'dnfbp', 'vasp_crypto'],
   },
   {
     source: 'EOCN — Direct Portal',
-    limitation: 'eocn.gov.ae has 2 sources with proof paths, zero MONITOR_OK. Direct access constraints. TFS/sanctions content partially covered via 16 MoE DNFBP document PDFs which are MONITOR_OK.',
+    limitation: '2 direct EOCN sources now have MONITOR_OK. EOCN/TFS has 22 fresh-alert sources and remains below the 25-source Strong threshold, with much of the TFS support still coming through MoE-owned documents.',
     impact: 'partial_coverage',
     clientsAffected: ['sanctions_tfs', 'aml_mlro', 'vasp_crypto', 'dnfbp'],
   },
   {
     source: 'CBUAE Rulebook Pages',
-    limitation: '25 rulebook.centralbank.ae pages have proof paths and hashes but zero MONITOR_OK runs. Baselines are in progress. Not yet confirmed live monitoring.',
-    impact: 'baseline_in_progress',
+    limitation: '25 CBUAE rulebook/regulatory sources now have MONITOR_OK. The generic CBUAE homepage and generic regulations portal remain excluded from fresh-alert claims.',
+    impact: 'resolved_with_scope',
     clientsAffected: ['fintech_payments', 'aml_mlro', 'banking'],
   },
   {
@@ -193,25 +193,25 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  'StatuteProof has 96 fresh-alert eligible UAE official-source monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 2026.',
+  'StatuteProof has 156 fresh-alert eligible UAE official-source monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 2026.',
   'StatuteProof also maintains an evidence library of official/static UAE source snapshots that may support audit packs but are not counted as fresh-alert monitoring.',
-  '150 enabled UAE sources have MONITOR_OK status overall; 96 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
-  'Our VARA monitoring includes 16 confirmed-live official VARA rulebook and regulatory sources, with additional VARA sources pending fresh-alert validation.',
+  '210 enabled UAE sources have MONITOR_OK status overall; 156 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
+  'Our CBUAE rulebook monitoring includes 25 fresh-alert eligible official rulebook/regulatory sources with MONITOR_OK and proof-backed baselines.',
+  'Our VARA monitoring includes 23 confirmed-live official VARA rulebook and regulatory sources, with enforcement still pending adapter validation.',
   'Our MoE DNFBP monitoring covers 43 sources including DNFBP guidelines, AML circulars from 2021 to 2026, high-risk jurisdiction updates, TFS-related cabinet decisions, and sector-specific supplemental guidance.',
   'Our FTA monitoring covers 22 confirmed-live sources including UAE Cabinet Decisions, FTA Decisions, Ministerial Decisions, VAT and Corporate Tax guides, and interpretive clarifications.',
   'StatuteProof maintains cryptographic evidence records — including SHA-256 hashes and timestamped proof files — for 216 of 226 enabled UAE regulatory source snapshots.',
-  'SCA AML/CFT monitoring has one proof-backed fresh-alert source; broader SCA family monitoring remains under remediation until additional sources reach MONITOR_OK.',
+  'SCA monitoring has 4 proof-backed fresh-alert sources; broader SCA family monitoring remains below Strong until additional official sources reach MONITOR_OK.',
 ] as const
 
 export const FORBIDDEN_CLAIMS = [
-  '226 monitored UAE regulatory sources — implies all 226 are producing live monitoring intelligence; 60 are static and 9 are in remediation.',
-  'Full SCA coverage or we monitor the SCA broadly — only one SCA AML/CFT source is fresh-alert eligible.',
-  'Complete UAE sanctions/TFS monitoring or EOCN monitoring is live — EOCN direct portal has zero MONITOR_OK.',
-  'UAE FIU circulars are monitored — the FIU circulars page has no MONITOR_OK.',
+  '226 monitored UAE regulatory sources — implies all 226 are producing live monitoring intelligence; 61 are static/evidence-library and 3 are in remediation.',
+  'Full SCA coverage or we monitor the SCA broadly — only 4 SCA sources are fresh-alert eligible.',
+  'Complete UAE sanctions/TFS monitoring — EOCN/TFS is improved but still below the 25-source Strong threshold.',
+  'UAE FIU circulars are monitored — the FIU circulars page still failed nav-shell.',
   'We never miss a regulatory update — no source monitoring product can guarantee this.',
   'Guarantee compliance — forbidden under StatuteProof product rules.',
   'Replace legal counsel or compliance professionals — forbidden under StatuteProof product rules.',
-  'CBUAE rulebook monitoring is live — CBUAE rulebook pages have baselines but zero MONITOR_OK runs confirmed.',
 ] as const
 
 export const AUDIT_META = {
@@ -222,6 +222,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: '96 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, and baseline confirmation',
-  recommendedDetailedClaim: '158 commercially meaningful UAE official sources mapped; 96 currently fresh-alert eligible, 61 pending fresh-signal validation, and 60 retained as evidence-library/static references',
+  recommendedSalesClaim: '156 fresh-alert eligible UAE official-source monitors with MONITOR_OK, proof records, hashes, and baseline confirmation',
+  recommendedDetailedClaim: '162 commercially meaningful UAE official sources mapped; 156 currently fresh-alert eligible, 6 pending fresh-signal validation, and 61 retained as evidence-library/static references',
 } as const
