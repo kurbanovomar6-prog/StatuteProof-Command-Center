@@ -344,10 +344,14 @@
         {
           "created_at": "2026-06-20T07:52:44Z",
           "note": "2026-06-20 weak-family sprint: TDD fixture added for SCA table/download rows; focused test failed before implementation with item_count=0, then passed after ScaListingAdapter table-row extraction. Adapter suite passed (49 passed) and SCA subset passed (7 passed). Controlled no-save for https://www.sca.gov.ae/en/regulations/regulations-listing returned NAV_SHELL_ONLY, quality_score=0, can_save_evidence=false, can_activate_monitoring=false, proof_path=null. No evidence saved, no MONITOR_OK, no source activation. Evidence Trail PASS on adapter/HOLD on activation; QA SHIP adapter/BLOCK live source. Next source task: investigate Playwright-rendered table/API path without bypassing access controls."
+        },
+        {
+          "created_at": "2026-06-20T08:15:33Z",
+          "note": "2026-06-20 SCA idealization sprint: Agent-to-agent loop produced one usable Source Monitor packet; Code Architect/QA CLI agents stalled and were terminated without usable output. Candidate AE-sca-violations tested no-save on www and beta official/public SCA pages. www violations hub: NAV_SHELL_ONLY, quality_score=0, adapter table failed with not enough rows, no proof. beta violations-of-companies child: selector-free no-save returned CONFIRMED_ACCESSIBLE but preview was Services/My Favourites shell, table selector missing, adapter_used=false, quality_score=53, no proof, no activation. beta violations hub discovery: Playwright fetched 141,911 chars and detected a table, but no public JSON candidates; follow-up no-save with wait_for_selector=table still returned NAV_SHELL_ONLY, quality_score=0, table did not contain enough rows. beta licensed-companies no-save also returned NAV_SHELL_ONLY/filter chrome, quality_score=0. No source activated; next exact task is public SCA open-data row/API extraction research without bypassing access controls."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T07:52:47Z"
+      "updated_at": "2026-06-20T08:15:33Z"
     },
     {
       "task_id": "fiu-circulars-public-source-investigation",
