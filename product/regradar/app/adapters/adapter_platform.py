@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import hashlib
 import re
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
@@ -1283,6 +1283,122 @@ class DfsaNoticeListingAdapter(DocumentListingAdapter):
     )
 
 
+class DfsaPublicationListingAdapter(DocumentListingAdapter):
+    family = "dfsa_publication_listing"
+    name = "dfsa_publication_listing"
+    heading = "DFSA publication/resource listing items"
+    allowed_tokens = (
+        "dfsa",
+        "publication",
+        "publications",
+        "report",
+        "reports",
+        "annual",
+        "aml",
+        "anti-money",
+        "financial crime",
+        "guidance",
+        "note",
+        "policy",
+        "statement",
+        "sanction",
+        "cyber",
+        "risk",
+        "regulatory",
+        "supervision",
+        "innovation",
+        "authorised",
+    )
+    allowed_path_prefixes = (
+        "/your-resources/publications",
+        "/your-resources/publications-reports",
+        "/laws-rules/legal-resources/policy-statements",
+    )
+    blocked_path_fragments = (
+        "/login",
+        "/e-portal",
+        "/public-register",
+        "/contact",
+        "/about",
+        "/careers",
+        "/media",
+        "/news",
+        "/search",
+    )
+
+    def extract(self, html: str, *, url: str = "", config: dict | None = None) -> AdapterResult:
+        cfg = {
+            "container_selector": "main",
+            "exclude_selectors": [
+                "header",
+                "nav",
+                "footer",
+                "form",
+                ".search",
+                "script",
+                "style",
+                "noscript",
+            ],
+        }
+        cfg.update(config or {})
+        result = super().extract(html, url=url, config=cfg)
+        result.adapter_family = self.family
+        result.adapter_name = self.name
+        result.extraction_strategy = f"adapter:{self.name}"
+
+        if not result.items:
+            result.failure_reason = "No DFSA publication listing items were isolated."
+            result.remediation_hint = "Review DFSA publication selectors or keep the source as candidate."
+            return result
+
+        filtered: list[dict] = []
+        seen: set[str] = set()
+        for item in result.items:
+            item_url = str(item.get("url") or "")
+            if not self._is_allowed_publication_url(item_url):
+                continue
+            key = f"{str(item.get('title') or '').casefold()}|{item_url.casefold()}"
+            if key in seen:
+                continue
+            seen.add(key)
+            item["row_hash"] = _row_hash(
+                item.get("title"),
+                item.get("date"),
+                item_url,
+                item.get("category"),
+                item.get("raw_text_snippet"),
+            )
+            filtered.append(item)
+
+        result.items = filtered
+        result.text = _format_items(self.heading, filtered)
+        result.noise_risk = "medium" if len(filtered) < 5 else "low"
+        result.source_health_risk = "medium"
+        result.metadata["allowed_path_prefixes"] = list(self.allowed_path_prefixes)
+        if not filtered:
+            result.failure_reason = "No DFSA publication listing items were isolated after path filtering."
+            result.remediation_hint = "Review DFSA publication URLs; homepage/login/register/news links are not monitorable publication items."
+        else:
+            result.failure_reason = ""
+            result.remediation_hint = ""
+        return result
+
+    def _is_allowed_publication_url(self, item_url: str) -> bool:
+        parsed = urlparse(item_url)
+        host = parsed.netloc.casefold()
+        path = parsed.path.casefold().rstrip("/")
+        if host and host not in {"www.dfsa.ae", "dfsa.ae"}:
+            return False
+        if not path or path == "/":
+            return False
+        if any(fragment in path for fragment in self.blocked_path_fragments):
+            return False
+        return any(
+            path == prefix or path.startswith(f"{prefix}/")
+            for prefix in self.allowed_path_prefixes
+        )
+
+
 class DifcLegalDatabaseAdapter(DocumentListingAdapter):
     family = "difc_legal_database"
     name = "difc_legal_database"
@@ -1369,6 +1485,7 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
     "rendered_dom_evidence": RenderedDomEvidenceAdapter(),
     "adgm_fsra_listing": AdgmFsraListingAdapter(),
     "dfsa_notice_listing": DfsaNoticeListingAdapter(),
+    "dfsa_publication_listing": DfsaPublicationListingAdapter(),
     "difc_legal_database": DifcLegalDatabaseAdapter(),
     "uae_legal_database": UaeLegalDatabaseAdapter(),
     "fta_tax_listing": FtaTaxListingAdapter(),
@@ -1404,7 +1521,7 @@ def extract_with_adapter(
             adapter_name=adapter_name or "",
             extraction_strategy=f"adapter:{key}" if key else "",
             failure_reason=f"Unknown adapter: {key}" if key else "No adapter configured.",
-            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, vara_pdf_listing, vara_news_listing, vara_enforcement_listing, or difc_legal_database.",
+            remediation_hint="Use a configured adapter family such as static_html, custom_element, listing, table, pdf_listing, register, sca_listing, dfsa_rulebook, dfsa_notice_listing, dfsa_publication_listing, cbuae_document_listing, fiu_eocn_document_listing, eocn_news_listing, vara_pdf_listing, vara_news_listing, vara_enforcement_listing, or difc_legal_database.",
             source_health_risk="medium",
         )
     try:

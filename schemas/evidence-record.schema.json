@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://statuteproof.local/schemas/evidence-record.schema.json",
+  "title": "StatuteProof Canonical Evidence Record",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "record_id",
+    "record_status",
+    "source",
+    "run",
+    "content",
+    "change",
+    "files",
+    "integrity",
+    "review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "complete",
+        "integrity_error",
+        "blocked"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "source_id",
+        "regulator",
+        "official_url",
+        "source_name"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "regulator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "official_url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "run_id",
+        "timestamp",
+        "status"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "FIRST_SEEN",
+            "UNCHANGED",
+            "CHANGED",
+            "FAILED",
+            "QUALITY_DROP"
+          ]
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "current_hash",
+        "raw_content_path",
+        "normalized_current_path"
+      ],
+      "properties": {
+        "previous_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "current_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "raw_content_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalized_current_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalized_previous_path": {
+          "type": "string"
+        }
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "summary",
+        "lines_added",
+        "lines_removed"
+      ],
+      "properties": {
+        "diff_path": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lines_added": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lines_removed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "snapshot_path",
+        "raw_path",
+        "normalized_path",
+        "metadata_path"
+      ],
+      "properties": {
+        "snapshot_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raw_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalized_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previous_path": {
+          "type": "string"
+        },
+        "metadata_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "diff_path": {
+          "type": "string"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "hash_verified",
+        "integrity_status",
+        "verified_at"
+      ],
+      "properties": {
+        "hash_verified": {
+          "const": true
+        },
+        "integrity_status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "FAILED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "verified_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "human_review_required",
+        "review_status",
+        "review_reason"
+      ],
+      "properties": {
+        "human_review_required": {
+          "type": "boolean"
+        },
+        "review_status": {
+          "type": "string",
+          "enum": [
+            "not_required",
+            "pending",
+            "approved",
+            "blocked"
+          ]
+        },
+        "review_reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

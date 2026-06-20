@@ -283,6 +283,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
         "adgm_fsra_listing",
         "dfsa_rulebook",
         "dfsa_notice_listing",
+        "dfsa_publication_listing",
         "document_listing",
         "pdf_listing",
         "adgm_fsra_listing",
@@ -305,6 +306,7 @@ def _has_structured_adapter_content(result: dict) -> bool:
     document_families = {
         "document_listing",
         "pdf_listing",
+        "dfsa_publication_listing",
         "cbuae_document_listing",
         "fiu_eocn_document_listing",
         "eocn_news_listing",

@@ -23,7 +23,9 @@ Fresh-signal overlay after the 25-per-family pass:
 | Ministry of Justice / UAE Legislation / Gazette | 0 | Missing | 25 |
 | Ministry of Finance | 1 | Weak | 24 |
 
-The legacy table below is retained for source-universe depth context only. Its legacy active counts come from older `status=active` fields and must not be used as customer-facing monitoring, fresh-alert, or coverage claims.
+## Appendix A: Historical Legacy Depth Table - Not Customer Or Adapter Truth
+
+The legacy table below is retained for source-universe depth context only. Its legacy active counts come from older `status=active` fields and must not be used as customer-facing monitoring, fresh-alert, adapter-priority, or coverage claims. Use the fresh-signal overlay above as the only primary scorecard.
 
 | Family | Enabled | Legacy active (not fresh-alert) | Remediation | Candidates mapped | Top-250 | Legacy depth label | Depth /10 | Trust /10 | Next 10 endpoints |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |

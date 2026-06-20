@@ -138,10 +138,18 @@
         {
           "created_at": "2026-06-19T21:16:31Z",
           "note": "QA final Phase 2 re-gate SHIP: no P0/P1 stale claim findings remain. Current app surfaces no longer use legacy 225/226 monitoring-active claims; source_summary uses fresh-alert/evidence-library/candidate/remediation buckets; plan/pricing validator expects 169."
+        },
+        {
+          "created_at": "2026-06-19T22:37:14Z",
+          "note": "Phase 1 QA found stale active audit artifacts (source_signal_quality_audit.md/json) with old 226/149/216-style claims; coordinator regenerated the active audit around 238/169/61/5/3 truth, corrected MoE 42 fresh-alert + 1 evidence-library wording, and added validator coverage before adapter work."
+        },
+        {
+          "created_at": "2026-06-20T00:14:01Z",
+          "note": "QA found stale web sourceQualityAudit.ts v1 claims: 2026-06-19, confirmed-live wording, and 174 commercially meaningful. Coordinator replaced the frontend export with v2 2026-06-20 safe claims, removed commerciallyMeaningful/tier language, and extended validate_audit.py plus tests to enforce web export parity with source_signal_quality_audit.json."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T21:16:31Z"
+      "updated_at": "2026-06-20T00:14:01Z"
     },
     {
       "task_id": "source-summary-fresh-alert-counting",
@@ -254,7 +262,7 @@
     {
       "task_id": "dfsa-publication-listing-adapter",
       "title": "Build DFSA publication and guidance listing adapter",
-      "status": "accepted",
+      "status": "blocked",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Source Monitor",
@@ -287,9 +295,14 @@
       ],
       "blocker": "Guidance, publications, and policy pages returned Go-to-Homepage nav-shell under current extraction.",
       "next_handoff_agent": "Source Monitor",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-19T22:48:39Z",
+          "note": "Implemented fixture-backed dfsa_publication_listing adapter and Source Intake structured allowlist. Live no-save stayed blocked: AE-dfsa-publications returned DFSA Page Not Found/nav-shell with item_count=0 and quality 0; AE-dfsa-aml-ctf-sanctions failed wait_for_selector main with URL_STALE/NEEDS_SELECTOR_REVIEW. No evidence saved, no baseline, no MONITOR_OK, no sources.json activation."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:03:12Z"
+      "updated_at": "2026-06-19T22:48:39Z"
     },
     {
       "task_id": "sca-table-download-adapter",
@@ -541,15 +554,19 @@
         {
           "created_at": "2026-06-19T21:31:28Z",
           "note": "Recommended storage: append-only evidence/{regulator_slug}/{source_id}/{run_id}/ with raw.html, snapshot.html, current.normalized.txt, previous.normalized.txt, metadata.json, and evidence-record.json. Do not migrate or rewrite source_snapshots; create derived backfill packages only when needed."
+        },
+        {
+          "created_at": "2026-06-20T00:08:43Z",
+          "note": "This sprint implemented the prerequisite schema, validator, and brief eligibility gate only. Production canonical evidence-record.json generation remains accepted/blocked-next: source_runs/source_snapshots must not be migrated or promoted until a generator creates append-only evidence/{regulator}/{source_id}/{run_id}/ packages and refuses incomplete source-run snapshots."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-19T21:31:28Z"
+      "updated_at": "2026-06-20T00:08:43Z"
     },
     {
       "task_id": "evidence-record-validator",
       "title": "Validate canonical evidence records before brief use",
-      "status": "accepted",
+      "status": "done",
       "owner_agent": "Evidence Trail",
       "reviewer_agents": [
         "QA / Critic",
@@ -590,15 +607,31 @@
         {
           "created_at": "2026-06-19T21:31:28Z",
           "note": "First implementation task: create schemas/evidence-record.schema.json from docs/evidence-record-spec.md, then add a validator test showing current VARA proof.json fails because it is not canonical evidence-record.json."
+        },
+        {
+          "created_at": "2026-06-20T00:08:32Z",
+          "note": "Implemented narrow canonical evidence record validator in product/regradar/app/evidence_records.py with tests in test_canonical_evidence_records.py. It rejects source_snapshots proof.json, recomputes current normalized sha256, requires canonical artifact paths, metadata, previous normalized artifact for non-FIRST_SEEN, diff for CHANGED, VERIFIED integrity, and review fields. Added schemas/evidence-record.schema.json."
+        },
+        {
+          "created_at": "2026-06-20T00:09:31Z",
+          "note": "Additional TDD hardening: added regression test that direct evidence-record.json paths outside the canonical evidence/ tree are not brief-eligible, then tightened load_evidence_record() to reject noncanonical storage."
+        },
+        {
+          "created_at": "2026-06-20T00:14:54Z",
+          "note": "Evidence Trail re-review found two edge cases: unknown run.status and direct paths under non-top-level other/evidence/ could pass. Coordinator added regression tests, restricted run.status to FIRST_SEEN/UNCHANGED/CHANGED/FAILED/QUALITY_DROP, and requires direct evidence-record.json paths to live under top-level evidence/."
+        },
+        {
+          "created_at": "2026-06-20T00:25:51Z",
+          "note": "Final Evidence Trail/QA post-fix review PASS for scoped validator: blocks source_snapshots proof.json, unknown run.status, FAILED/QUALITY_DROP, missing CHANGED diff, pending review for customer brief inputs, and non-top-level evidence paths; recomputes current/previous normalized hashes."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-19T21:31:28Z"
+      "updated_at": "2026-06-20T00:25:51Z"
     },
     {
       "task_id": "risk-brief-eligibility-gate",
       "title": "Gate risk briefs on canonical evidence records",
-      "status": "accepted",
+      "status": "done",
       "owner_agent": "Risk + Brief Pipeline",
       "reviewer_agents": [
         "Evidence Trail",
@@ -645,10 +678,30 @@
         {
           "created_at": "2026-06-19T21:31:28Z",
           "note": "Legal boundary for future brief copy: evidence-backed compliance intelligence for human review only; no legal advice, legal opinion, compliance certification, regulator approval, guaranteed update capture, guaranteed compliance, prevention of fines, or automated compliance decisions."
+        },
+        {
+          "created_at": "2026-06-20T00:08:37Z",
+          "note": "Implemented build_risk_brief_inputs(evidence_record_id_or_path, base_dir) in product/regradar/app/evidence_records.py. It blocks source snapshot proof.json, missing canonical evidence-record.json, FAILED/QUALITY_DROP runs, CHANGED records without diff, hash/path failures, and incomplete review/integrity fields. Passing canonical records return only evidence-backed brief input fields; no risk score or customer brief is generated."
+        },
+        {
+          "created_at": "2026-06-20T00:14:05Z",
+          "note": "QA found build_risk_brief_inputs was too permissive for review_status=pending. Coordinator added a regression test and changed the gate so customer brief inputs require canonical evidence validation plus review_status approved or not_required. Pending/blocked evidence records now return eligible=false. Production brief generation remains blocked until this gate is wired into delivery paths and canonical records are generated."
+        },
+        {
+          "created_at": "2026-06-20T00:20:21Z",
+          "note": "QA requested production-path enforcement. Coordinator added build_customer_audit_pack_export_response() and API customer_delivery=true wiring so customer-facing evidence exports must pass build_risk_brief_inputs. Regression tests prove source snapshot proof.json and pending canonical evidence are blocked, while approved canonical evidence can export. Canonical generator remains the next blocker before real customer briefs."
+        },
+        {
+          "created_at": "2026-06-20T00:23:37Z",
+          "note": "Final QA P2 follow-up: POST customer_delivery parsing now uses _truthy_param so string 'false' is not treated as true. Added test_api_customer_delivery_flag.py. API customer_delivery=true remains the explicit customer export gate."
+        },
+        {
+          "created_at": "2026-06-20T00:25:51Z",
+          "note": "Final QA PASS for production export gate integration. build_customer_audit_pack_export_response and API customer_delivery=true now force canonical evidence validation before customer-facing evidence export. Real customer briefs remain blocked until canonical-evidence-record-generator creates production records."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-19T21:31:28Z"
+      "updated_at": "2026-06-20T00:25:51Z"
     },
     {
       "task_id": "ruflo-safe-tooling-intake",

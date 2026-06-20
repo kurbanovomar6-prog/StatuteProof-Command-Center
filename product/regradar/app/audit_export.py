@@ -18,6 +18,7 @@ from typing import Any
 
 from app.config import DB_PATH
 from app.evidence_assessment import LEGAL_DISCLAIMER
+from app.evidence_records import build_risk_brief_inputs
 
 logger = logging.getLogger(__name__)
 
@@ -225,6 +226,48 @@ def build_audit_pack_export_response(
         "message": "Markdown/HTML audit pack exported.",
         "disclaimer": LEGAL_DISCLAIMER,
     }
+
+
+def build_customer_audit_pack_export_response(
+    evidence_record_id_or_path: str,
+    *,
+    export_format: str = "md_html",
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Export a customer-delivery audit pack only from canonical evidence."""
+
+    root = base_dir or _BASE_DIR
+    gate = build_risk_brief_inputs(evidence_record_id_or_path, base_dir=root)
+    if not gate.get("eligible"):
+        raise ValueError(f"Customer evidence export blocked: {gate.get('blocked_reason')}")
+
+    current_hash = str(gate.get("current_hash") or "")
+    normalized_hash = current_hash.removeprefix("sha256:")
+    canonical_record = {
+        "run_id": gate.get("run_id"),
+        "source_id": gate.get("source_id"),
+        "source_name": gate.get("source_name"),
+        "official_url": gate.get("official_url"),
+        "timestamp_utc": gate.get("run_timestamp"),
+        "change_status": gate.get("run_status"),
+        "extraction_quality": "CANONICAL_EVIDENCE",
+        "normalized_hash": normalized_hash,
+        "content_hash": normalized_hash,
+        "proof_block_path": gate.get("evidence_record_path"),
+        "diff_md_path": gate.get("diff_path"),
+    }
+    response = build_audit_pack_export_response(
+        canonical_record,
+        export_format=export_format,
+        base_dir=root,
+        demo=False,
+    )
+    response["customer_delivery"] = True
+    response["canonical_evidence_record_id"] = gate["evidence_record_id"]
+    response["evidence_record_id"] = gate["evidence_record_id"]
+    response["evidence_record_path"] = gate.get("evidence_record_path")
+    response["message"] = "Customer evidence export generated from a validated canonical evidence record."
+    return response
 
 
 def validate_date_range(date_from: str, date_to: str) -> tuple[bool, str]:

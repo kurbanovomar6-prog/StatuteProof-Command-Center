@@ -1138,6 +1138,133 @@ def test_dfsa_notice_listing_extracts_consultation_and_enforcement_links():
     assert "Contact" not in result.text
 
 
+def test_dfsa_publication_listing_adapter_extracts_publication_cards():
+    html = """
+    <html><body>
+      <header>
+        <a href="/login">Login</a>
+        <a href="/e-portal">E-Portal</a>
+        <a href="/">Go to Homepage</a>
+      </header>
+      <main>
+        <section class="publication-grid">
+          <article class="publication-card">
+            <h3>Annual Anti-Money Laundering Report 2025</h3>
+            <p>DFSA annual AML report for regulated firms, MLROs, sanctions controls, and financial crime governance.</p>
+            <time>12 June 2026</time>
+            <a href="/your-resources/publications-reports/annual-anti-money-laundering-reports">View Details</a>
+          </article>
+          <article class="publication-card">
+            <h3>Guidance Note on Cyber Risk Management</h3>
+            <p>Official DFSA guidance note for authorised firms and operational risk governance.</p>
+            <time>03 May 2026</time>
+            <a href="/your-resources/publications/guidance-notes/cyber-risk-management">Read More</a>
+          </article>
+          <article class="publication-card">
+            <h3>Policy Statement on Digital Finance</h3>
+            <p>Policy statement for financial services regulation, innovation testing, and regulatory supervision.</p>
+            <a href="/laws-rules/legal-resources/policy-statements/digital-finance">Open</a>
+          </article>
+        </section>
+      </main>
+      <footer><a href="/contact-us">Contact us</a></footer>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.dfsa.ae/your-resources/publications",
+        adapter_family="dfsa_publication_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "dfsa_publication_listing"
+    assert result.item_count == 3
+    assert "Annual Anti-Money Laundering Report 2025" in result.text
+    assert "Guidance Note on Cyber Risk Management" in result.text
+    assert "Policy Statement on Digital Finance" in result.text
+    assert "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports" in result.text
+    assert "https://www.dfsa.ae/login" not in result.text
+    assert "Go to Homepage" not in result.text
+    assert all(item.get("row_hash") for item in result.items)
+
+
+def test_dfsa_publication_listing_adapter_rejects_homepage_shell():
+    html = """
+    <html><body>
+      <header>
+        <a href="/">Go to Homepage</a>
+        <a href="/login">Login</a>
+        <a href="/about-us">About us</a>
+      </header>
+      <main>
+        <a href="/">Home</a>
+        <a href="/login">Login</a>
+        <a href="/contact-us">Contact</a>
+      </main>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.dfsa.ae/your-resources/publications",
+        adapter_family="dfsa_publication_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "dfsa_publication_listing"
+    assert result.item_count == 0
+    assert "DFSA publication" in result.failure_reason
+
+
+def test_source_intake_dfsa_publication_listing_stays_preview_only():
+    html = """
+    <html><body>
+      <header><a href="/login">Login</a><a href="/">Go to Homepage</a></header>
+      <main>
+        <article class="publication-card">
+          <h3>Annual Anti-Money Laundering Report 2025</h3>
+          <p>DFSA annual AML report for regulated firms, MLROs, suspicious activity reporting,
+          sanctions screening, customer due diligence, and financial crime governance.</p>
+          <a href="/your-resources/publications-reports/annual-anti-money-laundering-reports">View Details</a>
+        </article>
+        <article class="publication-card">
+          <h3>Guidance Note on Cyber Risk Management</h3>
+          <p>Official DFSA guidance note for authorised firms covering operational resilience,
+          cyber risk governance, systems, controls, and regulatory supervision.</p>
+          <a href="/your-resources/publications/guidance-notes/cyber-risk-management">Read More</a>
+        </article>
+        <article class="publication-card">
+          <h3>Policy Statement on Digital Finance</h3>
+          <p>Policy statement for financial services regulation, innovation testing,
+          fintech supervision, rulebook governance, and authorised firm obligations.</p>
+          <a href="/laws-rules/legal-resources/policy-statements/digital-finance">Open</a>
+        </article>
+      </main>
+    </body></html>
+    """
+    source = {
+        "source_id": "AE-dfsa-publications-test",
+        "name": "DFSA Publications Test",
+        "url": "https://www.dfsa.ae/your-resources/publications",
+        "adapter_family": "dfsa_publication_listing",
+        "adapter_name": "dfsa_publication_listing",
+        "adapter_config": {"container_selector": "main"},
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["adapter_used"] is True
+    assert result["adapter_family"] == "dfsa_publication_listing"
+    assert result["structured_adapter_content"] is True
+    assert result["can_save_for_validation"] is True
+    assert result["can_activate_monitoring"] is False
+    assert result["evidence_written"] is False
+
+
 def test_uae_legal_database_adapter_extracts_legislation_cards():
     html = """
     <html><body><main>

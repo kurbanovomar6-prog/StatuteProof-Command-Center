@@ -96,6 +96,13 @@ def _session_cookie_secure_for_host(host: str | None) -> bool:
     return True
 
 
+def _truthy_param(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().lower()
+    return normalized in {"1", "true", "yes", "on"}
+
+
 class _RateLimiter:
     """Small in-memory fixed-window limiter for MVP endpoint hardening."""
 
@@ -1065,7 +1072,12 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
         export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
-        self._write_evidence_export(evidence_id, export_format=export_format)
+        customer_delivery = _truthy_param((params.get("customer_delivery") or ["false"])[0])
+        self._write_evidence_export(
+            evidence_id,
+            export_format=export_format,
+            customer_delivery=customer_delivery,
+        )
 
     def _handle_reviews_queue_get(self) -> None:
         """GET /api/reviews/queue — saved evidence review queue."""
@@ -1109,12 +1121,31 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
         export_format = str(body.get("format") or "md_html").strip() or "md_html"
-        self._write_evidence_export(evidence_id, export_format=export_format)
+        customer_delivery = _truthy_param(body.get("customer_delivery"))
+        self._write_evidence_export(
+            evidence_id,
+            export_format=export_format,
+            customer_delivery=customer_delivery,
+        )
 
-    def _write_evidence_export(self, evidence_id: str, *, export_format: str = "md_html") -> None:
+    def _write_evidence_export(
+        self,
+        evidence_id: str,
+        *,
+        export_format: str = "md_html",
+        customer_delivery: bool = False,
+    ) -> None:
         try:
-            from app.audit_export import build_audit_pack_export_response
+            from app.audit_export import build_audit_pack_export_response, build_customer_audit_pack_export_response
             from app.evidence_assessment import find_evidence_record, latest_assessment_for
+
+            if customer_delivery:
+                response = build_customer_audit_pack_export_response(
+                    evidence_id,
+                    export_format=export_format,
+                )
+                self._send_json(response)
+                return
 
             record = find_evidence_record(evidence_id)
             assessment = latest_assessment_for(evidence_id)
