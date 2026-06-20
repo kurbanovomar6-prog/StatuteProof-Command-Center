@@ -488,6 +488,51 @@ class TableAdapter(BaseHtmlAdapter):
         )
 
 
+_SCA_ALLOWED_TOKENS = (
+    "decision",
+    "regulation",
+    "circular",
+    "rules",
+    "rule",
+    "procedure",
+    "law",
+    "aml",
+    "cft",
+    "market",
+    "chairman",
+    "fintech",
+    "virtual asset",
+    "passporting",
+    "fatca",
+    "crs",
+    "automatic exchange",
+    "exchange of information",
+    "cabinet resolution",
+    "reporting financial",
+    "intergovernmental agreement",
+    "residence by investment",
+    "citizenship by investment",
+)
+_SCA_TABLE_ACTION_TITLES = {
+    "download",
+    "download pdf",
+    "document",
+    "pdf",
+    "view",
+    "view details",
+}
+_SCA_TABLE_CATEGORY_TITLES = {
+    "circular",
+    "decision",
+    "document",
+    "procedure",
+    "regulation",
+    "regulations",
+    "rule",
+    "rules",
+}
+
+
 class ScaListingAdapter(ListingAdapter):
     family = "sca_listing"
     name = "sca_listing"
@@ -511,7 +556,9 @@ class ScaListingAdapter(ListingAdapter):
         result.adapter_family = self.family
         result.adapter_name = self.name
         result.extraction_strategy = f"adapter:{self.name}"
-        if result.items:
+        table_items = self._extract_table_download_items(html, url=url, config=cfg)
+        candidate_items = [*table_items, *result.items]
+        if candidate_items:
             by_title: dict[str, dict] = {}
 
             def _candidate_score(row: dict) -> int:
@@ -526,38 +573,14 @@ class ScaListingAdapter(ListingAdapter):
                     + min(len(context) // 120, 3)
                 )
 
-            for item in result.items:
+            for item in candidate_items:
                 title = item.get("title") or ""
                 item_url = item.get("url") or ""
                 context = item.get("raw_text_snippet") or ""
                 text = f"{title} {context}".lower()
                 if _is_noise_title(title):
                     continue
-                if not any(token in text for token in (
-                    "decision",
-                    "regulation",
-                    "circular",
-                    "rules",
-                    "rule",
-                    "procedure",
-                    "law",
-                    "aml",
-                    "cft",
-                    "market",
-                    "chairman",
-                    "fintech",
-                    "virtual asset",
-                    "passporting",
-                    "fatca",
-                    "crs",
-                    "automatic exchange",
-                    "exchange of information",
-                    "cabinet resolution",
-                    "reporting financial",
-                    "intergovernmental agreement",
-                    "residence by investment",
-                    "citizenship by investment",
-                )):
+                if not any(token in text for token in _SCA_ALLOWED_TOKENS):
                     continue
                 if not item.get("date"):
                     item["date"] = _extract_date(context)
@@ -582,6 +605,85 @@ class ScaListingAdapter(ListingAdapter):
                 result.failure_reason = "No SCA regulatory listing items were isolated."
                 result.remediation_hint = "Review rendered item selectors or official list data source."
         return result
+
+    def _extract_table_download_items(
+        self,
+        html: str,
+        *,
+        url: str,
+        config: dict,
+    ) -> list[dict]:
+        soup = _soup(html, config.get("exclude_selectors"))
+        container_selector = str(config.get("container_selector") or "main").strip()
+        container = soup.select_one(container_selector) if container_selector else soup
+        if not container:
+            container = soup.select_one("main") or soup.body or soup
+
+        items: list[dict] = []
+        for row in container.select("tr"):
+            cells = [_clean(cell.get_text(" ", strip=True), limit=260) for cell in row.select("td")]
+            cells = [cell for cell in cells if cell]
+            if len(cells) < 2:
+                continue
+            title = self._title_from_table_cells(cells)
+            if _is_noise_title(title):
+                continue
+            row_text = _node_text(row, separator=" ", limit=700)
+            combined = f"{title} {row_text}".casefold()
+            if not any(token in combined for token in _SCA_ALLOWED_TOKENS):
+                continue
+
+            item_url = self._first_table_href(row, url)
+            category = self._category_from_table_cells(cells, title)
+            item = {
+                "title": title,
+                "date": _extract_date(row_text),
+                "url": item_url,
+                "document_url": item_url if _DOCUMENT_EXT_RE.search(item_url) else "",
+                "category": category,
+                "raw_text_snippet": row_text,
+            }
+            item["row_hash"] = _row_hash(title, item.get("date"), item_url, category, row_text)
+            items.append(item)
+        return items
+
+    def _title_from_table_cells(self, cells: list[str]) -> str:
+        candidates: list[str] = []
+        for cell in cells:
+            folded = cell.casefold()
+            if _is_noise_title(cell):
+                continue
+            if folded in _SCA_TABLE_ACTION_TITLES or folded in _SCA_TABLE_CATEGORY_TITLES:
+                continue
+            if _extract_date(cell) == cell:
+                continue
+            candidates.append(cell)
+        if not candidates:
+            return ""
+        return max(
+            candidates,
+            key=lambda candidate: (
+                any(token in candidate.casefold() for token in _SCA_ALLOWED_TOKENS),
+                len(candidate),
+            ),
+        )
+
+    def _category_from_table_cells(self, cells: list[str], title: str) -> str:
+        for cell in cells:
+            folded = cell.casefold()
+            if cell == title:
+                continue
+            if folded in _SCA_TABLE_CATEGORY_TITLES:
+                return cell
+        return ""
+
+    def _first_table_href(self, row, base_url: str) -> str:
+        for anchor in row.select("a[href]"):
+            href = (anchor.get("href") or "").strip()
+            if not href or href.startswith(("#", "mailto:", "tel:", "javascript:", "javascipt:")):
+                continue
+            return urljoin(base_url, href)
+        return ""
 
 
 class RulebookModuleAdapter(BaseHtmlAdapter):

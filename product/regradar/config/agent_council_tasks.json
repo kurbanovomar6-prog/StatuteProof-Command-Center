@@ -307,7 +307,7 @@
     {
       "task_id": "sca-table-download-adapter",
       "title": "Build SCA table/download adapter",
-      "status": "accepted",
+      "status": "done",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Source Monitor",
@@ -340,9 +340,14 @@
       ],
       "blocker": "SCA regulations listing remained NAV_SHELL_ONLY in previous live probes.",
       "next_handoff_agent": "Source Monitor",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-20T07:52:44Z",
+          "note": "2026-06-20 weak-family sprint: TDD fixture added for SCA table/download rows; focused test failed before implementation with item_count=0, then passed after ScaListingAdapter table-row extraction. Adapter suite passed (49 passed) and SCA subset passed (7 passed). Controlled no-save for https://www.sca.gov.ae/en/regulations/regulations-listing returned NAV_SHELL_ONLY, quality_score=0, can_save_evidence=false, can_activate_monitoring=false, proof_path=null. No evidence saved, no MONITOR_OK, no source activation. Evidence Trail PASS on adapter/HOLD on activation; QA SHIP adapter/BLOCK live source. Next source task: investigate Playwright-rendered table/API path without bypassing access controls."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:03:12Z"
+      "updated_at": "2026-06-20T07:52:47Z"
     },
     {
       "task_id": "fiu-circulars-public-source-investigation",
@@ -381,9 +386,14 @@
       ],
       "blocker": "FIU circulars page remains nav-shell and public FIU universe appears small.",
       "next_handoff_agent": "Code Architect",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-20T07:52:58Z",
+          "note": "2026-06-20 weak-family sprint Source Monitor triage: UAE FIU remains 7 total / 5 fresh-alert / 1 candidate / 1 remediation. Active FIU sources are proof-backed; AE-uaefiu-circulars remains candidate/nav-shell and AE-uae-financial-intelligence-unit-uaefiu remains remediation/homepage. Do not count goAML/private/login content. Next no-save investigation should test public knowledge-centre circulars/notices or guidance subpaths only; duplicate Publications aliases must not be counted as new sources."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:03:12Z"
+      "updated_at": "2026-06-20T07:52:58Z"
     },
     {
       "task_id": "difc-consultation-listing-adapter",
@@ -461,9 +471,14 @@
       ],
       "blocker": "Only MoF publications hub is currently a fresh-alert source; generic homepage is excluded.",
       "next_handoff_agent": "Source Monitor",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-20T07:52:59Z",
+          "note": "2026-06-20 weak-family sprint Source Monitor triage: MoF remains 2 total / 1 fresh-alert / 1 evidence-library. AE-mof-publications-and-releases is the only MONITOR_OK fresh-alert source; AE-uae-ministry-of-finance remains evidence-library homepage. Next no-save candidates: financial-legislation and ESR public pages on mof.gov.ae; use official/public pages only and require proof/baseline/MONITOR_OK before any count change."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:03:12Z"
+      "updated_at": "2026-06-20T07:52:59Z"
     },
     {
       "task_id": "moj-gazette-official-alternative-research",
@@ -500,9 +515,14 @@
       ],
       "blocker": "MoJ/Gazette is 0/25 and current pages are nav-shell or WAF/access remediation.",
       "next_handoff_agent": "Code Architect",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-20T07:52:59Z",
+          "note": "2026-06-20 weak-family sprint Source Monitor triage: MoJ/Gazette remains 1 total / 0 fresh-alert / 1 remediation. AE-uae-legislation-portal remains WAF/nav-shell/access remediation; elaws.moj.gov.ae is disabled_external_access. Do not bypass WAF or geo/access controls. Next research should test official public moj.gov.ae ASPX legislation pages and any accessible official alternatives with no-save only."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:03:12Z"
+      "updated_at": "2026-06-20T07:52:59Z"
     },
     {
       "task_id": "canonical-evidence-record-generator",

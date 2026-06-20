@@ -524,6 +524,60 @@ def test_sca_listing_adapter_extracts_fatca_crs_document_links():
     assert "Search Services" not in result.text
 
 
+def test_sca_listing_adapter_extracts_table_download_rows():
+    html = """
+    <html><body>
+      <form id="aspnetForm">
+        <header>Services Search Login</header>
+        <main>
+          <table>
+            <thead>
+              <tr><th>Title</th><th>Type</th><th>Date</th><th>Document</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>The Chairman Decision No. (11/Chairman) of 2026 Concerning AML Controls</td>
+                <td>Decision</td>
+                <td>14 June 2026</td>
+                <td><a href="/assets/downloads/chairman-decision-11-2026.pdf">Download</a></td>
+              </tr>
+              <tr>
+                <td>Market Rules Approved by SCA for Licensed Markets</td>
+                <td>Rules</td>
+                <td>2025</td>
+                <td><a href="/assets/downloads/market-rules-approved-by-sca.pdf">View Details</a></td>
+              </tr>
+              <tr>
+                <td>Circular on the Annual General Assembly Meetings of Public Joint-Stock Companies for 2024</td>
+                <td>Circular</td>
+                <td>2024</td>
+                <td><a href="/assets/downloads/annual-general-assembly-circular.pdf">PDF</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </main>
+      </form>
+    </body></html>
+    """
+
+    result = extract_with_adapter(
+        html,
+        url="https://www.sca.gov.ae/en/regulations/regulations-listing",
+        adapter_family="sca_listing",
+        adapter_config={"container_selector": "main"},
+    )
+
+    assert result.adapter_name == "sca_listing"
+    assert result.item_count == 3
+    assert "The Chairman Decision No. (11/Chairman) of 2026" in result.text
+    assert "Market Rules Approved by SCA" in result.text
+    assert "Annual General Assembly Meetings" in result.text
+    assert "Services Search Login" not in result.text
+    assert "Title: Download" not in result.text
+    assert "Title: View Details" not in result.text
+    assert all(item.get("row_hash") for item in result.items)
+
+
 def test_dfsa_rulebook_adapter_extracts_module_titles_and_links():
     html = """
     <html><body><article>
