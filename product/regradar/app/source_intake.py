@@ -101,6 +101,13 @@ _GLOBAL_MIN_CHARS = 500
 _NAV_SHELL_LINE_RATIO = 0.65   # ratio of short lines that triggers nav-shell flag
 _NAV_SHELL_SHORT_WORDS = 8     # lines with < this many words count as "nav items"
 _NAV_SHELL_MAX_CHARS = 10_000  # above this char count, skip nav-shell check
+_ADAPTER_FALLBACK_SAFE_FAMILIES = {
+    "",
+    "static_html",
+    "custom_element",
+    "playwright_selector",
+    "rendered_dom_evidence",
+}
 
 # ── nav-shell detection ───────────────────────────────────────────────────────
 
@@ -183,7 +190,7 @@ def build_source_lab_contract(result: dict) -> dict:
         and not evidence_written
         and evidence_level == EvidenceLevel.PREVIEW_ONLY
     )
-    strict_save_gate = bool(result.get("can_save_evidence", True))
+    strict_save_gate = bool(result.get("can_save_evidence", False))
     can_save_for_validation = basic_save_condition and strict_save_gate
     can_activate_monitoring = (
         cert_status == "MONITORING_CERTIFIED"
@@ -440,6 +447,9 @@ def run_source_intake(
         "extraction_strategy": "",
         "adapter_metadata": {},
         "adapter_warnings": [],
+        "adapter_declared_and_failed": False,
+        "adapter_fallback_used": False,
+        "adapter_failure_reason": "",
         "dom_investigation": {},
         "normalized_preview": "",
         "legal_policy_status": "PUBLIC_SOURCE_ONLY",
@@ -646,6 +656,13 @@ def run_source_intake(
         else:
             from app.extractors import extract_best_text
             extracted = extract_best_text(html, url=url, content_selector=content_selector)
+            if adapter_result and not adapter_result.text:
+                result["adapter_declared_and_failed"] = bool(adapter_family or adapter_name)
+                result["adapter_fallback_used"] = bool(adapter_family or adapter_name)
+                result["adapter_failure_reason"] = (
+                    adapter_result.failure_reason
+                    or "Declared adapter returned no monitorable content."
+                )
         if isinstance(extracted, tuple):
             text = str(extracted[0] or "")
             result["extraction_method"] = str(extracted[1] or "")
@@ -661,7 +678,10 @@ def run_source_intake(
         result["errors"].append(f"Extraction failed: {exc}")
         text = ""
 
-    if not result.get("extraction_strategy"):
+    if result.get("adapter_fallback_used"):
+        fallback_method = result.get("extraction_method") or "generic"
+        result["extraction_strategy"] = f"generic_fallback:{fallback_method}"
+    elif not result.get("extraction_strategy"):
         result["extraction_strategy"] = result.get("extraction_method") or ""
 
     normalized_text = normalize_for_change_hash(text)
@@ -716,6 +736,11 @@ def run_source_intake(
 
     # ── 7. Status verdict ─────────────────────────────────────────────────────
     chars = result["chars_normalized"]
+    adapter_family_for_gate = str(result.get("adapter_family") or adapter_family or adapter_name or "").strip()
+    structured_adapter_fallback = bool(
+        result.get("adapter_fallback_used")
+        and adapter_family_for_gate not in _ADAPTER_FALLBACK_SAFE_FAMILIES
+    )
 
     if quality_report.get("policy_warnings"):
         result["status"] = SourceIntakeStatus.BLOCKED
@@ -745,6 +770,17 @@ def run_source_intake(
         result["status"] = SourceIntakeStatus.PDF_EXTRACTION_NEEDED
         result["failure_reason"] = "HTML text is thin but PDF text appears available."
         result["remediation_hint"] = "Add a PDF extraction path before activating monitoring."
+    elif structured_adapter_fallback:
+        result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
+        adapter_reason = result.get("adapter_failure_reason") or "Declared adapter returned no monitorable content."
+        result["failure_reason"] = (
+            "Declared adapter selector not found or did not extract monitorable content; "
+            f"generic fallback is preview-only. Adapter detail: {adapter_reason}"
+        )
+        result["remediation_hint"] = (
+            "Fix the adapter selector/config, verify a public structured endpoint, "
+            "or reclassify the source to a fallback-safe adapter family before evidence save."
+        )
     elif chars < expected_min:
         result["status"] = SourceIntakeStatus.QUALITY_DROP
         result["failure_reason"] = f"Normalized text length {chars} is below expected minimum {expected_min}."
@@ -938,6 +974,9 @@ def _write_intake_evidence(
         "adapter_name": result.get("adapter_name"),
         "adapter_version": result.get("adapter_version"),
         "extraction_strategy": result.get("extraction_strategy"),
+        "adapter_declared_and_failed": result.get("adapter_declared_and_failed"),
+        "adapter_fallback_used": result.get("adapter_fallback_used"),
+        "adapter_failure_reason": result.get("adapter_failure_reason"),
         "adapter_metadata": result.get("adapter_metadata"),
         "normalized_length": result.get("chars_normalized"),
         "warnings": result.get("errors", []),

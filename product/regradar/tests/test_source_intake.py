@@ -537,6 +537,67 @@ def test_intake_uses_extracted_dict_text_not_dict_repr():
     assert result["evidence_written"] is False
 
 
+def test_structured_adapter_failure_cannot_confirm_via_generic_fallback():
+    text = (
+        "Securities and Commodities Authority regulatory circulars for licensed "
+        "market participants, AML compliance, sanctions screening, investor "
+        "protection, market conduct rules, disclosure controls, supervisory "
+        "reporting, and enforcement decision monitoring. "
+    ) * 18
+    failed_adapter = MagicMock()
+    failed_adapter.text = ""
+    failed_adapter.adapter_family = "sca_listing"
+    failed_adapter.adapter_name = "sca_listing"
+    failed_adapter.adapter_version = "test"
+    failed_adapter.extraction_strategy = "adapter:sca_listing"
+    failed_adapter.failure_reason = "Table selector matched 0 rows."
+    failed_adapter.warnings = []
+    failed_adapter.as_metadata.return_value = {
+        "adapter_family": "sca_listing",
+        "adapter_name": "sca_listing",
+        "adapter_version": "test",
+        "extraction_strategy": "adapter:sca_listing",
+        "item_count": 0,
+        "warnings": [],
+        "failure_reason": "Table selector matched 0 rows.",
+        "remediation_hint": "Review table selector.",
+        "noise_risk": "medium",
+        "source_health_risk": "medium",
+        "metadata": {},
+    }
+    source = {
+        "source_id": "AE-sca-failed-adapter-fixture",
+        "url": "https://www.sca.gov.ae/en/open-data/violations-and-violators",
+        "adapter_family": "sca_listing",
+        "adapter_name": "sca_listing",
+        "adapter_config": {"container_selector": "main"},
+        "expected_min_length": 500,
+    }
+
+    html = "<html><body><main>" + ("Service shell content. " * 20) + "</main></body></html>"
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html), \
+         patch("app.dom_investigator.investigate_html", return_value={"nav_shell_risk": "low"}), \
+         patch("app.adapters.adapter_platform.extract_with_adapter", return_value=failed_adapter), \
+         patch("app.extractors.extract_best_text", return_value={
+             "text": text,
+             "method": "unit-generic",
+             "provider_used": "unit-generic",
+             "confidence": "high",
+         }):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["adapter_used"] is False
+    assert result["status"] == SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
+    assert result["can_save_for_validation"] is False
+    assert result["can_activate_monitoring"] is False
+    assert result["adapter_declared_and_failed"] is True
+    assert result["adapter_fallback_used"] is True
+    assert result["failure_reason"]
+    assert "adapter" in result["failure_reason"].lower()
+    assert result["extraction_strategy"].startswith("generic_fallback:")
+
+
 def test_readiness_summary_requires_hash_quality_and_proof():
     sources = [
         {
@@ -1015,6 +1076,7 @@ def test_source_lab_contract_separates_save_from_activation():
     result = {
         "status": SourceIntakeStatus.CONFIRMED_ACCESSIBLE,
         "evidence_written": False,
+        "can_save_evidence": True,
         "evidence_level": EvidenceLevel.PREVIEW_ONLY,
         "certification_status": CertificationStatus.TEST_PASSED,
         "certification": {
@@ -1029,6 +1091,29 @@ def test_source_lab_contract_separates_save_from_activation():
     assert contract["can_activate_monitoring"] is False
     assert contract["activation_readiness"] == "BASELINE_REQUIRED"
     assert contract["evidence_level"] == EvidenceLevel.PREVIEW_ONLY
+
+
+def test_source_lab_contract_defaults_missing_save_gate_closed():
+    """A caller that omits can_save_evidence must not get a default-open save gate."""
+    from app.source_intake import build_source_lab_contract
+    from app.source_certification import CertificationStatus, EvidenceLevel
+
+    result = {
+        "status": SourceIntakeStatus.CONFIRMED_ACCESSIBLE,
+        "evidence_written": False,
+        "evidence_level": EvidenceLevel.PREVIEW_ONLY,
+        "certification_status": CertificationStatus.TEST_PASSED,
+        "certification": {
+            "certification_status": CertificationStatus.TEST_PASSED,
+            "baseline_runs_completed": 0,
+            "baseline_runs_required": 2,
+        },
+    }
+    contract = build_source_lab_contract(result)
+
+    assert contract["can_save_for_validation"] is False
+    assert contract["can_save_evidence"] is False
+    assert contract["can_activate_monitoring"] is False
 
 
 def test_source_lab_contract_uses_certified_evidence_after_baseline():

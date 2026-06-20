@@ -72,10 +72,14 @@
         {
           "created_at": "2026-06-19T20:53:53Z",
           "note": "QA re-gate approved moving evidence-validator-hardening to done after including the new shared helper. Validators now require source_id, existing proof/normalized artifacts, complete proof fields, SHA-256 format, recomputed normalized hash, safe baseline parsing, daily metadata, baseline >= 2, alert_eligible, and MONITOR_OK."
+        },
+        {
+          "created_at": "2026-06-20T08:48:55Z",
+          "note": "Parser/adapter hardening sprint: Source Monitor + Evidence Trail + QA packets identified adapter-failure generic fallback and default-open save gate risks. Coordinator added TDD regressions and hardened source_intake so structured adapter fallback becomes NEEDS_SELECTOR_REVIEW with adapter provenance, and build_source_lab_contract defaults missing can_save_evidence closed. No sources activated; no MONITOR_OK added."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T20:53:53Z"
+      "updated_at": "2026-06-20T08:48:55Z"
     },
     {
       "task_id": "customer-claim-truth-cleanup",
