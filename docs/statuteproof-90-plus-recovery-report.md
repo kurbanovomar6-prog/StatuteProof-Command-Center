@@ -12,7 +12,7 @@ Honest internal score after this sprint: 64/100.
 
 Confidence: medium-high.
 
-This sprint materially improved the evidence and brief gates, but the product is not 80+ or 90+ yet. The remaining blockers are real: no production canonical evidence-record corpus, no completed real customer brief, no human review UI, no Stripe/payment conversion, no real paying customer evidence, and no production uptime/deployment automation.
+This sprint materially improved the evidence and brief gates, but the product is not 80+ or 90+ yet. A follow-up pass added a controlled canonical evidence generation CLI and created the first local production canonical evidence records from saved source runs. The remaining blockers are real: no approved production canonical evidence records, no completed real customer brief, no human review UI, no Stripe/payment conversion, no real paying customer evidence, and no production uptime/deployment automation.
 
 ## 3. Agents Launched
 
@@ -39,11 +39,12 @@ Usable handoff packets exchanged: 1.
 
 ## 5. P0 Blockers Remaining
 
-1. No production canonical evidence records were backfilled or committed.
+1. Local production canonical evidence records now exist, but all are pending review, are not committed to git, and none are customer brief-eligible.
 2. No real customer brief has completed the full production delivery path.
 3. No founder-facing human review UI was implemented in this sprint.
 4. Delivery approval remains explicit and blocked by default.
-5. 90+ GTM score is impossible without a real paying or design-partner pilot.
+5. One alert queue artifact was linked to a canonical evidence record in the local ignored data tree, but it remains `human_reviewed=false` and `delivery_approved=false`.
+6. 90+ GTM score is impossible without a real paying or design-partner pilot.
 
 ## 6. P1 Improvements Completed
 
@@ -55,16 +56,30 @@ Usable handoff packets exchanged: 1.
 2. Preflight orchestration:
    - Added `tools/run_statuteproof_preflight.py`.
    - Runs backend tests, compileall, source validators, parser validators, frontend build/lint/routes.
+   - Follow-up pass added `tools/validate_canonical_evidence_records.py` to the preflight suite.
    - No deployment, SSH, production sync, or secrets.
    - GitHub Actions workflow creation was attempted but could not be pushed because the current OAuth token lacks `workflow` scope.
 
 ## 7. Evidence Writer Status
 
-Implemented and fixture-tested.
+Implemented, fixture-tested, and now runnable through `tools/generate_canonical_evidence.py`.
 
-Canonical evidence records created in committed production data: 0.
+Canonical evidence records created from saved production source runs in this workspace: 11.
 
-Fixture tests create and validate canonical `evidence-record.json` packages under temporary test directories.
+Current local canonical evidence corpus:
+
+- 10 `FIRST_SEEN` records generated from current saved source runs.
+- 1 `CHANGED` SCA AML/CFT alert-run record generated for `AE-sca-aml-cft` / `intake-20260619T143025Z`.
+- All 11 records validate with `validate_evidence_record()`.
+- 0 records are brief-eligible because all remain `review_status=pending`.
+- The generated `product/regradar/evidence/` tree remains ignored runtime evidence data and was not staged, because raw official HTML snapshots can contain public page tokens and should not be written into git history without a redaction/private-storage policy.
+
+Fixture tests create and validate canonical `evidence-record.json` packages under temporary test directories. CLI tests cover dry-run behavior, explicit `--write`, blocked status skipping, and exact `--run-id` filtering.
+
+Generation reports:
+
+- `product/regradar/reports/canonical_evidence_generation_20260620T231331Z.md` created the 10 `FIRST_SEEN` records.
+- `product/regradar/reports/canonical_evidence_generation_20260620T231450Z.md` created the SCA `CHANGED` alert-run record.
 
 ## 8. End-to-End Brief Path Status
 
@@ -83,7 +98,7 @@ Not yet done:
 
 - no real customer brief delivered
 - no production review UI
-- no production evidence corpus
+- no approved production evidence corpus
 
 ## 9. FTA Consistency Status
 
@@ -148,6 +163,9 @@ Added/updated tests for:
 - forbidden legal phrase blocking
 - weekly brief exclusion without canonical evidence
 - operator-only failed-run health report
+- canonical evidence generation CLI dry-run/write behavior
+- exact source-run filtering before canonical evidence creation
+- canonical evidence corpus validator pass/fail behavior
 
 ## 15. Validation Results
 
@@ -166,6 +184,7 @@ Passed:
 - `python3 tools/validate_no_unvalidated_active_sources.py`
 - `python3 tools/validate_uae_source_pack.py`
 - `python3 tools/validate_fresh_signal_25_per_family.py`
+- `python3 tools/validate_canonical_evidence_records.py`
 - `python3 tools/agent_council.py list`
 - `git diff --check`
 - `python3 tools/run_statuteproof_preflight.py` -> added as local orchestrator; equivalent commands were run individually in this sprint
@@ -197,11 +216,11 @@ Frontend:
 
 ## 18. Next Exact Engineering Task
 
-Create a controlled command to generate canonical evidence records for 5-10 selected saved source runs, with dry-run mode, no overwrite, and a review report.
+Add a review-safe API/CLI path to approve or reject pending canonical evidence records and link approved records to alert drafts without enabling customer delivery by default.
 
 ## 19. Next Exact Evidence Task
 
-Evidence Trail review of the first real canonical evidence records created from production source snapshots.
+Evidence Trail review of the 11 production canonical evidence records created from saved source snapshots, including recomputed hash checks and confirmation that no pending record can enter a customer brief.
 
 ## 20. Next Exact Product Task
 

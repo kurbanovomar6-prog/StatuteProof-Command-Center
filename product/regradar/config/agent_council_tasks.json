@@ -598,9 +598,10 @@
       ],
       "validation_commands": [
         "python3 -m pytest product/regradar/tests -q",
-        "python3 tools/validate_fresh_signal_sources.py"
+        "python3 tools/validate_fresh_signal_sources.py",
+        "python3 tools/validate_canonical_evidence_records.py"
       ],
-      "blocker": "No canonical evidence-record.json package exists yet; source snapshot proof.json is monitoring evidence only.",
+      "blocker": "Production canonical evidence records now exist but remain pending review; next blocker is founder/Evidence Trail approval workflow before any customer brief use.",
       "next_handoff_agent": "Code Architect",
       "notes": [
         {
@@ -622,10 +623,14 @@
         {
           "created_at": "2026-06-20T22:35:32Z",
           "note": "90+ recovery sprint: implemented create_canonical_evidence_record() in evidence_records.py. Writer copies saved source-run artifacts out of data/source_snapshots into append-only evidence/{regulator}/{source_id}/{run_id}/, prefixes/recomputes sha256 hashes, rejects FAILED/QUALITY_DROP, missing proof, missing normalized paths, non-FIRST_SEEN records without previous normalized evidence, and hash mismatches. Fixture-backed tests create and validate canonical evidence-record.json; no mass production evidence backfill was run."
+        },
+        {
+          "created_at": "2026-06-20T23:20:00Z",
+          "note": "Follow-up after CTO re-audit v2: added tools/generate_canonical_evidence.py with dry-run default, explicit --write, --source-id/--run-id/--status/--limit filters, generation report output, and TDD coverage. Ran controlled local generation from saved source_runs/source_snapshots: 10 FIRST_SEEN records plus 1 SCA CHANGED alert-run record were created under ignored product/regradar/evidence/. All records remain review_status=pending and are not customer brief-eligible; raw evidence artifacts were not staged because official HTML snapshots can contain public page tokens and need a redaction/private-storage policy before git tracking."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-20T22:35:42Z"
+      "updated_at": "2026-06-20T23:20:00Z"
     },
     {
       "task_id": "evidence-record-validator",
@@ -659,9 +664,10 @@
       ],
       "validation_commands": [
         "python3 -m pytest product/regradar/tests -q",
-        "python3 tools/validate_fresh_signal_sources.py"
+        "python3 tools/validate_fresh_signal_sources.py",
+        "python3 tools/validate_canonical_evidence_records.py"
       ],
-      "blocker": "Requires schemas/evidence-record.schema.json and canonical evidence package contract.",
+      "blocker": "No validator blocker for current corpus; pending records still require human review before brief eligibility.",
       "next_handoff_agent": "Risk + Brief Pipeline",
       "notes": [
         {
@@ -687,10 +693,14 @@
         {
           "created_at": "2026-06-20T00:25:51Z",
           "note": "Final Evidence Trail/QA post-fix review PASS for scoped validator: blocks source_snapshots proof.json, unknown run.status, FAILED/QUALITY_DROP, missing CHANGED diff, pending review for customer brief inputs, and non-top-level evidence paths; recomputes current/previous normalized hashes."
+        },
+        {
+          "created_at": "2026-06-20T23:20:00Z",
+          "note": "Added tools/validate_canonical_evidence_records.py and included it in tools/run_statuteproof_preflight.py. Validator walks evidence/**/evidence-record.json, calls validate_evidence_record(), catches hash mismatches and malformed records, and passed on the current 11-record corpus."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-20T00:25:51Z"
+      "updated_at": "2026-06-20T23:20:00Z"
     },
     {
       "task_id": "risk-brief-eligibility-gate",
@@ -766,10 +776,14 @@
         {
           "created_at": "2026-06-20T22:35:32Z",
           "note": "90+ recovery sprint: wired canonical evidence into the weekly brief path. collect_approved_alerts() now excludes approved alerts that lack an eligible canonical evidence_record_id, and build_evidence_backed_brief_draft() creates non-delivery drafts only from approved canonical evidence after legal scan. Source snapshot proof alone remains blocked."
+        },
+        {
+          "created_at": "2026-06-20T23:20:00Z",
+          "note": "Post-generation gate check: 11 local production canonical evidence records validate, but 0 are brief-eligible because review_status remains pending. One ignored local alert_queue artifact was linked to evr_AE-sca-aml-cft_intake-20260619T143025Z while human_reviewed=false and delivery_approved=false remain in place."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-20T22:35:32Z"
+      "updated_at": "2026-06-20T23:20:00Z"
     },
     {
       "task_id": "ruflo-safe-tooling-intake",

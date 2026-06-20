@@ -61,6 +61,7 @@ product/**/__pycache__/
 product/**/.pytest_cache/
 product/**/.mypy_cache/
 product/**/.ruff_cache/
+tools/__pycache__/
 
 # Product runtime data (not source code)
 product/.cache/
@@ -69,6 +70,7 @@ product/.swarm/
 product/regradar/.claude/
 product/regradar/data/source_runs/*.jsonl
 product/regradar/data/source_snapshots/
+product/regradar/evidence/
 product/regradar/data/alert_queue/*.json
 product/regradar/data/alert_reviews/
 product/regradar/data/diagnostics/
