@@ -24,6 +24,7 @@ from app.alert_review import (
     review_alert,
 )
 from app.client_profiles import load_client_profile, score_alert_relevance, source_metadata_for_alert
+from app.evidence_records import build_risk_brief_inputs
 from app.source_runs import deduplicate_alerts
 from app.sources import load_sources
 _FULL_BRIEF_DISCLAIMER = (
@@ -171,11 +172,33 @@ def collect_approved_alerts(
             metadata = source_metadata_for_alert(alert)
             relevance = score_alert_relevance(alert, client_profile, metadata)
             alert["relevance"] = {"client_id": client_profile.get("client_id"), **relevance}
+        evidence_gate = _canonical_evidence_gate_for_alert(alert, base_dir=base_dir)
+        if not evidence_gate.get("eligible"):
+            logger.warning(
+                "BRIEF_EVIDENCE_HOLD alert_id=%s reason=%s",
+                alert.get("alert_id"),
+                evidence_gate.get("blocked_reason"),
+            )
+            continue
+        alert["canonical_evidence"] = evidence_gate
         alert["_effective_review_status"] = status
         alert["_effective_send_decision"] = decision
         rows.append(alert)
     rows.sort(key=lambda item: _risk_sort(item), reverse=True)
     return deduplicate_alerts(rows)
+
+
+def _canonical_evidence_gate_for_alert(alert: dict[str, Any], base_dir: Path | None = None) -> dict[str, Any]:
+    evidence_id = str(alert.get("evidence_record_id") or "").strip()
+    if not evidence_id:
+        return {
+            "eligible": False,
+            "blocked_reason": "Approved alert is missing canonical evidence_record_id.",
+        }
+    gate = build_risk_brief_inputs(evidence_id, base_dir=base_dir)
+    if not gate.get("eligible"):
+        return gate
+    return gate
 
 
 def build_weekly_brief(

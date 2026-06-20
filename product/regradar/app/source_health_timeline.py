@@ -79,6 +79,68 @@ def build_source_timeline(
     }
 
 
+def build_operator_source_health_report(
+    *,
+    base_dir: Path | None = None,
+    failed_threshold: int = 3,
+) -> dict[str, Any]:
+    """Build an operator-only report for sources that may have gone dark.
+
+    This function does not send notifications or produce customer-facing claims.
+    It gives the operator a deterministic list of sources needing manual review.
+    """
+
+    root = base_dir or _BASE_DIR
+    threshold = max(1, int(failed_threshold or 1))
+    by_source: dict[str, list[dict[str, Any]]] = {}
+    for run in _read_runs(root):
+        source_id = str(run.get("source_id") or "").strip()
+        if not source_id:
+            continue
+        by_source.setdefault(source_id, []).append(run)
+
+    alerts: list[dict[str, Any]] = []
+    for source_id, runs in sorted(by_source.items()):
+        consecutive_failed = 0
+        for run in reversed(runs):
+            if _operator_failed_status(run):
+                consecutive_failed += 1
+                continue
+            break
+        if consecutive_failed < threshold:
+            continue
+        latest = runs[-1]
+        alerts.append({
+            "operator_status": "OPERATOR_REVIEW_REQUIRED",
+            "source_id": source_id,
+            "source_name": latest.get("source_name") or source_id,
+            "official_url": latest.get("official_url") or latest.get("final_url") or "",
+            "latest_run_id": latest.get("run_id"),
+            "latest_run_at": latest.get("timestamp_utc") or latest.get("run_at") or "",
+            "latest_change_status": latest.get("change_status"),
+            "latest_extraction_quality": latest.get("extraction_quality"),
+            "consecutive_failed_runs": consecutive_failed,
+            "failed_threshold": threshold,
+            "blocked_reason": (
+                f"{consecutive_failed} consecutive failed or quality-drop source runs; "
+                "manual operator review required before relying on this source."
+            ),
+            "customer_safe_message": source_health_customer_message(_source_health_status(latest)),
+        })
+
+    return {
+        "ok": True,
+        "operator_only": True,
+        "external_send": False,
+        "customer_delivery": False,
+        "failed_threshold": threshold,
+        "sources_checked": len(by_source),
+        "sources_requiring_operator_review": len(alerts),
+        "alerts": alerts,
+        "disclaimer": LEGAL_DISCLAIMER,
+    }
+
+
 def build_evidence_review_history(
     evidence_record_id: str,
     *,
@@ -338,6 +400,13 @@ def _source_health_status(run: dict[str, Any]) -> str:
     if change == "CHANGED":
         return "HASH_DRIFT"
     return "MONITOR_OK"
+
+
+def _operator_failed_status(run: dict[str, Any]) -> bool:
+    change = str(run.get("change_status") or "").upper()
+    access = str(run.get("access_status") or "").lower()
+    quality = str(run.get("extraction_quality") or "").upper()
+    return change in {"FAILED", "QUALITY_DROP"} or quality == "FAILED" or access in {"failed", "restricted", "blocked"}
 
 
 def _timeline_status(source: dict[str, Any] | None, latest_run: dict[str, Any] | None, events: list[dict[str, Any]]) -> str:

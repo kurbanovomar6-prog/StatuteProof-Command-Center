@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from app.evidence_records import build_risk_brief_inputs
 from app.proof import DISCLAIMER
 
 
@@ -212,6 +213,64 @@ def build_alert_draft(
         "confidence": confidence,
         "limitations": limitations,
         "proof_block": proof_block,
+        "not_legal_advice_disclaimer": DISCLAIMER,
+    }
+
+
+def build_evidence_backed_brief_draft(
+    evidence_record_id_or_path: str,
+    *,
+    brief_fields: dict[str, Any],
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Build a non-delivery brief draft from approved canonical evidence only."""
+
+    gate = build_risk_brief_inputs(evidence_record_id_or_path, base_dir=base_dir)
+    if not gate.get("eligible"):
+        raise ValueError(f"Evidence-backed brief draft blocked: {gate.get('blocked_reason')}")
+
+    required = ("executive_summary", "business_action_required", "specific_obligation", "risk_level", "confidence")
+    missing = [key for key in required if not str(brief_fields.get(key) or "").strip()]
+    if missing:
+        raise ValueError("Evidence-backed brief draft missing required field(s): " + ", ".join(missing))
+
+    from app.weekly_brief import legal_scan_brief
+
+    legal_flags = legal_scan_brief(brief_fields)
+    if legal_flags:
+        raise ValueError("Evidence-backed brief draft blocked by legal scan: " + "; ".join(legal_flags))
+
+    evidence_record_id = str(gate.get("evidence_record_id") or "").strip()
+    source_id = str(gate.get("source_id") or "").strip()
+    run_id = str(gate.get("run_id") or "").strip()
+    seed = f"{evidence_record_id}|{source_id}|{run_id}"
+    draft_id = "brief-draft-" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:16]
+
+    return {
+        "brief_draft_id": draft_id,
+        "status": "DRAFT",
+        "customer_delivery": False,
+        "delivery_approved": False,
+        "delivery_blocked_reason": "Brief draft is not customer delivery; explicit delivery approval required.",
+        "evidence_record_id": evidence_record_id,
+        "evidence_record_path": gate.get("evidence_record_path"),
+        "source_id": source_id,
+        "source_name": gate.get("source_name"),
+        "official_url": gate.get("official_url"),
+        "run_id": run_id,
+        "run_status": gate.get("run_status"),
+        "run_timestamp": gate.get("run_timestamp"),
+        "current_hash": gate.get("current_hash"),
+        "previous_hash": gate.get("previous_hash"),
+        "diff_path": gate.get("diff_path"),
+        "review_status": gate.get("review_status"),
+        "human_review_required": gate.get("human_review_required"),
+        "executive_summary": str(brief_fields.get("executive_summary") or "").strip(),
+        "business_action_required": str(brief_fields.get("business_action_required") or "").strip(),
+        "specific_obligation": str(brief_fields.get("specific_obligation") or "").strip(),
+        "risk_level": str(brief_fields.get("risk_level") or "").strip(),
+        "confidence": brief_fields.get("confidence"),
+        "licence_scope": str(brief_fields.get("licence_scope") or "").strip(),
         "not_legal_advice_disclaimer": DISCLAIMER,
     }
 

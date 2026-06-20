@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.evidence_assessment import create_assessment
 from app.source_health_timeline import (
+    build_operator_source_health_report,
     build_evidence_review_history,
     build_source_timeline,
     source_health_customer_message,
@@ -157,6 +158,26 @@ class SourceHealthTimelineTests(unittest.TestCase):
             message = source_health_customer_message(status)
             self.assertNotIn("guaranteed", message.lower())
             self.assertNotIn("legal advice", message.lower())
+
+    def test_operator_health_report_flags_three_consecutive_failed_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            _write_sources(base)
+            _write_run(base, run_id="run-1", change_status="UNCHANGED")
+            _write_run(base, run_id="run-2", change_status="FAILED")
+            _write_run(base, run_id="run-3", change_status="FAILED")
+            _write_run(base, run_id="run-4", change_status="FAILED")
+
+            report = build_operator_source_health_report(base_dir=base, failed_threshold=3)
+
+            self.assertTrue(report["ok"])
+            self.assertEqual(report["operator_only"], True)
+            self.assertEqual(report["external_send"], False)
+            self.assertEqual(report["customer_delivery"], False)
+            self.assertEqual(report["sources_requiring_operator_review"], 1)
+            self.assertEqual(report["alerts"][0]["source_id"], "AE-test-source")
+            self.assertEqual(report["alerts"][0]["consecutive_failed_runs"], 3)
+            self.assertEqual(report["alerts"][0]["operator_status"], "OPERATOR_REVIEW_REQUIRED")
 
 
 if __name__ == "__main__":

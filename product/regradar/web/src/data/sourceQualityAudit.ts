@@ -89,7 +89,7 @@ export const FAMILY_QUALITY = [
     remediation: 0,
     status: 'strong_selected_source',
     gapTo25: 0,
-    notes: '25 official FTA tax sources are fresh-alert eligible.',
+    notes: '25 direct official FTA tax PDF endpoints are fresh-alert eligible. Broader FTA portal/listing extraction remains candidate/adapter work and is not counted as fresh-alert.',
   },
   {
     family: 'EOCN / sanctions / TFS',

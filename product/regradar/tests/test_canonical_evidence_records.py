@@ -7,7 +7,13 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.evidence_records import build_risk_brief_inputs, validate_evidence_record
+from app.evidence_records import (
+    EvidenceRecordError,
+    build_risk_brief_inputs,
+    create_canonical_evidence_record,
+    validate_evidence_record,
+)
+from app.alert_drafts import build_evidence_backed_brief_draft
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -109,6 +115,141 @@ def test_complete_canonical_evidence_record_is_brief_input_eligible(tmp_path):
     assert result["official_url"] == "https://www.dfsa.ae/example"
     assert result["diff_path"].endswith("diff.txt")
     assert result["current_hash"].startswith("sha256:")
+
+
+def _snapshot_run_record(base: Path, *, status: str = "FIRST_SEEN", bad_hash: bool = False) -> dict:
+    run_dir = base / "data" / "source_snapshots" / "2026-06-20" / "AE" / "AE-dfsa-writer-test" / "run-writer-001"
+    current_hash = _write(run_dir / "normalized.txt", "Current official DFSA writer text")
+    _write(run_dir / "raw.txt", "<main>Current official DFSA writer text</main>")
+    _write(run_dir / "metadata.json", json.dumps({"provider": "fixture"}, sort_keys=True))
+    _write(run_dir / "proof.json", json.dumps({"proof_quality": "LIMITED"}, sort_keys=True))
+    return {
+        "run_id": "run-writer-001",
+        "timestamp_utc": "2026-06-20T00:00:00Z",
+        "market": "AE",
+        "source_id": "AE-dfsa-writer-test",
+        "source_name": "DFSA Writer Test Source",
+        "category": "regulatory",
+        "official_url": "https://www.dfsa.ae/example",
+        "access_status": "accessible",
+        "fetch_method": "fixture",
+        "extraction_quality": "GOOD",
+        "change_status": status,
+        "normalized_hash": ("0" * 64 if bad_hash else current_hash),
+        "snapshot_raw_path": str((run_dir / "raw.txt").relative_to(base)),
+        "snapshot_normalized_path": str((run_dir / "normalized.txt").relative_to(base)),
+        "snapshot_metadata_path": str((run_dir / "metadata.json").relative_to(base)),
+        "proof_block_path": str((run_dir / "proof.json").relative_to(base)),
+    }
+
+
+def test_create_canonical_evidence_record_copies_saved_run_into_canonical_tree(tmp_path):
+    run = _snapshot_run_record(tmp_path)
+
+    record = create_canonical_evidence_record(run, base_dir=tmp_path)
+    validation = validate_evidence_record(record, base_dir=tmp_path)
+    gate = build_risk_brief_inputs(record["record_id"], base_dir=tmp_path)
+
+    assert validation["valid"] is True
+    assert gate["eligible"] is False
+    assert "review_status" in gate["blocked_reason"]
+    assert record["record_status"] == "complete"
+    assert record["review"]["review_status"] == "pending"
+    assert record["content"]["current_hash"].startswith("sha256:")
+    assert "source_snapshots" not in record["files"]["normalized_path"]
+    assert (tmp_path / "evidence" / "dfsa" / "AE-dfsa-writer-test" / "run-writer-001" / "evidence-record.json").exists()
+
+
+def test_create_canonical_evidence_record_rejects_hash_mismatch(tmp_path):
+    run = _snapshot_run_record(tmp_path, bad_hash=True)
+
+    with pytest.raises(EvidenceRecordError) as exc:
+        create_canonical_evidence_record(run, base_dir=tmp_path)
+
+    assert "normalized_hash does not match" in str(exc.value)
+
+
+@pytest.mark.parametrize("bad_status", ["FAILED", "QUALITY_DROP"])
+def test_create_canonical_evidence_record_rejects_blocked_run_status(tmp_path, bad_status):
+    run = _snapshot_run_record(tmp_path, status=bad_status)
+
+    with pytest.raises(EvidenceRecordError) as exc:
+        create_canonical_evidence_record(run, base_dir=tmp_path)
+
+    assert bad_status in str(exc.value)
+
+
+def test_create_canonical_evidence_record_rejects_run_without_snapshot_proof(tmp_path):
+    run = _snapshot_run_record(tmp_path)
+    (tmp_path / run["proof_block_path"]).unlink()
+
+    with pytest.raises(EvidenceRecordError) as exc:
+        create_canonical_evidence_record(run, base_dir=tmp_path)
+
+    assert "proof" in str(exc.value).lower()
+
+
+def test_evidence_backed_brief_draft_requires_approved_canonical_record(tmp_path):
+    run = _snapshot_run_record(tmp_path)
+    record = create_canonical_evidence_record(run, base_dir=tmp_path)
+
+    with pytest.raises(ValueError) as exc:
+        build_evidence_backed_brief_draft(
+            record["record_id"],
+            brief_fields={
+                "executive_summary": "Official-source monitoring detected a relevant update.",
+                "business_action_required": "Review the official source and evidence record.",
+                "specific_obligation": "No specific obligation is asserted by this draft.",
+                "risk_level": "MEDIUM",
+                "confidence": "medium",
+            },
+            base_dir=tmp_path,
+        )
+
+    assert "review_status" in str(exc.value)
+
+
+def test_evidence_backed_brief_draft_is_not_customer_delivery(tmp_path):
+    run = _snapshot_run_record(tmp_path)
+    record = create_canonical_evidence_record(run, base_dir=tmp_path, review_status="approved")
+
+    draft = build_evidence_backed_brief_draft(
+        record["record_id"],
+        brief_fields={
+            "executive_summary": "Official-source monitoring detected a relevant update.",
+            "business_action_required": "Review the official source and evidence record.",
+            "specific_obligation": "No specific obligation is asserted by this draft.",
+            "risk_level": "MEDIUM",
+            "confidence": "medium",
+        },
+        base_dir=tmp_path,
+    )
+
+    assert draft["evidence_record_id"] == record["record_id"]
+    assert draft["customer_delivery"] is False
+    assert draft["delivery_approved"] is False
+    assert "explicit delivery approval required" in draft["delivery_blocked_reason"].lower()
+    assert "not legal advice" in draft["not_legal_advice_disclaimer"].lower()
+
+
+def test_evidence_backed_brief_draft_blocks_forbidden_claims(tmp_path):
+    run = _snapshot_run_record(tmp_path)
+    record = create_canonical_evidence_record(run, base_dir=tmp_path, review_status="approved")
+
+    with pytest.raises(ValueError) as exc:
+        build_evidence_backed_brief_draft(
+            record["record_id"],
+            brief_fields={
+                "executive_summary": "This update will guarantee compliance.",
+                "business_action_required": "Review the official source and evidence record.",
+                "specific_obligation": "No specific obligation is asserted by this draft.",
+                "risk_level": "MEDIUM",
+                "confidence": "medium",
+            },
+            base_dir=tmp_path,
+        )
+
+    assert "FORBIDDEN phrase" in str(exc.value)
 
 
 def test_pending_review_canonical_record_is_not_customer_brief_eligible(tmp_path):

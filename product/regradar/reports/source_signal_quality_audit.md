@@ -43,7 +43,7 @@ These are monitoring-truth counts, not legal completeness claims.
 - DIFC: DIFC has 10 fresh-alert sources. Individual static whats-on pages remain evidence-library.
 - ADGM/FSRA: ADGM/FSRA has 10 fresh-alert sources. Three candidate rows still need selector or registry reconciliation before activation.
 - Ministry of Economy / DNFBP AML: 42 MoE/DNFBP AML sources are fresh-alert eligible, plus one evidence-library homepage.
-- FTA / Tax: 25 official FTA tax sources are fresh-alert eligible.
+- FTA / Tax: 25 direct official FTA tax PDF endpoints are fresh-alert eligible. Broader FTA portal/listing extraction remains candidate/adapter work and is not counted as fresh-alert.
 - EOCN / sanctions / TFS: 25 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN/UAEIEC and MoE-owned TFS support. This is not complete sanctions coverage.
 - SCA: SCA has 5 proof-backed fresh-alert sources. The broader SCA family remains below Strong until more official sources reach MONITOR_OK.
 - UAE FIU: UAE FIU has 6 fresh-alert sources after adding proof-backed system guides. FIU circulars remain candidate/held and the homepage remains remediation.

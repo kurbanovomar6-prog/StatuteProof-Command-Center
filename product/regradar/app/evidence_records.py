@@ -10,6 +10,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +25,165 @@ _NON_BRIEF_PROOF_NAMES = {"proof.json"}
 
 class EvidenceRecordError(ValueError):
     """Raised when an input is not a canonical evidence record."""
+
+
+def create_canonical_evidence_record(
+    run_record: dict[str, Any],
+    previous_run: dict[str, Any] | None = None,
+    *,
+    base_dir: Path | None = None,
+    review_status: str = "pending",
+    human_review_required: bool = True,
+    review_reason: str = "Customer-facing brief requires human review.",
+) -> dict[str, Any]:
+    """Create an append-only canonical evidence record from a saved source run.
+
+    Source snapshot proof is an input to this function, not the customer-facing
+    evidence object. The writer copies verified artifacts into the canonical
+    ``evidence/`` tree and rejects incomplete, failed, no-proof, or hash-mismatch
+    runs before any risk-brief gate can consume them.
+    """
+
+    root = Path(base_dir) if base_dir is not None else _BASE_DIR
+    if not isinstance(run_record, dict):
+        raise EvidenceRecordError("run_record must be a JSON object.")
+
+    run_status = _run_status(run_record)
+    if run_status in _BLOCKED_RUN_STATUSES:
+        raise EvidenceRecordError(f"Run status {run_status} is not eligible for canonical evidence.")
+    if run_status not in {"FIRST_SEEN", "UNCHANGED", "CHANGED"}:
+        raise EvidenceRecordError(f"Run status {run_status or '<missing>'} is not eligible for canonical evidence.")
+
+    run_id = _required_run_text(run_record, "run_id")
+    source_id = _required_run_text(run_record, "source_id")
+    source_name = _required_run_text(run_record, "source_name")
+    official_url = _required_run_text(run_record, "official_url")
+    timestamp = str(run_record.get("timestamp_utc") or run_record.get("run_at") or run_record.get("timestamp") or "").strip()
+    if not timestamp:
+        raise EvidenceRecordError("timestamp_utc is required for canonical evidence.")
+
+    proof_path = _resolve_input_artifact(run_record.get("proof_block_path"), root, "proof_block_path")
+    if proof_path.name != "proof.json":
+        raise EvidenceRecordError("proof_block_path must point to a saved source snapshot proof.json.")
+
+    raw_input = _resolve_input_artifact(run_record.get("snapshot_raw_path"), root, "snapshot_raw_path")
+    current_input = _resolve_input_artifact(
+        run_record.get("snapshot_normalized_path"),
+        root,
+        "snapshot_normalized_path",
+    )
+    metadata_input = _resolve_input_artifact(
+        run_record.get("snapshot_metadata_path"),
+        root,
+        "snapshot_metadata_path",
+    )
+
+    expected_current_hash = _normalize_sha256(run_record.get("normalized_hash"), "normalized_hash")
+    actual_current_hash = _sha256_path(current_input)
+    if expected_current_hash != f"sha256:{actual_current_hash}":
+        raise EvidenceRecordError("normalized_hash does not match snapshot_normalized_path.")
+
+    if run_status != "FIRST_SEEN" and previous_run is None:
+        previous_run = _find_previous_evidence_run(run_record, root)
+    previous_input: Path | None = None
+    previous_hash = ""
+    if run_status != "FIRST_SEEN":
+        if previous_run is None:
+            raise EvidenceRecordError("previous_run is required for non-FIRST_SEEN canonical evidence.")
+        previous_input = _resolve_input_artifact(
+            previous_run.get("snapshot_normalized_path"),
+            root,
+            "previous_run.snapshot_normalized_path",
+        )
+        previous_hash = f"sha256:{_sha256_path(previous_input)}"
+        expected_previous_hash = previous_run.get("normalized_hash")
+        if expected_previous_hash and _normalize_sha256(expected_previous_hash, "previous_run.normalized_hash") != previous_hash:
+            raise EvidenceRecordError("previous_run.normalized_hash does not match previous normalized snapshot.")
+
+    regulator_slug, regulator_name = _regulator_for_run(run_record)
+    record_dir = root / "evidence" / regulator_slug / source_id / run_id
+    record_path = record_dir / "evidence-record.json"
+    if record_path.exists():
+        raise EvidenceRecordError(f"Canonical evidence record already exists: {_relative_or_absolute(record_path, root)}")
+    if record_dir.exists() and any(record_dir.iterdir()):
+        raise EvidenceRecordError(f"Canonical evidence record directory is not empty: {_relative_or_absolute(record_dir, root)}")
+
+    try:
+        record_dir.mkdir(parents=True, exist_ok=False)
+        raw_path = _copy_artifact(raw_input, record_dir / "raw.txt")
+        snapshot_path = _copy_artifact(raw_input, record_dir / "snapshot.txt")
+        current_path = _copy_artifact(current_input, record_dir / "current.normalized.txt")
+        metadata_path = _copy_artifact(metadata_input, record_dir / "metadata.json")
+        previous_path = _copy_artifact(previous_input, record_dir / "previous.normalized.txt") if previous_input else None
+        diff_path, lines_added, lines_removed = _canonical_diff_artifact(
+            run_record=run_record,
+            previous_path=previous_path,
+            current_path=current_path,
+            record_dir=record_dir,
+            root=root,
+        )
+
+        record = {
+            "schema_version": "2.0",
+            "record_id": _canonical_record_id(source_id, run_id),
+            "record_status": "complete",
+            "source": {
+                "source_id": source_id,
+                "regulator": regulator_name,
+                "official_url": official_url,
+                "source_name": source_name,
+            },
+            "run": {
+                "run_id": run_id,
+                "timestamp": timestamp,
+                "status": run_status,
+            },
+            "content": {
+                "current_hash": f"sha256:{_sha256_path(current_path)}",
+                "raw_content_path": _relative_or_absolute(raw_path, root),
+                "normalized_current_path": _relative_or_absolute(current_path, root),
+            },
+            "change": {
+                "summary": _change_summary(run_record, run_status),
+                "lines_added": lines_added,
+                "lines_removed": lines_removed,
+            },
+            "files": {
+                "snapshot_path": _relative_or_absolute(snapshot_path, root),
+                "raw_path": _relative_or_absolute(raw_path, root),
+                "normalized_path": _relative_or_absolute(current_path, root),
+                "metadata_path": _relative_or_absolute(metadata_path, root),
+            },
+            "integrity": {
+                "hash_verified": True,
+                "integrity_status": "VERIFIED",
+                "verified_at": _utc_now(),
+            },
+            "review": {
+                "human_review_required": bool(human_review_required),
+                "review_status": str(review_status or "").strip() or "pending",
+                "review_reason": str(review_reason or "").strip() or "Customer-facing brief requires human review.",
+            },
+        }
+        if previous_path is not None:
+            record["content"]["previous_hash"] = previous_hash
+            record["content"]["normalized_previous_path"] = _relative_or_absolute(previous_path, root)
+            record["files"]["previous_path"] = _relative_or_absolute(previous_path, root)
+        if diff_path is not None:
+            rel_diff = _relative_or_absolute(diff_path, root)
+            record["change"]["diff_path"] = rel_diff
+            record["files"]["diff_path"] = rel_diff
+
+        validation = validate_evidence_record(record, base_dir=root)
+        if not validation["valid"]:
+            raise EvidenceRecordError("; ".join(validation["errors"]))
+        record_path.write_text(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    except Exception:
+        if record_dir.exists() and not record_path.exists():
+            shutil.rmtree(record_dir)
+        raise
+
+    return record
 
 
 def validate_evidence_record(record: dict[str, Any], base_dir: Path | None = None) -> dict[str, Any]:
@@ -266,6 +427,174 @@ def _require_path(
         errors.append(f"{label} is required.")
         return None
     return _resolve_existing_path(value, root, errors, label)
+
+
+def _required_run_text(record: dict[str, Any], key: str) -> str:
+    value = str(record.get(key) or "").strip()
+    if not value:
+        raise EvidenceRecordError(f"{key} is required for canonical evidence.")
+    return value
+
+
+def _run_status(record: dict[str, Any]) -> str:
+    return str(record.get("change_status") or record.get("status") or "").strip()
+
+
+def _normalize_sha256(value: Any, label: str) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        raise EvidenceRecordError(f"{label} is required for canonical evidence.")
+    if re.fullmatch(r"[a-f0-9]{64}", text):
+        text = f"sha256:{text}"
+    if not _SHA256_RE.match(text):
+        raise EvidenceRecordError(f"{label} must be sha256:<64 lowercase hex>.")
+    return text
+
+
+def _resolve_input_artifact(value: Any, root: Path, label: str) -> Path:
+    text = str(value or "").strip()
+    if not text:
+        raise EvidenceRecordError(f"{label} is required for canonical evidence.")
+    path = _safe_resolve(Path(text), root)
+    if not path.exists():
+        raise EvidenceRecordError(f"{label} does not exist: {text}")
+    if path.is_dir():
+        raise EvidenceRecordError(f"{label} must be a file: {text}")
+    return path
+
+
+def _copy_artifact(src: Path | None, dst: Path) -> Path:
+    if src is None:
+        raise EvidenceRecordError(f"Cannot copy missing artifact to {dst.name}.")
+    if dst.exists():
+        raise EvidenceRecordError(f"Canonical evidence artifact already exists: {dst.name}")
+    shutil.copyfile(src, dst)
+    return dst
+
+
+def _regulator_for_run(record: dict[str, Any]) -> tuple[str, str]:
+    explicit = str(record.get("regulator") or record.get("family") or "").strip()
+    source_id = str(record.get("source_id") or "").lower()
+    source_name = str(record.get("source_name") or "").lower()
+    haystack = f"{explicit.lower()} {source_id} {source_name}"
+    mapping = [
+        ("cbuae", "CBUAE"),
+        ("central-bank", "CBUAE"),
+        ("vara", "VARA"),
+        ("dfsa", "DFSA"),
+        ("adgm-fsra", "ADGM FSRA"),
+        ("fsra", "ADGM FSRA"),
+        ("adgm", "ADGM"),
+        ("difc", "DIFC"),
+        ("fiu", "UAE FIU"),
+        ("uaefiu", "UAE FIU"),
+        ("mof", "UAE Ministry of Finance"),
+        ("finance", "UAE Ministry of Finance"),
+        ("sca", "SCA"),
+        ("fta", "FTA"),
+        ("tax", "FTA"),
+        ("moj", "UAE Ministry of Justice"),
+        ("gazette", "UAE Gazette"),
+        ("eocn", "EOCN"),
+    ]
+    for token, name in mapping:
+        if token in haystack:
+            return _slugify(name), name
+    if explicit:
+        return _slugify(explicit), explicit
+    market = str(record.get("market") or record.get("jurisdiction") or "unknown").strip().upper() or "UNKNOWN"
+    return market.lower(), market
+
+
+def _slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or "unknown"
+
+
+def _canonical_record_id(source_id: str, run_id: str) -> str:
+    seed = re.sub(r"[^A-Za-z0-9_.:-]+", "_", f"{source_id}_{run_id}").strip("_")
+    return f"evr_{seed}"
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def _change_summary(record: dict[str, Any], run_status: str) -> str:
+    if str(record.get("change_summary") or "").strip():
+        return str(record["change_summary"]).strip()
+    if str(record.get("limitations_notes") or "").strip():
+        return str(record["limitations_notes"]).strip()
+    if run_status == "FIRST_SEEN":
+        return "First saved official-source snapshot captured for canonical evidence review."
+    if run_status == "UNCHANGED":
+        return "Saved official-source snapshot matched the previous normalized content."
+    return "Saved official-source snapshot changed against the previous normalized content."
+
+
+def _canonical_diff_artifact(
+    *,
+    run_record: dict[str, Any],
+    previous_path: Path | None,
+    current_path: Path,
+    record_dir: Path,
+    root: Path,
+) -> tuple[Path | None, int, int]:
+    run_status = _run_status(run_record)
+    if run_status != "CHANGED":
+        return None, 0, 0
+
+    existing_diff = str(run_record.get("diff_md_path") or run_record.get("diff_json_path") or "").strip()
+    diff_path = record_dir / "diff.txt"
+    if existing_diff:
+        copied = _copy_artifact(_resolve_input_artifact(existing_diff, root, "diff_path"), diff_path)
+        text = copied.read_text(encoding="utf-8", errors="replace")
+    else:
+        if previous_path is None:
+            raise EvidenceRecordError("CHANGED canonical evidence requires previous normalized text.")
+        previous_lines = previous_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        current_lines = current_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        import difflib
+
+        diff_lines = list(
+            difflib.unified_diff(
+                previous_lines,
+                current_lines,
+                fromfile="previous.normalized.txt",
+                tofile="current.normalized.txt",
+                lineterm="",
+            )
+        )
+        text = "\n".join(diff_lines) + "\n"
+        diff_path.write_text(text, encoding="utf-8")
+    lines_added = sum(1 for line in text.splitlines() if line.startswith("+") and not line.startswith("+++"))
+    lines_removed = sum(1 for line in text.splitlines() if line.startswith("-") and not line.startswith("---"))
+    return diff_path, lines_added, lines_removed
+
+
+def _find_previous_evidence_run(record: dict[str, Any], root: Path) -> dict[str, Any] | None:
+    run_file = root / "data" / "source_runs" / "source_runs.jsonl"
+    if not run_file.exists():
+        return None
+    source_id = str(record.get("source_id") or "")
+    run_id = str(record.get("run_id") or "")
+    rows: list[dict[str, Any]] = []
+    for line in run_file.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if parsed.get("source_id") == source_id:
+            rows.append(parsed)
+    previous: dict[str, Any] | None = None
+    for row in rows:
+        if row.get("run_id") == run_id:
+            break
+        if row.get("change_status") not in _BLOCKED_RUN_STATUSES and row.get("snapshot_normalized_path"):
+            previous = row
+    return previous
 
 
 def _resolve_existing_path(value: str, root: Path, errors: list[str], label: str) -> Path | None:

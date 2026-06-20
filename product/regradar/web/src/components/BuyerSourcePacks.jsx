@@ -25,7 +25,7 @@ const PACKS = [
       { text: 'UAE Ministry of Finance policy updates', status: 'active' },
       { text: 'UAE Legislation Portal federal law updates', status: 'pending' },
     ],
-    caveat: 'FTA clarifications require item-level review before activation.',
+    caveat: 'Direct FTA tax PDFs are active in the tax pack; broader FTA portal/listing extraction remains item-level adapter work.',
   },
   {
     profile: 'DIFC / DFSA',
@@ -72,12 +72,12 @@ const PACKS = [
     coverage: 'partial',
     layers: [
       { text: 'UAE Ministry of Finance policy updates', status: 'active' },
+      { text: 'Direct official tax PDF decisions, guides and clarifications', status: 'active' },
       { text: 'UAE Legislation Portal federal law updates', status: 'pending' },
-      { text: 'FTA — all tax legislation listing', status: 'pending' },
-      { text: 'FTA — VAT guides, references and clarifications', status: 'pending' },
-      { text: 'FTA — Corporate Tax guides and media centre', status: 'pending' },
+      { text: 'FTA — all tax legislation portal/listing extraction', status: 'pending' },
+      { text: 'FTA — VAT and Corporate Tax listing-page item extraction', status: 'pending' },
     ],
-    caveat: 'FTA sub-pages are public candidates, but the current extraction returns nav-shell/title-only content. They are not counted as fresh-alert eligible until item-level extraction passes proof and baseline gates.',
+    caveat: '25 direct official FTA PDF endpoints are fresh-alert eligible. Broader FTA sub-pages/listings are not counted until item-level extraction passes proof and baseline gates.',
   },
   {
     profile: 'Data Protection',

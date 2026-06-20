@@ -4,7 +4,7 @@ const ACTIVE_SOURCES = [
   { source: 'CBUAE Main',                             publishes: 'Central bank notices, licensing and supervisory updates',                     note: null },
   { source: 'CBUAE Regulations',                      publishes: 'CBUAE regulations and standards listing',                                     note: 'Noise filter applied before alert delivery' },
   { source: 'CBUAE Rulebook — multiple modules',      publishes: 'AML/CFT, Consumer Protection, Open Finance, Payment Token, Risk Management',  note: null },
-  { source: 'UAE Ministry of Finance',                publishes: 'Financial policy notices and public ministry publications',                    note: null },
+  { source: 'MoF + FTA direct tax PDFs',               publishes: 'MoF financial publications plus direct FTA tax PDF decisions, guides and clarifications', note: 'Broader FTA portal/listing extraction remains roadmap' },
   { source: 'VARA Main + Rulebook revision updates',  publishes: 'VASP licensing, rulebook updates, guidance notes, revision history',          note: null },
   { source: 'VARA Enforcement Notices',               publishes: 'VASP enforcement actions and regulatory decisions',                            note: null },
   { source: 'VARA Rulebook PDFs (6 modules)',         publishes: 'Compliance, Technology, VA Issuance, Broker-Dealer, Lending, Regulations',    note: null },
@@ -34,8 +34,8 @@ const CAVEAT_SOURCES = [
     why: 'The FIU homepage is a navigation shell, not a document listing. FIU annual reports, press releases, typology reports, AML/CFT laws, and publications hub have fresh-alert coverage; FIU circulars remain candidate/nav-shell.',
   },
   {
-    source: 'FTA Main Portal (tax.gov.ae)',
-    why: 'The FTA main portal and five tested FTA sub-pages are public candidates, but current extraction returns nav-shell/title-only content. They are not fresh-alert eligible until item-level extraction passes proof, repeat baseline, and MONITOR_OK gates.',
+    source: 'FTA Main Portal and listing pages (tax.gov.ae)',
+    why: '25 direct official FTA tax PDF endpoints are fresh-alert eligible. The FTA main portal and tested listing/sub-pages are not separately counted as fresh-alert because portal/listing extraction still needs item-level proof, repeat baseline, and MONITOR_OK gates.',
   },
   {
     source: 'Capital Markets Authority (former SCA)',
@@ -67,7 +67,7 @@ const NOT_AVAILABLE_SOURCES = [
 ]
 
 const ROADMAP_SOURCES = [
-  { source: 'FTA item-level legislation and guide listings', profile: 'Tax advisers, corporate finance and legal teams' },
+  { source: 'FTA item-level portal/listing extraction beyond direct PDFs', profile: 'Tax advisers, corporate finance and legal teams' },
   { source: 'ADGM FSRA dedicated regulatory-alerts listing', profile: 'ADGM regulated firms and securities teams' },
   { source: 'DMCC regulatory notices',            profile: 'DMCC member firms and commodity traders' },
   { source: 'Insurance Authority supervision',    profile: 'Insurance, insurtech, law firms' },

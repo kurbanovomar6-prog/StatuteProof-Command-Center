@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 import sys
@@ -45,11 +46,86 @@ def _write_profile(base: Path):
     (data / "client_profiles.example.json").write_text(json.dumps({"uae_vasp_demo": _profile()}), encoding="utf-8")
 
 
-def _write_alert(base: Path, idx: str, status: str, decision: str, source: str = "VARA"):
+def _write(path: Path, text: str) -> str:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _write_canonical_evidence(base: Path, idx: str, *, review_status: str = "approved") -> str:
+    record_dir = base / "evidence" / "vara" / f"AE-{idx}" / "run-1"
+    current_hash = _write(record_dir / "current.normalized.txt", "Current official VARA alert evidence")
+    previous_hash = _write(record_dir / "previous.normalized.txt", "Previous official VARA alert evidence")
+    _write(record_dir / "raw.txt", "<main>Current official VARA alert evidence</main>")
+    _write(record_dir / "snapshot.txt", "<html><main>Current official VARA alert evidence</main></html>")
+    _write(record_dir / "metadata.json", json.dumps({"provider": "fixture"}, sort_keys=True))
+    _write(record_dir / "diff.txt", "- Previous official VARA alert evidence\n+ Current official VARA alert evidence\n")
+    record = {
+        "schema_version": "2.0",
+        "record_id": f"evr_weekly_{idx}",
+        "record_status": "complete",
+        "source": {
+            "source_id": f"AE-{idx}",
+            "regulator": "VARA",
+            "official_url": "https://www.vara.ae/",
+            "source_name": "VARA",
+        },
+        "run": {
+            "run_id": "run-1",
+            "timestamp": "2026-05-30T10:00:00+00:00",
+            "status": "CHANGED",
+        },
+        "content": {
+            "previous_hash": f"sha256:{previous_hash}",
+            "current_hash": f"sha256:{current_hash}",
+            "raw_content_path": str((record_dir / "raw.txt").relative_to(base)),
+            "normalized_current_path": str((record_dir / "current.normalized.txt").relative_to(base)),
+            "normalized_previous_path": str((record_dir / "previous.normalized.txt").relative_to(base)),
+        },
+        "change": {
+            "diff_path": str((record_dir / "diff.txt").relative_to(base)),
+            "summary": "Evidence-only weekly fixture summary.",
+            "lines_added": 1,
+            "lines_removed": 1,
+        },
+        "files": {
+            "snapshot_path": str((record_dir / "snapshot.txt").relative_to(base)),
+            "raw_path": str((record_dir / "raw.txt").relative_to(base)),
+            "normalized_path": str((record_dir / "current.normalized.txt").relative_to(base)),
+            "previous_path": str((record_dir / "previous.normalized.txt").relative_to(base)),
+            "metadata_path": str((record_dir / "metadata.json").relative_to(base)),
+            "diff_path": str((record_dir / "diff.txt").relative_to(base)),
+        },
+        "integrity": {
+            "hash_verified": True,
+            "integrity_status": "VERIFIED",
+            "verified_at": "2026-05-30T10:01:00+00:00",
+        },
+        "review": {
+            "human_review_required": True,
+            "review_status": review_status,
+            "review_reason": "Weekly brief fixture requires human review.",
+        },
+    }
+    (record_dir / "evidence-record.json").write_text(json.dumps(record, indent=2, sort_keys=True), encoding="utf-8")
+    return record["record_id"]
+
+
+def _write_alert(
+    base: Path,
+    idx: str,
+    status: str,
+    decision: str,
+    source: str = "VARA",
+    *,
+    include_evidence: bool = True,
+):
     folder = base / "data" / "source_snapshots" / "2026-05-30" / "AE" / f"AE-{idx}" / "run-1"
     folder.mkdir(parents=True, exist_ok=True)
+    evidence_record_id = _write_canonical_evidence(base, idx) if include_evidence else ""
     alert = {
         "alert_id": f"draft-{idx}",
+        "evidence_record_id": evidence_record_id,
         "review_status": status,
         "send_decision": decision,
         "market": "AE",
@@ -121,6 +197,19 @@ class WeeklyBriefTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
             _write_alert(base, "draft", STATUS_DRAFT, DECISION_HOLD)
+            rows = collect_approved_alerts(
+                client_profile=_profile(),
+                market="AE",
+                start=datetime(2026, 5, 29, tzinfo=timezone.utc),
+                end=datetime(2026, 5, 31, tzinfo=timezone.utc),
+                base_dir=base,
+            )
+            self.assertEqual(rows, [])
+
+    def test_approved_alert_without_canonical_evidence_does_not_appear(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            _write_alert(base, "no-evidence", STATUS_APPROVED_WEEKLY, DECISION_WEEKLY, include_evidence=False)
             rows = collect_approved_alerts(
                 client_profile=_profile(),
                 market="AE",
