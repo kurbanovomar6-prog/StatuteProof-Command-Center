@@ -854,7 +854,8 @@
     "category": "financial_regulator",
     "enabled": false,
     "status": "disabled_navigation_only",
-    "notes": "SPA site — Playwright renders 244K chars HTML but all extractors yield 944–1,056c of navigation-only text, identical across every page (root, /en/regulatory-framework/, /en/media/). Change detection is impossible on navigation text. Needs adapter targeting SCA publications/circulars API endpoint."
+    "notes": "SPA site — Playwright renders 244K chars HTML but all extractors yield 944–1,056c of navigation-only text, identical across every page (root, /en/regulatory-framework/, /en/media/). Change detection is impossible on navigation text. Needs adapter targeting SCA publications/circulars API endpoint.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-sca-circulars-rules-procedures",
@@ -901,7 +902,8 @@
     "category": "tax",
     "enabled": false,
     "status": "disabled_external_access",
-    "notes": "JS SPA — all tested URLs fail: root (0–42c), /en/default.aspx (HTTP 200, 0c), /en/laws.and.guides/laws/ (unknown status, 0c). External access restriction: server renders no content for non-browser clients outside UAE. Needs UAE-IP adapter or direct API endpoint."
+    "notes": "JS SPA — all tested URLs fail: root (0–42c), /en/default.aspx (HTTP 200, 0c), /en/laws.and.guides/laws/ (unknown status, 0c). External access restriction: server renders no content for non-browser clients outside UAE. Needs UAE-IP adapter or direct API endpoint.",
+    "monitoring_mode": "remediation"
   },
   {
     "name": "UAE e-Laws Portal (Ministry of Justice)",
@@ -910,7 +912,8 @@
     "category": "legal_acts",
     "enabled": false,
     "status": "disabled_external_access",
-    "notes": "Connection timeout — unreachable from outside UAE as of 2026-05-24. Likely geo-IP blocked. Monitor for CDN-accessible mirror or alternate MOJ endpoint."
+    "notes": "Connection timeout — unreachable from outside UAE as of 2026-05-24. Likely geo-IP blocked. Monitor for CDN-accessible mirror or alternate MOJ endpoint.",
+    "monitoring_mode": "remediation"
   },
   {
     "name": "DIFC Laws and Regulations",
@@ -1689,7 +1692,8 @@
     "enabled": false,
     "status": "duplicate_url",
     "tier": "1",
-    "notes": "VARA primary rulebook and framework updates — duplicate of AE-vara-framework, kept as alias."
+    "notes": "VARA primary rulebook and framework updates — duplicate of AE-vara-framework, kept as alias.",
+    "monitoring_mode": "evidence_library"
   },
   {
     "source_id": "AE-dfsa-notices",
@@ -1707,7 +1711,8 @@
     "expected_min_length": 3000,
     "scraper_notes": "JS-rendered SPA — nav shell only without wait_for_selector. Hash collision fixed 2026-06-13.",
     "replacement_source_id": "AE-dfsa-annual-aml-reports",
-    "replacement_reason": "Current URL returns DFSA page-not-found/nav-shell output; AML reports endpoint is a stronger official DFSA PDF listing."
+    "replacement_reason": "Current URL returns DFSA page-not-found/nav-shell output; AML reports endpoint is a stronger official DFSA PDF listing.",
+    "monitoring_mode": "evidence_library"
   },
   {
     "source_id": "AE-adgm-fsra-rules",
@@ -1718,7 +1723,8 @@
     "enabled": false,
     "status": "disabled_external_access",
     "tier": "1",
-    "notes": "ADGM FSRA rulebook — network error on test 2026-06-12; cannot_monitor. Needs adapter or alternate URL."
+    "notes": "ADGM FSRA rulebook — network error on test 2026-06-12; cannot_monitor. Needs adapter or alternate URL.",
+    "monitoring_mode": "remediation"
   },
   {
     "source_id": "AE-cbuae-circulars",
@@ -1729,7 +1735,8 @@
     "enabled": false,
     "status": "duplicate_url",
     "tier": "1",
-    "notes": "CBUAE circulars and regulatory decisions — duplicate of AE-cbuae-regulations URL, kept as alias."
+    "notes": "CBUAE circulars and regulatory decisions — duplicate of AE-cbuae-regulations URL, kept as alias.",
+    "monitoring_mode": "evidence_library"
   },
   {
     "source_id": "AE-uaefiu-guidance",
@@ -1740,7 +1747,8 @@
     "enabled": false,
     "status": "duplicate_url",
     "tier": "3",
-    "notes": "AML/CFT guidance, typologies, STR notices — duplicate of AE-uaefiu-circulars URL, kept as alias."
+    "notes": "AML/CFT guidance, typologies, STR notices — duplicate of AE-uaefiu-circulars URL, kept as alias.",
+    "monitoring_mode": "evidence_library"
   },
   {
     "source_id": "AE-difc-legislation",
@@ -1751,7 +1759,8 @@
     "enabled": false,
     "status": "disabled_navigation_only",
     "tier": "1",
-    "notes": "DIFC legislation portal — 0c extracted on test 2026-06-12; JS SPA. Needs Playwright adapter. AE-difc-laws-homepage (difc.com) is the active alternative."
+    "notes": "DIFC legislation portal — 0c extracted on test 2026-06-12; JS SPA. Needs Playwright adapter. AE-difc-laws-homepage (difc.com) is the active alternative.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-sca-decisions",
@@ -1762,7 +1771,8 @@
     "enabled": false,
     "status": "disabled_navigation_only",
     "tier": "3",
-    "notes": "SCA decisions — 0c extracted on test 2026-06-12; JS SPA. Needs adapter targeting SCA publications API endpoint."
+    "notes": "SCA decisions — 0c extracted on test 2026-06-12; JS SPA. Needs adapter targeting SCA publications API endpoint.",
+    "monitoring_mode": "candidate"
   },
   {
     "name": "ADGM FSRA Guidance and Policy Statements",
@@ -4039,7 +4049,8 @@
     "adapter_family": "listing",
     "adapter_name": "listing",
     "expected_min_length": 500,
-    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=35, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice."
+    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=35, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-fta-vat-guides-references",
@@ -4053,7 +4064,8 @@
     "adapter_family": "listing",
     "adapter_name": "listing",
     "expected_min_length": 500,
-    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=66, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice."
+    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=66, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-fta-corporate-tax-guides-references",
@@ -4067,7 +4079,8 @@
     "adapter_family": "listing",
     "adapter_name": "listing",
     "expected_min_length": 500,
-    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=37, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice."
+    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=37, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-fta-media-centre",
@@ -4081,7 +4094,8 @@
     "adapter_family": "listing",
     "adapter_name": "listing",
     "expected_min_length": 500,
-    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=36, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice."
+    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=36, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-fta-corporate-tax-legislation",
@@ -4095,7 +4109,8 @@
     "adapter_family": "listing",
     "adapter_name": "listing",
     "expected_min_length": 500,
-    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=11, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice."
+    "notes": "Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-shell/title-only content (normalized_length=11, NAV_SHELL_ONLY). Requires FTA-specific rendered document-listing adapter before activation. Monitoring intelligence only, not legal advice.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-adgm-fsra-supervision-circulars",
@@ -4159,7 +4174,8 @@
     "fetch_method": "playwright",
     "wait_for_selector": "adgm-page",
     "expected_min_length": 500,
-    "notes": "Candidate only after 2026-06-18 no-save retest: official ADGM page is public but configured listing adapter isolated no regulatory alert rows and returned NAV_SHELL_ONLY. Requires source-specific selector/listing investigation before activation. Monitoring intelligence only, not legal advice."
+    "notes": "Candidate only after 2026-06-18 no-save retest: official ADGM page is public but configured listing adapter isolated no regulatory alert rows and returned NAV_SHELL_ONLY. Requires source-specific selector/listing investigation before activation. Monitoring intelligence only, not legal advice.",
+    "monitoring_mode": "candidate"
   },
   {
     "source_id": "AE-adgm-data-protection-regulations-2021-pdf",

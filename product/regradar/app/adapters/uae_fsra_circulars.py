@@ -1,9 +1,12 @@
 """
-ADGM FSRA circulars row-extraction prototype.
+ADGM FSRA circulars adapter — registered in app.adapters.registry as FSRACircularsAdapter.
 
-This adapter is intentionally not registered in app.adapters.registry. It is
-used by scripts/validate_uae_sources.py for manual source-readiness validation
-only and must not activate production monitoring by itself.
+Handles public adgm.com URLs for:
+- supervision/circulars listing: structured item extraction (title, date, document_url, row_hash)
+- regulatory-alerts, public-consultations, guidance pages: generic text extraction
+- source_id containing 'ra-circular' or adapter_name == 'adgm_fsra_listing': explicit opt-in
+
+can_handle() matches adgm.com hosts with FSRA-specific path patterns or source metadata.
 """
 
 from __future__ import annotations
@@ -205,8 +208,7 @@ def extract_fsra_circular_items(
     items.sort(key=lambda item: ((item.get("date") or ""), item.get("title") or "", item.get("url") or ""))
 
     limitations = [
-        "This adapter is not wired into production monitoring.",
-        "Same-run stability is not a true change-diff; scheduled comparison is still required.",
+        "Scheduled comparison is required — same-run content is not a change-diff.",
     ]
     if not items:
         limitations.append("No circular rows were isolated from the current HTML response.")

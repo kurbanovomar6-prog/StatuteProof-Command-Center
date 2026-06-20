@@ -1,9 +1,11 @@
 """
-CBUAE Rulebook revision-updates row-extraction prototype.
+CBUAE Rulebook adapter — registered in app.adapters.registry as CBUAERulebookAdapter.
 
-This adapter is intentionally not registered in app.adapters.registry. It is
-used only by scripts/validate_uae_sources.py to produce manual source-readiness
-evidence for UAE source expansion.
+Handles all public rulebook.centralbank.ae URLs:
+- Revision-updates listing page: structured item extraction (title, date, row_hash)
+- Individual rulebook pages: full text extraction via extract_text + BeautifulSoup fallback
+
+can_handle() matches any URL whose host ends with rulebook.centralbank.ae.
 """
 
 from __future__ import annotations
@@ -184,8 +186,7 @@ def extract_cbuae_rulebook_update_items(
 
     rows.sort(key=lambda row: ((row.get("date") or ""), row.get("title") or "", row.get("url") or ""))
     limitations = [
-        "This adapter is not wired into production monitoring.",
-        "Same-run stability is not a true change-diff; scheduled comparison is still required.",
+        "Scheduled comparison is required — same-run content is not a change-diff.",
     ]
     if not rows:
         limitations.append("No CBUAE revision/update rows were isolated from the current HTML response.")
