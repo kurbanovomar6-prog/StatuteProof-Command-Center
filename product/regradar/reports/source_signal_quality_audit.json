@@ -4,13 +4,13 @@
   "auditor": "StatuteProof Source Quality Auditor v2",
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
-    "total_enabled": 238,
-    "fresh_alert_eligible": 169,
+    "total_enabled": 239,
+    "fresh_alert_eligible": 170,
     "evidence_library": 61,
     "candidate": 5,
     "remediation": 3,
-    "source_level_monitor_ok": 223,
-    "with_proof_path": 229
+    "source_level_monitor_ok": 224,
+    "with_proof_path": 230
   },
   "family_readiness": [
     {
@@ -125,14 +125,14 @@
     },
     {
       "family": "Ministry of Finance",
-      "total_enabled": 2,
-      "fresh_alert_eligible": 1,
+      "total_enabled": 3,
+      "fresh_alert_eligible": 2,
       "evidence_library": 1,
       "candidate": 0,
       "remediation": 0,
       "status": "weak",
-      "gap_to_25": 24,
-      "notes": "MoF has one medium-signal fresh-alert source and one evidence-library homepage."
+      "gap_to_25": 23,
+      "notes": "MoF has two proof-backed fresh-alert sources, including financial legislation PDFs, plus one evidence-library homepage."
     },
     {
       "family": "Ministry of Justice / UAE Legislation / Gazette",
@@ -147,14 +147,15 @@
     }
   ],
   "safe_claims": [
-    "StatuteProof has 169 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 20, 2026.",
+    "StatuteProof has 170 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 20, 2026.",
     "StatuteProof also maintains 61 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
-    "223 enabled UAE sources have MONITOR_OK status overall; 169 of those are currently fresh-alert eligible after excluding static evidence-library pages.",
-    "StatuteProof maintains source-level proof files for 229 of 238 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
+    "224 enabled UAE sources have MONITOR_OK status overall; 170 of those are currently fresh-alert eligible after excluding static evidence-library pages.",
+    "StatuteProof maintains source-level proof files for 230 of 239 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
+    "MoF monitoring has 2 fresh-alert eligible official sources plus one evidence-library homepage.",
     "MoE/DNFBP AML monitoring has 42 fresh-alert eligible official sources plus one evidence-library homepage."
   ],
   "forbidden_claims": [
-    "238 monitored UAE regulatory sources",
+    "239 monitored UAE regulatory sources",
     "complete UAE coverage",
     "complete sanctions coverage",
     "complete VARA coverage",

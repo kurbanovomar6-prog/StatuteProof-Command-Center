@@ -22581,15 +22581,101 @@
         "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
         "reviewed_at": "2026-06-18T23:42:04Z"
       }
+    },
+    {
+      "source_id": "AE-mof-financial-legislation",
+      "regulator": "UAE Ministry of Finance",
+      "url": "https://mof.gov.ae/en/financial-legislation",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:pdf_listing",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "#main-content",
+        "content_selector": "#main-content",
+        "item_selector": "a[href]"
+      },
+      "extraction_strategy": "adapter:pdf_listing",
+      "last_adapter_test_at": "2026-06-20T09:25:00Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "#main-content",
+      "wait_selector": "",
+      "proof_path": "data/source_snapshots/2026-06-20/AE/AE-mof-financial-legislation/intake-20260620T092307Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "98775e38247a313be2d05cc3de840bd90afadb0b468e78d1e4196f92526a7aad",
+      "no_save_normalized_length": 4034,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "pdf_listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-20T09:25:00Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-20T09:25:00Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-20T09:25:00Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-20T09:25:00Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-20T09:25:00Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-20T09:25:00Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-20T09:25:00Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-20T09:25:00Z"
+      }
     }
   ],
   "summary": {
-    "activation_ready_count": 206,
+    "activation_ready_count": 207,
     "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
-    "baseline_complete_count": 207,
+    "baseline_complete_count": 208,
     "baseline_pending_count": 2,
     "blocked_count": 19,
     "candidate_count": 27,
@@ -22619,13 +22705,13 @@
     },
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready queue entries count toward the queue-specific 50 working-source target; public truth is reconciled separately from sources.json.",
-    "proof_backed_count": 207,
-    "public_source_truth_after": "238 enabled UAE sources / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
+    "proof_backed_count": 208,
+    "public_source_truth_after": "239 enabled UAE sources / 170 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 1,
     "remediation_count": 16,
     "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
-    "total_entries": 271,
+    "total_entries": 272,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
     "source_activation_platform_note": "Final remediation sprint replaced two stale DFSA remediation endpoints with proof-backed official DFSA PDF-listing sources; FIU homepage remains honestly held.",
@@ -22633,11 +22719,11 @@
     "last_weak_zone_remediation_update_at": "2026-06-16T06:12:00Z",
     "last_weak_zone_elimination_update_at": "2026-06-16T00:00:00Z",
     "last_final_8_activation_update_at": "2026-06-16T00:00:00Z",
-    "public_source_truth_after_validation": "238 enabled UAE sources / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
+    "public_source_truth_after_validation": "239 enabled UAE sources / 170 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
     "last_updated_at": "2026-06-16T18:36:18Z",
-    "enabled_count": 238,
-    "readiness_supported_count": 169,
-    "current_truth": "238 enabled / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
+    "enabled_count": 239,
+    "readiness_supported_count": 170,
+    "current_truth": "239 enabled / 170 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
     "summary_count_note": "Authoritative public source truth is reconciled from sources.json; older queue-specific counts are retained only in timestamped historical fields.",
     "difc_remediation_update_at": "2026-06-16T18:36:18Z",
     "last_final_remediation_update_at": "2026-06-17T12:52:30Z",
@@ -22645,10 +22731,10 @@
     "weak_family_bulk_activation_note": "41 proof-backed DFSA/DIFC/Ministry of Economy sources activated after no-save, repeat baseline, mass-monitor MONITOR_OK, and gates."
   },
   "version": 1,
-  "public_source_truth_after_validation": "238 enabled UAE sources / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
-  "public_source_truth_after": "238 enabled UAE sources / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
-  "enabled_count": 238,
-  "readiness_supported_count": 169,
+  "public_source_truth_after_validation": "239 enabled UAE sources / 170 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
+  "public_source_truth_after": "239 enabled UAE sources / 170 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
+  "enabled_count": 239,
+  "readiness_supported_count": 170,
   "remediation_count": 3,
-  "current_truth": "238 enabled UAE sources / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation"
+  "current_truth": "239 enabled UAE sources / 170 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation"
 }

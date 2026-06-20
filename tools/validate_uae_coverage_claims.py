@@ -7,7 +7,7 @@ Validates the UAE Coverage Proof Dossier for:
 - Roadmap does not contain unsafe absolute coverage claims (as positive claims)
 - No forbidden phrases appear as positive claims in dossier documents
 - "complete UAE coverage" appears only in negative/conditional/gap contexts
-- Current source truth (238 enabled / 237 monitoring-active / 1 remediation) is intact after proof-backed activations
+- Current source truth (239 enabled / 170 fresh-alert / 61 evidence-library / 5 candidate / 3 remediation) is intact after proof-backed activations
 - sources.json changes remain proof-backed and validator-gated
 - uae_source_universe_candidates.json was not modified (grand_total preserved)
 - Roadmap P0 section reflects revised 15-source list (not 25)
@@ -305,10 +305,14 @@ if roadmap_text:
 
 # ── Check 7: sources.json integrity ───────────────────────────────────────────
 
-print("\nCheck 7: sources.json integrity — 238 enabled / 237 monitoring-active / 1 remediation...")
-EXPECTED_ENABLED = 238
-EXPECTED_READINESS = 237
-EXPECTED_REMEDIATION = 1
+print("\nCheck 7: sources.json integrity — 239 enabled / 170 fresh-alert / 61 evidence-library / 5 candidate / 3 remediation...")
+EXPECTED_ENABLED = 239
+EXPECTED_MODES = {
+    "fresh_alert": 170,
+    "evidence_library": 61,
+    "candidate": 5,
+    "remediation": 3,
+}
 
 try:
     with open(SOURCES_PATH) as f:
@@ -317,14 +321,13 @@ try:
     sources = sources_data if isinstance(sources_data, list) else sources_data.get("sources", [])
 
     enabled_count = sum(1 for s in sources if s.get("enabled", False) is True)
-    readiness_count = sum(
-        1 for s in sources
-        if s.get("enabled", False) and s.get("status") in ("active", "readiness_supported")
-    )
-    remediation_count = sum(
-        1 for s in sources
-        if s.get("enabled", False) and s.get("status") == "remediation"
-    )
+    mode_counts = {mode: 0 for mode in EXPECTED_MODES}
+    for source in sources:
+        if not source.get("enabled", False):
+            continue
+        mode = source.get("monitoring_mode")
+        if mode in mode_counts:
+            mode_counts[mode] += 1
 
     if enabled_count == EXPECTED_ENABLED:
         print(f"  OK — {enabled_count} enabled sources (expected {EXPECTED_ENABLED})")
@@ -332,15 +335,13 @@ try:
         err(f"sources.json enabled count changed: got {enabled_count}, expected {EXPECTED_ENABLED}")
         err("  sources.json truth must match the latest proof-backed activation sprint")
 
-    if abs(readiness_count - EXPECTED_READINESS) <= 2:
-        print(f"  OK — {readiness_count} readiness-supported sources (expected ~{EXPECTED_READINESS})")
-    else:
-        warn(f"sources.json readiness count: got {readiness_count}, expected ~{EXPECTED_READINESS}")
-
-    if remediation_count == EXPECTED_REMEDIATION:
-        print(f"  OK — {remediation_count} remediation sources (expected {EXPECTED_REMEDIATION})")
-    else:
-        warn(f"sources.json remediation count: got {remediation_count}, expected {EXPECTED_REMEDIATION}")
+    for mode, expected_count in EXPECTED_MODES.items():
+        actual_count = mode_counts.get(mode, 0)
+        if actual_count == expected_count:
+            print(f"  OK — {actual_count} {mode} sources (expected {expected_count})")
+        else:
+            err(f"sources.json {mode} count changed: got {actual_count}, expected {expected_count}")
+            err("  monitoring-mode truth must match the latest proof-backed activation sprint")
 
 except FileNotFoundError:
     err(f"sources.json not found at {SOURCES_PATH}")

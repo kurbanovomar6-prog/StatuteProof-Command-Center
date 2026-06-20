@@ -197,6 +197,76 @@ def test_structured_listing_adapter_output_is_not_nav_shell():
     assert result["can_activate_monitoring"] is False
 
 
+def test_structured_listing_service_shell_is_blocked():
+    service_cards = "\n".join(
+        f"""
+        <div class="card">
+          <a href="/en/services/service-{idx}">{title}</a>
+          <p>Start Service</p>
+        </div>
+        """
+        for idx, title in enumerate(
+            [
+                "Access to legislations",
+                "Accreditation of Staff at Companies Licensed by the Authority",
+                "Amendment to a local investment fund offering document",
+                "Request consultation",
+                "Submit a complaint related to capital market transactions",
+                "Submit an Appeal from decisions made by SCA and markets",
+            ],
+            start=1,
+        )
+    )
+    html = f"<html><body><main>{service_cards}</main></body></html>"
+    source = {
+        "source_id": "AE-sca-service-shell",
+        "url": "https://www.uaecma.gov.ae/en/open-data/violations-and-warnings.aspx",
+        "adapter_family": "listing",
+        "adapter_name": "listing",
+        "adapter_config": {"container_selector": "main"},
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["adapter_used"] is True
+    assert result["structured_adapter_content"] is True
+    assert result["nav_shell_detected"] is True
+    assert result["status"] == SourceIntakeStatus.NAV_SHELL_ONLY
+    assert result["failure_code"] == "NAV_SHELL_ONLY"
+    assert result["can_save_evidence"] is False
+    assert result["can_save_for_validation"] is False
+
+
+def test_structured_listing_service_shell_prefix_is_blocked():
+    service_prefix = "\n".join(
+        f'<div class="card"><a href="/en/open-data/en/services/service-{idx}">Service {idx}</a></div>'
+        for idx in range(1, 7)
+    )
+    later_links = """
+      <div class="card"><a href="/en/open-data/warnings">Warnings</a></div>
+      <div class="card"><a href="/en/open-data/violations-and-violators">Violations and Violators</a></div>
+    """
+    html = f"<html><body><main>{service_prefix}{later_links}</main></body></html>"
+    source = {
+        "source_id": "AE-sca-service-shell-prefix",
+        "url": "https://www.uaecma.gov.ae/en/open-data/violations-and-warnings.aspx",
+        "adapter_family": "listing",
+        "adapter_name": "listing",
+        "adapter_config": {"container_selector": "main"},
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", return_value=html):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["adapter_used"] is True
+    assert result["service_shell_detected"] is True
+    assert result["status"] == SourceIntakeStatus.NAV_SHELL_ONLY
+    assert result["can_save_evidence"] is False
+
+
 def test_custom_element_adapter_preserves_structure_for_quality_gate():
     aml_paragraph = (
         "Regulated firms must maintain anti money laundering governance, customer "

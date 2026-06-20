@@ -23,6 +23,8 @@ def _spec() -> dict:
         "adapter_family": "fiu_eocn_document_listing",
         "adapter_name": "fiu_eocn_document_listing",
         "adapter_config": {"container_selector": "body"},
+        "wait_for_selector": "main",
+        "content_selector": "main",
         "expected_min_length": 500,
         "proof_path": "data/source_snapshots/proof.json",
         "normalized_text_path": "data/source_snapshots/normalized.txt",
@@ -40,11 +42,20 @@ def test_activation_status_entry_preserves_adapter_config():
     entry = module.slug_to_status_entry(_spec())
 
     assert entry["adapter_config"] == {"container_selector": "body"}
+    assert entry["wait_for_selector"] == "main"
+    assert entry["content_selector"] == "main"
     assert entry["normalized_hash"] == "abc123"
     assert entry["normalized_text_path"] == "data/source_snapshots/normalized.txt"
     assert entry["baseline_runs_completed"] == 2
     assert entry["last_monitor_status"] == "MONITOR_OK"
     assert "Not legal advice" in entry["notes"]
+    assert entry["monitoring_mode"] == "fresh_alert"
+    assert entry["alert_eligible"] is True
+    assert entry["recommended_check_frequency"] == "daily"
+    assert entry["fresh_signal_type"]
+    assert entry["expected_update_pattern"]
+    assert entry["customer_alert_policy"]
+    assert entry["commercial_signal_tier"] in {"A", "B"}
 
 
 def test_activation_status_entry_updates_existing_source():

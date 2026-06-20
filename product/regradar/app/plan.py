@@ -61,7 +61,7 @@ PLAN_CAPABILITIES = {
     "professional": {
         "live_monitoring": False,
         "manual_activation_required": True,
-        "source_limit": 169,        # selected fresh-alert eligible UAE sources after readiness gates
+        "source_limit": 170,        # selected fresh-alert eligible UAE sources after readiness gates
         "custom_sources": 2,        # requires activation
         "weekly_briefs": True,      # Telegram; email requires activation
         "audit_export": True,

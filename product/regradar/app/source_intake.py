@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -108,6 +109,8 @@ _ADAPTER_FALLBACK_SAFE_FAMILIES = {
     "playwright_selector",
     "rendered_dom_evidence",
 }
+_SERVICE_SHELL_ADAPTER_FAMILIES = {"listing", "sca_listing"}
+_STRUCTURED_URL_RE = re.compile(r"^URL:\s+(.+)$", re.IGNORECASE | re.MULTILINE)
 
 # ── nav-shell detection ───────────────────────────────────────────────────────
 
@@ -325,6 +328,58 @@ def _has_structured_adapter_content(result: dict) -> bool:
     if family in document_families:
         return bool(result.get("adapter_used")) and item_count >= 2 and chars >= 500
     return bool(result.get("adapter_used")) and item_count >= 3
+
+
+def _is_structured_service_shell(result: dict, normalized_text: str) -> bool:
+    """Detect service-directory listings masquerading as monitorable rows."""
+    adapter_metadata = result.get("adapter_metadata") or {}
+    if not isinstance(adapter_metadata, dict):
+        return False
+    family = str(adapter_metadata.get("adapter_family") or result.get("adapter_family") or "")
+    if family not in _SERVICE_SHELL_ADAPTER_FAMILIES:
+        return False
+    if int(adapter_metadata.get("item_count") or 0) < 3:
+        return False
+
+    urls = [match.group(1).strip() for match in _STRUCTURED_URL_RE.finditer(normalized_text or "")]
+    if len(urls) < 3:
+        return False
+
+    service_links = 0
+    service_positions: list[int] = []
+    monitorable_links = 0
+    monitorable_tokens = (
+        "regulation",
+        "regulations",
+        "law",
+        "laws",
+        "legislation",
+        "publication",
+        "publications",
+        "circular",
+        "decision",
+        "warning",
+        "warnings",
+        "violation",
+        "violations",
+        "open-data",
+        "pdf",
+    )
+    for idx, url in enumerate(urls):
+        path = urlparse(url).path.lower()
+        is_service = "/services/" in path or path.endswith("/services")
+        if is_service:
+            service_links += 1
+            service_positions.append(idx)
+            continue
+        if any(token in path for token in monitorable_tokens):
+            monitorable_links += 1
+
+    first_window = urls[: min(6, len(urls))]
+    first_service_count = sum(1 for idx in service_positions if idx < len(first_window))
+    service_prefix = len(first_window) >= 3 and first_service_count / len(first_window) >= 0.75
+    service_dominant = service_links / len(urls) >= 0.6 and monitorable_links == 0
+    return service_prefix or service_dominant
 
 
 def apply_quality_gate_fields(result: dict) -> None:
@@ -692,7 +747,11 @@ def run_source_intake(
     dom_nav_shell = (result.get("dom_investigation") or {}).get("nav_shell_risk") == "high"
     structured_adapter_content = _has_structured_adapter_content(result)
     result["structured_adapter_content"] = structured_adapter_content
-    nav_shell = False if (structured_adapter_content or is_direct_pdf) else (is_nav_shell_only(normalized_text) or bool(dom_nav_shell))
+    service_shell = _is_structured_service_shell(result, normalized_text)
+    result["service_shell_detected"] = service_shell
+    nav_shell = service_shell or (
+        False if (structured_adapter_content or is_direct_pdf) else (is_nav_shell_only(normalized_text) or bool(dom_nav_shell))
+    )
     result["nav_shell_detected"] = nav_shell
 
     # ── 5. Hash collision check ───────────────────────────────────────────────

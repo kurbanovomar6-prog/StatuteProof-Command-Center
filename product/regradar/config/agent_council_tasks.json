@@ -342,7 +342,7 @@
         "python3 -m pytest product/regradar/tests/test_adapter_platform.py -q",
         "python3 tools/validate_fresh_signal_sources.py"
       ],
-      "blocker": "SCA regulations listing remained NAV_SHELL_ONLY in previous live probes.",
+      "blocker": "SCA open-data/regulations live pages still produce service/nav-shell rows except existing circulars surface; no new SCA MONITOR_OK source found.",
       "next_handoff_agent": "Source Monitor",
       "notes": [
         {
@@ -352,10 +352,14 @@
         {
           "created_at": "2026-06-20T08:15:33Z",
           "note": "2026-06-20 SCA idealization sprint: Agent-to-agent loop produced one usable Source Monitor packet; Code Architect/QA CLI agents stalled and were terminated without usable output. Candidate AE-sca-violations tested no-save on www and beta official/public SCA pages. www violations hub: NAV_SHELL_ONLY, quality_score=0, adapter table failed with not enough rows, no proof. beta violations-of-companies child: selector-free no-save returned CONFIRMED_ACCESSIBLE but preview was Services/My Favourites shell, table selector missing, adapter_used=false, quality_score=53, no proof, no activation. beta violations hub discovery: Playwright fetched 141,911 chars and detected a table, but no public JSON candidates; follow-up no-save with wait_for_selector=table still returned NAV_SHELL_ONLY, quality_score=0, table did not contain enough rows. beta licensed-companies no-save also returned NAV_SHELL_ONLY/filter chrome, quality_score=0. No source activated; next exact task is public SCA open-data row/API extraction research without bypassing access controls."
+        },
+        {
+          "created_at": "2026-06-20T09:35:00Z",
+          "note": "2026-06-20 25-plus expansion sprint: fresh CLI agents were attempted but all failed on provider limit; coordinator proceeded with local Source Monitor/Evidence/QA checks. SCA sitemap/robots checked: robots allows public fetch, sitemap has 1,597 locs / 789 English locs / 613 open-data-regulations-news-like locs, but many are service/detail/news/video surfaces. New service-shell truth gate added after live SCA warnings/telemarketing no-save showed generic listing could extract /services/ rows as CONFIRMED_ACCESSIBLE preview. Regression tests now block structured listing service-shell prefixes. SCA no-save batch tested AE-sca-circulars, homepage, latest-regulations, and news; only AE-sca-circulars strong-passed and it is already an existing fresh-alert surface. No new SCA source activated. Next: official SCA network/API row extraction research for open-data tables without bypassing access controls."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T08:15:33Z"
+      "updated_at": "2026-06-20T09:35:00Z"
     },
     {
       "task_id": "fiu-circulars-public-source-investigation",
@@ -392,16 +396,20 @@
         "python3 tools/validate_fresh_signal_sources.py",
         "python3 tools/validate_uae_coverage_claims.py"
       ],
-      "blocker": "FIU circulars page remains nav-shell and public FIU universe appears small.",
+      "blocker": "Homepage, Awareness, and Publications/circulars public URLs remained NAV_SHELL_ONLY in no-save; no public circular row/API endpoint proven yet.",
       "next_handoff_agent": "Code Architect",
       "notes": [
         {
           "created_at": "2026-06-20T07:52:58Z",
           "note": "2026-06-20 weak-family sprint Source Monitor triage: UAE FIU remains 7 total / 5 fresh-alert / 1 candidate / 1 remediation. Active FIU sources are proof-backed; AE-uaefiu-circulars remains candidate/nav-shell and AE-uae-financial-intelligence-unit-uaefiu remains remediation/homepage. Do not count goAML/private/login content. Next no-save investigation should test public knowledge-centre circulars/notices or guidance subpaths only; duplicate Publications aliases must not be counted as new sources."
+        },
+        {
+          "created_at": "2026-06-20T09:35:00Z",
+          "note": "2026-06-20 25-plus expansion sprint: FIU no-save batch tested homepage, Awareness, and Publications/circulars public URLs. All returned no strong pass; homepage/Awareness/Publications remained NAV_SHELL_ONLY. No proof saved, no MONITOR_OK, no source activation. goAML/private routes remain blocked. Next: search only public knowledge-centre subpaths or official same-domain feed/API endpoints; duplicate Publications aliases must not be counted."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T07:52:58Z"
+      "updated_at": "2026-06-20T09:35:00Z"
     },
     {
       "task_id": "difc-consultation-listing-adapter",
@@ -446,7 +454,7 @@
     {
       "task_id": "mof-document-publication-adapter",
       "title": "Build MoF document and publication adapter",
-      "status": "accepted",
+      "status": "done",
       "owner_agent": "Code Architect",
       "reviewer_agents": [
         "Source Monitor",
@@ -477,16 +485,20 @@
         "python3 -m pytest product/regradar/tests/test_adapter_platform.py -q",
         "python3 tools/validate_fresh_signal_sources.py"
       ],
-      "blocker": "Only MoF publications hub is currently a fresh-alert source; generic homepage is excluded.",
+      "blocker": "",
       "next_handoff_agent": "Source Monitor",
       "notes": [
         {
           "created_at": "2026-06-20T07:52:59Z",
           "note": "2026-06-20 weak-family sprint Source Monitor triage: MoF remains 2 total / 1 fresh-alert / 1 evidence-library. AE-mof-publications-and-releases is the only MONITOR_OK fresh-alert source; AE-uae-ministry-of-finance remains evidence-library homepage. Next no-save candidates: financial-legislation and ESR public pages on mof.gov.ae; use official/public pages only and require proof/baseline/MONITOR_OK before any count change."
+        },
+        {
+          "created_at": "2026-06-20T09:35:00Z",
+          "note": "2026-06-20 25-plus expansion sprint: MoF financial-legislation official URL strong-passed no-save via pdf_listing (quality 65), proof was saved twice, normalized hash was stable, certification reached MONITORING_CERTIFIED with baseline 2/2, mass-monitor dry-run returned MONITOR_OK with unchanged hash, and AE-mof-financial-legislation was activated as fresh_alert. MoF is now 3 enabled / 2 fresh-alert / 1 evidence-library. ESR also strong-passed no-save via pdf_listing but was not activated in this commit; it still needs proof/baseline/MONITOR_OK gates."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T07:52:59Z"
+      "updated_at": "2026-06-20T09:35:00Z"
     },
     {
       "task_id": "moj-gazette-official-alternative-research",
@@ -521,16 +533,20 @@
         "python3 tools/validate_uae_coverage_claims.py",
         "python3 tools/validate_fresh_signal_sources.py"
       ],
-      "blocker": "MoJ/Gazette is 0/25 and current pages are nav-shell or WAF/access remediation.",
+      "blocker": "UAE Legislation/MoJ public alternatives remain WAF/access/nav-shell until a no-save public endpoint passes.",
       "next_handoff_agent": "Code Architect",
       "notes": [
         {
           "created_at": "2026-06-20T07:52:59Z",
           "note": "2026-06-20 weak-family sprint Source Monitor triage: MoJ/Gazette remains 1 total / 0 fresh-alert / 1 remediation. AE-uae-legislation-portal remains WAF/nav-shell/access remediation; elaws.moj.gov.ae is disabled_external_access. Do not bypass WAF or geo/access controls. Next research should test official public moj.gov.ae ASPX legislation pages and any accessible official alternatives with no-save only."
+        },
+        {
+          "created_at": "2026-06-20T09:35:00Z",
+          "note": "2026-06-20 25-plus expansion sprint: queue filter found AE-uae-elaws-moj and AE-uae-legislation-portal as relevant MoJ/Gazette candidates/remediation, but no activation attempt was made because current documented blockers remain WAF/access/nav-shell and no public-source legality-safe alternative passed no-save in this wave. Do not bypass WAF/access controls. Next: test official public moj.gov.ae ASPX legislation pages and accessible gazette/legislation alternatives no-save only."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T07:52:59Z"
+      "updated_at": "2026-06-20T09:35:00Z"
     },
     {
       "task_id": "canonical-evidence-record-generator",

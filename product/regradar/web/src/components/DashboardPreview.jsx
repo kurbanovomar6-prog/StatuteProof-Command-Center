@@ -16,10 +16,10 @@ const verdictLabel   = { READINESS: 'Readiness', REVIEW: 'Review' }
 const accessVariant  = { Accessible: 'green', Limited: 'yellow' }
 
 const SOURCE_PACK_SUMMARY = {
-  enabled: 238,
-  freshAlert: 168,
+  enabled: 239,
+  freshAlert: 170,
   evidenceLibrary: 61,
-  underReview: 9,
+  underReview: 8,
 }
 
 const col = createColumnHelper()

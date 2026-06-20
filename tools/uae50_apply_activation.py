@@ -105,6 +105,7 @@ def build_activation_entry(spec: dict, now: str) -> dict:
 
 def slug_to_status_entry(spec: dict) -> dict:
     last_monitor_status = spec.get("last_monitor_status") or "MONITOR_OK"
+    monitoring_mode = spec.get("monitoring_mode") or "fresh_alert"
     entry = {
         "name": spec["name"],
         "url": spec["url"],
@@ -113,6 +114,19 @@ def slug_to_status_entry(spec: dict) -> dict:
         "enabled": True,
         "status": "active",
         "source_id": spec["source_id"],
+        "monitoring_mode": monitoring_mode,
+        "fresh_signal_class": spec.get("fresh_signal_class") or "FRESH_ALERT",
+        "fresh_signal_type": spec.get("fresh_signal_type") or "official_publication_listing",
+        "expected_update_pattern": spec.get("expected_update_pattern")
+        or "daily checked new_removed_or_changed_official_publication_rows",
+        "customer_alert_policy": spec.get("customer_alert_policy")
+        or (
+            "Alert only after proof-backed monitoring detects a material official "
+            "publication/listing change; suppress unchanged, duplicate, static, and nav-shell noise."
+        ),
+        "recommended_check_frequency": spec.get("recommended_check_frequency") or "daily",
+        "alert_eligible": spec.get("alert_eligible", monitoring_mode == "fresh_alert"),
+        "commercial_signal_tier": spec.get("commercial_signal_tier") or "B",
         "adapter_family": spec["adapter_family"],
         "adapter_name": spec["adapter_name"],
         "expected_min_length": spec.get("expected_min_length", 500),
@@ -136,6 +150,10 @@ def slug_to_status_entry(spec: dict) -> dict:
     }
     if spec.get("adapter_config"):
         entry["adapter_config"] = spec.get("adapter_config")
+    if spec.get("wait_for_selector"):
+        entry["wait_for_selector"] = spec.get("wait_for_selector")
+    if spec.get("content_selector"):
+        entry["content_selector"] = spec.get("content_selector")
     if spec.get("fetch_method"):
         entry["fetch_method"] = spec.get("fetch_method")
     return entry

@@ -4,7 +4,7 @@ Date: 2026-06-20
 
 Fresh-signal labels: Strong = 25+ fresh-alert eligible endpoints; Good = 10-24; Partial = 5-9; Weak = 1-4; Missing = 0. Source-family labels describe selected-source depth, not legal completeness.
 
-Current fresh-signal truth: 238 enabled UAE sources / 169 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
+Current fresh-signal truth: 239 enabled UAE sources / 170 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
 
 Fresh-signal overlay after the 25-per-family pass:
 
@@ -21,7 +21,7 @@ Fresh-signal overlay after the 25-per-family pass:
 | UAE FIU | 5 | Partial | 20 |
 | SCA | 5 | Weak | 20 |
 | Ministry of Justice / UAE Legislation / Gazette | 0 | Missing | 25 |
-| Ministry of Finance | 1 | Weak | 24 |
+| Ministry of Finance | 2 | Weak | 23 |
 
 ## Appendix A: Historical Legacy Depth Table - Not Customer Or Adapter Truth
 
@@ -41,7 +41,7 @@ The legacy table below is retained for source-universe depth context only. Its l
 | Ministry of Economy / DNFBP AML | 26 | 26 | 0 | 35 | 20 | Strong | 8.0 | 8 | Target reached for direct DNFBP/MoE AML sources. MoE-owned AML/TFS documents also strengthen the EOCN/TFS-relevant family, without claiming complete MoE coverage. |
 | Ministry of Justice / UAE Legislation / Gazette | 1 | 1 | 0 | 70 | 29 | Weak | 0.5 | 4 | `AE-ai-legislation-511679d1`, `AE-elawyer-signup-a979f83b`, `AE-moj-ar-about-moj-judicial-training-institute-laws-and-legislation-aspx-3579a2bc`, `AE-moj-ar-about-moj-union-supreme-court-e-services-laws-of-union-supreme-court-aspx-677651f6`, `AE-moj-ar-laws-and-legislation-aspx-b60d2907`, `AE-moj-ar-laws-and-legislation-anti-money-laundering-and-combatting-terrorism-financing-aspx-08cdebef`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-aspx-f12a87ea`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-6fe3558c`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-3569166b`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-4910ca15` |
 | UAE Data Office / PDPL / privacy | 0 | 0 | 0 | 0 | 0 | Missing | 1 | 2 | None mapped yet |
-| Ministry of Finance | 1 | 1 | 0 | 85 | 4 | Weak | 0.5 | 4 | `AE-mof-ar-financial-legislation-5921ed44`, `AE-mof-ar-public-finance-international-relations-economic-substance-regulations-esr-944b90cc`, `AE-mof-en-financial-legislation-a936b440`, `AE-mof-en-public-finance-international-relations-economic-substance-regulations-esr-bb46d3fd` |
+| Ministry of Finance | 2 | 2 | 0 | 85 | 4 | Weak | 1.0 | 5 | `AE-mof-financial-legislation` activated after proof/baseline/MONITOR_OK. Next candidates: `AE-mof-ar-financial-legislation-5921ed44`, `AE-mof-ar-public-finance-international-relations-economic-substance-regulations-esr-944b90cc`, `AE-mof-en-public-finance-international-relations-economic-substance-regulations-esr-bb46d3fd`. |
 | Cabinet / Federal decrees | 0 | 0 | 0 | 0 | 0 | Missing | 1 | 2 | None mapped yet |
 | DFM | 0 | 0 | 0 | 70 | 4 | Missing | 1 | 2 | `AE-dfm-ar-the-exchange-regulation-market-rules-27fbdedf`, `AE-dfm-ar-the-exchange-regulation-sharia-compliance-bedc9982`, `AE-dfm-the-exchange-regulation-market-rules-4ded6b02`, `AE-dfm-the-exchange-regulation-sharia-compliance-d3da0b2f` |
 | ADX | 0 | 0 | 0 | 56 | 5 | Missing | 1 | 2 | `AE-adx-en-issuers-resources-rules-and-regulations-766f98d4`, `AE-adx-issuers-resources-rules-and-regulations-e058f413`, `AE-adx-main-market-company-profile-financial-reports-4bb85689`, `AE-adx-resources-rules-and-regulations-55b53564`, `AE-adx-resources-rules-and-regulations-rules-and-regulations-54bb57c7` |
