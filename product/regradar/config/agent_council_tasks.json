@@ -406,10 +406,14 @@
         {
           "created_at": "2026-06-20T09:35:00Z",
           "note": "2026-06-20 25-plus expansion sprint: FIU no-save batch tested homepage, Awareness, and Publications/circulars public URLs. All returned no strong pass; homepage/Awareness/Publications remained NAV_SHELL_ONLY. No proof saved, no MONITOR_OK, no source activation. goAML/private routes remain blocked. Next: search only public knowledge-centre subpaths or official same-domain feed/API endpoints; duplicate Publications aliases must not be counted."
+        },
+        {
+          "created_at": "2026-06-20T10:23:00Z",
+          "note": "2026-06-20 program hardening sprint: AE-uaefiu-system-guides official public UAE FIU system-guides URL strong-passed no-save via pdf_listing (quality 65), two proof-backed baseline runs saved stable hash c1b79b644500d43c5029a47499c4f696e99b80404240bb8af6b707dbb43eda03, mass-monitor dry-run returned MONITOR_OK, and the source was activated as fresh_alert. UAE FIU is now 8 enabled / 6 fresh-alert / 1 candidate / 1 remediation. FIU publications index retest remained NAV_SHELL_ONLY; FIU circulars/goAML remain blocked or candidate only."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T09:35:00Z"
+      "updated_at": "2026-06-20T10:23:00Z"
     },
     {
       "task_id": "difc-consultation-listing-adapter",
@@ -492,14 +496,18 @@
           "created_at": "2026-06-20T07:52:59Z",
           "note": "2026-06-20 weak-family sprint Source Monitor triage: MoF remains 2 total / 1 fresh-alert / 1 evidence-library. AE-mof-publications-and-releases is the only MONITOR_OK fresh-alert source; AE-uae-ministry-of-finance remains evidence-library homepage. Next no-save candidates: financial-legislation and ESR public pages on mof.gov.ae; use official/public pages only and require proof/baseline/MONITOR_OK before any count change."
         },
-        {
-          "created_at": "2026-06-20T09:35:00Z",
-          "note": "2026-06-20 25-plus expansion sprint: MoF financial-legislation official URL strong-passed no-save via pdf_listing (quality 65), proof was saved twice, normalized hash was stable, certification reached MONITORING_CERTIFIED with baseline 2/2, mass-monitor dry-run returned MONITOR_OK with unchanged hash, and AE-mof-financial-legislation was activated as fresh_alert. MoF is now 3 enabled / 2 fresh-alert / 1 evidence-library. ESR also strong-passed no-save via pdf_listing but was not activated in this commit; it still needs proof/baseline/MONITOR_OK gates."
-        }
-      ],
-      "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T09:35:00Z"
+    {
+      "created_at": "2026-06-20T09:35:00Z",
+      "note": "2026-06-20 25-plus expansion sprint: MoF financial-legislation official URL strong-passed no-save via pdf_listing (quality 65), proof was saved twice, normalized hash was stable, certification reached MONITORING_CERTIFIED with baseline 2/2, mass-monitor dry-run returned MONITOR_OK with unchanged hash, and AE-mof-financial-legislation was activated as fresh_alert. MoF is now 3 enabled / 2 fresh-alert / 1 evidence-library. ESR also strong-passed no-save via pdf_listing but was not activated in this commit; it still needs proof/baseline/MONITOR_OK gates."
     },
+    {
+      "created_at": "2026-06-20T10:18:00Z",
+      "note": "2026-06-20 program hardening sprint: AE-mof-esr official MoF ESR URL strong-passed no-save via pdf_listing (quality 65), two proof-backed baseline runs saved stable hash b8eac4a534b0d8485170dc026b218a8b0d06f5584c12385cc61c63bf93a904db, mass-monitor dry-run returned MONITOR_OK, and the source was activated as fresh_alert. MoF is now 4 enabled / 3 fresh-alert / 1 evidence-library. Next MoF work should focus on non-duplicate Arabic mirrors or additional official MoF document listings only."
+    }
+  ],
+  "created_at": "2026-06-19T00:00:00Z",
+  "updated_at": "2026-06-20T10:18:00Z"
+},
     {
       "task_id": "moj-gazette-official-alternative-research",
       "title": "Research official MoJ/Gazette alternatives",
@@ -543,10 +551,14 @@
         {
           "created_at": "2026-06-20T09:35:00Z",
           "note": "2026-06-20 25-plus expansion sprint: queue filter found AE-uae-elaws-moj and AE-uae-legislation-portal as relevant MoJ/Gazette candidates/remediation, but no activation attempt was made because current documented blockers remain WAF/access/nav-shell and no public-source legality-safe alternative passed no-save in this wave. Do not bypass WAF/access controls. Next: test official public moj.gov.ae ASPX legislation pages and accessible gazette/legislation alternatives no-save only."
+        },
+        {
+          "created_at": "2026-06-20T10:20:00Z",
+          "note": "2026-06-20 program hardening sprint: official public MoJ AML/CFT legislation page was tested no-save. Wait selector main/PDF did not appear within 10s and result remained NAV_SHELL_ONLY; no proof saved, no MONITOR_OK, and no source activation. MoJ/Gazette remains 1 enabled / 0 fresh-alert / 1 remediation. Continue only with public moj.gov.ae ASPX or official gazette alternatives; do not bypass WAF/access controls."
         }
       ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-20T09:35:00Z"
+      "updated_at": "2026-06-20T10:20:00Z"
     },
     {
       "task_id": "canonical-evidence-record-generator",

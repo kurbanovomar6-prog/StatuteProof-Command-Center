@@ -65,7 +65,7 @@ const PLANS_DATA = [
     cta: 'Upgrade to UAE Monitor',
     ctaPrimary: true,
     features: [
-      { label: 'Official UAE sources', value: '170 fresh-alert eligible sources; selected official UAE endpoints only' },
+      { label: 'Official UAE sources', value: '172 fresh-alert eligible sources; selected official UAE endpoints only' },
       { label: 'Source readiness review', value: true },
       { label: 'Evidence records + full diff view', value: true },
       { label: 'Custom sources', value: 'Up to 2 — requires activation' },

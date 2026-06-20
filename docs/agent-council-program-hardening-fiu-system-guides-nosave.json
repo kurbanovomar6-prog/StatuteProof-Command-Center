@@ -1,0 +1,80 @@
+{
+  "tested_count": 1,
+  "strong_pass_count": 1,
+  "strong_pass_ids": [
+    "AE-uaefiu-system-guides"
+  ],
+  "results": [
+    {
+      "source_id": "AE-uaefiu-system-guides",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/system-guides/",
+      "regulator": "manual",
+      "recommended_adapter": "pdf_listing",
+      "detected_page_type": "pdf_listing",
+      "selector_confidence": 80,
+      "probe": {
+        "status": "NAV_SHELL_ONLY",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "quality_score": 0,
+        "normalized_length": 4073,
+        "normalized_hash": "0b7964cf833af3e0ae517aa5fb6c0673b5af8074edf748085505481a371ed0da",
+        "nav_shell": true,
+        "hash_collision": false,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "adapter_used": false,
+        "adapter_name": "",
+        "adapter_family": "",
+        "failure_code": "NAV_SHELL_ONLY",
+        "strong_pass": false
+      },
+      "applied": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "quality_score": 65,
+        "normalized_length": 2401,
+        "normalized_hash": "c1b79b644500d43c5029a47499c4f696e99b80404240bb8af6b707dbb43eda03",
+        "nav_shell": false,
+        "hash_collision": false,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "adapter_used": true,
+        "adapter_name": "pdf_listing",
+        "adapter_family": "pdf_listing",
+        "failure_code": "",
+        "strong_pass": true,
+        "adapter_config": {
+          "container_selector": "main",
+          "content_selector": "main",
+          "item_selector": "a[href]"
+        },
+        "wait_for_selector": "main, a[href$='.pdf']"
+      },
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "quality_score": 65,
+        "normalized_length": 2401,
+        "normalized_hash": "c1b79b644500d43c5029a47499c4f696e99b80404240bb8af6b707dbb43eda03",
+        "nav_shell": false,
+        "hash_collision": false,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "adapter_used": true,
+        "adapter_name": "pdf_listing",
+        "adapter_family": "pdf_listing",
+        "failure_code": "",
+        "strong_pass": true,
+        "adapter_config": {
+          "container_selector": "main",
+          "content_selector": "main",
+          "item_selector": "a[href]"
+        },
+        "wait_for_selector": "main, a[href$='.pdf']"
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "sources": [
+    {
+      "source_id": "AE-uaefiu-system-guides",
+      "name": "UAE FIU System Guides",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/system-guides/",
+      "regulator": "UAE FIU",
+      "jurisdiction": "AE",
+      "source_type": "aml",
+      "activation_status": "activation_ready",
+      "current_state": "activation_ready",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_config": {
+        "container_selector": "main",
+        "content_selector": "main",
+        "item_selector": "a[href]"
+      },
+      "wait_for_selector": "main, a[href$=\".pdf\"]",
+      "expected_min_length": 500,
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true
+    }
+  ],
+  "summary": {
+    "purpose": "Scoped dry-run mass-monitor queue for AE-uaefiu-system-guides only. Created after strong no-save and two proof-backed baseline runs; not a source activation by itself."
+  }
+}

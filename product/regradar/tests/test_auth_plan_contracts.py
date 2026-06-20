@@ -46,7 +46,7 @@ class PlanIntentContractTests(unittest.TestCase):
         self.assertTrue(state["manual_activation_required"])
         self.assertEqual(state["active_capabilities"]["source_limit"], 0)
         self.assertEqual(state["active_capabilities"]["custom_sources"], 0)
-        self.assertEqual(state["requested_capabilities"]["source_limit"], 170)
+        self.assertEqual(state["requested_capabilities"]["source_limit"], 172)
         self.assertEqual(state["requested_capabilities"]["custom_sources"], 2)
         self.assertTrue(state["requested_capabilities"]["audit_export"])
         self.assertTrue(state["requested_capabilities"]["pdf_export"])

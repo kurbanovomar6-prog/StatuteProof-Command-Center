@@ -1,0 +1,41 @@
+{
+  "activation_ready_only": true,
+  "alert_delivery_enabled": false,
+  "include_enabled_sources": false,
+  "mode": "dry-run",
+  "processed_count": 1,
+  "results": [
+    {
+      "alert_sent": false,
+      "change_detected": false,
+      "evidence_written": false,
+      "failure_code": "",
+      "failure_reason": "",
+      "normalized_hash": "c1b79b644500d43c5029a47499c4f696e99b80404240bb8af6b707dbb43eda03",
+      "previous_hash": "",
+      "proof_path": "",
+      "quality_score": 65,
+      "regulator": "UAE FIU",
+      "remediation_hint": "",
+      "source_health_status": "MONITOR_OK",
+      "source_id": "AE-uaefiu-system-guides",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/system-guides/"
+    }
+  ],
+  "save_proof": false,
+  "skipped": [],
+  "skipped_count": 0,
+  "source_health_counts": {
+    "HASH_COLLISION": 0,
+    "MANUAL_CHECK_REQUIRED": 0,
+    "MONITOR_DISCONNECTED": 0,
+    "MONITOR_OK": 1,
+    "NAV_SHELL_ONLY": 0,
+    "QUALITY_DROP": 0,
+    "REMEDIATION_REQUIRED": 0,
+    "SELECTOR_BROKEN": 0,
+    "SOURCE_STRUCTURE_CHANGED": 0
+  },
+  "sources_json_changed": false,
+  "warnings": []
+}

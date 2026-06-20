@@ -1,0 +1,47 @@
+{
+  "specs": [
+    {
+      "source_id": "AE-uaefiu-system-guides",
+      "name": "UAE FIU System Guides",
+      "regulator": "UAE FIU",
+      "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/system-guides/",
+      "category": "aml",
+      "source_type": "aml",
+      "priority": "P1",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_config": {
+        "container_selector": "main",
+        "content_selector": "main",
+        "item_selector": "a[href]"
+      },
+      "wait_for_selector": "main, a[href$=\".pdf\"]",
+      "content_selector": "main",
+      "expected_min_length": 500,
+      "proof_path": "data/source_snapshots/2026-06-20/AE/AE-uaefiu-system-guides/intake-20260620T102113Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-20/AE/AE-uaefiu-system-guides/intake-20260620T102113Z/normalized.txt",
+      "no_save_normalized_hash": "c1b79b644500d43c5029a47499c4f696e99b80404240bb8af6b707dbb43eda03",
+      "no_save_normalized_length": 2401,
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_quality_score": 65,
+      "last_monitor_hash": "c1b79b644500d43c5029a47499c4f696e99b80404240bb8af6b707dbb43eda03",
+      "last_checked_at": "2026-06-20T10:21:17Z",
+      "monitoring_mode": "fresh_alert",
+      "fresh_signal_class": "FRESH_ALERT",
+      "fresh_signal_type": "official_publication_listing",
+      "expected_update_pattern": "daily checked new, removed, or changed UAE FIU system guide PDF links",
+      "customer_alert_policy": "Alert only after proof-backed monitoring detects a material official UAE FIU system guide publication/listing change; suppress unchanged, duplicate, static, and nav-shell noise.",
+      "recommended_check_frequency": "daily",
+      "alert_eligible": true,
+      "commercial_signal_tier": "B",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "tier": "2",
+      "notes": "Activated after strong no-save pass, two proof-backed baseline runs, stable normalized hash, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    }
+  ]
+}

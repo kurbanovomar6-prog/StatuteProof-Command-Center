@@ -1,0 +1,72 @@
+{
+  "tested_count": 1,
+  "strong_pass_count": 0,
+  "strong_pass_ids": [],
+  "results": [
+    {
+      "source_id": "AE-moj-aml-cft-legislation",
+      "url": "https://www.moj.gov.ae/en/laws-and-legislation/anti-money-laundering-and-combatting-terrorism/anti-money-laundering-and-combatting-terrorism.aspx",
+      "regulator": "manual",
+      "recommended_adapter": "pdf_listing",
+      "detected_page_type": "pdf_listing",
+      "selector_confidence": 80,
+      "probe": {
+        "status": "NAV_SHELL_ONLY",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "quality_score": 0,
+        "normalized_length": 407,
+        "normalized_hash": "3ae7a48c68db40a0bc0616b3e228a7c6c639ea78d1f25623a772b4e3f013dd47",
+        "nav_shell": true,
+        "hash_collision": false,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "adapter_used": false,
+        "adapter_name": "",
+        "adapter_family": "",
+        "failure_code": "NAV_SHELL_ONLY",
+        "strong_pass": false
+      },
+      "applied": {
+        "status": "NEEDS_SELECTOR_REVIEW",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "quality_score": 5,
+        "normalized_length": 0,
+        "normalized_hash": "",
+        "nav_shell": false,
+        "hash_collision": false,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "adapter_used": false,
+        "adapter_name": "",
+        "adapter_family": "",
+        "failure_code": "URL_STALE",
+        "strong_pass": false,
+        "adapter_config": {
+          "container_selector": "#main-content-area",
+          "content_selector": "#main-content-area",
+          "item_selector": "a[href]"
+        },
+        "wait_for_selector": "main, a[href$='.pdf']"
+      },
+      "best": {
+        "status": "NAV_SHELL_ONLY",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "quality_score": 0,
+        "normalized_length": 407,
+        "normalized_hash": "3ae7a48c68db40a0bc0616b3e228a7c6c639ea78d1f25623a772b4e3f013dd47",
+        "nav_shell": true,
+        "hash_collision": false,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "adapter_used": false,
+        "adapter_name": "",
+        "adapter_family": "",
+        "failure_code": "NAV_SHELL_ONLY",
+        "strong_pass": false
+      }
+    }
+  ]
+}

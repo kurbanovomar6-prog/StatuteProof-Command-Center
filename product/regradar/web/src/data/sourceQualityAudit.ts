@@ -4,13 +4,13 @@
 
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: '2026-06-20',
-  totalEnabled: 239,
-  freshAlertEligible: 170,
+  totalEnabled: 241,
+  freshAlertEligible: 172,
   evidenceLibraryOnly: 61,
   candidate: 5,
   remediation: 3,
-  sourceLevelMonitorOk: 224,
-  withProofPath: 230,
+  sourceLevelMonitorOk: 226,
+  withProofPath: 232,
 } as const
 
 export const FAMILY_QUALITY = [
@@ -104,8 +104,8 @@ export const FAMILY_QUALITY = [
   },
   {
     family: 'SCA',
-    totalEnabled: 7,
-    freshAlertEligible: 5,
+    totalEnabled: 8,
+    freshAlertEligible: 6,
     evidenceLibrary: 1,
     candidate: 0,
     remediation: 1,
@@ -121,19 +121,19 @@ export const FAMILY_QUALITY = [
     candidate: 1,
     remediation: 1,
     status: 'partial',
-    gapTo25: 20,
-    notes: 'UAE FIU has 5 fresh-alert sources. FIU circulars remain candidate/held and the homepage remains remediation.',
+    gapTo25: 19,
+    notes: 'UAE FIU has 6 fresh-alert sources after adding proof-backed system guides. FIU circulars remain candidate/held and the homepage remains remediation.',
   },
   {
     family: 'Ministry of Finance',
-    totalEnabled: 3,
-    freshAlertEligible: 2,
+    totalEnabled: 4,
+    freshAlertEligible: 3,
     evidenceLibrary: 1,
     candidate: 0,
     remediation: 0,
     status: 'weak',
-    gapTo25: 23,
-    notes: 'MoF has two proof-backed fresh-alert sources, including financial legislation PDFs, plus one evidence-library homepage.',
+    gapTo25: 22,
+    notes: 'MoF has three proof-backed fresh-alert sources, including financial legislation and ESR publication/PDF listings, plus one evidence-library homepage.',
   },
   {
     family: 'Ministry of Justice / UAE Legislation / Gazette',
@@ -157,7 +157,7 @@ export const KNOWN_LIMITATIONS = [
   },
   {
     source: 'UAE FIU',
-    limitation: 'UAE FIU has 5 fresh-alert sources. FIU circulars remain candidate/held and cannot be claimed as monitored.',
+    limitation: 'UAE FIU has 6 fresh-alert sources. FIU circulars remain candidate/held and cannot be claimed as monitored.',
     impact: 'partial_coverage',
     clientsAffected: ['aml_mlro', 'dnfbp', 'vasp_crypto'],
   },
@@ -176,16 +176,16 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  'StatuteProof has 170 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 20, 2026.',
+  'StatuteProof has 172 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 20, 2026.',
   'StatuteProof also maintains 61 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.',
-  '224 enabled UAE sources have MONITOR_OK status overall; 170 of those are currently fresh-alert eligible after excluding static evidence-library pages.',
-  'StatuteProof maintains source-level proof files for 230 of 239 enabled UAE source snapshots; this is not customer risk-brief eligibility.',
-  'MoF monitoring has 2 fresh-alert eligible official sources plus one evidence-library homepage.',
+  '226 UAE source records currently have MONITOR_OK status overall; 172 of those are fresh-alert eligible after excluding static evidence-library pages.',
+  'StatuteProof maintains source-level proof files for 232 of 241 enabled UAE source snapshots; this is not customer risk-brief eligibility.',
+  'MoF monitoring has 3 fresh-alert eligible official sources plus one evidence-library homepage.',
   'MoE/DNFBP AML monitoring has 42 fresh-alert eligible official sources plus one evidence-library homepage.',
 ] as const
 
 export const FORBIDDEN_CLAIMS = [
-  'Do not describe all 239 enabled UAE sources as live monitors.',
+  'Do not describe all 241 enabled UAE sources as live monitors.',
   'Do not describe UAE coverage as complete.',
   'Do not describe sanctions coverage as complete.',
   'Do not describe VARA coverage as complete.',
@@ -206,6 +206,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: '170 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, source-level proof files, hashes, and baseline confirmation',
+  recommendedSalesClaim: '172 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, source-level proof files, hashes, and baseline confirmation',
   riskBriefBoundary: 'Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist.',
 } as const

@@ -8,13 +8,13 @@ Source file: `product/regradar/sources.json`
 
 | Metric | Count |
 | --- | ---: |
-| Enabled UAE sources | 239 |
-| Fresh-alert eligible | 170 |
+| Enabled UAE sources | 241 |
+| Fresh-alert eligible | 172 |
 | Evidence-library only | 61 |
 | Candidate | 5 |
 | Remediation | 3 |
-| Source-level MONITOR_OK | 224 |
-| Sources with proof path | 230 |
+| Source-level MONITOR_OK | 226 |
+| Sources with proof path | 232 |
 
 These are monitoring-truth counts, not legal completeness claims.
 
@@ -31,8 +31,8 @@ These are monitoring-truth counts, not legal completeness claims.
 | FTA / Tax | 25 | 25 | 0 | 0 | 0 | Strong Selected Source | 0 |
 | EOCN / sanctions / TFS | 25 | 25 | 0 | 0 | 0 | Strong Selected Source | 0 |
 | SCA | 7 | 5 | 1 | 0 | 1 | Weak | 20 |
-| UAE FIU | 7 | 5 | 0 | 1 | 1 | Partial | 20 |
-| Ministry of Finance | 3 | 2 | 1 | 0 | 0 | Weak | 23 |
+| UAE FIU | 8 | 6 | 0 | 1 | 1 | Partial | 19 |
+| Ministry of Finance | 4 | 3 | 1 | 0 | 0 | Weak | 22 |
 | Ministry of Justice / UAE Legislation / Gazette | 1 | 0 | 0 | 0 | 1 | Missing | 25 |
 
 ## Family Notes
@@ -46,22 +46,22 @@ These are monitoring-truth counts, not legal completeness claims.
 - FTA / Tax: 25 official FTA tax sources are fresh-alert eligible.
 - EOCN / sanctions / TFS: 25 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN/UAEIEC and MoE-owned TFS support. This is not complete sanctions coverage.
 - SCA: SCA has 5 proof-backed fresh-alert sources. The broader SCA family remains below Strong until more official sources reach MONITOR_OK.
-- UAE FIU: UAE FIU has 5 fresh-alert sources. FIU circulars remain candidate/held and the homepage remains remediation.
-- Ministry of Finance: MoF has two proof-backed fresh-alert sources, including financial legislation PDFs, plus one evidence-library homepage.
+- UAE FIU: UAE FIU has 6 fresh-alert sources after adding proof-backed system guides. FIU circulars remain candidate/held and the homepage remains remediation.
+- Ministry of Finance: MoF has three proof-backed fresh-alert sources, including financial legislation and ESR publication/PDF listings, plus one evidence-library homepage.
 - Ministry of Justice / UAE Legislation / Gazette: UAE Legislation Portal remains remediation due to WAF/access issues. No MONITOR_OK claim is allowed.
 
 ## Safe Product Claims
 
-- StatuteProof has 170 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 20, 2026.
+- StatuteProof has 172 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 20, 2026.
 - StatuteProof also maintains 61 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.
-- 224 enabled UAE sources have MONITOR_OK status overall; 170 of those are currently fresh-alert eligible after excluding static evidence-library pages.
-- StatuteProof maintains source-level proof files for 230 of 239 enabled UAE source snapshots; this is not customer risk-brief eligibility.
-- MoF monitoring has 2 fresh-alert eligible official sources plus one evidence-library homepage.
+- 226 UAE source records currently have MONITOR_OK status overall; 172 of those are fresh-alert eligible after excluding static evidence-library pages.
+- StatuteProof maintains source-level proof files for 232 of 241 enabled UAE source snapshots; this is not customer risk-brief eligibility.
+- MoF monitoring has 3 fresh-alert eligible official sources plus one evidence-library homepage.
 - MoE/DNFBP AML monitoring has 42 fresh-alert eligible official sources plus one evidence-library homepage.
 
 ## Forbidden Claims
 
-- 239 monitored UAE regulatory sources.
+- 241 monitored UAE regulatory sources.
 - complete UAE coverage.
 - complete sanctions coverage.
 - complete VARA coverage.

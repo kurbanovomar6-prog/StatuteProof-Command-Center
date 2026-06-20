@@ -1,0 +1,47 @@
+{
+  "specs": [
+    {
+      "source_id": "AE-mof-esr",
+      "name": "UAE Ministry of Finance Economic Substance Regulations",
+      "regulator": "Ministry of Finance",
+      "url": "https://mof.gov.ae/en/public-finance/international-relations/economic-substance-regulations/",
+      "category": "regulatory",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_config": {
+        "container_selector": "#main-content",
+        "content_selector": "#main-content",
+        "item_selector": "a[href]"
+      },
+      "wait_for_selector": "main, a[href$=\".pdf\"]",
+      "content_selector": "#main-content",
+      "expected_min_length": 500,
+      "proof_path": "data/source_snapshots/2026-06-20/AE/AE-mof-esr/intake-20260620T101409Z/proof.json",
+      "normalized_text_path": "data/source_snapshots/2026-06-20/AE/AE-mof-esr/intake-20260620T101409Z/normalized.txt",
+      "no_save_normalized_hash": "b8eac4a534b0d8485170dc026b218a8b0d06f5584c12385cc61c63bf93a904db",
+      "no_save_normalized_length": 4939,
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "last_monitor_status": "MONITOR_OK",
+      "last_monitor_quality_score": 65,
+      "last_monitor_hash": "b8eac4a534b0d8485170dc026b218a8b0d06f5584c12385cc61c63bf93a904db",
+      "last_checked_at": "2026-06-20T10:14:44Z",
+      "monitoring_mode": "fresh_alert",
+      "fresh_signal_class": "FRESH_ALERT",
+      "fresh_signal_type": "official_publication_listing",
+      "expected_update_pattern": "daily checked new, removed, or changed Ministry of Finance ESR publication/PDF links",
+      "customer_alert_policy": "Alert only after proof-backed monitoring detects a material official MoF ESR publication/listing change; suppress unchanged, duplicate, static, and nav-shell noise.",
+      "recommended_check_frequency": "daily",
+      "alert_eligible": true,
+      "commercial_signal_tier": "B",
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "tier": "2",
+      "notes": "Activated after strong no-save pass, two proof-backed baseline runs, stable normalized hash, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    }
+  ]
+}

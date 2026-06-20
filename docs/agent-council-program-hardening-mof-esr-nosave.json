@@ -1,0 +1,80 @@
+{
+  "tested_count": 1,
+  "strong_pass_count": 1,
+  "strong_pass_ids": [
+    "AE-mof-esr"
+  ],
+  "results": [
+    {
+      "source_id": "AE-mof-esr",
+      "url": "https://mof.gov.ae/en/public-finance/international-relations/economic-substance-regulations/",
+      "regulator": "manual",
+      "recommended_adapter": "pdf_listing",
+      "detected_page_type": "pdf_listing",
+      "selector_confidence": 80,
+      "probe": {
+        "status": "NAV_SHELL_ONLY",
+        "activation_readiness": "NEEDS_REMEDIATION",
+        "quality_score": 0,
+        "normalized_length": 5240,
+        "normalized_hash": "c43374ee5c53f67d03831069fafd9fe5985d84b9c1c443d28d6853bdce891eeb",
+        "nav_shell": true,
+        "hash_collision": false,
+        "noise_risk": "unknown",
+        "source_health_risk": "unknown",
+        "can_save_evidence": false,
+        "adapter_used": false,
+        "adapter_name": "",
+        "adapter_family": "",
+        "failure_code": "NAV_SHELL_ONLY",
+        "strong_pass": false
+      },
+      "applied": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "quality_score": 65,
+        "normalized_length": 4939,
+        "normalized_hash": "b8eac4a534b0d8485170dc026b218a8b0d06f5584c12385cc61c63bf93a904db",
+        "nav_shell": false,
+        "hash_collision": false,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "adapter_used": true,
+        "adapter_name": "pdf_listing",
+        "adapter_family": "pdf_listing",
+        "failure_code": "",
+        "strong_pass": true,
+        "adapter_config": {
+          "container_selector": "#main-content",
+          "content_selector": "#main-content",
+          "item_selector": "a[href]"
+        },
+        "wait_for_selector": "main, a[href$='.pdf']"
+      },
+      "best": {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "activation_readiness": "BASELINE_REQUIRED",
+        "quality_score": 65,
+        "normalized_length": 4939,
+        "normalized_hash": "b8eac4a534b0d8485170dc026b218a8b0d06f5584c12385cc61c63bf93a904db",
+        "nav_shell": false,
+        "hash_collision": false,
+        "noise_risk": "low",
+        "source_health_risk": "medium",
+        "can_save_evidence": true,
+        "adapter_used": true,
+        "adapter_name": "pdf_listing",
+        "adapter_family": "pdf_listing",
+        "failure_code": "",
+        "strong_pass": true,
+        "adapter_config": {
+          "container_selector": "#main-content",
+          "content_selector": "#main-content",
+          "item_selector": "a[href]"
+        },
+        "wait_for_selector": "main, a[href$='.pdf']"
+      }
+    }
+  ]
+}

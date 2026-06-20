@@ -2,11 +2,11 @@
   "version": "2026-06-14",
   "purpose": "Research-only UAE official source pack candidates. This file does not activate monitoring and must not be marketed as validated coverage.",
   "current_customer_truth": {
-    "enabled_uae_sources": 239,
-    "readiness_supported": 238,
+    "enabled_uae_sources": 241,
+    "readiness_supported": 240,
     "remediation": 1,
-    "customer_copy": "239 enabled UAE sources; 238 monitoring-active in the legacy registry; 1 remediation. Customer fresh-alert claims must use the narrower 170 fresh-alert eligible count. Selected sources only. Monitoring intelligence only. Not legal advice.",
-    "monitoring_active": 238
+    "customer_copy": "241 enabled UAE sources; 240 monitoring-active in the legacy registry; 1 remediation. Customer fresh-alert claims must use the narrower 172 fresh-alert eligible count. Selected sources only. Monitoring intelligence only. Not legal advice.",
+    "monitoring_active": 240
   },
   "status_definitions": {
     "candidate": "Official or officially linked candidate, not yet tested.",
@@ -4360,7 +4360,7 @@
     "low_source_health_risk_count": 0,
     "medium_source_health_risk_count": 3,
     "high_source_health_risk_count": 37,
-    "public_truth_after_validation": "239 enabled UAE sources; 238 monitoring-active; 1 remediation",
+    "public_truth_after_validation": "241 enabled UAE sources; 240 monitoring-active; 1 remediation",
     "sources_json_changed": false,
     "accepted_default_pack_count": 2
   },
@@ -4373,7 +4373,7 @@
     "remediation_count": 3,
     "blocked_count": 1,
     "sources_json_changed": false,
-    "public_truth_after_validation": "239 enabled UAE sources; 238 monitoring-active; 1 remediation"
+    "public_truth_after_validation": "241 enabled UAE sources; 240 monitoring-active; 1 remediation"
   },
   "last_adgm_fsra_sca_saved_baseline": {
     "tested_at": "2026-06-14T15:30:28Z",
@@ -4385,7 +4385,7 @@
     "baseline_pending_count": 3,
     "remediation_count": 1,
     "sources_json_changed": false,
-    "public_truth_after_validation": "239 enabled UAE sources; 238 monitoring-active; 1 remediation",
+    "public_truth_after_validation": "241 enabled UAE sources; 240 monitoring-active; 1 remediation",
     "notes": "SCA AML/CFT failed save mode with NAV_SHELL_ONLY despite previous no-save result. Evidence artifacts are local runtime files and remain gitignored."
   },
   "last_uae_50_agent_gated_sprint": {
@@ -4401,10 +4401,10 @@
   "sources": [],
   "summary": {
     "activation_ready_count": 10,
-    "enabled_count": 239,
-    "readiness_supported_count": 238,
+    "enabled_count": 241,
+    "readiness_supported_count": 240,
     "remediation_count": 1,
-    "current_truth": "239 enabled / 238 monitoring-active / 1 remediation",
-    "current_source_truth": "239 enabled / 238 monitoring-active / 1 remediation"
+    "current_truth": "241 enabled / 240 monitoring-active / 1 remediation",
+    "current_source_truth": "241 enabled / 240 monitoring-active / 1 remediation"
   }
 }

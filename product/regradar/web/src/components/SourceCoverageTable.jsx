@@ -93,8 +93,8 @@ const SOURCES = [
 ]
 
 const SOURCE_TRUTH = {
-  enabled: 239,
-  readinessSupported: 170,
+  enabled: 241,
+  readinessSupported: 172,
   remediation: 3,
 }
 
