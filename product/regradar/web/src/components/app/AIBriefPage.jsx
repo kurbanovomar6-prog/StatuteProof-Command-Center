@@ -50,21 +50,34 @@ export default function AIBriefPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
+      <div className="sp-command-panel p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">Reviewed monitoring brief queue</h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
-              Briefs are drafted from monitored source evidence and remain subject to human review before delivery. This is not legal advice.
+              Brief drafts require canonical evidence, human review, legal-language scan, and explicit delivery approval. This is not legal advice.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {['Evidence-backed', 'Human review gate', 'No sample fallback', 'Delivery requires setup'].map(label => (
+            {['Evidence-gated', 'Human review gate', 'No sample fallback', 'Delivery requires setup'].map(label => (
               <span key={label} className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300">
                 {label}
               </span>
             ))}
           </div>
+        </div>
+        <div className="mt-4 grid gap-2 md:grid-cols-4">
+          {[
+            ['Evidence', 'canonical record required'],
+            ['Review', 'human decision required'],
+            ['Scan', 'forbidden phrases blocked'],
+            ['Delivery', 'off until approved'],
+          ].map(([title, body]) => (
+            <div key={title} className="rounded-xl border border-slate-800 bg-slate-950/45 p-3">
+              <p className="text-xs font-semibold text-white">{title}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{body}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -107,14 +120,15 @@ export default function AIBriefPage() {
 
       {!loading && !error && filtered.length > 0 && (
         <div className="grid gap-3 lg:grid-cols-2">
-          {filtered.map(brief => {
+          {filtered.map((brief, index) => {
             const status = brief.delivery_approved
               ? 'approved'
               : brief.human_reviewed
               ? 'pending'
               : 'draft'
+            const briefKey = brief.alert_id || brief.id || `${brief.source_id || 'brief'}-${brief.run_id || index}`
             return (
-              <article key={brief.alert_id} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+              <article key={briefKey} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLE[status]}`}>
                     {brief.delivery_approved ? 'Delivery approved' : brief.human_reviewed ? 'Reviewed' : 'Draft queue'}

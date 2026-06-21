@@ -196,8 +196,73 @@ export default function ReviewQueuePage() {
           <p className="rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3 text-sm text-slate-500">No canonical evidence records found.</p>
         )}
         {!canonicalLoading && !canonicalError && canonicalRows.length > 0 && (
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
-            <table className="sp-table min-w-[1180px]">
+          <div>
+            <div className="grid gap-3 lg:hidden">
+              {canonicalRows.map(row => {
+                const state = reviewState[row.record_id]
+                const isSaving = state?.status === 'saving'
+                return (
+                  <article key={row.record_id} className="sp-mobile-card">
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="sp-mono truncate text-xs text-slate-300">{row.record_id}</p>
+                        <p className="mt-1 text-sm font-semibold text-white">{row.source_id || 'Unknown source'}</p>
+                        <p className="text-xs text-slate-500">{row.regulator || 'Unknown regulator'} · {row.run_status || 'UNKNOWN'}</p>
+                      </div>
+                      <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-200">
+                        {row.record_review_status || 'pending'}
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Record path</p>
+                      <p className="mt-1 break-all text-xs text-slate-400">{row.record_path}</p>
+                    </div>
+                    <div className="mt-3">
+                      <label className="mb-1.5 block text-xs font-semibold text-slate-400">Reviewer note</label>
+                      <input
+                        type="text"
+                        value={reviewNotes[row.record_id] || ''}
+                        onChange={event => setReviewNotes(prev => ({ ...prev, [row.record_id]: event.target.value }))}
+                        placeholder="Required before decision"
+                        className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+                      />
+                      {state?.message && (
+                        <p className={`mt-1 text-[11px] ${state.status === 'error' ? 'text-rose-300' : 'text-emerald-300'}`}>{state.message}</p>
+                      )}
+                    </div>
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => submitCanonicalReview(row.record_id, 'approved')}
+                        className="rounded-lg border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => submitCanonicalReview(row.record_id, 'rejected')}
+                        className="rounded-lg border border-rose-400/25 bg-rose-400/10 px-3 py-2 text-xs font-semibold text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => submitCanonicalReview(row.record_id, 'blocked')}
+                        className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Block
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+
+            <div className="hidden overflow-x-auto rounded-lg border border-slate-800 lg:block">
+              <table className="sp-table min-w-[1180px]">
               <thead>
                 <tr>
                   {['Record', 'Source', 'Run', 'Record review', 'Latest decision', 'Reviewer note', 'Decision'].map(header => (
@@ -273,7 +338,8 @@ export default function ReviewQueuePage() {
                   )
                 })}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         )}
       </div>
@@ -329,8 +395,51 @@ export default function ReviewQueuePage() {
       )}
 
       {!loading && !error && filteredRows.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#0D1B2E]">
-          <table className="sp-table min-w-[1050px]">
+        <div>
+          <div className="grid gap-3 lg:hidden">
+            {filteredRows.map(row => (
+              <article key={row.evidence_record_id} className="sp-mobile-card">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white">{row.source_name || row.source_id}</p>
+                    <p className="mt-1 text-xs text-slate-500">{row.timestamp_utc || 'No timestamp'}</p>
+                  </div>
+                  <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-200">
+                    {row.change_status || 'UNKNOWN'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
+                    <p className="text-slate-500">Source health</p>
+                    <div className="mt-1"><StatusPill value={row.source_health_status} /></div>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
+                    <p className="text-slate-500">Quality</p>
+                    <p className="mt-1 font-semibold text-slate-300">{row.extraction_quality || 'UNKNOWN'}</p>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
+                    <p className="text-slate-500">Hash</p>
+                    <p className="sp-mono mt-1 truncate text-slate-300">{row.normalized_hash_short || 'not recorded'}</p>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
+                    <p className="text-slate-500">Assessment</p>
+                    <p className="mt-1 font-semibold text-amber-200">{row.pending_review ? 'Pending' : row.impact_level || row.assessment_status || 'Assessed'}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <a href="/app/evidence" className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">Open evidence</a>
+                  {row.official_url && (
+                    <a href={row.official_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-200">
+                      Official source <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-xl border border-slate-800 bg-[#0D1B2E] lg:block">
+            <table className="sp-table min-w-[1050px]">
             <thead>
               <tr>
                 {['Source', 'Change', 'Source health', 'Quality', 'Hash', 'Assessment', 'Reviewer', 'Actions'].map(header => (
@@ -376,7 +485,8 @@ export default function ReviewQueuePage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       )}
 

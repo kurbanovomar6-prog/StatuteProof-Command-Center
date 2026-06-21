@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, CheckCircle, Clock, FileText, Globe, Link2, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { ArrowRight, Bell, CheckCircle, Clock, FileText, Globe, Link2, ShieldCheck, AlertTriangle } from 'lucide-react'
 
 import { telegramPair, sources as sourcesApi } from '../../api'
 import PlanBanner from './PlanBanner'
@@ -263,6 +263,63 @@ function EvidenceBadge({ source }) {
   )
 }
 
+function CommandMetric({ label, value, tone = 'slate', detail }) {
+  const toneClass = {
+    cyan: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-100',
+    emerald: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100',
+    amber: 'border-amber-400/25 bg-amber-400/10 text-amber-100',
+    slate: 'border-slate-700 bg-slate-950/55 text-slate-200',
+  }[tone] || 'border-slate-700 bg-slate-950/55 text-slate-200'
+
+  return (
+    <div className={`rounded-2xl border p-4 ${toneClass}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">{label}</p>
+      <p className="sp-mono mt-2 text-3xl font-bold">{value}</p>
+      {detail && <p className="mt-1 text-xs leading-relaxed opacity-70">{detail}</p>}
+    </div>
+  )
+}
+
+function EvidenceChainPanel() {
+  const steps = [
+    ['Source run', 'official source checked', 'done'],
+    ['Canonical evidence', 'hash + proof verified', 'done'],
+    ['Human review', 'reviewer decision needed', 'review'],
+    ['Alert link', 'route to queue', 'review'],
+    ['Draft brief', 'allowed after evidence', 'blocked'],
+    ['Delivery approval', 'explicit separate gate', 'blocked'],
+  ]
+
+  return (
+    <div className="sp-command-panel p-5">
+      <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-white">Evidence-to-brief chain</h2>
+          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-500">
+            This is the internal gate map. A source change becomes a customer artifact only after every required gate passes.
+          </p>
+        </div>
+        <StatusPill tone="slate">Delivery blocked by default</StatusPill>
+      </div>
+
+      <div className="sp-evidence-chain">
+        {steps.map(([title, detail, state]) => (
+          <div key={title} className={`sp-evidence-step ${state === 'blocked' ? 'is-blocked' : ''}`}>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${
+                state === 'done' ? 'bg-emerald-300' : state === 'review' ? 'bg-amber-300' : 'bg-slate-500'
+              }`} />
+              <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{state}</span>
+            </div>
+            <p className="text-xs font-semibold text-white">{title}</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{detail}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function DashboardHome({ navigate, currentUser, planState, onChoosePlan }) {
   const profile = getWorkspaceProfile()
 
@@ -331,70 +388,70 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
       <PlanBanner planState={planState} onChoosePlan={onChoosePlan} />
 
-      <div className="sp-panel border-amber-400/20 p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="sp-command-hero p-5 lg:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
           <div>
-            <div className="mb-2 flex flex-wrap gap-2">
-              <StatusPill tone="amber">Source pack validation in progress</StatusPill>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <StatusPill tone="amber">Operator command center</StatusPill>
               <StatusPill tone="cyan">Evidence-readiness review</StatusPill>
             </div>
-            <h2 className="text-lg font-semibold text-white">
+            <h1 className="max-w-4xl text-2xl font-semibold leading-tight text-white md:text-3xl">
               {sourcesError
                 ? 'Source readiness summary is unavailable right now.'
                 : sourcesLoading
                 ? 'Loading UAE source readiness summary...'
-                : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} of ${sourceSummary?.enabled_count ?? 0} enabled UAE source records are fresh-alert eligible.`}
-            </h2>
-            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
-              Source activation remains subject to source readiness, evidence, repeat baseline, source-health,
-              and review gates. This is monitoring intelligence only, not legal advice.
+                : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} fresh-alert eligible sources, ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations to keep visible.`}
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
+              Use this screen to decide what needs operator review before relying on any alert,
+              brief draft, or source claim. This is monitoring intelligence only, not legal advice.
             </p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {attentionItems.map(item => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => navigate(item.action)}
+                  className="group rounded-2xl border border-slate-800 bg-slate-950/45 p-4 text-left transition hover:-translate-y-0.5 hover:border-cyan-400/35 hover:bg-slate-900/70"
+                >
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{item.label}</p>
+                    <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Gated'}</StatusPill>
+                  </div>
+                  <p className="sp-mono text-3xl font-semibold text-white">{item.value}</p>
+                  <p className="mt-2 min-h-[2.4rem] text-xs leading-relaxed text-slate-500">{item.detail}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-cyan-200">
+                    Open <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="grid min-w-[280px] grid-cols-3 gap-2 text-center">
-            <div className="rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-white">{sourceSummary?.enabled_count ?? '—'}</p>
-              <p className="text-[11px] text-slate-500">enabled</p>
-            </div>
-            <div className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-emerald-100">{sourceSummary?.readiness_supported_count ?? '—'}</p>
-              <p className="text-[11px] text-emerald-100/70">fresh-alert</p>
-            </div>
-            <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2">
-              <p className="sp-mono text-xl font-semibold text-amber-100">{(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'}</p>
-              <p className="text-[11px] text-amber-100/70">candidate/remediation</p>
+
+          <div className="sp-action-lane p-5">
+            <p className="text-xs font-bold uppercase tracking-wide text-amber-200">Next safest action</p>
+            <h2 className="mt-2 text-xl font-semibold text-white">Review source-health flags before any brief work.</h2>
+            <p className="mt-2 text-sm leading-relaxed text-amber-50/80">
+              Failed and quality-drop source runs are operator risks. Clear or document them before presenting source scope to a pilot buyer.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('sources')}
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-200 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-100"
+            >
+              Review source health <ArrowRight className="h-4 w-4" />
+            </button>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <CommandMetric label="Enabled" value={sourceSummary?.enabled_count ?? '—'} detail="source records" />
+              <CommandMetric label="Fresh-alert" value={sourceSummary?.readiness_supported_count ?? '—'} tone="emerald" detail="eligible" />
+              <CommandMetric label="Limited" value={(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'} tone="amber" detail="not claimed" />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="sp-panel p-5">
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-white">What needs attention now</h2>
-            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-500">
-              Start here before relying on any brief, alert, or source claim. These are operator tasks, not customer-facing conclusions.
-            </p>
-          </div>
-          <StatusPill tone="cyan">Human review required</StatusPill>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {attentionItems.map(item => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => navigate(item.action)}
-              className="rounded-lg border border-slate-800 bg-slate-950/35 p-4 text-left transition-colors hover:border-cyan-400/30 hover:bg-slate-900/70"
-            >
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
-                <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Gated'}</StatusPill>
-              </div>
-              <p className="sp-mono text-2xl font-semibold text-white">{item.value}</p>
-              <p className="mt-2 text-xs leading-relaxed text-slate-500">{item.detail}</p>
-            </button>
-          ))}
-        </div>
-      </div>
+      <EvidenceChainPanel />
 
       <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} planState={planState} />
 

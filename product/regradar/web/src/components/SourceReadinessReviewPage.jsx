@@ -7,7 +7,7 @@
  * Disclaimer: Not legal advice and does not determine regulatory obligations.
  */
 import { useState } from 'react'
-import { Shield, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react'
+import { Shield, CheckCircle, AlertTriangle, ArrowLeft, ClipboardCheck, FileSearch, Map, Send } from 'lucide-react'
 
 const REGULATORS = [
   'CBUAE',
@@ -98,28 +98,28 @@ export default function SourceReadinessReviewPage({ onBack }) {
     }
   }
 
-  const inputCls = 'min-h-11 w-full bg-[#0A1628] border border-slate-800 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#16D9F5]/50 focus:ring-1 focus:ring-[#16D9F5]/50 transition-all text-sm'
-  const selectCls = 'min-h-11 w-full bg-[#0A1628] border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#16D9F5]/50 focus:ring-1 focus:ring-[#16D9F5]/50 transition-all text-sm'
-  const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide'
+  const inputCls = 'min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 shadow-sm transition-all focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
+  const selectCls = 'min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 shadow-sm transition-all focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
+  const labelCls = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600'
 
   if (status === 'success') {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-[#07111F] px-4">
-        <div className="max-w-md w-full text-center">
-          <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-3">Request received</h2>
-          <p className="text-slate-400 mb-6 leading-relaxed">
+      <div className="sp-page-orbit flex min-h-dvh items-center justify-center px-4">
+        <div className="sp-paper-panel w-full max-w-md p-8 text-center">
+          <CheckCircle className="mx-auto mb-4 h-16 w-16 text-emerald-600" />
+          <h2 className="mb-3 text-2xl font-semibold text-slate-950">Request received</h2>
+          <p className="mb-6 leading-relaxed text-slate-600">
             Your source readiness review request has been submitted. We will review your profile
             and source requirements and be in touch.
           </p>
-          <p className="text-xs text-slate-600 mb-6 leading-relaxed">
+          <p className="mb-6 text-xs leading-relaxed text-slate-500">
             This is not legal advice and does not determine regulatory obligations.
           </p>
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#16D9F5] hover:underline"
+            className="inline-flex items-center gap-2 text-sm font-bold text-cyan-800 hover:underline"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to homepage
+            <ArrowLeft className="h-4 w-4" /> Back to homepage
           </button>
         </div>
       </div>
@@ -127,16 +127,16 @@ export default function SourceReadinessReviewPage({ onBack }) {
   }
 
   return (
-    <div className="min-h-dvh bg-[#07111F] text-slate-200">
+    <div className="sp-page-orbit min-h-dvh text-slate-200">
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#07111F]/90 backdrop-blur-md border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-800/80 bg-[#06101D]/92 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+            className="flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm text-slate-400 transition-colors hover:bg-slate-800/60 hover:text-white"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back
           </button>
           <div className="flex items-center gap-2">
@@ -149,51 +149,98 @@ export default function SourceReadinessReviewPage({ onBack }) {
         </div>
       </header>
 
-      <main className="pt-28 pb-20 px-4">
-        <div className="max-w-2xl mx-auto">
-
-          {/* Title */}
-          <div className="text-center mb-10">
-            <div className="sp-kicker mb-5">
-              <Shield className="w-3.5 h-3.5" />
-              Free Source Readiness Review
+      <main className="relative z-10 px-4 pb-20 pt-28">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+            <div>
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+                <Shield className="h-3.5 w-3.5" />
+                Free source readiness review
+              </div>
+              <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-white md:text-5xl">
+                Bring your UAE source list. We return a monitored-source truth map.
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-400">
+                We check whether each requested official source is public, technically accessible,
+                fresh-alert eligible, evidence-library only, blocked, or still requiring remediation.
+              </p>
+              <p className="mt-3 text-xs text-slate-500">
+                Monitoring intelligence only. This is not legal advice and does not determine regulatory obligations.
+              </p>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-4">
-              Request a source readiness review
-            </h1>
-            <p className="text-slate-400 leading-relaxed max-w-xl mx-auto">
-              Tell us which UAE regulators your team monitors and how you currently track changes.
-              We check whether the sources are official, public, technically accessible, and suitable for evidence-backed monitoring.
-            </p>
-            <p className="text-xs text-slate-600 mt-3">
-              This is not legal advice and does not determine regulatory obligations.
-            </p>
-            <div className="mx-auto mt-6 grid max-w-lg grid-cols-1 gap-2 text-center sm:grid-cols-3">
+
+            <div className="grid gap-3 sm:grid-cols-3">
               {[
-                ['241', 'UAE source records'],
-                ['172', 'fresh-alert eligible'],
-                ['61', 'evidence-library'],
-              ].map(([value, label]) => (
-                <div key={label} className="sp-panel-muted px-3 py-2">
-                  <p className="sp-mono text-xl font-semibold text-white">{value}</p>
-                  <p className="text-[11px] text-slate-500">{label}</p>
+                ['241', 'UAE source records', 'registry truth'],
+                ['172', 'fresh-alert eligible', 'selected sources'],
+                ['61', 'evidence-library', 'not alert volume'],
+              ].map(([value, label, note]) => (
+                <div key={label} className="rounded-3xl border border-slate-800 bg-slate-950/45 p-4">
+                  <p className="sp-mono text-3xl font-bold text-white">{value}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-200">{label}</p>
+                  <p className="mt-1 text-xs text-slate-500">{note}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Form card */}
-          <div className="sp-panel p-7 sm:p-10">
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-4 py-3">
-                <p className="text-sm font-semibold text-cyan-100">What this review returns</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                  A source map for your licence profile: fresh-alert eligible sources, evidence-library sources,
-                  known blockers, and sources that need adapter or access remediation. It is not a legal opinion.
-                </p>
+          <div className="grid gap-6 lg:grid-cols-[0.72fr_1fr]">
+            <aside className="space-y-4">
+              <div className="sp-paper-panel p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <Map className="h-5 w-5 text-cyan-800" />
+                  <h2 className="text-lg font-semibold text-slate-950">What you get back</h2>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    ['Source map', 'Fresh-alert eligible, evidence-library, candidate, and remediation rows.'],
+                    ['Blocker notes', 'Access restrictions, static pages, nav shells, and parser limitations.'],
+                    ['Pilot fit', 'Which official sources can safely support your first monitored scope.'],
+                  ].map(([title, body]) => (
+                    <div key={title} className="rounded-2xl border border-slate-200 bg-white/72 p-4">
+                      <p className="font-semibold text-slate-950">{title}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-slate-600">{body}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
+              <div className="rounded-3xl border border-amber-400/25 bg-amber-400/10 p-5">
+                <div className="mb-3 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-300" />
+                  <h2 className="text-sm font-semibold text-white">Important boundary</h2>
+                </div>
+                <p className="text-sm leading-relaxed text-amber-50/80">
+                  Selecting a regulator tells us what your team checks today. It does not mean
+                  StatuteProof claims complete coverage for that regulator.
+                </p>
+              </div>
+            </aside>
+
+            <div className="sp-paper-panel p-5 sm:p-7">
+              <div className="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-900">
+                    <ClipboardCheck className="h-3.5 w-3.5" />
+                    Intake form
+                  </div>
+                  <h2 className="text-2xl font-semibold text-slate-950">Request source readiness review</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                    Four sections: identity, licence profile, source areas, and current process.
+                  </p>
+                </div>
+                <FileSearch className="hidden h-9 w-9 text-cyan-800 sm:block" />
+              </div>
+
+              <form className="space-y-6" onSubmit={handleSubmit}>
+              <section>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="sp-mono flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">1</span>
+                  <h3 className="text-sm font-bold text-slate-950">Who should receive the review?</h3>
+                </div>
+
               {/* Email */}
+              <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelCls}>Work email *</label>
                 <input
@@ -218,31 +265,42 @@ export default function SourceReadinessReviewPage({ onBack }) {
                   required
                 />
               </div>
-
-              {/* Job title */}
-              <div>
-                <label className={labelCls}>Job title</label>
-                <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
-                  {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
-                </select>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                  MLRO = Money Laundering Reporting Officer. CCO = Chief Compliance Officer.
-                </p>
               </div>
+              </section>
 
-              {/* Company type */}
-              <div>
-                <label className={labelCls}>Company type</label>
-                <select value={form.companyType} onChange={set('companyType')} className={selectCls}>
-                  {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
-                </select>
-              </div>
+              <section>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="sp-mono flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">2</span>
+                  <h3 className="text-sm font-bold text-slate-950">What profile should we map?</h3>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelCls}>Job title</label>
+                    <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
+                      {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
+                    </select>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                      MLRO = Money Laundering Reporting Officer. CCO = Chief Compliance Officer.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className={labelCls}>Company type</label>
+                    <select value={form.companyType} onChange={set('companyType')} className={selectCls}>
+                      {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </section>
 
               {/* Regulators checkboxes */}
-              <div>
-                <label className={labelCls}>Regulators currently monitored (select all that apply)</label>
-                <p className="mb-2 text-xs leading-relaxed text-slate-500">
-                  Select the official-source areas your team already checks. This does not mean StatuteProof claims complete coverage for that regulator.
+              <section>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="sp-mono flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">3</span>
+                  <h3 className="text-sm font-bold text-slate-950">Which official-source areas matter?</h3>
+                </div>
+                <p className="mb-3 text-xs leading-relaxed text-slate-500">
+                  Select the areas your team checks today. We will return readiness status, not a complete coverage claim.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {REGULATORS.map(reg => (
@@ -252,44 +310,51 @@ export default function SourceReadinessReviewPage({ onBack }) {
                       onClick={() => toggleRegulator(reg)}
                       className={`min-h-10 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
                         form.regulators.includes(reg)
-                          ? 'bg-[#16D9F5]/10 border-[#16D9F5]/50 text-[#16D9F5]'
-                          : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                          ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
+                          : 'border-slate-300 bg-white text-slate-600 hover:border-slate-500 hover:text-slate-950'
                       }`}
                     >
                       {reg}
                     </button>
                   ))}
                 </div>
-              </div>
+              </section>
 
               {/* Current monitoring process */}
-              <div>
-                <label className={labelCls}>Current monitoring process</label>
-                <textarea
-                  rows={3}
-                  placeholder="How does your team currently track regulatory changes? (e.g. manual website checks, email alerts, subscription service)"
-                  value={form.currentProcess}
-                  onChange={set('currentProcess')}
-                  className={`${inputCls} resize-none`}
-                />
-              </div>
+              <section>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="sp-mono flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">4</span>
+                  <h3 className="text-sm font-bold text-slate-950">How do you monitor today?</h3>
+                </div>
+                <div className="grid gap-4">
+                  <div>
+                    <label className={labelCls}>Current monitoring process</label>
+                    <textarea
+                      rows={3}
+                      placeholder="Manual website checks, email alerts, regulator mailing lists, spreadsheet tracker..."
+                      value={form.currentProcess}
+                      onChange={set('currentProcess')}
+                      className={`${inputCls} resize-none`}
+                    />
+                  </div>
 
-              {/* Notes */}
-              <div>
-                <label className={labelCls}>Additional notes (optional)</label>
-                <textarea
-                  rows={2}
-                  placeholder="Any specific source requirements or context for your review request"
-                  value={form.notes}
-                  onChange={set('notes')}
-                  className={`${inputCls} resize-none`}
-                />
-              </div>
+                  <div>
+                    <label className={labelCls}>Additional notes (optional)</label>
+                    <textarea
+                      rows={2}
+                      placeholder="Specific sources, regulator families, or known gaps you want checked"
+                      value={form.notes}
+                      onChange={set('notes')}
+                      className={`${inputCls} resize-none`}
+                    />
+                  </div>
+                </div>
+              </section>
 
               {/* Error */}
               {(status === 'error' && errorMsg) && (
-                <div className="flex items-start gap-2 text-xs text-rose-300 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2.5">
-                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-800">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
                   {errorMsg}
                 </div>
               )}
@@ -298,33 +363,21 @@ export default function SourceReadinessReviewPage({ onBack }) {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="min-h-11 w-full rounded-lg bg-[#16D9F5] py-3 font-bold text-[#07111F] transition-colors hover:bg-[#11c2db] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-3 font-bold text-white shadow-lg shadow-slate-900/20 transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === 'loading' ? 'Submitting…' : 'Request source readiness review'}
+                <Send className="h-4 w-4" />
               </button>
 
               {/* Disclaimer */}
-              <p className="text-xs text-slate-600 text-center leading-relaxed">
+              <p className="text-center text-xs leading-relaxed text-slate-500">
                 This is not legal advice and does not determine regulatory obligations.
                 StatuteProof provides monitoring intelligence only and does not provide legal advice or
                 determine compliance outcomes.
               </p>
             </form>
           </div>
-
-          {/* What to expect */}
-          <div className="mt-8 grid sm:grid-cols-3 gap-4">
-            {[
-              { title: 'Source map', body: 'We identify which official UAE sources are fresh-alert eligible, on the roadmap, or have access restrictions — for your specific licence profile.' },
-              { title: 'Honest about limits', body: 'We disclose sources that have access restrictions, geo-blocking, or extraction issues.' },
-              { title: 'Not legal advice', body: 'This is monitoring intelligence only. Consult qualified professionals for legal and compliance decisions.' },
-            ].map(item => (
-              <div key={item.title} className="sp-panel p-4">
-                <h3 className="text-sm font-semibold text-white mb-2">{item.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{item.body}</p>
-              </div>
-            ))}
-          </div>
+        </div>
         </div>
       </main>
     </div>

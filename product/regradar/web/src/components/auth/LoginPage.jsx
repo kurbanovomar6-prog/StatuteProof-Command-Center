@@ -1,63 +1,73 @@
 import { useEffect, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { CheckCircle, Eye, EyeOff, FileCheck2, LockKeyhole, RadioTower } from 'lucide-react'
 import { auth } from '../../api'
 
-function AuthLayout({ children, quote }) {
+function AuthLayout({ children }) {
+  const trustRows = [
+    ['Evidence', 'hash + timestamp'],
+    ['Briefs', 'draft until reviewed'],
+    ['Scope', 'selected UAE sources'],
+  ]
+
   return (
-    <div className="flex min-h-dvh bg-[#07111F] font-sans text-slate-200 selection:bg-[#16D9F5]/30">
-      {/* Left panel */}
-      <div className="hidden lg:flex w-5/12 bg-[#0A1628] border-r border-slate-800 p-12 flex-col justify-between relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: 'linear-gradient(#16D9F5 1px, transparent 1px), linear-gradient(90deg, #16D9F5 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
-        <div className="relative z-10">
-          <div className="flex items-center gap-2.5">
-            <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-9 w-auto" />
-            <span className="text-lg font-extrabold text-white tracking-tight">
+    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-10 text-slate-200 selection:bg-[#16D9F5]/30">
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.92fr_0.78fr]">
+        <aside className="hidden lg:block">
+          <div className="mb-10 flex items-center gap-3">
+            <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-10 w-auto" />
+            <span className="text-2xl font-extrabold tracking-tight text-white">
               Statute<span className="text-[#16D9F5]">Proof</span>
             </span>
           </div>
-        </div>
 
-        <div className="relative z-10 max-w-sm">
-          <div className="w-10 h-[3px] bg-[#16D9F5] rounded-full mb-6" />
-          <h2 className="text-2xl font-bold text-white mb-6 leading-tight">{quote}</h2>
-          <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/35 p-4 text-xs text-slate-400">
-            <div className="flex justify-between gap-3">
-              <span>Evidence</span>
-              <span className="text-slate-200">hash + timestamp</span>
+          <div className="max-w-xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+              <LockKeyhole className="h-3.5 w-3.5" />
+              Evidence workspace access
             </div>
-            <div className="flex justify-between gap-3">
-              <span>Briefs</span>
-              <span className="text-slate-200">human-reviewed</span>
+            <h2 className="text-4xl font-semibold leading-tight text-white">
+              Sign in to review source evidence before it becomes a brief.
+            </h2>
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-400">
+              The account area separates source monitoring, canonical evidence review, draft brief
+              preparation, and delivery approval.
+            </p>
+          </div>
+
+          <div className="mt-8 max-w-lg rounded-3xl border border-slate-800 bg-slate-950/42 p-5">
+            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
+              <RadioTower className="h-4 w-4 text-cyan-300" />
+              Workspace boundary
             </div>
-            <div className="flex justify-between gap-3">
-              <span>Scope</span>
-              <span className="text-slate-200">UAE official sources</span>
+            <div className="grid gap-3">
+              {trustRows.map(([label, value]) => (
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-slate-800 bg-[#07111F]/72 px-4 py-3 text-sm">
+                  <span className="text-slate-500">{label}</span>
+                  <span className="font-semibold text-slate-100">{value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-xs leading-relaxed text-amber-100/80">
+              <FileCheck2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-200" />
+              <span>No legal advice, no complete coverage claim, and no customer delivery without gates.</span>
             </div>
           </div>
-        </div>
-        <div />
-      </div>
+        </aside>
 
-      {/* Right panel */}
-      <div className="relative flex flex-1 flex-col justify-start overflow-y-auto px-6 py-10 sm:px-16 lg:justify-center lg:px-24 lg:py-12">
-        <div className="w-full max-w-md mx-auto">{children}</div>
+        <section className="sp-paper-panel w-full p-6 sm:p-8">
+          {children}
+        </section>
       </div>
     </div>
   )
 }
 
 export default function LoginPage({ onLogin, onRegister }) {
-  const [email, setEmail]         = useState('')
-  const [password, setPassword]   = useState('')
-  const [showPass, setShowPass]   = useState(false)
-  const [error, setError]         = useState('')
-  const [loading, setLoading]     = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const [googleStatus, setGoogleStatus] = useState({ loading: true, available: false, message: '' })
 
   useEffect(() => {
@@ -107,66 +117,66 @@ export default function LoginPage({ onLogin, onRegister }) {
     window.location.assign(auth.googleStartUrl('/app'))
   }
 
-  const inputCls = (hasError) =>
-    `w-full rounded-lg border ${hasError ? 'border-red-500/60' : 'border-slate-700'} bg-[#0A1628] px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:border-[#16D9F5] focus:outline-none focus:ring-1 focus:ring-[#16D9F5]/20 transition-colors`
+  const inputCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
+  const labelCls = 'block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1.5'
 
   return (
-    <AuthLayout quote="Official-source monitoring with hash-verified evidence and human review for MLROs and compliance teams.">
-
-      <h1 className="text-2xl font-bold text-white mb-2">Sign in to StatuteProof</h1>
-      <p className="text-slate-400 text-sm mb-8">
-        Review monitored sources, canonical evidence records, and draft briefs that remain subject to human review.
-      </p>
+    <AuthLayout>
+      <div className="mb-7">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300 bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-900 lg:hidden">
+          <LockKeyhole className="h-3.5 w-3.5" />
+          Evidence workspace access
+        </div>
+        <h1 className="text-3xl font-semibold leading-tight text-slate-950">Sign in to StatuteProof</h1>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          Review monitored sources, canonical evidence records, and draft brief gates.
+        </p>
+      </div>
 
       <form className="space-y-5" onSubmit={handleSubmit}>
-
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
-            Work Email
-          </label>
+          <label className={labelCls}>Work email</label>
           <input
             type="email"
             placeholder="name@company.com"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className={inputCls(false)}
+            className={inputCls}
             required
             autoComplete="email"
           />
         </div>
 
         <div>
-          <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider">
-              Password
-            </label>
-            <span className="text-xs text-slate-600" title="Password reset is not enabled yet.">
+          <div className="flex justify-between gap-3">
+            <label className={labelCls}>Password</label>
+            <span className="text-xs font-medium text-slate-500" title="Password reset is not enabled yet.">
               Password reset unavailable
             </span>
           </div>
           <div className="relative">
             <input
               type={showPass ? 'text' : 'password'}
-              placeholder="••••••••"
+              placeholder="Your password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className={`${inputCls(false)} pr-10`}
+              className={`${inputCls} pr-11`}
               required
               autoComplete="current-password"
             />
             <button
               type="button"
               onClick={() => setShowPass(v => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+              className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800"
               aria-label={showPass ? 'Hide password' : 'Show password'}
             >
-              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2.5">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
             {error}
           </div>
         )}
@@ -174,16 +184,16 @@ export default function LoginPage({ onLogin, onRegister }) {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#16D9F5] px-5 py-2.5 text-sm font-semibold text-[#07111F] transition-colors hover:bg-[#0EC8E4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#16D9F5] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
 
       <div className="my-6 flex items-center gap-3">
-        <div className="flex-1 h-px bg-slate-800" />
-        <span className="text-xs text-slate-600">or</span>
-        <div className="flex-1 h-px bg-slate-800" />
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-semibold text-slate-400">or</span>
+        <div className="h-px flex-1 bg-slate-200" />
       </div>
 
       <div className="relative">
@@ -191,40 +201,41 @@ export default function LoginPage({ onLogin, onRegister }) {
           type="button"
           disabled={googleStatus.loading || !googleStatus.available}
           onClick={handleGoogleSignIn}
-          className={`flex min-h-11 w-full select-none items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
+          className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition ${
             googleStatus.available
-              ? 'border-slate-700 text-slate-200 hover:border-cyan-400/40 hover:bg-slate-900'
-              : 'cursor-not-allowed border-slate-800 text-slate-600'
+              ? 'border-slate-300 bg-white text-slate-900 hover:border-cyan-400 hover:bg-cyan-50'
+              : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
           }`}
         >
-          <span className="font-bold text-slate-500">G</span>
+          <span className="font-bold">G</span>
           {googleStatus.loading ? 'Checking Google sign-in...' : 'Continue with Google'}
         </button>
         {!googleStatus.loading && !googleStatus.available && (
-          <span className="absolute -top-2.5 right-3 text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded-sm tracking-wide">
+          <span className="absolute -top-2.5 right-3 rounded-md bg-slate-200 px-2 py-0.5 text-[10px] font-bold tracking-wide text-slate-500">
             Not configured
           </span>
         )}
       </div>
-      <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-600">
-        Use your verified work Google account. StatuteProof uses the verified email to create or find your account.
+
+      <p className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-600">
+        Use your verified work Google account. StatuteProof uses the verified email to create
+        or find your account; no OAuth secret is exposed in the browser.
       </p>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-slate-600">
         No account?{' '}
         <button
           onClick={onRegister}
-          className="text-[#16D9F5] font-medium hover:underline focus:outline-none"
+          className="font-bold text-cyan-800 hover:underline focus:outline-none"
         >
           Register
-        </button>{' '}
-        <span className="text-slate-600">→</span>
+        </button>
       </p>
 
-      <p className="mt-4 text-center text-xs text-slate-700 leading-relaxed">
-        StatuteProof provides monitoring intelligence only. Not legal advice.
-        Official source links included.
-      </p>
+      <div className="mt-5 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs leading-relaxed text-emerald-900">
+        <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+        <span>Monitoring intelligence only. Not legal advice. Official source links included.</span>
+      </div>
     </AuthLayout>
   )
 }

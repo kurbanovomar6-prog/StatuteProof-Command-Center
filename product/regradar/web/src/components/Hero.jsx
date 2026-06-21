@@ -1,150 +1,179 @@
-import { ArrowRight, CheckCircle, Clock, FileCheck2, Hash, ShieldCheck, TriangleAlert } from 'lucide-react'
+import {
+  ArrowRight,
+  CheckCircle,
+  FileCheck2,
+  Hash,
+  LockKeyhole,
+  RadioTower,
+  ShieldCheck,
+  TriangleAlert,
+} from 'lucide-react'
 
-function SampleEvidenceCard() {
-  const rows = [
-    ['Source', 'VARA Enforcement Notices'],
-    ['Status', 'CHANGED'],
-    ['Risk', 'MEDIUM'],
-    ['Evidence hash', 'sha256:7b1e4a8f...d92'],
-    ['Diff available', 'Yes'],
-    ['Proof saved', 'Snapshot + proof block'],
-    ['Human review', 'Required before delivery'],
-  ]
+const proofRows = [
+  ['Source', 'VARA official notices'],
+  ['Run status', 'CHANGED'],
+  ['Normalized hash', 'sha256:7b1e4a8f...d92'],
+  ['Review state', 'Human review required'],
+]
 
+const chainSteps = [
+  ['01', 'Source run', 'Official public source checked'],
+  ['02', 'Evidence', 'Snapshot + hash preserved'],
+  ['03', 'Review', 'MLRO/founder decision logged'],
+  ['04', 'Brief', 'Draft only until approved'],
+]
+
+function EvidenceDossier() {
   return (
-    <div className="sp-panel relative overflow-hidden p-5 text-sm">
-      <div className="absolute left-0 top-0 h-full w-1 bg-cyan-300/70" />
-
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3 pl-2">
-        <div>
-          <span className="sp-demo-badge">
-            <TriangleAlert className="h-3 w-3" />
-            SAMPLE / DEMO — not a real regulatory update
-          </span>
-          <h3 className="mt-4 text-lg font-semibold text-white">Evidence record preview</h3>
-          <p className="mt-1 text-xs leading-relaxed text-slate-400">
-            Shows the fields an MLRO reviews before a brief can be approved.
-          </p>
-        </div>
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-blue-400/30 bg-blue-400/10 px-2.5 py-1 text-xs font-semibold text-blue-200">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
-          CHANGED
-        </span>
-      </div>
-
-      <div className="mb-4 rounded-lg border border-slate-800 bg-slate-950/35 p-4">
-        <div className="mb-3 flex items-start justify-between gap-3">
+    <div className="sp-paper-panel sp-reveal relative overflow-hidden p-5 sm:p-6">
+      <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem] bg-cyan-200/55" />
+      <div className="relative">
+        <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-white">VARA — Enforcement Notices</p>
-            <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-              <Clock className="h-3.5 w-3.5" />
-              2026-06-10 09:14 UTC
-            </p>
+            <p className="sp-mono text-[11px] font-bold uppercase tracking-wide text-slate-500">Canonical evidence preview</p>
+            <h3 className="mt-2 max-w-xs text-2xl font-semibold leading-tight text-slate-950">
+              A source change is not a customer brief yet.
+            </h3>
           </div>
-          <span className="rounded-md border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-xs font-semibold text-amber-200">
-            Human review
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-900">
+            <TriangleAlert className="h-3.5 w-3.5" />
+            Sample
           </span>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-2">
-          {rows.map(([label, value]) => (
-            <div key={label} className="rounded-md border border-slate-800 bg-[#07111F]/70 px-3 py-2">
-              <p className="text-[11px] font-medium text-slate-500">{label}</p>
-              <p className={`mt-0.5 truncate text-sm font-semibold ${label.includes('hash') ? 'sp-mono text-cyan-200' : 'text-slate-200'}`}>
+        <div className="mb-5 grid gap-2">
+          {proofRows.map(([label, value]) => (
+            <div key={label} className="grid grid-cols-[110px_1fr] gap-3 rounded-xl border border-slate-300/70 bg-white/72 px-3 py-2.5 text-sm">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</span>
+              <span className={label.includes('hash') ? 'sp-mono truncate font-semibold text-cyan-800' : 'font-semibold text-slate-900'}>
                 {value}
-              </p>
+              </span>
             </div>
           ))}
         </div>
-      </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-3">
-          <CheckCircle className="mb-2 h-4 w-4 text-emerald-300" />
-          <p className="text-xs font-semibold text-emerald-100">Diff ready</p>
-          <p className="mt-1 text-[11px] text-emerald-100/70">3 changed sections</p>
+        <div className="rounded-2xl border border-slate-300 bg-slate-950 p-4 text-white">
+          <div className="mb-3 flex items-center gap-2">
+            <FileCheck2 className="h-4 w-4 text-cyan-200" />
+            <p className="text-sm font-semibold">Brief gate</p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {[
+              ['Proof', 'verified', 'emerald'],
+              ['Review', 'pending', 'amber'],
+              ['Delivery', 'blocked', 'slate'],
+            ].map(([label, value, tone]) => (
+              <div key={label} className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
+                <p className="text-[11px] uppercase tracking-wide text-slate-500">{label}</p>
+                <p className={`mt-1 text-sm font-bold ${
+                  tone === 'emerald' ? 'text-emerald-300' : tone === 'amber' ? 'text-amber-300' : 'text-slate-300'
+                }`}>
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/10 p-3">
-          <FileCheck2 className="mb-2 h-4 w-4 text-cyan-200" />
-          <p className="text-xs font-semibold text-cyan-100">Proof saved</p>
-          <p className="mt-1 text-[11px] text-cyan-100/70">Timestamped record</p>
-        </div>
-        <div className="rounded-lg border border-slate-600/40 bg-slate-800/35 p-3">
-          <Hash className="mb-2 h-4 w-4 text-slate-300" />
-          <p className="text-xs font-semibold text-slate-200">Hash stored</p>
-          <p className="mt-1 text-[11px] text-slate-500">Old/new compared</p>
-        </div>
-      </div>
 
-      <div className="mt-4 border-t border-slate-800 pt-3 text-xs leading-relaxed text-slate-500">
-        Sample data for interface review only. Not legal advice. Not regulator approval.
+        <p className="mt-4 text-xs leading-relaxed text-slate-600">
+          Interface sample only. It shows the chain of custody; it is not a real regulatory update,
+          legal advice, or regulator approval.
+        </p>
       </div>
+    </div>
+  )
+}
+
+function ChainStrip() {
+  return (
+    <div className="mt-8 grid gap-3 md:grid-cols-4">
+      {chainSteps.map(([num, title, detail], index) => (
+        <div key={title} className="rounded-2xl border border-slate-800 bg-slate-950/45 p-4" style={{ animationDelay: `${index * 70}ms` }}>
+          <p className="sp-mono text-xs font-bold text-cyan-300">{num}</p>
+          <p className="mt-2 text-sm font-semibold text-white">{title}</p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">{detail}</p>
+        </div>
+      ))}
     </div>
   )
 }
 
 export default function Hero({ onCreateWorkspace, onViewSample }) {
   return (
-    <section className="relative overflow-hidden bg-[#07111F] px-4 pt-24 pb-16 lg:pt-28 lg:pb-20" id="top">
-
-      {/* Background grid */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-80">
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(#16D9F5 1px, transparent 1px), linear-gradient(90deg, #16D9F5 1px, transparent 1px)',
-            backgroundSize: '44px 44px',
-            backgroundPosition: 'center center',
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,0.78fr)] lg:items-center">
-        <div className="max-w-3xl">
-          <div className="sp-kicker mb-6">
-            <ShieldCheck className="h-4 w-4" />
-            Official-source monitoring for UAE compliance teams
+    <section className="sp-page-orbit px-4 pt-24 pb-16 lg:pt-28 lg:pb-20" id="top">
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+            <RadioTower className="h-3.5 w-3.5" />
+            Selected-source UAE regulatory monitoring
           </div>
-
-          <h1 className="max-w-4xl text-4xl font-semibold leading-[1.08] text-white md:text-5xl lg:text-6xl">
-            UAE regulatory updates, captured with evidence before they become compliance surprises.
-          </h1>
-
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-            StatuteProof monitors official UAE regulatory sources, detects text changes, preserves
-            timestamped evidence records, and prepares human-reviewed compliance briefs for MLROs
-            and compliance teams.
-          </p>
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <button onClick={onCreateWorkspace} className="sp-btn-primary justify-center px-6">
-              Request a free source readiness review <ArrowRight className="h-4 w-4" />
-            </button>
-            <button type="button" onClick={onViewSample} className="sp-btn-secondary justify-center px-6">
-              View sample evidence brief
-            </button>
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-950/40 px-3 py-1.5 text-xs font-semibold text-slate-300">
+            <LockKeyhole className="h-3.5 w-3.5 text-amber-300" />
+            Customer delivery remains gated
           </div>
-
-          <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
-            {[
-              ['241', 'UAE source records'],
-              ['172', 'fresh-alert eligible'],
-              ['Selected', 'licence profiles mapped'],
-            ].map(([value, label]) => (
-              <div key={label} className="sp-panel-muted px-4 py-3">
-                <p className="sp-mono text-2xl font-semibold text-white">{value}</p>
-                <p className="mt-1 text-xs leading-snug text-slate-500">{label}</p>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-5 max-w-2xl text-xs leading-relaxed text-slate-500">
-            Monitoring intelligence only. Not legal advice. Source coverage, extraction quality,
-            activation readiness, and failure reasons are disclosed before activation.
-          </p>
         </div>
 
-        <SampleEvidenceCard />
+        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.8fr)]">
+          <div className="sp-reveal">
+            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.03] text-white md:text-5xl lg:text-[4.55rem]">
+              Official UAE source changes, captured as evidence before anyone calls them compliance.
+            </h1>
+
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
+              StatuteProof watches selected official UAE sources, preserves hash-verified source evidence,
+              and keeps draft briefs behind human review and delivery gates.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button onClick={onCreateWorkspace} className="sp-btn-primary justify-center px-6">
+                Request source review <ArrowRight className="h-4 w-4" />
+              </button>
+              <button type="button" onClick={onViewSample} className="sp-btn-secondary justify-center px-6">
+                View sample evidence flow
+              </button>
+            </div>
+
+            <div className="mt-7 grid max-w-2xl grid-cols-3 gap-2">
+              {[
+                ['241', 'enabled UAE source records'],
+                ['172', 'fresh-alert eligible'],
+                ['0', 'complete coverage claims'],
+              ].map(([value, label]) => (
+                <div key={label} className="rounded-2xl border border-slate-800 bg-slate-950/45 px-4 py-3">
+                  <p className="sp-mono text-2xl font-bold text-white">{value}</p>
+                  <p className="mt-1 text-[11px] leading-snug text-slate-500">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex items-start gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm leading-relaxed text-emerald-50/80">
+              <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />
+              <p>
+                We disclose source limits, failed extraction paths, and review gates before pilot activation.
+                Monitoring intelligence only; not legal advice.
+              </p>
+            </div>
+          </div>
+
+          <EvidenceDossier />
+        </div>
+
+        <ChainStrip />
+
+        <div className="mt-8 grid gap-3 border-t border-slate-800 pt-5 text-sm text-slate-400 md:grid-cols-3">
+          <div className="flex items-start gap-2">
+            <Hash className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-300" />
+            <span>Every saved source-run proof is hash checked before canonical evidence use.</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-300" />
+            <span>Human review separates monitoring signals from customer-facing draft briefs.</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <TriangleAlert className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
+            <span>Selected-source scope. Not a full-country source map or compliance guarantee.</span>
+          </div>
+        </div>
       </div>
     </section>
   )

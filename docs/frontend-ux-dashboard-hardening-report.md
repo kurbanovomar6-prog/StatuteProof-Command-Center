@@ -2,6 +2,32 @@
 
 Report date: 2026-06-21
 
+## Correction: Technical UX Hardening, Not Visible Redesign
+
+This report describes the earlier technical UX hardening sprint. It should not be read as proof that the product received a materially visible redesign.
+
+The visible redesign pass is documented separately in:
+
+- `docs/frontend-visible-redesign-report.md`
+
+What changed in the earlier sprint:
+
+- safer copy
+- mobile viewport/touch improvements
+- clearer helper panels
+- reduced-motion guard
+- unused starter asset cleanup
+
+What did not change enough in that sprint:
+
+- homepage first viewport composition
+- auth page visual system
+- source readiness page layout
+- dashboard command-center feel
+- mobile review/evidence experience
+
+The later visible redesign sprint corrected that gap. Do not overclaim the earlier hardening work as a full redesign.
+
 ## 1. Starting Frontend / UX State
 
 Preflight passed before edits. The frontend already had a credible dark RegTech visual system, legal-safe disclaimers, source transparency, Google-auth availability states, and real app surfaces for sources, evidence, review queue, reports, billing, settings, and integrations.
@@ -44,7 +70,7 @@ Read-only references:
 - Local `ui-ux-pro-max` skill: applied accessibility, touch target, responsive layout, reduced motion, form feedback, and dashboard usability rules.
 - `https://github.com/leonxlnx/taste-skill`: reviewed read-only as external design reference.
 - `https://github.com/nextlevelbuilder/ui-ux-pro-max-skill`: reviewed read-only as external UI/UX reference.
-- YouTube motion-site reference opened, but no reliable transcript/frame-level review was available through the current tool path. No video-specific claim is made.
+- YouTube motion-site reference was not reliably reviewed during this earlier hardening sprint. In the later visible redesign sprint, metadata and Russian subtitles were retrieved with `yt-dlp`, but full frame-by-frame review was still not performed.
 
 No external package was installed.
 
@@ -183,7 +209,7 @@ Frontend validation passed in focused runs. The existing TanStack Table lint war
 ## 19. Remaining Blockers
 
 - Fresh subagent launch blocked by thread limit; no autonomous agent council packets were produced.
-- Public unauthenticated pages still trigger expected `401` auth bootstrap network entries when the API is mocked as unauthenticated. This is not a JS crash, but it is visible in dev console.
+- This was fixed in the later visible redesign sprint by skipping protected auth bootstrap on public/auth routes.
 - Dashboard visual QA for authenticated state used mocked API responses because no real local authenticated session was created in this sprint.
 - Larger dashboard IA work remains: source health remediation drilldown, evidence chain timeline, and a clearer "brief blocked because..." path.
 
@@ -213,4 +239,3 @@ Reduce the authenticated dashboard's dependence on wide tables by adding mobile 
 - Review Queue
 - Evidence Records
 - Reports
-

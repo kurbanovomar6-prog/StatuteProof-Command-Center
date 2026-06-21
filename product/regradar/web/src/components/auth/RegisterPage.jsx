@@ -1,55 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { CheckCircle, Eye, EyeOff, FileCheck2, LockKeyhole, ShieldCheck } from 'lucide-react'
 import { auth } from '../../api'
-
-function AuthLayout({ children, quote }) {
-  return (
-    <div className="flex min-h-dvh bg-[#07111F] font-sans text-slate-200 selection:bg-[#16D9F5]/30">
-      {/* Left panel */}
-      <div className="hidden lg:flex w-5/12 bg-[#0A1628] border-r border-slate-800 p-12 flex-col justify-between relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: 'linear-gradient(#16D9F5 1px, transparent 1px), linear-gradient(90deg, #16D9F5 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
-        <div className="relative z-10">
-          <div className="flex items-center gap-2.5">
-            <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-9 w-auto" />
-            <span className="text-lg font-extrabold text-white tracking-tight">
-              Statute<span className="text-[#16D9F5]">Proof</span>
-            </span>
-          </div>
-        </div>
-        <div className="relative z-10 max-w-sm">
-          <div className="w-10 h-[3px] bg-[#16D9F5] rounded-full mb-6" />
-          <h2 className="text-2xl font-bold text-white mb-6 leading-tight">{quote}</h2>
-          <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/35 p-4 text-xs text-slate-400">
-            <div className="flex justify-between gap-3">
-              <span>Readiness</span>
-              <span className="text-slate-200">172 fresh-alert eligible</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span>Activation</span>
-              <span className="text-slate-200">manual after review</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span>Boundary</span>
-              <span className="text-slate-200">not legal advice</span>
-            </div>
-          </div>
-        </div>
-        <div />
-      </div>
-
-      {/* Right panel — scrollable */}
-      <div className="flex flex-1 flex-col justify-start overflow-y-auto px-6 py-10 sm:px-16 lg:px-20">
-        <div className="w-full max-w-md mx-auto">{children}</div>
-      </div>
-    </div>
-  )
-}
 
 const JOB_TITLES = [
   'MLRO',
@@ -79,22 +30,78 @@ const JURISDICTIONS = [
   'Multiple',
 ]
 
+function AuthLayout({ children }) {
+  return (
+    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-10 text-slate-200 selection:bg-[#16D9F5]/30">
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.78fr_0.92fr]">
+        <aside className="hidden lg:block">
+          <div className="mb-10 flex items-center gap-3">
+            <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-10 w-auto" />
+            <span className="text-2xl font-extrabold tracking-tight text-white">
+              Statute<span className="text-[#16D9F5]">Proof</span>
+            </span>
+          </div>
+          <div className="max-w-md">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Pilot workspace setup
+            </div>
+            <h2 className="text-4xl font-semibold leading-tight text-white">
+              Create one accountable workspace per verified email.
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-slate-400">
+              Registration captures the compliance profile needed to scope selected-source monitoring
+              without implying complete regulatory coverage.
+            </p>
+          </div>
+
+          <div className="mt-8 max-w-md rounded-3xl border border-slate-800 bg-slate-950/42 p-5">
+            {[
+              ['1', 'Account', 'case-insensitive unique work email'],
+              ['2', 'Profile', 'licence type and primary jurisdiction'],
+              ['3', 'Scope', 'source readiness before activation'],
+            ].map(([num, title, detail]) => (
+              <div key={title} className="flex gap-3 border-b border-slate-800 py-3 last:border-b-0">
+                <span className="sp-mono flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-300/10 text-sm font-bold text-cyan-200">
+                  {num}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-white">{title}</p>
+                  <p className="text-xs leading-relaxed text-slate-500">{detail}</p>
+                </div>
+              </div>
+            ))}
+            <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-xs leading-relaxed text-amber-100/80">
+              <FileCheck2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-200" />
+              <span>Registration does not activate source monitoring or customer brief delivery.</span>
+            </div>
+          </div>
+        </aside>
+
+        <section className="sp-paper-panel w-full p-6 sm:p-8">
+          {children}
+        </section>
+      </div>
+    </div>
+  )
+}
+
 export default function RegisterPage({ onRegister, onLogin }) {
   const [form, setForm] = useState({
-    firstName:    '',
-    lastName:     '',
-    email:        '',
-    password:     '',
-    company:      '',
-    jobTitle:     'MLRO',
-    companyType:  'VARA-licensed VASP',
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    company: '',
+    jobTitle: 'MLRO',
+    companyType: 'VARA-licensed VASP',
     jurisdiction: 'Dubai / VARA',
   })
-  const [showPass, setShowPass]                           = useState(false)
-  const [termsAccepted, setTermsAccepted]                 = useState(false)
-  const [privacyAccepted, setPrivacyAccepted]             = useState(false)
+  const [showPass, setShowPass] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [disclaimerAcknowledged, setDisclaimerAcknowledged] = useState(false)
-  const [error, setError]   = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleStatus, setGoogleStatus] = useState({ loading: true, available: false, message: '' })
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }))
@@ -139,12 +146,12 @@ export default function RegisterPage({ onRegister, onLogin }) {
     setLoading(true)
     try {
       const data = await auth.register({
-        full_name:    `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
-        email:        form.email,
-        password:     form.password,
+        full_name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
+        email: form.email,
+        password: form.password,
         company_name: form.company,
-        industry:     form.companyType,
-        job_title:    form.jobTitle,
+        industry: form.companyType,
+        job_title: form.jobTitle,
         company_type: form.companyType,
         jurisdiction: form.jurisdiction,
       })
@@ -165,17 +172,22 @@ export default function RegisterPage({ onRegister, onLogin }) {
     window.location.assign(auth.googleStartUrl('/app'))
   }
 
-  const inputCls = 'w-full rounded-lg border border-slate-700 bg-[#0A1628] px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:border-[#16D9F5] focus:outline-none focus:ring-1 focus:ring-[#16D9F5]/20 transition-colors'
-  const selectCls = 'w-full rounded-lg border border-slate-700 bg-[#0A1628] px-4 py-2.5 text-sm text-slate-200 focus:border-[#16D9F5] focus:outline-none focus:ring-1 focus:ring-[#16D9F5]/20 transition-colors appearance-none'
-  const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider'
+  const inputCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
+  const selectCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
+  const labelCls = 'block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1.5'
 
   return (
-    <AuthLayout quote="Official-source monitoring with hash-verified evidence and human review for UAE financial teams.">
-
-      <h1 className="text-2xl font-bold text-white mb-1">Create your StatuteProof workspace</h1>
-      <p className="text-slate-400 text-sm mb-7">
-        Create a workspace for source monitoring, evidence review, and draft brief workflows.
-      </p>
+    <AuthLayout>
+      <div className="mb-7">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300 bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-900 lg:hidden">
+          <LockKeyhole className="h-3.5 w-3.5" />
+          Pilot workspace setup
+        </div>
+        <h1 className="text-3xl font-semibold leading-tight text-slate-950">Create your StatuteProof workspace</h1>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          One work email maps to one persisted account. Your profile helps scope the source-readiness review.
+        </p>
+      </div>
 
       <div className="mb-5">
         <div className="relative">
@@ -183,73 +195,51 @@ export default function RegisterPage({ onRegister, onLogin }) {
             type="button"
             disabled={googleStatus.loading || !googleStatus.available}
             onClick={handleGoogleRegister}
-              className={`flex min-h-11 w-full select-none items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
+            className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition ${
               googleStatus.available
-                ? 'border-slate-700 text-slate-200 hover:border-cyan-400/40 hover:bg-slate-900'
-                : 'cursor-not-allowed border-slate-800 text-slate-600'
+                ? 'border-slate-300 bg-white text-slate-900 hover:border-cyan-400 hover:bg-cyan-50'
+                : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
             }`}
           >
-            <span className="font-bold text-slate-500">G</span>
+            <span className="font-bold">G</span>
             {googleStatus.loading ? 'Checking Google sign-up...' : 'Continue with Google'}
           </button>
           {!googleStatus.loading && !googleStatus.available && (
-            <span className="absolute -top-2.5 right-3 text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded-sm tracking-wide">
+            <span className="absolute -top-2.5 right-3 rounded-md bg-slate-200 px-2 py-0.5 text-[10px] font-bold tracking-wide text-slate-500">
               Not configured
             </span>
           )}
         </div>
-        <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-600">
-          Use your verified work Google account. StatuteProof uses the verified email to create or find your account.
+        <p className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-600">
+          Google sign-up uses a verified work email to create or find your account. If OAuth is not configured,
+          email registration remains available.
         </p>
-        <div className="mt-5 flex items-center gap-3">
-          <div className="flex-1 h-px bg-slate-800" />
-          <span className="text-xs text-slate-600">or register with email</span>
-          <div className="flex-1 h-px bg-slate-800" />
-        </div>
+      </div>
+
+      <div className="mb-5 flex items-center gap-3">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-semibold text-slate-400">or register with email</span>
+        <div className="h-px flex-1 bg-slate-200" />
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
-
-        {/* Name row */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className={labelCls}>First name *</label>
-            <input
-              type="text"
-              placeholder="First"
-              value={form.firstName}
-              onChange={set('firstName')}
-              className={inputCls}
-              required
-            />
+            <input type="text" placeholder="First" value={form.firstName} onChange={set('firstName')} className={inputCls} required />
           </div>
           <div>
             <label className={labelCls}>Last name</label>
-            <input
-              type="text"
-              placeholder="Last"
-              value={form.lastName}
-              onChange={set('lastName')}
-              className={inputCls}
-            />
+            <input type="text" placeholder="Last" value={form.lastName} onChange={set('lastName')} className={inputCls} />
           </div>
         </div>
 
-        {/* Work email */}
         <div>
-          <label className={labelCls}>Work Email *</label>
-          <input
-            type="email"
-            placeholder="name@company.com"
-            value={form.email}
-            onChange={set('email')}
-            className={inputCls}
-            required
-            autoComplete="email"
-          />
+          <label className={labelCls}>Work email *</label>
+          <input type="email" placeholder="name@company.com" value={form.email} onChange={set('email')} className={inputCls} required autoComplete="email" />
+          <p className="mt-1.5 text-xs text-slate-500">Email uniqueness is checked case-insensitively after trimming spaces.</p>
         </div>
 
-        {/* Password */}
         <div>
           <label className={labelCls}>Password *</label>
           <div className="relative">
@@ -258,51 +248,41 @@ export default function RegisterPage({ onRegister, onLogin }) {
               placeholder="Min. 8 characters"
               value={form.password}
               onChange={set('password')}
-              className={`${inputCls} pr-10`}
+              className={`${inputCls} pr-11`}
               required
               minLength={8}
             />
             <button
               type="button"
               onClick={() => setShowPass(v => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+              className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800"
               aria-label={showPass ? 'Hide password' : 'Show password'}
             >
-              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
-        {/* Company */}
         <div>
           <label className={labelCls}>Company name *</label>
-          <input
-            type="text"
-            placeholder="Your organisation"
-            value={form.company}
-            onChange={set('company')}
-            className={inputCls}
-            required
-          />
+          <input type="text" placeholder="Your organisation" value={form.company} onChange={set('company')} className={inputCls} required />
         </div>
 
-        {/* Job title */}
-        <div>
-          <label className={labelCls}>Job title</label>
-          <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
-            {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
-          </select>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label className={labelCls}>Job title</label>
+            <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
+              {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Company type</label>
+            <select value={form.companyType} onChange={set('companyType')} className={selectCls}>
+              {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
         </div>
 
-        {/* Company type */}
-        <div>
-          <label className={labelCls}>Company type</label>
-          <select value={form.companyType} onChange={set('companyType')} className={selectCls}>
-            {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
-          </select>
-        </div>
-
-        {/* Primary jurisdiction */}
         <div>
           <label className={labelCls}>Primary jurisdiction</label>
           <select value={form.jurisdiction} onChange={set('jurisdiction')} className={selectCls}>
@@ -310,8 +290,7 @@ export default function RegisterPage({ onRegister, onLogin }) {
           </select>
         </div>
 
-        {/* Checkboxes */}
-        <div className="space-y-3 pt-2">
+        <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
           {[
             {
               id: 'terms',
@@ -329,25 +308,23 @@ export default function RegisterPage({ onRegister, onLogin }) {
               id: 'disclaimer',
               checked: disclaimerAcknowledged,
               onChange: e => setDisclaimerAcknowledged(e.target.checked),
-              text: 'I understand StatuteProof provides monitoring intelligence and evidence-backed summaries only. It does not provide legal advice or determine compliance outcomes.',
+              text: 'I understand StatuteProof provides monitoring intelligence and review-support summaries only. It does not provide legal advice or determine compliance outcomes.',
             },
           ].map(({ id, checked, onChange, text }) => (
-            <label key={id} className="flex items-start gap-3 cursor-pointer group">
+            <label key={id} className="flex cursor-pointer items-start gap-3">
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={onChange}
-                className="mt-0.5 w-4 h-4 rounded border-slate-700 bg-[#0A1628] text-[#16D9F5] focus:ring-[#16D9F5]/30 flex-shrink-0 accent-[#16D9F5]"
+                className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-slate-300 accent-cyan-700"
               />
-              <span className="text-xs text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">
-                {text}
-              </span>
+              <span className="text-xs leading-relaxed text-slate-700">{text}</span>
             </label>
           ))}
         </div>
 
         {error && (
-          <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2.5">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
             {error}
           </div>
         )}
@@ -355,26 +332,22 @@ export default function RegisterPage({ onRegister, onLogin }) {
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#16D9F5] px-5 py-2.5 text-sm font-semibold text-[#07111F] transition-colors hover:bg-[#0EC8E4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#16D9F5] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Creating workspace...' : 'Create workspace'}
         </button>
       </form>
 
-      <p className="mt-5 text-xs text-slate-600 text-center leading-relaxed">
-        StatuteProof provides monitoring intelligence only. Not legal advice.
-        Official source links included.
-      </p>
+      <div className="mt-5 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs leading-relaxed text-emerald-900">
+        <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+        <span>Monitoring intelligence only. Not legal advice. Official source links included.</span>
+      </div>
 
-      <div className="mt-5 text-center text-sm text-slate-500 border-t border-slate-800 pt-5">
+      <div className="mt-5 border-t border-slate-200 pt-5 text-center text-sm text-slate-600">
         Already have an account?{' '}
-        <button
-          onClick={onLogin}
-          className="text-[#16D9F5] font-medium hover:underline focus:outline-none"
-        >
+        <button onClick={onLogin} className="font-bold text-cyan-800 hover:underline focus:outline-none">
           Sign in
-        </button>{' '}
-        <span className="text-slate-600">→</span>
+        </button>
       </div>
     </AuthLayout>
   )

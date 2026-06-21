@@ -84,6 +84,9 @@
   --bg-surface:    #091629;
   --bg-elevated:   #0D1B2E;
   --bg-raised:     #12243B;
+  --paper:         #EAF3F3;
+  --paper-strong:  #F7FBFB;
+  --ink:           #07111F;
   --border:        #22314A;
   --border-subtle: #12223A;
   --border-muted:  #17263E;
@@ -105,6 +108,7 @@
   --status-quality-drop:#FBBF24;
   --shadow-soft:   0 18px 54px rgba(1, 8, 20, 0.42);
   --shadow-cyan:   0 0 0 1px rgba(25, 211, 243, 0.16), 0 20px 60px rgba(8, 145, 178, 0.13);
+  --shadow-paper:  0 26px 90px rgba(1, 8, 20, 0.46);
 }
 
 /* ─── Utility Classes ─── */
@@ -276,6 +280,115 @@
 .sp-mono {
   font-family: "SFMono-Regular", "Cascadia Mono", "Roboto Mono", ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
+}
+
+/* ─── Visible Redesign Utilities ─── */
+.sp-page-orbit {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(25, 211, 243, 0.14), transparent 30rem),
+    radial-gradient(circle at 86% 18%, rgba(55, 211, 153, 0.08), transparent 26rem),
+    linear-gradient(180deg, #06101d 0%, #07111f 46%, #040b16 100%);
+}
+.sp-page-orbit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(234, 243, 243, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(234, 243, 243, 0.08) 1px, transparent 1px);
+  background-size: 84px 84px;
+  mask-image: radial-gradient(circle at 50% 0%, black, transparent 66%);
+}
+
+.sp-paper-panel {
+  border: 1px solid rgba(234, 243, 243, 0.86);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(247, 251, 251, 0.98), rgba(218, 235, 236, 0.96));
+  color: var(--ink);
+  box-shadow: var(--shadow-paper);
+}
+
+.sp-command-panel {
+  border: 1px solid rgba(96, 165, 250, 0.16);
+  border-radius: 1rem;
+  background:
+    linear-gradient(135deg, rgba(13, 27, 46, 0.98), rgba(7, 17, 31, 0.94)),
+    radial-gradient(circle at 100% 0%, rgba(25, 211, 243, 0.12), transparent 30rem);
+  box-shadow: var(--shadow-soft);
+}
+
+.sp-command-hero {
+  border: 1px solid rgba(25, 211, 243, 0.2);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(135deg, rgba(4, 11, 22, 0.94), rgba(13, 27, 46, 0.98)),
+    radial-gradient(circle at 82% 18%, rgba(25, 211, 243, 0.15), transparent 28rem);
+  box-shadow: var(--shadow-cyan);
+}
+
+.sp-action-lane {
+  border: 1px solid rgba(244, 184, 74, 0.28);
+  border-radius: 1rem;
+  background:
+    linear-gradient(135deg, rgba(244, 184, 74, 0.14), rgba(13, 27, 46, 0.86));
+}
+
+.sp-evidence-chain {
+  display: grid;
+  gap: 0.75rem;
+}
+@media (min-width: 768px) {
+  .sp-evidence-chain {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+.sp-evidence-step {
+  position: relative;
+  min-height: 5rem;
+  border: 1px solid rgba(34, 49, 74, 0.9);
+  border-radius: 0.875rem;
+  background: rgba(4, 11, 22, 0.55);
+  padding: 0.9rem;
+}
+.sp-evidence-step::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(25, 211, 243, 0.9), rgba(55, 211, 153, 0.55));
+  transform-origin: left;
+  animation: sp-flow-line 4.8s ease-in-out infinite;
+}
+.sp-evidence-step.is-blocked::after {
+  background: linear-gradient(90deg, rgba(244, 184, 74, 0.95), rgba(248, 113, 113, 0.7));
+}
+
+.sp-mobile-card {
+  border: 1px solid var(--border-muted);
+  border-radius: 0.875rem;
+  background: rgba(13, 27, 46, 0.96);
+  padding: 1rem;
+}
+
+.sp-reveal {
+  animation: sp-reveal-up 440ms ease both;
+}
+
+@keyframes sp-reveal-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes sp-flow-line {
+  0%, 100% { transform: scaleX(0.32); opacity: 0.5; }
+  50% { transform: scaleX(1); opacity: 1; }
 }
 
 /* Status Badges */

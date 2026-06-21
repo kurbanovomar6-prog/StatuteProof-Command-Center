@@ -86,6 +86,8 @@ const initialRoute = pathToRoute(
   typeof window !== 'undefined' ? window.location.pathname : '/',
 )
 
+const AUTH_REQUIRED_VIEWS = new Set(['app', 'choose-plan'])
+
 export default function App() {
   const [view, setView] = useState(initialRoute.view)
   const [appPage, setAppPage] = useState(initialRoute.appPage)
@@ -163,6 +165,13 @@ export default function App() {
     async function bootstrapAuth() {
       const route = pathToRoute(window.location.pathname)
       setAppPage(route.appPage)
+      if (!AUTH_REQUIRED_VIEWS.has(route.view)) {
+        if (!active) return
+        setCurrentUser(null)
+        setView(route.view)
+        setAuthLoading(false)
+        return
+      }
       try {
         const authData = await auth.me()
         let profileData = null
