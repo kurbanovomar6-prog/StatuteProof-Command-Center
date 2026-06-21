@@ -49,7 +49,7 @@ function AuthLayout({ children }) {
             </div>
             <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-xs leading-relaxed text-amber-100/80">
               <FileCheck2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-200" />
-              <span>No legal advice, no complete coverage claim, and no customer delivery without gates.</span>
+              <span>No legal advice, no blanket source claim, and no customer delivery without gates.</span>
             </div>
           </div>
         </aside>

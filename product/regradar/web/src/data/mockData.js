@@ -103,7 +103,7 @@ export const pricingPlans = [
     routePlan: 'professional',
     desc: 'Selected official UAE regulatory source pack across VARA, CBUAE, DFSA, ADGM, FIU, DIFC and related public authorities. Built for an MLRO who needs evidence that regulatory changes were tracked.',
     features: [
-      '172 fresh-alert eligible official-source endpoints',
+      'Validated official-source profile after readiness review',
       'Priority review queue for high-risk changes',
       'Weekly monitoring brief (activation required)',
       'Up to 2 custom sources after review',
@@ -135,5 +135,5 @@ export const steps = [
   { n: '02', title: 'Scheduled source monitoring', desc: 'Configured sources are checked on a defined schedule. Each run produces a delta status: FIRST_SEEN, UNCHANGED, CHANGED, FAILED, or QUALITY_DROP.' },
   { n: '03', title: 'Change detection and quality check', desc: 'When a source returns CHANGED, extracted content is compared against the prior run. When extraction quality drops below threshold, the run is flagged for human review before any alert is issued.' },
   { n: '04', title: 'Profile relevance matching', desc: 'Detected changes are evaluated against your regulatory profile — your licence type, business activity, and monitored regulators. A VARA update does not go to a payments firm with no virtual asset exposure.' },
-  { n: '05', title: 'Evidence-backed brief', desc: 'Your team receives a structured brief: what changed, the official source URL, timestamp, extraction quality, evidence snippet, known limitations, and a not-legal-advice disclaimer. Every brief is verifiable against the original source.' },
+  { n: '05', title: 'Evidence-gated draft brief', desc: 'Your team receives a structured draft: what changed, the official source URL, timestamp, extraction quality, evidence snippet, known limitations, and a not-legal-advice disclaimer. Every draft is verifiable against the original source before delivery approval.' },
 ]

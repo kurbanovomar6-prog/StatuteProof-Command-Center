@@ -133,15 +133,15 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
               </button>
             </div>
 
-            <div className="mt-7 grid max-w-2xl grid-cols-3 gap-2">
+            <div className="mt-7 grid max-w-2xl gap-2 sm:grid-cols-3">
               {[
-                ['241', 'enabled UAE source records'],
-                ['172', 'fresh-alert eligible'],
-                ['0', 'complete coverage claims'],
-              ].map(([value, label]) => (
+                ['Selected official sources', 'not a volume claim'],
+                ['Hash-verified proof', 'before brief drafting'],
+                ['Human review gates', 'before delivery'],
+              ].map(([label, detail]) => (
                 <div key={label} className="rounded-2xl border border-slate-800 bg-slate-950/45 px-4 py-3">
-                  <p className="sp-mono text-2xl font-bold text-white">{value}</p>
-                  <p className="mt-1 text-[11px] leading-snug text-slate-500">{label}</p>
+                  <p className="text-sm font-semibold text-white">{label}</p>
+                  <p className="mt-1 text-[11px] leading-snug text-slate-500">{detail}</p>
                 </div>
               ))}
             </div>

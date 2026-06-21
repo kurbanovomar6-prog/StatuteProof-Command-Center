@@ -141,6 +141,14 @@ Safer wording now emphasizes:
 - draft brief gates
 - delivery blocked until approval
 
+Follow-up numeric hierarchy correction:
+
+- Homepage hero no longer uses registry counts as a primary marketing proof point.
+- Public dashboard preview no longer repeats global source counts.
+- Pricing and billing copy now describe source scope as a validated monitoring profile instead of selling a fixed registry count.
+- Source readiness review keeps the source-truth counts because it is a transparency/intake surface, and it now displays the registry date plus a note that counts are transparency data, not a coverage promise.
+- Internal dashboard command-center counts remain appropriate because operators need source-truth telemetry.
+
 Claims explicitly not made:
 
 - complete UAE coverage

@@ -8,6 +8,7 @@
  */
 import { useState } from 'react'
 import { Shield, CheckCircle, AlertTriangle, ArrowLeft, ClipboardCheck, FileSearch, Map, Send } from 'lucide-react'
+import { SOURCE_QUALITY_SUMMARY } from '../data/sourceQualityAudit'
 
 const REGULATORS = [
   'CBUAE',
@@ -31,6 +32,19 @@ const COMPANY_TYPES = [
   'VARA-licensed VASP', 'UAE fintech', 'DFSA-authorised firm',
   'ADGM FSRA-regulated firm', 'Compliance consultancy', 'Law firm', 'Other',
 ]
+
+function formatSourceTruthDate(dateValue) {
+  const [year, month, day] = String(dateValue).split('-')
+  const monthNames = {
+    '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+    '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
+    '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec',
+  }
+  return `${Number(day)} ${monthNames[month] || month} ${year}`
+}
+
+const sourceTruthAsOf = formatSourceTruthDate(SOURCE_QUALITY_SUMMARY.auditDate)
+const limitationsDisclosed = SOURCE_QUALITY_SUMMARY.candidate + SOURCE_QUALITY_SUMMARY.remediation
 
 export default function SourceReadinessReviewPage({ onBack }) {
   const [form, setForm] = useState({
@@ -169,11 +183,12 @@ export default function SourceReadinessReviewPage({ onBack }) {
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-4">
               {[
-                ['241', 'UAE source records', 'registry truth'],
-                ['172', 'fresh-alert eligible', 'selected sources'],
-                ['61', 'evidence-library', 'not alert volume'],
+                [SOURCE_QUALITY_SUMMARY.totalEnabled, 'enabled UAE records', 'registry truth'],
+                [SOURCE_QUALITY_SUMMARY.freshAlertEligible, 'fresh-alert eligible', 'selected sources'],
+                [SOURCE_QUALITY_SUMMARY.evidenceLibraryOnly, 'evidence-library', 'not alert volume'],
+                [limitationsDisclosed, 'limitations disclosed', 'candidate + remediation'],
               ].map(([value, label, note]) => (
                 <div key={label} className="rounded-3xl border border-slate-800 bg-slate-950/45 p-4">
                   <p className="sp-mono text-3xl font-bold text-white">{value}</p>
@@ -181,6 +196,9 @@ export default function SourceReadinessReviewPage({ onBack }) {
                   <p className="mt-1 text-xs text-slate-500">{note}</p>
                 </div>
               ))}
+              <p className="text-xs text-slate-500 sm:col-span-4">
+                Source registry snapshot as of {sourceTruthAsOf}. Counts are transparency data, not a coverage promise.
+              </p>
             </div>
           </div>
 
@@ -212,7 +230,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
                 </div>
                 <p className="text-sm leading-relaxed text-amber-50/80">
                   Selecting a regulator tells us what your team checks today. It does not mean
-                  StatuteProof claims complete coverage for that regulator.
+                  StatuteProof claims a full regulator-wide source map.
                 </p>
               </div>
             </aside>
@@ -300,7 +318,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
                   <h3 className="text-sm font-bold text-slate-950">Which official-source areas matter?</h3>
                 </div>
                 <p className="mb-3 text-xs leading-relaxed text-slate-500">
-                  Select the areas your team checks today. We will return readiness status, not a complete coverage claim.
+                  Select the areas your team checks today. We will return readiness status, not a full regulator map.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {REGULATORS.map(reg => (

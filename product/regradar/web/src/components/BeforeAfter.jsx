@@ -13,7 +13,7 @@ const after = [
   'Meaningful changes surfaced for review',
   'Client profile relevance filtering',
   'Human review before client delivery',
-  'Evidence-backed brief with official source URL, timestamp, extraction quality, and limitations',
+  'Evidence-gated draft brief with official source URL, timestamp, extraction quality, and limitations',
 ]
 
 export default function BeforeAfter() {

@@ -104,7 +104,7 @@ export default function BillingPage({ planState }) {
         <div className="bg-[#16D9F5]/5 border border-[#16D9F5]/20 rounded-xl p-4">
           <p className="text-sm font-semibold text-white mb-1">Upgrade to UAE Monitor</p>
           <p className="text-xs text-slate-400 mb-3">
-            241 enabled UAE source records: 172 fresh-alert eligible after proof and baseline gates.
+            Source scope is activated from your validated monitoring profile, not a blanket source count.
             Includes high-risk review queue, weekly MLRO brief after setup, and 180-day evidence retention.
           </p>
           <div className="flex gap-2">

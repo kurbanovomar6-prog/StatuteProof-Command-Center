@@ -58,11 +58,11 @@ const PLANS = [
     period: '/ month',
     badge: 'Recommended',
     highlight: true,
-    desc: '241 enabled UAE source records, including 172 fresh-alert eligible daily monitors and 61 evidence-library snapshots. Manual activation after source readiness review.',
+    desc: 'Selected official UAE source scope after readiness review. Manual activation keeps source limits and evidence gates visible.',
     cta: 'Upgrade to UAE Monitor',
     ctaStyle: 'primary',
     features: [
-      '172 fresh-alert eligible UAE sources',
+      'Validated official UAE source profile',
       'Selected VARA / CBUAE / DFSA / ADGM / UAE FIU fresh-alert source pack',
       'Evidence records + full diff view',
       'High-risk review queue',
