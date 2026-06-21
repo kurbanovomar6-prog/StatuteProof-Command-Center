@@ -133,6 +133,17 @@ export const reviews = {
     })
     return authRequest(`/api/reviews/queue?${search.toString()}`)
   },
+
+  canonicalEvidence() {
+    return authRequest('/api/canonical-evidence')
+  },
+
+  reviewCanonicalEvidence(body) {
+    return authRequest('/api/canonical-evidence/review', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
 }
 
 export const briefs = {

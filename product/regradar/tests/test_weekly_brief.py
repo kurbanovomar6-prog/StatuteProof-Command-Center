@@ -25,6 +25,7 @@ from app.weekly_brief import (
     render_weekly_brief_html,
     render_weekly_brief_markdown,
 )
+from app.review_queue import record_canonical_review_action
 from app.sources import load_sources
 
 
@@ -119,10 +120,11 @@ def _write_alert(
     source: str = "VARA",
     *,
     include_evidence: bool = True,
+    evidence_review_status: str = "approved",
 ):
     folder = base / "data" / "source_snapshots" / "2026-05-30" / "AE" / f"AE-{idx}" / "run-1"
     folder.mkdir(parents=True, exist_ok=True)
-    evidence_record_id = _write_canonical_evidence(base, idx) if include_evidence else ""
+    evidence_record_id = _write_canonical_evidence(base, idx, review_status=evidence_review_status) if include_evidence else ""
     alert = {
         "alert_id": f"draft-{idx}",
         "evidence_record_id": evidence_record_id,
@@ -166,6 +168,62 @@ class WeeklyBriefTests(unittest.TestCase):
                 base_dir=base,
             )
             self.assertEqual([item["alert_id"] for item in rows], [alert["alert_id"]])
+
+    def test_append_only_canonical_review_approval_allows_weekly_alert(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            alert = _write_alert(
+                base,
+                "external-review",
+                STATUS_APPROVED_WEEKLY,
+                DECISION_WEEKLY,
+                evidence_review_status="pending",
+            )
+            result = record_canonical_review_action(
+                alert["evidence_record_id"],
+                decision="approved",
+                reviewer="Evidence Trail",
+                note="Verified canonical evidence before draft brief inclusion.",
+                base_dir=base,
+            )
+            rows = collect_approved_alerts(
+                client_profile=_profile(),
+                market="AE",
+                start=datetime(2026, 5, 29, tzinfo=timezone.utc),
+                end=datetime(2026, 5, 31, tzinfo=timezone.utc),
+                base_dir=base,
+            )
+
+            self.assertEqual(result["status"], "ok")
+            self.assertEqual([item["alert_id"] for item in rows], [alert["alert_id"]])
+
+    def test_append_only_canonical_review_rejection_blocks_weekly_alert(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            alert = _write_alert(
+                base,
+                "external-reject",
+                STATUS_APPROVED_WEEKLY,
+                DECISION_WEEKLY,
+                evidence_review_status="pending",
+            )
+            result = record_canonical_review_action(
+                alert["evidence_record_id"],
+                decision="rejected",
+                reviewer="Evidence Trail",
+                note="Canonical evidence needs investigation before draft use.",
+                base_dir=base,
+            )
+            rows = collect_approved_alerts(
+                client_profile=_profile(),
+                market="AE",
+                start=datetime(2026, 5, 29, tzinfo=timezone.utc),
+                end=datetime(2026, 5, 31, tzinfo=timezone.utc),
+                base_dir=base,
+            )
+
+            self.assertEqual(result["status"], "ok")
+            self.assertEqual(rows, [])
 
     def test_approved_urgent_alert_appears_in_brief(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -271,6 +271,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_evidence_export_get()
         elif path == "/api/reviews/queue":
             self._handle_reviews_queue_get()
+        elif path == "/api/canonical-evidence":
+            self._handle_canonical_evidence_get()
         elif path == "/api/briefs":
             self._handle_briefs_list()
         elif path == "/api/plan":
@@ -339,6 +341,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_custom_sources_add()
         elif path == "/api/review/action":
             self._handle_review_action()
+        elif path == "/api/canonical-evidence/review":
+            self._handle_canonical_evidence_review_action()
         elif path == "/api/audit/vault":
             self._handle_audit_vault()
         else:
@@ -1105,6 +1109,20 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json(queue)
         except Exception as exc:
             logger.error("reviews/queue failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_canonical_evidence_get(self) -> None:
+        """GET /api/canonical-evidence — append-only canonical evidence review state."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            from app.review_queue import build_canonical_evidence_review_queue
+
+            self._send_json(build_canonical_evidence_review_queue())
+        except Exception as exc:
+            logger.error("canonical evidence list failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_evidence_export_post(self) -> None:
@@ -1880,6 +1898,51 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             logger.error("review action error: %s", exc)
             self._send_json({"ok": False, "message": str(exc)}, 500)
+
+    def _handle_canonical_evidence_review_action(self) -> None:
+        """Append an approval/rejection/block decision for canonical evidence."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        record_id = str(body.get("record_id") or body.get("evidence_record_id") or "").strip()
+        raw_decision = str(body.get("decision") or body.get("action") or "").strip().lower()
+        decision = {
+            "approve": "approved",
+            "approved": "approved",
+            "reject": "rejected",
+            "rejected": "rejected",
+            "block": "blocked",
+            "blocked": "blocked",
+        }.get(raw_decision, raw_decision)
+        note = str(body.get("note") or body.get("reason") or "").strip()
+        reviewer = str(user.get("full_name") or user.get("email") or f"user:{user.get('id')}" or "").strip()
+        if not record_id or not decision or not note:
+            self._send_json({"ok": False, "message": "record_id, decision, and note are required."}, 400)
+            return
+        try:
+            from app.review_queue import record_canonical_review_action
+
+            result = record_canonical_review_action(
+                record_id,
+                decision=decision,
+                reviewer=reviewer,
+                note=note,
+            )
+            if result.get("status") == "error":
+                self._send_json({"ok": False, **result}, 400)
+            else:
+                self._send_json({"ok": True, **result})
+        except Exception as exc:
+            logger.error("canonical evidence review action error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     # ── POST /api/audit/vault ─────────────────────────────────────────────────
 

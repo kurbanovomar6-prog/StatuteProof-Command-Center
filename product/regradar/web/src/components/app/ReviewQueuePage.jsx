@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, ExternalLink, Filter, Search, ShieldCheck } from 'lucide-react'
+import { AlertTriangle, Ban, CheckCircle, ExternalLink, Filter, Search, ShieldCheck, XCircle } from 'lucide-react'
 
 import { reviews } from '../../api'
 
@@ -49,8 +49,13 @@ export default function ReviewQueuePage() {
   const [changeStatus, setChangeStatus] = useState('')
   const [search, setSearch] = useState('')
   const [queueData, setQueueData] = useState(null)
+  const [canonicalData, setCanonicalData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [canonicalLoading, setCanonicalLoading] = useState(true)
   const [error, setError] = useState('')
+  const [canonicalError, setCanonicalError] = useState('')
+  const [reviewNotes, setReviewNotes] = useState({})
+  const [reviewState, setReviewState] = useState({})
 
   useEffect(() => {
     let active = true
@@ -72,6 +77,58 @@ export default function ReviewQueuePage() {
       })
     return () => { active = false }
   }, [status, sourceHealthStatus, changeStatus])
+
+  const loadCanonicalEvidence = () => {
+    setCanonicalLoading(true)
+    setCanonicalError('')
+    reviews.canonicalEvidence()
+      .then(data => setCanonicalData(data))
+      .catch(err => setCanonicalError(err.message || 'Could not load canonical evidence records.'))
+      .finally(() => setCanonicalLoading(false))
+  }
+
+  useEffect(() => {
+    let active = true
+    setCanonicalLoading(true)
+    reviews.canonicalEvidence()
+      .then(data => {
+        if (active) setCanonicalData(data)
+      })
+      .catch(err => {
+        if (active) setCanonicalError(err.message || 'Could not load canonical evidence records.')
+      })
+      .finally(() => {
+        if (active) setCanonicalLoading(false)
+      })
+    return () => { active = false }
+  }, [])
+
+  const canonicalRows = canonicalData?.records || []
+
+  const submitCanonicalReview = async (recordId, decision) => {
+    const note = (reviewNotes[recordId] || '').trim()
+    if (!note) {
+      setReviewState(prev => ({ ...prev, [recordId]: { status: 'error', message: 'Reviewer note required.' } }))
+      return
+    }
+    setReviewState(prev => ({ ...prev, [recordId]: { status: 'saving', message: '' } }))
+    try {
+      const result = await reviews.reviewCanonicalEvidence({ record_id: recordId, decision, note })
+      setReviewState(prev => ({
+        ...prev,
+        [recordId]: {
+          status: 'ok',
+          message: result.brief_eligible
+            ? 'Review saved. Draft brief input gate is eligible.'
+            : result.blocked_reason || 'Review saved. Brief gate remains blocked.',
+        },
+      }))
+      setReviewNotes(prev => ({ ...prev, [recordId]: '' }))
+      loadCanonicalEvidence()
+    } catch (err) {
+      setReviewState(prev => ({ ...prev, [recordId]: { status: 'error', message: err.message || 'Could not save review.' } }))
+    }
+  }
 
   const filteredRows = useMemo(() => (queueData?.queue || []).filter(row => {
     const haystack = [
@@ -111,6 +168,114 @@ export default function ReviewQueuePage() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+        <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Canonical evidence review</h2>
+            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-400">
+              Append-only review decisions for canonical evidence records. Approval can unlock draft-only brief inputs; customer delivery remains separately blocked.
+            </p>
+          </div>
+          {canonicalData?.counts && (
+            <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
+              <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-amber-200">Pending {canonicalData.counts.pending}</span>
+              <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2 py-1 text-emerald-200">Approved {canonicalData.counts.approved}</span>
+              <span className="rounded-full border border-rose-400/25 bg-rose-400/10 px-2 py-1 text-rose-200">Rejected {canonicalData.counts.rejected}</span>
+              <span className="rounded-full border border-slate-600 bg-slate-900 px-2 py-1 text-slate-300">Blocked {canonicalData.counts.blocked}</span>
+            </div>
+          )}
+        </div>
+
+        {canonicalLoading && <p className="text-sm text-slate-400">Loading canonical evidence records...</p>}
+        {!canonicalLoading && canonicalError && (
+          <p className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2 text-xs text-rose-200">{canonicalError}</p>
+        )}
+        {!canonicalLoading && !canonicalError && canonicalRows.length === 0 && (
+          <p className="rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3 text-sm text-slate-500">No canonical evidence records found.</p>
+        )}
+        {!canonicalLoading && !canonicalError && canonicalRows.length > 0 && (
+          <div className="overflow-x-auto rounded-lg border border-slate-800">
+            <table className="sp-table min-w-[1180px]">
+              <thead>
+                <tr>
+                  {['Record', 'Source', 'Run', 'Record review', 'Latest decision', 'Reviewer note', 'Decision'].map(header => (
+                    <th key={header}>{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {canonicalRows.map(row => {
+                  const state = reviewState[row.record_id]
+                  const isSaving = state?.status === 'saving'
+                  return (
+                    <tr key={row.record_id} className="hover:bg-slate-800/35">
+                      <td className="max-w-[300px]">
+                        <p className="sp-mono truncate text-xs text-slate-300">{row.record_id}</p>
+                        <p className="mt-1 truncate text-[11px] text-slate-500">{row.record_path}</p>
+                      </td>
+                      <td>
+                        <p className="font-semibold text-white">{row.source_id || 'Unknown source'}</p>
+                        <p className="mt-1 text-[11px] text-slate-500">{row.regulator || 'Unknown regulator'}</p>
+                      </td>
+                      <td>
+                        <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-200">
+                          {row.run_status || 'UNKNOWN'}
+                        </span>
+                      </td>
+                      <td className="text-slate-300">{row.record_review_status || 'pending'}</td>
+                      <td className="text-slate-300">{row.latest_review_decision || 'none'}</td>
+                      <td className="min-w-[260px]">
+                        <input
+                          type="text"
+                          value={reviewNotes[row.record_id] || ''}
+                          onChange={event => setReviewNotes(prev => ({ ...prev, [row.record_id]: event.target.value }))}
+                          placeholder="Reviewer note required"
+                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+                        />
+                        {state?.message && (
+                          <p className={`mt-1 text-[11px] ${state.status === 'error' ? 'text-rose-300' : 'text-emerald-300'}`}>{state.message}</p>
+                        )}
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            title="Approve canonical evidence for draft brief inputs"
+                            disabled={isSaving}
+                            onClick={() => submitCanonicalReview(row.record_id, 'approved')}
+                            className="rounded-lg border border-emerald-400/25 bg-emerald-400/10 p-2 text-emerald-200 hover:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <CheckCircle className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            title="Reject canonical evidence"
+                            disabled={isSaving}
+                            onClick={() => submitCanonicalReview(row.record_id, 'rejected')}
+                            className="rounded-lg border border-rose-400/25 bg-rose-400/10 p-2 text-rose-200 hover:bg-rose-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <XCircle className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            title="Block canonical evidence pending remediation"
+                            disabled={isSaving}
+                            onClick={() => submitCanonicalReview(row.record_id, 'blocked')}
+                            className="rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Ban className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">

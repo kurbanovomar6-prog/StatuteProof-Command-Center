@@ -14,6 +14,12 @@ from pathlib import Path
 from typing import Any
 
 from app.evidence_assessment import LEGAL_DISCLAIMER, load_assessments, now_utc
+from app.evidence_records import (
+    EvidenceRecordError,
+    build_risk_brief_inputs,
+    list_canonical_evidence_records,
+    record_canonical_evidence_review,
+)
 from app.source_health_timeline import source_health_customer_message
 
 logger = logging.getLogger(__name__)
@@ -80,6 +86,70 @@ def build_review_queue(
         "disclaimer": LEGAL_DISCLAIMER,
         "message": "Review queue is built from saved evidence records and Acknowledge & Assess records only.",
     }
+
+
+def build_canonical_evidence_review_queue(
+    *,
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Return append-only canonical evidence review state for operator review."""
+
+    root = base_dir or _BASE_DIR
+    records = list_canonical_evidence_records(base_dir=root)
+    counts = {"pending": 0, "approved": 0, "rejected": 0, "blocked": 0}
+    for row in records:
+        latest = str(row.get("latest_review_decision") or "").strip()
+        embedded = str(row.get("record_review_status") or "").strip()
+        effective = latest or embedded or "pending"
+        if effective in counts:
+            counts[effective] += 1
+        elif embedded == "pending":
+            counts["pending"] += 1
+    return {
+        "ok": True,
+        "records": records,
+        "total": len(records),
+        "counts": counts,
+        "disclaimer": LEGAL_DISCLAIMER,
+        "message": (
+            "Canonical evidence review decisions are append-only and do not approve "
+            "customer delivery."
+        ),
+    }
+
+
+def record_canonical_review_action(
+    record_id: str,
+    *,
+    decision: str,
+    reviewer: str,
+    note: str,
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Append a canonical evidence review decision and report brief eligibility."""
+
+    root = base_dir or _BASE_DIR
+    try:
+        review = record_canonical_evidence_review(
+            record_id,
+            decision=decision,
+            reviewer=reviewer,
+            note=note,
+            base_dir=root,
+        )
+        gate = build_risk_brief_inputs(record_id, base_dir=root)
+        return {
+            "status": "ok",
+            "review_id": review["review_id"],
+            "evidence_record_id": review["evidence_record_id"],
+            "decision": review["decision"],
+            "reviewed_at": review["reviewed_at"],
+            "brief_eligible": bool(gate.get("eligible")),
+            "blocked_reason": gate.get("blocked_reason") or "",
+            "customer_delivery_approved": False,
+        }
+    except EvidenceRecordError as exc:
+        return {"status": "error", "message": str(exc)}
 
 
 def _queue_row(
