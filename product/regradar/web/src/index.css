@@ -6,6 +6,9 @@
     scroll-behavior: smooth;
     background: #040B16;
   }
+  #root {
+    min-height: 100dvh;
+  }
   body {
     margin: 0;
     font-family: Aptos, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -14,6 +17,7 @@
     background:
       linear-gradient(180deg, rgba(9, 22, 41, 0.98) 0%, rgba(4, 11, 22, 1) 48%, rgba(6, 16, 31, 1) 100%);
     color: #f8fafc;
+    overflow-x: hidden;
   }
 
   body::before {
@@ -56,6 +60,20 @@
   textarea:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

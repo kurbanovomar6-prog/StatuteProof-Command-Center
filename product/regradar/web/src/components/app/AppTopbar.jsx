@@ -36,12 +36,12 @@ export default function AppTopbar({ page, onMenuClick, navigate, currentUser }) 
   const ws = getWorkspace(currentUser)
 
   return (
-    <header className="flex-shrink-0 h-14 bg-[#07111F] border-b border-slate-800 flex items-center px-5 gap-4 sticky top-0 z-40">
+    <header className="sticky top-0 z-40 flex h-14 flex-shrink-0 items-center gap-4 border-b border-slate-800 bg-[#07111F] px-4 sm:px-5">
 
       {/* Mobile menu toggle */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden p-1.5 rounded text-slate-400 hover:text-white transition-colors"
+        className="flex min-h-10 min-w-10 items-center justify-center rounded text-slate-400 transition-colors hover:text-white lg:hidden"
         aria-label="Open menu"
       >
         <Menu className="w-5 h-5" />
@@ -73,7 +73,7 @@ export default function AppTopbar({ page, onMenuClick, navigate, currentUser }) 
 
         <button
           onClick={() => navigate('sources')}
-          className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#16D9F5] bg-[#16D9F5]/10 hover:bg-[#16D9F5]/20 border border-[#16D9F5]/20 px-3 py-1.5 rounded-lg transition-colors"
+          className="hidden min-h-10 items-center gap-1.5 rounded-lg border border-[#16D9F5]/20 bg-[#16D9F5]/10 px-3 py-1.5 text-xs font-semibold text-[#16D9F5] transition-colors hover:bg-[#16D9F5]/20 sm:inline-flex"
         >
           Review source map
         </button>

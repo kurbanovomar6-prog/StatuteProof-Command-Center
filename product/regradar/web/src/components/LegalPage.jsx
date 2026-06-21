@@ -5,7 +5,7 @@ const CONTENT = {
     title: 'Terms of Service',
     kicker: 'Terms',
     body: [
-      'StatuteProof provides official-source monitoring intelligence and evidence-backed summaries for compliance review support. It does not provide legal advice, regulatory advice, compliance determination, or a legal opinion.',
+      'StatuteProof provides official-source monitoring intelligence, hash-verified source evidence, and review-support summaries. It does not provide legal advice, regulatory advice, compliance determination, or a legal opinion.',
       'Access to monitored sources, custom sources, weekly briefs, exports, and billing is subject to source readiness review, manual activation, and workspace configuration.',
       'Users remain responsible for reviewing official source material directly, validating evidence records, and consulting qualified legal or compliance professionals before making regulatory decisions.',
     ],
@@ -35,7 +35,7 @@ export default function LegalPage({ type = 'disclaimer', onBack }) {
   const page = CONTENT[type] || CONTENT.disclaimer
 
   return (
-    <div className="min-h-screen bg-[#07111F] text-slate-200">
+    <div className="min-h-dvh bg-[#07111F] text-slate-200">
       <header className="border-b border-slate-800 bg-[#06101D]/92">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white">

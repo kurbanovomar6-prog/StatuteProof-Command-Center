@@ -57,7 +57,7 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
   }
 
   return (
-    <div className="flex h-screen bg-[#07111F] overflow-hidden">
+    <div className="flex h-dvh min-h-dvh bg-[#07111F] overflow-hidden">
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -92,7 +92,7 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
           navigate={navigate}
           currentUser={currentUser}
         />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto scroll-smooth">
           <Suspense fallback={<PageLoader />}>
             {renderPage()}
           </Suspense>

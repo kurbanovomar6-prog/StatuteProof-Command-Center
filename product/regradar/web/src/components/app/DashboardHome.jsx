@@ -296,6 +296,36 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
   }, [])
 
   const widgets = buildWidgets(sourcesData, sourceSummary)
+  const attentionItems = [
+    {
+      label: 'Source-health flags',
+      value: sourcesLoading ? '—' : widgets?.failedSources ?? 0,
+      detail: 'Failed or quality-drop runs that need operator review.',
+      tone: (widgets?.failedSources ?? 0) > 0 ? 'amber' : 'emerald',
+      action: 'sources',
+    },
+    {
+      label: 'Changes needing review',
+      value: sourcesLoading ? '—' : widgets?.reviewRequired ?? 0,
+      detail: 'Changed or first-seen sources before customer conclusions.',
+      tone: (widgets?.reviewRequired ?? 0) > 0 ? 'amber' : 'emerald',
+      action: 'review-queue',
+    },
+    {
+      label: 'Coverage limits',
+      value: sourceSummary ? `${(sourceSummary.candidate_count ?? 0) + (sourceSummary.remediation_count ?? 0)}` : '—',
+      detail: 'Candidate and remediation rows stay outside fresh-alert claims.',
+      tone: ((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) > 0 ? 'amber' : 'emerald',
+      action: 'sources',
+    },
+    {
+      label: 'Brief delivery',
+      value: 'Blocked',
+      detail: 'Customer delivery remains off until evidence and human-review gates pass.',
+      tone: 'slate',
+      action: 'briefs',
+    },
+  ]
 
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
@@ -334,6 +364,35 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <p className="text-[11px] text-amber-100/70">candidate/remediation</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="sp-panel p-5">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">What needs attention now</h2>
+            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-500">
+              Start here before relying on any brief, alert, or source claim. These are operator tasks, not customer-facing conclusions.
+            </p>
+          </div>
+          <StatusPill tone="cyan">Human review required</StatusPill>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {attentionItems.map(item => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => navigate(item.action)}
+              className="rounded-lg border border-slate-800 bg-slate-950/35 p-4 text-left transition-colors hover:border-cyan-400/30 hover:bg-slate-900/70"
+            >
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
+                <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Gated'}</StatusPill>
+              </div>
+              <p className="sp-mono text-2xl font-semibold text-white">{item.value}</p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-500">{item.detail}</p>
+            </button>
+          ))}
         </div>
       </div>
 

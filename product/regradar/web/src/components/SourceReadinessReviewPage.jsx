@@ -98,13 +98,13 @@ export default function SourceReadinessReviewPage({ onBack }) {
     }
   }
 
-  const inputCls = 'w-full bg-[#0A1628] border border-slate-800 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#16D9F5]/50 focus:ring-1 focus:ring-[#16D9F5]/50 transition-all text-sm'
-  const selectCls = 'w-full bg-[#0A1628] border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#16D9F5]/50 focus:ring-1 focus:ring-[#16D9F5]/50 transition-all text-sm'
+  const inputCls = 'min-h-11 w-full bg-[#0A1628] border border-slate-800 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#16D9F5]/50 focus:ring-1 focus:ring-[#16D9F5]/50 transition-all text-sm'
+  const selectCls = 'min-h-11 w-full bg-[#0A1628] border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#16D9F5]/50 focus:ring-1 focus:ring-[#16D9F5]/50 transition-all text-sm'
   const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide'
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-[#07111F] flex items-center justify-center px-4">
+      <div className="flex min-h-dvh items-center justify-center bg-[#07111F] px-4">
         <div className="max-w-md w-full text-center">
           <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-3">Request received</h2>
@@ -127,7 +127,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#07111F] text-slate-200">
+    <div className="min-h-dvh bg-[#07111F] text-slate-200">
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#07111F]/90 backdrop-blur-md border-b border-slate-800">
@@ -163,12 +163,12 @@ export default function SourceReadinessReviewPage({ onBack }) {
             </h1>
             <p className="text-slate-400 leading-relaxed max-w-xl mx-auto">
               Tell us which UAE regulators your team monitors and how you currently track changes.
-              We will review your source requirements and share a source readiness report.
+              We check whether the sources are official, public, technically accessible, and suitable for evidence-backed monitoring.
             </p>
             <p className="text-xs text-slate-600 mt-3">
               This is not legal advice and does not determine regulatory obligations.
             </p>
-            <div className="mx-auto mt-6 grid max-w-lg grid-cols-3 gap-2 text-center">
+            <div className="mx-auto mt-6 grid max-w-lg grid-cols-1 gap-2 text-center sm:grid-cols-3">
               {[
                 ['241', 'UAE source records'],
                 ['172', 'fresh-alert eligible'],
@@ -185,6 +185,13 @@ export default function SourceReadinessReviewPage({ onBack }) {
           {/* Form card */}
           <div className="sp-panel p-7 sm:p-10">
             <form className="space-y-5" onSubmit={handleSubmit}>
+              <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-4 py-3">
+                <p className="text-sm font-semibold text-cyan-100">What this review returns</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                  A source map for your licence profile: fresh-alert eligible sources, evidence-library sources,
+                  known blockers, and sources that need adapter or access remediation. It is not a legal opinion.
+                </p>
+              </div>
 
               {/* Email */}
               <div>
@@ -218,6 +225,9 @@ export default function SourceReadinessReviewPage({ onBack }) {
                 <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
                   {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
                 </select>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  MLRO = Money Laundering Reporting Officer. CCO = Chief Compliance Officer.
+                </p>
               </div>
 
               {/* Company type */}
@@ -231,13 +241,16 @@ export default function SourceReadinessReviewPage({ onBack }) {
               {/* Regulators checkboxes */}
               <div>
                 <label className={labelCls}>Regulators currently monitored (select all that apply)</label>
+                <p className="mb-2 text-xs leading-relaxed text-slate-500">
+                  Select the official-source areas your team already checks. This does not mean StatuteProof claims complete coverage for that regulator.
+                </p>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {REGULATORS.map(reg => (
                     <button
                       key={reg}
                       type="button"
                       onClick={() => toggleRegulator(reg)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                      className={`min-h-10 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
                         form.regulators.includes(reg)
                           ? 'bg-[#16D9F5]/10 border-[#16D9F5]/50 text-[#16D9F5]'
                           : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
@@ -285,7 +298,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="w-full bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-h-11 w-full rounded-lg bg-[#16D9F5] py-3 font-bold text-[#07111F] transition-colors hover:bg-[#11c2db] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === 'loading' ? 'Submitting…' : 'Request source readiness review'}
               </button>

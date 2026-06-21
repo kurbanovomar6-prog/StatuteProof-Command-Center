@@ -31,7 +31,7 @@ const LegalPage             = lazy(() => import('./components/LegalPage'))
 
 function GlobalLoader() {
   return (
-    <div className="flex items-center justify-center h-screen bg-[#07111F]">
+    <div className="flex min-h-dvh items-center justify-center bg-[#07111F]">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#16D9F5]" />
     </div>
   )
@@ -259,7 +259,7 @@ export default function App() {
   }
 
   if (authLoading) {
-    return <div className="min-h-screen bg-[#07111F]" />
+    return <div className="min-h-dvh bg-[#07111F]" />
   }
 
   if (view === 'login') {
@@ -352,7 +352,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07111F] text-slate-200">
+    <div className="min-h-dvh bg-[#07111F] text-slate-200">
       <Header
         onSignIn={() => navigatePublic('login')}
         onCreateWorkspace={() => navigateRegister()}

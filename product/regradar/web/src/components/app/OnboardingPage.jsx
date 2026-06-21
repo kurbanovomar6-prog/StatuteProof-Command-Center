@@ -188,7 +188,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
   const totalSteps = 4
 
   return (
-    <div className="min-h-screen bg-[#07111F] flex flex-col items-center justify-center p-6 text-slate-200 font-sans selection:bg-[#16D9F5]/30">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-[#07111F] p-6 font-sans text-slate-200 selection:bg-[#16D9F5]/30">
       <div className="w-full max-w-2xl">
 
         {/* Logo */}

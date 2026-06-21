@@ -49,7 +49,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
   const planLabel = planDisplay(planState)
 
   return (
-    <aside className={`flex-shrink-0 flex flex-col bg-[#0A1628] border-r border-slate-800 transition-all duration-200 h-screen ${collapsed ? 'w-16' : 'w-64'}`}>
+    <aside className={`flex-shrink-0 flex h-dvh min-h-dvh flex-col bg-[#0A1628] border-r border-slate-800 transition-all duration-200 ${collapsed ? 'w-16' : 'w-64'}`}>
 
       {/* Logo */}
       <div className="flex items-center justify-between px-4 h-14 border-b border-slate-800 flex-shrink-0">
@@ -74,7 +74,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
         )}
         <button
           onClick={onToggle}
-          className="p-1 rounded text-slate-600 hover:text-slate-300 transition-colors flex-shrink-0"
+          className="flex min-h-9 min-w-9 flex-shrink-0 items-center justify-center rounded text-slate-600 transition-colors hover:text-slate-300"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed
@@ -92,7 +92,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
               key={id}
               onClick={() => navigate(id)}
               title={collapsed ? label : undefined}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative ${
+              className={`relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
                 active
                   ? 'bg-[#16D9F5]/10 text-[#16D9F5] border-r-2 border-[#16D9F5]'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-r-2 border-transparent'
@@ -134,7 +134,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
 
             <button
               onClick={onSignOut}
-              className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 transition-colors w-full px-1 py-1"
+              className="flex min-h-10 w-full items-center gap-2 px-1 py-1 text-xs text-slate-500 transition-colors hover:text-slate-300"
             >
               <LogOut className="w-3.5 h-3.5" />
               Sign out
@@ -147,7 +147,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
             </div>
             <button
               onClick={onSignOut}
-              className="text-slate-500 hover:text-slate-300 transition-colors"
+              className="flex min-h-10 min-w-10 items-center justify-center text-slate-500 transition-colors hover:text-slate-300"
               title="Sign out"
             >
               <LogOut className="w-3.5 h-3.5" />

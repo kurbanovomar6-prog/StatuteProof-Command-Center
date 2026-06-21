@@ -23,8 +23,8 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm text-slate-500 leading-relaxed">
-              Official-source regulatory monitoring with evidence-backed compliance briefs for UAE
-              financial firms. Source limitations disclosed. Not legal advice.
+              Official-source regulatory monitoring with hash-verified evidence records and human-review
+              workflows for UAE financial firms. Source limitations disclosed. Not legal advice.
             </p>
           </div>
 

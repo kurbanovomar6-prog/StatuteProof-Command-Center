@@ -127,7 +127,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#07111F] text-slate-200 py-12 px-4">
+    <div className="min-h-dvh bg-[#07111F] px-4 py-12 text-slate-200">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}

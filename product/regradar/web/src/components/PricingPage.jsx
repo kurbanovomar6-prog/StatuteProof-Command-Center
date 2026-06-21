@@ -178,7 +178,7 @@ export default function PricingPage({ onBack, onCreateWorkspace, onSourceReview,
   }
 
   return (
-    <div className="min-h-screen bg-[#07111F] text-slate-200">
+    <div className="min-h-dvh bg-[#07111F] text-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
 
         {/* Back */}

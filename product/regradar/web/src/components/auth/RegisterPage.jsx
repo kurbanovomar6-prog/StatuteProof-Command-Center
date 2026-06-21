@@ -4,7 +4,7 @@ import { auth } from '../../api'
 
 function AuthLayout({ children, quote }) {
   return (
-    <div className="min-h-screen bg-[#07111F] flex text-slate-200 font-sans selection:bg-[#16D9F5]/30">
+    <div className="flex min-h-dvh bg-[#07111F] font-sans text-slate-200 selection:bg-[#16D9F5]/30">
       {/* Left panel */}
       <div className="hidden lg:flex w-5/12 bg-[#0A1628] border-r border-slate-800 p-12 flex-col justify-between relative overflow-hidden">
         <div
@@ -44,7 +44,7 @@ function AuthLayout({ children, quote }) {
       </div>
 
       {/* Right panel — scrollable */}
-      <div className="flex-1 flex flex-col justify-start px-8 sm:px-16 lg:px-20 py-10 overflow-y-auto">
+      <div className="flex flex-1 flex-col justify-start overflow-y-auto px-6 py-10 sm:px-16 lg:px-20">
         <div className="w-full max-w-md mx-auto">{children}</div>
       </div>
     </div>
@@ -170,11 +170,11 @@ export default function RegisterPage({ onRegister, onLogin }) {
   const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider'
 
   return (
-    <AuthLayout quote="Official-source monitoring with evidence-backed compliance briefs for UAE financial teams.">
+    <AuthLayout quote="Official-source monitoring with hash-verified evidence and human review for UAE financial teams.">
 
       <h1 className="text-2xl font-bold text-white mb-1">Create your StatuteProof workspace</h1>
       <p className="text-slate-400 text-sm mb-7">
-        Access monitored sources, evidence records, and human-reviewed compliance briefs.
+        Create a workspace for source monitoring, evidence review, and draft brief workflows.
       </p>
 
       <div className="mb-5">
@@ -183,7 +183,7 @@ export default function RegisterPage({ onRegister, onLogin }) {
             type="button"
             disabled={googleStatus.loading || !googleStatus.available}
             onClick={handleGoogleRegister}
-            className={`w-full flex items-center justify-center gap-2 text-sm font-medium border py-2.5 rounded-lg select-none transition-colors ${
+              className={`flex min-h-11 w-full select-none items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
               googleStatus.available
                 ? 'border-slate-700 text-slate-200 hover:border-cyan-400/40 hover:bg-slate-900'
                 : 'cursor-not-allowed border-slate-800 text-slate-600'
@@ -211,7 +211,7 @@ export default function RegisterPage({ onRegister, onLogin }) {
       <form className="space-y-4" onSubmit={handleSubmit}>
 
         {/* Name row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className={labelCls}>First name *</label>
             <input
@@ -355,7 +355,7 @@ export default function RegisterPage({ onRegister, onLogin }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#16D9F5] px-5 py-2.5 text-sm font-semibold text-[#07111F] hover:bg-[#0EC8E4] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#16D9F5] disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+          className="mt-1 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#16D9F5] px-5 py-2.5 text-sm font-semibold text-[#07111F] transition-colors hover:bg-[#0EC8E4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#16D9F5] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Creating workspace...' : 'Create workspace'}
         </button>
