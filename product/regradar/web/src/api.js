@@ -48,6 +48,14 @@ export const auth = {
   me() {
     return authRequest('/api/auth/me')
   },
+
+  googleStatus() {
+    return authRequest('/api/auth/google/status')
+  },
+
+  googleStartUrl(next = '/app') {
+    return `/api/auth/google/start?next=${encodeURIComponent(next)}`
+  },
 }
 
 export const profile = {

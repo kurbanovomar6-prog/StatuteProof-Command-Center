@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { auth } from '../../api'
 
@@ -96,7 +96,32 @@ export default function RegisterPage({ onRegister, onLogin }) {
   const [disclaimerAcknowledged, setDisclaimerAcknowledged] = useState(false)
   const [error, setError]   = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleStatus, setGoogleStatus] = useState({ loading: true, available: false, message: '' })
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }))
+
+  useEffect(() => {
+    let active = true
+    auth.googleStatus()
+      .then(data => {
+        if (active) {
+          setGoogleStatus({
+            loading: false,
+            available: Boolean(data.available),
+            message: data.message || '',
+          })
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setGoogleStatus({
+            loading: false,
+            available: false,
+            message: 'Google sign-up is not configured for this environment.',
+          })
+        }
+      })
+    return () => { active = false }
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -131,6 +156,15 @@ export default function RegisterPage({ onRegister, onLogin }) {
     }
   }
 
+  function handleGoogleRegister() {
+    setError('')
+    if (!googleStatus.available) {
+      setError(googleStatus.message || 'Google sign-up is not configured for this environment.')
+      return
+    }
+    window.location.assign(auth.googleStartUrl('/app'))
+  }
+
   const inputCls = 'w-full rounded-lg border border-slate-700 bg-[#0A1628] px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:border-[#16D9F5] focus:outline-none focus:ring-1 focus:ring-[#16D9F5]/20 transition-colors'
   const selectCls = 'w-full rounded-lg border border-slate-700 bg-[#0A1628] px-4 py-2.5 text-sm text-slate-200 focus:border-[#16D9F5] focus:outline-none focus:ring-1 focus:ring-[#16D9F5]/20 transition-colors appearance-none'
   const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider'
@@ -142,6 +176,37 @@ export default function RegisterPage({ onRegister, onLogin }) {
       <p className="text-slate-400 text-sm mb-7">
         Access monitored sources, evidence records, and human-reviewed compliance briefs.
       </p>
+
+      <div className="mb-5">
+        <div className="relative">
+          <button
+            type="button"
+            disabled={googleStatus.loading || !googleStatus.available}
+            onClick={handleGoogleRegister}
+            className={`w-full flex items-center justify-center gap-2 text-sm font-medium border py-2.5 rounded-lg select-none transition-colors ${
+              googleStatus.available
+                ? 'border-slate-700 text-slate-200 hover:border-cyan-400/40 hover:bg-slate-900'
+                : 'cursor-not-allowed border-slate-800 text-slate-600'
+            }`}
+          >
+            <span className="font-bold text-slate-500">G</span>
+            {googleStatus.loading ? 'Checking Google sign-up...' : 'Continue with Google'}
+          </button>
+          {!googleStatus.loading && !googleStatus.available && (
+            <span className="absolute -top-2.5 right-3 text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded-sm tracking-wide">
+              Not configured
+            </span>
+          )}
+        </div>
+        <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-600">
+          Use your verified work Google account. StatuteProof uses the verified email to create or find your account.
+        </p>
+        <div className="mt-5 flex items-center gap-3">
+          <div className="flex-1 h-px bg-slate-800" />
+          <span className="text-xs text-slate-600">or register with email</span>
+          <div className="flex-1 h-px bg-slate-800" />
+        </div>
+      </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
 

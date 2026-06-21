@@ -32,10 +32,17 @@ from app.auth import (
     SESSION_COOKIE_NAME,
     SESSION_MAX_AGE_SECONDS,
     DuplicateEmailError,
+    OAuthAccountError,
     create_session,
+    create_google_oauth_state,
     create_user,
     delete_session,
+    consume_google_oauth_state,
+    exchange_google_oauth_code,
     get_user_by_email,
+    google_oauth_authorization_url,
+    google_oauth_available,
+    link_or_create_google_user,
     make_public_user,
     normalize_email,
     parse_session_cookie,
@@ -227,6 +234,21 @@ class _Handler(BaseHTTPRequestHandler):
     def _truncate(self, value, limit: int) -> str:
         return str(value or "").strip()[:limit]
 
+    def _redirect(
+        self,
+        location: str,
+        *,
+        status: int = 302,
+        extra_headers: list[tuple[str, str]] | None = None,
+    ) -> None:
+        self.send_response(status)
+        self.send_header("Location", location)
+        for k, v in _CORS.items():
+            self.send_header(k, v)
+        for k, v in extra_headers or []:
+            self.send_header(k, v)
+        self.end_headers()
+
     # ── CORS preflight ─────────────────────────────────────────────────────────
 
     def do_OPTIONS(self):
@@ -241,6 +263,12 @@ class _Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/api/auth/me":
             self._handle_auth_me()
+        elif path == "/api/auth/google/status":
+            self._handle_auth_google_status()
+        elif path == "/api/auth/google/start":
+            self._handle_auth_google_start()
+        elif path == "/api/auth/google/callback":
+            self._handle_auth_google_callback()
         elif path == "/api/profile":
             self._handle_profile_get()
         elif path == "/api/telegram/pair/status":
@@ -441,6 +469,71 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
         self._send_json({"ok": True, "user": make_public_user(user)})
+
+    def _handle_auth_google_status(self) -> None:
+        available = google_oauth_available()
+        self._send_json(
+            {
+                "ok": True,
+                "available": available,
+                "message": (
+                    "Google sign-in is configured."
+                    if available
+                    else "Google sign-in is not configured for this environment."
+                ),
+            }
+        )
+
+    def _handle_auth_google_start(self) -> None:
+        if self._rate_limited(_LOGIN_LIMITER, "auth_google_start"):
+            return
+        if not google_oauth_available():
+            self._send_json(
+                {
+                    "ok": False,
+                    "available": False,
+                    "message": "Google sign-in is not configured for this environment.",
+                },
+                503,
+            )
+            return
+        params = parse_qs(urlparse(self.path).query)
+        next_path = str((params.get("next") or ["/app"])[0] or "/app")
+        try:
+            state = create_google_oauth_state(next_path=next_path)
+            self._redirect(google_oauth_authorization_url(state))
+        except OAuthAccountError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 503)
+        except Exception as exc:
+            logger.error("Google OAuth start failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Google sign-in could not be started."}, 500)
+
+    def _handle_auth_google_callback(self) -> None:
+        params = parse_qs(urlparse(self.path).query)
+        if params.get("error"):
+            self._redirect("/login?google=cancelled")
+            return
+        state = str((params.get("state") or [""])[0] or "").strip()
+        code = str((params.get("code") or [""])[0] or "").strip()
+        state_record = consume_google_oauth_state(state)
+        if not state_record or not code:
+            self._redirect("/login?google=failed")
+            return
+        try:
+            claims = exchange_google_oauth_code(code)
+            user = link_or_create_google_user(claims)
+            if not user.get("is_active"):
+                raise OAuthAccountError("Account is not active.")
+            session_id = create_session(int(user["id"]))
+            self._redirect(
+                str(state_record.get("next_path") or "/app"),
+                extra_headers=[("Set-Cookie", self._session_cookie_header(session_id))],
+            )
+        except OAuthAccountError:
+            self._redirect("/login?google=failed")
+        except Exception as exc:
+            logger.error("Google OAuth callback failed: %s", type(exc).__name__)
+            self._redirect("/login?google=failed")
 
     def _handle_profile_get(self) -> None:
         user = require_auth(self)

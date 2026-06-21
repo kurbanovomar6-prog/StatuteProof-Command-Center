@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { auth } from '../../api'
 
@@ -58,6 +58,31 @@ export default function LoginPage({ onLogin, onRegister }) {
   const [showPass, setShowPass]   = useState(false)
   const [error, setError]         = useState('')
   const [loading, setLoading]     = useState(false)
+  const [googleStatus, setGoogleStatus] = useState({ loading: true, available: false, message: '' })
+
+  useEffect(() => {
+    let active = true
+    auth.googleStatus()
+      .then(data => {
+        if (active) {
+          setGoogleStatus({
+            loading: false,
+            available: Boolean(data.available),
+            message: data.message || '',
+          })
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setGoogleStatus({
+            loading: false,
+            available: false,
+            message: 'Google sign-in is not configured for this environment.',
+          })
+        }
+      })
+    return () => { active = false }
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -71,6 +96,15 @@ export default function LoginPage({ onLogin, onRegister }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleGoogleSignIn() {
+    setError('')
+    if (!googleStatus.available) {
+      setError(googleStatus.message || 'Google sign-in is not configured for this environment.')
+      return
+    }
+    window.location.assign(auth.googleStartUrl('/app'))
   }
 
   const inputCls = (hasError) =>
@@ -157,19 +191,29 @@ export default function LoginPage({ onLogin, onRegister }) {
         <div className="flex-1 h-px bg-slate-800" />
       </div>
 
-      {/* Google OAuth placeholder */}
       <div className="relative">
         <button
-          disabled
-          className="w-full flex items-center justify-center gap-2 text-sm font-medium text-slate-600 border border-slate-800 py-2.5 rounded-lg cursor-not-allowed select-none"
+          type="button"
+          disabled={googleStatus.loading || !googleStatus.available}
+          onClick={handleGoogleSignIn}
+          className={`w-full flex items-center justify-center gap-2 text-sm font-medium border py-2.5 rounded-lg select-none transition-colors ${
+            googleStatus.available
+              ? 'border-slate-700 text-slate-200 hover:border-cyan-400/40 hover:bg-slate-900'
+              : 'cursor-not-allowed border-slate-800 text-slate-600'
+          }`}
         >
           <span className="font-bold text-slate-500">G</span>
-          Continue with Google
+          {googleStatus.loading ? 'Checking Google sign-in...' : 'Continue with Google'}
         </button>
-        <span className="absolute -top-2.5 right-3 text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded-sm tracking-wide">
-          Coming soon
-        </span>
+        {!googleStatus.loading && !googleStatus.available && (
+          <span className="absolute -top-2.5 right-3 text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded-sm tracking-wide">
+            Not configured
+          </span>
+        )}
       </div>
+      <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-600">
+        Use your verified work Google account. StatuteProof uses the verified email to create or find your account.
+      </p>
 
       <p className="mt-6 text-center text-sm text-slate-500">
         No account?{' '}

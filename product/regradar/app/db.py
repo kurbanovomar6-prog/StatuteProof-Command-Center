@@ -67,7 +67,10 @@ _CREATE_AUTH_TABLES = """
     CREATE TABLE IF NOT EXISTS users (
         id            INTEGER PRIMARY KEY AUTOINCREMENT,
         email         TEXT      UNIQUE NOT NULL,
+        normalized_email TEXT   UNIQUE NOT NULL,
         password_hash TEXT      NOT NULL,
+        auth_provider TEXT      NOT NULL DEFAULT 'password',
+        email_verified INTEGER  NOT NULL DEFAULT 0,
         full_name     TEXT,
         company_name  TEXT,
         industry      TEXT,
@@ -87,6 +90,30 @@ _CREATE_AUTH_TABLES = """
     CREATE INDEX IF NOT EXISTS idx_users_email       ON users(email);
     CREATE INDEX IF NOT EXISTS idx_sessions_user_id  ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_expires  ON sessions(expires_at);
+
+    CREATE TABLE IF NOT EXISTS oauth_identities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        provider TEXT NOT NULL,
+        provider_user_id TEXT NOT NULL,
+        normalized_email TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP NOT NULL,
+        UNIQUE(provider, provider_user_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_oauth_identities_user_id ON oauth_identities(user_id);
+    CREATE INDEX IF NOT EXISTS idx_oauth_identities_email ON oauth_identities(normalized_email);
+
+    CREATE TABLE IF NOT EXISTS oauth_states (
+        state TEXT PRIMARY KEY,
+        next_path TEXT NOT NULL DEFAULT '/app',
+        created_at TIMESTAMP NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        consumed_at TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_oauth_states_expires ON oauth_states(expires_at);
 """
 
 _CREATE_DELIVERY_LOG_TABLE = """
@@ -138,6 +165,15 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
         if "full_name" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN full_name TEXT")
             logger.info("DB: added users.full_name column")
+        if "normalized_email" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN normalized_email TEXT")
+            logger.info("DB: added users.normalized_email column")
+        if "auth_provider" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN auth_provider TEXT NOT NULL DEFAULT 'password'")
+            logger.info("DB: added users.auth_provider column")
+        if "email_verified" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0")
+            logger.info("DB: added users.email_verified column")
         if "job_title" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN job_title TEXT")
             logger.info("DB: added users.job_title column")
@@ -156,6 +192,35 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
         if "plan_intent_at" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN plan_intent_at TIMESTAMP")
             logger.info("DB: added users.plan_intent_at column")
+        _backfill_normalized_user_emails(conn)
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_normalized_email_unique ON users(normalized_email)")
+        conn.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS oauth_identities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                provider TEXT NOT NULL,
+                provider_user_id TEXT NOT NULL,
+                normalized_email TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                UNIQUE(provider, provider_user_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_oauth_identities_user_id ON oauth_identities(user_id);
+            CREATE INDEX IF NOT EXISTS idx_oauth_identities_email ON oauth_identities(normalized_email);
+
+            CREATE TABLE IF NOT EXISTS oauth_states (
+                state TEXT PRIMARY KEY,
+                next_path TEXT NOT NULL DEFAULT '/app',
+                created_at TIMESTAMP NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                consumed_at TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_oauth_states_expires ON oauth_states(expires_at);
+            """
+        )
         conn.commit()
     finally:
         if owned_conn:
@@ -165,6 +230,30 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
     from app.telegram_pairing import ensure_telegram_pairing_tables
     ensure_telegram_pairing_tables()
     ensure_delivery_log_table()
+
+
+def _backfill_normalized_user_emails(conn: sqlite3.Connection) -> None:
+    rows = conn.execute(
+        "SELECT id, email, normalized_email FROM users ORDER BY id ASC"
+    ).fetchall()
+    seen: set[str] = set()
+    for row in rows:
+        user_id = row["id"]
+        email = str(row["email"] or "").strip()
+        normalized = str(row["normalized_email"] or "").strip().lower() or email.lower()
+        if normalized in seen:
+            quarantined = f"{normalized}#duplicate-{user_id}"
+            conn.execute(
+                "UPDATE users SET normalized_email = ?, is_active = 0 WHERE id = ?",
+                (quarantined, user_id),
+            )
+            logger.warning("DB: quarantined duplicate normalized_email for user_id=%s", user_id)
+            continue
+        seen.add(normalized)
+        conn.execute(
+            "UPDATE users SET email = ?, normalized_email = ? WHERE id = ?",
+            (email, normalized, user_id),
+        )
 
 
 # ── migration helpers ─────────────────────────────────────────────────────────
