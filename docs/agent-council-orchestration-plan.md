@@ -17,11 +17,22 @@ StatuteProof already has ten core roles in `AGENTS.md`, `.claude/agents/`, and `
 9. ICP Lead Research
 10. Outreach Writer
 
-These remain the core council roles. New worker roles may be added as implementation helpers, but they do not replace Source Monitor, Evidence Trail, QA, Legal Language, or Product Manager gates.
+These remain the only active council roles. Worker-style capabilities may be used only as modes inside the 10 roles below; they do not create an 11th active agent and they do not replace Source Monitor, Evidence Trail, QA, Legal Language, Risk + Brief Pipeline, or Product Manager gates.
 
-## Deprecated Rule
+## Active Agent Limit
 
-The old "10 agents maximum" rule is deprecated for orchestration planning. It should no longer block adding bounded worker roles such as Adapter Worker, Validator Worker, Test Fixture Worker, Source Discovery Worker, Security/Tooling Auditor, or Browser/Access Investigator.
+The 10-agent maximum is active and binding. Do not create an 11th active agent.
+
+Allowed sub-modes inside the 10-agent roster:
+
+- Adapter Worker mode -> Code Architect, with Source Monitor review.
+- Validator Worker mode -> Code Architect, with QA review.
+- Test Fixture Worker mode -> Code Architect, with QA review.
+- Source Discovery Worker mode -> Source Monitor.
+- Security/Tooling Auditor mode -> Code Architect plus QA / Critic plus Chief of Staff.
+- Browser/Access Investigator mode -> Source Monitor, limited to public unauthenticated pages.
+
+These are modes, not active agents. They cannot own independent blocking authority unless the underlying roster role already has that authority.
 
 ## Rules That Remain Mandatory
 
@@ -73,7 +84,7 @@ Agents may propose next tasks to one another, but task status changes must be re
 - Evidence/brief gate: Evidence Trail -> Risk + Brief Pipeline -> QA -> Legal -> Product.
 - Customer copy gate: Product -> Legal -> QA.
 - Outreach gate: ICP Lead Research -> Product -> Legal -> Outreach Writer -> QA.
-- Tooling gate: Security/Tooling Auditor -> Code Architect -> QA -> Chief of Staff.
+- Tooling gate: Code Architect in Security/Tooling Auditor mode -> QA -> Chief of Staff.
 
 ## Safety Boundaries
 

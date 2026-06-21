@@ -1,0 +1,256 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "1.0",
+  "current_wave": "simulation",
+  "tasks": [
+    {
+      "task_id": "agent-os-protocol-simulation",
+      "status": "done",
+      "owner_agent": "Chief of Staff",
+      "reviewer_agents": [
+        "Evidence Trail",
+        "QA / Critic"
+      ],
+      "domains": [
+        "evidence"
+      ],
+      "current_phase": "review_qa",
+      "score_before": 35,
+      "target_score": 70,
+      "actual_score_after": 76,
+      "evidence_required": [
+        "protocol configuration",
+        "blackboard dry-run packet",
+        "validator command result"
+      ],
+      "validation_commands": [
+        {
+          "command": "python3 tools/validate_agent_council_protocol.py",
+          "exit_code": 0,
+          "run_at": "2026-06-21T00:00:00Z"
+        }
+      ],
+      "handoff_packets": [
+        {
+          "packet_id": "packet-evidence-trail-001",
+          "from_agent": "Evidence Trail",
+          "to_agent": "QA / Critic",
+          "verdict": "PASS",
+          "task_score": 74,
+          "score_impact": {
+            "before": 35,
+            "after": 74,
+            "delta": 39
+          },
+          "evidence_found": [
+            "Protocol and blackboard are stored as JSON files.",
+            "Evidence-related dry-run task requires Evidence Trail packet before done."
+          ],
+          "files_inspected": [
+            "product/regradar/config/agent_council_protocol.json",
+            "product/regradar/config/agent_council_blackboard.json",
+            "tools/validate_agent_council_protocol.py"
+          ],
+          "commands_run": [
+            {
+              "command": "python3 tools/validate_agent_council_protocol.py",
+              "exit_code": 0
+            }
+          ],
+          "findings": {
+            "P0": [],
+            "P1": [],
+            "P2": [
+              "Dry-run packet is not autonomous execution."
+            ]
+          },
+          "blocker_reason": "",
+          "prompt_for_next_agent": "Review whether the dry-run Agent OS packet prevents evidence-related work from moving to done without Evidence Trail and QA gates.",
+          "questions_for_next_agent": [
+            "Does this evidence packet include files, commands, proof, and a next-agent prompt?"
+          ],
+          "stop_continue_recommendation": "continue"
+        },
+        {
+          "packet_id": "packet-qa-critic-001",
+          "from_agent": "QA / Critic",
+          "to_agent": "Chief of Staff",
+          "verdict": "PASS",
+          "task_score": 76,
+          "score_impact": {
+            "before": 35,
+            "after": 76,
+            "delta": 41
+          },
+          "evidence_found": [
+            "QA packet includes a 1-100 task_score.",
+            "Done status is blocked without required reviewer PASS packets and passing validation commands."
+          ],
+          "files_inspected": [
+            "product/regradar/config/agent_council_protocol.json",
+            "product/regradar/config/agent_council_blackboard.json",
+            "tools/validate_agent_council_protocol.py",
+            "product/regradar/tests/test_agent_council_protocol.py"
+          ],
+          "commands_run": [
+            {
+              "command": "python3 tools/validate_agent_council_protocol.py",
+              "exit_code": 0
+            }
+          ],
+          "findings": {
+            "P0": [],
+            "P1": [
+              "Legacy task board remains advisory for historical tasks."
+            ],
+            "P2": [
+              "No background automation or daemon is enabled."
+            ]
+          },
+          "blocker_reason": "",
+          "prompt_for_next_agent": "Use the governed Agent OS protocol for the next agent-council sprint and reject any done claim without QA score, proof, validation output, and next prompt.",
+          "questions_for_next_agent": [
+            "What manual gate remains before any real customer delivery?",
+            "Which task should enter the protocol blackboard next?"
+          ],
+          "stop_continue_recommendation": "continue"
+        }
+      ],
+      "prompt_packets": [
+        {
+          "packet_id": "prompt-router-001",
+          "from_agent": "Outreach Writer",
+          "to_agent": "Evidence Trail",
+          "task_id": "agent-os-protocol-simulation",
+          "context": "Dry-run governed Agent OS simulation only. Inspect product/regradar/config/agent_council_protocol.json, product/regradar/config/agent_council_blackboard.json, tools/validate_agent_council_protocol.py, and product/regradar/tests/test_agent_council_protocol.py. No autonomous loop, deployment, customer delivery, source activation, or live source fetch is in scope.",
+          "hard_rules": [
+            "No deploy.",
+            "No secrets print.",
+            "No fake MONITOR_OK."
+          ],
+          "questions": [
+            "Do all proof paths listed by the blackboard exist on disk and match the files inspected in the Evidence Trail packet?",
+            "Does packet-evidence-trail-001 contain real commands_run entries with exit_code=0 rather than prose-only approval?",
+            "Does the 35 to 74 score movement cite inspectable protocol, blackboard, validator, and test evidence?"
+          ],
+          "expected_output_format": [
+            "verdict",
+            "task_score",
+            "score_impact",
+            "evidence_found",
+            "files_inspected",
+            "commands_run",
+            "findings",
+            "blocker_reason",
+            "prompt_for_next_agent",
+            "questions_for_next_agent",
+            "stop_continue_recommendation"
+          ]
+        }
+      ],
+      "blockers": [],
+      "proof": [
+        "product/regradar/config/agent_council_protocol.json",
+        "product/regradar/config/agent_council_blackboard.json",
+        "tools/validate_agent_council_protocol.py",
+        "product/regradar/tests/test_agent_council_protocol.py"
+      ],
+      "stop_condition": "Stop if any required reviewer packet, QA score, prompt packet, proof, or validation result is missing."
+    },
+    {
+      "task_id": "agent-runtime-unavailable-blocker",
+      "status": "blocked",
+      "owner_agent": "Chief of Staff",
+      "reviewer_agents": [
+        "QA / Critic"
+      ],
+      "domains": [],
+      "current_phase": "runtime_blocked",
+      "score_before": 0,
+      "target_score": 70,
+      "actual_score_after": 44,
+      "evidence_required": [
+        "runtime blocker note"
+      ],
+      "validation_commands": [
+        {
+          "command": "multi_agent_v1.spawn_agent",
+          "exit_code": 1,
+          "run_at": "2026-06-21T00:00:00Z"
+        }
+      ],
+      "handoff_packets": [
+        {
+          "packet_id": "packet-qa-runtime-hold-001",
+          "from_agent": "QA / Critic",
+          "to_agent": "Chief of Staff",
+          "verdict": "HOLD",
+          "task_score": 44,
+          "score_impact": {
+            "before": 0,
+            "after": 44,
+            "delta": 44
+          },
+          "evidence_found": [
+            "Codex subagent runtime returned agent thread limit reached.",
+            "No old stuck agents were resumed or closed."
+          ],
+          "files_inspected": [
+            "docs/agent-council-handoff-rules.md"
+          ],
+          "commands_run": [],
+          "findings": {
+            "P0": [
+              "Fresh subagent runtime is not reliably available."
+            ],
+            "P1": [],
+            "P2": []
+          },
+          "blocker_reason": "Agent runtime thread limit reached; use no-session CLI agents or local protocol simulation until runtime is available.",
+          "prompt_for_next_agent": "Chief of Staff should plan the next council wave with no more than one to three fresh agents and must record runtime blockers as HOLD instead of pretending autonomy worked.",
+          "questions_for_next_agent": [
+            "Is the runtime available for fresh subagents?",
+            "If not, what local validator-backed fallback is acceptable?"
+          ],
+          "stop_continue_recommendation": "stop"
+        }
+      ],
+      "prompt_packets": [
+        {
+          "packet_id": "prompt-runtime-hold-001",
+          "from_agent": "Outreach Writer",
+          "to_agent": "Chief of Staff",
+          "task_id": "agent-runtime-unavailable-blocker",
+          "context": "Runtime blocker packet for unavailable fresh subagents. The multi_agent_v1 runtime returned agent thread limit reached; old stuck agents must not be resumed or closed. The acceptable fallback is a local validator-backed protocol simulation or fresh no-session CLI agents that return usable packets within a bounded time.",
+          "hard_rules": [
+            "Use fresh agents only.",
+            "Do not resume or close old stuck agents."
+          ],
+          "questions": [
+            "Is the fresh-agent runtime available for this wave without touching old stuck agents?",
+            "If the runtime is unavailable, what validator-backed fallback preserves evidence, scoring, and handoff honesty?",
+            "What exact blocker should be recorded before stopping the wave?"
+          ],
+          "expected_output_format": [
+            "verdict",
+            "task_score",
+            "score_impact",
+            "evidence_found",
+            "files_inspected",
+            "commands_run",
+            "findings",
+            "blocker_reason",
+            "prompt_for_next_agent",
+            "questions_for_next_agent",
+            "stop_continue_recommendation"
+          ]
+        }
+      ],
+      "blockers": [
+        "Agent runtime thread limit reached; fresh subagents unavailable through multi_agent_v1 in this session."
+      ],
+      "proof": [],
+      "stop_condition": "Stop if the only available path requires interacting with old stuck agents."
+    }
+  ]
+}

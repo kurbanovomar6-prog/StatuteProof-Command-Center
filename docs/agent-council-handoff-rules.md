@@ -20,8 +20,8 @@ Agents may propose tasks to each other, but no source activation, customer claim
 
 - Starts only after Source Monitor defines source/fetch blocker.
 - Code Architect owns design and file scope.
-- Adapter Worker may implement bounded files only when assigned.
-- Test Fixture Worker provides local fixtures before or with adapter tests.
+- Code Architect may use Adapter Worker mode for bounded implementation.
+- Code Architect may use Test Fixture Worker mode for local fixtures before or with adapter tests.
 - No adapter result can activate a source without Evidence Trail.
 
 ## Evidence and Briefs
@@ -42,8 +42,8 @@ Agents may propose tasks to each other, but no source activation, customer claim
 
 ## Tooling
 
-- Security/Tooling Auditor reviews external tools first.
-- Chief of Staff can accept tooling tasks but cannot override a Security/Tooling Auditor block.
+- Code Architect in Security/Tooling Auditor mode reviews external tools first, with QA / Critic as the blocking reviewer.
+- Chief of Staff can accept tooling tasks but cannot override a QA / Critic block.
 - Full Ruflo mode, daemon, hooks, MCP memory auto-sync, and broad agent imports require explicit founder approval.
 
 ## Chief of Staff Authority
@@ -80,7 +80,7 @@ Recommended waves:
 
 1. Truth wave: Code Architect, Evidence Trail, QA / Critic.
 2. Claim wave: Product Manager, Legal Language, QA / Critic.
-3. Source wave: Source Monitor plus one Adapter Worker for one source family.
+3. Source wave: Source Monitor plus Code Architect in Adapter Worker mode for one source family.
 4. Sales wave: ICP Lead Research, Product Manager, Outreach Writer after Legal approval.
 
 This lets all roles participate without relying on unsafe full-swarm concurrency.

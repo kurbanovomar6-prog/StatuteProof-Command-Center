@@ -1,0 +1,212 @@
+{
+  "schema_version": "1.0",
+  "max_active_agents": 10,
+  "active_agents": [
+    {
+      "agent_id": "chief-of-staff",
+      "role": "Chief of Staff",
+      "modes": [
+        "Council Router / Orchestrator"
+      ]
+    },
+    {
+      "agent_id": "product-manager",
+      "role": "Product Manager",
+      "modes": [
+        "Pilot/Beta/Production Readiness Gate"
+      ]
+    },
+    {
+      "agent_id": "code-architect",
+      "role": "Code Architect",
+      "modes": [
+        "Agent Systems Architect"
+      ]
+    },
+    {
+      "agent_id": "qa-critic",
+      "role": "QA / Critic",
+      "modes": [
+        "External CTO Scorer"
+      ]
+    },
+    {
+      "agent_id": "legal-language",
+      "role": "Legal Language",
+      "modes": [
+        "Claims Gate"
+      ]
+    },
+    {
+      "agent_id": "source-monitor",
+      "role": "Source Monitor",
+      "modes": [
+        "Source Truth Gate"
+      ]
+    },
+    {
+      "agent_id": "evidence-trail",
+      "role": "Evidence Trail",
+      "modes": [
+        "Evidence Corpus Auditor"
+      ]
+    },
+    {
+      "agent_id": "risk-brief-pipeline",
+      "role": "Risk + Brief Pipeline",
+      "modes": [
+        "Customer Delivery Gate"
+      ]
+    },
+    {
+      "agent_id": "icp-lead-research",
+      "role": "ICP Lead Research",
+      "modes": [
+        "Market/GTM Scorer"
+      ]
+    },
+    {
+      "agent_id": "outreach-writer",
+      "role": "Outreach Writer",
+      "modes": [
+        "Prompt Router / Handoff Scribe"
+      ]
+    }
+  ],
+  "allowed_task_statuses": [
+    "proposed",
+    "in_progress",
+    "review",
+    "blocked",
+    "done"
+  ],
+  "allowed_verdicts": [
+    "PASS",
+    "HOLD",
+    "FAIL"
+  ],
+  "required_task_fields": [
+    "task_id",
+    "owner_agent",
+    "reviewer_agents",
+    "current_phase",
+    "score_before",
+    "target_score",
+    "actual_score_after",
+    "evidence_required",
+    "validation_commands",
+    "handoff_packets",
+    "prompt_packets",
+    "blockers",
+    "stop_condition"
+  ],
+  "required_packet_fields": [
+    "verdict",
+    "score_impact",
+    "evidence_found",
+    "files_inspected",
+    "commands_run",
+    "findings",
+    "blocker_reason",
+    "prompt_for_next_agent",
+    "questions_for_next_agent",
+    "stop_continue_recommendation"
+  ],
+  "domain_gates": {
+    "evidence": [
+      "Evidence Trail"
+    ],
+    "customer_copy": [
+      "Legal Language"
+    ],
+    "brief_delivery": [
+      "Risk + Brief Pipeline"
+    ],
+    "source_activation": [
+      "Source Monitor"
+    ],
+    "done": [
+      "QA / Critic"
+    ]
+  },
+  "autonomy_limits": {
+    "max_agents_per_wave": 3,
+    "max_implementation_loops_per_commit": 2,
+    "background_loops_allowed": false
+  },
+  "safety_rules": [
+    "No deploy.",
+    "No infra touch.",
+    "No secrets print.",
+    "No .env printing.",
+    "No customer emails.",
+    "No access-control bypass.",
+    "No Ruflo full mode.",
+    "No hooks, daemon, or MCP memory auto-sync.",
+    "No fake MONITOR_OK.",
+    "No source activation without evidence gates.",
+    "No customer brief without complete approved canonical evidence.",
+    "No complete coverage claim.",
+    "No legal advice claim.",
+    "No perfect parsing claim.",
+    "No never-miss-updates claim.",
+    "No unrelated staging."
+  ],
+  "scoring_dimensions": [
+    {
+      "dimension": "product_readiness",
+      "max_score": 100,
+      "zero_condition": "Core workflow has never run end to end."
+    },
+    {
+      "dimension": "evidence_integrity",
+      "max_score": 100,
+      "zero_condition": "Evidence cannot be recomputed from disk."
+    },
+    {
+      "dimension": "source_monitoring_truth",
+      "max_score": 100,
+      "zero_condition": "Source claims exceed validator-backed source truth."
+    },
+    {
+      "dimension": "parser_adapter_reliability",
+      "max_score": 100,
+      "zero_condition": "Static, nav-shell, or no-save previews can pass as ready."
+    },
+    {
+      "dimension": "risk_brief_readiness",
+      "max_score": 100,
+      "zero_condition": "Briefs can be produced without complete approved canonical evidence."
+    },
+    {
+      "dimension": "legal_safe_claims",
+      "max_score": 100,
+      "zero_condition": "Customer copy claims legal advice, complete coverage, or guaranteed compliance."
+    },
+    {
+      "dimension": "test_coverage",
+      "max_score": 100,
+      "zero_condition": "Required gates lack regression tests."
+    },
+    {
+      "dimension": "operational_readiness",
+      "max_score": 100,
+      "zero_condition": "Failure states are invisible to the operator."
+    },
+    {
+      "dimension": "maintainability",
+      "max_score": 100,
+      "zero_condition": "Changes require broad unreviewed refactors."
+    },
+    {
+      "dimension": "gtm_readiness",
+      "max_score": 100,
+      "zero_condition": "No real pilot/customer evidence supports GTM claims."
+    },
+    {
+      "dimension": "customer_delivery_readiness",
+      "max_score": 100,
+      "zero_condition": "No gated customer delivery path exists."
+    }
+  ]
+}

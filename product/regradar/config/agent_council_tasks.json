@@ -789,9 +789,8 @@
       "task_id": "ruflo-safe-tooling-intake",
       "title": "Review Ruflo safe adoption path",
       "status": "accepted",
-      "owner_agent": "Security/Tooling Auditor",
+      "owner_agent": "Code Architect",
       "reviewer_agents": [
-        "Code Architect",
         "QA / Critic",
         "Chief of Staff"
       ],
@@ -823,9 +822,14 @@
       ],
       "blocker": "",
       "next_handoff_agent": "Chief of Staff",
-      "notes": [],
+      "notes": [
+        {
+          "created_at": "2026-06-21T00:00:00Z",
+          "note": "Agent OS governance update: Security/Tooling Auditor is a Code Architect mode, not an 11th active agent. Owner reassigned to Code Architect; QA / Critic remains the blocking tooling-safety reviewer."
+        }
+      ],
       "created_at": "2026-06-19T00:00:00Z",
-      "updated_at": "2026-06-19T00:00:00Z"
+      "updated_at": "2026-06-21T00:00:00Z"
     }
   ]
 }

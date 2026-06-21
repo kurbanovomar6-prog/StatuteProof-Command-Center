@@ -104,64 +104,49 @@ Date: 2026-06-19
 - Handoff target: Legal Language and QA / Critic.
 - Blocking authority: message quality only, not evidence or product readiness.
 
-## Optional Ruflo-Style Worker Roles
+## Approved Modes Inside The 10 Roles
 
-### 11. Adapter Worker
+The following capabilities are modes, not active agents. They must not be counted as roles 11-16.
+
+### Code Architect: Adapter Worker Mode
 
 - Responsibilities: bounded adapter implementation under Code Architect ownership.
 - Allowed actions: edit assigned adapter/test files only.
 - Forbidden actions: registry/source activation without Source Monitor and Evidence Trail gates.
-- Inputs required: adapter spec, fixture, expected item extraction behavior.
 - Outputs expected: adapter patch, tests, validation output.
-- Handoff target: Code Architect.
-- Blocking authority: none; proposes findings only.
+- Blocking authority: Code Architect can block technically unsafe work; Source Monitor and Evidence Trail own source activation gates.
 
-### 12. Validator Worker
+### Code Architect: Validator Worker Mode
 
 - Responsibilities: implement or harden validators under Code Architect ownership.
-- Allowed actions: edit assigned validator/test files.
 - Forbidden actions: weakening gates to make counts pass.
-- Inputs required: exact rule, failing scenario, expected pass/fail examples.
 - Outputs expected: validator patch and tests.
-- Handoff target: QA / Critic.
-- Blocking authority: none; QA owns final gate.
+- Blocking authority: QA / Critic owns final gate.
 
-### 13. Test Fixture Worker
+### Code Architect: Test Fixture Worker Mode
 
 - Responsibilities: create realistic local fixtures for adapters and validators.
-- Allowed actions: add fixture files and fixture tests only.
 - Forbidden actions: using live websites as unit-test dependencies.
-- Inputs required: captured safe public structure or hand-built representative HTML/PDF metadata.
 - Outputs expected: fixtures with positive and negative cases.
-- Handoff target: Code Architect and QA / Critic.
-- Blocking authority: none.
+- Blocking authority: QA / Critic owns final gate.
 
-### 14. Source Discovery Worker
+### Source Monitor: Source Discovery Worker Mode
 
 - Responsibilities: research official/public candidate endpoints.
-- Allowed actions: produce candidate records and rejection reasons.
 - Forbidden actions: adding active sources or bypassing access controls.
-- Inputs required: source family, allowed domains, forbidden source types.
 - Outputs expected: candidate list, blocker classification, priority.
-- Handoff target: Source Monitor.
-- Blocking authority: none.
+- Blocking authority: Source Monitor can block inaccessible, private, static, duplicate, or nav-shell endpoints.
 
-### 15. Security/Tooling Auditor
+### Code Architect + QA: Security/Tooling Auditor Mode
 
 - Responsibilities: review external tools, Ruflo features, hooks, MCP, scripts, dependencies.
-- Allowed actions: inspect in temp directories, recommend safe subsets.
 - Forbidden actions: full install, daemon/hooks/MCP enablement without explicit approval.
-- Inputs required: tool repo/path, intended use, project constraints.
 - Outputs expected: pass/warn/fail/block recommendation.
-- Handoff target: Chief of Staff and QA / Critic.
-- Blocking authority: can block unsafe tooling adoption.
+- Blocking authority: QA / Critic can block unsafe tooling adoption.
 
-### 16. Browser/Access Investigator
+### Source Monitor: Browser/Access Investigator Mode
 
 - Responsibilities: safe rendered-page investigation and selector diagnosis for public official sources.
-- Allowed actions: use browser/Playwright on public unauthenticated pages.
 - Forbidden actions: login, CAPTCHA, private portal, paywall, access-control bypass.
-- Inputs required: URL, source family, expected public content.
 - Outputs expected: HTTP/render status, selectors, screenshots/logs if needed, blocker.
-- Handoff target: Source Monitor and Code Architect.
-- Blocking authority: can block an endpoint as access-restricted or nav-shell.
+- Blocking authority: Source Monitor can block an endpoint as access-restricted or nav-shell.

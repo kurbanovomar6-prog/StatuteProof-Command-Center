@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -136,6 +137,8 @@ def build_parser() -> argparse.ArgumentParser:
     note_parser.add_argument("task_id")
     note_parser.add_argument("note")
 
+    subparsers.add_parser("validate-protocol", help="Validate the governed Agent Council protocol and blackboard.")
+
     return parser
 
 
@@ -159,6 +162,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "add-note":
             _print_json(add_note(args.task_id, args.note))
             return 0
+        if args.command == "validate-protocol":
+            validator_path = ROOT / "tools" / "validate_agent_council_protocol.py"
+            spec = importlib.util.spec_from_file_location("validate_agent_council_protocol", validator_path)
+            if spec is None or spec.loader is None:
+                raise ValueError("Unable to load validate_agent_council_protocol.py")
+            validate_agent_council_protocol = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(validate_agent_council_protocol)
+
+            return validate_agent_council_protocol.main([])
     except (KeyError, ValueError) as exc:
         parser.exit(2, f"agent_council: {exc}\n")
     parser.error(f"Unsupported command: {args.command}")
