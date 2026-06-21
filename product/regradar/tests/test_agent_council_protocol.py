@@ -1,5 +1,6 @@
-import copy
+import hashlib
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -155,6 +156,7 @@ def _valid_blackboard() -> dict:
                 "prompt_packets": [_prompt_packet()],
                 "blockers": [],
                 "proof": ["product/regradar/config/agent_council_protocol.json"],
+                "proof_artifacts": [],
                 "stop_condition": "Stop if any required packet is missing or incomplete.",
             }
         ],
@@ -247,3 +249,26 @@ def test_missing_prompt_packet_blocks_done_task():
     errors = validator.validate_payloads(_valid_protocol(), blackboard)
 
     assert any("prompt_packets" in error for error in errors)
+
+
+def test_validate_files_rejects_tampered_proof_artifact(tmp_path):
+    validator = _load_validator()
+    protocol = _valid_protocol()
+    proof_path = tmp_path / "proof.txt"
+    proof_path.write_text("verified protocol proof", encoding="utf-8")
+    digest = hashlib.sha256(proof_path.read_bytes()).hexdigest()
+    blackboard = _valid_blackboard()
+    blackboard["tasks"][0]["proof_artifacts"] = [
+        {"path": str(proof_path), "sha256": f"sha256:{digest}"}
+    ]
+    protocol_path = tmp_path / "protocol.json"
+    blackboard_path = tmp_path / "blackboard.json"
+    protocol_path.write_text(json.dumps(protocol), encoding="utf-8")
+    blackboard_path.write_text(json.dumps(blackboard), encoding="utf-8")
+
+    assert validator.validate_files(protocol_path, blackboard_path) == []
+
+    proof_path.write_text("tampered proof", encoding="utf-8")
+    errors = validator.validate_files(protocol_path, blackboard_path)
+
+    assert any("proof_artifacts hash mismatch" in error for error in errors)

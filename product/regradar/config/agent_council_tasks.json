@@ -627,10 +627,14 @@
         {
           "created_at": "2026-06-20T23:20:00Z",
           "note": "Follow-up after CTO re-audit v2: added tools/generate_canonical_evidence.py with dry-run default, explicit --write, --source-id/--run-id/--status/--limit filters, generation report output, and TDD coverage. Ran controlled local generation from saved source_runs/source_snapshots: 10 FIRST_SEEN records plus 1 SCA CHANGED alert-run record were created under ignored product/regradar/evidence/. All records remain review_status=pending and are not customer brief-eligible; raw evidence artifacts were not staged because official HTML snapshots can contain public page tokens and need a redaction/private-storage policy before git tracking."
+        },
+        {
+          "created_at": "2026-06-21T09:52:58Z",
+          "note": "2026-06-21 100-readiness sprint: added append-only canonical evidence review journal and tools/review_canonical_evidence.py list/review CLI. Review decisions reference evidence_record_id plus sha256 of the reviewed evidence-record.json and never mutate canonical records. Existing local production records remain pending; no real record was approved or staged."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-20T23:20:00Z"
+      "updated_at": "2026-06-21T09:52:58Z"
     },
     {
       "task_id": "evidence-record-validator",
@@ -780,10 +784,14 @@
         {
           "created_at": "2026-06-20T23:20:00Z",
           "note": "Post-generation gate check: 11 local production canonical evidence records validate, but 0 are brief-eligible because review_status remains pending. One ignored local alert_queue artifact was linked to evr_AE-sca-aml-cft_intake-20260619T143025Z while human_reviewed=false and delivery_approved=false remain in place."
+        },
+        {
+          "created_at": "2026-06-21T09:52:59Z",
+          "note": "2026-06-21 100-readiness sprint: build_risk_brief_inputs can use the latest append-only external review decision to unlock draft-only brief inputs, but only when the approval hash still matches the current evidence-record.json. Pending/rejected/blocked/tampered records remain ineligible; customer_delivery_approved remains false."
         }
       ],
       "created_at": "2026-06-19T21:31:28Z",
-      "updated_at": "2026-06-20T23:20:00Z"
+      "updated_at": "2026-06-21T09:52:59Z"
     },
     {
       "task_id": "ruflo-safe-tooling-intake",

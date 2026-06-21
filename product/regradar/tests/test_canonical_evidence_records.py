@@ -11,6 +11,9 @@ from app.evidence_records import (
     EvidenceRecordError,
     build_risk_brief_inputs,
     create_canonical_evidence_record,
+    latest_canonical_evidence_review,
+    list_canonical_evidence_records,
+    record_canonical_evidence_review,
     validate_evidence_record,
 )
 from app.alert_drafts import build_evidence_backed_brief_draft
@@ -261,6 +264,104 @@ def test_pending_review_canonical_record_is_not_customer_brief_eligible(tmp_path
     assert validation["valid"] is True
     assert result["eligible"] is False
     assert "review_status" in result["blocked_reason"]
+
+
+def test_append_only_canonical_review_approval_unlocks_brief_inputs_without_rewriting_record(tmp_path):
+    record = _canonical_record(tmp_path, review_status="pending")
+    record_path = tmp_path / "evidence" / "dfsa" / "AE-dfsa-test" / "run_AE-dfsa-test_20260620T000000Z" / "evidence-record.json"
+    before = record_path.read_text(encoding="utf-8")
+
+    review = record_canonical_evidence_review(
+        record["record_id"],
+        decision="approved",
+        reviewer="Evidence Trail",
+        note="Hashes recomputed and source/diff paths verified.",
+        base_dir=tmp_path,
+    )
+    result = build_risk_brief_inputs(record["record_id"], base_dir=tmp_path)
+
+    assert review["decision"] == "approved"
+    assert result["eligible"] is True
+    assert result["review_status"] == "approved"
+    assert result["review_reason"] == "Hashes recomputed and source/diff paths verified."
+    assert record_path.read_text(encoding="utf-8") == before
+
+
+def test_append_only_canonical_review_blocks_if_record_changed_after_approval(tmp_path):
+    record = _canonical_record(tmp_path, review_status="pending")
+    record_path = tmp_path / "evidence" / "dfsa" / "AE-dfsa-test" / "run_AE-dfsa-test_20260620T000000Z" / "evidence-record.json"
+    record_canonical_evidence_review(
+        record["record_id"],
+        decision="approved",
+        reviewer="Evidence Trail",
+        note="Hashes recomputed and source/diff paths verified.",
+        base_dir=tmp_path,
+    )
+
+    tampered = json.loads(record_path.read_text(encoding="utf-8"))
+    tampered["review"]["review_reason"] = "Tampered after review."
+    record_path.write_text(json.dumps(tampered, indent=2, sort_keys=True), encoding="utf-8")
+    result = build_risk_brief_inputs(record["record_id"], base_dir=tmp_path)
+
+    assert result["eligible"] is False
+    assert "external review hash" in result["blocked_reason"]
+
+
+def test_append_only_canonical_review_rejection_keeps_brief_inputs_blocked(tmp_path):
+    record = _canonical_record(tmp_path, review_status="pending")
+
+    review = record_canonical_evidence_review(
+        record["record_id"],
+        decision="rejected",
+        reviewer="Evidence Trail",
+        note="Diff path needs review before customer use.",
+        base_dir=tmp_path,
+    )
+    result = build_risk_brief_inputs(record["record_id"], base_dir=tmp_path)
+
+    assert review["decision"] == "rejected"
+    assert result["eligible"] is False
+    assert "rejected" in result["blocked_reason"]
+
+
+def test_canonical_review_requires_reviewer_and_note(tmp_path):
+    record = _canonical_record(tmp_path, review_status="pending")
+
+    with pytest.raises(EvidenceRecordError, match="reviewer"):
+        record_canonical_evidence_review(
+            record["record_id"],
+            decision="approved",
+            reviewer="",
+            note="Verified.",
+            base_dir=tmp_path,
+        )
+    with pytest.raises(EvidenceRecordError, match="note"):
+        record_canonical_evidence_review(
+            record["record_id"],
+            decision="approved",
+            reviewer="Evidence Trail",
+            note="",
+            base_dir=tmp_path,
+        )
+
+
+def test_list_canonical_evidence_records_includes_latest_review(tmp_path):
+    record = _canonical_record(tmp_path, review_status="pending")
+    record_canonical_evidence_review(
+        record["record_id"],
+        decision="approved",
+        reviewer="Evidence Trail",
+        note="Ready for draft-only brief inputs.",
+        base_dir=tmp_path,
+    )
+
+    rows = list_canonical_evidence_records(base_dir=tmp_path)
+    latest = latest_canonical_evidence_review(record["record_id"], base_dir=tmp_path)
+
+    assert rows[0]["record_id"] == record["record_id"]
+    assert rows[0]["record_review_status"] == "pending"
+    assert rows[0]["latest_review_decision"] == "approved"
+    assert latest["note"] == "Ready for draft-only brief inputs."
 
 
 def test_changed_canonical_record_without_diff_is_blocked(tmp_path):

@@ -87,6 +87,7 @@ A record may be marked complete only when all conditions are true:
 After `record_status: complete`, do not edit the record in place.
 Allowed after completion:
 - Add a separate review note referencing the record ID.
+- Add a separate append-only review decision record referencing the record ID and evidence-record hash.
 - Add a separate correction record with a new record ID.
 - Add downstream brief ID in a separate linked artifact.
 - Mark a later superseding record as authoritative.
@@ -97,6 +98,34 @@ Not allowed after completion:
 - Rewriting diff.
 - Deleting the run folder.
 - Mixing sample files with production files.
+
+## Append-Only Review Journal
+
+Canonical evidence records are immutable after completion. Human approval,
+rejection, or blocked status must be stored outside `evidence-record.json`.
+
+Default local review store:
+
+```text
+data/evidence_reviews/canonical_evidence_reviews.jsonl
+```
+
+Each review row must include:
+
+1. review ID.
+2. evidence record ID.
+3. evidence record path.
+4. SHA-256 hash of the reviewed `evidence-record.json`.
+5. decision: `approved`, `rejected`, or `blocked`.
+6. reviewer.
+7. note.
+8. reviewed timestamp.
+9. `customer_delivery_approved: false`.
+
+An external review decision may make a pending canonical record eligible for
+draft brief inputs only when the latest decision is `approved` and the
+underlying evidence record still validates. It does not approve customer
+delivery.
 
 ## SAMPLE vs Production Separation Rule
 SAMPLE / FAKE evidence must never live in the same folder tree as production customer evidence.

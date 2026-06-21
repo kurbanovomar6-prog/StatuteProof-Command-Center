@@ -155,6 +155,12 @@
         "tools/validate_agent_council_protocol.py",
         "product/regradar/tests/test_agent_council_protocol.py"
       ],
+      "proof_artifacts": [
+        {
+          "path": "product/regradar/config/agent_council_protocol.json",
+          "sha256": "sha256:cf05c13111e36c3a40e5bc7a976b6cd978fb1233931d32fb0167f1317a8dd9d8"
+        }
+      ],
       "stop_condition": "Stop if any required reviewer packet, QA score, prompt packet, proof, or validation result is missing."
     },
     {

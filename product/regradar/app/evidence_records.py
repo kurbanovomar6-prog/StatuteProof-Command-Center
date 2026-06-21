@@ -21,6 +21,8 @@ _SHA256_RE = re.compile(r"^sha256:[a-f0-9]{64}$")
 _ALLOWED_RUN_STATUSES = {"FIRST_SEEN", "UNCHANGED", "CHANGED", "FAILED", "QUALITY_DROP"}
 _BLOCKED_RUN_STATUSES = {"FAILED", "QUALITY_DROP"}
 _NON_BRIEF_PROOF_NAMES = {"proof.json"}
+_REVIEW_DECISIONS = {"approved", "rejected", "blocked"}
+_CANONICAL_REVIEW_FILE = Path("data") / "evidence_reviews" / "canonical_evidence_reviews.jsonl"
 
 
 class EvidenceRecordError(ValueError):
@@ -315,7 +317,32 @@ def build_risk_brief_inputs(evidence_record_id_or_path: str, base_dir: Path | No
     files = record["files"]
     review = record["review"]
     review_status = str(review.get("review_status") or "").strip()
-    if review_status not in {"approved", "not_required"}:
+    external_review = latest_canonical_evidence_review(record["record_id"], base_dir=root)
+    effective_review_status = review_status
+    effective_review_reason = str(review.get("review_reason") or "").strip()
+    if review_status not in {"approved", "not_required"} and external_review:
+        current_record_hash = f"sha256:{_sha256_path(record_path)}"
+        reviewed_record_hash = str(external_review.get("evidence_record_hash") or "").strip().lower()
+        if reviewed_record_hash != current_record_hash:
+            return {
+                "eligible": False,
+                "evidence_record_id": record["record_id"],
+                "blocked_reason": "Canonical evidence record external review hash no longer matches current record.",
+            }
+        decision = str(external_review.get("decision") or "").strip()
+        if decision == "approved":
+            effective_review_status = "approved"
+            effective_review_reason = str(external_review.get("note") or "").strip()
+        elif decision in {"rejected", "blocked"}:
+            return {
+                "eligible": False,
+                "evidence_record_id": record["record_id"],
+                "blocked_reason": (
+                    "Canonical evidence record external review decision is "
+                    f"{decision}: {external_review.get('note') or '<no note>'}."
+                ),
+            }
+    if effective_review_status not in {"approved", "not_required"}:
         return {
             "eligible": False,
             "evidence_record_id": record["record_id"],
@@ -343,9 +370,146 @@ def build_risk_brief_inputs(evidence_record_id_or_path: str, base_dir: Path | No
         "raw_content_path": content["raw_content_path"],
         "normalized_current_path": content["normalized_current_path"],
         "human_review_required": review["human_review_required"],
-        "review_status": review["review_status"],
-        "review_reason": review["review_reason"],
+        "review_status": effective_review_status,
+        "review_reason": effective_review_reason,
+        "external_review_id": (external_review or {}).get("review_id", ""),
     }
+
+
+def canonical_evidence_review_store_path(base_dir: Path | None = None) -> Path:
+    root = Path(base_dir) if base_dir is not None else _BASE_DIR
+    return root / _CANONICAL_REVIEW_FILE
+
+
+def list_canonical_evidence_records(
+    *,
+    base_dir: Path | None = None,
+    review_file: Path | None = None,
+) -> list[dict[str, Any]]:
+    """Return canonical evidence record summaries with latest external review status."""
+
+    root = Path(base_dir) if base_dir is not None else _BASE_DIR
+    rows: list[dict[str, Any]] = []
+    evidence_root = root / "evidence"
+    if not evidence_root.exists():
+        return rows
+    for path in sorted(evidence_root.glob("**/evidence-record.json")):
+        try:
+            record = _read_json_object(path)
+        except EvidenceRecordError:
+            continue
+        source = record.get("source") if isinstance(record.get("source"), dict) else {}
+        run = record.get("run") if isinstance(record.get("run"), dict) else {}
+        review = record.get("review") if isinstance(record.get("review"), dict) else {}
+        record_id = str(record.get("record_id") or "").strip()
+        latest = latest_canonical_evidence_review(record_id, base_dir=root, review_file=review_file) if record_id else None
+        rows.append(
+            {
+                "record_id": record_id,
+                "record_path": _relative_or_absolute(path, root),
+                "source_id": source.get("source_id", ""),
+                "regulator": source.get("regulator", ""),
+                "run_id": run.get("run_id", ""),
+                "run_status": run.get("status", ""),
+                "record_review_status": review.get("review_status", ""),
+                "latest_review_decision": (latest or {}).get("decision", ""),
+                "latest_review_id": (latest or {}).get("review_id", ""),
+                "reviewed_at": (latest or {}).get("reviewed_at", ""),
+            }
+        )
+    return rows
+
+
+def record_canonical_evidence_review(
+    evidence_record_id_or_path: str,
+    *,
+    decision: str,
+    reviewer: str,
+    note: str,
+    base_dir: Path | None = None,
+    review_file: Path | None = None,
+) -> dict[str, Any]:
+    """Append a human review decision for a complete canonical evidence record.
+
+    The canonical ``evidence-record.json`` remains immutable. Customer brief
+    gates may use this append-only review journal as the approval signal.
+    """
+
+    root = Path(base_dir) if base_dir is not None else _BASE_DIR
+    normalized_decision = str(decision or "").strip().lower()
+    if normalized_decision not in _REVIEW_DECISIONS:
+        raise EvidenceRecordError("decision must be one of: approved, rejected, blocked")
+    reviewer_name = str(reviewer or "").strip()
+    if not reviewer_name:
+        raise EvidenceRecordError("reviewer is required for canonical evidence review.")
+    review_note = str(note or "").strip()
+    if not review_note:
+        raise EvidenceRecordError("note is required for canonical evidence review.")
+
+    record, record_path = load_evidence_record(evidence_record_id_or_path, base_dir=root)
+    validation = validate_evidence_record(record, base_dir=root)
+    if not validation["valid"]:
+        raise EvidenceRecordError("; ".join(validation["errors"]))
+
+    reviewed_at = _utc_now()
+    record_id = str(record.get("record_id") or "").strip()
+    record_hash = _sha256_path(record_path)
+    review_id = "evrev_" + hashlib.sha256(
+        f"{record_id}|{normalized_decision}|{reviewer_name}|{reviewed_at}|{record_hash}".encode("utf-8")
+    ).hexdigest()[:20]
+    row = {
+        "schema_version": "1.0",
+        "review_id": review_id,
+        "evidence_record_id": record_id,
+        "evidence_record_path": _relative_or_absolute(record_path, root),
+        "evidence_record_hash": f"sha256:{record_hash}",
+        "decision": normalized_decision,
+        "reviewer": reviewer_name,
+        "note": review_note,
+        "reviewed_at": reviewed_at,
+        "customer_delivery_approved": False,
+    }
+    path = review_file or canonical_evidence_review_store_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+    return row
+
+
+def load_canonical_evidence_review_records(
+    *,
+    base_dir: Path | None = None,
+    review_file: Path | None = None,
+) -> list[dict[str, Any]]:
+    path = review_file or canonical_evidence_review_store_path(base_dir)
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict):
+            rows.append(parsed)
+    return rows
+
+
+def latest_canonical_evidence_review(
+    evidence_record_id: str,
+    *,
+    base_dir: Path | None = None,
+    review_file: Path | None = None,
+) -> dict[str, Any] | None:
+    wanted = str(evidence_record_id or "").strip()
+    if not wanted:
+        return None
+    for row in reversed(load_canonical_evidence_review_records(base_dir=base_dir, review_file=review_file)):
+        if str(row.get("evidence_record_id") or "") == wanted:
+            return row
+    return None
 
 
 def load_evidence_record(

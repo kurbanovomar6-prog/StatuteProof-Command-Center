@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -333,6 +334,56 @@ def validate_blackboard(blackboard: dict[str, Any], protocol: dict[str, Any]) ->
     return errors
 
 
+def _normalize_sha256(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    if len(text) == 64 and all(char in "0123456789abcdef" for char in text):
+        return f"sha256:{text}"
+    return text
+
+
+def _resolve_proof_path(value: Any, root: Path) -> Path | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    path = Path(text)
+    return path.resolve() if path.is_absolute() else (root / path).resolve()
+
+
+def validate_proof_artifacts(blackboard: dict[str, Any], root: Path = ROOT) -> list[str]:
+    errors: list[str] = []
+    for task in _as_list(blackboard.get("tasks")):
+        if not isinstance(task, dict) or task.get("status") != DONE_STATUS:
+            continue
+        task_id = _task_label(task)
+        artifacts = _as_list(task.get("proof_artifacts"))
+        if not artifacts:
+            errors.append(f"{task_id}: done task must include proof_artifacts with path and sha256")
+            continue
+        for index, artifact in enumerate(artifacts):
+            if not isinstance(artifact, dict):
+                errors.append(f"{task_id}: proof_artifacts[{index}] must be an object")
+                continue
+            path = _resolve_proof_path(artifact.get("path"), root)
+            expected = _normalize_sha256(artifact.get("sha256"))
+            if path is None:
+                errors.append(f"{task_id}: proof_artifacts[{index}].path is required")
+                continue
+            try:
+                path.relative_to(root.resolve())
+            except ValueError:
+                errors.append(f"{task_id}: proof_artifacts[{index}] path is outside workspace")
+                continue
+            if not path.exists() or path.is_dir():
+                errors.append(f"{task_id}: proof_artifacts[{index}] path does not exist or is not a file")
+                continue
+            actual = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+            if actual != expected:
+                errors.append(f"{task_id}: proof_artifacts hash mismatch for {artifact.get('path')}")
+    return errors
+
+
 def validate_payloads(protocol: dict[str, Any], blackboard: dict[str, Any]) -> list[str]:
     errors = validate_protocol(protocol)
     errors.extend(validate_blackboard(blackboard, protocol))
@@ -342,7 +393,12 @@ def validate_payloads(protocol: dict[str, Any], blackboard: dict[str, Any]) -> l
 def validate_files(protocol_path: Path = DEFAULT_PROTOCOL_PATH, blackboard_path: Path = DEFAULT_BLACKBOARD_PATH) -> list[str]:
     protocol = load_json(protocol_path)
     blackboard = load_json(blackboard_path)
-    return validate_payloads(protocol, blackboard)
+    errors = validate_payloads(protocol, blackboard)
+    protocol_resolved = protocol_path.resolve()
+    repo_root = ROOT.resolve()
+    proof_root = repo_root if protocol_resolved.is_relative_to(repo_root) else protocol_path.parent.resolve()
+    errors.extend(validate_proof_artifacts(blackboard, root=proof_root))
+    return errors
 
 
 def build_parser() -> argparse.ArgumentParser:
