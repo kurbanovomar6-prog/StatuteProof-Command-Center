@@ -4,7 +4,7 @@
     "url": "https://cbr.ru/press/pr/",
     "jurisdiction": "RU",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "limited"
   },
   {
@@ -12,7 +12,7 @@
     "url": "https://minfin.gov.ru/ru/document/",
     "jurisdiction": "RU",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -20,7 +20,7 @@
     "url": "https://www.fedsfm.ru/",
     "jurisdiction": "RU",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -28,7 +28,7 @@
     "url": "https://nationalbank.kz/ru/link/normativnaya-pravovaya-baza",
     "jurisdiction": "KZ",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -36,7 +36,7 @@
     "url": "https://www.gov.kz/memleket/entities/minfin",
     "jurisdiction": "KZ",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -44,7 +44,7 @@
     "url": "https://www.gov.kz/memleket/entities/ardfm",
     "jurisdiction": "KZ",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -52,7 +52,7 @@
     "url": "https://www.cbar.az/",
     "jurisdiction": "AZ",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -60,7 +60,7 @@
     "url": "https://maliyye.gov.az/",
     "jurisdiction": "AZ",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -68,7 +68,7 @@
     "url": "https://www.nbrb.by/",
     "jurisdiction": "BY",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -76,7 +76,7 @@
     "url": "https://minfin.gov.by/",
     "jurisdiction": "BY",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -84,7 +84,7 @@
     "url": "https://cbu.uz/",
     "jurisdiction": "UZ",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -92,7 +92,7 @@
     "url": "https://imv.uz/",
     "jurisdiction": "UZ",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "Playwright fetches 470K HTML but beautifulsoup extracts only 396c — JS-heavy SPA; needs adapter."
   },
@@ -101,7 +101,7 @@
     "url": "https://www.fatf-gafi.org/en/publications.html",
     "jurisdiction": "INT",
     "category": "international",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -109,7 +109,7 @@
     "url": "https://www.bis.org/bcbs/publications.htm",
     "jurisdiction": "INT",
     "category": "international",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -117,7 +117,7 @@
     "url": "https://www.taxes.gov.az/",
     "jurisdiction": "AZ",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -126,7 +126,7 @@
     "url": "https://fms.gov.az/",
     "jurisdiction": "AZ",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -135,7 +135,7 @@
     "url": "https://e-qanun.az/",
     "jurisdiction": "AZ",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -144,7 +144,7 @@
     "url": "https://kgd.gov.kz/",
     "jurisdiction": "KZ",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -161,7 +161,7 @@
     "url": "https://www.gov.kz/memleket/entities/adilet",
     "jurisdiction": "KZ",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -169,7 +169,7 @@
     "url": "https://www.gov.kz/memleket/entities/afm",
     "jurisdiction": "KZ",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -177,7 +177,7 @@
     "url": "https://aifc.kz/",
     "jurisdiction": "KZ",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -194,7 +194,7 @@
     "url": "https://lex.uz/",
     "jurisdiction": "UZ",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -202,7 +202,7 @@
     "url": "https://adliya.uz/",
     "jurisdiction": "UZ",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -210,7 +210,7 @@
     "url": "https://regulation.gov.uz/",
     "jurisdiction": "UZ",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -218,7 +218,7 @@
     "url": "https://www.nbg.gov.ge/",
     "jurisdiction": "GE",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -226,7 +226,7 @@
     "url": "https://rs.ge/",
     "jurisdiction": "GE",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -234,7 +234,7 @@
     "url": "https://matsne.gov.ge/",
     "jurisdiction": "GE",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -242,7 +242,7 @@
     "url": "https://fms.gov.ge/",
     "jurisdiction": "GE",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "947c — below 1,000c threshold; needs adapter to improve extraction."
   },
@@ -251,7 +251,7 @@
     "url": "https://mof.ge/",
     "jurisdiction": "GE",
     "category": "ministry_finance",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -277,7 +277,7 @@
     "url": "https://www.arlis.am/",
     "jurisdiction": "AM",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -303,7 +303,7 @@
     "url": "https://www.nalog.gov.by/",
     "jurisdiction": "BY",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "990c HTML (below 1,000c threshold); 3 PDFs found with 5,237c combined — needs adapter for reliable extraction."
   },
@@ -312,7 +312,7 @@
     "url": "https://pravo.by/",
     "jurisdiction": "BY",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -320,7 +320,7 @@
     "url": "https://nalog.gov.ru/",
     "jurisdiction": "RU",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -329,7 +329,7 @@
     "url": "https://pravo.gov.ru/",
     "jurisdiction": "RU",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -338,7 +338,7 @@
     "url": "https://www.imf.org/en/Topics/Financial-Sector-Assessment-and-Development",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -347,7 +347,7 @@
     "url": "https://www.worldbank.org/en/topic/financialsector",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -356,7 +356,7 @@
     "url": "https://www.iosco.org/library/pubdocs/",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -365,7 +365,7 @@
     "url": "https://www.oecd.org/en/topics/policy-issues/financial-markets.html",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -374,7 +374,7 @@
     "url": "https://www.eba.europa.eu/regulation-and-policy/",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -383,7 +383,7 @@
     "url": "https://www.esma.europa.eu/section/publications",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -392,7 +392,7 @@
     "url": "https://www.fsb.org/publications/",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -401,7 +401,7 @@
     "url": "https://egmontgroup.org/",
     "jurisdiction": "INT",
     "category": "international_standard_setter",
-    "enabled": true,
+    "enabled": false,
     "status": "mapped",
     "notes": "Mapped coverage source. Requires test-source before activation."
   },
@@ -410,7 +410,7 @@
     "url": "https://www.tcmb.gov.tr/",
     "jurisdiction": "TR",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -418,7 +418,7 @@
     "url": "https://www.bddk.org.tr/",
     "jurisdiction": "TR",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "Tier 1 SSL cert fails — Playwright fallback used. Previously extracted 2,638c; degraded to 158c as of 2026-05-24 (Playwright fetches 5–6M chars SPA bundle, only 158c extractable). Needs adapter. SPK remains the primary capital-markets regulator source for TR."
   },
@@ -427,7 +427,7 @@
     "url": "https://masak.hmb.gov.tr/",
     "jurisdiction": "TR",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -435,7 +435,7 @@
     "url": "https://www.spk.gov.tr/",
     "jurisdiction": "TR",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "remediation",
     "notes": "Tier 1 SSL cert fails — Playwright fallback used; 2,056c extracted reliably."
   },
@@ -444,7 +444,7 @@
     "url": "https://www.resmigazete.gov.tr/",
     "jurisdiction": "TR",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -452,7 +452,7 @@
     "url": "https://www.gib.gov.tr/",
     "jurisdiction": "TR",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -460,7 +460,7 @@
     "url": "https://www.hmb.gov.tr/",
     "jurisdiction": "TR",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active"
   },
   {
@@ -468,7 +468,7 @@
     "url": "https://www.kvkk.gov.tr/",
     "jurisdiction": "TR",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Activated 2026-05-24. Data-protection compliance source for TR fintech and payment providers. Tested good (1,835c)."
   },
@@ -477,7 +477,7 @@
     "url": "https://www.rekabet.gov.tr/",
     "jurisdiction": "TR",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Activated 2026-05-24. Competition enforcement relevant to fintech/banking M&A and market-practice cases in TR. Tested good (2,248c)."
   },
@@ -1049,7 +1049,7 @@
     "url": "https://www.qfcra.com/",
     "jurisdiction": "QA",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "QFC regulator for banking, insurance, capital markets, and investment management firms operating within the Qatar Financial Centre. English-language portal. HTTP 200, tested 3,478c GOOD (2026-05-27)."
   },
@@ -1058,7 +1058,7 @@
     "url": "https://www.qfc.qa/",
     "jurisdiction": "QA",
     "category": "financial_free_zone",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Qatar Financial Centre authority — business registration, licencing, and regulatory framework for QFC-domiciled firms. HTTP 200, tested 5,476c GOOD (2026-05-27)."
   },
@@ -1067,7 +1067,7 @@
     "url": "https://www.mof.gov.qa/",
     "jurisdiction": "QA",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Qatar federal Ministry of Finance. Fiscal policy, budget, public expenditure regulation. HTTP 403, Playwright extracts 8,976c GOOD (2026-05-27)."
   },
@@ -1076,7 +1076,7 @@
     "url": "https://www.gta.gov.qa/",
     "jurisdiction": "QA",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Qatar tax authority. Corporate income tax, withholding tax, transfer pricing, and tax treaty compliance for businesses operating in Qatar. HTTP 200, tested 1,681c GOOD (2026-05-27)."
   },
@@ -1085,7 +1085,7 @@
     "url": "https://www.moci.gov.qa/",
     "jurisdiction": "QA",
     "category": "company_registry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Qatar company registration, trade licences, consumer protection, competition. HTTP 200, tested 3,528c GOOD + 75,846c PDF content (2026-05-27)."
   },
@@ -1094,7 +1094,7 @@
     "url": "https://www.almeezan.qa/",
     "jurisdiction": "QA",
     "category": "legal_database",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Official Qatar legislation portal operated by the Ministry of Justice. Arabic primary, some English. Playwright required (SSL cert issue for Tier 1). Tested 3,075c GOOD (2026-05-27)."
   },
@@ -1103,7 +1103,7 @@
     "url": "https://www.qfiu.gov.qa/",
     "jurisdiction": "QA",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Qatar AML/CFT financial intelligence unit. Publishes AML/CFT laws, typologies, and guidance. Playwright required (SSL cert issue for Tier 1). Tested 4,609c GOOD (2026-05-27). Note: PDF links present but PDF download also blocked by SSL — HTML extraction reliable."
   },
@@ -1112,7 +1112,7 @@
     "url": "https://www.ncsa.gov.qa/",
     "jurisdiction": "QA",
     "category": "cybersecurity",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Qatar national cybersecurity authority. Publishes cybersecurity regulations, advisories, and critical infrastructure protection guidance relevant to regulated financial and digital services. HTTP 200, tested 7,330c GOOD (2026-05-27)."
   },
@@ -1121,7 +1121,7 @@
     "url": "https://www.cra.gov.qa/",
     "jurisdiction": "QA",
     "category": "digital_regulation",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Qatar communications and digital services regulator. Covers telecom, internet services, data and digital regulation. HTTP 200, tested 11,086c GOOD (2026-05-27)."
   },
@@ -1166,7 +1166,7 @@
     "url": "https://www.sama.gov.sa/en-US/Pages/default.aspx",
     "jurisdiction": "SA",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "PDF-primary source. HTML extraction degraded to 0c by 2026-05-27 (SharePoint JS rendering). PDFs confirmed stable: 5 PDF links, 68,237c (Regulatory Sandbox guidance 20,520c, Key Economic Developments 27,723c). Tested 2026-05-26/27."
   },
@@ -1175,7 +1175,7 @@
     "url": "https://zatca.gov.sa/",
     "jurisdiction": "SA",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Saudi zakat, tax, and customs authority. VAT, corporate income tax, customs declarations, e-invoicing regulations. HTTP 200, confirmed 1,029c GOOD (2026-05-27)."
   },
@@ -1184,7 +1184,7 @@
     "url": "https://www.cst.gov.sa/",
     "jurisdiction": "SA",
     "category": "digital_regulation",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "Regulates electronic payment networks, fintech infrastructure, and digital services in Saudi Arabia. Targeted test-source revalidation on 2026-05-27 extracted 1,198c GOOD via Playwright/trafilatura; BeautifulSoup-only extraction remains 266c LOW_CONTENT. Keep enabled with status limited because monitoring is Playwright-dependent and still needs an adapter for robust coverage."
   },
@@ -1193,7 +1193,7 @@
     "url": "https://cma.org.sa/en/RulesRegulations/Regulations/Pages/default.aspx",
     "jurisdiction": "SA",
     "category": "capital_markets",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "PDF-primary source. HTML extraction degraded to 0c by 2026-05-27 (JS SPA). PDFs confirmed stable: 36 PDF links, 40,177c (Investment Fund Rules, Exclusion Controls, Foreign Investment Rules). Root URL (cma.org.sa/) remains 0c SPA. Tested 2026-05-26/27."
   },
@@ -1229,7 +1229,7 @@
     "url": "https://misa.gov.sa/",
     "jurisdiction": "SA",
     "category": "government",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Tested 2026-05-26: 8,022c extracted (beautifulsoup). 5 PDF links, 3 PDFs extracted (104,425c). RSS feed at misa.gov.sa/rss (4 items). Quality score 90 (excellent). Relevant for investment regulation, licensing, and business establishment rules impacting fintech and payment companies."
   },
@@ -1238,7 +1238,7 @@
     "url": "https://mc.gov.sa/en/Pages/default.aspx",
     "jurisdiction": "SA",
     "category": "commerce",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "PDF-primary source. HTML extraction degraded to 0c by 2026-05-27 (JS SPA). PDFs confirmed stable: 6 PDF links, 134,346c. Relevant for commercial licensing, consumer protection, and e-commerce regulation. Tested 2026-05-26/27."
   },
@@ -1247,7 +1247,7 @@
     "url": "https://nca.gov.sa/",
     "jurisdiction": "SA",
     "category": "cybersecurity",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Saudi cybersecurity authority. Publishes Essential Cybersecurity Controls (ECC), Cloud Cybersecurity Controls (CCC), and sector-specific frameworks for fintech/payments. HTTP 200, confirmed 2,744c GOOD (2026-05-27). Upgraded from limited to active."
   },
@@ -1274,7 +1274,7 @@
     "url": "https://www.mas.gov.sg/regulation",
     "jurisdiction": "SG",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Primary SG financial regulator and de-facto central bank. Covers Payment Services Act, Securities and Futures Act, Banking Act, Insurance Act, digital asset licensing. Tested 7,204c (2026-05-24)."
   },
@@ -1283,7 +1283,7 @@
     "url": "https://www.mas.gov.sg/regulation/anti-money-laundering",
     "jurisdiction": "SG",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "MAS AML/CFT regulatory notices, guidelines, and enforcement actions. Covers STRO (Suspicious Transaction Reporting Office) frameworks and all SG AML obligations for financial institutions. Tested 12,891c (2026-05-24)."
   },
@@ -1292,7 +1292,7 @@
     "url": "https://www.iras.gov.sg/news-events/newsroom",
     "jurisdiction": "SG",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Inland Revenue Authority of Singapore — tax policy announcements, e-Tax guides, GST and income tax updates, budget commentary. Newsroom page extracts significantly more content than /taxes index. Tested 6,986c (2026-05-24)."
   },
@@ -1301,7 +1301,7 @@
     "url": "https://sso.agc.gov.sg/Browse/Act/Current",
     "jurisdiction": "SG",
     "category": "legal_acts",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Official Singapore legislation database maintained by the Attorney-General's Chambers. Browse/Act/Current lists all current Acts with links. Root page (sso.agc.gov.sg/) is a SPA search interface with only 950c; /Browse/Act/Current extracts 2,653c reliably. Tested (2026-05-24)."
   },
@@ -1310,7 +1310,7 @@
     "url": "https://www.pdpc.gov.sg/guidelines-and-consultation",
     "jurisdiction": "SG",
     "category": "data_protection",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Personal Data Protection Commission — PDPA advisory guidelines, consultation papers, data breach notifications, and DPTM certification. Site is a SPA; Tier 1 returns <500c, Playwright succeeds with 328K chars yielding 3,507c extracted. Tested (2026-05-24)."
   },
@@ -1319,7 +1319,7 @@
     "url": "https://www.acra.gov.sg/",
     "jurisdiction": "SG",
     "category": "company_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Business registration, corporate compliance, financial reporting standards, and public accountants regulation in Singapore. Tested 3,497c (2026-05-24)."
   },
@@ -1328,7 +1328,7 @@
     "url": "https://www.csa.gov.sg/",
     "jurisdiction": "SG",
     "category": "cyber",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Singapore's national cybersecurity authority. Covers Cybersecurity Act licensing, critical information infrastructure protection, digital regulation, and threat advisories relevant to fintech operators. Tested 5,124c (2026-05-24)."
   },
@@ -1337,7 +1337,7 @@
     "url": "https://www.cccs.gov.sg/",
     "jurisdiction": "SG",
     "category": "competition",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Enforces Competition Act and Consumer Protection (Fair Trading) Act. Relevant for M&A clearance, market investigations, and anti-competitive practices in SG financial services. Tested 4,268c (2026-05-24)."
   },
@@ -1346,7 +1346,7 @@
     "url": "https://www.hkma.gov.hk/eng/news-and-media/press-releases/",
     "jurisdiction": "HK",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Primary HK monetary authority and banking regulator. Covers banking regulation, Payment Systems, FAST, stablecoin regulation, virtual banking, fintech. Playwright required (SPA). Tested 12,863c (2026-05-27)."
   },
@@ -1355,7 +1355,7 @@
     "url": "https://www.sfc.hk/en/News-and-announcements",
     "jurisdiction": "HK",
     "category": "financial_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Primary HK securities and futures regulator. Covers VASP licensing, virtual asset regulation, securities, capital markets, intermediary regulation. Tested 1,421c generic (2026-05-27). SFC site is a SPA — deep URLs return 404 but /News-and-announcements returns 200."
   },
@@ -1364,7 +1364,7 @@
     "url": "https://www.ird.gov.hk/eng/tax/",
     "jurisdiction": "HK",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Official HK tax authority. Covers Profits Tax, Salaries Tax, Property Tax, stamp duty, tax treaties, and crypto asset tax guidance. Tested 2,573c (2026-05-27)."
   },
@@ -1373,7 +1373,7 @@
     "url": "https://www.fstb.gov.hk/en/",
     "jurisdiction": "HK",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HK government bureau responsible for financial services policy, banking legislation, securities regulation, insurance, and fintech policy including virtual asset framework. Playwright required. Tested 7,137c (2026-05-27)."
   },
@@ -1382,7 +1382,7 @@
     "url": "https://www.jfiu.gov.hk/en/",
     "jurisdiction": "HK",
     "category": "aml",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HK AML/CFT intelligence unit. Publishes typology studies, guidance notes, AML/CFT advisories for financial institutions and DNFBPs. Tested 13,771c (2026-05-27)."
   },
@@ -1391,7 +1391,7 @@
     "url": "https://www.cr.gov.hk/en/publications/index.htm",
     "jurisdiction": "HK",
     "category": "company_registry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Official HK company registry publications: circulars, practice notes, regulatory notices. Playwright required. Tested 2,112c (2026-05-27)."
   },
@@ -1400,7 +1400,7 @@
     "url": "https://www.elegislation.gov.hk/hk/cap571",
     "jurisdiction": "HK",
     "category": "legal_database",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Official HK legislation database — Securities and Futures Ordinance (Cap. 571). Primary statutory text governing securities, futures, capital markets, and VASP licensing. Tracks legislative amendments. Playwright required. Tested 62,727c (2026-05-27)."
   },
@@ -1409,7 +1409,7 @@
     "url": "https://www.ia.org.hk/en/supervision/IA_Circular_To_Industry.html",
     "jurisdiction": "HK",
     "category": "insurance_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HK insurance regulator. Publishes circulars to industry, regulatory guidance, supervisory policy. Playwright required. SPA site: deep URLs return HTTP 404 from server but Playwright renders full circular listing content. Tested 11,694c (2026-05-27). Monitor for URL stability."
   },
@@ -1418,7 +1418,7 @@
     "url": "https://www.pcpd.org.hk/english/home/home.html",
     "jurisdiction": "HK",
     "category": "data_protection",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "HK data protection authority. SPA site — all URLs return HTTP 404 from server. Playwright extracts 4,292c but identical content on all pages (app shell with static navigation). Dynamic content (new publications, guidelines) not accessible without adapter. Retest with session navigation adapter."
   },
@@ -1427,7 +1427,7 @@
     "url": "https://www.gld.gov.hk/egazette/",
     "jurisdiction": "HK",
     "category": "official_gazette",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "Official HK Government Gazette. Tested 991c — just below 1,000c threshold. Navigation-heavy homepage. Needs adapter targeting specific issue/section pages. Worth activating once adapter navigates to gazette content pages."
   },
@@ -1436,7 +1436,7 @@
     "url": "https://www.cbb.gov.bh/",
     "jurisdiction": "BH",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, tested 2,972c GOOD via BeautifulSoup; 4 PDFs (10,496c). Primary banking, payments, insurance, and capital markets regulator for Bahrain. Covers all CBB-licensed financial institutions. (2026-05-27)"
   },
@@ -1445,7 +1445,7 @@
     "url": "https://www.cbb.gov.bh/fintech/",
     "jurisdiction": "BH",
     "category": "fintech",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, tested 24,241c GOOD; 6 PDFs (37,873c). Dedicated CBB fintech section covering regulatory sandbox, open banking framework, digital banking licensing, and crypto-asset regulation. CBB was first GCC regulator to license crypto exchanges. Distinct from CBB root — covers fintech/crypto regulatory area specifically. (2026-05-27)"
   },
@@ -1454,7 +1454,7 @@
     "url": "https://www.bahrainbourse.com/",
     "jurisdiction": "BH",
     "category": "capital_markets",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, Playwright 10,090c GOOD; 9 PDFs (29,782c). Official Bahrain stock exchange and securities market. Covers listed company disclosures, market data, exchange rules, and capital markets regulatory announcements. (2026-05-27)"
   },
@@ -1463,7 +1463,7 @@
     "url": "https://www.mofne.gov.bh/",
     "jurisdiction": "BH",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, tested 3,086c GOOD; 2 PDFs (36,381c). Primary source for Bahrain fiscal policy, budget, public finance, and economic policy. Relevant for tax advisory and economic compliance monitoring. (2026-05-27)"
   },
@@ -1472,7 +1472,7 @@
     "url": "https://www.nbr.gov.bh/",
     "jurisdiction": "BH",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, Playwright 5,093c GOOD; 1 PDF (34,523c). Bahrain tax authority responsible for VAT (5%) administration. Mandatory monitoring for all businesses operating in Bahrain with VAT obligations. (2026-05-27)"
   },
@@ -1481,7 +1481,7 @@
     "url": "https://www.lloc.gov.bh/",
     "jurisdiction": "BH",
     "category": "legal_database",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, tested 2,358c GOOD; 12 PDFs + 5 DOCX (5,003c). Official Bahrain legislation portal and legal database. K-series PDFs are official gazette entries (enacted laws and decrees). Serves as both legal_database and official_gazette for Bahrain. (2026-05-27)"
   },
@@ -1490,7 +1490,7 @@
     "url": "https://www.pdp.gov.bh/",
     "jurisdiction": "BH",
     "category": "data_protection",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, tested 3,633c GOOD; 2 PDFs (19,699c including regulations.pdf 19,637c). Official Bahrain data protection regulator enforcing PDPL. Critical for fintech, banks, and any organisation processing personal data in Bahrain. (2026-05-27)"
   },
@@ -1499,7 +1499,7 @@
     "url": "https://www.customs.gov.bh/",
     "jurisdiction": "BH",
     "category": "customs",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, tested 1,802c GOOD; 1 PDF (9,485c). Official customs authority. Relevant for trade compliance, import/export regulations, and GCC customs union monitoring. (2026-05-27)"
   },
@@ -1508,7 +1508,7 @@
     "url": "https://www.sijilat.bh/",
     "jurisdiction": "BH",
     "category": "company_registry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, Playwright 3,554c GOOD. Official Bahrain commercial registration portal for company formation, licensing, and CR data. Separate from MOIC regulatory policy — this is the operational company registry. (2026-05-27)"
   },
@@ -1517,7 +1517,7 @@
     "url": "https://www.moic.gov.bh/",
     "jurisdiction": "BH",
     "category": "commerce",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, tested 1,104c GOOD; 1 PDF (34,492c). Regulatory ministry for commercial activity, trade licensing, consumer protection, and intellectual property in Bahrain. Policy-level monitoring distinct from Sijilat operational registry. (2026-05-27)"
   },
@@ -1526,7 +1526,7 @@
     "url": "https://www.tra.org.bh/",
     "jurisdiction": "BH",
     "category": "digital_regulation",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTML 746c LOW_CONTENT; PDF-primary: 2 PDFs (84,352c). TRA regulates telecoms, internet, digital services, and data localisation in Bahrain. PDF extraction yields full regulatory documents. Important for fintech, payments, and digital banking compliance. (2026-05-27)"
   },
@@ -1535,7 +1535,7 @@
     "url": "https://www.iga.gov.bh/",
     "jurisdiction": "BH",
     "category": "digital_government",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTML 323c; PDF-primary: 3 PDFs (195,616c) including AI RAM Report (142,244c) and General AI Policy (33,275c). Official digital governance authority publishing AI regulation frameworks and eGovernment policy. Relevant for compliance teams navigating Bahrain AI and digital regulation. (2026-05-27)"
   },
@@ -1553,7 +1553,7 @@
     "url": "https://www.moj.gov.bh/",
     "jurisdiction": "BH",
     "category": "official_gazette",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "HTTP 200, 1,460c GOOD HTML; PDFs (33,472c) but content is judiciary/court procedures (Private_Execution.pdf, couching_list.pdf) rather than official gazette/legislation. LLOC serves as the primary legislation and official gazette source. MoJ would need adapter targeting gazette publication pages specifically. (2026-05-27)"
   },
@@ -1562,7 +1562,7 @@
     "url": "https://www.bnm.gov.my/",
     "jurisdiction": "MY",
     "category": "central_bank",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 202, Playwright 2,046c GOOD. Primary central bank, banking regulator, payments regulator, and insurance/takaful supervisor for Malaysia. Publishes AML/CFT policy for BNM-licensed financial institutions, but standalone FIU/public AML source remains missing. (2026-05-27)"
   },
@@ -1571,7 +1571,7 @@
     "url": "https://www.sc.com.my/",
     "jurisdiction": "MY",
     "category": "securities_regulator",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, BeautifulSoup 9,128c GOOD. Regulates capital markets, investment funds, securities intermediaries, and digital asset exchanges (DAX). Covers crypto/digital asset regulatory framework under SC Act. (2026-05-27)"
   },
@@ -1580,7 +1580,7 @@
     "url": "https://www.bursamalaysia.com/",
     "jurisdiction": "MY",
     "category": "capital_markets",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "Playwright 14,029c GOOD. Official stock exchange and securities market operator. Covers listed company announcements, market rules, corporate disclosure requirements, and trading regulation. Current HTTP surface may return 403 while rendered content remains extractable; PDF downloads also return 403. (2026-05-27)"
   },
@@ -1589,7 +1589,7 @@
     "url": "https://www.hasil.gov.my/",
     "jurisdiction": "MY",
     "category": "tax",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, BeautifulSoup 7,351c GOOD; 13 PDF links found (PDF extraction partial — pypdf issue on some docs). Tax authority administering income tax, withholding tax, real property gains tax, and stamp duty. Critical for all businesses with Malaysia tax obligations. (2026-05-27)"
   },
@@ -1598,7 +1598,7 @@
     "url": "https://belanjawan.mof.gov.my/",
     "jurisdiction": "MY",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, BeautifulSoup 9,618c GOOD; 14 PDFs (194,422c including Budget 2026 touchpoint and tax appendix). Official Malaysia federal budget portal under Ministry of Finance. Covers fiscal policy, tax changes, government spending, and economic measures. Best accessible MoF content — main mof.gov.my SPA returns < 500c. (2026-05-27)"
   },
@@ -1607,7 +1607,7 @@
     "url": "https://lom.agc.gov.my/",
     "jurisdiction": "MY",
     "category": "legal_database",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, BeautifulSoup 6,310c GOOD. Official Malaysia legislation database maintained by Attorney General's Chambers. Contains all federal statutes including Financial Services Act, Capital Markets Act, Anti-Money Laundering Act, and Companies Act. Primary legislative reference for legal and compliance teams. (2026-05-27)"
   },
@@ -1616,7 +1616,7 @@
     "url": "https://www.pdp.gov.my/",
     "jurisdiction": "MY",
     "category": "data_protection",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, BeautifulSoup 13,248c GOOD. Official data protection authority enforcing the Personal Data Protection Act 2010 (PDPA). Critical for fintech, banks, and any organisation processing personal data in Malaysia. (2026-05-27)"
   },
@@ -1625,7 +1625,7 @@
     "url": "https://www.mcmc.gov.my/",
     "jurisdiction": "MY",
     "category": "digital_regulation",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, Playwright 3,758c GOOD; 13 PDFs (38,685c — regulatory determinations and policy documents). Regulates communications, internet services, spectrum, and multimedia. Relevant for fintech, payments, and digital banking compliance. (2026-05-27)"
   },
@@ -1634,7 +1634,7 @@
     "url": "https://www.nacsa.gov.my/",
     "jurisdiction": "MY",
     "category": "cybersecurity",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, BeautifulSoup 12,890c GOOD; 6 PDFs (13,911c). National cybersecurity agency issuing security standards and policies for critical national information infrastructure. Mandatory monitoring for financial institutions and digital service providers. (2026-05-27)"
   },
@@ -1643,7 +1643,7 @@
     "url": "https://www.mycc.gov.my/",
     "jurisdiction": "MY",
     "category": "competition",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, BeautifulSoup 9,054c GOOD; 5 PDFs (9,904c — competition enforcement decisions and press releases). Competition authority enforcing the Competition Act 2010. Relevant for M&A compliance, market conduct, and antitrust monitoring. (2026-05-27)"
   },
@@ -1652,7 +1652,7 @@
     "url": "https://www.ssm.com.my/Pages/Legal_Framework/Guidelines.aspx",
     "jurisdiction": "MY",
     "category": "company_registry",
-    "enabled": true,
+    "enabled": false,
     "status": "active",
     "notes": "HTTP 200, Playwright/trafilatura 2,607c GOOD; 30 PDF links found with 11,834c extracted from sampled registration/company procedure documents. Official company registry and corporate governance authority. Guidelines page covers Companies Act 2016 guidelines, registration requirements, and corporate governance frameworks. SSM root returns 1,341c (Playwright) with no PDFs; guidelines page is the stronger monitoring URL. (2026-05-27)"
   },
@@ -1661,7 +1661,7 @@
     "url": "https://www.mof.gov.my/",
     "jurisdiction": "MY",
     "category": "finance_ministry",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "Finance ministry portal. Root and all tested sub-paths return < 500c (SPA). mof.gov.my/en/ = 460c, mof.gov.my/en/news/press-release = 404, /economy/macro-economic = 404. treasury.gov.my also fails (SSL error + 174c). belanjawan.mof.gov.my is activated instead as the primary accessible MoF content source. (2026-05-27)"
   },
@@ -1679,7 +1679,7 @@
     "url": "https://www.customs.gov.my/",
     "jurisdiction": "MY",
     "category": "customs",
-    "enabled": true,
+    "enabled": false,
     "status": "limited",
     "notes": "Customs authority. Root returns 307c (SPA). All tested sub-paths (/en/Pages/default.aspx, /en/LM/Pages, /en/PR/Pages, /en/AK/Pages) return 404 or 0c. Entire site appears to be a deep SharePoint portal inaccessible without session navigation. Adapter required. (2026-05-27)"
   },
