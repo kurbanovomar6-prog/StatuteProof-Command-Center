@@ -24,7 +24,7 @@ Migration path:
 import hashlib
 import logging
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.config import DB_PATH
 from app.text_normalization import stable_content_hash
@@ -61,6 +61,7 @@ _CREATE_TABLE_V3 = """
 _CREATE_INDEXES = """
     CREATE INDEX IF NOT EXISTS idx_url        ON documents(url);
     CREATE INDEX IF NOT EXISTS idx_created_at ON documents(created_at);
+    CREATE INDEX IF NOT EXISTS idx_url_created ON documents (url, created_at DESC);
 """
 
 _CREATE_AUTH_TABLES = """
@@ -114,6 +115,22 @@ _CREATE_AUTH_TABLES = """
     );
 
     CREATE INDEX IF NOT EXISTS idx_oauth_states_expires ON oauth_states(expires_at);
+"""
+
+_CREATE_ACTION_LOG_TABLE = """
+    CREATE TABLE IF NOT EXISTS alert_action_log (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id       INTEGER NOT NULL,
+        alert_id      TEXT    NOT NULL,
+        decision      TEXT    NOT NULL,
+        notes         TEXT    NOT NULL DEFAULT '',
+        reviewer_name TEXT    NOT NULL DEFAULT '',
+        created_at    TIMESTAMP NOT NULL,
+        action_hash   TEXT    NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_aal_user_alert ON alert_action_log(user_id, alert_id);
+    CREATE INDEX IF NOT EXISTS idx_aal_created_at ON alert_action_log(created_at);
 """
 
 _CREATE_DELIVERY_LOG_TABLE = """
@@ -221,6 +238,7 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
             CREATE INDEX IF NOT EXISTS idx_oauth_states_expires ON oauth_states(expires_at);
             """
         )
+        conn.executescript(_CREATE_ACTION_LOG_TABLE)
         conn.commit()
     finally:
         if owned_conn:
@@ -354,7 +372,7 @@ def save_document(
         stable_content_hash(content)
         or hashlib.sha256(content.encode("utf-8")).hexdigest()
     )
-    now          = datetime.utcnow().isoformat()
+    now          = datetime.now(timezone.utc).isoformat()
     conn         = _connect()
     try:
         conn.execute(

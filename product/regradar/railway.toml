@@ -1,3 +1,13 @@
+# Railway build configuration
+#
+# A Dockerfile is present in this directory. Railway's Nixpacks builder takes
+# priority when builder = "nixpacks" is set explicitly. To switch to the
+# Dockerfile-based build, remove the [build] section entirely (or change
+# builder to "dockerfile") — Railway will then auto-detect the Dockerfile.
+#
+# Current state: using Nixpacks (no change to existing behaviour).
+# The Dockerfile is available for local Docker builds, VPS deployments, and
+# any CI/CD pipeline that builds a container image directly.
 [build]
 builder = "nixpacks"
 
@@ -5,5 +15,5 @@ builder = "nixpacks"
 startCommand = "python run.py api --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
-restartPolicyType = "on_failure"
+restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-react'
 
 import { evidence } from '../../api'
+import AuditBinderExport from './AuditBinderExport'
 
 const STATUS_STYLE = {
   CHANGED: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
@@ -78,6 +79,8 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+      <AuditBinderExport />
+
       <div>
         <h1 className="text-lg font-bold text-white mb-1">Audit Reports</h1>
         <p className="max-w-3xl text-sm leading-relaxed text-slate-400">

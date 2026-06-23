@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CheckCircle, X, ArrowLeft, ArrowRight, HelpCircle } from 'lucide-react'
+import { CONTACT_EMAIL } from '../data/constants'
 
 // Honest feature status labels shown in the table
 // ✓ = available  ✗ = not included  text = qualified/roadmap
@@ -159,7 +160,7 @@ export default function PricingPage({ onBack, onCreateWorkspace, onSourceReview,
 
   function handleCta(plan) {
     if (plan.id === 'consultant') {
-      window.location.assign('mailto:hello@statuteproof.com?subject=Consultant%20Plan%20Enquiry')
+      window.location.assign(`mailto:${CONTACT_EMAIL}?subject=Consultant%20Plan%20Enquiry`)
       return
     }
     if (plan.id === 'free') {
@@ -307,7 +308,7 @@ export default function PricingPage({ onBack, onCreateWorkspace, onSourceReview,
               Start founding pilot
             </button>
             <a
-              href="mailto:hello@statuteproof.com?subject=StatuteProof%20Enquiry"
+              href={`mailto:${CONTACT_EMAIL}?subject=StatuteProof%20Enquiry`}
               className="sp-btn-secondary inline-flex items-center gap-2"
             >
               Talk to us

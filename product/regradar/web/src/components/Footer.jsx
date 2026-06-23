@@ -1,3 +1,5 @@
+import { ShieldCheck, Lock, FileCheck2 } from 'lucide-react'
+
 const footerLinks = [
   { label: 'How It Works', href: '#how-it-works' },
   { label: 'Source Coverage', href: '#coverage' },
@@ -18,7 +20,7 @@ export default function Footer() {
           <div className="max-w-xs">
             <div className="flex items-center gap-2.5 mb-4">
               <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-8 w-auto flex-shrink-0" />
-              <span className="text-base font-extrabold text-white tracking-tight">
+              <span className="sp-display text-base font-extrabold text-white tracking-tight">
                 Statute<span className="text-[#16D9F5]">Proof</span>
               </span>
             </div>

@@ -1,6 +1,7 @@
 # Secrets — never bake into image
 .env
 .env.*
+!.env.example
 *.env
 secrets/
 credentials/
@@ -45,3 +46,17 @@ venv/
 
 # Playwright browser cache (large; installed fresh in container)
 ~/.cache/ms-playwright/
+
+# Logs (written at runtime, not baked in)
+logs/
+*.log
+
+# Tests (not needed at runtime)
+tests/
+
+# Documentation
+*.md
+
+# Large archive / output files
+*.zip
+repopack-output.txt

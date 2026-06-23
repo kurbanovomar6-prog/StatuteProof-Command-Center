@@ -22,6 +22,37 @@ import requests
 from app.config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from app import telegram_settings as _ts
 
+# ---------------------------------------------------------------------------
+# Customer delivery helper
+# ---------------------------------------------------------------------------
+
+def _deliver_alert_to_subscribed_users(message: str) -> int:
+    """
+    Send a formatted alert message to every subscribed customer via the
+    ALERTS bot (token = TELEGRAM_ALERTS_BOT_TOKEN).
+
+    Returns the number of users successfully reached.
+    Falls back to 0 without raising if anything goes wrong.
+    """
+    try:
+        from app.telegram_pairing import get_all_linked_chat_ids  # type: ignore[import]
+        chat_ids = get_all_linked_chat_ids()
+    except Exception as exc:
+        logger.debug("_deliver_alert_to_subscribed_users: could not fetch linked chat_ids: %s", exc)
+        return 0
+
+    if not chat_ids:
+        return 0
+
+    sent = 0
+    for chat_id in chat_ids:
+        try:
+            if send_telegram_message(str(chat_id), message):
+                sent += 1
+        except Exception as exc:
+            logger.warning("_deliver_alert_to_subscribed_users: failed for chat_id=%s: %s", chat_id, exc)
+    return sent
+
 logger = logging.getLogger(__name__)
 
 _ALERT_THRESHOLD = {"MEDIUM", "HIGH"}
@@ -133,12 +164,6 @@ def send_telegram_alert(result: dict) -> bool:
         logger.debug("Telegram alert skipped — risk=%s below threshold", risk)
         return False
 
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        logger.warning(
-            "Telegram alert skipped — TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set"
-        )
-        return False
-
     icon    = _RISK_ICON.get(risk, "")
     url     = result.get("url", "unknown")
     summary = _safe(result.get("executive_summary", result.get("reason", "No summary")), _MAX_SUMMARY_LEN)
@@ -154,7 +179,7 @@ def send_telegram_alert(result: dict) -> bool:
     affected  = result.get("affected_entities", [])
     deadline  = result.get("deadline")
     rev_req   = result.get("review_required", False)
-    rev_rsn   = result.get("review_reason", "")
+    rev_rsn   = _safe(result.get("review_reason", ""), _MAX_REASON_LEN)
 
     # Urgency: prefer standardised brief field, fall back to raw value
     urgency_std = result.get("urgency", "")
@@ -198,9 +223,36 @@ def send_telegram_alert(result: dict) -> bool:
         lines.append(f"\n⚠️ *Legal review required:* {rev_text}")
 
     lines.append(f"\n🔗 {url}")
+    lines.append("\n_Monitoring information only. Not legal advice._")
 
     message = "\n".join(lines)
 
+    # ── Step 1: deliver to subscribed customers via ALERTS bot ──────────────
+    # Falls back to founder chat during pilot phase;
+    # production routes through user_delivery / _deliver_alert_to_subscribed_users.
+    users_reached = _deliver_alert_to_subscribed_users(message)
+    if users_reached > 0:
+        logger.info(
+            "Telegram alert sent to %d subscribed user(s) via alerts bot — risk=%s url=%s",
+            users_reached, risk, url,
+        )
+        return True
+
+    # ── Step 2: no subscribed users yet — fall back to founder chat (admin bot) ──
+    # This is acceptable during the pilot phase while no customers are linked.
+    # Uses TELEGRAM_BOT_TOKEN (admin bot) + TELEGRAM_CHAT_ID (founder chat).
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        logger.warning(
+            "Telegram alert skipped — no subscribed users and "
+            "TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID not set (pilot fallback unavailable)"
+        )
+        return False
+
+    logger.debug(
+        "No subscribed users found — sending alert to founder chat via admin bot (pilot fallback)"
+    )
+
+    tg_err: Exception | None = None
     try:
         resp = requests.post(
             f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
@@ -213,15 +265,51 @@ def send_telegram_alert(result: dict) -> bool:
             timeout=_TELEGRAM_TIMEOUT_S,
         )
         resp.raise_for_status()
-        logger.info("Telegram alert sent — risk=%s url=%s", risk, url)
-        return True
-
-    except requests.Timeout:
+        data = resp.json()
+        if not data.get("ok"):
+            tg_err = RuntimeError(f"Telegram returned not-ok: {data.get('description', data)}")
+        else:
+            logger.info(
+                "Telegram alert sent to founder chat (pilot fallback) — risk=%s url=%s",
+                risk, url,
+            )
+            return True
+    except requests.Timeout as exc:
         logger.warning("Telegram alert timed out after %ds", _TELEGRAM_TIMEOUT_S)
-        return False
+        tg_err = exc
     except requests.HTTPError as exc:
         logger.warning("Telegram API error: %s", exc)
-        return False
+        tg_err = exc
     except Exception as exc:
         logger.warning("Telegram alert failed (%s: %s)", type(exc).__name__, exc)
-        return False
+        tg_err = exc
+
+    if tg_err is not None:
+        logger.warning(
+            "Telegram alert failed for %s (risk=%s): %s — attempting email fallback",
+            source_name or url, risk, tg_err,
+        )
+        if risk in _ALERT_THRESHOLD:
+            try:
+                from app.email_delivery import build_monitoring_brief_email, deliver_brief_email
+                brief_text = result.get("executive_summary") or result.get("reason") or message
+                email_payload = build_monitoring_brief_email(
+                    brief_markdown=brief_text,
+                    source_name=source_name or url,
+                    risk_level=risk,
+                )
+                email_result = deliver_brief_email(
+                    email_payload,
+                    source_id=str(result.get("source_id") or result.get("source_name") or ""),
+                )
+                logger.info(
+                    "Email fallback for %s (risk=%s): status=%s",
+                    source_name or url, risk, email_result.get("status"),
+                )
+            except Exception as email_err:
+                logger.error(
+                    "Email fallback also failed for %s (risk=%s): %s",
+                    source_name or url, risk, email_err,
+                )
+
+    return False

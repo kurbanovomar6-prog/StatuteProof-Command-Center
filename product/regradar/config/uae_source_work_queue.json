@@ -441,85 +441,82 @@
       "source_id": "AE-adgm-fsra-guidance-policy",
       "regulator": "ADGM/FSRA",
       "url": "https://www.adgm.com/legal-framework/guidance-and-policy-statements",
-      "source_type": "guidance",
+      "source_type": "regulatory_guidance",
       "priority": "P1",
       "current_state": "activation_ready",
       "blocker": "",
       "next_action": "activated_in_sources_json_after_mass_monitor_ok",
       "expected_extraction_strategy": "adapter:custom_element",
-      "expected_min_length": 2000,
+      "expected_min_length": 500,
       "noise_risk": "low",
       "source_health_risk": "medium",
-      "baseline_runs_completed": 2,
+      "baseline_runs_completed": 6,
       "baseline_runs_required": 2,
       "can_activate": true,
       "activation_decision": "activation_ready",
       "adapter_family": "custom_element",
       "adapter_name": "custom_element",
       "adapter_version": "adapter-platform-1.0",
-      "adapter_config": {
-        "container_selector": "adgm-page",
-        "content_selector": "adgm-page"
-      },
+      "adapter_config": {},
       "extraction_strategy": "adapter:custom_element",
-      "last_adapter_test_at": "2026-06-15T14:40:00Z",
+      "last_adapter_test_at": "2026-06-21T21:46:21Z",
       "adapter_status": "evidence_saved",
       "adapter_failure_reason": "",
       "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
       "selector": "adgm-page",
       "wait_selector": "adgm-page",
-      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-adgm-fsra-guidance-policy/intake-20260615T143126Z/proof.json",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-adgm-fsra-guidance-policy/intake-20260621T214439Z/proof.json",
       "no_save_tested": true,
       "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
       "no_save_quality_score": 65,
-      "no_save_quality_label": "GOOD",
-      "no_save_normalized_hash": "704c83258e2f32a31f8c6d61841a46539e00e650b679a171606da6006b96e141",
-      "no_save_normalized_length": 8309,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "e30552e2f3b64bd1a4618abeaafb509338d25f8a3548e2dadcd0ea5bd2e9e9eb",
+      "no_save_normalized_length": 18109,
       "no_save_nav_shell": false,
       "no_save_duplicate_hash": false,
       "no_save_adapter_used": true,
       "no_save_adapter_name": "custom_element",
       "no_save_failure_reason": "",
       "no_save_remediation_hint": "",
-      "last_no_save_test_at": "2026-06-15T14:40:00Z",
+      "last_no_save_test_at": "2026-06-21T21:46:21Z",
       "source_monitor_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T14:40:00Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       },
       "evidence_trail_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T14:40:00Z",
+        "reviewed_at": "2026-06-21T21:46:21Z",
         "proof_paths_checked": true
       },
       "qa_critic_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T14:40:00Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       },
       "legal_language_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T14:40:00Z",
+        "reviewed_at": "2026-06-21T21:46:21Z",
         "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
         "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
       },
       "code_architect_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T14:40:00Z",
+        "reviewed_at": "2026-06-21T21:46:21Z",
         "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
       },
       "product_manager_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T14:40:00Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       },
       "final_activation_gate": {
         "status": "activation_ready",
         "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
-        "reviewed_at": "2026-06-15T14:40:00Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       }
     },
     {
@@ -3416,113 +3413,86 @@
       "wait_selector": null
     },
     {
-      "activation_decision": "activation_ready",
-      "adapter_config": {
-        "container_selector": "main"
-      },
-      "adapter_failure_reason": "",
-      "adapter_family": "difc_legal_database",
-      "adapter_name": "difc_legal_database",
-      "adapter_remediation_hint": "",
-      "adapter_status": "activation_ready",
-      "adapter_version": "adapter-platform-1.0",
-      "baseline_runs_completed": 2,
-      "baseline_runs_required": 2,
-      "blocker": "",
-      "can_activate": true,
-      "code_architect_gate": {
-        "status": "pass",
-        "reason": "Uses source-specific DIFC adapter without bypassing access controls.",
-        "reviewed_at": "2026-06-16T18:22:10Z",
-        "blocking_issues": []
-      },
+      "source_id": "AE-difc-legal-database",
+      "regulator": "DIFC",
+      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
+      "source_type": "legal_database_listing",
+      "priority": "P1",
       "current_state": "activation_ready",
-      "evidence_trail_gate": {
-        "status": "pass",
-        "reason": "Proof path exists and repeat baseline is complete with stable normalized hash.",
-        "reviewed_at": "2026-06-16T18:22:10Z",
-        "blocking_issues": []
-      },
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
       "expected_extraction_strategy": "adapter:difc_legal_database",
       "expected_min_length": 500,
-      "extraction_strategy": "adapter:difc_legal_database",
-      "final_activation_gate": {
-        "status": "activation_ready",
-        "reason": "Proof, repeat baseline, source quality, risk review, and required agent gates passed.",
-        "reviewed_at": "2026-06-16T18:36:18Z",
-        "blocking_issues": []
-      },
-      "last_adapter_test_at": "2026-06-16T18:03:40Z",
-      "last_no_save_test_at": "2026-06-16T18:03:40Z",
-      "legal_language_gate": {
-        "status": "pass",
-        "reason": "Allowed wording is readiness-supported DIFC official source; no legal-advice or end-to-end scope claim.",
-        "reviewed_at": "2026-06-16T18:22:10Z",
-        "blocking_issues": []
-      },
-      "next_action": "monitor_dry_run_then_customer_scope_review",
-      "no_save_adapter_name": "",
-      "no_save_adapter_used": false,
-      "no_save_duplicate_hash": false,
-      "no_save_failure_reason": "Source appears to require login, CAPTCHA, paywall access, or a private portal.",
-      "no_save_nav_shell": false,
-      "no_save_normalized_hash": "87b27e52537e2b68e9245732e1924dbe63defda3eedb6aa5d189a603ad51a53f",
-      "no_save_normalized_length": 16054,
-      "no_save_quality_label": "POOR",
-      "no_save_quality_score": 29,
-      "no_save_readiness_status": "BLOCKED",
-      "no_save_remediation_hint": "Use only public pages that are permitted to be monitored without bypassing access controls.",
-      "no_save_tested": true,
       "noise_risk": "low",
-      "priority": "P1",
-      "product_manager_gate": {
-        "status": "pass",
-        "reason": "Useful to DIFC firms, legal counsel, consultants, and UAE compliance buyers.",
-        "reviewed_at": "2026-06-16T18:22:10Z",
-        "blocking_issues": []
-      },
-      "proof_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-legal-database/intake-20260616T180332Z/proof.json",
-      "qa_critic_gate": {
-        "status": "pass",
-        "reason": "No nav-shell, shallow, duplicate, no-save-only, or unresolved high-risk issue remains.",
-        "reviewed_at": "2026-06-16T18:22:10Z",
-        "blocking_issues": []
-      },
-      "regulator": "DIFC",
-      "selector": null,
       "source_health_risk": "medium",
-      "source_id": "AE-difc-legal-database",
+      "baseline_runs_completed": 5,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "difc_legal_database",
+      "adapter_name": "difc_legal_database",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {},
+      "extraction_strategy": "adapter:difc_legal_database",
+      "last_adapter_test_at": "2026-06-21T21:46:21Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "main, a[href$=\".pdf\"]",
+      "wait_selector": "main, a[href$=\".pdf\"]",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-difc-legal-database/intake-20260621T214518Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "c86855bcc6a246e4977e24fadd5506c4477ba270a16ed2f65825b863646d05d2",
+      "no_save_normalized_length": 234904,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "difc_legal_database",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-21T21:46:21Z",
       "source_monitor_gate": {
         "status": "pass",
-        "reason": "Mass-monitor dry-run returned MONITOR_OK and source-health risk is acceptable.",
-        "reviewed_at": "2026-06-16T18:22:10Z",
-        "blocking_issues": []
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:46:21Z"
       },
-      "source_type": "legal_database",
-      "url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
-      "wait_selector": null,
-      "normalized_hash": "59b9e188efb5c9f82006d8277ed371b5d79a0b0c9b8476f4d3e3cbc645513298",
-      "name": "DIFC Legal Database",
-      "jurisdiction": "AE",
-      "official_status": "official",
-      "discovery_status": "official_public",
-      "no_save_status": "passed",
-      "quality_score": 65,
-      "quality_label": "ACCEPTABLE",
-      "evidence_status": "proof_saved",
-      "baseline_status": "complete",
-      "activation_status": "activation_ready",
-      "failure_code": "",
-      "failure_reason": "",
-      "remediation_hint": "",
-      "agent_gate_status": "pass",
-      "normalized_text_path": "product/regradar/data/source_snapshots/2026-06-16/AE/AE-difc-legal-database/intake-20260616T180332Z/normalized.txt",
-      "nav_shell": false,
-      "shallow_content": false,
-      "duplicate_hash": false,
-      "mass_monitor_status": "MONITOR_OK",
-      "monitor_ok": true,
-      "updated_at": "2026-06-16T18:36:18Z"
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:46:21Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:46:21Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:46:21Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:46:21Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:46:21Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-21T21:46:21Z"
+      }
     },
     {
       "activation_decision": "candidate",
@@ -7246,85 +7216,82 @@
       "source_id": "AE-sca-regulations-listing",
       "regulator": "SCA",
       "url": "https://www.sca.gov.ae/en/regulations/regulations-listing",
-      "source_type": "regulations_listing",
+      "source_type": "regulatory_listing",
       "priority": "P1",
       "current_state": "activation_ready",
       "blocker": "",
       "next_action": "activated_in_sources_json_after_mass_monitor_ok",
       "expected_extraction_strategy": "adapter:sca_listing",
-      "expected_min_length": 1000,
+      "expected_min_length": 500,
       "noise_risk": "low",
       "source_health_risk": "medium",
-      "baseline_runs_completed": 2,
+      "baseline_runs_completed": 5,
       "baseline_runs_required": 2,
       "can_activate": true,
       "activation_decision": "activation_ready",
       "adapter_family": "sca_listing",
       "adapter_name": "sca_listing",
       "adapter_version": "adapter-platform-1.0",
-      "adapter_config": {
-        "container_selector": "main",
-        "max_items": 80
-      },
+      "adapter_config": {},
       "extraction_strategy": "adapter:sca_listing",
-      "last_adapter_test_at": "2026-06-15T18:22:28Z",
+      "last_adapter_test_at": "2026-06-21T21:46:21Z",
       "adapter_status": "evidence_saved",
       "adapter_failure_reason": "",
       "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
       "selector": "main",
-      "wait_selector": "",
-      "proof_path": "data/source_snapshots/2026-06-15/AE/AE-sca-regulations-listing/intake-20260615T182128Z/proof.json",
+      "wait_selector": "main",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-sca-regulations-listing/intake-20260621T214501Z/proof.json",
       "no_save_tested": true,
       "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
       "no_save_quality_score": 65,
       "no_save_quality_label": "ACCEPTABLE",
-      "no_save_normalized_hash": "fecd262a251402488e62b2fcfc2cefc71cd50ac41b7312550a85f4d0dd5cdada",
-      "no_save_normalized_length": 11021,
+      "no_save_normalized_hash": "61d0df8f31cc3015411091d3051dc7e84038e89ad0d56865516814ddc85d1e8a",
+      "no_save_normalized_length": 11327,
       "no_save_nav_shell": false,
       "no_save_duplicate_hash": false,
       "no_save_adapter_used": true,
       "no_save_adapter_name": "sca_listing",
       "no_save_failure_reason": "",
       "no_save_remediation_hint": "",
-      "last_no_save_test_at": "2026-06-15T18:22:28Z",
+      "last_no_save_test_at": "2026-06-21T21:46:21Z",
       "source_monitor_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T18:22:28Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       },
       "evidence_trail_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T18:22:28Z",
+        "reviewed_at": "2026-06-21T21:46:21Z",
         "proof_paths_checked": true
       },
       "qa_critic_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T18:22:28Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       },
       "legal_language_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T18:22:28Z",
+        "reviewed_at": "2026-06-21T21:46:21Z",
         "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
         "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
       },
       "code_architect_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T18:22:28Z",
+        "reviewed_at": "2026-06-21T21:46:21Z",
         "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
       },
       "product_manager_gate": {
         "status": "pass",
         "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
-        "reviewed_at": "2026-06-15T18:22:28Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       },
       "final_activation_gate": {
         "status": "activation_ready",
         "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
-        "reviewed_at": "2026-06-15T18:22:28Z"
+        "reviewed_at": "2026-06-21T21:46:21Z"
       }
     },
     {
@@ -22839,15 +22806,445 @@
         "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
         "reviewed_at": "2026-06-20T10:23:00Z"
       }
+    },
+    {
+      "source_id": "AE-uae-legislation-legislations-listing-20260621",
+      "regulator": "UAE Legislation",
+      "url": "https://www.uaelegislation.gov.ae/en/legislations",
+      "source_type": "legislation_listing",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:listing",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "listing",
+      "adapter_name": "listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "main",
+        "content_selector": "main",
+        "item_selector": "article, li, tr, .card, .item, a[href]"
+      },
+      "extraction_strategy": "adapter:listing",
+      "last_adapter_test_at": "2026-06-21T18:12:51Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "main",
+      "wait_selector": "main",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-uae-legislation-legislations-listing-20260621/intake-20260621T181050Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "1ce11e729f66f23abe67e834fed5cc4b33c75aecd507a67c3559d4c05a295970",
+      "no_save_normalized_length": 4510,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-21T18:12:51Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T18:12:51Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T18:12:51Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T18:12:51Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T18:12:51Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T18:12:51Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T18:12:51Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-21T18:12:51Z"
+      }
+    },
+    {
+      "source_id": "AE-mof-top-up-tax",
+      "regulator": "UAE Ministry of Finance",
+      "url": "https://mof.gov.ae/en/public-finance/tax/top-up-tax/",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:listing",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "listing",
+      "adapter_name": "listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "main",
+        "content_selector": "main",
+        "item_selector": "article, li, tr, .card, .item, a[href]"
+      },
+      "extraction_strategy": "adapter:listing",
+      "last_adapter_test_at": "2026-06-21T21:02:42Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "main",
+      "wait_selector": "",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-mof-top-up-tax/intake-20260621T205440Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 62,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "82ed5ecfbbf89fb4b3dcf340a1390ee3fa70fd30cc5dbfd9e62382f88f65a17c",
+      "no_save_normalized_length": 0,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-21T21:02:42Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      }
+    },
+    {
+      "source_id": "AE-mof-corporate-tax-in-the-uae",
+      "regulator": "UAE Ministry of Finance",
+      "url": "https://mof.gov.ae/en/public-finance/tax/corporate-tax-in-the-uae/",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:listing",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "listing",
+      "adapter_name": "listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "main",
+        "content_selector": "main",
+        "item_selector": "article, li, tr, .card, .item, a[href]"
+      },
+      "extraction_strategy": "adapter:listing",
+      "last_adapter_test_at": "2026-06-21T21:02:42Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "main",
+      "wait_selector": "",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-mof-corporate-tax-in-the-uae/intake-20260621T205506Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "05b8a469606cde1c532b48d2ce4e3a2ed4a8b74c3db807ba7c397768ab716215",
+      "no_save_normalized_length": 0,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-21T21:02:42Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      }
+    },
+    {
+      "source_id": "AE-mof-aeoi-fatca-crs",
+      "regulator": "UAE Ministry of Finance",
+      "url": "https://mof.gov.ae/en/public-finance/international-relations/automatic-exchange-of-information-aeoi-fatca-crs/",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:pdf_listing",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "#main-content",
+        "content_selector": "#main-content",
+        "item_selector": "a[href]"
+      },
+      "extraction_strategy": "adapter:pdf_listing",
+      "last_adapter_test_at": "2026-06-21T21:02:42Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "#main-content",
+      "wait_selector": "",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-mof-aeoi-fatca-crs/intake-20260621T205905Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "11673e31c6d77132100ec3405005b738bd6c4d631bb498b4e015a4b66a48c917",
+      "no_save_normalized_length": 0,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "pdf_listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-21T21:02:42Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      }
+    },
+    {
+      "source_id": "AE-mof-uae-financial-framework",
+      "regulator": "UAE Ministry of Finance",
+      "url": "https://mof.gov.ae/en/public-finance/uae-financial-sustainability/uae-financial-framework/",
+      "source_type": "regulatory",
+      "priority": "P1",
+      "current_state": "activation_ready",
+      "blocker": "",
+      "next_action": "activated_in_sources_json_after_mass_monitor_ok",
+      "expected_extraction_strategy": "adapter:pdf_listing",
+      "expected_min_length": 500,
+      "noise_risk": "low",
+      "source_health_risk": "medium",
+      "baseline_runs_completed": 2,
+      "baseline_runs_required": 2,
+      "can_activate": true,
+      "activation_decision": "activation_ready",
+      "adapter_family": "pdf_listing",
+      "adapter_name": "pdf_listing",
+      "adapter_version": "adapter-platform-1.0",
+      "adapter_config": {
+        "container_selector": "#main-content",
+        "content_selector": "#main-content",
+        "item_selector": "a[href]"
+      },
+      "extraction_strategy": "adapter:pdf_listing",
+      "last_adapter_test_at": "2026-06-21T21:02:42Z",
+      "adapter_status": "evidence_saved",
+      "adapter_failure_reason": "",
+      "adapter_remediation_hint": "Activated in sources.json after proof, repeat baseline, and mass-monitor dry-run.",
+      "selector": "#main-content",
+      "wait_selector": "",
+      "proof_path": "data/source_snapshots/2026-06-21/AE/AE-mof-uae-financial-framework/intake-20260621T205938Z/proof.json",
+      "no_save_tested": true,
+      "no_save_readiness_status": "CONFIRMED_ACCESSIBLE",
+      "no_save_quality_score": 65,
+      "no_save_quality_label": "ACCEPTABLE",
+      "no_save_normalized_hash": "1a71b7108c2433225654477395e9772e97ce08b439fa1abbb939b28e34b5410a",
+      "no_save_normalized_length": 0,
+      "no_save_nav_shell": false,
+      "no_save_duplicate_hash": false,
+      "no_save_adapter_used": true,
+      "no_save_adapter_name": "pdf_listing",
+      "no_save_failure_reason": "",
+      "no_save_remediation_hint": "",
+      "last_no_save_test_at": "2026-06-21T21:02:42Z",
+      "source_monitor_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "evidence_trail_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "proof_paths_checked": true
+      },
+      "qa_critic_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "legal_language_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "allowed_wording": "Readiness-supported, proof-backed monitoring source.",
+        "forbidden_wording": "guaranteed compliance, legal advice, regulator certified"
+      },
+      "code_architect_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z",
+        "adapter_or_code_notes": "Adapter live-tested and evidence-saved."
+      },
+      "product_manager_gate": {
+        "status": "pass",
+        "reason": "Pass after proof-backed repeat baseline and mass-monitor dry-run with MONITOR_OK.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      },
+      "final_activation_gate": {
+        "status": "activation_ready",
+        "reason": "Proof, repeat baseline, source quality, mass-monitor dry-run, and agent gates passed.",
+        "reviewed_at": "2026-06-21T21:02:42Z"
+      }
     }
   ],
   "summary": {
-    "activation_ready_count": 209,
+    "activation_ready_count": 214,
     "adapter_fields_updated_at": "2026-06-14T19:49:43Z",
     "adapter_live_smoke_note": "No-save adapter smoke: ADGM financial crime and rulebooks passed custom_element; SCA latest regulations remains remediation.",
     "adapter_note": "Adapter fields describe extraction strategy only; they do not change activation or public source truth.",
     "adapter_platform_version": "adapter-platform-1.0",
-    "baseline_complete_count": 210,
+    "baseline_complete_count": 215,
     "baseline_pending_count": 2,
     "blocked_count": 19,
     "candidate_count": 27,
@@ -22877,13 +23274,13 @@
     },
     "last_50_target_no_save_test_at": "2026-06-14T19:59:07Z",
     "notes": "Queue applies manual agent gates. Only activation_ready queue entries count toward the queue-specific 50 working-source target; public truth is reconciled separately from sources.json.",
-    "proof_backed_count": 210,
-    "public_source_truth_after": "241 enabled UAE sources / 172 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation",
+    "proof_backed_count": 215,
+    "public_source_truth_after": "246 enabled UAE sources / 245 readiness-supported / 1 under extraction remediation",
     "public_source_truth_before": "13 enabled UAE sources / 9 readiness-supported / 4 under extraction remediation",
     "rejected_count": 1,
     "remediation_count": 16,
     "source_specific_adapter_note": "Configured SCA, DFSA rulebook, CBUAE, FIU/EOCN, and VARA source-specific adapter families for remediation; no activation decisions changed.",
-    "total_entries": 274,
+    "total_entries": 279,
     "source_activation_platform_updated_at": "2026-06-15",
     "source_activation_platform_version": "dom-investigator-1.0",
     "source_activation_platform_note": "Final remediation sprint replaced two stale DFSA remediation endpoints with proof-backed official DFSA PDF-listing sources; FIU homepage remains honestly held.",

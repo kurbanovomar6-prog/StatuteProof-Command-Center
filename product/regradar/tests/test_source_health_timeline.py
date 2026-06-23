@@ -179,6 +179,35 @@ class SourceHealthTimelineTests(unittest.TestCase):
             self.assertEqual(report["alerts"][0]["consecutive_failed_runs"], 3)
             self.assertEqual(report["alerts"][0]["operator_status"], "OPERATOR_REVIEW_REQUIRED")
 
+    def test_operator_health_report_separates_disabled_historical_failures(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            _write_sources(base)
+            sources = json.loads((base / "sources.json").read_text(encoding="utf-8"))
+            sources.append(
+                {
+                    "source_id": "AE-disabled-source",
+                    "name": "Disabled Historical Source",
+                    "url": "https://regulator.example/disabled",
+                    "jurisdiction": "AE",
+                    "enabled": False,
+                    "status": "disabled_external_access",
+                    "monitoring_mode": "remediation",
+                }
+            )
+            (base / "sources.json").write_text(json.dumps(sources), encoding="utf-8")
+            _write_run(base, run_id="run-1", source_id="AE-disabled-source", change_status="FAILED")
+            _write_run(base, run_id="run-2", source_id="AE-disabled-source", change_status="FAILED")
+            _write_run(base, run_id="run-3", source_id="AE-disabled-source", change_status="FAILED")
+
+            report = build_operator_source_health_report(base_dir=base, failed_threshold=3)
+
+            self.assertEqual(report["sources_requiring_operator_review"], 0)
+            self.assertEqual(report["historical_sources_requiring_operator_review"], 1)
+            self.assertEqual(report["alerts"], [])
+            self.assertEqual(report["historical_alerts"][0]["source_id"], "AE-disabled-source")
+            self.assertEqual(report["historical_alerts"][0]["operator_status"], "DISABLED_SOURCE_HISTORY")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -10,9 +10,10 @@ export function getWorkspaceProfile() {
       industries:    Array.isArray(p.industries)    ? p.industries    : [],
       topics:        Array.isArray(p.topics)        ? p.topics        : [],
       customSources: Array.isArray(p.customSources) ? p.customSources : [],
+      licenceTypes:  Array.isArray(p.licenceTypes)  ? p.licenceTypes  : [],
     }
   } catch {
-    return { company: 'Profile workspace', email: '', markets: [], industries: [], topics: [], customSources: [] }
+    return { company: 'Profile workspace', email: '', markets: [], industries: [], topics: [], customSources: [], licenceTypes: [] }
   }
 }
 

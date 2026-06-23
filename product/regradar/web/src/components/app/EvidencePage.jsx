@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AlertTriangle, CheckCircle, Clock, Download, FileText, Hash, History, Loader2, Shield } from 'lucide-react'
 
 import { evidence as evidenceApi } from '../../api'
+import DiffViewer from '../DiffViewer'
 
 const STATUS_STYLES = {
   CHANGED:      { bg: 'bg-blue-500/10 border-blue-500/30',     text: 'text-blue-400',   label: 'CHANGED' },
@@ -40,7 +41,11 @@ function EvidenceCard({ record }) {
   const [historyError, setHistoryError] = useState('')
   const [saving, setSaving] = useState(false)
   const [exportingFormat, setExportingFormat] = useState('')
-  const canAssess = Boolean(record.proof_block_path && record.evidence_record_id)
+  const [diffText, setDiffText] = useState(null)
+  const [diffLoading, setDiffLoading] = useState(false)
+  const [diffError, setDiffError] = useState('')
+  const [diffExpanded, setDiffExpanded] = useState(false)
+  const canAssess = Boolean(record.evidence_record_id)
   const detectedDate = record.detected_at
     ? new Date(record.detected_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
     : 'Not recorded'
@@ -76,6 +81,25 @@ function EvidenceCard({ record }) {
     }
   }
 
+  async function handleLoadDiff() {
+    if (!record.run_id || diffLoading) return
+    if (diffText !== null) {
+      setDiffExpanded(v => !v)
+      return
+    }
+    setDiffLoading(true)
+    setDiffError('')
+    try {
+      const data = await evidenceApi.fetchDiff(record.run_id)
+      setDiffText(data.diff_text || '')
+      setDiffExpanded(true)
+    } catch (err) {
+      setDiffError(err.message || 'Diff could not be loaded.')
+    } finally {
+      setDiffLoading(false)
+    }
+  }
+
   async function handleAssess() {
     if (!canAssess || !internalNote.trim()) return
     setSaving(true)
@@ -97,22 +121,19 @@ function EvidenceCard({ record }) {
     }
   }
 
-  async function handleExport(format = 'pdf') {
+  function handleExport(format = 'pdf') {
     if (!record.evidence_record_id) return
     setExportingFormat(format)
     setExportMsg('')
-    try {
-      const data = await evidenceApi.exportAuditPack(record.evidence_record_id, format)
-      const paths = data.export || {}
-      const artifactPath = data.format === 'pdf'
-        ? paths.pdf_path || data.pdf_path || 'PDF path unavailable'
-        : paths.md_path || paths.html_path || 'Markdown/HTML path unavailable'
-      setExportMsg(`${data.message || 'Audit pack exported.'} ${artifactPath}`)
-    } catch (err) {
-      setExportMsg(err.message || 'Audit export failed.')
-    } finally {
-      setExportingFormat('')
-    }
+    const downloadUrl = `/api/evidence/export-download?evidence_record_id=${encodeURIComponent(record.evidence_record_id)}&format=${encodeURIComponent(format)}`
+    const anchor = document.createElement('a')
+    anchor.href = downloadUrl
+    anchor.download = ''
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    setExportMsg('Download started. Check your downloads folder.')
+    setExportingFormat('')
   }
 
   return (
@@ -164,10 +185,28 @@ function EvidenceCard({ record }) {
         )}
         <div className="flex gap-2">
           <span className="text-slate-500 w-20 flex-shrink-0">Diff:</span>
-          <span className={record.diff_available ? 'text-emerald-400' : 'text-slate-500'}>
-            {record.diff_available ? 'Available' : 'Not available'}
-          </span>
+          {record.diff_available ? (
+            <button
+              type="button"
+              onClick={handleLoadDiff}
+              className="text-cyan-400 hover:text-cyan-200 transition-colors"
+            >
+              {diffLoading ? 'Loading…' : diffExpanded ? 'Hide diff' : 'View diff'}
+            </button>
+          ) : (
+            <span className="text-slate-500">Not available</span>
+          )}
         </div>
+        {diffError && (
+          <p className="text-xs text-amber-300">{diffError}</p>
+        )}
+        {diffExpanded && diffText !== null && (
+          <DiffViewer
+            diffText={diffText}
+            sourceId={record.source_id}
+            detectedAt={detectedDate}
+          />
+        )}
       </div>
 
       <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
@@ -180,7 +219,7 @@ function EvidenceCard({ record }) {
         </div>
         {!canAssess ? (
           <p className="text-xs text-amber-300">
-            Assessment disabled because this record does not have a saved proof artifact.
+            Assessment requires an evidence record ID. This record has not been assigned one yet.
           </p>
         ) : (
           <div className="space-y-2">
@@ -309,7 +348,7 @@ function mapEvidenceRecord(record, index) {
     run_id: record.run_id,
     status: record.change_status || 'UNCHANGED',
     new_hash: record.normalized_hash || record.content_hash ? `sha256:${String(record.normalized_hash || record.content_hash)}` : null,
-    diff_available: Boolean(record.diff_json_path || record.diff_md_path || record.change_status === 'CHANGED'),
+    diff_available: Boolean(record.run_id && (record.diff_json_path || record.diff_md_path || record.change_status === 'CHANGED')),
     proof_block_path: record.proof_block_path || '',
     official_url: record.official_url || '',
     source_health_status: sourceHealthStatus(record),

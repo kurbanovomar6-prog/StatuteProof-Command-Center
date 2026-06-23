@@ -30,8 +30,52 @@ from __future__ import annotations
 
 import json
 import logging
+import time
+from collections import deque
+from threading import Lock
+
+# parse_action_steps and derive_urgency_from_text are re-exported from ai.py so
+# that ai_brief callers can use the same structured what_to_do utilities
+# without duplicating logic.  The "import X as X" form is the Pyright-recognised
+# re-export pattern and suppresses the "not accessed" diagnostic.
+from app.ai import (  # noqa: F401
+    derive_urgency_from_text as derive_urgency_from_text,
+    parse_action_steps as parse_action_steps,
+)
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Soft rate guard — brief generation call budget
+# ---------------------------------------------------------------------------
+# Tracks AI call timestamps within a rolling window.  Log a warning when the
+# limit is exceeded but do NOT block — briefs are high-value and should never
+# be silently dropped.  Hard blocking belongs at the API-key / billing layer.
+_BRIEF_RATE_LIMIT  = 20          # max generations per window
+_BRIEF_RATE_WINDOW = 3_600       # 1 hour in seconds
+_brief_call_times: deque[float] = deque()
+_brief_call_lock   = Lock()
+
+
+def _check_brief_rate_limit() -> None:
+    """
+    Soft guard: warn if more than _BRIEF_RATE_LIMIT AI calls have been made
+    in the last _BRIEF_RATE_WINDOW seconds.  Never raises or blocks.
+    """
+    now = time.monotonic()
+    with _brief_call_lock:
+        # Evict timestamps older than the window
+        while _brief_call_times and now - _brief_call_times[0] > _BRIEF_RATE_WINDOW:
+            _brief_call_times.popleft()
+        _brief_call_times.append(now)
+        count = len(_brief_call_times)
+
+    if count > _BRIEF_RATE_LIMIT:
+        logger.warning(
+            "ai_brief: soft rate limit exceeded — %d brief generations in the last "
+            "%ds (limit: %d). Consider throttling the pipeline or increasing the limit.",
+            count, _BRIEF_RATE_WINDOW, _BRIEF_RATE_LIMIT,
+        )
 
 _MODEL              = "claude-haiku-4-5-20251001"
 _MAX_TEXT_CHARS     = 6_000
@@ -152,9 +196,94 @@ def _build_meta_block(metadata: dict) -> str:
         parts.append(f"Change status: {metadata['change_status']}")
     if metadata.get("limitations_notes"):
         parts.append(f"Limitations: {metadata['limitations_notes']}")
+    if metadata.get("diff_summary"):
+        parts.append(f"Diff summary: {metadata['diff_summary']}")
+    if metadata.get("diff_excerpt"):
+        parts.append(f"Key change excerpt:\n{metadata['diff_excerpt']}")
     if not parts:
         return ""
     return "\n".join(parts) + "\n\n"
+
+
+# ---------------------------------------------------------------------------
+# Regulator-specific action table
+# ---------------------------------------------------------------------------
+_REGULATOR_ACTIONS: dict[str, str] = {
+    "VARA":   (
+        "Review the VARA Broker-Dealer / relevant Rulebook sections changed against "
+        "current VASP licensing controls, AML/CFT obligations, and internal policies. "
+        "Escalate to MLRO and Legal if new obligations are identified."
+    ),
+    "CBUAE":  (
+        "Review CBUAE circular or regulation changes against AML/CFT controls, "
+        "consumer protection policies, and capital adequacy frameworks. "
+        "File CBUAE notification if a reporting obligation is triggered."
+    ),
+    "DFSA":   (
+        "Cross-reference DFSA rulebook module changes against DIFC authorised "
+        "firm's regulatory permissions and compliance manual. "
+        "Consult DFSA correspondence tracker and update PIB/GEN/AML module gap analysis."
+    ),
+    "ADGM":   (
+        "Review ADGM/FSRA policy changes against ADGM Financial Services Regulations "
+        "and firm's regulatory business plan. "
+        "Assess impact on FSRA-issued Financial Services Permission and notify MLRO."
+    ),
+    "UAEFIU": (
+        "Review UAE FIU guidance changes against current goAML reporting procedures "
+        "and STR/SAR filing workflows. Update AML/CFT compliance manual if required."
+    ),
+    "SCA":    (
+        "Review SCA regulatory changes against Securities and Commodities Law "
+        "obligations, prospectus filing requirements, and licensed activity scope."
+    ),
+}
+
+_SOURCE_ID_REGULATOR_MAP: dict[str, str] = {
+    "vara":    "VARA",
+    "dfsa":    "DFSA",
+    "difc":    "DFSA",
+    "cbuae":   "CBUAE",
+    "adgm":    "ADGM",
+    "fsra":    "ADGM",
+    "uaefiu":  "UAEFIU",
+    "sca":     "SCA",
+}
+
+
+def _regulator_from_metadata(metadata: dict) -> str:
+    """
+    Derive the primary regulator from metadata fields.
+    Returns one of: VARA, DFSA, CBUAE, ADGM, UAEFIU, SCA, or empty string.
+    """
+    # Prefer explicit regulatory_body field if set
+    if metadata.get("regulatory_body"):
+        return str(metadata["regulatory_body"]).upper().strip()
+
+    source_id = str(metadata.get("source_id") or "").lower()
+    for fragment, regulator in _SOURCE_ID_REGULATOR_MAP.items():
+        if fragment in source_id:
+            return regulator
+
+    source_name = str(metadata.get("source_name") or "").upper()
+    for fragment, regulator in _SOURCE_ID_REGULATOR_MAP.items():
+        if fragment in source_name.lower():
+            return regulator
+
+    return ""
+
+
+def _build_diff_excerpt(metadata: dict) -> str:
+    """
+    Extract and format a short diff excerpt suitable for embedding in the brief.
+    Returns a string of at most 500 chars, or empty string if no meaningful
+    diff content is available.
+    """
+    # Caller may pre-compute and pass this in metadata
+    if metadata.get("diff_excerpt"):
+        excerpt = str(metadata["diff_excerpt"]).strip()
+        return excerpt[:500]
+    return ""
 
 
 def _parse_ai_response(raw: str) -> dict | None:
@@ -245,6 +374,7 @@ def _fallback_brief(change_text: str, metadata: dict, error: str) -> dict:
     """
     Rule-based fallback brief produced entirely offline.
     Uses app.risk.analyze_risk() with a synthetic diff dict.
+    Enriched with diff excerpt and regulator-specific action when available.
     """
     try:
         from app.risk import analyze_risk
@@ -260,19 +390,50 @@ def _fallback_brief(change_text: str, metadata: dict, error: str) -> dict:
     urgency_raw = {"HIGH": "high", "MEDIUM": "medium", "LOW": "low"}.get(risk_level, "low")
 
     source_name = metadata.get("source_name") or metadata.get("url") or "the monitored source"
-    excerpt = change_text[:300].strip()
-    if len(change_text) > 300:
-        excerpt += "..."
-    exec_summary = (
-        f"Change detected on {source_name}. "
-        f"Risk level: {risk_level}. "
-        f"{excerpt}"
+    regulator    = _regulator_from_metadata(metadata)
+    diff_summary = metadata.get("diff_summary") or ""
+    diff_excerpt = _build_diff_excerpt(metadata)
+    change_type  = str(metadata.get("change_type") or "").replace("_", " ").title()
+
+    # Build a more informative executive summary
+    summary_parts: list[str] = []
+    summary_parts.append(
+        f"{'VARA' if regulator == 'VARA' else regulator or source_name} "
+        f"regulatory change detected on {source_name}."
     )
+    if change_type:
+        summary_parts.append(f"Change classification: {change_type}.")
+    if diff_summary:
+        summary_parts.append(f"Scope: {diff_summary.rstrip('.')}.")
+    if diff_excerpt:
+        # Trim and quote the excerpt
+        short_excerpt = diff_excerpt[:300].rstrip()
+        if len(diff_excerpt) > 300:
+            short_excerpt += "…"
+        summary_parts.append(f'Excerpt from change: "{short_excerpt}"')
+    if not diff_excerpt and change_text:
+        # Fall back to a snippet of change_text
+        excerpt = change_text[:200].strip()
+        if len(change_text) > 200:
+            excerpt += "…"
+        summary_parts.append(f"Content sample: {excerpt}")
+    summary_parts.append(f"Risk assessment: {risk_level}. {risk_reason}")
+    exec_summary = " ".join(summary_parts)
+
+    # Use regulator-specific action if available, else generic
+    if regulator and regulator in _REGULATOR_ACTIONS:
+        action = _REGULATOR_ACTIONS[regulator]
+    else:
+        action = (
+            "Review the detected change against current compliance policies, "
+            "internal controls, and regulatory obligations. "
+            "Escalate to Legal or the MLRO if a new obligation is identified."
+        )
 
     return {
         "risk_level":               risk_level,
         "executive_summary":        exec_summary,
-        "business_action_required": "Review the detected change against current compliance policies and escalate to legal if required.",
+        "business_action_required": action,
         "reason":                   risk_reason,
         "affected_entities":        [],
         "urgency":                  _URGENCY_MAP.get(urgency_raw, "unclear"),
@@ -455,6 +616,9 @@ def generate_ai_brief(
         change_text           = truncated,
     )
 
+    # Soft rate guard — log warning if budget is exceeded; never blocks.
+    _check_brief_rate_limit()
+
     try:
         client  = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
         message = client.messages.create(
@@ -467,7 +631,12 @@ def generate_ai_brief(
             logger.warning("ai_brief: response truncated (max_tokens) — falling back")
             return _fallback_brief(truncated, metadata, "AI response truncated at max_tokens")
 
-        raw    = message.content[0].text
+        # Extract text from the first content block safely — only TextBlock has .text
+        raw = ""
+        for _block in message.content:
+            if isinstance(_block, anthropic.types.TextBlock):
+                raw = _block.text
+                break
         parsed = _parse_ai_response(raw)
 
         if parsed is None:
@@ -510,7 +679,12 @@ def generate_ai_brief(
                     messages   = [{"role": "user", "content": retry_prompt}],
                 )
                 if retry_msg.stop_reason != "max_tokens":
-                    retry_parsed = _parse_ai_response(retry_msg.content[0].text)  # type: ignore[union-attr]
+                    _retry_raw = ""
+                    for _b in retry_msg.content:
+                        if isinstance(_b, anthropic.types.TextBlock):
+                            _retry_raw = _b.text
+                            break
+                    retry_parsed = _parse_ai_response(_retry_raw)
                     if retry_parsed is not None:
                         retry_issues = _quality_check(_assemble_brief(retry_parsed))
                         if not retry_issues:

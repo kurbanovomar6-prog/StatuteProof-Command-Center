@@ -33,9 +33,10 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
             alt="StatuteProof"
             className="h-8 w-8 flex-shrink-0 object-contain transition-transform duration-300 group-hover:scale-105"
           />
-          <span className="text-lg font-extrabold tracking-tight text-white">
+          <span className="sp-display text-lg font-extrabold tracking-tight text-white">
             Statute<span className="text-[#16D9F5]">Proof</span>
           </span>
+          <span className="sp-live-dot" />
         </div>
 
         {/* Desktop nav — center */}
@@ -45,7 +46,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
               <a
                 key={l.label}
                 href={l.href}
-                className="hover:text-slate-100 transition-colors"
+                className="hover:text-cyan-300 transition-colors"
               >
                 {l.label}
               </a>
@@ -54,7 +55,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
                 key={l.label}
                 type="button"
                 onClick={() => handleNav(l)}
-                className="text-slate-400 hover:text-slate-100"
+                className="text-slate-400 hover:text-cyan-300 transition-colors"
               >
                 {l.label}
               </button>

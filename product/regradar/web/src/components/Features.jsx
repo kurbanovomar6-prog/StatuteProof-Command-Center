@@ -10,33 +10,37 @@ const ICON_MAP = {
   MessageSquare, FileText, ShieldCheck, Search, BarChart2,
 }
 
+// Stagger delay classes cycle through delay-1/2/3
+const DELAY_CLASSES = ['sp-delay-1', 'sp-delay-2', 'sp-delay-3']
+
 export default function Features() {
   return (
-    <section className="py-20 bg-white" id="features">
+    <section className="py-20 bg-[#040B16]" id="features">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
         <div className="text-center mb-12">
-          <span className="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest mb-4">Capabilities</span>
-          <h2 className="text-3xl font-bold text-slate-900 mb-3">What StatuteProof monitors and delivers</h2>
-          <p className="text-slate-600 max-w-xl mx-auto">
+          <span className="sp-badge-trust mb-4 inline-flex">Capabilities</span>
+          <h2 className="sp-heading text-3xl text-white mb-3">What StatuteProof monitors and delivers</h2>
+          <p className="text-slate-400 max-w-xl mx-auto">
             Every capability maps to a concrete compliance task — official source monitoring,
             source proof, evidence trail, and team-ready briefs.
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {features.map(f => {
+          {features.map((f, index) => {
             const Icon = ICON_MAP[f.icon] || Globe
+            const delayClass = DELAY_CLASSES[index % DELAY_CLASSES.length]
             return (
               <div
                 key={f.title}
-                className="group bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl p-5 transition-colors"
+                className={`sp-glass group rounded-xl p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(25,211,243,0.08)] sp-animate-fade-up ${delayClass}`}
               >
-                <div className="w-10 h-10 bg-white group-hover:bg-blue-100 rounded-lg border border-slate-200 group-hover:border-blue-200 flex items-center justify-center mb-4 transition-colors">
-                  <Icon className="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" />
+                <div className="sp-badge-trust p-2 rounded-xl mb-4 inline-flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-cyan-300" />
                 </div>
-                <h3 className="font-semibold text-slate-800 text-sm mb-1.5">{f.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{f.desc}</p>
+                <h3 className="font-semibold text-slate-100 text-sm mb-1.5">{f.title}</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">{f.desc}</p>
               </div>
             )
           })}

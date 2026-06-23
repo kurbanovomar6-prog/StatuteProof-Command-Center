@@ -188,6 +188,9 @@ def is_low_content_html(html: str) -> bool:
 
 # ── Tier 1: requests ──────────────────────────────────────────────────────────
 
+_MAX_RESPONSE_BYTES = 10 * 1024 * 1024  # 10 MB hard limit
+
+
 def _fetch_via_requests(url: str) -> str | None:
     """
     Attempt a plain HTTP GET.
@@ -195,6 +198,10 @@ def _fetch_via_requests(url: str) -> str | None:
     Returns the response text on success, or None when the request fails.
     Does NOT apply the content-quality check — that is done in fetch_page()
     so the caller can log the decision with full context.
+
+    Size guard: if Content-Length is declared and exceeds 10 MB, or the
+    decoded body exceeds 10 MB, the response is discarded and None is
+    returned rather than buffering a huge file into memory.
     """
     try:
         resp = requests.get(
@@ -207,8 +214,32 @@ def _fetch_via_requests(url: str) -> str | None:
             allow_redirects=True,
         )
         resp.raise_for_status()
-        logger.info("Tier 1 (requests) HTTP OK — %d chars from %s", len(resp.text), url)
-        return resp.text
+
+        # ── Size guard ────────────────────────────────────────────────
+        declared_len = resp.headers.get("Content-Length")
+        if declared_len is not None:
+            try:
+                if int(declared_len) > _MAX_RESPONSE_BYTES:
+                    logger.warning(
+                        "Tier 1 (requests): Content-Length %s bytes exceeds "
+                        "%d MB limit for %s — skipping",
+                        declared_len, _MAX_RESPONSE_BYTES // (1024 * 1024), url,
+                    )
+                    return None
+            except ValueError:
+                pass  # malformed header; proceed and check body length
+
+        body = resp.text
+        if len(body.encode("utf-8", errors="replace")) > _MAX_RESPONSE_BYTES:
+            logger.warning(
+                "Tier 1 (requests): decoded body (%d chars) exceeds %d MB "
+                "limit for %s — skipping",
+                len(body), _MAX_RESPONSE_BYTES // (1024 * 1024), url,
+            )
+            return None
+
+        logger.info("Tier 1 (requests) HTTP OK — %d chars from %s", len(body), url)
+        return body
 
     except requests.RequestException as exc:
         logger.warning("Tier 1 (requests) failed: %s — escalating to Playwright", exc)

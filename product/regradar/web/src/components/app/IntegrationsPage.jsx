@@ -90,6 +90,8 @@ export default function IntegrationsPage() {
     try {
       const data = await telegramPair.status()
       setStatus(data)
+      // Populate bot username from status if available (e.g. after page reload with active code)
+      if (data.bot_username) setBotUsername(data.bot_username)
     } catch (err) {
       setError(err.message || 'Could not load Telegram status.')
     } finally {

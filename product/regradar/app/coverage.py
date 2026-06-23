@@ -22,9 +22,8 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
-from typing import Any
 
 from app.sources import load_sources
 
@@ -245,7 +244,7 @@ def _group_metrics(records: list[dict]) -> dict:
 
 # ── Insight generators ────────────────────────────────────────────────────────
 
-def _build_strengths(by_j: dict, by_c: dict, overall_score: int) -> list[str]:
+def _build_strengths(by_j: dict, by_c: dict) -> list[str]:
     strengths: list[str] = []
 
     for jur, m in sorted(by_j.items(), key=lambda x: -x[1]["score"]):
@@ -328,14 +327,14 @@ def _build_recommendations(by_j: dict, by_c: dict, needs_adapter: int) -> list[s
 
     weak_j = [j for j, m in by_j.items() if m["score"] < 50 and m["total"] >= 2]
     if weak_j:
-        names = ", ".join(_JURISDICTION_NAME.get(j, j) for j in weak_j[:3])
+        names = ", ".join(x for x in (_JURISDICTION_NAME.get(j, j) for j in weak_j[:3]) if x is not None)
         recs.append(
             f"Validate and fix failed sources in {names} — most likely DNS or SSL issues."
         )
 
     no_mon = [j for j, m in by_j.items() if m["enabled"] == 0 and m["total"] >= 2]
     if no_mon:
-        names = ", ".join(_JURISDICTION_NAME.get(j, j) for j in no_mon[:4])
+        names = ", ".join(x for x in (_JURISDICTION_NAME.get(j, j) for j in no_mon[:4]) if x is not None)
         recs.append(
             f"Consider activating vetted sources for: {names}."
         )
@@ -489,7 +488,7 @@ def generate_coverage_report(use_existing_audit: bool = True) -> dict:
     }
 
     # ── Insights ──────────────────────────────────────────────────────────────
-    top_strengths   = _build_strengths(by_jurisdiction, by_category, overall)
+    top_strengths   = _build_strengths(by_jurisdiction, by_category)
     top_gaps        = _build_gaps(by_jurisdiction, by_category)
     recommendations = _build_recommendations(by_jurisdiction, by_category, needs_adp)
 
@@ -526,7 +525,6 @@ def generate_coverage_report(use_existing_audit: bool = True) -> dict:
 
 # ── Terminal printer ──────────────────────────────────────────────────────────
 
-_SEP  = "─" * 68
 _SEP2 = "═" * 68
 
 _R      = "\033[0m"
@@ -536,7 +534,6 @@ _GREEN  = "\033[32m"
 _YELLOW = "\033[33m"
 _RED    = "\033[31m"
 _CYAN   = "\033[36m"
-_BLUE   = "\033[34m"
 
 _SCORE_COLOR = {
     "strong":  _GREEN,
@@ -797,19 +794,6 @@ def build_coverage_html(report: dict) -> str:
     strengths_html = _li_list(report.get("top_strengths", []), "#4ade80")
     gaps_html      = _li_list(report.get("top_gaps", []), "#fbbf24")
     recs_html      = _li_list(report.get("recommendations", []), "#93c5fd")
-
-    table_style = (
-        "width:100%;border-collapse:collapse;margin-bottom:24px;"
-        "font-size:0.88em"
-    )
-    th_style = (
-        "background:#1a2b3c;color:#00c8ff;text-align:left;"
-        "padding:8px 12px;border-bottom:2px solid #00c8ff"
-    )
-    td_style = (
-        "padding:8px 12px;border-bottom:1px solid #1e3a52;"
-        "vertical-align:middle"
-    )
 
     html = f"""<!DOCTYPE html>
 <html lang="en">

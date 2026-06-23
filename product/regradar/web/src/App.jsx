@@ -7,6 +7,7 @@ import Footer from './components/Footer'
 
 const Problem               = lazy(() => import('./components/Problem'))
 const HowItWorks            = lazy(() => import('./components/HowItWorks'))
+const AIInsightSection      = lazy(() => import('./components/AIInsightSection'))
 const WithoutWith           = lazy(() => import('./components/WithoutWith'))
 const DashboardPreview      = lazy(() => import('./components/DashboardPreview'))
 const Coverage              = lazy(() => import('./components/Coverage'))
@@ -376,6 +377,7 @@ export default function App() {
         <Suspense fallback={<div className="py-20" />}>
           <Problem />
           <HowItWorks />
+          <AIInsightSection />
           <WithoutWith />
           <SampleBrief />
           <Coverage onCreateWorkspace={() => navigatePublic('source-readiness-review')} />

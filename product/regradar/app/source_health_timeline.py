@@ -9,10 +9,43 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from app.evidence_assessment import LEGAL_DISCLAIMER, load_assessments, latest_assessment_for
+
+
+STALE_AFTER_DAYS = 7  # sources not checked in 7+ days are flagged stale
+
+
+def _is_stale(latest_run_at: str | None, stale_days: int = STALE_AFTER_DAYS) -> bool:
+    """Return True if the source has not been checked within stale_days days.
+
+    A missing timestamp is treated as stale (no recorded run at all).
+    A parse error is treated as NOT stale so callers never get a false positive
+    from a malformed timestamp.
+    """
+    if not latest_run_at:
+        return True
+    try:
+        dt = datetime.fromisoformat(latest_run_at.replace("Z", "+00:00"))
+        cutoff = datetime.now(timezone.utc) - timedelta(days=stale_days)
+        return dt < cutoff
+    except Exception:
+        return False
+
+
+def _days_since(latest_run_at: str | None) -> float | None:
+    """Return fractional days since latest_run_at, or None if unparseable."""
+    if not latest_run_at:
+        return None
+    try:
+        dt = datetime.fromisoformat(latest_run_at.replace("Z", "+00:00"))
+        delta = datetime.now(timezone.utc) - dt
+        return round(delta.total_seconds() / 86400, 2)
+    except Exception:
+        return None
 
 
 _BASE_DIR = Path(__file__).parent.parent
@@ -92,14 +125,16 @@ def build_operator_source_health_report(
 
     root = base_dir or _BASE_DIR
     threshold = max(1, int(failed_threshold or 1))
-    by_source: dict[str, list[dict[str, Any]]] = {}
-    for run in _read_runs(root):
-        source_id = str(run.get("source_id") or "").strip()
-        if not source_id:
-            continue
-        by_source.setdefault(source_id, []).append(run)
+    registry = _read_source_registry(root)
+
+    # Use the indexed reader — one JSONL parse, O(1) per-source access later.
+    by_source = _read_runs_index(root)
 
     alerts: list[dict[str, Any]] = []
+    historical_alerts: list[dict[str, Any]] = []
+    stale_alerts: list[dict[str, Any]] = []
+
+    # --- Pass 1: consecutive-failure detection (existing behaviour) ---
     for source_id, runs in sorted(by_source.items()):
         consecutive_failed = 0
         for run in reversed(runs):
@@ -110,23 +145,91 @@ def build_operator_source_health_report(
         if consecutive_failed < threshold:
             continue
         latest = runs[-1]
-        alerts.append({
+        latest_run_at = latest.get("timestamp_utc") or latest.get("run_at") or ""
+        source = registry.get(source_id)
+        enabled = source.get("enabled") is True if source else False
+        status = str((source or {}).get("status") or "").lower()
+        monitoring_mode = str((source or {}).get("monitoring_mode") or "").lower()
+        entry = {
             "operator_status": "OPERATOR_REVIEW_REQUIRED",
             "source_id": source_id,
-            "source_name": latest.get("source_name") or source_id,
-            "official_url": latest.get("official_url") or latest.get("final_url") or "",
+            "source_name": (source or {}).get("name") or latest.get("source_name") or source_id,
+            "official_url": (source or {}).get("url") or latest.get("official_url") or latest.get("final_url") or "",
             "latest_run_id": latest.get("run_id"),
-            "latest_run_at": latest.get("timestamp_utc") or latest.get("run_at") or "",
+            "latest_run_at": latest_run_at,
             "latest_change_status": latest.get("change_status"),
             "latest_extraction_quality": latest.get("extraction_quality"),
             "consecutive_failed_runs": consecutive_failed,
             "failed_threshold": threshold,
+            "stale": _is_stale(latest_run_at),
+            "last_run_days_ago": _days_since(latest_run_at),
+            "registry_present": source is not None,
+            "registry_enabled": enabled,
+            "registry_status": status,
+            "registry_monitoring_mode": monitoring_mode,
             "blocked_reason": (
                 f"{consecutive_failed} consecutive failed or quality-drop source runs; "
                 "manual operator review required before relying on this source."
             ),
             "customer_safe_message": source_health_customer_message(_source_health_status(latest)),
-        })
+        }
+        if enabled:
+            alerts.append(entry)
+        else:
+            entry["operator_status"] = "DISABLED_SOURCE_HISTORY"
+            entry["blocked_reason"] = (
+                f"{consecutive_failed} consecutive failed or quality-drop runs are recorded for a "
+                "disabled, removed, or unregistered source ID. Keep visible for audit history, but "
+                "do not count it as an active monitoring blocker."
+            )
+            historical_alerts.append(entry)
+
+    # --- Pass 2: staleness detection ---
+    # Catches sources that look "healthy" (no consecutive failures) but have not
+    # been checked recently.  These would otherwise display as green with no
+    # warning, creating a silent monitoring gap.
+    failed_source_ids = {e["source_id"] for e in alerts} | {e["source_id"] for e in historical_alerts}
+    for source_id, runs in sorted(by_source.items()):
+        if source_id in failed_source_ids:
+            # Already flagged by Pass 1 — staleness field already attached.
+            continue
+        latest = runs[-1]
+        latest_run_at = latest.get("timestamp_utc") or latest.get("run_at") or ""
+        if not _is_stale(latest_run_at):
+            continue
+        source = registry.get(source_id)
+        enabled = source.get("enabled") is True if source else False
+        status = str((source or {}).get("status") or "").lower()
+        monitoring_mode = str((source or {}).get("monitoring_mode") or "").lower()
+        days_ago = _days_since(latest_run_at)
+        days_str = f"{days_ago:.1f} days" if days_ago is not None else "unknown duration"
+        stale_entry = {
+            "operator_status": "STALE",
+            "source_id": source_id,
+            "source_name": (source or {}).get("name") or latest.get("source_name") or source_id,
+            "official_url": (source or {}).get("url") or latest.get("official_url") or latest.get("final_url") or "",
+            "latest_run_id": latest.get("run_id"),
+            "latest_run_at": latest_run_at,
+            "latest_change_status": latest.get("change_status"),
+            "latest_extraction_quality": latest.get("extraction_quality"),
+            "consecutive_failed_runs": 0,
+            "failed_threshold": threshold,
+            "stale": True,
+            "last_run_days_ago": days_ago,
+            "registry_present": source is not None,
+            "registry_enabled": enabled,
+            "registry_status": status,
+            "registry_monitoring_mode": monitoring_mode,
+            "blocked_reason": (
+                f"Source has not been checked in {days_str} (threshold: {STALE_AFTER_DAYS} days). "
+                "Last recorded run appeared healthy. Operator should verify that the monitor "
+                "scheduler is running and that this source is still being polled."
+            ),
+            "customer_safe_message": source_health_customer_message("NO_HISTORY"),
+        }
+        stale_alerts.append(stale_entry)
+
+    stale_source_names = [e["source_name"] for e in stale_alerts]
 
     return {
         "ok": True,
@@ -134,9 +237,15 @@ def build_operator_source_health_report(
         "external_send": False,
         "customer_delivery": False,
         "failed_threshold": threshold,
+        "stale_threshold_days": STALE_AFTER_DAYS,
         "sources_checked": len(by_source),
         "sources_requiring_operator_review": len(alerts),
+        "historical_sources_requiring_operator_review": len(historical_alerts),
+        "stale_sources_count": len(stale_alerts),
+        "stale_sources": stale_source_names,
         "alerts": alerts,
+        "historical_alerts": historical_alerts,
+        "stale_alerts": stale_alerts,
         "disclaimer": LEGAL_DISCLAIMER,
     }
 
@@ -196,6 +305,22 @@ def _read_runs(base_dir: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _read_runs_index(base_dir: Path) -> dict[str, list[dict[str, Any]]]:
+    """Return all runs grouped by source_id for O(1) per-source access.
+
+    Callers that need runs for a specific source_id can do:
+        index = _read_runs_index(base_dir)
+        source_runs = index.get(source_id, [])
+    instead of scanning the full JSONL list.  The JSONL is still read only once.
+    """
+    index: dict[str, list[dict[str, Any]]] = {}
+    for row in _read_runs(base_dir):
+        source_id = str(row.get("source_id") or "").strip()
+        if source_id:
+            index.setdefault(source_id, []).append(row)
+    return index
+
+
 def _find_run(run_id: str, base_dir: Path) -> dict[str, Any] | None:
     for row in _read_runs(base_dir):
         if str(row.get("run_id") or "") == run_id:
@@ -204,22 +329,28 @@ def _find_run(run_id: str, base_dir: Path) -> dict[str, Any] | None:
 
 
 def _find_source(source_id: str, base_dir: Path) -> dict[str, Any] | None:
+    return _read_source_registry(base_dir).get(source_id)
+
+
+def _read_source_registry(base_dir: Path) -> dict[str, dict[str, Any]]:
     path = base_dir / "sources.json"
     if not path.exists():
-        return None
+        return {}
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
-        return None
+        return {}
     sources = payload.get("sources", payload) if isinstance(payload, dict) else payload
     if not isinstance(sources, list):
-        return None
+        return {}
+    by_source: dict[str, dict[str, Any]] = {}
     for source in sources:
         if not isinstance(source, dict):
             continue
-        if str(source.get("source_id") or source.get("id") or "") == source_id:
-            return source
-    return None
+        source_id = str(source.get("source_id") or source.get("id") or "").strip()
+        if source_id:
+            by_source[source_id] = source
+    return by_source
 
 
 def _events_from_run(run: dict[str, Any], *, index: int) -> list[dict[str, Any]]:

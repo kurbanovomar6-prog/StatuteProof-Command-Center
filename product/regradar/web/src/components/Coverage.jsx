@@ -143,7 +143,7 @@ export default function Coverage({ onCreateWorkspace }) {
           {/* Active sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Fresh-alert eligible examples — {ACTIVE_SOURCES.length} sources</h3>
+              <h3 className="font-bold text-white">Source monitoring examples — {ACTIVE_SOURCES.length} sources</h3>
               <StatusBadge tone="active">Fresh-alert eligible</StatusBadge>
             </div>
             <SourceTable
@@ -152,7 +152,7 @@ export default function Coverage({ onCreateWorkspace }) {
                 { key: 'publishes', label: 'What it covers' },
                 { key: 'note',      label: 'Note' },
               ]}
-              rows={ACTIVE_SOURCES.map(r => ({ ...r, note: r.note || '—' }))}
+              rows={ACTIVE_SOURCES.map(r => ({ ...r, note: r.note || '' }))}
             />
           </div>
 

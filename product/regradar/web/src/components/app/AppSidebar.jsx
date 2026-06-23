@@ -59,7 +59,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
             className="flex items-center gap-2 min-w-0"
           >
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-7 w-auto flex-shrink-0" />
-            <span className="text-sm font-extrabold text-white tracking-tight truncate">
+            <span className="sp-display text-sm font-extrabold text-white tracking-tight truncate">
               Statute<span className="text-[#16D9F5]">Proof</span>
             </span>
           </button>

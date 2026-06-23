@@ -93,12 +93,12 @@ const SOURCES = [
 ]
 
 const SOURCE_TRUTH = {
-  enabled: 241,
-  readinessSupported: 172,
-  remediation: 3,
+  enabled: 246,
+  readinessSupported: 180,
+  remediation: 2,
 }
 
-const LAST_CHECKED = '2026-06-18'
+const LAST_CHECKED = '2026-06-21'
 
 function StatusBadge({ status }) {
   if (status === 'ACTIVE') {

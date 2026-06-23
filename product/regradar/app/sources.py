@@ -30,6 +30,11 @@ _VALID_STATUSES = {
     "disabled_external_access",   # geo-block / JS SPA zero-extraction / protocol error
     "disabled_navigation_only",   # SPA returns identical navigation/menu text only
     "adapter_required",           # loads but needs custom adapter for reliable extraction
+    # Extended statuses used by source management tooling
+    "candidate",                  # under evaluation, not yet activated
+    "remediation",                # temporarily disabled pending fix
+    "duplicate_url",              # URL is already covered by another active source
+    "replaced",                   # superseded by a different source record
 }
 
 

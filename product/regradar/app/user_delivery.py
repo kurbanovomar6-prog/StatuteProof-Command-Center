@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import sqlite3
 from datetime import datetime, timezone
 
 from app.db import _connect, ensure_auth_tables, ensure_delivery_log_table
@@ -46,7 +45,7 @@ def is_user_delivery_eligible(user_id: int) -> tuple[bool, str, dict]:
     return True, "ok", context
 
 
-def build_sample_brief_message(profile: dict, link: dict) -> str:
+def build_sample_brief_message(profile: dict) -> str:
     company = profile.get("company_name") or "Your workspace"
     today = _today_iso()
     return "\n".join([
@@ -167,7 +166,7 @@ def send_sample_brief_to_user(user_id: int) -> dict:
     profile = context["profile"]
     link = context["link"]
     idempotency_key = f"{int(user_id)}:sample_brief:{_today_iso()}"
-    message = build_sample_brief_message(profile, link)
+    message = build_sample_brief_message(profile)
     log = create_delivery_log(
         int(user_id),
         delivery_type="sample_brief",

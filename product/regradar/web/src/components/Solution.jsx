@@ -48,19 +48,53 @@ const VALUE_CARDS = [
   },
 ]
 
+const TRUST_CREDENTIALS = [
+  {
+    Icon: ShieldCheck,
+    label: 'SHA-256 хэширование',
+    detail: 'Every source run is hash-verified before evidence storage.',
+  },
+  {
+    Icon: CheckCircle,
+    label: 'Cryptographic evidence',
+    detail: 'Snapshot, hash, diff and timestamp on every monitoring run.',
+  },
+  {
+    Icon: Radio,
+    label: 'Official sources only',
+    detail: 'Monitored directly from official UAE regulatory publications.',
+  },
+]
+
 export default function Solution() {
   return (
     <section className="py-20 bg-[#0A1628]" id="product">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
+
+        {/* Trust credentials strip */}
+        <div className="mb-12 grid gap-3 sm:grid-cols-3 sp-animate-fade-up sp-delay-1">
+          {TRUST_CREDENTIALS.map(({ Icon, label, detail }) => (
+            <div key={label} className="sp-glass rounded-xl px-5 py-4 flex items-start gap-3">
+              <span className="sp-badge-trust p-1.5 rounded-lg inline-flex shrink-0 mt-0.5">
+                <Icon className="w-4 h-4 text-cyan-300" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-slate-100">{label}</p>
+                <p className="mt-0.5 text-xs text-slate-400 leading-relaxed">{detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="flex flex-col lg:flex-row items-start gap-14">
 
           {/* Copy */}
-          <div className="flex-1">
+          <div className="flex-1 sp-animate-fade-up sp-delay-2">
             <div className="inline-flex items-center gap-2 border border-cyan-400/20 bg-cyan-400/10 rounded-full px-4 py-1.5 text-sm font-medium text-cyan-200 mb-6">
               <Radio className="w-4 h-4" />
               The StatuteProof approach
             </div>
-            <h2 className="text-3xl font-bold text-white mb-5">
+            <h2 className="sp-heading text-3xl text-white mb-5">
               Official-source monitoring built for UAE compliance teams.
             </h2>
             <p className="text-slate-400 mb-8 leading-relaxed">
@@ -82,11 +116,11 @@ export default function Solution() {
           </div>
 
           {/* 4 value cards 2×2 */}
-          <div className="flex-1 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
+          <div className="flex-1 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto sp-animate-fade-up sp-delay-3">
             {VALUE_CARDS.map(({ Icon, iconColor, iconBg, borderColor, accentBg, title, desc }) => (
               <div
                 key={title}
-                className={`relative bg-[#07111F] border ${borderColor} rounded-xl p-5 shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)]`}
+                className={`sp-glass relative rounded-xl p-5 overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(25,211,243,0.08)]`}
               >
                 <div className={`absolute top-0 left-0 right-0 h-[3px] ${accentBg} opacity-60`} />
                 <div className={`w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center mb-3 mt-1 border ${borderColor}`}>

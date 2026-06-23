@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import logging
 import os
-import time
 
 import requests
 
@@ -42,21 +41,16 @@ _TIMEOUT_S = 10
 _POLL_TIMEOUT_S = 30   # long-poll window for getUpdates
 
 
-def _build_start(chat_id: int | str) -> str:
+def _build_start() -> str:
     return (
         "Welcome to StatuteProof Alerts.\n\n"
         "This bot connects Telegram to your StatuteProof account.\n\n"
-        f"Your Telegram Chat ID:\n`{chat_id}`\n\n"
         "To connect this chat:\n"
         "1. Open StatuteProof → Integrations.\n"
         "2. Generate a pairing code.\n"
         "3. Send `/start CODE` here.\n\n"
         "Need help?\n"
-        "Contact us via the website contact form.\n\n"
-        "For channels:\n"
-        "1. Add this bot as an admin.\n"
-        "2. Allow posting messages.\n"
-        "3. Send the pairing command from the channel or connected chat."
+        "Contact us via the website contact form."
     )
 
 
@@ -69,9 +63,8 @@ def _build_id(chat_id: int | str) -> str:
     )
 
 
-def _build_connect(chat_id: int | str) -> str:
+def _build_connect() -> str:
     return (
-        f"Your Telegram Chat ID:\n`{chat_id}`\n\n"
         "Generate a pairing code in StatuteProof → Integrations and send `/start CODE` here.\n\n"
         "Need help? Contact us via the website contact form."
     )
@@ -81,11 +74,9 @@ def _build_unknown() -> str:
     return (
         "StatuteProof Alerts bot is ready.\n\n"
         "Commands:\n"
-        "/start — pairing instructions and your Chat ID\n"
         "/start CODE — connect this chat to your account\n"
-        "/id — show your Chat ID\n"
-        "/connect — connection steps\n"
         "/connect CODE — connect this chat to your account\n\n"
+        "To get a code: open StatuteProof → Integrations → Connect Telegram.\n\n"
         "Need help? Contact us via the website contact form."
     )
 
@@ -95,7 +86,8 @@ def _build_pairing_result(result: str) -> str:
         return (
             "✅ Telegram connected to your StatuteProof account.\n\n"
             "You can return to StatuteProof → Integrations and click Refresh.\n"
-            "This chat can now receive test messages."
+            "This chat can now receive regulatory change alerts.\n\n"
+            "_Alerts are for monitoring information only. Not legal advice._"
         )
     if result == "expired":
         return "⏱ This pairing code has expired. Generate a new code in StatuteProof → Integrations."
@@ -161,14 +153,14 @@ def handle_update(update: dict, bot_token: str) -> None:
             consume_pairing_code(argument, str(chat_id), from_user),
         )
     elif cmd == "/start":
-        reply = _build_start(chat_id)
+        reply = _build_start()
     elif cmd == "/id":
         if _ADMIN_CHAT_IDS and str(chat_id) not in _ADMIN_CHAT_IDS:
             send_reply(chat_id, "Unauthorized.", bot_token)
             return
         reply = _build_id(chat_id)
     elif cmd == "/connect":
-        reply = _build_connect(chat_id)
+        reply = _build_connect()
     else:
         reply = _build_unknown()
 

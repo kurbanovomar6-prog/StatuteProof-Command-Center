@@ -209,8 +209,47 @@ def deliver_weekly_brief_provider_ready(
         body_html = body_html.replace("</body>", f"<p>{LEGAL_DISCLAIMER}</p></body>")
 
     status = config["status"]
-    if status == "production_enabled":
-        status = "ready_but_disabled"
+
+    # When provider IS configured AND send is explicitly enabled, delegate to
+    # deliver_brief_email() which handles the actual SMTP/SendGrid/Postmark call.
+    # deliver_brief_email() branches on (provider, send_enabled) internally,
+    # so this is the correct send path for production delivery.
+    if status == "production_enabled" and config.get("send_enabled"):
+        payload = build_monitoring_brief_email(
+            brief_markdown=body_text,
+            source_name="",
+            risk_level="",
+            client_email=recipient,
+        )
+        # Overwrite the auto-generated fields with the rendered weekly brief content
+        payload["subject"]    = subject
+        payload["body_text"]  = body_text
+        payload["body_html"]  = body_html
+        send_result = deliver_brief_email(payload, env=env, base_dir=root)
+        send_result.setdefault("channel", "email")
+        send_result.setdefault("provider", config["provider"])
+        send_result.setdefault("recipient_email", recipient)
+        send_result.setdefault("subject", subject)
+        send_result.setdefault("body_text", body_text)
+        send_result.setdefault("body_html", body_html)
+        send_result.setdefault("disclaimer", LEGAL_DISCLAIMER)
+        record = {
+            "ok": send_result.get("status") == "sent",
+            "channel": "email",
+            "provider": config["provider"],
+            "status": send_result.get("status", "unknown"),
+            "recipient_email": recipient,
+            "subject": subject,
+            "created_at": now_utc(),
+            "external_send": True,
+            "missing_config": [],
+            "legal_disclaimer": LEGAL_DISCLAIMER,
+        }
+        _append_status(record, status_path)
+        return send_result
+
+    # Provider not fully configured OR send_enabled is False — record and return
+    # without sending.  status is "ready_but_disabled" or "configuration_required".
     record = {
         "ok": False,
         "channel": "email",
@@ -526,8 +565,27 @@ def deliver_brief_email(
 
 
 def _brief_markdown_to_html(markdown: str) -> str:
-    """Convert brief markdown to simple HTML paragraphs (no external deps)."""
+    """Convert brief markdown to simple HTML paragraphs (no external deps).
+
+    Ordering contract:
+    1. html.escape() the raw text first — this escapes &, <, >, " but NOT *.
+    2. Apply bold/italic regex replacements on the escaped text — safe because
+       html.escape() never touches asterisks, so **..** patterns survive intact.
+       Inner content rendered inside <strong>...</strong> is already HTML-safe.
+    This order is correct for all line types (headings, list items, paragraphs).
+    """
     import html as _html_mod
+    import re as _re
+
+    def _apply_inline(text: str) -> str:
+        """Escape HTML, then render **bold** and *italic* markers."""
+        escaped = _html_mod.escape(text)
+        # Bold — ** is not touched by html.escape, so this matches correctly.
+        escaped = _re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
+        # Italic — single * not adjacent to another *.
+        escaped = _re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", escaped)
+        return escaped
+
     lines = str(markdown or "").splitlines()
     parts: list[str] = []
     for line in lines:
@@ -535,16 +593,13 @@ def _brief_markdown_to_html(markdown: str) -> str:
         if not stripped:
             continue
         if stripped.startswith("# "):
-            parts.append(f"<h1>{_html_mod.escape(stripped[2:])}</h1>")
+            parts.append(f"<h1>{_apply_inline(stripped[2:])}</h1>")
         elif stripped.startswith("## "):
-            parts.append(f"<h2>{_html_mod.escape(stripped[3:])}</h2>")
+            parts.append(f"<h2>{_apply_inline(stripped[3:])}</h2>")
         elif stripped.startswith("- "):
-            parts.append(f"<li>{_html_mod.escape(stripped[2:])}</li>")
+            parts.append(f"<li>{_apply_inline(stripped[2:])}</li>")
         else:
-            import re as _re
-            escaped = _html_mod.escape(stripped)
-            escaped = _re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
-            parts.append(f"<p>{escaped}</p>")
+            parts.append(f"<p>{_apply_inline(stripped)}</p>")
     return "\n".join(parts)
 
 

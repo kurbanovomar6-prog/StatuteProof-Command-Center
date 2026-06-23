@@ -4,6 +4,8 @@ import { ArrowRight, Bell, CheckCircle, Clock, FileText, Globe, Link2, ShieldChe
 import { telegramPair, sources as sourcesApi } from '../../api'
 import PlanBanner from './PlanBanner'
 import { getWorkspaceProfile, profileLabel } from '../../data/workspaceProfile'
+import DeadlinesPanel from './DeadlinesPanel'
+import PressureScore from './PressureScore'
 
 const COV_COLOR = {
   emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -32,7 +34,7 @@ function StatusPill({ tone = 'slate', children }) {
   )
 }
 
-function InfoCard({ icon: Icon, tone, label, value, sub }) {
+function InfoCard({ icon: Icon, tone, label, value, sub, isSourcesMonitored }) {
   const iconStyle = {
     cyan: 'bg-cyan-500/10 text-cyan-300',
     emerald: 'bg-emerald-500/10 text-emerald-300',
@@ -41,14 +43,17 @@ function InfoCard({ icon: Icon, tone, label, value, sub }) {
   }[tone] || 'bg-slate-800 text-slate-400'
 
   return (
-    <div className="sp-panel p-4">
+    <div className="sp-glass p-4">
       <div className="mb-3 flex items-start justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+          {isSourcesMonitored && <span className="sp-live-dot" />}
+        </div>
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconStyle}`}>
           <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="text-2xl font-bold text-white">{value}</p>
+      <p className="sp-animate-stat text-2xl font-bold text-white">{value}</p>
       {sub && <p className="mt-1 text-xs text-slate-500">{sub}</p>}
     </div>
   )
@@ -65,7 +70,7 @@ function ProfileSummaryCard({ profile, currentUser, navigate, planState }) {
   const planLabel = displayPlanName(planState)
 
   return (
-    <div className="sp-panel border-cyan-400/20 p-5">
+    <div className="sp-glass sp-animate-fade-up border-cyan-400/20 p-5">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="mb-2 flex flex-wrap gap-2">
@@ -201,14 +206,19 @@ function SourceReadinessCard({ navigate }) {
 // Derive summary widgets from real sources/status and sources/summary API responses
 function buildWidgets(sourcesData, sourceSummary) {
   if (!sourcesData) return null
-  const { sources = [], summary = {}, last_run_at } = sourcesData
+  const { sources = [], summary = {} } = sourcesData
   const changed   = summary.CHANGED     || 0
   const failed    = summary.FAILED      || 0
   const qualityDrop = summary.QUALITY_DROP || 0
   const firstSeen = summary.FIRST_SEEN  || 0
   const highRiskPending = sources.filter(s => s.change_status === 'CHANGED' || s.change_status === 'FIRST_SEEN').length
-  const lastCheck = last_run_at
-    ? new Date(last_run_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }) + ' UTC'
+  const mostRecentRunAt = sources
+    .map(s => s.last_run_at)
+    .filter(Boolean)
+    .sort()
+    .pop()
+  const lastCheck = mostRecentRunAt
+    ? new Date(mostRecentRunAt).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }) + ' UTC'
     : 'No runs yet'
   return {
     enabledSources: sourceSummary?.enabled_count ?? sources.length,
@@ -395,13 +405,18 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <StatusPill tone="amber">Operator command center</StatusPill>
               <StatusPill tone="cyan">Evidence-readiness review</StatusPill>
             </div>
-            <h1 className="max-w-4xl text-2xl font-semibold leading-tight text-white md:text-3xl">
-              {sourcesError
-                ? 'Source readiness summary is unavailable right now.'
-                : sourcesLoading
-                ? 'Loading UAE source readiness summary...'
-                : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} fresh-alert eligible sources, ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations to keep visible.`}
-            </h1>
+            <div className="flex flex-wrap items-center gap-3 mt-2">
+              <h1 className="sp-heading max-w-4xl text-2xl font-semibold leading-tight text-white md:text-3xl">
+                {sourcesError
+                  ? 'Source readiness summary is unavailable right now.'
+                  : sourcesLoading
+                  ? 'Loading UAE source readiness summary...'
+                  : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} fresh-alert eligible sources, ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations to keep visible.`}
+              </h1>
+              {!sourcesLoading && !sourcesError && (
+                <span className="sp-badge-trust">Monitoring active</span>
+              )}
+            </div>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
               Use this screen to decide what needs operator review before relying on any alert,
               brief draft, or source claim. This is monitoring intelligence only, not legal advice.
@@ -459,10 +474,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
       {sourcesLoading ? (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4 animate-pulse">
-              <div className="h-3 bg-slate-700 rounded w-2/3 mb-4" />
-              <div className="h-7 bg-slate-700 rounded w-1/2" />
-            </div>
+            <div key={i} className="sp-skeleton h-24 w-full rounded-xl" />
           ))}
         </div>
       ) : sourcesError ? (
@@ -472,7 +484,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={widgets?.enabledSources ?? 0}  sub="reviewed UAE source pack" />
+          <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={widgets?.enabledSources ?? 0}  sub="reviewed UAE source pack" isSourcesMonitored={true} />
           <InfoCard icon={CheckCircle} tone="emerald" label="Readiness-supported" value={widgets?.supportedSources ?? 0} sub="current registry review" />
           <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={widgets?.remediationSources ?? 0} sub="UAE Legislation, FIU homepage, SCA listing" />
           <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with proof data" />
@@ -482,6 +494,8 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
           <InfoCard icon={Link2}     tone={telegramStatus?.connected ? 'emerald' : 'amber'} label="Plan state" value={displayPlanName(planState)} sub={telegramStatus?.connected ? 'Telegram connected' : 'choose plan or connect delivery'} />
         </div>
       )}
+
+      <PressureScore />
 
       {/* Real source table — from /api/sources/status */}
       {!sourcesLoading && !sourcesError && sourcesData?.sources?.length > 0 && (
@@ -606,6 +620,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         <div className="space-y-5">
           <WorkspaceChecklist profile={profile} telegramStatus={telegramStatus} telegramLoading={telegramLoading} navigate={navigate} />
           <SourceReadinessCard navigate={navigate} />
+          <DeadlinesPanel />
 
           <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
             <div className="mb-3 flex items-center gap-2">

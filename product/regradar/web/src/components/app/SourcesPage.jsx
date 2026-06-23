@@ -145,7 +145,7 @@ function saveLocalCustomSource(source) {
     const p = JSON.parse(localStorage.getItem('regradar_workspace_profile') || '{}')
     p.customSources = [...(p.customSources || []), source]
     localStorage.setItem('regradar_workspace_profile', JSON.stringify(p))
-  } catch (e) { console.warn('localStorage fallback failed', e) }
+  } catch { /* localStorage unavailable — custom source will not persist */ }
 }
 
 // ── component ─────────────────────────────────────────────────────────────────

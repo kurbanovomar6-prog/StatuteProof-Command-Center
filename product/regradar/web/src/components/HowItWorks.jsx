@@ -33,10 +33,10 @@ export default function HowItWorks() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
         <div className="text-center mb-14">
-          <span className="sp-kicker">
+          <span className="sp-badge-trust mb-4 inline-flex">
             How it works
           </span>
-          <h2 className="text-3xl font-bold text-white mb-3 mt-4">
+          <h2 className="sp-heading text-3xl font-bold text-white mb-3 mt-4">
             From regulatory scope to evidence trail
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto text-sm leading-relaxed">
@@ -45,20 +45,21 @@ export default function HowItWorks() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {STEPS.map((step) => {
+          {STEPS.map((step, i) => {
             const Icon = step.icon
+            const delays = ['sp-delay-1','sp-delay-2','sp-delay-3','sp-delay-4']
             return (
               <div
                 key={step.n}
-                className="sp-panel flex flex-col"
+                className={`sp-glass sp-animate-fade-up ${delays[i] || 'sp-delay-4'} flex flex-col`}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-9 h-9 rounded-lg bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center flex-shrink-0">
+                <div className="mb-4">
+                  <span className="sp-display text-4xl font-bold text-cyan-300/30 leading-none block mb-3">{step.n}</span>
+                  <div className="w-9 h-9 rounded-lg bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center">
                     <Icon className="w-4 h-4 text-cyan-300" />
                   </div>
-                  <span className="text-[11px] font-bold text-cyan-400/60 tracking-widest">{step.n}</span>
                 </div>
-                <h3 className="font-semibold text-white text-sm mb-2 leading-snug">{step.title}</h3>
+                <h3 className="sp-heading font-semibold text-white text-sm mb-2 leading-snug">{step.title}</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">{step.desc}</p>
               </div>
             )

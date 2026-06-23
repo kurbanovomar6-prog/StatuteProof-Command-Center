@@ -1,5 +1,15 @@
 import { CheckCircle } from 'lucide-react'
 import { pricingPlans } from '../data/mockData'
+import {
+  CONTACT_EMAIL,
+  STRIPE_LINK_FOUNDING_PILOT,
+  STRIPE_LINK_UAE_MONITOR,
+} from '../data/constants'
+
+const STRIPE_LINKS = {
+  starter_pilot: STRIPE_LINK_FOUNDING_PILOT,
+  professional:  STRIPE_LINK_UAE_MONITOR,
+}
 
 export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPlan }) {
   function handleCta(plan) {
@@ -8,10 +18,16 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
       return
     }
     if (plan.ctaType === 'consultant') {
-      window.location.assign('mailto:hello@statuteproof.com?subject=Compliance%20Consultant%20Plan')
+      window.location.assign(`mailto:${CONTACT_EMAIL}?subject=Compliance%20Consultant%20Plan`)
       return
     }
+    // Paid plans: open Stripe link if configured, otherwise route to registration
     if (plan.routePlan) {
+      const stripeLink = STRIPE_LINKS[plan.routePlan]
+      if (stripeLink) {
+        window.open(stripeLink, '_blank', 'noopener,noreferrer')
+        return
+      }
       onSelectPlan?.(plan.routePlan)
       return
     }
@@ -24,7 +40,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
 
         <div className="text-center mb-10">
           <div className="sp-kicker mb-4">Pricing and activation</div>
-          <h2 className="text-3xl font-semibold text-white mb-3">Honest plans for source readiness and pilot monitoring</h2>
+          <h2 className="sp-heading text-3xl text-white mb-3">Honest plans for source readiness and pilot monitoring</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
             Founding pilots are manually activated after source readiness review. No payment method
             is stored until billing is formally set up.
@@ -35,20 +51,19 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
           {pricingPlans.map(plan => (
             <div
               key={plan.name}
-              className={`sp-panel p-6 flex flex-col transition-all ${
+              className={`sp-glass p-6 flex flex-col transition-all ${
                 plan.highlight
-                  ? 'border-[#16D9F5]/45 bg-[#16D9F5]/5 shadow-[0_0_30px_rgba(22,217,245,0.10)]'
+                  ? 'border-cyan-400/40 bg-[#16D9F5]/5 shadow-[0_0_30px_rgba(22,217,245,0.10)]'
                   : ''
               }`}
             >
               <div className="mb-6">
-                {(plan.highlight || plan.badge) && (
-                  <div className={`mb-2 inline-flex rounded-md border px-2 py-1 text-[11px] font-semibold ${
-                    plan.highlight
-                      ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200'
-                      : 'border-slate-700 bg-slate-900 text-slate-300'
-                  }`}>
-                    {plan.badge || 'Recommended'}
+                {plan.highlight && (
+                  <span className="sp-badge-trust mb-2">Most Popular</span>
+                )}
+                {!plan.highlight && plan.badge && (
+                  <div className="mb-2 inline-flex rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-slate-300">
+                    {plan.badge}
                   </div>
                 )}
                 <h3 className="font-bold text-lg text-white mb-1">{plan.name}</h3>
@@ -84,8 +99,15 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
               >
                 {plan.cta}
               </button>
+              <p className="text-xs text-slate-500 mt-3">No automatic charges · Cancel anytime · Human review included</p>
             </div>
           ))}
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-3 mt-8">
+          <span className="sp-badge-trust">SHA-256 evidence</span>
+          <span className="sp-badge-trust">Official sources only</span>
+          <span className="sp-badge-trust">Human review gate</span>
         </div>
 
         <p className="text-center text-xs text-slate-500 mt-6 max-w-3xl mx-auto leading-relaxed">

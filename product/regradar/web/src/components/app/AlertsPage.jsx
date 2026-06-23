@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle, ExternalLink, Search, Send, ShieldCheck } from 'lucide-react'
 
 import { delivery } from '../../api'
+import ActionLogPanel from './ActionLogPanel'
 
 const RISK_DARK = {
   HIGH: 'text-red-400 bg-red-500/15 border border-red-500/30',
@@ -27,6 +28,7 @@ export default function AlertsPage() {
   const [error, setError] = useState('')
   const [riskFilter, setRiskFilter] = useState('All')
   const [search, setSearch] = useState('')
+  const [licenceFilter, setLicenceFilter] = useState('All')
   const [sendState, setSendState] = useState({})
 
   useEffect(() => {
@@ -47,6 +49,10 @@ export default function AlertsPage() {
   const filtered = useMemo(() => (preview?.matches || []).filter(item => {
     const risk = String(item.risk_level || 'MEDIUM').toUpperCase()
     if (riskFilter !== 'All' && risk !== riskFilter) return false
+    if (licenceFilter !== 'All') {
+      const types = Array.isArray(item.affected_licence_types) ? item.affected_licence_types : []
+      if (!types.some(t => String(t).toLowerCase().includes(licenceFilter.toLowerCase()))) return false
+    }
     const haystack = [
       item.title,
       item.source_name,
@@ -55,7 +61,7 @@ export default function AlertsPage() {
       item.executive_summary,
     ].join(' ').toLowerCase()
     return !search || haystack.includes(search.toLowerCase())
-  }), [preview, riskFilter, search])
+  }), [preview, riskFilter, search, licenceFilter])
 
   async function handleSendPreviewAlert(alertId) {
     setSendState(prev => ({ ...prev, [alertId]: { status: 'sending', message: '' } }))
@@ -129,6 +135,21 @@ export default function AlertsPage() {
                 {risk === 'All' ? 'All risk' : risk}
               </button>
             ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">Licence type</label>
+            <select
+              value={licenceFilter}
+              onChange={e => setLicenceFilter(e.target.value)}
+              className="rounded-lg border border-slate-700 bg-slate-900 py-1.5 pl-2.5 pr-8 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+            >
+              <option value="All">All types</option>
+              <option value="VASP">VASP</option>
+              <option value="CBUAE">CBUAE Payment Institution</option>
+              <option value="DIFC">DIFC Licence</option>
+              <option value="ADGM">ADGM Licence</option>
+              <option value="DFSA">DFSA Regulated</option>
+            </select>
           </div>
         </div>
       </div>
@@ -213,6 +234,7 @@ export default function AlertsPage() {
                     </span>
                   )}
                 </div>
+                <ActionLogPanel alertId={item.alert_id} />
               </article>
             )
           })}

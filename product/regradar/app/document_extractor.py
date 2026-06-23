@@ -14,7 +14,7 @@ Public API
 find_document_links(html, base_url)                          → dict
 fetch_document(url, timeout, max_bytes)                      → dict
 extract_pdf_text(file_bytes)                                 → dict
-extract_documents_from_page(html, base_url, max_docs=3)      → dict
+extract_documents_from_page(html, base_url, max_docs=10)     → dict
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
+from app.config import REQUESTS_UA
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,12 @@ _XLSX_EXTS = frozenset({".xlsx", ".xls"})
 _ALL_EXTS  = _PDF_EXTS | _DOC_EXTS | _DOCX_EXTS | _XLSX_EXTS
 
 _MAX_BYTES_DEFAULT = 10_000_000   # 10 MB
+
+# Anchor-text pattern that suggests a PDF download even without a .pdf extension
+_PDF_ANCHOR_RE = re.compile(
+    r'\b(download|pdf|circular|notice|guidance|regulation|decision|resolution)\b',
+    re.I,
+)
 
 
 def _quality(chars: int) -> str:
@@ -72,6 +78,24 @@ def _normalise_text(text: str) -> str:
     return "\n".join(lines).strip()
 
 
+# ── Priority scoring for PDF links ───────────────────────────────────────────
+
+def _priority_score(link_info: dict) -> int:
+    """Score PDF links by anchor text quality for regulatory content."""
+    anchor = link_info.get("anchor_text", "").lower()
+    score = 0
+    # Date pattern in anchor text
+    if re.search(r'\d{4}|\d{1,2}[\/\-]\d{1,2}', anchor):
+        score += 2
+    # Regulatory keywords
+    if any(kw in anchor for kw in ["circular", "notice", "regulation", "guidance", "decision", "resolution", "law"]):
+        score += 1
+    # Generic/noise anchors
+    if any(kw in anchor for kw in ["download", "click here", "here", "pdf", "attachment"]):
+        score -= 1
+    return score
+
+
 # ── Link discovery ─────────────────────────────────────────────────────────────
 
 def find_document_links(html: str, base_url: str) -> dict:
@@ -97,11 +121,11 @@ def find_document_links(html: str, base_url: str) -> dict:
         return empty
 
     soup = BeautifulSoup(html, "html.parser")
-    seen:  set[str]  = set()
-    pdfs:  list[str] = []
-    docs:  list[str] = []
-    docxs: list[str] = []
-    xlsxs: list[str] = []
+    seen:       set[str]   = set()
+    pdf_items:  list[dict] = []   # {"url": ..., "anchor_text": ...}
+    docs:       list[str]  = []
+    docxs:      list[str]  = []
+    xlsxs:      list[str]  = []
 
     for tag in soup.find_all("a", href=True):
         href = tag["href"].strip()
@@ -119,7 +143,7 @@ def find_document_links(html: str, base_url: str) -> dict:
                 continue
             seen.add(full)
             if ext in _PDF_EXTS:
-                pdfs.append(full)
+                pdf_items.append({"url": full, "anchor_text": tag.get_text(strip=True)})
             elif ext in _DOC_EXTS:
                 docs.append(full)
             elif ext in _DOCX_EXTS:
@@ -128,6 +152,36 @@ def find_document_links(html: str, base_url: str) -> dict:
                 xlsxs.append(full)
         except Exception:
             continue
+
+    # Second pass: collect extensionless links whose anchor text looks like a PDF
+    for a_tag in soup.find_all("a", href=True):
+        href = a_tag.get("href", "").strip()
+        if not href or href.startswith(("#", "javascript:", "mailto:", "tel:", "data:")):
+            continue
+        try:
+            resolved = urljoin(base_url, href)
+            p = urlparse(resolved)
+            if p.scheme not in ("http", "https") or not p.netloc:
+                continue
+            if resolved in seen:
+                continue
+            # Skip links that already have a known document extension
+            if _doc_ext(resolved):
+                continue
+            anchor_text = a_tag.get_text(strip=True)
+            if _PDF_ANCHOR_RE.search(anchor_text):
+                seen.add(resolved)
+                pdf_items.append({
+                    "url":          resolved,
+                    "anchor_text":  anchor_text,
+                    "needs_ct_check": True,
+                })
+        except Exception:
+            continue
+
+    # Sort PDFs by regulatory signal quality before capping at 20
+    pdf_items.sort(key=_priority_score, reverse=True)
+    pdfs = [item["url"] for item in pdf_items]
 
     all_docs = pdfs + docs + docxs + xlsxs
     return {
@@ -323,6 +377,39 @@ def extract_pdf_text(file_bytes: bytes) -> dict:
         result["error"] = (prev + " | " if prev else "") + f"pdfplumber: {str(exc)[:120]}"
         logger.debug("document_extractor: pdfplumber failed: %s", exc)
 
+    # ── OCR fallback for scanned PDFs ──────────────────────────────────────
+    if result["chars"] < _LOW_CHARS:
+        logger.debug("document_extractor: attempting OCR fallback (chars so far: %d)", result["chars"])
+        try:
+            import pytesseract        # type: ignore[import-untyped]
+            from PIL import Image     # type: ignore[import-untyped]
+            import fitz               # type: ignore[import-untyped]  # PyMuPDF
+
+            doc_pdf = fitz.open(stream=file_bytes, filetype="pdf")
+            ocr_texts: list[str] = []
+            for page_num in range(min(doc_pdf.page_count, 10)):  # max 10 pages
+                page = doc_pdf[page_num]
+                pix  = page.get_pixmap(dpi=150)
+                img  = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+                page_text = pytesseract.image_to_string(img, lang="eng+ara")
+                if page_text.strip():
+                    ocr_texts.append(page_text)
+            doc_pdf.close()
+            if ocr_texts:
+                text = _normalise_text("\n\n".join(ocr_texts))
+                result.update(
+                    text=text,
+                    chars=len(text),
+                    quality=_quality(len(text)),
+                    method="ocr",
+                    error="",
+                )
+                logger.info("document_extractor: OCR produced %d chars", len(text))
+        except ImportError:
+            pass  # OCR dependencies not installed — skip silently
+        except Exception as ocr_err:
+            logger.warning("document_extractor: OCR fallback failed: %s", ocr_err)
+
     # ── Both unavailable/failed ─────────────────────────────────────────────
     if result["method"] == "none" and not result["error"]:
         result["error"] = "no PDF library available — install pypdf"
@@ -335,7 +422,7 @@ def extract_pdf_text(file_bytes: bytes) -> dict:
 def extract_documents_from_page(
     html:     str,
     base_url: str,
-    max_docs: int = 3,
+    max_docs: int = 10,
 ) -> dict:
     """
     Discover document links in HTML and extract text from up to max_docs PDFs.
@@ -365,7 +452,7 @@ def extract_documents_from_page(
     items:       list[dict] = []
     text_blocks: list[str]  = []
 
-    for pdf_url in pdfs[:max_docs]:
+    for doc_index, pdf_url in enumerate(pdfs[:max_docs], start=1):
         item: dict = {
             "url":     pdf_url,
             "type":    "pdf",
@@ -386,7 +473,7 @@ def extract_documents_from_page(
             )
             if extr["text"]:
                 text_blocks.append(
-                    f"[Document: {pdf_url}]\n{extr['text']}"
+                    f"[Document {doc_index}]\n{extr['text']}"
                 )
         else:
             item["error"] = fetch.get("error", "download failed")

@@ -1,5 +1,6 @@
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { PLAN_CAPABILITIES } from '../../data/planCapabilities'
+import { CONTACT_EMAIL } from '../../data/constants'
 
 function Row({ label, value, highlight }) {
   return (
@@ -109,13 +110,13 @@ export default function BillingPage({ planState }) {
           </p>
           <div className="flex gap-2">
             <a
-              href="mailto:hello@statuteproof.com?subject=UAE%20Monitor%20Plan%20Enquiry"
+              href={`mailto:${CONTACT_EMAIL}?subject=UAE%20Monitor%20Plan%20Enquiry`}
               className="sp-btn-primary text-xs py-1.5 px-3 inline-flex items-center gap-1.5"
             >
               Request upgrade <ArrowRight className="w-3.5 h-3.5" />
             </a>
             <a
-              href="mailto:hello@statuteproof.com?subject=Consultant%20Plan%20Enquiry"
+              href={`mailto:${CONTACT_EMAIL}?subject=Consultant%20Plan%20Enquiry`}
               className="sp-btn-secondary text-xs py-1.5 px-3"
             >
               Talk to us (Consultant)

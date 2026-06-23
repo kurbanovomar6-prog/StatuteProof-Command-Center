@@ -86,7 +86,7 @@ def _snapshot_paths(timestamp_utc: str, market: str, source_id: str, run_id: str
     return _SNAPSHOT_DIR / date_part / market.upper() / source_id / run_id
 
 
-def _write_snapshots(
+def write_snapshots(
     *,
     timestamp_utc: str,
     market: str,
@@ -381,7 +381,7 @@ def record_from_source_result(
         "normalized_chars": len(normalized_text),
         "pdf_extracted_chars": pdf_chars,
     }
-    snapshots = _write_snapshots(
+    snapshots = write_snapshots(
         timestamp_utc=timestamp_utc,
         market=market,
         source_id=source_id,
@@ -441,7 +441,7 @@ def restricted_record(
         "official_url": source.get("url", ""),
         "restricted": True,
     }
-    snapshots = _write_snapshots(
+    snapshots = write_snapshots(
         timestamp_utc=timestamp_utc,
         market=market,
         source_id=source_id,

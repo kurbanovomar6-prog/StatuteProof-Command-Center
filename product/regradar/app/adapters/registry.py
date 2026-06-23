@@ -13,16 +13,34 @@ import logging
 
 from app.adapters.base import SourceAdapter
 from app.adapters.cbr import CBRAdapter
+from app.adapters.fca_rss import FCARSSAdapter
+from app.adapters.federal_register import FederalRegisterAdapter
+from app.adapters.fta import FTAAdapter
 from app.adapters.minfin import MinfinAdapter
 from app.adapters.rosfinmonitoring import RosfinmonitoringAdapter
 from app.adapters.uae_cbuae_rulebook import CBUAERulebookAdapter
 from app.adapters.uae_fsra_circulars import FSRACircularsAdapter
+from app.adapters.dfsa import DFSAAdapter
+from app.adapters.adgm_fsra import ADGMFSRAAdapter
+from app.adapters.sca import SCAAdapter
+from app.adapters.vara import VARAAdapter
 
 logger = logging.getLogger(__name__)
 
 _ADAPTERS: list[SourceAdapter] = [
+    # UAE digital-asset and tax regulators — highest priority UAE adapters
+    VARAAdapter(),
+    FTAAdapter(),
     CBUAERulebookAdapter(),
+    # FSRACircularsAdapter owns adgm.com supervision/circulars paths.
+    # ADGMFSRAAdapter owns fsra/regulatory-framework and fsra/regulatory-requirements
+    # without overlap (can_handle explicitly excludes supervision/circulars).
     FSRACircularsAdapter(),
+    ADGMFSRAAdapter(),
+    DFSAAdapter(),
+    SCAAdapter(),
+    FCARSSAdapter(),
+    FederalRegisterAdapter(),
     CBRAdapter(),
     MinfinAdapter(),
     RosfinmonitoringAdapter(),

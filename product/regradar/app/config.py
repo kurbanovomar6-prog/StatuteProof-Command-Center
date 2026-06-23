@@ -68,9 +68,17 @@ AI_MAX_CALLS_PER_RUN: int = int(os.getenv("AI_MAX_CALLS_PER_RUN", "3"))
 # If credentials are missing or the POST fails, the pipeline continues
 # normally — the Telegram step never blocks or crashes the main flow.
 ENABLE_TELEGRAM_ALERTS: bool = os.getenv("ENABLE_TELEGRAM_ALERTS", "false").lower() == "true"
+
+# Admin/founder bot — used ONLY for contact-form notifications to the founder.
 TELEGRAM_BOT_TOKEN:     str  = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID:       str  = os.getenv("TELEGRAM_CHAT_ID", "")
 TELEGRAM_BOT_USERNAME:  str  = os.getenv("TELEGRAM_BOT_USERNAME", "").strip().lstrip("@")
+
+# Customer-facing alerts bot — used for customer account pairing and regulatory
+# change alerts. Shown on the website. Separate from the founder admin bot.
+# Falls back to TELEGRAM_BOT_TOKEN if not set (single-bot legacy mode).
+TELEGRAM_ALERTS_BOT_TOKEN:    str = os.getenv("TELEGRAM_ALERTS_BOT_TOKEN", "").strip() or os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_ALERTS_BOT_USERNAME: str = os.getenv("TELEGRAM_ALERTS_BOT_USERNAME", "").strip().lstrip("@") or os.getenv("TELEGRAM_BOT_USERNAME", "").strip().lstrip("@")
 
 # Contact-form smoke tests can queue requests without sending Telegram.
 # This affects only /api/contact delivery; monitoring alerts and telegram-test
@@ -126,3 +134,26 @@ ENABLE_DEEP_SOURCE_DISCOVERY: bool = (
 ENABLE_CRAWL4AI_EXTRACTOR: bool = (
     os.getenv("ENABLE_CRAWL4AI_EXTRACTOR", "false").lower() == "true"
 )
+
+# ── web server ────────────────────────────────────────────────────────────────
+
+SECRET_KEY: str = os.getenv("SECRET_KEY", "change-me-to-a-random-64-char-string")
+ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+LOG_LEVEL: str = os.getenv("LOG_LEVEL", "WARNING").upper()
+LOG_DIR: str = os.getenv("LOG_DIR", "logs")
+
+# ── startup validation ────────────────────────────────────────────────────────
+
+
+def validate_config() -> list[str]:
+    """Return list of critical configuration warnings."""
+    warnings: list[str] = []
+    if not SECRET_KEY or SECRET_KEY == "change-me-to-a-random-64-char-string":
+        warnings.append(
+            "SECRET_KEY is not set or is the default placeholder — set a real secret before production use."
+        )
+    if len(SECRET_KEY) < 32:
+        warnings.append(
+            f"SECRET_KEY is too short ({len(SECRET_KEY)} chars) — use at least 32 random chars."
+        )
+    return warnings

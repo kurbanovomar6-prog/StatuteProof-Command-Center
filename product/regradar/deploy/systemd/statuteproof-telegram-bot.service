@@ -1,0 +1,20 @@
+[Unit]
+Description=StatuteProof Customer Alerts Bot (@statuteproofalerts_bot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=regradar
+Group=regradar
+WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/regradar/.venv/bin/python run.py telegram-listen
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

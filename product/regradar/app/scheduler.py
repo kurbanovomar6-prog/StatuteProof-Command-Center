@@ -12,9 +12,11 @@ No external scheduler library is used — just time.sleep().
 import logging
 import time
 from datetime import datetime
+from pathlib import Path
 
 from app.config import WATCH_INTERVAL_MINUTES
 from app.monitor import monitor_all_sources
+from app.pipeline import run_pipeline_for_source
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,79 @@ _FLAG       = {
 }
 
 WIDTH = 68
+
+# ── Priority tiers ────────────────────────────────────────────────────────────
+#
+# Sources declare their urgency via  "monitoring_priority"  in sources.json.
+# The field is optional; the default tier is "standard".
+#
+#   critical   → run every 30 minutes
+#   standard   → run at the configured WATCH_INTERVAL_MINUTES (default 60 min)
+#   background → run once per day (1440 minutes)
+#
+# The scheduler currently uses these constants for logging and
+# get_sources_by_priority().  Active enforcement of the critical 30-minute
+# sub-cycle is handled inside run_watch_loop() using _CRITICAL_INTERVAL_MINUTES.
+
+# How often (minutes) critical-priority sources are re-checked between full cycles.
+_CRITICAL_INTERVAL_MINUTES = 30
+_DEFAULT_PRIORITY = "standard"
+
+# sources.json lives one level above this module (project root)
+_SOURCES_JSON = Path(__file__).parent.parent / "sources.json"
+
+
+def get_sources_by_priority(priority: str) -> list[dict]:
+    """
+    Return all enabled sources that have the given monitoring_priority value.
+
+    Sources without a monitoring_priority field are treated as "standard".
+
+    Parameters
+    ----------
+    priority : str
+        One of "critical", "standard", or "background".
+
+    Returns
+    -------
+    list[dict]
+        Enabled source entries matching the requested priority, in file order.
+        Returns an empty list when sources.json is missing or unreadable.
+    """
+    import json as _json  # local import to avoid circular imports at module level
+
+    try:
+        raw = _SOURCES_JSON.read_text(encoding="utf-8")
+        all_sources = _json.loads(raw)
+    except Exception as exc:
+        logger.warning("get_sources_by_priority: cannot read sources.json: %s", exc)
+        return []
+
+    if not isinstance(all_sources, list):
+        logger.warning("get_sources_by_priority: sources.json is not a list")
+        return []
+
+    matched = [
+        s for s in all_sources
+        if isinstance(s, dict)
+        and s.get("enabled") is True
+        and s.get("monitoring_priority", _DEFAULT_PRIORITY) == priority
+    ]
+    logger.debug(
+        "get_sources_by_priority(%r): %d sources matched", priority, len(matched)
+    )
+    return matched
+
+
+def _log_priority_summary() -> None:
+    """Log a one-time breakdown of sources by priority tier for operator visibility."""
+    for tier in ("critical", "standard", "background"):
+        sources = get_sources_by_priority(tier)
+        if sources:
+            names = ", ".join(s.get("name", s.get("url", "?")) for s in sources)
+            logger.info("Priority [%s] (%d sources): %s", tier, len(sources), names)
+        else:
+            logger.debug("Priority [%s]: no enabled sources", tier)
 
 
 def _hr(char: str = "─") -> None:
@@ -134,42 +209,107 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
     """
     interval = interval_minutes if interval_minutes is not None else WATCH_INTERVAL_MINUTES
 
+    # Log a one-time priority breakdown so operators can verify configuration.
+    _log_priority_summary()
+
+    critical_sources = get_sources_by_priority("critical")
+    has_critical = len(critical_sources) > 0
+
     print(f"\n  {_BOLD}StatuteProof watch mode started.{_R}")
     print(
         f"  Checking all enabled sources every "
         f"{interval} minute{'s' if interval != 1 else ''}."
     )
+    if has_critical:
+        print(
+            f"  {_YELLOW}Critical sources ({len(critical_sources)}): "
+            f"re-checked every {_CRITICAL_INTERVAL_MINUTES} minutes.{_R}"
+        )
     print(f"  Press {_BOLD}Ctrl+C{_R} to stop.\n")
 
     cycle = 0
+    # Track when we last ran the full cycle so we can decide whether to run
+    # critical sources only (sub-cycle) or all sources (full cycle).
+    # NOTE: last_full_run_at is intentionally initialised to 0.0 so that a
+    # full cycle runs immediately on startup — this ensures the monitor is
+    # current from the first moment the process is alive (desirable for
+    # reliability, not a bug).
+    last_full_run_at: float = 0.0
 
     try:
         while True:
-            cycle += 1
-            _print_cycle_header(cycle, interval)
+            now = time.monotonic()
+            full_cycle_due = (now - last_full_run_at) >= (interval * 60)
 
-            try:
-                results = monitor_all_sources(verbose=True)
-                _print_cycle_summary(results)
-            except Exception as exc:
-                # Per-source errors are already handled inside monitor_all_sources.
-                # This catches unexpected failures at the orchestrator level.
-                logger.error(
-                    "Watch cycle %d failed: %s: %s", cycle, type(exc).__name__, exc
+            if full_cycle_due:
+                cycle += 1
+                _print_cycle_header(cycle, interval)
+                try:
+                    results = monitor_all_sources(verbose=True)
+                    _print_cycle_summary(results)
+                    last_full_run_at = time.monotonic()
+                except Exception as exc:
+                    # Per-source errors are handled inside monitor_all_sources.
+                    # This catches unexpected failures at the orchestrator level.
+                    logger.error(
+                        "Watch cycle %d failed: %s: %s",
+                        cycle, type(exc).__name__, exc,
+                    )
+                    print(
+                        f"\n  {_RED}Cycle {cycle} unexpected error:{_R} "
+                        f"{type(exc).__name__}: {exc}"
+                    )
+                    print(f"  Recovering — will retry next cycle in 30 s.\n")
+                    time.sleep(30)
+            elif has_critical:
+                # Sub-cycle: run ONLY the critical-priority sources directly,
+                # without touching standard/background sources at all.
+                logger.info(
+                    "Critical sub-cycle: running %d critical source(s)",
+                    len(critical_sources),
                 )
-                print(
-                    f"\n  {_RED}Cycle {cycle} unexpected error:{_R} "
-                    f"{type(exc).__name__}: {exc}"
-                )
-                print(f"  Recovering — will retry next cycle in 30 s.\n")
-                time.sleep(30)
+                try:
+                    critical_results: list[dict] = []
+                    for src in critical_sources:
+                        src_name = src.get("name", src.get("url", "?"))
+                        try:
+                            result = run_pipeline_for_source(src)
+                            critical_results.append(result)
+                        except Exception as src_exc:
+                            logger.error(
+                                "Critical sub-cycle error for %s: %s: %s",
+                                src_name, type(src_exc).__name__, src_exc,
+                            )
+                            critical_results.append({
+                                "source_name":   src_name,
+                                "url":           src.get("url", ""),
+                                "jurisdiction":  src.get("jurisdiction", ""),
+                                "category":      src.get("category", ""),
+                                "changed":       False,
+                                "status":        "error",
+                                "access_status": "error",
+                                "error":         f"{type(src_exc).__name__}: {src_exc}",
+                            })
+                    if critical_results:
+                        print(
+                            f"  {_DIM}Critical sub-cycle "
+                            f"({len(critical_results)} source(s)):{_R}"
+                        )
+                        _print_cycle_summary(critical_results)
+                except Exception as exc:
+                    logger.error(
+                        "Critical sub-cycle error: %s: %s", type(exc).__name__, exc
+                    )
 
             print(
                 f"  {_DIM}Next check in "
-                f"{interval} minute{'s' if interval != 1 else ''} "
-                f"— Ctrl+C to stop.{_R}\n"
+                f"{_CRITICAL_INTERVAL_MINUTES if has_critical else interval} "
+                f"minute(s) — Ctrl+C to stop.{_R}\n"
             )
-            time.sleep(interval * 60)
+            # Sleep the shorter interval when critical sources are configured;
+            # otherwise sleep the full configured interval.
+            sleep_minutes = _CRITICAL_INTERVAL_MINUTES if has_critical else interval
+            time.sleep(sleep_minutes * 60)
 
     except KeyboardInterrupt:
         print(

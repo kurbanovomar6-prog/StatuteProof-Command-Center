@@ -929,7 +929,7 @@ def _write_intake_evidence(
 ) -> dict:
     """Write raw/normalized snapshot for the intake result."""
     import datetime
-    from app.source_runs import _write_snapshots, append_run, _rel, _read_runs
+    from app.source_runs import write_snapshots as _write_snapshots, append_run, _rel, _read_runs
     from app.source_certification import build_certification_from_runs
     from app.text_normalization import stable_normalized_hash
 

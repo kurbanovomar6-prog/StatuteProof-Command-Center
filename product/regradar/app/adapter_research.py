@@ -22,7 +22,6 @@ from app.scraper import _fetch_via_playwright, is_low_content_html
 logger = logging.getLogger(__name__)
 
 _SOURCES_PATH = Path(__file__).parent.parent / "sources.json"
-_SEP  = "─" * 68
 _SEP2 = "═" * 68
 
 # Path keywords that suggest relevant regulatory content pages
@@ -391,6 +390,7 @@ def run_adapter_research(query: str) -> dict | None:
                 result["http_status"] = 200
             result["fetch_error"] = None     # Playwright recovered
         except Exception as pw_exc:
+            logger.debug("Playwright fetch failed for %s: %s", url, pw_exc)
             if tier1_html:
                 raw_html = tier1_html        # best-effort fallback
             else:

@@ -21,8 +21,15 @@ Usage
 Exit codes: 0 = success, 1 = error, 2 = bad arguments
 """
 
-import logging
 import sys
+
+if sys.version_info < (3, 11):
+    print(f"ERROR: Python 3.11+ required, got {sys.version}", file=sys.stderr)
+    sys.exit(1)
+
+import logging
+import logging.handlers
+import os
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -31,13 +38,29 @@ from app.pipeline import init_pipeline, run_pipeline
 
 # ── logging (quiet by default; set LOG_LEVEL=DEBUG to see internals) ──────────
 
-_log_level = logging.getLevelName(
-    __import__("os").getenv("LOG_LEVEL", "WARNING").upper()
+_log_level = getattr(logging, os.getenv("LOG_LEVEL", "WARNING").upper(), logging.WARNING)
+_log_dir = os.getenv("LOG_DIR", "logs")
+os.makedirs(_log_dir, exist_ok=True)
+
+_formatter = logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+_file_handler = logging.handlers.RotatingFileHandler(
+    os.path.join(_log_dir, "statuteproof.log"),
+    maxBytes=10 * 1024 * 1024,   # 10 MB
+    backupCount=5,
+    encoding="utf-8",
+)
+_file_handler.setFormatter(_formatter)
+
+_console_handler = logging.StreamHandler()
+_console_handler.setFormatter(_formatter)
+
 logging.basicConfig(
     level=_log_level,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%H:%M:%S",
+    handlers=[_file_handler, _console_handler],
 )
 
 # ── colour palette ────────────────────────────────────────────────────────────
@@ -2079,6 +2102,10 @@ def _cmd_investigate_source(
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    from app.config import validate_config
+    for warning in validate_config():
+        print(f"WARNING: CONFIG WARNING: {warning}")
+
     args = sys.argv[1:]
 
     if not args:
@@ -2128,6 +2155,12 @@ def main() -> None:
         print("  python run.py source-history --market AE                inspect latest source run history", file=sys.stderr)
         print("  python run.py source-diff --market AE --latest-changed  inspect latest changed diff/proof", file=sys.stderr)
         print("  python run.py alert-draft --market AE --latest-changed  build DRAFT alert from latest changed run", file=sys.stderr)
+        print("  python run.py backfill-alerts               backfill alert_draft.json for all CHANGED runs without drafts", file=sys.stderr)
+        print("  python run.py backfill-alerts --dry-run     preview what would be written", file=sys.stderr)
+        print("  python run.py create-canonical-evidence                     create canonical evidence records for all eligible CHANGED runs", file=sys.stderr)
+        print("  python run.py create-canonical-evidence --source-id <id>    create canonical evidence for a specific source", file=sys.stderr)
+        print("  python run.py create-canonical-evidence --dry-run           preview what would be written", file=sys.stderr)
+        print("  python run.py create-canonical-evidence --limit <n>         create at most N evidence records", file=sys.stderr)
         print("  python run.py alert-draft --market AE --latest-changed --profile uae_vasp_demo", file=sys.stderr)
         print("  python run.py relevance-test --market AE --profile uae_vasp_demo", file=sys.stderr)
         print("  python run.py alert-review list --market AE             list local alert drafts", file=sys.stderr)
@@ -2145,6 +2178,8 @@ def main() -> None:
         print("  python run.py api                       start settings API server on 127.0.0.1:5001", file=sys.stderr)
         print("  python run.py api --port <n>            start API server on custom port", file=sys.stderr)
         print("  python run.py api --host 0.0.0.0        bind to all interfaces (production behind nginx)", file=sys.stderr)
+        print("  python run.py generate-brief --source-id <id>               generate brief for latest CHANGED run", file=sys.stderr)
+        print("  python run.py generate-brief --source-id <id> --run-id <r>  generate brief for a specific run", file=sys.stderr)
         print("  python run.py discover-source <url>                      discover candidate endpoints without saving evidence", file=sys.stderr)
         print("  python run.py discover-source <url> --json               print structured source discovery JSON", file=sys.stderr)
         print("  python run.py discover-source <url> --jurisdiction CODE  tag with jurisdiction code (e.g. AE, SG, KZ)", file=sys.stderr)
@@ -2721,6 +2756,44 @@ def main() -> None:
         print(f"\nBackfilled: {len(backfilled)}  Skipped: {len(skipped)}  No-snapshot: {len(no_snap)}{f'  Dry-run: {len(dry)}' if dry_run else ''}")
         if backfilled and not dry_run:
             print("source_runs.jsonl updated with new artifact paths.")
+        sys.exit(0)
+
+    elif cmd == "backfill-alerts":
+        dry_run = "--dry-run" in args
+        import importlib.util as _ilu
+        import pathlib as _pl
+        _script = _pl.Path(__file__).parent / "tools" / "backfill_alert_drafts.py"
+        _spec = _ilu.spec_from_file_location("backfill_alert_drafts", _script)
+        _mod = _ilu.module_from_spec(_spec)  # type: ignore[arg-type]
+        _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
+        _mod.run_backfill(dry_run=dry_run)
+        sys.exit(0)
+
+    elif cmd == "create-canonical-evidence":
+        import importlib.util as _ilu
+        import pathlib as _pl
+        _script = _pl.Path(__file__).parent / "tools" / "create_canonical_evidence.py"
+        _spec = _ilu.spec_from_file_location("create_canonical_evidence", _script)
+        _mod = _ilu.module_from_spec(_spec)  # type: ignore[arg-type]
+        _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
+        _dry_run = "--dry-run" in args
+        _all_statuses = "--all-statuses" in args
+        _source_id: str | None = None
+        _limit: int | None = None
+        for _i, _a in enumerate(args[1:], 1):
+            if _a == "--source-id" and _i + 1 < len(args):
+                _source_id = args[_i + 1]
+            if _a == "--limit" and _i + 1 < len(args):
+                try:
+                    _limit = int(args[_i + 1])
+                except ValueError:
+                    pass
+        _mod.run_create(
+            source_id_filter=_source_id,
+            dry_run=_dry_run,
+            all_statuses=_all_statuses,
+            limit=_limit,
+        )
         sys.exit(0)
 
     elif cmd == "alert-queue":
@@ -3319,6 +3392,50 @@ def main() -> None:
             max_depth=ds_max_depth,
         )
 
+    elif cmd == "generate-brief":
+        _gb_source_id: str | None = None
+        _gb_run_id: str | None = None
+        _gb_extra = args[1:]
+        _gb_i = 0
+        while _gb_i < len(_gb_extra):
+            tok = _gb_extra[_gb_i]
+            if tok == "--source-id":
+                if _gb_i + 1 >= len(_gb_extra):
+                    print("Error: --source-id requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                _gb_source_id = _gb_extra[_gb_i + 1].strip()
+                _gb_i += 2
+            elif tok == "--run-id":
+                if _gb_i + 1 >= len(_gb_extra):
+                    print("Error: --run-id requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                _gb_run_id = _gb_extra[_gb_i + 1].strip()
+                _gb_i += 2
+            else:
+                print(
+                    f"Error: unknown argument {tok!r} for 'generate-brief'.\n"
+                    "  Usage: python run.py generate-brief --source-id <id> [--run-id <run_id>]",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+        if not _gb_source_id:
+            print(
+                "Error: 'generate-brief' requires --source-id.\n"
+                "  Usage: python run.py generate-brief --source-id <id> [--run-id <run_id>]",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        _cmd_generate_brief(source_id=_gb_source_id, run_id=_gb_run_id)
+
+    elif cmd == "generate-secret-key":
+        import secrets as _secrets
+        key = _secrets.token_hex(32)
+        print("Generated SECRET_KEY (copy to .env):")
+        print(f"  SECRET_KEY={key}")
+
+    elif cmd == "validate-config":
+        _cmd_validate_config()
+
     elif cmd.startswith(("http://", "https://")):
         # backward-compatible bare URL
         _run_single_url(cmd)
@@ -3326,10 +3443,471 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | generate-secret-key | validate-config",
             file=sys.stderr,
         )
         sys.exit(2)
+
+
+def _cmd_validate_config() -> None:
+    """
+    Validate critical environment variables and print a human-readable checklist.
+
+    Usage:
+        python run.py validate-config
+    """
+    import os as _os
+
+    # Load .env so we check the actual runtime config.
+    from app.config import (  # noqa: F401 — triggers dotenv load as side effect
+        ANTHROPIC_API_KEY,
+        DB_PATH,
+        SECRET_KEY,
+        TELEGRAM_ALERTS_BOT_TOKEN,
+        TELEGRAM_BOT_TOKEN,
+    )
+
+    _placeholder = "change-me-to-a-random-64-char-string"
+
+    def _ok(label: str, detail: str = "") -> None:
+        suffix = f" ({detail})" if detail else ""
+        print(f"  {_GREEN}✓{_R} {label}{_DIM}{suffix}{_R}")
+
+    def _warn(label: str, detail: str = "") -> None:
+        suffix = f" ({detail})" if detail else ""
+        print(f"  {_YELLOW}✗{_R} {label}{_DIM}{suffix}{_R}")
+
+    def _fail(label: str, detail: str = "") -> None:
+        suffix = f" ({detail})" if detail else ""
+        print(f"  {_RED}✗{_R} {label}{_DIM}{suffix}{_R}")
+
+    print(f"\n{_BOLD}Config validation:{_R}")
+
+    # SECRET_KEY
+    if not SECRET_KEY or SECRET_KEY == _placeholder:
+        _fail("SECRET_KEY", "not set or still placeholder — run: python3 run.py generate-secret-key")
+    elif len(SECRET_KEY) < 32:
+        _fail("SECRET_KEY", f"too short ({len(SECRET_KEY)} chars, need >=32)")
+    else:
+        _ok("SECRET_KEY", f"{len(SECRET_KEY)} chars")
+
+    # DB_PATH
+    db_val = _os.getenv("REGRADAR_DB_PATH", DB_PATH)
+    if db_val:
+        _ok("DB_PATH", f"{db_val}")
+    else:
+        _fail("DB_PATH", "not set — set REGRADAR_DB_PATH in .env")
+
+    # OPENAI_API_KEY (optional)
+    openai_key = _os.getenv("OPENAI_API_KEY", "").strip()
+    if openai_key:
+        _ok("OPENAI_API_KEY", "set")
+    else:
+        _warn("OPENAI_API_KEY", "not set (AI briefs will use rule-based only)")
+
+    # TELEGRAM_ALERTS_BOT_TOKEN
+    if TELEGRAM_ALERTS_BOT_TOKEN:
+        _ok("TELEGRAM_ALERTS_BOT_TOKEN", "set")
+    else:
+        _warn("TELEGRAM_ALERTS_BOT_TOKEN", "not set (customer Telegram alerts disabled)")
+
+    # ANTHROPIC_API_KEY (optional but surfaces AI status)
+    if ANTHROPIC_API_KEY:
+        _ok("ANTHROPIC_API_KEY", "set")
+    else:
+        _warn("ANTHROPIC_API_KEY", "not set (AI analysis disabled)")
+
+    print()
+
+
+def _find_latest_changed_run(source_id: str, run_id: str | None) -> dict | None:
+    """
+    Return the run record to use for brief generation.
+
+    If run_id is given, find that specific run for source_id.
+    Otherwise find the latest CHANGED run for source_id from source_runs.jsonl.
+    Returns None if no matching record is found.
+    """
+    import json as _json_mod
+    from pathlib import Path as _Path
+
+    if run_id:
+        run_file = _Path(__file__).parent / "data" / "source_runs" / "source_runs.jsonl"
+        if run_file.exists():
+            with run_file.open(encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        rec = _json_mod.loads(line)
+                    except _json_mod.JSONDecodeError:
+                        continue
+                    if rec.get("source_id") == source_id and rec.get("run_id") == run_id:
+                        return rec
+        return None
+
+    from app.source_runs import changed_runs
+    rows = changed_runs(limit=200)
+    for rec in rows:
+        if rec.get("source_id") == source_id:
+            return rec
+    return None
+
+
+def _cmd_generate_brief(*, source_id: str, run_id: str | None = None) -> None:
+    """
+    Generate a compliance brief for the latest (or specified) CHANGED run of a source.
+
+    Usage:
+        python run.py generate-brief --source-id AE-adgm-fsra-guidance-policy
+        python run.py generate-brief --source-id AE-adgm-fsra-guidance-policy --run-id AE-20260611T224847Z-abcd1234
+    """
+    import json as _json_mod
+    from datetime import datetime, timezone
+    from pathlib import Path as _Path
+
+    from app.config import BASE_DIR, ENABLE_AI_ANALYSIS
+
+    _hr("═")
+    print(f"  {_BOLD}StatuteProof — Generate Brief{_R}")
+    print(f"  {_DIM}Source: {source_id}{_R}")
+    if run_id:
+        print(f"  {_DIM}Run ID: {run_id}{_R}")
+    _hr("═")
+
+    # 1. Locate the run record.
+    run_record = _find_latest_changed_run(source_id, run_id)
+    if not run_record:
+        if run_id:
+            print(
+                f"\n{_RED}Error:{_R} No run record found for source_id={source_id!r} run_id={run_id!r}.\n"
+                f"  Check that source_runs.jsonl contains this run.",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"\n{_RED}Error:{_R} No CHANGED run record found for source_id={source_id!r}.\n"
+                f"  Run 'python run.py all' to populate source_runs.jsonl first.",
+                file=sys.stderr,
+            )
+        sys.exit(1)
+
+    actual_run_id = run_record.get("run_id", "")
+    source_name = run_record.get("source_name", source_id)
+    official_url = run_record.get("official_url", run_record.get("final_url", ""))
+    change_status = run_record.get("change_status", "")
+    timestamp_utc = run_record.get("timestamp_utc", "")
+
+    print(f"\n  {_BOLD}Source name:{_R}    {source_name}")
+    print(f"  {_BOLD}Run ID:{_R}         {actual_run_id}")
+    print(f"  {_BOLD}Change status:{_R}  {change_status}")
+    print(f"  {_BOLD}Timestamp:{_R}      {timestamp_utc}")
+    print(f"  {_BOLD}URL:{_R}            {official_url}")
+    _hr("·")
+
+    # 2. Build change text from diff/snapshot data if available.
+    change_text = ""
+    diff_json_path = run_record.get("diff_json_path") or run_record.get("diff_path")
+    diff_artifact: dict = {}
+    if diff_json_path:
+        diff_path = _Path(diff_json_path) if _Path(diff_json_path).is_absolute() else BASE_DIR / diff_json_path
+        if diff_path.exists():
+            try:
+                diff_artifact = _json_mod.loads(diff_path.read_text(encoding="utf-8"))
+                added = diff_artifact.get("added_chunks") or diff_artifact.get("added") or []
+                removed = diff_artifact.get("removed_chunks") or diff_artifact.get("removed") or []
+                changed_chunks = diff_artifact.get("changed_chunks") or diff_artifact.get("modified") or []
+                parts: list[str] = []
+                parts.extend(str(c) for c in added[:5] if c)
+                for ch in (changed_chunks[:3] if isinstance(changed_chunks, list) else []):
+                    if isinstance(ch, dict):
+                        parts.extend(str(b) for b in (ch.get("before") or [])[:2] if b)
+                        parts.extend(str(a) for a in (ch.get("after") or [])[:2] if a)
+                    else:
+                        parts.append(str(ch))
+                parts.extend(str(c) for c in removed[:3] if c)
+                change_text = "\n\n".join(parts)
+            except Exception:
+                pass
+
+    if not change_text:
+        snap_path_rel = run_record.get("snapshot_normalized_path") or run_record.get("snapshot_raw_path")
+        if snap_path_rel:
+            snap_path = _Path(snap_path_rel) if _Path(snap_path_rel).is_absolute() else BASE_DIR / snap_path_rel
+            if snap_path.exists():
+                try:
+                    change_text = snap_path.read_text(encoding="utf-8")[:6000]
+                except Exception:
+                    pass
+
+    # Build a diff excerpt for inclusion in metadata (max 500 chars).
+    # Boilerplate patterns to skip when selecting an excerpt (contact info, table-of-contents dots, etc.)
+    _BOILERPLATE_SKIP = ("varaconnect@", "PO Box", "صندوق بريد", "............", "INTRODUCTION ...", "Contents")
+
+    def _is_substantive(text: str) -> bool:
+        """Return True if the text is meaningful regulatory content, not boilerplate."""
+        t = text.strip()
+        if len(t) < 50:
+            return False
+        if any(p in t for p in _BOILERPLATE_SKIP):
+            return False
+        return True
+
+    _diff_excerpt_parts: list[str] = []
+    if diff_artifact:
+        _added   = diff_artifact.get("added_chunks") or diff_artifact.get("added") or []
+        _removed = diff_artifact.get("removed_chunks") or diff_artifact.get("removed") or []
+        _changed = diff_artifact.get("changed_chunks") or diff_artifact.get("modified") or []
+        # 1. Prefer added chunks with substantive content
+        for _chunk in _added[:10]:
+            _s = str(_chunk).strip()
+            if _is_substantive(_s):
+                _diff_excerpt_parts.append(f"[ADDED] {_s[:250]}")
+                break
+        # 2. Changed chunks — scan all after-items to find best substantive text
+        if not _diff_excerpt_parts:
+            for _ch in (_changed if isinstance(_changed, list) else []):
+                _after_items = _ch.get("after") if isinstance(_ch, dict) else []
+                _before_items = _ch.get("before") if isinstance(_ch, dict) else []
+                _before_set = set(str(x).strip() for x in (_before_items or []))
+                # Prefer items present only in "after" (truly new content)
+                _candidates: list[str] = []
+                for _a in (_after_items or []):
+                    _s = str(_a).strip()
+                    if _is_substantive(_s) and _s not in _before_set:
+                        _candidates.append(_s)
+                # Fall back to any substantive after-item if no new-only candidates
+                if not _candidates:
+                    for _a in (_after_items or []):
+                        _s = str(_a).strip()
+                        if _is_substantive(_s):
+                            _candidates.append(_s)
+                if _candidates:
+                    # Pick the longest substantive candidate (richest content)
+                    _best = max(_candidates, key=len)
+                    _diff_excerpt_parts.append(f"[CHANGED] {_best[:300]}")
+                    break
+        # 3. Removed chunks as last resort
+        if not _diff_excerpt_parts:
+            for _chunk in _removed[:10]:
+                _s = str(_chunk).strip()
+                if _is_substantive(_s):
+                    _diff_excerpt_parts.append(f"[REMOVED] {_s[:250]}")
+                    break
+    _diff_excerpt_str = "\n".join(_diff_excerpt_parts)[:500] if _diff_excerpt_parts else ""
+    _diff_summary_str = (
+        diff_artifact.get("diff_summary") or
+        run_record.get("diff_summary") or
+        ""
+    )
+
+    metadata = {
+        "source_name": source_name,
+        "url": official_url,
+        "source_id": source_id,
+        "jurisdiction": run_record.get("jurisdiction") or run_record.get("market", ""),
+        "category": run_record.get("category", ""),
+        "change_status": change_status,
+        "extraction_quality": run_record.get("extraction_quality", ""),
+        "limitations_notes": run_record.get("limitations_notes", ""),
+        "output_language": "en",
+        "diff_summary": _diff_summary_str,
+        "diff_excerpt": _diff_excerpt_str,
+    }
+
+    # 3. Generate the brief.
+    brief_data: dict = {}
+    method_used = "rule-based"
+
+    if ENABLE_AI_ANALYSIS and change_text and change_text.strip():
+        try:
+            from app.ai_brief import generate_ai_brief
+            print(f"  {_DIM}Generating AI brief (ENABLE_AI_ANALYSIS=true)…{_R}")
+            brief_data = generate_ai_brief(change_text, metadata)
+            if not brief_data.get("fallback_used"):
+                method_used = "ai"
+        except Exception as exc:
+            print(f"  {_YELLOW}AI brief generation failed ({type(exc).__name__}: {exc}), using rule-based fallback.{_R}")
+
+    if not brief_data:
+        try:
+            from app.alert_drafts import classify_change_type, classify_risk, affected_entities_for, recommended_action_for
+
+            proof_block: dict = {}
+            proof_json_path = run_record.get("proof_block_path") or run_record.get("proof_json_path")
+            if proof_json_path:
+                proof_path = _Path(proof_json_path) if _Path(proof_json_path).is_absolute() else BASE_DIR / proof_json_path
+                if proof_path.exists():
+                    try:
+                        proof_block = _json_mod.loads(proof_path.read_text(encoding="utf-8"))
+                    except Exception:
+                        pass
+
+            change_type = classify_change_type(run_record, diff_artifact)
+            risk_level_rb, risk_rationale, confidence_rb = classify_risk(run_record, diff_artifact, proof_block, change_type)
+            affected = affected_entities_for(run_record, change_type)
+            action = recommended_action_for(run_record, change_type, risk_level_rb)
+
+            # Build a richer executive summary using diff data
+            _rb_summary_parts: list[str] = [
+                f"{source_name} — regulatory change detected.",
+                f"Change classification: {change_type.replace('_', ' ').title()}.",
+            ]
+            if _diff_summary_str:
+                _ds = _diff_summary_str.rstrip(".")
+                _rb_summary_parts.append(f"Scope: {_ds}.")
+            if _diff_excerpt_str:
+                _short_exc = _diff_excerpt_str[:300].rstrip()
+                if len(_diff_excerpt_str) > 300:
+                    _short_exc += "…"
+                _rb_summary_parts.append(f'Key excerpt: "{_short_exc}"')
+            _rb_summary_parts.append(f"Risk assessment: {risk_level_rb}. {risk_rationale}")
+            _rb_exec_summary = " ".join(_rb_summary_parts)
+
+            brief_data = {
+                "risk_level": risk_level_rb,
+                "executive_summary": _rb_exec_summary,
+                "business_action_required": action,
+                "affected_entities": [affected],
+                "change_type": change_type,
+                "confidence": confidence_rb,
+                "reason": risk_rationale,
+                "ai_used": False,
+                "fallback_used": True,
+            }
+        except Exception as exc:
+            print(f"  {_YELLOW}Rule-based brief generation failed ({type(exc).__name__}: {exc}).{_R}")
+            brief_data = {
+                "risk_level": "REVIEW",
+                "executive_summary": f"Change detected on {source_name}. Manual review required.",
+                "business_action_required": "Review the detected change against internal compliance controls.",
+                "confidence": "LOW",
+                "ai_used": False,
+                "fallback_used": True,
+            }
+
+    risk_level = str(brief_data.get("risk_level", "REVIEW")).upper()
+    risk_col = _RISK_COLOR.get(risk_level, _R)
+    risk_icon = _RISK_ICON.get(risk_level, "")
+
+    print(f"\n  {_BOLD}Risk level:{_R}       {risk_col}{_BOLD}{risk_icon} {risk_level}{_R}")
+    print(f"  {_BOLD}Confidence:{_R}       {brief_data.get('confidence', '')}")
+    print(f"  {_BOLD}Method:{_R}           {method_used}")
+
+    exec_summary = brief_data.get("executive_summary", "")
+    if exec_summary:
+        print(f"\n  {_BOLD}Executive Summary:{_R}")
+        for line in _wrap(exec_summary, WIDTH - 4):
+            print(f"    {line}")
+
+    action_text = brief_data.get("business_action_required", "")
+    if action_text:
+        print(f"\n  {_BOLD}Recommended Action:{_R}")
+        for line in _wrap(action_text, WIDTH - 4):
+            print(f"    {_YELLOW}{line}{_R}")
+
+    change_type_val = str(brief_data.get("change_type", "") or "")
+    if change_type_val:
+        print(f"\n  {_BOLD}Change type:{_R}      {change_type_val}")
+
+    affected_raw = brief_data.get("affected_entities", [])
+    if affected_raw:
+        affected_str = (
+            ", ".join(str(a) for a in affected_raw[:3])
+            if isinstance(affected_raw, list)
+            else str(affected_raw)
+        )
+        print(f"  {_BOLD}Affected entities:{_R} {affected_str}")
+
+    _hr("·")
+
+    # 4. Build brief markdown.
+    ts_now = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    save_dir = BASE_DIR / "data" / "internal_briefs" / source_id
+    save_path = save_dir / f"{ts_now}_brief.md"
+
+    brief_lines = [
+        "# StatuteProof — Internal Brief",
+        "",
+        "**INTERNAL — NOT CUSTOMER DELIVERY**",
+        "",
+        f"Generated: {datetime.now(timezone.utc).isoformat()}",
+        "",
+        "## Source",
+        "",
+        f"- Source ID: {source_id}",
+        f"- Source name: {source_name}",
+        f"- Run ID: {actual_run_id}",
+        f"- Timestamp: {timestamp_utc}",
+        f"- URL: {official_url}",
+        f"- Change status: {change_status}",
+        "",
+        "## Risk Assessment",
+        "",
+        f"- Risk level: **{risk_level}**",
+        f"- Confidence: {brief_data.get('confidence', '')}",
+        f"- Method: {method_used}",
+        f"- Change type: {change_type_val or 'unknown'}",
+    ]
+    if _diff_summary_str:
+        brief_lines.append(f"- Diff scope: {_diff_summary_str}")
+    brief_lines.extend([
+        "",
+        "## Executive Summary",
+        "",
+        exec_summary or "(not available)",
+        "",
+        "## Business Action Required",
+        "",
+        action_text or "(not available)",
+        "",
+    ])
+    # Key change excerpt — only when real diff content is available
+    if _diff_excerpt_str:
+        brief_lines.extend([
+            "### Key Change Excerpt",
+            "",
+            "> Evidence from hash-verified diff. Verify against official source before relying on this content.",
+            "",
+            "```",
+            _diff_excerpt_str,
+            "```",
+            "",
+        ])
+    specific_obligation = str(brief_data.get("specific_obligation") or "")
+    if specific_obligation:
+        brief_lines.extend(["## Specific Obligation", "", specific_obligation, ""])
+    if isinstance(affected_raw, list) and affected_raw:
+        brief_lines.extend(["## Affected Entities", "", "\n".join(f"- {a}" for a in affected_raw), ""])
+    # Implementation deadline if set
+    _impl_dl = str(brief_data.get("implementation_deadline") or "")
+    if _impl_dl and _impl_dl not in ("Not specified in source", "Not specified"):
+        brief_lines.extend(["## Implementation Deadline", "", _impl_dl, ""])
+    brief_lines.extend([
+        "## Disclaimer",
+        "",
+        "Monitoring intelligence only. Not legal advice. Not customer delivery.",
+        "",
+    ])
+    brief_markdown = "\n".join(brief_lines)
+
+    # 5. Save brief to disk (non-fatal).
+    try:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        save_path.write_text(brief_markdown, encoding="utf-8")
+        print(f"  {_GREEN}Brief saved:{_R} {save_path}")
+    except Exception as exc:
+        print(f"  {_YELLOW}Warning: could not save brief ({type(exc).__name__}: {exc}).{_R}")
+
+    _hr("═")
+    print(f"\n{brief_markdown}\n")
+    _hr("═")
+    print(
+        f"\n  {_DIM}Not legal advice. Not customer delivery. "
+        f"Human review required before any external use.{_R}\n"
+    )
+    sys.exit(0)
 
 
 def _cmd_document_test(url: str) -> None:
@@ -3689,7 +4267,7 @@ def _cmd_alert_draft(
         print(f"  confidence: {alert.get('confidence')}")
         print(f"  alert_draft_json_path: {paths.get('alert_draft_json_path') or 'not written'}")
         print(f"  alert_draft_md_path: {paths.get('alert_draft_md_path') or 'not written'}")
-        if relevance is not None:
+        if relevance is not None and client_profile is not None:
             print(f"  profile: {client_profile.get('client_id')}")
             print(f"  relevance_score: {relevance.get('relevance_score')}")
             print(f"  delivery_decision: {relevance.get('delivery_decision')}")
@@ -3805,7 +4383,7 @@ def _cmd_alert_review_list(market: str = "AE") -> None:
         print("No alert drafts found.\n")
         return
     for alert in rows:
-        latest = latest_review_for(alert.get("alert_id"))
+        latest = latest_review_for(str(alert.get("alert_id") or ""))
         status = (latest or {}).get("new_status") or alert.get("review_status") or "DRAFT"
         decision = (latest or {}).get("new_send_decision") or alert.get("send_decision") or "HOLD_FOR_REVIEW"
         print(f"{alert.get('checked_at_utc') or 'unknown'}  {status:<22} {decision:<26} {alert.get('source_name')}")
@@ -3951,7 +4529,7 @@ def _rel_to_cwd(path: object) -> str:
         return ""
     from pathlib import Path as _Path
 
-    p = _Path(path)
+    p = _Path(str(path))
     try:
         return str(p.resolve().relative_to(_Path.cwd().resolve()))
     except ValueError:

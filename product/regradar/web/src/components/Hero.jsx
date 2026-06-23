@@ -1,7 +1,7 @@
+import { useEffect, useState } from 'react'
 import {
   ArrowRight,
   CheckCircle,
-  FileCheck2,
   Hash,
   LockKeyhole,
   RadioTower,
@@ -9,11 +9,40 @@ import {
   TriangleAlert,
 } from 'lucide-react'
 
-const proofRows = [
-  ['Source', 'VARA official notices'],
-  ['Run status', 'CHANGED'],
-  ['Normalized hash', 'sha256:7b1e4a8f...d92'],
-  ['Review state', 'Human review required'],
+// ─── Rotating signal cards in hero panel ─────────────────────────────────────
+const SIGNALS = [
+  {
+    regulator: 'VARA · Rulebook',
+    dot: 'green',
+    what: 'VARA updated capital requirements for VASP licence holders.',
+    risk: 'HIGH',
+    riskNote: 'Licensing requirement with direct regulatory implications.',
+    consider: 'Your compliance team may wish to review current capital adequacy against the updated section.',
+  },
+  {
+    regulator: 'CBUAE · AML Guidance',
+    dot: 'green',
+    what: 'CBUAE revised the customer due diligence section of its AML/CFT guidelines.',
+    risk: 'MEDIUM',
+    riskNote: 'Affects standard customer onboarding procedures.',
+    consider: 'Consider reviewing your CDD procedures in consultation with your MLRO.',
+  },
+  {
+    regulator: 'DFSA · Consultation',
+    dot: 'amber',
+    what: 'DFSA published a new 28-page consultation paper on crypto asset regulation.',
+    risk: 'HIGH',
+    riskNote: 'New consultation — response window may apply to your licence type.',
+    consider: 'It would be prudent to assess whether a formal response is required before the deadline.',
+  },
+  {
+    regulator: 'UAE FIU · Publication',
+    dot: 'green',
+    what: 'UAE FIU released a new AML typology report covering virtual asset sector risks.',
+    risk: 'MEDIUM',
+    riskNote: 'Relevant for VASP and payment institution risk assessments.',
+    consider: 'Your team may wish to incorporate new typologies into your next risk assessment cycle.',
+  },
 ]
 
 const chainSteps = [
@@ -23,62 +52,112 @@ const chainSteps = [
   ['04', 'Brief', 'Draft only until approved'],
 ]
 
+// Regulator name strip shown below headline
+const REGULATOR_STRIP = ['CBUAE', 'DFSA', 'ADGM / FSRA', 'VARA', 'SCA', 'UAE FIU']
+
 function EvidenceDossier() {
+  const [idx, setIdx] = useState(0)
+  const [fading, setFading] = useState(false)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setFading(true)
+      setTimeout(() => {
+        setIdx(i => (i + 1) % SIGNALS.length)
+        setFading(false)
+      }, 300)
+    }, 5000)
+    return () => clearInterval(id)
+  }, [])
+
+  const sig = SIGNALS[idx]
+  const isHigh = sig.risk === 'HIGH'
+  const dotClass =
+    sig.dot === 'amber'
+      ? 'inline-block h-2 w-2 rounded-full bg-amber-400'
+      : 'sp-live-dot'
+
   return (
     <div className="sp-paper-panel sp-reveal relative overflow-hidden p-5 sm:p-6">
       <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem] bg-cyan-200/55" />
-      <div className="relative">
+
+      <div
+        className="relative transition-opacity duration-300"
+        style={{ opacity: fading ? 0 : 1 }}
+      >
+        {/* Header */}
         <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="sp-mono text-[11px] font-bold uppercase tracking-wide text-slate-500">Canonical evidence preview</p>
-            <h3 className="mt-2 max-w-xs text-2xl font-semibold leading-tight text-slate-950">
-              A source change is not a customer brief yet.
-            </h3>
+          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+            <span className={dotClass} />
+            {sig.regulator}
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-900">
+          <span className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-900">
             <TriangleAlert className="h-3.5 w-3.5" />
             Sample
           </span>
         </div>
 
-        <div className="mb-5 grid gap-2">
-          {proofRows.map(([label, value]) => (
-            <div key={label} className="grid grid-cols-[110px_1fr] gap-3 rounded-xl border border-slate-300/70 bg-white/72 px-3 py-2.5 text-sm">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</span>
-              <span className={label.includes('hash') ? 'sp-mono truncate font-semibold text-cyan-800' : 'font-semibold text-slate-900'}>
-                {value}
-              </span>
-            </div>
-          ))}
+        {/* What changed */}
+        <div className="mb-4 rounded-xl border border-slate-200 bg-white/80 px-4 py-3">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            What changed
+          </p>
+          <p className="text-sm font-medium leading-snug text-slate-900">{sig.what}</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-300 bg-slate-950 p-4 text-white">
-          <div className="mb-3 flex items-center gap-2">
-            <FileCheck2 className="h-4 w-4 text-cyan-200" />
-            <p className="text-sm font-semibold">Brief gate</p>
+        {/* Risk level */}
+        <div
+          className={`mb-4 rounded-xl border px-4 py-3 ${
+            isHigh ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'
+          }`}
+        >
+          <div className="mb-1 flex items-center gap-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Risk level
+            </p>
+            <span
+              className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
+                isHigh ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              {sig.risk}
+            </span>
           </div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {[
-              ['Proof', 'verified', 'emerald'],
-              ['Review', 'pending', 'amber'],
-              ['Delivery', 'blocked', 'slate'],
-            ].map(([label, value, tone]) => (
-              <div key={label} className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500">{label}</p>
-                <p className={`mt-1 text-sm font-bold ${
-                  tone === 'emerald' ? 'text-emerald-300' : tone === 'amber' ? 'text-amber-300' : 'text-slate-300'
-                }`}>
-                  {value}
-                </p>
-              </div>
+          <p className="text-xs leading-snug text-slate-600">{sig.riskNote}</p>
+        </div>
+
+        {/* What to consider */}
+        <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            What you should consider
+          </p>
+          <p className="text-xs leading-relaxed text-slate-700">{sig.consider}</p>
+        </div>
+
+        {/* Dot navigation + footnote */}
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] leading-relaxed text-slate-400">
+            Monitoring intelligence only. Not legal advice.
+          </p>
+          <div className="flex gap-1.5">
+            {SIGNALS.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => {
+                  setFading(true)
+                  setTimeout(() => {
+                    setIdx(i)
+                    setFading(false)
+                  }, 200)
+                }}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === idx ? 'w-4 bg-cyan-500' : 'w-1.5 bg-slate-300'
+                }`}
+              />
             ))}
           </div>
         </div>
-
-        <p className="mt-4 text-xs leading-relaxed text-slate-600">
-          Interface sample only. It shows the chain of custody; it is not a real regulatory update,
-          legal advice, or regulator approval.
-        </p>
       </div>
     </div>
   )
@@ -88,7 +167,11 @@ function ChainStrip() {
   return (
     <div className="mt-8 grid gap-3 md:grid-cols-4">
       {chainSteps.map(([num, title, detail], index) => (
-        <div key={title} className="rounded-2xl border border-slate-800 bg-slate-950/45 p-4" style={{ animationDelay: `${index * 70}ms` }}>
+        <div
+          key={title}
+          className="rounded-2xl border border-slate-800 bg-slate-950/45 p-4"
+          style={{ animationDelay: `${index * 70}ms` }}
+        >
           <p className="sp-mono text-xs font-bold text-cyan-300">{num}</p>
           <p className="mt-2 text-sm font-semibold text-white">{title}</p>
           <p className="mt-1 text-xs leading-relaxed text-slate-500">{detail}</p>
@@ -100,7 +183,7 @@ function ChainStrip() {
 
 export default function Hero({ onCreateWorkspace, onViewSample }) {
   return (
-    <section className="sp-page-orbit px-4 pt-24 pb-16 lg:pt-28 lg:pb-20" id="top">
+    <section className="sp-page-orbit px-4 pb-16 pt-24 lg:pb-20 lg:pt-28" id="top">
       <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
@@ -114,44 +197,83 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
         </div>
 
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.8fr)]">
-          <div className="sp-reveal">
-            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.03] text-white md:text-5xl lg:text-[4.55rem]">
-              Official UAE source changes, captured as evidence before anyone calls them compliance.
+          <div className="sp-reveal sp-animate-fade-up">
+            {/* Trust badge */}
+            <span className="sp-badge-trust sp-animate-fade-up sp-delay-1 mb-5 inline-flex">
+              Official UAE sources only
+            </span>
+
+            {/* Primary headline — updated */}
+            <h1 className="sp-display sp-animate-fade-up sp-delay-1 max-w-4xl text-5xl leading-[1.03] text-white md:text-6xl lg:text-7xl">
+              Your compliance team gets the change, the meaning, and the action — not just an alert.
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              StatuteProof watches selected official UAE sources, preserves hash-verified source evidence,
-              and keeps draft briefs behind human review and delivery gates.
+            {/* Subheadline — updated */}
+            <p className="sp-animate-fade-up sp-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
+              StatuteProof monitors UAE and international regulators, detects changes in official
+              sources, and delivers AI-written briefs telling you exactly what to do — with
+              cryptographic evidence of when it was caught.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button onClick={onCreateWorkspace} className="sp-btn-primary justify-center px-6">
-                Request source review <ArrowRight className="h-4 w-4" />
-              </button>
-              <button type="button" onClick={onViewSample} className="sp-btn-secondary justify-center px-6">
-                View sample evidence flow
-              </button>
+            {/* Regulator strip */}
+            <div className="sp-animate-fade-up sp-delay-2 mt-6 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-medium text-slate-500 mr-1">
+                Sources monitored include:
+              </span>
+              {REGULATOR_STRIP.map(name => (
+                <span
+                  key={name}
+                  className="rounded-md border border-slate-700/70 bg-slate-900/50 px-2.5 py-1 text-[11px] font-semibold text-slate-300"
+                >
+                  {name}
+                </span>
+              ))}
             </div>
 
-            <div className="mt-7 grid max-w-2xl gap-2 sm:grid-cols-3">
+            {/* Trust metrics */}
+            <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-3">
               {[
-                ['Selected official sources', 'not a volume claim'],
-                ['Hash-verified proof', 'before brief drafting'],
-                ['Human review gates', 'before delivery'],
-              ].map(([label, detail]) => (
-                <div key={label} className="rounded-2xl border border-slate-800 bg-slate-950/45 px-4 py-3">
-                  <p className="text-sm font-semibold text-white">{label}</p>
-                  <p className="mt-1 text-[11px] leading-snug text-slate-500">{detail}</p>
+                ['180+', 'Monitored sources'],
+                ['SHA-256', 'Hash per run'],
+                ['Human-review', 'Delivery gate'],
+              ].map(([stat, label]) => (
+                <div key={stat} className="sp-glass rounded-2xl px-4 py-3">
+                  <p className="sp-mono text-base font-bold text-cyan-300">{stat}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-slate-400">{label}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 flex items-start gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm leading-relaxed text-emerald-50/80">
-              <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />
-              <p>
-                We disclose source limits, failed extraction paths, and review gates before pilot activation.
-                Monitoring intelligence only; not legal advice.
-              </p>
+            {/* CTAs — updated labels */}
+            <div className="sp-animate-fade-up sp-delay-3 mt-8 flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={onCreateWorkspace}
+                className="sp-btn-primary justify-center px-6"
+              >
+                View source readiness <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onViewSample}
+                className="sp-btn-secondary justify-center px-6"
+              >
+                View sample evidence record
+              </button>
+            </div>
+
+            {/* Live indicator + disclaimer */}
+            <div className="sp-animate-fade-up sp-delay-3 mt-5 flex flex-col gap-3">
+              <div className="inline-flex items-center gap-2 text-sm font-medium text-emerald-300">
+                <span className="sp-live-dot" />
+                Monitoring active
+              </div>
+              <div className="flex items-start gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm leading-relaxed text-emerald-50/80">
+                <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />
+                <p>
+                  We disclose source limits, failed extraction paths, and review gates before pilot
+                  activation. Monitoring intelligence only; not legal advice.
+                </p>
+              </div>
             </div>
           </div>
 

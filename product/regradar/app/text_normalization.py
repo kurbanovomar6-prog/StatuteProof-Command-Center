@@ -10,6 +10,7 @@ as text, and document links.
 from __future__ import annotations
 
 import hashlib
+import html
 import re
 
 
@@ -86,6 +87,16 @@ _DATE_WORD_RE = re.compile(
     re.IGNORECASE,
 )
 
+_ARABIC_RE = re.compile(r"[؀-ۿ]")
+
+
+def _is_arabic_line(line: str) -> bool:
+    """Return True if more than 20% of the line's characters are Arabic-script."""
+    if not line:
+        return False
+    arabic_chars = len(_ARABIC_RE.findall(line))
+    return arabic_chars > 0.2 * len(line)
+
 
 def _clean_line(line: str) -> str:
     line = line.replace("\u00a0", " ")
@@ -107,7 +118,7 @@ def _is_volatile_line(line: str) -> bool:
     return False
 
 
-def _is_boilerplate_line(line: str, _seen_count: int) -> bool:
+def _is_boilerplate_line(line: str) -> bool:
     lower = line.lower().strip(" .:-|")
     if line.startswith("حساب حكومة الإمارات"):
         return True
@@ -136,6 +147,7 @@ def normalize_for_change_hash(text: str) -> str:
     if not text:
         return ""
 
+    text = html.unescape(text)
     raw_lines = str(text).replace("\r\n", "\n").replace("\r", "\n").split("\n")
     lines: list[str] = []
     seen: dict[str, int] = {}
@@ -149,7 +161,7 @@ def normalize_for_change_hash(text: str) -> str:
 
         key = line.casefold()
         seen_count = seen.get(key, 0)
-        if _is_boilerplate_line(line, seen_count):
+        if _is_boilerplate_line(line):
             seen[key] = seen_count + 1
             continue
         if seen_count > 0:
@@ -170,15 +182,28 @@ def normalize_for_change_hash(text: str) -> str:
 def _merge_wrapped_lines(lines: list[str]) -> list[str]:
     merged: list[str] = []
     for line in lines:
-        if (
-            merged
-            and merged[-1]
-            and not merged[-1].endswith((".", ":", ";", "!", "?", ")", "]"))
-            and line[:1].islower()
-        ):
-            merged[-1] = f"{merged[-1]} {line}"
-        else:
+        if not merged or not merged[-1]:
             merged.append(line)
+            continue
+        prev = merged[-1]
+        if _is_arabic_line(prev) or _is_arabic_line(line):
+            # For Arabic lines, only merge if the previous line ends with a
+            # comma (Arabic or ASCII) — never rely on the lowercase-initial
+            # check because Arabic script has no case distinction.
+            if prev.endswith("،") or prev.endswith(","):
+                merged[-1] = f"{prev} {line}"
+            else:
+                merged.append(line)
+        else:
+            # English / Latin merge heuristic: previous line does not end in
+            # sentence-closing punctuation and current line starts lowercase.
+            if (
+                not prev.endswith((".", ":", ";", "!", "?", ")", "]"))
+                and line[:1].islower()
+            ):
+                merged[-1] = f"{prev} {line}"
+            else:
+                merged.append(line)
     return merged
 
 

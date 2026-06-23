@@ -8,5 +8,8 @@ Type=oneshot
 User=regradar
 Group=regradar
 WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/srv/regradar/.venv/bin/python scripts/run_cbuae_rulebook_watch.py
+StandardOutput=journal
+StandardError=journal

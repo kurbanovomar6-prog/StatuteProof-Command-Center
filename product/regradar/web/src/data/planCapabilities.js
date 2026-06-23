@@ -1,7 +1,7 @@
 // Plan definitions — no Stripe, no payment processing.
 // Billing is manually activated for founding pilots after source readiness review.
 // Prices: Founding Pilot $199/mo | UAE Monitor $399/mo | Consultant custom
-// Source truth: 241 enabled UAE records; 172 fresh-alert eligible, 61 evidence-library, 5 candidate, 3 remediation
+// Source truth: 246 enabled UAE records; 180 fresh-alert eligible, 60 evidence-library, 4 candidate, 2 remediation
 
 export const PLAN_NAMES = {
   EVIDENCE_PREVIEW: 'evidence_preview',

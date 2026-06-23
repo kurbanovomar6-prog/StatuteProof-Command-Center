@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   FileText, AlertTriangle, Users, CheckSquare, BookOpen,
   ExternalLink, Brain, ShieldCheck, ChevronDown, ChevronUp,
+  Scale, MapPin,
 } from 'lucide-react'
 import { Badge } from './ui/Badge'
+
+// SAMPLE / FAKE — illustrative content only, not real regulatory data
 
 const FEATURES = [
   {
@@ -36,23 +39,88 @@ const FEATURES = [
 const AFFECTED_TAGS = ['DPT service providers', 'Crypto exchanges', 'Payment institutions', 'Compliance teams']
 
 const REVIEW_STEPS = [
-  'Review the official CBUAE or VARA source layer',
-  'Assess licensing, AML/CFT and reporting relevance',
-  'Escalate to compliance and legal teams for guidance',
+  'Review the official VARA source and compare to previous version',
+  'Assess AML/CFT and licensing obligation relevance to your entity',
+  'Escalate to compliance and legal teams for implementation guidance',
 ]
 
 const TRUST_POINTS = [
-  { mark: '✓', text: 'Official source link included',                       c: 'text-emerald-400' },
-  { mark: '✓', text: 'Paragraph-level change detected',                     c: 'text-emerald-400' },
-  { mark: '✓', text: 'Source health: Evidence confirmed',                   c: 'text-emerald-400' },
+  { mark: '✓', text: 'Official source link included',                            c: 'text-emerald-400' },
+  { mark: '✓', text: 'Paragraph-level change detected and hashed',              c: 'text-emerald-400' },
+  { mark: '✓', text: 'Source health: Evidence confirmed',                        c: 'text-emerald-400' },
   { mark: '✓', text: 'Risk signals: AML/CFT · reporting · licensing · deadline', c: 'text-emerald-400' },
-  { mark: '~', text: 'AI confidence: Medium',                               c: 'text-amber-400'   },
-  { mark: '~', text: 'Human review recommended for high-risk updates',      c: 'text-amber-400'   },
-  { mark: '!', text: 'Not legal advice',                                    c: 'text-slate-500'   },
+  { mark: '~', text: 'AI confidence: 87% — high but not certain',               c: 'text-amber-400'   },
+  { mark: '~', text: 'Human review recommended for high-risk updates',           c: 'text-amber-400'   },
+  { mark: '!', text: 'Not legal advice',                                         c: 'text-slate-500'   },
 ]
+
+const EXECUTIVE_SUMMARY =
+  'VARA has amended Section 7.2 of the Virtual Assets Regulatory Rulebook to introduce mandatory AML/CFT controls for DPT service providers processing transactions above AED 35,000. Affected entities must update their transaction monitoring systems and appoint a designated AML Compliance Officer within 45 days of publication.'
+
+// Typewriter hook — types the string character by character
+function useTypewriter(text, speed = 22, startDelay = 400) {
+  const [displayed, setDisplayed] = useState('')
+  const [done, setDone] = useState(false)
+  const indexRef = useRef(0)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    setDisplayed('')
+    setDone(false)
+    indexRef.current = 0
+
+    const startTimer = setTimeout(() => {
+      timerRef.current = setInterval(() => {
+        indexRef.current += 1
+        setDisplayed(text.slice(0, indexRef.current))
+        if (indexRef.current >= text.length) {
+          clearInterval(timerRef.current)
+          setDone(true)
+        }
+      }, speed)
+    }, startDelay)
+
+    return () => {
+      clearTimeout(startTimer)
+      clearInterval(timerRef.current)
+    }
+  }, [text, speed, startDelay])
+
+  return { displayed, done }
+}
+
+// Animated confidence meter bar
+function ConfidenceMeter({ value }) {
+  const [width, setWidth] = useState(0)
+
+  useEffect(() => {
+    const t = setTimeout(() => setWidth(value), 600)
+    return () => clearTimeout(t)
+  }, [value])
+
+  const color =
+    value >= 80 ? 'bg-emerald-400' :
+    value >= 60 ? 'bg-amber-400' :
+    'bg-red-400'
+
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="h-1.5 flex-1 rounded-full bg-slate-700 overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-1000 ease-out ${color}`}
+          style={{ width: `${width}%` }}
+        />
+      </div>
+      <span className={`text-xs font-bold tabular-nums ${value >= 80 ? 'text-emerald-300' : value >= 60 ? 'text-amber-300' : 'text-red-300'}`}>
+        {value}%
+      </span>
+    </div>
+  )
+}
 
 export default function AIAnalyst() {
   const [trustOpen, setTrustOpen] = useState(false)
+  const { displayed, done } = useTypewriter(EXECUTIVE_SUMMARY)
 
   return (
     <section className="py-20 bg-slate-50" id="ai-analyst">
@@ -111,15 +179,55 @@ export default function AIAnalyst() {
               </div>
             </div>
 
+            {/* Brief metadata row — legal area + jurisdiction */}
+            <div className="bg-slate-800/50 border-b border-slate-700 px-5 py-2.5 flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-300">
+                <Scale className="w-3 h-3" />
+                Legal Area: AML/CFT
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 bg-slate-700/50 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
+                <MapPin className="w-3 h-3" />
+                Jurisdiction: UAE — VARA
+              </span>
+              <span className="ml-auto text-[10px] text-slate-500">SAMPLE / FAKE</span>
+            </div>
+
             {/* Brief title */}
             <div className="px-5 pt-4 pb-3.5 border-b border-slate-800">
               <p className="text-white font-semibold text-sm leading-snug">
-                VARA Rulebook Preview: Sample AML/CFT Requirements for VASP Teams
+                VARA Rulebook Amendment: AML/CFT Requirements for DPT Service Providers
               </p>
               <p className="text-slate-500 text-xs mt-1.5">Sample · vara.ae</p>
             </div>
 
             <div className="divide-y divide-slate-800">
+
+              {/* Executive summary — typewriter effect */}
+              <div className="px-5 py-3.5">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  Executive Summary
+                </p>
+                <p className="text-slate-300 text-xs leading-relaxed min-h-[4.5rem]">
+                  {displayed}
+                  {!done && (
+                    <span className="inline-block w-0.5 h-3 bg-blue-400 ml-0.5 animate-pulse align-middle" />
+                  )}
+                </p>
+              </div>
+
+              {/* AI Confidence meter */}
+              <div className="px-5 py-3.5">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    AI Confidence
+                  </p>
+                  <span className="text-[10px] text-slate-500">Source-backed analysis</span>
+                </div>
+                <ConfidenceMeter value={87} />
+                <p className="text-[10px] text-slate-600 mt-1.5">
+                  Human review recommended before any compliance action on high-risk updates
+                </p>
+              </div>
 
               {/* What changed */}
               <div className="px-5 py-3.5">
@@ -127,8 +235,9 @@ export default function AIAnalyst() {
                   What changed
                 </p>
                 <p className="text-slate-300 text-xs leading-relaxed">
-                  A UAE virtual asset source layer is shown in sample format, including
-                  source proof, profile relevance, human review status and limitation notes.
+                  Section 7.2 now mandates AML/CFT controls for DPT service providers processing
+                  transactions above AED 35,000. A designated AML Compliance Officer is now required
+                  within 45 days of publication.
                 </p>
               </div>
 
@@ -138,8 +247,8 @@ export default function AIAnalyst() {
                   Why it matters
                 </p>
                 <p className="text-slate-300 text-xs leading-relaxed">
-                  VASP and crypto compliance teams need source-backed review steps before
-                  relying on any monitoring output or internal compliance action.
+                  VASP and crypto compliance teams must update transaction monitoring thresholds
+                  and appoint a compliance officer before the 45-day deadline or risk regulatory findings.
                 </p>
               </div>
 
@@ -179,7 +288,7 @@ export default function AIAnalyst() {
               <div className="px-5 py-3.5 flex items-center justify-between">
                 <p className="text-xs text-slate-500">Official source</p>
                 <span className="inline-flex items-center gap-1.5 text-xs text-blue-400">
-                  vara.ae / source-readiness-sample
+                  vara.ae / rulebook / section-7
                   <ExternalLink className="w-3 h-3" />
                 </span>
               </div>

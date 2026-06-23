@@ -108,6 +108,10 @@ export const evidence = {
     return authRequest(`/api/evidence?market=${encodeURIComponent(market)}&limit=${encodeURIComponent(limit)}`)
   },
 
+  fetchDiff(runId) {
+    return authRequest(`/api/evidence/diff?run_id=${encodeURIComponent(runId)}`)
+  },
+
   review(evidenceRecordId) {
     return authRequest(`/api/evidence/review?evidence_record_id=${encodeURIComponent(evidenceRecordId)}`)
   },
@@ -158,6 +162,14 @@ export const briefs = {
   list(market = 'AE', limit = 50) {
     return authRequest(`/api/briefs?market=${encodeURIComponent(market)}&limit=${encodeURIComponent(limit)}`)
   },
+  generate(sourceId, runId) {
+    const body = { source_id: sourceId }
+    if (runId) body.run_id = runId
+    return authRequest('/api/briefs/generate', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
 }
 
 export const delivery = {
@@ -205,6 +217,19 @@ export const plan = {
     return authRequest('/api/plan', {
       method: 'POST',
       body: JSON.stringify({ plan_name: planName }),
+    })
+  },
+}
+
+export const actionLog = {
+  list(alertId) {
+    return authRequest(`/api/alerts/action-log?alert_id=${encodeURIComponent(alertId)}`)
+  },
+
+  create(body) {
+    return authRequest('/api/alerts/action-log', {
+      method: 'POST',
+      body: JSON.stringify(body),
     })
   },
 }

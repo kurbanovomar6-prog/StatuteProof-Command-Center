@@ -55,7 +55,6 @@ See `TOOL_ROUTER.md` for which agent or skill to use for each task type.
 
 ## Agent Rules
 
-- Never create an 11th active StatuteProof agent.
 - Agents in `.claude/agents/` are the authoritative role definitions.
 - Agents in `agents/` are the human-readable system prompt docs.
 - Chief of Staff is the routing coordinator — do not bypass it for multi-agent tasks.
@@ -95,16 +94,58 @@ Do not run it for: routine brief drafts, source spec updates, internal planning.
 
 See `docs/agent-council-decision-system.md` for the full decision framework.
 
-## Ruflo Rule
+## Ruflo
 
-Ruflo (`https://github.com/ruvnet/ruflo`) is documented in `references/ruflo-notes.md` as **inspiration only**.
+Ruflo (`https://github.com/ruvnet/ruflo`) — разрешено изучать, скачивать и использовать агентов.
 
-Never use in StatuteProof:
-- Ruflo runtime or daemon
-- Ruflo MCP tools or CLI (`npx ruflo`, `npx claude-flow`, etc.)
-- Ruflo swarm initialization or federated agents
+## Telegram Architecture (два бота — не путать)
 
-The concept extracted from Ruflo — sequential challenge before execution — lives in `skills/agent-council-review/SKILL.md` as a pure document workflow with no dependencies.
+Система использует **два отдельных бота**. Не смешивать токены.
+
+### Бот 1 — Админ / Founder only
+- **Username:** `@StatuteProof_bot`
+- **Env var:** `TELEGRAM_BOT_TOKEN`
+- **Chat ID:** `TELEGRAM_CHAT_ID` (ID чата основателя)
+- **Назначение:** только уведомления с контактной формы сайта → идут основателю
+- **Код:** `_handle_contact()` в `app/api.py` — использует эти переменные напрямую
+- **Никогда не показывать этот токен и Chat ID покупателям**
+
+### Бот 2 — Customer alerts bot (публичный)
+- **Username:** `@statuteproofalerts_bot`
+- **Env var:** `TELEGRAM_ALERTS_BOT_TOKEN`
+- **Назначение:** привязка аккаунтов покупателей + отправка регуляторных алертов
+- **Код:** `telegram_settings.get_token()` возвращает этот токен первым; `telegram_onboarding.py` — листенер для `/start CODE`
+- **Показывается на сайте**, публичный
+
+### Как работает привязка покупателя
+1. Покупатель открывает дашборд → Integrations → "Connect Telegram" → получает код `SP-XXXXXX`
+2. Отправляет `/start SP-XXXXXX` боту `@statuteproofalerts_bot`
+3. Бот автоматически захватывает `chat_id` из Telegram update
+4. `consume_pairing_code()` в `telegram_pairing.py` сохраняет `chat_id` в SQLite
+5. Покупатель **никогда не вводит Chat ID вручную** — это происходит невидимо
+
+### Что показывает бот в ответе на /start
+- Только инструкции по коду — Chat ID **не показывается** (убрано 2026-06-21)
+- `/id` — единственная команда, которая показывает chat_id (явная команда, для отладки)
+
+### Переменные в .env
+```
+TELEGRAM_BOT_TOKEN=<admin bot token>          # @StatuteProof_bot
+TELEGRAM_CHAT_ID=<founder chat id>            # куда идут контакты
+TELEGRAM_BOT_USERNAME=StatuteProof_bot
+
+TELEGRAM_ALERTS_BOT_TOKEN=<alerts bot token>  # @statuteproofalerts_bot
+TELEGRAM_ALERTS_BOT_USERNAME=statuteproofalerts_bot
+```
+
+### Запуск листенера
+```bash
+PYTHONUNBUFFERED=1 nohup python3 -u run.py telegram-listen > logs/telegram_bot.log 2>&1 &
+echo $! > logs/telegram_bot.pid
+```
+Или: `./run_telegram_bot.sh`
+
+Конфликт (несколько экземпляров): `pkill -f "run.py telegram-listen"` перед перезапуском.
 
 ## Product Code Location
 

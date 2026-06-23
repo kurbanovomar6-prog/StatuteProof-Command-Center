@@ -28,6 +28,52 @@ import re
 
 _ARABIC_RE = re.compile(r"[؀-ۿ]")
 
+# ── Improvement 4: urgency derivation from diff text ─────────────────────────
+# Canonical implementation lives in app.ai; the patterns are duplicated here
+# so risk.py can be used standalone (offline, no AI dependency) in tests and
+# rule-based-only pipelines.
+
+_URGENCY_PATTERNS: list[tuple[re.Pattern, str]] = [
+    (
+        re.compile(
+            r"effective\s+(from|as\s+of|on)\s+"
+            r"(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}|\d{4}-\d{2}-\d{2})",
+            re.I,
+        ),
+        "IMMEDIATE",
+    ),
+    (
+        re.compile(
+            r"by\s+(end\s+of\s+)?"
+            r"(january|february|march|april|may|june|july|august|"
+            r"september|october|november|december)\s+\d{4}",
+            re.I,
+        ),
+        "WITHIN_30_DAYS",
+    ),
+    (re.compile(r"within\s+(\d+)\s+days", re.I), "WITHIN_30_DAYS"),
+    (re.compile(r"no\s+later\s+than", re.I),     "WITHIN_30_DAYS"),
+]
+
+
+def derive_urgency_from_text(diff_text: str) -> str:
+    """
+    Scan diff text for deadline/effectivity patterns and return urgency tier.
+
+    Returns one of: IMMEDIATE | WITHIN_30_DAYS | MONITOR (fallback).
+    Used as a fallback when the AI does not return urgency or returns an
+    unrecognised value.  Mirrors the identical function in app.ai so that
+    rule-based pipelines can use urgency derivation without importing the AI layer.
+
+    Never raises.
+    """
+    if not diff_text:
+        return "MONITOR"
+    for pattern, urgency in _URGENCY_PATTERNS:
+        if pattern.search(diff_text):
+            return urgency
+    return "MONITOR"
+
 _HIGH_KEYWORDS: tuple[str, ...] = (
     "ban",
     "restriction",

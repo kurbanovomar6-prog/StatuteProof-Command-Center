@@ -81,10 +81,12 @@ export default function ReviewQueuePage() {
   const loadCanonicalEvidence = () => {
     setCanonicalLoading(true)
     setCanonicalError('')
+    let active = true
     reviews.canonicalEvidence()
-      .then(data => setCanonicalData(data))
-      .catch(err => setCanonicalError(err.message || 'Could not load canonical evidence records.'))
-      .finally(() => setCanonicalLoading(false))
+      .then(data => { if (active) setCanonicalData(data) })
+      .catch(err => { if (active) setCanonicalError(err.message || 'Could not load canonical evidence records.') })
+      .finally(() => { if (active) setCanonicalLoading(false) })
+    return () => { active = false }
   }
 
   useEffect(() => {
