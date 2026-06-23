@@ -12,44 +12,44 @@ import {
 // ─── Rotating signal cards in hero panel ─────────────────────────────────────
 const SIGNALS = [
   {
-    regulator: 'VARA · Rulebook',
+    regulator: 'VARA · Virtual Assets Rulebook',
     dot: 'green',
-    what: 'VARA updated capital requirements for VASP licence holders.',
+    what: 'VARA amended Chapter 3 of the Virtual Assets and Related Activities Regulations — capital adequacy thresholds revised for Category 3 licence holders.',
     risk: 'HIGH',
-    riskNote: 'Licensing requirement with direct regulatory implications.',
-    consider: 'Your compliance team may wish to review current capital adequacy against the updated section.',
+    riskNote: 'Mandatory compliance deadline applies. Affects licence renewal and ongoing capital reporting obligations.',
+    consider: 'Your MLRO and CFO should review current capital adequacy against the amended thresholds before the next reporting window.',
   },
   {
-    regulator: 'CBUAE · AML Guidance',
+    regulator: 'CBUAE · AML/CFT Guidelines',
     dot: 'green',
-    what: 'CBUAE revised the customer due diligence section of its AML/CFT guidelines.',
+    what: 'CBUAE updated Section 4.2 of its AML/CFT Guidelines — customer due diligence requirements for non-resident customers strengthened.',
     risk: 'MEDIUM',
-    riskNote: 'Affects standard customer onboarding procedures.',
-    consider: 'Consider reviewing your CDD procedures in consultation with your MLRO.',
+    riskNote: 'Affects onboarding procedures for non-resident clients. Remediation of existing customer files may be required.',
+    consider: 'Review CDD workflows with your MLRO and assess whether existing customer files meet the revised standard.',
   },
   {
-    regulator: 'DFSA · Consultation',
+    regulator: 'DFSA · CP143 Consultation',
     dot: 'amber',
-    what: 'DFSA published a new 28-page consultation paper on crypto asset regulation.',
+    what: 'DFSA issued CP143 — 34-page consultation on crypto token classification and disclosure requirements for DIFC-registered entities.',
     risk: 'HIGH',
-    riskNote: 'New consultation — response window may apply to your licence type.',
-    consider: 'It would be prudent to assess whether a formal response is required before the deadline.',
+    riskNote: 'Response deadline in 45 days. Proposed classification changes may affect your current product permissions.',
+    consider: 'Assess whether a formal response submission is required and whether proposed changes affect your current authorisation scope.',
   },
   {
-    regulator: 'UAE FIU · Publication',
+    regulator: 'FSRA · ADGM Guidance',
     dot: 'green',
-    what: 'UAE FIU released a new AML typology report covering virtual asset sector risks.',
+    what: 'ADGM FSRA published updated guidance on virtual asset custody arrangements and segregation requirements.',
     risk: 'MEDIUM',
-    riskNote: 'Relevant for VASP and payment institution risk assessments.',
-    consider: 'Your team may wish to incorporate new typologies into your next risk assessment cycle.',
+    riskNote: 'Relevant for all FSRA-regulated firms holding virtual assets on behalf of clients.',
+    consider: 'Review current custody and segregation arrangements against the updated FSRA guidance with your legal adviser.',
   },
 ]
 
 const chainSteps = [
-  ['01', 'Source run', 'Official public source checked'],
-  ['02', 'Evidence', 'Snapshot + hash preserved'],
-  ['03', 'Review', 'MLRO/founder decision logged'],
-  ['04', 'Brief', 'Draft only until approved'],
+  ['01', 'Source run', 'Official public source fetched and logged'],
+  ['02', 'Evidence', 'SHA-256 hash + timestamp preserved'],
+  ['03', 'Review', 'MLRO/CCO decision gate recorded'],
+  ['04', 'Brief', 'Draft released only after approval'],
 ]
 
 // Regulator name strip shown below headline
@@ -203,17 +203,31 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
               Official UAE sources only
             </span>
 
-            {/* Primary headline — updated */}
+            {/* Primary headline */}
             <h1 className="sp-display sp-animate-fade-up sp-delay-1 max-w-4xl text-5xl leading-[1.03] text-white md:text-6xl lg:text-7xl">
-              Your compliance team gets the change, the meaning, and the action — not just an alert.
+              VARA, DFSA, and CBUAE publish without warning. Your team finds out when it's too late.
             </h1>
 
-            {/* Subheadline — updated */}
+            {/* Subheadline */}
             <p className="sp-animate-fade-up sp-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              StatuteProof monitors UAE and international regulators, detects changes in official
-              sources, and delivers AI-written briefs telling you exactly what to do — with
-              cryptographic evidence of when it was caught.
+              StatuteProof monitors 252 UAE official sources on a defined schedule, detects
+              text changes the moment they appear, and delivers a structured brief with a source URL,
+              diff, timestamp, and SHA-256 evidence record your audit trail can rely on.
             </p>
+
+            {/* Pain point bullets */}
+            <ul className="sp-animate-fade-up sp-delay-2 mt-6 max-w-xl space-y-2.5">
+              {[
+                'VARA issued an update. Your team learned about it from a LinkedIn post.',
+                'Your board asked for the audit trail. Your spreadsheet has no timestamps.',
+                'A DFSA consultation closes in 30 days. Nobody flagged the response deadline.',
+              ].map(point => (
+                <li key={point} className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-300">
+                  <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400" />
+                  {point}
+                </li>
+              ))}
+            </ul>
 
             {/* Regulator strip */}
             <div className="sp-animate-fade-up sp-delay-2 mt-6 flex flex-wrap items-center gap-2">
@@ -233,9 +247,9 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             {/* Trust metrics */}
             <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-3">
               {[
-                ['180+', 'Monitored sources'],
-                ['SHA-256', 'Hash per run'],
-                ['Human-review', 'Delivery gate'],
+                ['252', 'UAE official sources'],
+                ['SHA-256', 'Hash per evidence run'],
+                ['Human-review', 'MLRO/CCO delivery gate'],
               ].map(([stat, label]) => (
                 <div key={stat} className="sp-glass rounded-2xl px-4 py-3">
                   <p className="sp-mono text-base font-bold text-cyan-300">{stat}</p>

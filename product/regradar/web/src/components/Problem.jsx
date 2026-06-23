@@ -6,32 +6,32 @@ const problems = [
     iconColor: 'text-amber-200',
     iconBg: 'bg-amber-400/10 border border-amber-300/20',
     accentBg: 'bg-amber-400',
-    title: 'You are checking 10+ regulator websites by hand',
-    desc: 'CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, DIFC, Ministry of Finance, Ministry of Economy — each publishes independently. There is no aggregated feed. A compliance officer doing this manually will spend two to four hours a week copying page text into a spreadsheet and hoping nothing was missed.',
+    title: 'Six UAE regulators. No shared feed. No alert when something changes.',
+    desc: 'CBUAE, VARA, DFSA, ADGM/FSRA, SCA, and UAE FIU each publish independently across PDFs, web pages, and consultation portals. There is no aggregated feed. Checking them manually means two to four hours a week per compliance officer — and every site you do not check that day is a gap in your monitoring record.',
   },
   {
     Icon: Clock,
     iconColor: 'text-cyan-200',
     iconBg: 'bg-cyan-400/10 border border-cyan-300/20',
     accentBg: 'bg-[#16D9F5]',
-    title: 'You find out about rule changes from peers, not from a system',
-    desc: "When VARA issued its updated Virtual Assets and Related Activities Regulations, some compliance teams learned about it from a consultant or a LinkedIn post — not from a live monitor on the official portal. That gap between publication and internal awareness is the window your regulator is watching.",
+    title: 'Your team found out about the VARA update from a LinkedIn post — not a system',
+    desc: 'When VARA amended its Virtual Assets and Related Activities Regulations in late 2024, a number of VASP compliance teams first learned about it through a consultant or peer — not through a live monitor on the official portal. The gap between publication date and internal awareness date is exactly what regulators scrutinise during an enforcement review.',
   },
   {
     Icon: FileX,
     iconColor: 'text-emerald-200',
     iconBg: 'bg-emerald-400/10 border border-emerald-300/20',
     accentBg: 'bg-emerald-400',
-    title: 'Your board asks for evidence — your spreadsheet is not evidence',
-    desc: "When the board or an internal audit asks how you track regulatory changes, a manually maintained spreadsheet with no timestamps, no source URLs, and no change history does not hold up. What they are asking for is a documented record: which source, when it changed, and what your team did in response.",
+    title: 'Your board asks for the audit trail. A spreadsheet with no timestamps is not one.',
+    desc: 'Internal audit and board risk committees are asking for documented evidence of how regulatory changes are tracked. A manually updated spreadsheet with no source URL, no timestamp, and no change delta does not constitute a monitoring record. What they need: which source, what changed, when it was detected, and what decision was made in response.',
   },
   {
     Icon: MessageSquare,
     iconColor: 'text-purple-200',
     iconBg: 'bg-purple-400/10 border border-purple-300/20',
     accentBg: 'bg-purple-400',
-    title: 'A raw source alert is not the same as a brief you can act on',
-    desc: 'Knowing that CBUAE published something is not the same as knowing whether it affects your licence type, your AML obligations, or your customer onboarding procedures. Without relevance filtering tied to your specific profile, every alert is noise until someone reads the whole document.',
+    title: 'A DFSA consultation closed last month. Did your team log the response decision?',
+    desc: 'Knowing that CBUAE or DFSA published something is not the same as knowing whether it affects your licence category, triggers a response obligation, or requires a procedure update. Without a structured brief tied to your firm profile, every publication is noise until someone reads the full document — and consultation deadlines pass silently.',
   },
 ]
 
@@ -42,14 +42,15 @@ export default function Problem() {
 
         <div className="text-center mb-12">
           <div className="sp-kicker inline-flex items-center gap-2 text-amber-200 bg-amber-400/10 border border-amber-300/20 rounded-full px-4 py-1.5 text-sm font-medium mb-4">
-            The compliance monitoring gap
+            The monitoring gap regulators exploit
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">
-            Regulatory changes do not wait for your Monday review.
+            The circular was published three weeks ago. Did your MLRO know by end of day?
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
-            UAE financial authorities publish across federal, DIFC, ADGM, and specialist regulator layers.
-            Most compliance teams are still monitoring the old way — manually, infrequently, and without a documented record.
+            UAE financial regulators publish circulars, guidance notes, and consultation papers across
+            CBUAE, VARA, DFSA, ADGM/FSRA, SCA, and UAE FIU — without notifying you.
+            Most compliance teams are monitoring manually, infrequently, and without a documented record that holds up in an enforcement review.
           </p>
         </div>
 
@@ -71,7 +72,7 @@ export default function Problem() {
 
         <div className="mt-12 rounded-xl border border-cyan-400/20 bg-[#0D1B2E] px-8 py-6 text-center">
           <p className="text-slate-300 text-base leading-relaxed max-w-3xl mx-auto">
-            StatuteProof monitors these sources on a defined schedule and delivers a structured brief when something changes — with a source URL, timestamp, change delta, and evidence record your board can inspect.
+            StatuteProof monitors 252 UAE official sources on a defined schedule. When text changes, it delivers a structured brief — source URL, change diff, detection timestamp, SHA-256 hash — with a logged MLRO review gate before anything reaches your team. Monitoring intelligence only. Not legal advice.
           </p>
         </div>
 
