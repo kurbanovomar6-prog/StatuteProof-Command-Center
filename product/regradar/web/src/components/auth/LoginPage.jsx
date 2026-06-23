@@ -13,12 +13,12 @@ function AuthLayout({ children }) {
     <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-10 text-slate-200 selection:bg-[#16D9F5]/30">
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.92fr_0.78fr]">
         <aside className="hidden lg:block">
-          <div className="mb-10 flex items-center gap-3">
+          <a href="/" className="mb-10 flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-10 w-auto" />
             <span className="text-2xl font-extrabold tracking-tight text-white">
               Statute<span className="text-[#16D9F5]">Proof</span>
             </span>
-          </div>
+          </a>
 
           <div className="max-w-xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
