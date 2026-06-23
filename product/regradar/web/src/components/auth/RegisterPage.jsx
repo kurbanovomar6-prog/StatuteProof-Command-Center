@@ -214,7 +214,7 @@ export default function RegisterPage({ onRegister, onLogin }) {
             ? 'Checking…'
             : googleStatus.available
               ? 'Continue with Google'
-              : 'Continue with Google'}
+              : 'Google sign-up not available'}
         </button>
       </div>
 

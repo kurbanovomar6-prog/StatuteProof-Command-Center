@@ -503,7 +503,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-white">Source status</h2>
-              <p className="mt-1 text-xs text-slate-500">Live data from /api/sources/status, shown with readiness-safe labels.</p>
+              <p className="mt-1 text-xs text-slate-500">Current monitoring status and extraction readiness for all active UAE sources.</p>
             </div>
             <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300">LIVE API</span>
           </div>

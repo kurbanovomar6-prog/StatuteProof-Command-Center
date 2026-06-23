@@ -296,12 +296,12 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
             </div>
             <Toggle checked={tgEnabled} onChange={setTgEnabled} />
           </div>
-          <div className="flex items-center justify-between opacity-50">
+          <div className="flex items-center justify-between opacity-40 cursor-not-allowed" title="Email digest is not yet available in this pilot">
             <div>
               <p className="text-sm text-slate-200">Email digest</p>
-              <p className="text-xs text-slate-500">Coming soon</p>
+              <p className="text-xs text-slate-500">Not available in pilot — Telegram delivery is active</p>
             </div>
-            <Toggle checked={emailEnabled} onChange={setEmailEnabled} />
+            <Toggle checked={false} onChange={() => {}} disabled />
           </div>
         </div>
       </Section>

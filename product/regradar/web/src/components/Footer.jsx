@@ -5,7 +5,7 @@ const footerLinks = [
   { label: 'Source Coverage', href: '#coverage' },
   { label: 'Evidence', href: '#evidence' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Contact', href: 'mailto:hello@statuteproof.com' },
 ]
 
 export default function Footer() {

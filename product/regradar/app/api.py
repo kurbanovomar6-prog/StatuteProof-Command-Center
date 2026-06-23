@@ -90,6 +90,15 @@ _CORS: dict[str, str] = {
 if _ALLOWED_ORIGIN:
     _CORS["Access-Control-Allow-Origin"] = _ALLOWED_ORIGIN
 
+# Security headers — applied to every API response.
+_SECURITY_HEADERS: dict[str, str] = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+}
+
 
 def _session_cookie_secure_for_host(host: str | None) -> bool:
     override = os.environ.get("STATUTEPROOF_COOKIE_SECURE", "").strip().lower()
@@ -163,14 +172,21 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         for k, v in _CORS.items():
             self.send_header(k, v)
+        for k, v in _SECURITY_HEADERS.items():
+            self.send_header(k, v)
         for k, v in extra_headers or []:
             self.send_header(k, v)
         self.end_headers()
         self.wfile.write(body)
 
+    _MAX_BODY_BYTES = 524_288  # 512 KB — reasonable for all API payloads
+
     def _read_json(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
         if not length:
+            return {}
+        if length > self._MAX_BODY_BYTES:
+            self._send_json({"ok": False, "message": "Request body too large."}, 413)
             return {}
         try:
             return json.loads(self.rfile.read(length))
@@ -181,6 +197,9 @@ class _Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         if not length:
             return {}, None
+        if length > self._MAX_BODY_BYTES:
+            self._send_json({"ok": False, "message": "Request body too large."}, 413)
+            return None, "Request body too large."
         try:
             data = json.loads(self.rfile.read(length))
         except (json.JSONDecodeError, ValueError):
@@ -309,6 +328,8 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_header("Location", location)
         for k, v in _CORS.items():
             self.send_header(k, v)
+        for k, v in _SECURITY_HEADERS.items():
+            self.send_header(k, v)
         for k, v in extra_headers or []:
             self.send_header(k, v)
         self.end_headers()
@@ -318,6 +339,8 @@ class _Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204)
         for k, v in _CORS.items():
+            self.send_header(k, v)
+        for k, v in _SECURITY_HEADERS.items():
             self.send_header(k, v)
         self.end_headers()
 
@@ -583,7 +606,7 @@ class _Handler(BaseHTTPRequestHandler):
             state = create_google_oauth_state(next_path=next_path)
             self._redirect(google_oauth_authorization_url(state))
         except OAuthAccountError as exc:
-            self._send_json({"ok": False, "message": str(exc)}, 503)
+            self._send_json({"ok": False, "message": "Google sign-in is not available for this account type."}, 503)
         except Exception as exc:
             logger.error("Google OAuth start failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Google sign-in could not be started."}, 500)
@@ -1404,12 +1427,15 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(data)))
             for k, v in _CORS.items():
                 self.send_header(k, v)
+            for k, v in _SECURITY_HEADERS.items():
+                self.send_header(k, v)
             self.end_headers()
             self.wfile.write(data)
         except ValueError as exc:
             self._send_json({"ok": False, "message": str(exc)}, 400)
         except RuntimeError as exc:
-            self._send_json({"ok": False, "message": str(exc)}, 500)
+            logger.warning("evidence export download runtime error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
         except Exception as exc:
             logger.error("evidence export download failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
@@ -1511,7 +1537,8 @@ class _Handler(BaseHTTPRequestHandler):
         except ValueError as exc:
             self._send_json({"ok": False, "message": str(exc)}, 400)
         except RuntimeError as exc:
-            self._send_json({"ok": False, "message": str(exc)}, 500)
+            logger.warning("evidence export runtime error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
         except Exception as exc:
             logger.error("evidence export failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
@@ -1600,6 +1627,13 @@ class _Handler(BaseHTTPRequestHandler):
 
         if not source_id:
             self._send_json({"ok": False, "message": "source_id is required."}, 400)
+            return
+
+        # Sanitize source_id — strip any path traversal characters before
+        # it is used as a directory component on disk.
+        import re as _re
+        if not _re.match(r'^[\w\-\.]+$', source_id):
+            self._send_json({"ok": False, "message": "Invalid source_id format."}, 400)
             return
 
         try:
@@ -2479,20 +2513,24 @@ class _Handler(BaseHTTPRequestHandler):
                 report = render_assurance_report_markdown(stats, client_name=client_name)
                 self._send_json({"status": "ok", "report": report, "stats": stats})
         except Exception as exc:
-            logger.error("monthly-assurance error: %s", exc)
-            self._send_json({"status": "error", "message": str(exc)}, 500)
+            logger.error("monthly-assurance error: %s", type(exc).__name__)
+            self._send_json({"status": "error", "message": "Internal server error."}, 500)
 
     # ── GET /api/email/delivery-status ────────────────────────────────────────
 
     def _handle_email_delivery_status(self) -> None:
-        """Return email provider configuration status (read-only, no auth required)."""
+        """Return email provider configuration status (authenticated users only)."""
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
         from app.email_delivery import validate_email_provider_config
         try:
             config = validate_email_provider_config()
             self._send_json({"status": "ok", **config})
         except Exception as exc:
-            logger.error("email delivery-status error: %s", exc)
-            self._send_json({"status": "error", "message": str(exc)}, 500)
+            logger.error("email delivery-status error: %s", type(exc).__name__)
+            self._send_json({"status": "error", "message": "Unable to retrieve email configuration."}, 500)
 
     # ── POST /api/review/action ───────────────────────────────────────────────
 
@@ -2525,8 +2563,8 @@ class _Handler(BaseHTTPRequestHandler):
             else:
                 self._send_json({"ok": True, **result})
         except Exception as exc:
-            logger.error("review action error: %s", exc)
-            self._send_json({"ok": False, "message": str(exc)}, 500)
+            logger.error("review action error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_canonical_evidence_review_action(self) -> None:
         """Append an approval/rejection/block decision for canonical evidence."""
@@ -2608,8 +2646,8 @@ class _Handler(BaseHTTPRequestHandler):
             else:
                 self._send_json({"ok": True, **result})
         except Exception as exc:
-            logger.error("audit vault error: %s", exc)
-            self._send_json({"ok": False, "message": str(exc)}, 500)
+            logger.error("audit vault error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
 
 def _start_background_monitor() -> None:

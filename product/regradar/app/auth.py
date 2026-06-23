@@ -281,7 +281,6 @@ def validate_session(session_id: str) -> dict | None:
             "id": data["user_id"],
             "email": data["email"],
             "normalized_email": data.get("normalized_email"),
-            "password_hash": data["password_hash"],
             "auth_provider": data.get("auth_provider"),
             "email_verified": data.get("email_verified"),
             "full_name": data["full_name"],
