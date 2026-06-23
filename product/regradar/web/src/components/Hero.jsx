@@ -9,39 +9,39 @@ import {
   TriangleAlert,
 } from 'lucide-react'
 
-// ─── Rotating signal cards in hero panel ─────────────────────────────────────
+// ─── Rotating signal cards in hero panel — SAMPLE / FAKE ─────────────────────
 const SIGNALS = [
   {
-    regulator: 'VARA · Virtual Assets Rulebook',
+    regulator: 'DFSA Rulebook / AML Module',
     dot: 'green',
-    what: 'VARA amended Chapter 3 of the Virtual Assets and Related Activities Regulations — capital adequacy thresholds revised for Category 3 licence holders.',
+    what: 'A monitored DFSA page shows updated wording in a section related to AML systems and controls. The changed text has been captured, hashed and timestamped for review.',
+    risk: 'MEDIUM',
+    riskNote: 'Check whether the wording affects your current AML monitoring procedures, policies or control mapping.',
+    consider: 'Assign review to Compliance and MLRO before deciding whether internal documentation needs updating.',
+  },
+  {
+    regulator: 'VARA Compliance & Risk Management',
+    dot: 'green',
+    what: 'A VARA source page appears to have been updated with revised language around compliance obligations. StatuteProof captured the changed section and linked it to the monitoring run evidence.',
     risk: 'HIGH',
-    riskNote: 'Mandatory compliance deadline applies. Affects licence renewal and ongoing capital reporting obligations.',
-    consider: 'Your MLRO and CFO should review current capital adequacy against the amended thresholds before the next reporting window.',
+    riskNote: 'Review whether the change affects your current compliance calendar, responsible owner or policy controls.',
+    consider: 'Escalate to the relevant compliance lead before updating internal procedures.',
+  },
+  {
+    regulator: 'FSRA Guidance / Financial Crime',
+    dot: 'amber',
+    what: 'A monitored FSRA guidance page shows a text update in a financial crime-related section. The brief highlights the affected wording and stores the run hash for later reference.',
+    risk: 'MEDIUM',
+    riskNote: 'Relevant for regulated firms with financial crime monitoring and reporting obligations.',
+    consider: 'Compare the updated wording against your current financial crime framework and monitoring controls. Decide whether the change requires legal review, policy refresh or no action.',
   },
   {
     regulator: 'CBUAE · AML/CFT Guidelines',
     dot: 'green',
-    what: 'CBUAE updated Section 4.2 of its AML/CFT Guidelines — customer due diligence requirements for non-resident customers strengthened.',
+    what: 'A monitored CBUAE page shows updated wording in a section related to customer due diligence. The change has been captured and is ready for MLRO review.',
     risk: 'MEDIUM',
-    riskNote: 'Affects onboarding procedures for non-resident clients. Remediation of existing customer files may be required.',
+    riskNote: 'Affects onboarding and ongoing CDD procedures. Remediation of existing files may be required.',
     consider: 'Review CDD workflows with your MLRO and assess whether existing customer files meet the revised standard.',
-  },
-  {
-    regulator: 'DFSA · CP143 Consultation',
-    dot: 'amber',
-    what: 'DFSA issued CP143 — 34-page consultation on crypto token classification and disclosure requirements for DIFC-registered entities.',
-    risk: 'HIGH',
-    riskNote: 'Response deadline in 45 days. Proposed classification changes may affect your current product permissions.',
-    consider: 'Assess whether a formal response submission is required and whether proposed changes affect your current authorisation scope.',
-  },
-  {
-    regulator: 'FSRA · ADGM Guidance',
-    dot: 'green',
-    what: 'ADGM FSRA published updated guidance on virtual asset custody arrangements and segregation requirements.',
-    risk: 'MEDIUM',
-    riskNote: 'Relevant for all FSRA-regulated firms holding virtual assets on behalf of clients.',
-    consider: 'Review current custody and segregation arrangements against the updated FSRA guidance with your legal adviser.',
   },
 ]
 
@@ -93,7 +93,7 @@ function EvidenceDossier() {
           </div>
           <span className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-900">
             <TriangleAlert className="h-3.5 w-3.5" />
-            Sample
+            SAMPLE / FAKE
           </span>
         </div>
 
@@ -204,26 +204,24 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             </span>
 
             {/* Primary headline */}
-            <h1 className="sp-display sp-animate-fade-up sp-delay-1 max-w-4xl text-5xl leading-[1.03] text-white md:text-6xl lg:text-7xl">
-              VARA, DFSA, and CBUAE publish without warning. Your team finds out when it's too late.
+            <h1 className="sp-display sp-animate-fade-up sp-delay-1 max-w-4xl text-5xl text-white md:text-6xl lg:text-7xl">
+              Stop refreshing regulator websites every week.
             </h1>
 
             {/* Subheadline */}
             <p className="sp-animate-fade-up sp-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              StatuteProof monitors 252 UAE official sources on a defined schedule, detects
-              text changes the moment they appear, and delivers a structured brief with a source URL,
-              diff, timestamp, and SHA-256 evidence record your audit trail can rely on.
+              StatuteProof watches official UAE regulator sources and sends your team a concise brief when relevant text changes. Instead of spending hours checking pages manually, Compliance gets a reviewed signal with source links, change context and evidence.
             </p>
 
-            {/* Pain point bullets */}
+            {/* Bullets */}
             <ul className="sp-animate-fade-up sp-delay-2 mt-6 max-w-xl space-y-2.5">
               {[
-                'VARA issued an update. Your team learned about it from a LinkedIn post.',
-                'Your board asked for the audit trail. Your spreadsheet has no timestamps.',
-                'A DFSA consultation closes in 30 days. Nobody flagged the response deadline.',
+                'Reduce weekly manual checks across VARA, DFSA, FSRA, SCA and CBUAE.',
+                'See what changed, where it changed and why it may matter to your firm.',
+                'Give MLRO, CCO and Compliance one shared brief for review.',
               ].map(point => (
                 <li key={point} className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-300">
-                  <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400" />
+                  <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-400" />
                   {point}
                 </li>
               ))}
@@ -247,9 +245,9 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             {/* Trust metrics */}
             <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-3">
               {[
-                ['252', 'UAE official sources'],
-                ['SHA-256', 'Hash per evidence run'],
-                ['Human-review', 'MLRO/CCO delivery gate'],
+                ['252', 'UAE official sources monitored'],
+                ['SHA-256', 'Hash per run — evidence attached'],
+                ['Human-review', 'Gate before every delivery'],
               ].map(([stat, label]) => (
                 <div key={stat} className="sp-glass rounded-2xl px-4 py-3">
                   <p className="sp-mono text-base font-bold text-cyan-300">{stat}</p>
