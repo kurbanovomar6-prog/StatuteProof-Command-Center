@@ -31,15 +31,15 @@ const PACKS = [
   {
     profile: 'DIFC / DFSA',
     bestFor: 'DIFC regulated firms, funds, advisers, law firms and compliance consultants',
-    coverage: 'strong',
+    coverage: 'good',
     layers: [
-      { text: 'DIFC Laws and Regulations — selected legal database and news hub', status: 'active' },
-      { text: 'DIFC Data Protection — Commissioner, guidance and enforcement', status: 'active' },
       { text: 'DFSA legislative amendment notices, consultation papers and enforcement', status: 'active' },
       { text: 'DFSA Rulebook modules and SEO letters', status: 'active' },
       { text: 'DIFC Courts — practice directions and registrar directions', status: 'active' },
+      { text: 'DIFC Laws and Regulations — legal database and news hub', status: 'pending' },
+      { text: 'DIFC Data Protection — Commissioner, guidance and enforcement', status: 'pending' },
     ],
-    caveat: null,
+    caveat: 'DFSA and DIFC Courts sources are fresh-alert eligible. DIFC website (difc.com) uses anti-bot protection — a Playwright adapter is required before DIFC Laws and Data Protection sources deliver alerts.',
   },
   {
     profile: 'ADGM / FSRA',
