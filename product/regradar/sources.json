@@ -9961,5 +9961,197 @@
       "item_selector": "a[href]"
     },
     "wait_for_selector": "main, a[href$=\".pdf\"]"
+  },
+  {
+    "name": "VARA Public Register — Registered Entities",
+    "url": "https://www.vara.ae/en/public-register/",
+    "jurisdiction": "UAE",
+    "category": "virtual_assets",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "VARA Regulatory Framework — Rulebooks Index",
+    "url": "https://www.vara.ae/en/regulatory-framework/rulebooks/",
+    "jurisdiction": "UAE",
+    "category": "virtual_assets",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "VARA AML/CFT Rulebook",
+    "url": "https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/",
+    "jurisdiction": "UAE",
+    "category": "virtual_assets",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "CBUAE Publications Hub",
+    "url": "https://www.centralbank.ae/en/publications/",
+    "jurisdiction": "UAE",
+    "category": "central_bank",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "CBUAE Consultations",
+    "url": "https://www.centralbank.ae/en/consultations/",
+    "jurisdiction": "UAE",
+    "category": "central_bank",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "CBUAE Media Centre and News",
+    "url": "https://www.centralbank.ae/en/media-center/news/",
+    "jurisdiction": "UAE",
+    "category": "central_bank",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "CBUAE Licensing — Regulated Entities",
+    "url": "https://www.centralbank.ae/en/licensing/",
+    "jurisdiction": "UAE",
+    "category": "central_bank",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "CBUAE AML/CFT Operations Hub",
+    "url": "https://www.centralbank.ae/en/our-operations/anti-money-laundering-and-combatting-the-financing-of-terrorism/",
+    "jurisdiction": "UAE",
+    "category": "central_bank",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DFSA Public Register",
+    "url": "https://www.dfsa.ae/public-register/",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DFSA Publications Hub",
+    "url": "https://www.dfsa.ae/your-resources/publications/",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DIFC Consultation Papers Index",
+    "url": "https://www.difc.com/business/laws-and-regulations/consultation-papers/",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ADGM Legal Framework — Legislation Index",
+    "url": "https://www.adgm.com/legal-framework/legislation/",
+    "jurisdiction": "UAE",
+    "category": "adgm_fsra",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ADGM FSRA Rules and Regulations Index",
+    "url": "https://www.adgm.com/fsra/rules-and-regulations/",
+    "jurisdiction": "UAE",
+    "category": "adgm_fsra",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ADGM FSRA Guidance and Policy Statements",
+    "url": "https://www.adgm.com/fsra/guidance-and-policy-statements/",
+    "jurisdiction": "UAE",
+    "category": "adgm_fsra",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ADGM FSRA Notices",
+    "url": "https://www.adgm.com/fsra/notices/",
+    "jurisdiction": "UAE",
+    "category": "adgm_fsra",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ADGM FSRA Consultations",
+    "url": "https://www.adgm.com/fsra/consultations/",
+    "jurisdiction": "UAE",
+    "category": "adgm_fsra",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "UAE FIU Laws and Regulations",
+    "url": "https://www.uaefiu.gov.ae/en/Laws-Regulations/",
+    "jurisdiction": "UAE",
+    "category": "aml",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "Executive Office for AML/CFT — Anti-Money Laundering Hub",
+    "url": "https://www.moec.gov.ae/en/anti-money-laundering/",
+    "jurisdiction": "UAE",
+    "category": "aml",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "SCA Laws and Legislation",
+    "url": "https://www.sca.gov.ae/en/legislation/laws.aspx",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "SCA Regulations Index",
+    "url": "https://www.sca.gov.ae/en/legislation/regulations.aspx",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "SCA Circulars",
+    "url": "https://www.sca.gov.ae/en/circulars.aspx",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "FTA VAT Public Clarifications",
+    "url": "https://tax.gov.ae/en/taxes/vat/vat-public-clarifications.aspx",
+    "jurisdiction": "UAE",
+    "category": "tax",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ADGM Office of Data Protection",
+    "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/",
+    "jurisdiction": "UAE",
+    "category": "data_protection",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DIFC Laws and Regulations — Data Protection Section",
+    "url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
+    "jurisdiction": "UAE",
+    "category": "data_protection",
+    "enabled": true,
+    "status": "candidate"
   }
 ]
