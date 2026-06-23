@@ -1,0 +1,302 @@
+[
+  {
+    "name": "Federal Tax Authority — All Tax Legislation",
+    "url": "https://tax.gov.ae/en/legislation.aspx",
+    "status_code": 200,
+    "size_bytes": 385048,
+    "final_url": "https://tax.gov.ae/en/legislation.aspx",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <!--[if IE 8]>  <html lang=\"en\" class=\"ie8\">  <![endif]-->  <!--[if IE 9]>  <html lang=\"en\" class=\"ie9\">  <![endif]-->  <!--[if !IE]><!-->    <html lang=\"en-US\">  \t<!--<![endif]"
+  },
+  {
+    "name": "Federal Tax Authority — VAT Guides and References",
+    "url": "https://tax.gov.ae/en/taxes/vat/guides.references.aspx",
+    "status_code": 200,
+    "size_bytes": 386049,
+    "final_url": "https://tax.gov.ae/en/taxes/vat/guides.references.aspx",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <!--[if IE 8]>  <html lang=\"en\" class=\"ie8\">  <![endif]-->  <!--[if IE 9]>  <html lang=\"en\" class=\"ie9\">  <![endif]-->  <!--[if !IE]><!-->    <html lang=\"en-US\">  \t<!--<![endif]"
+  },
+  {
+    "name": "Federal Tax Authority — Corporate Tax Guides and References",
+    "url": "https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.guides.references.aspx",
+    "status_code": 200,
+    "size_bytes": 393250,
+    "final_url": "https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.guides.references.aspx",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <!--[if IE 8]>  <html lang=\"en\" class=\"ie8\">  <![endif]-->  <!--[if IE 9]>  <html lang=\"en\" class=\"ie9\">  <![endif]-->  <!--[if !IE]><!-->    <html lang=\"en-US\">  \t<!--<![endif]"
+  },
+  {
+    "name": "Federal Tax Authority — Media Centre",
+    "url": "https://tax.gov.ae/en/media.centre.aspx",
+    "status_code": 200,
+    "size_bytes": 376335,
+    "final_url": "https://tax.gov.ae/en/media.centre.aspx",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <!--[if IE 8]>  <html lang=\"en\" class=\"ie8\">  <![endif]-->  <!--[if IE 9]>  <html lang=\"en\" class=\"ie9\">  <![endif]-->  <!--[if !IE]><!-->    <html lang=\"en-US\">  \t<!--<![endif]"
+  },
+  {
+    "name": "Federal Tax Authority — Corporate Tax Legislation",
+    "url": "https://tax.gov.ae/en/legislation/corporate-tax.aspx",
+    "status_code": 200,
+    "size_bytes": 384902,
+    "final_url": "https://tax.gov.ae/en/legislation/corporate-tax.aspx",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <!--[if IE 8]>  <html lang=\"en\" class=\"ie8\">  <![endif]-->  <!--[if IE 9]>  <html lang=\"en\" class=\"ie9\">  <![endif]-->  <!--[if !IE]><!-->    <html lang=\"en-US\">  \t<!--<![endif]"
+  },
+  {
+    "name": "ADGM FSRA Regulatory Alerts",
+    "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/enforcement/regulatory-alerts",
+    "status_code": 200,
+    "size_bytes": 163897,
+    "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/enforcement/regulatory-alerts",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <html lang=\"en\">  <head>      <meta charset=\"utf-8\" />      <meta http-equiv=\"X-UA-Compatible\" content=\"IE=10\" />      <meta name=\"viewport\" content=\"width=device-width, initial-sca"
+  },
+  {
+    "name": "VARA Public Register — Registered Entities",
+    "url": "https://www.vara.ae/en/public-register/",
+    "status_code": 404,
+    "size_bytes": 114391,
+    "final_url": "https://www.vara.ae/en/public-register/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — URL path changed. New confirmed working path: https://www.vara.ae/en/licenses-and-register/public-register/ (724KB, 200 OK). Update sources.json URL before activation.",
+    "snippet": "<!DOCTYPE html><html><head><meta charSet=\"utf-8\"/><meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"/><meta nam"
+  },
+  {
+    "name": "VARA Regulatory Framework — Rulebooks Index",
+    "url": "https://www.vara.ae/en/regulatory-framework/rulebooks/",
+    "status_code": 404,
+    "size_bytes": 114391,
+    "final_url": "https://www.vara.ae/en/regulatory-framework/rulebooks/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — URL path changed. VARA restructured. Regulations now at /en/regulations/regulatory-notices/ (200 OK, 605KB). Update URL in sources.json.",
+    "snippet": "<!DOCTYPE html><html><head><meta charSet=\"utf-8\"/><meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"/><meta nam"
+  },
+  {
+    "name": "VARA AML/CFT Rulebook",
+    "url": "https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/",
+    "status_code": 404,
+    "size_bytes": 114391,
+    "final_url": "https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — specific AML/CFT rulebook path not found. VARA site restructured. Manual crawl of /en/regulations/ required to locate new AML path.",
+    "snippet": "<!DOCTYPE html><html><head><meta charSet=\"utf-8\"/><meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"/><meta nam"
+  },
+  {
+    "name": "CBUAE Publications Hub",
+    "url": "https://www.centralbank.ae/en/publications/",
+    "status_code": 403,
+    "size_bytes": 5614,
+    "final_url": "https://www.centralbank.ae/en/publications/",
+    "verdict": "GEO_BLOCKED",
+    "notes": "HTTP 403 — likely geo-IP restriction or auth wall",
+    "snippet": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta nam"
+  },
+  {
+    "name": "CBUAE Consultations",
+    "url": "https://www.centralbank.ae/en/consultations/",
+    "status_code": 403,
+    "size_bytes": 5638,
+    "final_url": "https://www.centralbank.ae/en/consultations/",
+    "verdict": "GEO_BLOCKED",
+    "notes": "HTTP 403 — likely geo-IP restriction or auth wall",
+    "snippet": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta nam"
+  },
+  {
+    "name": "CBUAE Media Centre and News",
+    "url": "https://www.centralbank.ae/en/media-center/news/",
+    "status_code": 403,
+    "size_bytes": 5671,
+    "final_url": "https://www.centralbank.ae/en/media-center/news/",
+    "verdict": "GEO_BLOCKED",
+    "notes": "HTTP 403 — likely geo-IP restriction or auth wall",
+    "snippet": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta nam"
+  },
+  {
+    "name": "CBUAE Licensing — Regulated Entities",
+    "url": "https://www.centralbank.ae/en/licensing/",
+    "status_code": 403,
+    "size_bytes": 5626,
+    "final_url": "https://www.centralbank.ae/en/licensing/",
+    "verdict": "GEO_BLOCKED",
+    "notes": "HTTP 403 — likely geo-IP restriction or auth wall",
+    "snippet": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta nam"
+  },
+  {
+    "name": "CBUAE AML/CFT Operations Hub",
+    "url": "https://www.centralbank.ae/en/our-operations/anti-money-laundering-and-combatting-the-financing-of-terrorism/",
+    "status_code": 403,
+    "size_bytes": 5919,
+    "final_url": "https://www.centralbank.ae/en/our-operations/anti-money-laundering-and-combatting-the-financing-of-terrorism/",
+    "verdict": "GEO_BLOCKED",
+    "notes": "HTTP 403 — likely geo-IP restriction or auth wall",
+    "snippet": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta nam"
+  },
+  {
+    "name": "DFSA Public Register",
+    "url": "https://www.dfsa.ae/public-register/",
+    "status_code": 200,
+    "size_bytes": 70670,
+    "final_url": "https://www.dfsa.ae/public-register/firms",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html> <!--[if lte IE 8]> <html lang=\"en\" class=\"ie10 ie9 ie8\"> <![endif]--> <!--[if IE 9]> <html lang=\"en\" class=\"ie10 ie9\"> <![endif]--> <!--[if gt IE 9]><!--> <html lang=\"en\"> <!--<![end"
+  },
+  {
+    "name": "DFSA Publications Hub",
+    "url": "https://www.dfsa.ae/your-resources/publications/",
+    "status_code": 404,
+    "size_bytes": 48407,
+    "final_url": "https://www.dfsa.ae/your-resources/publications",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — page not found",
+    "snippet": "<!DOCTYPE html> <!--[if lte IE 8]> <html lang=\"en\" class=\"ie10 ie9 ie8\"> <![endif]--> <!--[if IE 9]> <html lang=\"en\" class=\"ie10 ie9\"> <![endif]--> <!--[if gt IE 9]><!--> <html lang=\"en\"> <!--<![end"
+  },
+  {
+    "name": "DIFC Consultation Papers Index",
+    "url": "https://www.difc.com/business/laws-and-regulations/consultation-papers/",
+    "status_code": 429,
+    "size_bytes": 33794,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/consultation-papers/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 429 — rate limited / bot-blocked; Astro SPA shell returned, content requires JS + no-rate-limit access",
+    "snippet": "<!DOCTYPE html><html lang=\"en\" data-astro-cid-nbv56vs3> <head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#000\"><title>V"
+  },
+  {
+    "name": "ADGM Legal Framework — Legislation Index",
+    "url": "https://www.adgm.com/legal-framework/legislation/",
+    "status_code": 404,
+    "size_bytes": 83352,
+    "final_url": "https://www.adgm.com/legal-framework/legislation/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — page not found",
+    "snippet": "<!DOCTYPE html>  <html lang=\"en\">  <head>      <meta charset=\"utf-8\" />      <meta http-equiv=\"X-UA-Compatible\" content=\"IE=10\" />      <meta name=\"viewport\" content=\"width=device-width, initial-sca"
+  },
+  {
+    "name": "ADGM FSRA Rules and Regulations Index",
+    "url": "https://www.adgm.com/fsra/rules-and-regulations/",
+    "status_code": 404,
+    "size_bytes": 83352,
+    "final_url": "https://www.adgm.com/financial-services-regulatory-authorityrules-and-regulations/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — page not found",
+    "snippet": "<!DOCTYPE html>  <html lang=\"en\">  <head>      <meta charset=\"utf-8\" />      <meta http-equiv=\"X-UA-Compatible\" content=\"IE=10\" />      <meta name=\"viewport\" content=\"width=device-width, initial-sca"
+  },
+  {
+    "name": "ADGM FSRA Guidance and Policy Statements",
+    "url": "https://www.adgm.com/fsra/guidance-and-policy-statements/",
+    "status_code": 404,
+    "size_bytes": 83352,
+    "final_url": "https://www.adgm.com/financial-services-regulatory-authorityguidance-and-policy-statements/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — page not found",
+    "snippet": "<!DOCTYPE html>  <html lang=\"en\">  <head>      <meta charset=\"utf-8\" />      <meta http-equiv=\"X-UA-Compatible\" content=\"IE=10\" />      <meta name=\"viewport\" content=\"width=device-width, initial-sca"
+  },
+  {
+    "name": "ADGM FSRA Notices",
+    "url": "https://www.adgm.com/fsra/notices/",
+    "status_code": 404,
+    "size_bytes": 83352,
+    "final_url": "https://www.adgm.com/financial-services-regulatory-authoritynotices/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — page not found",
+    "snippet": "<!DOCTYPE html>  <html lang=\"en\">  <head>      <meta charset=\"utf-8\" />      <meta http-equiv=\"X-UA-Compatible\" content=\"IE=10\" />      <meta name=\"viewport\" content=\"width=device-width, initial-sca"
+  },
+  {
+    "name": "ADGM FSRA Consultations",
+    "url": "https://www.adgm.com/fsra/consultations/",
+    "status_code": 404,
+    "size_bytes": 83352,
+    "final_url": "https://www.adgm.com/financial-services-regulatory-authorityconsultations/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 404 — page not found",
+    "snippet": "<!DOCTYPE html>  <html lang=\"en\">  <head>      <meta charset=\"utf-8\" />      <meta http-equiv=\"X-UA-Compatible\" content=\"IE=10\" />      <meta name=\"viewport\" content=\"width=device-width, initial-sca"
+  },
+  {
+    "name": "UAE FIU Laws and Regulations",
+    "url": "https://www.uaefiu.gov.ae/en/Laws-Regulations/",
+    "status_code": 403,
+    "size_bytes": 5621,
+    "final_url": "https://uaefiu.gov.ae/en/Laws-Regulations/",
+    "verdict": "GEO_BLOCKED",
+    "notes": "HTTP 403 — likely geo-IP restriction or auth wall",
+    "snippet": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta nam"
+  },
+  {
+    "name": "Executive Office for AML/CFT — Anti-Money Laundering Hub",
+    "url": "https://www.moec.gov.ae/en/anti-money-laundering/",
+    "status_code": 200,
+    "size_bytes": 343292,
+    "final_url": "https://www.moet.gov.ae",
+    "verdict": "REDIRECT_WALL",
+    "notes": "Domain migrated: moec.gov.ae -> moet.gov.ae (Ministry renamed). Update URL to moet.gov.ae equivalent path.",
+    "snippet": "<!DOCTYPE html>                                                                        <html class=\"rtl\" dir=\"rtl\" lang=\"ar-SA\">            <head>  \t<title>الصف"
+  },
+  {
+    "name": "SCA Laws and Legislation",
+    "url": "https://www.sca.gov.ae/en/legislation/laws.aspx",
+    "status_code": 200,
+    "size_bytes": 171869,
+    "final_url": "https://www.uaecma.gov.ae/en/home",
+    "verdict": "REDIRECT_WALL",
+    "notes": "Domain migrated: sca.gov.ae -> uaecma.gov.ae (SCA renamed to UAE Capital Markets Authority). Update URL to uaecma.gov.ae.",
+    "snippet": "<!DOCTYPE html><html lang=en-GB dir=ltr itemscope itemtype=http://schema.org/WebPage><head><meta charset=utf-8 /><meta name=viewport content=\"width=device-width,initial-scale=1,maximum-scale=5.0\" /><m"
+  },
+  {
+    "name": "SCA Regulations Index",
+    "url": "https://www.sca.gov.ae/en/legislation/regulations.aspx",
+    "status_code": 200,
+    "size_bytes": 171869,
+    "final_url": "https://www.uaecma.gov.ae/en/home",
+    "verdict": "REDIRECT_WALL",
+    "notes": "Domain migrated: sca.gov.ae -> uaecma.gov.ae (SCA renamed to UAE Capital Markets Authority). Update URL to uaecma.gov.ae.",
+    "snippet": "<!DOCTYPE html><html lang=en-GB dir=ltr itemscope itemtype=http://schema.org/WebPage><head><meta charset=utf-8 /><meta name=viewport content=\"width=device-width,initial-scale=1,maximum-scale=5.0\" /><m"
+  },
+  {
+    "name": "SCA Circulars",
+    "url": "https://www.sca.gov.ae/en/circulars.aspx",
+    "status_code": 200,
+    "size_bytes": 171869,
+    "final_url": "https://www.uaecma.gov.ae/en/home",
+    "verdict": "REDIRECT_WALL",
+    "notes": "Domain migrated: sca.gov.ae -> uaecma.gov.ae (SCA renamed to UAE Capital Markets Authority). Update URL to uaecma.gov.ae.",
+    "snippet": "<!DOCTYPE html><html lang=en-GB dir=ltr itemscope itemtype=http://schema.org/WebPage><head><meta charset=utf-8 /><meta name=viewport content=\"width=device-width,initial-scale=1,maximum-scale=5.0\" /><m"
+  },
+  {
+    "name": "FTA VAT Public Clarifications",
+    "url": "https://tax.gov.ae/en/taxes/vat/vat-public-clarifications.aspx",
+    "status_code": 200,
+    "size_bytes": 427112,
+    "final_url": "https://tax.gov.ae/en/default.aspx",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <!--[if IE 8]>  <html lang=\"en\" class=\"ie8\">  <![endif]-->  <!--[if IE 9]>  <html lang=\"en\" class=\"ie9\">  <![endif]-->  <!--[if !IE]><!-->    <html lang=\"en-US\">  \t<!--<![endif]--"
+  },
+  {
+    "name": "ADGM Office of Data Protection",
+    "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/",
+    "status_code": 200,
+    "size_bytes": 101715,
+    "final_url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/",
+    "verdict": "GOOD",
+    "notes": "Real page with content",
+    "snippet": "<!DOCTYPE html>  <html lang=\"en\">  <head>      <meta charset=\"utf-8\" />      <meta http-equiv=\"X-UA-Compatible\" content=\"IE=10\" />      <meta name=\"viewport\" content=\"width=device-width, initial-sca"
+  },
+  {
+    "name": "DIFC Laws and Regulations — Data Protection Section",
+    "url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
+    "status_code": 429,
+    "size_bytes": 33793,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
+    "verdict": "BROKEN",
+    "notes": "HTTP 429 — rate limited / bot-blocked; Astro SPA shell returned, content requires JS + no-rate-limit access",
+    "snippet": "<!DOCTYPE html><html lang=\"en\" data-astro-cid-nbv56vs3> <head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#000\"><title>V"
+  }
+]

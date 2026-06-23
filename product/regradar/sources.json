@@ -848,8 +848,8 @@
     "fresh_signal_notes": "Remediation: important source is blocked, unstable, shallow, or not confirmed MONITOR_OK. Not counted as customer fresh-alert monitoring."
   },
   {
-    "name": "UAE Securities and Commodities Authority (SCA)",
-    "url": "https://www.sca.gov.ae/",
+    "name": "UAE Capital Market Authority (CMA)",
+    "url": "https://www.uaecma.gov.ae/",
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": false,
@@ -859,8 +859,8 @@
   },
   {
     "source_id": "AE-sca-circulars-rules-procedures",
-    "name": "SCA Circulars, Rules and Procedures",
-    "url": "https://www.sca.gov.ae/en/regulations/circulars-rules-and-procedures",
+    "name": "UAE CMA Circulars, Rules and Procedures",
+    "url": "https://www.uaecma.gov.ae/en/regulations/circulars-and-procedures.aspx",
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
@@ -1764,8 +1764,8 @@
   },
   {
     "source_id": "AE-sca-decisions",
-    "name": "SCA Board Decisions",
-    "url": "https://www.sca.gov.ae/en/legislation/sca-decisions.aspx",
+    "name": "UAE CMA Board Decisions",
+    "url": "https://www.uaecma.gov.ae/en/legislation/sca-decisions.aspx",
     "jurisdiction": "AE",
     "category": "securities_regulator",
     "enabled": false,
@@ -1958,8 +1958,8 @@
     "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
   },
   {
-    "name": "SCA Regulations Listing",
-    "url": "https://www.sca.gov.ae/en/regulations/regulations-listing",
+    "name": "UAE CMA Regulations Listing",
+    "url": "https://www.uaecma.gov.ae/en/regulations/regulations-listing.aspx",
     "jurisdiction": "AE",
     "category": "SCA",
     "enabled": true,
@@ -1999,8 +1999,8 @@
     "wait_for_selector": "main"
   },
   {
-    "name": "SCA FATCA and CRS Guidance",
-    "url": "https://www.sca.gov.ae/en/regulations/automatic-exchange-of-information-fatca-and-crs",
+    "name": "UAE CMA FATCA and CRS Guidance",
+    "url": "https://www.uaecma.gov.ae/en/regulations/automatic-exchange-of-information-fatca-and-crs.aspx",
     "jurisdiction": "AE",
     "category": "regulatory",
     "enabled": true,
@@ -2076,8 +2076,8 @@
     "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
   },
   {
-    "name": "SCA Corporate Governance Regulations",
-    "url": "https://www.sca.gov.ae/en/regulations/corporate-governance",
+    "name": "UAE CMA Corporate Governance Regulations",
+    "url": "https://www.uaecma.gov.ae/en/regulations/corporate-governance.aspx",
     "jurisdiction": "AE",
     "category": "regulatory",
     "enabled": true,
@@ -2217,8 +2217,8 @@
     "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
   },
   {
-    "name": "UAE SCA Anti-Money Laundering and Terrorist Financing",
-    "url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+    "name": "UAE CMA Anti-Money Laundering and Terrorist Financing",
+    "url": "https://www.uaecma.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing.aspx",
     "jurisdiction": "AE",
     "category": "aml",
     "enabled": true,
@@ -4213,7 +4213,7 @@
     "jurisdiction": "AE",
     "category": "financial_regulation",
     "enabled": true,
-    "status": "candidate",
+    "status": "active",
     "tier": "2",
     "adapter_family": "adgm_fsra_listing",
     "adapter_name": "adgm_fsra_listing",
@@ -9288,8 +9288,8 @@
     "customer_alert_policy": "Alert on material DFSA enforcement, regulatory action, decision, notice, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
   },
   {
-    "name": "SCA FinTech Regulatory Sandbox",
-    "url": "https://www.sca.gov.ae/en/regulations/fintech-regulatory-sandbox",
+    "name": "UAE CMA FinTech Regulatory Sandbox",
+    "url": "https://www.uaecma.gov.ae/en/regulations/fintech-regulatory-sandbox.aspx",
     "jurisdiction": "AE",
     "category": "regulatory",
     "enabled": true,
@@ -9963,68 +9963,68 @@
     "wait_for_selector": "main, a[href$=\".pdf\"]"
   },
   {
-    "name": "VARA Public Register — Registered Entities",
-    "url": "https://www.vara.ae/en/public-register/",
+    "name": "VARA Public Register — Licensed Entities",
+    "url": "https://www.vara.ae/en/licenses-and-register/public-register/",
     "jurisdiction": "UAE",
     "category": "virtual_assets",
     "enabled": true,
     "status": "candidate"
   },
   {
-    "name": "VARA Regulatory Framework — Rulebooks Index",
-    "url": "https://www.vara.ae/en/regulatory-framework/rulebooks/",
+    "name": "VARA Regulatory Notices and Enforcement Index",
+    "url": "https://www.vara.ae/en/regulations/regulatory-notices/",
     "jurisdiction": "UAE",
     "category": "virtual_assets",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "VARA AML/CFT Rulebook",
     "url": "https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/",
     "jurisdiction": "UAE",
     "category": "virtual_assets",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "CBUAE Publications Hub",
     "url": "https://www.centralbank.ae/en/publications/",
     "jurisdiction": "UAE",
     "category": "central_bank",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "geo_blocked"
   },
   {
     "name": "CBUAE Consultations",
     "url": "https://www.centralbank.ae/en/consultations/",
     "jurisdiction": "UAE",
     "category": "central_bank",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "geo_blocked"
   },
   {
     "name": "CBUAE Media Centre and News",
     "url": "https://www.centralbank.ae/en/media-center/news/",
     "jurisdiction": "UAE",
     "category": "central_bank",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "geo_blocked"
   },
   {
     "name": "CBUAE Licensing — Regulated Entities",
     "url": "https://www.centralbank.ae/en/licensing/",
     "jurisdiction": "UAE",
     "category": "central_bank",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "geo_blocked"
   },
   {
     "name": "CBUAE AML/CFT Operations Hub",
     "url": "https://www.centralbank.ae/en/our-operations/anti-money-laundering-and-combatting-the-financing-of-terrorism/",
     "jurisdiction": "UAE",
     "category": "central_bank",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "geo_blocked"
   },
   {
     "name": "DFSA Public Register",
@@ -10032,99 +10032,99 @@
     "jurisdiction": "UAE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "DFSA Publications Hub",
     "url": "https://www.dfsa.ae/your-resources/publications/",
     "jurisdiction": "UAE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "DIFC Consultation Papers Index",
     "url": "https://www.difc.com/business/laws-and-regulations/consultation-papers/",
     "jurisdiction": "UAE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_needs_playwright"
   },
   {
     "name": "ADGM Legal Framework — Legislation Index",
     "url": "https://www.adgm.com/legal-framework/legislation/",
     "jurisdiction": "UAE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "ADGM FSRA Rules and Regulations Index",
     "url": "https://www.adgm.com/fsra/rules-and-regulations/",
     "jurisdiction": "UAE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "ADGM FSRA Guidance and Policy Statements",
     "url": "https://www.adgm.com/fsra/guidance-and-policy-statements/",
     "jurisdiction": "UAE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "ADGM FSRA Notices",
     "url": "https://www.adgm.com/fsra/notices/",
     "jurisdiction": "UAE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "ADGM FSRA Consultations",
     "url": "https://www.adgm.com/fsra/consultations/",
     "jurisdiction": "UAE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "UAE FIU Laws and Regulations",
     "url": "https://www.uaefiu.gov.ae/en/Laws-Regulations/",
     "jurisdiction": "UAE",
     "category": "aml",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "geo_blocked"
   },
   {
-    "name": "Executive Office for AML/CFT — Anti-Money Laundering Hub",
-    "url": "https://www.moec.gov.ae/en/anti-money-laundering/",
+    "name": "UAE Ministry of Economy — AML/CFT Hub (formerly Executive Office)",
+    "url": "https://www.moet.gov.ae/en/aml",
     "jurisdiction": "UAE",
     "category": "aml",
     "enabled": true,
     "status": "candidate"
   },
   {
-    "name": "SCA Laws and Legislation",
-    "url": "https://www.sca.gov.ae/en/legislation/laws.aspx",
+    "name": "UAE CMA Laws and Legislation",
+    "url": "https://www.uaecma.gov.ae/en/legislation/laws.aspx",
     "jurisdiction": "UAE",
     "category": "financial_regulator",
     "enabled": true,
     "status": "candidate"
   },
   {
-    "name": "SCA Regulations Index",
-    "url": "https://www.sca.gov.ae/en/legislation/regulations.aspx",
+    "name": "UAE CMA Regulations Index",
+    "url": "https://www.uaecma.gov.ae/en/legislation/regulations.aspx",
     "jurisdiction": "UAE",
     "category": "financial_regulator",
     "enabled": true,
     "status": "candidate"
   },
   {
-    "name": "SCA Circulars",
-    "url": "https://www.sca.gov.ae/en/circulars.aspx",
+    "name": "UAE CMA Circulars",
+    "url": "https://www.uaecma.gov.ae/en/circulars.aspx",
     "jurisdiction": "UAE",
     "category": "financial_regulator",
     "enabled": true,
@@ -10144,13 +10144,93 @@
     "jurisdiction": "UAE",
     "category": "data_protection",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "DIFC Laws and Regulations — Data Protection Section",
     "url": "https://www.difc.com/business/laws-and-regulations/data-protection/",
     "jurisdiction": "UAE",
     "category": "data_protection",
+    "enabled": false,
+    "status": "disabled_needs_playwright"
+  },
+  {
+    "name": "MOHRE — Ministerial Resolutions and Circulars",
+    "url": "https://www.mohre.gov.ae/en/laws-and-regulations/resolutions-and-circulars.aspx",
+    "jurisdiction": "UAE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "MOHRE — Laws and Regulations Index",
+    "url": "https://www.mohre.gov.ae/en/laws-and-regulations/laws.aspx",
+    "jurisdiction": "UAE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "UAE Cabinet — News and Decisions",
+    "url": "https://uaecabinet.ae/en/news",
+    "jurisdiction": "UAE",
+    "category": "regulatory",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "Dubai Legislation Portal — Laws Search",
+    "url": "https://dlp.dubai.gov.ae/en/Pages/LegislationSearch.aspx",
+    "jurisdiction": "UAE",
+    "category": "legal_acts",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DIFC Courts — Practice Directions",
+    "url": "https://www.difccourts.ae/rules-decisions/practice-directions",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active"
+  },
+  {
+    "name": "DIFC Courts — Registrar's Directions",
+    "url": "https://www.difccourts.ae/rules-decisions/registrars-directions",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "active"
+  },
+  {
+    "name": "DIFC — News and Announcements Hub",
+    "url": "https://www.difc.com/whats-on/news",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ADGM — Media Announcements Hub",
+    "url": "https://www.adgm.com/media/announcements",
+    "jurisdiction": "UAE",
+    "category": "adgm_fsra",
+    "enabled": true,
+    "status": "active"
+  },
+  {
+    "name": "DFSA — News Hub (legislative amendment notices)",
+    "url": "https://www.dfsa.ae/news",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DFSA — SEO Letters",
+    "url": "https://www.dfsa.ae/your-resources/publications-reports/seo-letters-1",
+    "jurisdiction": "UAE",
+    "category": "financial_regulator",
     "enabled": true,
     "status": "candidate"
   }
