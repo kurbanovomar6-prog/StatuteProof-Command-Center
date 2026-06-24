@@ -11,7 +11,7 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Virtual assets (VARA)',
-    sourceCount: '24 fresh-alert eligible',
+    sourceCount: '3 fresh-alert eligible',
     statusTone: 'active',
     whatWeMonitor: 'VARA licensing rules, selected official notices, rulebook PDFs, revision update history',
     limitation: null,
@@ -19,7 +19,7 @@ const MATRIX_ROWS = [
   },
   {
     category: 'DIFC / DFSA',
-    sourceCount: '26 fresh-alert eligible across DIFC/DFSA',
+    sourceCount: '21 fresh-alert eligible across DIFC/DFSA',
     statusTone: 'active',
     whatWeMonitor: 'DIFC laws, data protection, DFSA rulebook modules, consultation papers, enforcement decisions and annual reports',
     limitation: null,
@@ -27,7 +27,7 @@ const MATRIX_ROWS = [
   },
   {
     category: 'ADGM / FSRA',
-    sourceCount: '10 fresh-alert eligible',
+    sourceCount: '9 fresh-alert eligible',
     statusTone: 'active',
     whatWeMonitor: 'ADGM FSRA rules, guidance, waivers, supervision circulars, public consultations, Registration Authority circulars, data protection, enforcement',
     limitation: 'FSRA rulebook on the Thomson Reuters platform has restricted external access. The dedicated regulatory-alerts page is a candidate pending selector remediation.',

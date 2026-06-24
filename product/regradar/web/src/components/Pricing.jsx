@@ -59,7 +59,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
             >
               <div className="mb-6">
                 {plan.highlight && (
-                  <span className="sp-badge-trust mb-2">Most Popular</span>
+                  <span className="sp-badge-trust mb-2">{plan.badge || 'Recommended'}</span>
                 )}
                 {!plan.highlight && plan.badge && (
                   <div className="mb-2 inline-flex rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-slate-300">

@@ -1,6 +1,7 @@
 {
   "change_status": "CHANGED",
   "delivery_approved": false,
+  "evidence_record_id": "evr_AE-uae-legislation-portal_AE-20260611T224414Z-2a59324c",
   "diff_json_path": "data/source_snapshots/2026-06-11/AE/AE-uae-legislation-portal/AE-20260611T224414Z-2a59324c/diff.json",
   "human_reviewed": false,
   "normalized_hash": "2b005e02367098464bf68ea3ae8e7b5729cabaa5efff0703ea46736fb37515b0",

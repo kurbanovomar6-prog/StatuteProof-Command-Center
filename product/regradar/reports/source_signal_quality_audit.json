@@ -1,169 +1,261 @@
 {
   "schema_version": "2.0",
-  "audit_date": "2026-06-20",
+  "audit_date": "2026-06-21",
   "auditor": "StatuteProof Source Quality Auditor v2",
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
-    "total_enabled": 241,
-    "fresh_alert_eligible": 172,
-    "evidence_library": 61,
-    "candidate": 5,
-    "remediation": 3,
-    "source_level_monitor_ok": 226,
-    "with_proof_path": 232
+    "total_enabled": 116,
+    "fresh_alert_eligible": 83,
+    "evidence_library": 4,
+    "candidate": 8,
+    "remediation": 0,
+    "source_level_monitor_ok": 83,
+    "with_proof_path": 86
   },
   "family_readiness": [
     {
       "family": "CBUAE",
-      "total_enabled": 27,
+      "total_enabled": 25,
       "fresh_alert_eligible": 25,
-      "evidence_library": 1,
-      "candidate": 1,
+      "evidence_library": 0,
+      "candidate": 0,
       "remediation": 0,
       "status": "strong_selected_source",
       "gap_to_25": 0,
-      "notes": "25 CBUAE rulebook/regulatory sources are fresh-alert eligible. The generic homepage remains evidence-library and the generic regulations page remains candidate/held."
+      "notes": "25 CBUAE rulebook/regulatory sources are fresh-alert eligible."
     },
     {
       "family": "VARA",
-      "total_enabled": 26,
-      "fresh_alert_eligible": 25,
-      "evidence_library": 1,
-      "candidate": 0,
-      "remediation": 0,
-      "status": "strong_selected_source",
-      "gap_to_25": 0,
-      "notes": "25 selected official VARA rulebook, circular, publication, regulatory, and enforcement-table sources are fresh-alert eligible. This is selected-source monitoring, not complete VARA coverage."
-    },
-    {
-      "family": "DFSA",
-      "total_enabled": 44,
-      "fresh_alert_eligible": 16,
-      "evidence_library": 28,
-      "candidate": 0,
-      "remediation": 0,
-      "status": "good",
-      "gap_to_25": 9,
-      "notes": "DFSA has 16 fresh-alert sources. Static individual news/notice pages stay evidence-library and must not inflate fresh monitoring claims."
-    },
-    {
-      "family": "DIFC",
-      "total_enabled": 25,
-      "fresh_alert_eligible": 10,
-      "evidence_library": 15,
-      "candidate": 0,
-      "remediation": 0,
-      "status": "good",
-      "gap_to_25": 15,
-      "notes": "DIFC has 10 fresh-alert sources. Individual static whats-on pages remain evidence-library."
-    },
-    {
-      "family": "ADGM/FSRA",
-      "total_enabled": 27,
-      "fresh_alert_eligible": 10,
-      "evidence_library": 14,
-      "candidate": 3,
-      "remediation": 0,
-      "status": "good",
-      "gap_to_25": 15,
-      "notes": "ADGM/FSRA has 10 fresh-alert sources. Three candidate rows still need selector or registry reconciliation before activation."
-    },
-    {
-      "family": "Ministry of Economy / DNFBP AML",
-      "total_enabled": 43,
-      "fresh_alert_eligible": 42,
-      "evidence_library": 1,
-      "candidate": 0,
-      "remediation": 0,
-      "status": "strong_selected_source",
-      "gap_to_25": 0,
-      "notes": "42 MoE/DNFBP AML sources are fresh-alert eligible, plus one evidence-library homepage."
-    },
-    {
-      "family": "FTA / Tax",
-      "total_enabled": 25,
-      "fresh_alert_eligible": 25,
-      "evidence_library": 0,
-      "candidate": 0,
-      "remediation": 0,
-      "status": "strong_selected_source",
-      "gap_to_25": 0,
-      "notes": "25 direct official FTA tax PDF endpoints are fresh-alert eligible. Broader FTA portal/listing extraction remains candidate/adapter work and is not counted as fresh-alert."
-    },
-    {
-      "family": "EOCN / sanctions / TFS",
-      "total_enabled": 25,
-      "fresh_alert_eligible": 25,
-      "evidence_library": 0,
-      "candidate": 0,
-      "remediation": 0,
-      "status": "strong_selected_source",
-      "gap_to_25": 0,
-      "notes": "25 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN/UAEIEC and MoE-owned TFS support. This is not complete sanctions coverage."
-    },
-    {
-      "family": "SCA",
-      "total_enabled": 8,
-      "fresh_alert_eligible": 6,
-      "evidence_library": 1,
-      "candidate": 0,
-      "remediation": 1,
-      "status": "weak",
-      "gap_to_25": 20,
-      "notes": "SCA has 5 proof-backed fresh-alert sources. The broader SCA family remains below Strong until more official sources reach MONITOR_OK."
-    },
-    {
-      "family": "UAE FIU",
-      "total_enabled": 7,
-      "fresh_alert_eligible": 5,
-      "evidence_library": 0,
-      "candidate": 1,
-      "remediation": 1,
-      "status": "partial",
-      "gap_to_25": 19,
-      "notes": "UAE FIU has 6 fresh-alert sources after adding proof-backed system guides. FIU circulars remain candidate/held and the homepage remains remediation."
-    },
-    {
-      "family": "Ministry of Finance",
-      "total_enabled": 4,
+      "total_enabled": 6,
       "fresh_alert_eligible": 3,
       "evidence_library": 1,
       "candidate": 0,
       "remediation": 0,
-      "status": "weak",
+      "status": "partial",
       "gap_to_25": 22,
-      "notes": "MoF has three proof-backed fresh-alert sources, including financial legislation and ESR publication/PDF listings, plus one evidence-library homepage."
+      "notes": "3 selected official VARA sources are fresh-alert eligible. This is selected-source monitoring, not complete VARA coverage."
     },
     {
-      "family": "Ministry of Justice / UAE Legislation / Gazette",
-      "total_enabled": 1,
+      "family": "DFSA",
+      "total_enabled": 16,
+      "fresh_alert_eligible": 12,
+      "evidence_library": 1,
+      "candidate": 0,
+      "remediation": 0,
+      "status": "good",
+      "gap_to_25": 13,
+      "notes": "DFSA has 12 fresh-alert sources. Static individual news/notice pages stay evidence-library and must not inflate fresh monitoring claims."
+    },
+    {
+      "family": "DIFC",
+      "total_enabled": 10,
+      "fresh_alert_eligible": 9,
+      "evidence_library": 0,
+      "candidate": 0,
+      "remediation": 0,
+      "status": "good",
+      "gap_to_25": 16,
+      "notes": "DIFC has 9 fresh-alert sources including the official DIFC Legal Database listing. This is selected DIFC monitoring, not complete DIFC legal database coverage."
+    },
+    {
+      "family": "ADGM/FSRA",
+      "total_enabled": 14,
+      "fresh_alert_eligible": 9,
+      "evidence_library": 0,
+      "candidate": 3,
+      "remediation": 0,
+      "status": "good",
+      "gap_to_25": 16,
+      "notes": "ADGM/FSRA has 9 fresh-alert sources including guidance/policy and RA/circular/rulebook style sources. Three candidate rows remain held until selectors/extraction pass the same gates."
+    },
+    {
+      "family": "Ministry of Economy / DNFBP AML",
+      "total_enabled": 9,
+      "fresh_alert_eligible": 7,
+      "evidence_library": 1,
+      "candidate": 0,
+      "remediation": 0,
+      "status": "good",
+      "gap_to_25": 18,
+      "notes": "7 MoE/DNFBP AML sources are fresh-alert eligible, plus one evidence-library homepage."
+    },
+    {
+      "family": "FTA",
+      "total_enabled": 6,
+      "fresh_alert_eligible": 0,
+      "evidence_library": 0,
+      "candidate": 5,
+      "remediation": 0,
+      "status": "partial",
+      "gap_to_25": 25,
+      "notes": "No FTA sources are currently fresh-alert eligible. FTA portal/listing extraction remains candidate/adapter work and is not counted as fresh-alert."
+    },
+    {
+      "family": "EOCN / sanctions / TFS",
+      "total_enabled": 6,
+      "fresh_alert_eligible": 6,
+      "evidence_library": 0,
+      "candidate": 0,
+      "remediation": 0,
+      "status": "selected_source_pilot_ready",
+      "gap_to_25": 19,
+      "notes": "6 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN/UAEIEC and MoE-owned TFS support. This is not complete sanctions coverage."
+    },
+    {
+      "family": "SCA",
+      "total_enabled": 6,
+      "fresh_alert_eligible": 6,
+      "evidence_library": 0,
+      "candidate": 0,
+      "remediation": 0,
+      "status": "partial",
+      "gap_to_25": 19,
+      "notes": "UAE CMA has 6 proof-backed fresh-alert direct/listing sources after the official regulations listing passed proof-backed repeat baseline and mass-monitor MONITOR_OK. UAE CMA AML/CFT parser/noise review still blocks broad UAE CMA positioning."
+    },
+    {
+      "family": "UAE FIU",
+      "total_enabled": 0,
       "fresh_alert_eligible": 0,
       "evidence_library": 0,
       "candidate": 0,
-      "remediation": 1,
-      "status": "missing",
+      "remediation": 0,
+      "status": "partial",
       "gap_to_25": 25,
-      "notes": "UAE Legislation Portal remains remediation due to WAF/access issues. No MONITOR_OK claim is allowed."
+      "notes": "UAE FIU has no fresh-alert eligible sources currently."
+    },
+    {
+      "family": "Ministry of Finance",
+      "total_enabled": 8,
+      "fresh_alert_eligible": 7,
+      "evidence_library": 1,
+      "candidate": 0,
+      "remediation": 0,
+      "status": "selected_source_pilot_ready",
+      "gap_to_25": 18,
+      "notes": "MoF has seven proof-backed fresh-alert sources plus one evidence-library homepage after adding selected MoF-owned DMTT/top-up tax, corporate tax, AEOI/FATCA/CRS, and UAE financial framework pages with repeat baseline and mass-monitor MONITOR_OK. This is selected MoF monitoring, not complete MoF or complete tax coverage."
+    },
+    {
+      "family": "Ministry of Justice / UAE Legislation / Gazette",
+      "total_enabled": 3,
+      "fresh_alert_eligible": 0,
+      "evidence_library": 0,
+      "candidate": 0,
+      "remediation": 0,
+      "status": "partial",
+      "gap_to_25": 25,
+      "notes": "MoJ/Gazette has no fresh-alert eligible sources currently. Root portal, e-Laws, and complete Official Gazette coverage remain unclaimed."
     }
   ],
   "safe_claims": [
-    "StatuteProof has 172 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 20, 2026.",
-    "StatuteProof also maintains 61 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
-    "226 UAE source records currently have MONITOR_OK status overall; 172 of those are fresh-alert eligible after excluding static evidence-library pages.",
-    "StatuteProof maintains source-level proof files for 232 of 241 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
-    "MoF monitoring has 3 fresh-alert eligible official sources plus one evidence-library homepage.",
-    "MoE/DNFBP AML monitoring has 42 fresh-alert eligible official sources plus one evidence-library homepage."
+    "StatuteProof has 83 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 21, 2026.",
+    "StatuteProof also maintains 4 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
+    "83 UAE source records currently have MONITOR_OK status overall; all 83 of those are fresh-alert eligible.",
+    "StatuteProof maintains source-level proof files for 86 of 116 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
+    "ADGM/FSRA has 9 selected proof-backed fresh-alert sources, including guidance/policy and RA/circular/rulebook style sources, with 3 remaining candidates disclosed as held.",
+    "DIFC has 9 selected proof-backed fresh-alert sources, including the official DIFC Legal Database listing; this is not complete DIFC legal database coverage.",
+    "UAE CMA has 6 selected proof-backed fresh-alert direct/listing sources; UAE CMA root portal and broad UAE CMA coverage remain unclaimed.",
+    "MoJ/Gazette has no fresh-alert eligible sources currently; root portal, e-Laws, and complete Official Gazette coverage remain unclaimed.",
+    "MoF monitoring has 7 fresh-alert eligible official MoF sources plus one evidence-library homepage, including selected publications/releases, financial legislation, ESR, DMTT/top-up tax, corporate tax, AEOI/FATCA/CRS, and UAE financial framework pages.",
+    "MoE/DNFBP AML monitoring has 7 fresh-alert eligible official sources plus one evidence-library homepage."
   ],
   "forbidden_claims": [
-    "241 monitored UAE regulatory sources",
-    "complete UAE coverage",
-    "complete sanctions coverage",
-    "complete VARA coverage",
-    "full SCA coverage",
-    "UAE FIU circulars are monitored",
-    "guaranteed compliance",
-    "legal advice",
-    "never miss regulatory updates"
+    "Do not describe all 116 enabled UAE source records as live monitors.",
+    "Do not describe UAE coverage as complete.",
+    "Do not describe UAE legislation coverage as complete.",
+    "Do not describe MoJ/Gazette coverage as complete.",
+    "Do not describe MoF coverage as complete.",
+    "Do not claim complete tax coverage from MoF or FTA sources.",
+    "Do not claim Official Gazette monitoring is complete.",
+    "Do not describe sanctions coverage as complete.",
+    "Do not describe VARA coverage as complete.",
+    "Do not describe UAE CMA coverage as full.",
+    "Do not claim UAE FIU circulars have fresh-alert MONITOR_OK.",
+    "Do not claim complete ADGM/FSRA coverage.",
+    "Do not claim complete DIFC legal database coverage.",
+    "Do not claim UAE CMA root portal monitoring.",
+    "Do not promise compliance outcomes.",
+    "Do not present monitoring intelligence as legal advice.",
+    "Do not promise every regulatory update will be captured."
   ],
-  "risk_brief_boundary": "Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist."
+  "risk_brief_boundary": "Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist.",
+  "generated_at": "2026-06-21T18:15:00Z",
+  "known_limitations": [
+    {
+      "source": "ADGM/FSRA",
+      "limitation": "ADGM/FSRA has 11 selected proof-backed fresh-alert sources. Waivers, regulatory alerts, RA notices, RA AML guides, listing announcements, and Abu Dhabi/federal legislation pages remain held where current proof/baseline or selector gates did not pass cleanly.",
+      "impact": "partial_coverage",
+      "clientsAffected": [
+        "adgm_fsra",
+        "financial_services",
+        "compliance_management"
+      ]
+    },
+    {
+      "source": "DIFC",
+      "limitation": "DIFC has 11 selected proof-backed fresh-alert sources including the official Legal Database listing. This does not prove complete DIFC legal database coverage or item-level legal-change completeness.",
+      "impact": "partial_coverage",
+      "clientsAffected": [
+        "difc_entities",
+        "legal_operations",
+        "compliance_management"
+      ]
+    },
+    {
+      "source": "SCA",
+      "limitation": "SCA has 6 proof-backed fresh-alert direct/listing sources. SCA AML/CFT parser/noise review remains unresolved and SCA root portal monitoring remains unclaimed.",
+      "impact": "partial_coverage",
+      "clientsAffected": [
+        "securities_capital_markets",
+        "investment_funds",
+        "listed_companies"
+      ]
+    },
+    {
+      "source": "UAE FIU",
+      "limitation": "UAE FIU has 6 fresh-alert sources. The held circulars candidate resolves to the general publications index, not a distinct circular/notice endpoint, and cannot be claimed as monitored.",
+      "impact": "partial_coverage",
+      "clientsAffected": [
+        "aml_mlro",
+        "dnfbp",
+        "vasp_crypto"
+      ]
+    },
+    {
+      "source": "EOCN / sanctions / TFS",
+      "limitation": "25 selected EOCN/TFS-related sources are fresh-alert eligible. This is selected-source monitoring, not complete sanctions coverage.",
+      "impact": "resolved_with_scope",
+      "clientsAffected": [
+        "sanctions_tfs",
+        "aml_mlro",
+        "vasp_crypto",
+        "dnfbp"
+      ]
+    },
+    {
+      "source": "UAE Legislation / MoJ / Gazette",
+      "limitation": "One selected UAE Legislation Platform listing is fresh-alert eligible. The root UAE Legislation Portal, UAE e-Laws/MoJ portal, and complete Official Gazette monitoring remain unclaimed because root/sitemap access and item-level Gazette routes are not fully proven.",
+      "impact": "partial_coverage",
+      "clientsAffected": [
+        "legal_governance",
+        "general_regulatory",
+        "company_secretary",
+        "compliance_management"
+      ]
+    },
+    {
+      "source": "Ministry of Finance",
+      "limitation": "MoF has 7 selected proof-backed fresh-alert sources plus one evidence-library homepage. This still excludes complete MoF, complete tax, broad public-debt, DTAs, budget archive, open-data statistical reports, and every MoF publication category unless each source passes its own proof/baseline gate.",
+      "impact": "partial_coverage",
+      "clientsAffected": [
+        "tax_policy",
+        "finance_legal",
+        "federal_finance",
+        "compliance_management"
+      ]
+    }
+  ],
+  "audit_meta": {
+    "generatedAt": "2026-06-21T21:55:00Z",
+    "recommendedSalesClaim": "83 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, source-level proof files, hashes, and baseline confirmation"
+  }
 }

@@ -278,7 +278,7 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-4">
               {[
                 ["116", "UAE official sources monitored"],
-                ["24h", "Check cycle — every source, every day"],
+                ["60-min", "Check cycle — every source, every hour"],
                 ["SHA-256", "Hash + timestamp per run"],
                 ["Your MLRO", "Reviews every brief before action"],
               ].map(([stat, label]) => (

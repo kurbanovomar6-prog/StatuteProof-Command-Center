@@ -14,6 +14,22 @@ AUDIT_MD = ROOT / "product" / "regradar" / "reports" / "source_signal_quality_au
 FRONTEND_AUDIT = ROOT / "product" / "regradar" / "web" / "src" / "data" / "sourceQualityAudit.ts"
 SOURCES_JSON = ROOT / "product" / "regradar" / "sources.json"
 
+AUDIT_FAMILY_TO_VALIDATOR_FAMILY = {
+    "CBUAE": "CBUAE",
+    "VARA": "VARA",
+    "DFSA": "DFSA",
+    "DIFC": "DIFC",
+    "ADGM/FSRA": "ADGM/FSRA",
+    "UAE FIU": "UAE FIU",
+    "EOCN / sanctions / TFS": "EOCN/TFS",
+    "SCA": "SCA",
+    "Ministry of Justice / UAE Legislation / Gazette": "MoJ/Gazette",
+    "Ministry of Finance": "MoF",
+    "FTA": "FTA",
+    "FTA / Tax": "FTA",
+    "Ministry of Economy / DNFBP AML": "MoE/DNFBP AML",
+}
+
 REQUIRED_TRUTH_FIELDS = {
     "total_enabled",
     "fresh_alert_eligible",
@@ -83,6 +99,80 @@ def _expected_truth(sources: list[dict]) -> dict:
     }
 
 
+def _haystack(source: dict) -> str:
+    return " ".join(
+        str(source.get(key) or "")
+        for key in ("source_id", "name", "url", "official_url", "family", "category", "notes")
+    ).lower()
+
+
+def _belongs_to(source: dict, family: str) -> bool:
+    text = _haystack(source)
+    source_id = str(source.get("source_id") or "").lower()
+    url = str(source.get("url") or "").lower()
+    name = str(source.get("name") or "").lower()
+    if family == "CBUAE":
+        return "centralbank.ae" in url or "cbuae" in source_id or "central bank" in name
+    if family == "VARA":
+        return "vara.ae" in url or source_id.startswith("ae-vara") or "virtual assets regulatory authority" in name
+    if family == "DFSA":
+        return "dfsa.ae" in url or "dfsaen.thomsonreuters.com" in url or source_id.startswith("ae-dfsa") or "dubai financial services authority" in name
+    if family == "DIFC":
+        return "difc.com" in url or "assets.difc.com" in url or source_id.startswith("ae-difc")
+    if family == "ADGM/FSRA":
+        return "adgm.com" in url or source_id.startswith("ae-adgm") or "fsra" in source_id or "fsra" in name
+    if family == "UAE FIU":
+        return "uaefiu.gov.ae" in url or source_id.startswith("ae-uaefiu") or "financial intelligence unit" in name
+    if family == "EOCN/TFS":
+        return (
+            "eocn.gov.ae" in url
+            or "uaeiec.gov.ae" in url
+            or "eocn" in source_id
+            or "uaeiec" in source_id
+            or source_id.startswith("ae-moet-targeted-financial-sanctions")
+            or ("moet-dnfbp" in source_id and ("tfs" in text or "sanction" in text))
+        )
+    if family == "SCA":
+        return "sca.gov.ae" in url or source_id.startswith("ae-sca") or "securities and commodities authority" in name
+    if family == "MoJ/Gazette":
+        return "uaelegislation.gov.ae" in url or "moj.gov.ae" in url or "official gazette" in text or "legislation portal" in name
+    if family == "MoF":
+        return "mof.gov.ae" in url or source_id.startswith("ae-mof") or name == "uae ministry of finance"
+    if family == "FTA":
+        return "tax.gov.ae" in url or source_id.startswith("ae-fta") or "federal tax authority" in name
+    if family == "MoE/DNFBP AML":
+        return "moec.gov.ae" in url or "moet" in source_id or "dnfbp" in text or "ministry of economy" in name
+    return False
+
+
+def _fresh_alert_ready(source: dict) -> bool:
+    return (
+        source.get("monitoring_mode") == "fresh_alert"
+        and source.get("alert_eligible") is True
+        and source.get("last_monitor_status") == "MONITOR_OK"
+        and bool(source.get("proof_path"))
+        and bool(source.get("normalized_text_path"))
+        and bool(source.get("normalized_hash"))
+        and int(source.get("baseline_runs_completed") or 0)
+        >= int(source.get("baseline_runs_required") or 2)
+        and source.get("recommended_check_frequency") == "daily"
+    )
+
+
+def _expected_family_readiness(sources: list[dict], family: str) -> dict:
+    rows = [source for source in sources if _belongs_to(source, family)]
+    fresh = [source for source in rows if _fresh_alert_ready(source)]
+    return {
+        "total_enabled": len(rows),
+        "fresh_alert_eligible": len(fresh),
+        "evidence_library": sum(
+            1 for source in rows if source.get("monitoring_mode") == "evidence_library"
+        ),
+        "candidate": sum(1 for source in rows if source.get("monitoring_mode") == "candidate"),
+        "remediation": sum(1 for source in rows if source.get("monitoring_mode") == "remediation"),
+    }
+
+
 def _check(condition: bool, failures: list[str], message: str) -> None:
     if not condition:
         failures.append(message)
@@ -117,6 +207,32 @@ def main() -> int:
         "forbidden_claims must be non-empty",
     )
 
+    family_readiness = audit.get("family_readiness")
+    _check(
+        isinstance(family_readiness, list) and family_readiness,
+        failures,
+        "family_readiness must be non-empty",
+    )
+    if isinstance(family_readiness, list):
+        for family_row in family_readiness:
+            family_name = family_row.get("family")
+            validator_family = AUDIT_FAMILY_TO_VALIDATOR_FAMILY.get(str(family_name))
+            _check(
+                validator_family is not None,
+                failures,
+                f"unknown family_readiness family: {family_name!r}",
+            )
+            if not validator_family:
+                continue
+            expected_family = _expected_family_readiness(sources, validator_family)
+            for key, expected_value in expected_family.items():
+                actual_value = family_row.get(key)
+                _check(
+                    actual_value == expected_value,
+                    failures,
+                    f"{family_name} {key}={actual_value!r}, expected {expected_value!r} from sources.json",
+                )
+
     audit_text = AUDIT_MD.read_text(encoding="utf-8") if AUDIT_MD.exists() else ""
     frontend_text = FRONTEND_AUDIT.read_text(encoding="utf-8") if FRONTEND_AUDIT.exists() else ""
     serialized = json.dumps(audit, sort_keys=True)
@@ -128,9 +244,9 @@ def main() -> int:
     _check(frontend_text, failures, f"missing frontend audit export: {FRONTEND_AUDIT}")
     if frontend_text:
         _check(
-            "auditDate: '2026-06-20'" in frontend_text,
+            "auditDate: '2026-06-21'" in frontend_text or 'auditDate: "2026-06-21"' in frontend_text,
             failures,
-            "frontend audit must expose auditDate 2026-06-20",
+            "frontend audit must expose auditDate 2026-06-21",
         )
         _check(
             "StatuteProof Source Quality Auditor v2" in frontend_text,

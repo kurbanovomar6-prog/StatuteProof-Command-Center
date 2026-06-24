@@ -46,11 +46,11 @@ const PACKS = [
       { text: "UAE Ministry of Finance policy updates", status: "active" },
       {
         text: "UAE Legislation Portal — federal law texts and gazette updates",
-        status: "active",
+        status: "geo_blocked",
       },
     ],
     caveat:
-      "Direct FTA tax PDFs are active in the tax pack. UAE Legislation Portal is active. Broader FTA listing-page extraction remains item-level adapter work.",
+      "UAE Legislation Portal is not fresh-alert eligible — currently in remediation and geo-restricted from outside the UAE. Direct FTA tax PDFs are active in the tax pack.",
   },
   {
     profile: "DIFC / DFSA",
@@ -152,11 +152,11 @@ const PACKS = [
       },
       {
         text: "UAE Legislation Portal — federal law texts and official gazette",
-        status: "active",
+        status: "geo_blocked",
       },
       {
         text: "Dubai Legislation Portal — Dubai local laws and executive decisions",
-        status: "active",
+        status: "out_of_scope",
       },
       {
         text: "FTA — VAT clarifications and Corporate Tax listing pages",
@@ -164,7 +164,7 @@ const PACKS = [
       },
     ],
     caveat:
-      "25 direct official FTA PDF endpoints, UAE Legislation Portal and Dubai Legislation Portal are fresh-alert eligible. FTA listing index pages are active in the system pending item-level extraction proof.",
+      "FTA monitoring covers 6 selected fresh-alert eligible sources. UAE Legislation Portal and Dubai Legislation Portal are not fresh-alert eligible — the UAE Legislation Portal is currently in remediation and geo-restricted from outside the UAE, and the Dubai Legislation Portal is evidence-library only.",
   },
   {
     profile: "Data Protection",

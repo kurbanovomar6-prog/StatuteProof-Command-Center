@@ -26,6 +26,8 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
     ("python3", "tools/validate_fresh_signal_25_per_family.py"),
     ("python3", "tools/validate_canonical_evidence_records.py"),
     ("python3", "tools/review_canonical_evidence.py", "list"),
+    ("python3", "tools/validate_verified_monitoring_digest.py"),
+    ("python3", "tools/validate_internal_non_customer_brief_cycle.py"),
     ("python3", "tools/validate_agent_council_protocol.py"),
     ("python3", "tools/agent_council.py", "list"),
     ("git", "diff", "--check"),

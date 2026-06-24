@@ -1,10 +1,10 @@
 # UAE Source Family Scorecard
 
-Date: 2026-06-20
+Date: 2026-06-21
 
 Fresh-signal labels: Strong = 25+ fresh-alert eligible endpoints; Good = 10-24; Partial = 5-9; Weak = 1-4; Missing = 0. Source-family labels describe selected-source depth, not legal completeness.
 
-Current fresh-signal truth: 241 enabled UAE sources / 172 fresh-alert eligible / 61 evidence-library / 5 candidate / 3 remediation. Monitoring intelligence only. Not legal advice.
+Current fresh-signal truth: 116 enabled UAE sources / 83 fresh-alert eligible / 4 evidence-library / 8 candidate / 0 remediation. Monitoring intelligence only. Not legal advice.
 
 Fresh-signal overlay after the 25-per-family pass:
 
@@ -16,12 +16,12 @@ Fresh-signal overlay after the 25-per-family pass:
 | VARA | 25 | Strong selected-source | 0 |
 | EOCN / sanctions / TFS | 25 | Strong selected-source | 0 |
 | DFSA | 16 | Good | 9 |
-| DIFC | 10 | Good | 15 |
-| ADGM/FSRA | 10 | Good | 15 |
+| DIFC | 11 | Good | 14 |
+| ADGM/FSRA | 11 | Good | 14 |
 | UAE FIU | 6 | Partial | 19 |
-| SCA | 5 | Weak | 20 |
-| Ministry of Justice / UAE Legislation / Gazette | 0 | Missing | 25 |
-| Ministry of Finance | 3 | Weak | 22 |
+| SCA | 6 | Partial | 19 |
+| Ministry of Finance | 7 | Partial selected-source | 18 |
+| Ministry of Justice / UAE Legislation / Gazette | 1 | Weak selected-source | 24 |
 
 ## Appendix A: Historical Legacy Depth Table - Not Customer Or Adapter Truth
 
@@ -34,14 +34,14 @@ The legacy table below is retained for source-universe depth context only. Its l
 | DIFC | 25 | 25 | 0 | 98 | 28 | Strong | 8.0 | 8 | Target reached with 13 added proof-backed DIFC legal/consultation/static official endpoints. Next: reliability history and document-hub depth. |
 | ADGM/FSRA | 25 | 25 | 0 | 107 | 13 | Strong | 8.0 | 8 | Target reached with 13 added proof-backed ADGM/FSRA consultation and RA endpoints. Next: official rulebook and courts/legal notices only where buyer-relevant. |
 | VARA | 25 | 25 | 0 | 31 | 7 | Strong | 8.0 | 8 | Target reached with 16 added direct official VARA PDF/rulebook/regulation endpoints. Next: guidance/admin orders if they pass gates. |
-| SCA | 6 | 6 | 0 | 15 | 4 | Partial | 3.0 | 6 | Below target after adding SCA FinTech Regulatory Sandbox. SCA table/download adapter fixture passes, but live regulations-listing and tested open-data violations/licensed-company pages still return nav-shell, filter chrome, or non-row service content. Next: public rendered-table/API row extraction research before evidence or activation. Do not bypass robots, WAF, or access controls. |
+| SCA | 6 | 6 | 0 | 15 | 4 | Partial selected-source | 4.0 | 6 | SCA now has 6 selected fresh-alert direct/listing sources after the regulations listing passed proof/baseline/MONITOR_OK. SCA AML/CFT parser/noise review remains unresolved; do not claim SCA root portal monitoring or full SCA coverage. |
 | UAE FIU | 8 | 7 | 1 | 16 | 1 | Partial | 3.5 | 5 | Below target. UAE FIU system guides were added after proof/baseline/MONITOR_OK. FIU circulars remain candidate/held; direct FIU media PDFs remain blocked under the project fetch policy. |
 | EOCN / sanctions / TFS | 25 | 25 | 0 | 20 | 4 | Strong selected-source | 8 | 8 | Reached 25 after adding UAEIEC news listing. This remains selected-source monitoring across direct EOCN/UAEIEC and MoE-owned TFS support, not a complete sanctions coverage claim. |
 | FTA / Tax | 25 | 25 | 0 | 77 | 70 | Strong | 8 | 7 | Direct official FTA PDF corpus now has 25 proof-backed active endpoints. Next: activate FTA listing pages only after item-level pagination/filter extraction passes gates. |
 | Ministry of Economy / DNFBP AML | 26 | 26 | 0 | 35 | 20 | Strong | 8.0 | 8 | Target reached for direct DNFBP/MoE AML sources. MoE-owned AML/TFS documents also strengthen the EOCN/TFS-relevant family, without claiming complete MoE coverage. |
-| Ministry of Justice / UAE Legislation / Gazette | 1 | 1 | 0 | 70 | 29 | Weak | 0.5 | 4 | `AE-ai-legislation-511679d1`, `AE-elawyer-signup-a979f83b`, `AE-moj-ar-about-moj-judicial-training-institute-laws-and-legislation-aspx-3579a2bc`, `AE-moj-ar-about-moj-union-supreme-court-e-services-laws-of-union-supreme-court-aspx-677651f6`, `AE-moj-ar-laws-and-legislation-aspx-b60d2907`, `AE-moj-ar-laws-and-legislation-anti-money-laundering-and-combatting-terrorism-financing-aspx-08cdebef`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-aspx-f12a87ea`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-6fe3558c`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-3569166b`, `AE-moj-ar-laws-and-legislation-international-cooperation-department-agreements-aspx-4910ca15` |
+| Ministry of Justice / UAE Legislation / Gazette | 2 | 1 | 1 | 70 | 29 | Weak selected-source | 3.0 | 5 | One selected UAE Legislation Platform listing now passes proof/baseline/MONITOR_OK. Root/e-Laws/Gazette routes remain remediation/unproven; next target is item-level Gazette/legislation detail source or official feed/API only if proof-backed. |
 | UAE Data Office / PDPL / privacy | 0 | 0 | 0 | 0 | 0 | Missing | 1 | 2 | None mapped yet |
-| Ministry of Finance | 3 | 3 | 0 | 85 | 4 | Weak | 1.5 | 5 | `AE-mof-financial-legislation` and `AE-mof-esr` activated after proof/baseline/MONITOR_OK. Next candidates: Arabic financial legislation/ESR mirrors only if not duplicates; then additional MoF document/publication listings. |
+| Ministry of Finance | 8 | 7 | 0 | 85 | 4 | Partial selected-source | 6.0 | 7 | Seven selected MoF fresh-alert sources now pass proof/baseline/MONITOR_OK: publications/releases, financial legislation, ESR, DMTT/top-up tax, corporate tax, AEOI/FATCA/CRS, and UAE financial framework. Still not complete MoF/tax coverage; next targets are budget archive/open data/DTAs only with adapter proof. |
 | Cabinet / Federal decrees | 0 | 0 | 0 | 0 | 0 | Missing | 1 | 2 | None mapped yet |
 | DFM | 0 | 0 | 0 | 70 | 4 | Missing | 1 | 2 | `AE-dfm-ar-the-exchange-regulation-market-rules-27fbdedf`, `AE-dfm-ar-the-exchange-regulation-sharia-compliance-bedc9982`, `AE-dfm-the-exchange-regulation-market-rules-4ded6b02`, `AE-dfm-the-exchange-regulation-sharia-compliance-d3da0b2f` |
 | ADX | 0 | 0 | 0 | 56 | 5 | Missing | 1 | 2 | `AE-adx-en-issuers-resources-rules-and-regulations-766f98d4`, `AE-adx-issuers-resources-rules-and-regulations-e058f413`, `AE-adx-main-market-company-profile-financial-reports-4bb85689`, `AE-adx-resources-rules-and-regulations-55b53564`, `AE-adx-resources-rules-and-regulations-rules-and-regulations-54bb57c7` |
