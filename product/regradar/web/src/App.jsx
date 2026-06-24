@@ -21,6 +21,9 @@ const Contact               = lazy(() => import('./components/Contact'))
 const EvidenceCard          = lazy(() => import('./components/EvidenceCard'))
 const SourceCoverageTable   = lazy(() => import('./components/SourceCoverageTable'))
 const DiffViewer            = lazy(() => import('./components/DiffViewer'))
+const AuditBinderSample     = lazy(() => import('./components/AuditBinderSample'))
+const VendorTrustSection    = lazy(() => import('./components/VendorTrustSection'))
+const ConsultationTracker   = lazy(() => import('./components/ConsultationTracker'))
 const LoginPage             = lazy(() => import('./components/auth/LoginPage'))
 const RegisterPage          = lazy(() => import('./components/auth/RegisterPage'))
 const OnboardingPage        = lazy(() => import('./components/app/OnboardingPage'))
@@ -380,9 +383,12 @@ export default function App() {
           <AIInsightSection />
           <WithoutWith />
           <SampleBrief />
+          <AuditBinderSample />
           <Coverage onCreateWorkspace={() => navigatePublic('source-readiness-review')} />
           <SourceTransparencyMatrix onCreateWorkspace={() => navigateRegister()} />
+          <ConsultationTracker />
           <BuyerSourcePacks onCreateWorkspace={() => navigateRegister()} />
+          <VendorTrustSection />
           <ConfiguredMonitoring />
           <TrustLayer />
           {/* Evidence Demo Section — SAMPLE / FAKE */}
