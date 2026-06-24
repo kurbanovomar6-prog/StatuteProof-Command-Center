@@ -23,12 +23,14 @@ from app.adapters.uae_fsra_circulars import FSRACircularsAdapter
 from app.adapters.dfsa import DFSAAdapter
 from app.adapters.adgm_fsra import ADGMFSRAAdapter
 from app.adapters.sca import SCAAdapter
+from app.adapters.difc import DIFCAdapter
 from app.adapters.vara import VARAAdapter
 
 logger = logging.getLogger(__name__)
 
 _ADAPTERS: list[SourceAdapter] = [
     # UAE digital-asset and tax regulators — highest priority UAE adapters
+    DIFCAdapter(),
     VARAAdapter(),
     FTAAdapter(),
     CBUAERulebookAdapter(),
