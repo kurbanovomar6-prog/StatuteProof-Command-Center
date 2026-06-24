@@ -1,0 +1,82 @@
+# StatuteProof nginx configuration example
+#
+# Copy to /etc/nginx/sites-available/statuteproof and symlink:
+#   sudo ln -s /etc/nginx/sites-available/statuteproof /etc/nginx/sites-enabled/
+#
+# Prerequisites:
+#   1. Build the frontend:  cd /srv/regradar/web && npm run build
+#   2. Start the API:       systemctl enable --now statuteproof-api
+#   3. Obtain TLS cert:     certbot --nginx -d yourdomain.com
+#
+# This config:
+#   - Redirects all HTTP to HTTPS
+#   - Serves the React SPA from web/dist/ with SPA fallback
+#   - Proxies /api/* to the Python API on 127.0.0.1:5001
+#   - Sets secure headers (HSTS, CSP, X-Frame-Options, etc.)
+#
+# Replace YOUR_DOMAIN with the actual domain before use.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name YOUR_DOMAIN;
+
+    # Redirect all HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name YOUR_DOMAIN;
+
+    # TLS — managed by certbot (do not edit these lines manually)
+    ssl_certificate     /etc/letsencrypt/live/YOUR_DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/YOUR_DOMAIN/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Frontend static files (built React SPA)
+    root  /srv/regradar/web/dist;
+    index index.html;
+
+    # ── Security headers ──────────────────────────────────────────────────────
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options    "nosniff"                                      always;
+    add_header X-Frame-Options           "DENY"                                         always;
+    add_header Referrer-Policy           "strict-origin-when-cross-origin"              always;
+    add_header Permissions-Policy        "camera=(), microphone=(), geolocation=()"     always;
+
+    # ── API proxy — /api/* → Python backend ──────────────────────────────────
+    location /api/ {
+        proxy_pass         http://127.0.0.1:5001;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+
+        # Prevent large request bodies (contact form, API payloads)
+        client_max_body_size 256k;
+    }
+
+    # ── Static asset cache — hashed filenames from Vite ──────────────────────
+    location ~* \.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico|webp|avif)$ {
+        expires     1y;
+        add_header  Cache-Control "public, immutable";
+        access_log  off;
+    }
+
+    # ── SPA fallback — all other paths serve index.html ──────────────────────
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ── Block common scanner targets ──────────────────────────────────────────
+    location ~ /\. {
+        deny all;
+        access_log off;
+    }
+}
