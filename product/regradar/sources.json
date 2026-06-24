@@ -635,8 +635,8 @@
     "url": "https://www.adgm.com/fsra",
     "jurisdiction": "AE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_path_moved",
     "source_id": "AE-abu-dhabi-global-market-adgm",
     "notes": "ADGM FSRA section — fsra.adgm.com subdomain unreachable 2026-06-12; adgm.com/fsra extracts 2,742c reliably.",
     "tier": "1",
@@ -2170,8 +2170,8 @@
     "url": "https://www.adgm.com/fsra/enforcement",
     "jurisdiction": "AE",
     "category": "regulatory",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_path_moved",
     "source_id": "AE-adgm-fsra-enforcement",
     "adapter_family": "custom_element",
     "adapter_name": "custom_element",
@@ -8115,8 +8115,8 @@
     "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-insurance-regulatory-framework-and-climate-risk-management",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-adgm-fsra-launches-consultation-on-enhancements-to-insurance-regulator-0df860c1",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8146,8 +8146,8 @@
     "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework-4f656348",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8177,8 +8177,8 @@
     "url": "https://www.adgm.com/media/announcements/adgm-fsra-publishes-consultation-paper-to-advance-its-capital-markets-framework-and-ecosystem",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-adgm-fsra-publishes-consultation-paper-to-advance-its-capital-markets--d9ae1e0d",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8208,8 +8208,8 @@
     "url": "https://www.adgm.com/media/announcements/fsra-commences-public-consultation-for-broadening-participation-in-private-capital-markets",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-fsra-commences-public-consultation-for-broadening-participation-in-pri-08f3733b",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8239,8 +8239,8 @@
     "url": "https://www.adgm.com/media/announcements/fsra-issues-public-consultation-on-updates-to-its-pru-rulebook",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-fsra-issues-public-consultation-on-updates-to-its-pru-rulebook-1b9ddae2",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8270,8 +8270,8 @@
     "url": "https://www.adgm.com/media/announcements/adgm-publishes-consultation-paper-on-a-comprehensive-sustainable-finance-regulatory-framework",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-adgm-publishes-consultation-paper-on-a-comprehensive-sustainable-finan-49fb8a0a",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8301,8 +8301,8 @@
     "url": "https://www.adgm.com/media/announcements/fsra-commences-public-consultation-on-proposed-3rd-party-fintech-provider-regulatory-framework",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-fsra-commences-public-consultation-on-proposed-3rd-party-fintech-provi-1d5f8cd9",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8332,8 +8332,8 @@
     "url": "https://www.adgm.com/media/announcements/public-consultation-on-adgms-proposed-enhanced-auditors-framework",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-public-consultation-on-adgms-proposed-enhanced-auditors-framework-a25acdd4",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8363,8 +8363,8 @@
     "url": "https://www.adgm.com/media/announcements/the-ra-commences-public-consultation-on-proposed-adgm-company-service-providers-framework",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-the-ra-commences-public-consultation-on-proposed-adgm-company-service--4ffb0fe4",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8394,8 +8394,8 @@
     "url": "https://www.adgm.com/media/announcements/adgm-ra-publishes-consultation-paper-on-its-insolvency-practitioner-regime",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-adgm-ra-publishes-consultation-paper-on-its-insolvency-practitioner-re-08039fa0",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8425,8 +8425,8 @@
     "url": "https://www.adgm.com/media/announcements/the-ra-of-adgm-publishes-a-consultation-paper-on-employment-regulations",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-the-ra-of-adgm-publishes-a-consultation-paper-on-employment-regulation-da3421c4",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8456,8 +8456,8 @@
     "url": "https://www.adgm.com/media/announcements/adgm-registration-authority-publishes-consultation-paper-on-substantial-public-interest-rules-to-be-issued-under-the-data-protection-regulations-2021",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-adgm-registration-authority-publishes-consultation-paper-on-substantia-26556c81",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -8487,8 +8487,8 @@
     "url": "https://www.adgm.com/media/announcements/adgm-commences-public-consultation-on-proposed-new-data-protection-regulations",
     "jurisdiction": "AE",
     "category": "adgm_fsra",
-    "enabled": true,
-    "status": "active",
+    "enabled": false,
+    "status": "disabled_covered_by_hub",
     "source_id": "AE-adgm-static-adgm-commences-public-consultation-on-proposed-new-data-protection-reg-ba969779",
     "adapter_family": "static_html",
     "adapter_name": "static_html",
@@ -9968,7 +9968,7 @@
     "jurisdiction": "AE",
     "category": "virtual_assets",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "VARA Regulatory Notices and Enforcement Index",
@@ -10104,31 +10104,31 @@
     "jurisdiction": "AE",
     "category": "aml",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "UAE CMA Laws and Legislation",
     "url": "https://www.uaecma.gov.ae/en/legislation/laws.aspx",
     "jurisdiction": "AE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "UAE CMA Regulations Index",
     "url": "https://www.uaecma.gov.ae/en/legislation/regulations.aspx",
     "jurisdiction": "AE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "UAE CMA Circulars",
     "url": "https://www.uaecma.gov.ae/en/circulars.aspx",
     "jurisdiction": "AE",
     "category": "financial_regulator",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "FTA VAT Public Clarifications",
@@ -10159,24 +10159,24 @@
     "url": "https://www.mohre.gov.ae/en/laws-and-regulations/resolutions-and-circulars.aspx",
     "jurisdiction": "AE",
     "category": "regulatory",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "MOHRE — Laws and Regulations Index",
     "url": "https://www.mohre.gov.ae/en/laws-and-regulations/laws.aspx",
     "jurisdiction": "AE",
     "category": "regulatory",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_path_moved"
   },
   {
     "name": "UAE Cabinet — News and Decisions",
     "url": "https://uaecabinet.ae/en/news",
     "jurisdiction": "AE",
     "category": "regulatory",
-    "enabled": true,
-    "status": "candidate"
+    "enabled": false,
+    "status": "disabled_geo_blocked"
   },
   {
     "name": "Dubai Legislation Portal — Laws Search",
@@ -10184,7 +10184,7 @@
     "jurisdiction": "AE",
     "category": "legal_acts",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "DIFC Courts — Practice Directions",
@@ -10224,7 +10224,7 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "DFSA — SEO Letters",
@@ -10232,7 +10232,7 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "Ministry of Justice UAE — News",
@@ -10240,7 +10240,7 @@
     "jurisdiction": "AE",
     "category": "ministry_justice",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "DFM — Regulatory Circulars",
@@ -10248,7 +10248,7 @@
     "jurisdiction": "AE",
     "category": "stock_exchange",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "ICP UAE — News",
@@ -10256,7 +10256,7 @@
     "jurisdiction": "AE",
     "category": "immigration_regulatory",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "Ministry of Justice UAE — Media Centre",
@@ -10264,7 +10264,7 @@
     "jurisdiction": "AE",
     "category": "ministry_justice",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "TDRA UAE — Media Centre",
@@ -10272,7 +10272,7 @@
     "jurisdiction": "AE",
     "category": "data_protection",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "MOCCAE — Media Centre",
@@ -10280,7 +10280,7 @@
     "jurisdiction": "AE",
     "category": "environmental_regulation",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "JAFZA — Media Centre",
@@ -10288,7 +10288,7 @@
     "jurisdiction": "AE",
     "category": "freezone_authority",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   },
   {
     "name": "DMCC — Latest News and Regulatory Updates",
@@ -10296,6 +10296,6 @@
     "jurisdiction": "AE",
     "category": "freezone_authority",
     "enabled": true,
-    "status": "candidate"
+    "status": "active"
   }
 ]
