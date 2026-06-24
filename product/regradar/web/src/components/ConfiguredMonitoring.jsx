@@ -29,7 +29,7 @@ const PROFILES = [
     icon: FileSearch,
     title: 'AML and compliance consultants',
     sources: 'Primary regulators: UAE FIU, CBUAE, UAE Ministry of Economy, selected UAE CMA/DFSA sources',
-    scope: 'Alert focus: UAE FIU typologies and guidance, CBUAE AML/CFT compliance notices, UAE Ministry of Economy beneficial ownership and AML policy, and selected SCA/DFSA AML/CFT guidance where relevant. Multi-client consultants can request separate monitoring profiles.',
+    scope: 'Alert focus: UAE FIU typologies and guidance, CBUAE AML/CFT compliance notices, UAE Ministry of Economy beneficial ownership and AML policy, and selected UAE CMA/DFSA AML/CFT guidance where relevant. Multi-client consultants can request separate monitoring profiles.',
   },
   {
     icon: Scale,
