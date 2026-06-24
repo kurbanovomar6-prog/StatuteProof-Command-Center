@@ -582,7 +582,10 @@ def link_or_create_google_user(claims: dict[str, Any]) -> dict:
                         now,
                     ),
                 )
-                user_id = int(cur.lastrowid)
+                _row_id = cur.lastrowid
+                if _row_id is None:
+                    raise RuntimeError("Google user insert returned no row ID.")
+                user_id = int(_row_id)
             conn.execute(
                 """
                 INSERT OR IGNORE INTO oauth_identities
