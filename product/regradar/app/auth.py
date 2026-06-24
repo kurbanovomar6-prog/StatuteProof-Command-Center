@@ -516,7 +516,7 @@ def exchange_google_oauth_code(code: str) -> dict[str, Any]:
     return payload
 
 
-def link_or_create_google_user(claims: Any) -> dict:
+def link_or_create_google_user(claims: object) -> dict:
     ensure_auth_tables()
     if not isinstance(claims, dict):
         raise OAuthAccountError("Google account payload was invalid.")
