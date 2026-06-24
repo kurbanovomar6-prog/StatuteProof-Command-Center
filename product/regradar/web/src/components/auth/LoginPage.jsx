@@ -68,6 +68,10 @@ export default function LoginPage({ onLogin, onRegister }) {
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [verificationNeeded, setVerificationNeeded] = useState(false)
+  const [verificationEmail, setVerificationEmail] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMessage, setResendMessage] = useState('')
   const [googleStatus, setGoogleStatus] = useState({ loading: true, available: false, message: '' })
 
   useEffect(() => {
@@ -97,14 +101,35 @@ export default function LoginPage({ onLogin, onRegister }) {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    setVerificationNeeded(false)
+    setResendMessage('')
     setLoading(true)
     try {
       const data = await auth.login({ email, password })
       onLogin(data.user)
     } catch (err) {
-      setError(err.message || 'Could not sign in. Check your credentials and try again.')
+      if (err.requiresVerification) {
+        setVerificationNeeded(true)
+        setVerificationEmail(err.email || email)
+        setError('')
+      } else {
+        setError(err.message || 'Could not sign in. Check your credentials and try again.')
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleResend() {
+    setResendLoading(true)
+    setResendMessage('')
+    try {
+      const data = await auth.resendVerification(verificationEmail)
+      setResendMessage(data.message || 'Verification email sent. Check your inbox.')
+    } catch (err) {
+      setResendMessage(err.message || 'Could not resend verification email. Please try again.')
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -175,6 +200,27 @@ export default function LoginPage({ onLogin, onRegister }) {
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
             {error}
+          </div>
+        )}
+
+        {verificationNeeded && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p className="font-semibold">Email not yet verified</p>
+            <p className="mt-1 text-xs leading-relaxed">
+              Check your inbox for a verification link sent to{' '}
+              <span className="font-medium">{verificationEmail}</span>.
+            </p>
+            {resendMessage && (
+              <p className="mt-2 text-xs text-emerald-700">{resendMessage}</p>
+            )}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendLoading}
+              className="mt-2 text-xs font-semibold text-amber-800 underline hover:text-amber-700 disabled:opacity-60"
+            >
+              {resendLoading ? 'Sending...' : 'Resend verification email'}
+            </button>
           </div>
         )}
 

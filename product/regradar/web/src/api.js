@@ -21,7 +21,12 @@ async function authRequest(path, options = {}) {
   const response = await apiFetch(path, options)
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    throw new Error(data.message || data.error || `HTTP ${response.status}`)
+    const err = new Error(data.message || data.error || `HTTP ${response.status}`)
+    if (data.requires_verification) {
+      err.requiresVerification = true
+      err.email = data.email || ''
+    }
+    throw err
   }
   return data
 }
@@ -55,6 +60,13 @@ export const auth = {
 
   googleStartUrl(next = '/app') {
     return `/api/auth/google/start?next=${encodeURIComponent(next)}`
+  },
+
+  resendVerification(email) {
+    return authRequest('/api/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    })
   },
 }
 

@@ -323,6 +323,74 @@ def require_auth(handler) -> dict | None:
     return validate_session(session_id or "")
 
 
+_VERIFICATION_TOKEN_HOURS = 24
+
+
+def generate_verification_token(user_id: int) -> str:
+    """Create a 32-byte URL-safe verification token, store it, and return it."""
+    ensure_auth_tables()
+    token = secrets.token_urlsafe(32)
+    now = _now()
+    expires_at = now + timedelta(hours=_VERIFICATION_TOKEN_HOURS)
+    conn = _connect()
+    try:
+        conn.execute(
+            """
+            INSERT INTO email_verification_tokens (token, user_id, created_at, expires_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (token, user_id, _iso(now), _iso(expires_at)),
+        )
+        conn.commit()
+        return token
+    finally:
+        conn.close()
+
+
+def consume_verification_token(token: str) -> int | None:
+    """Validate token (unexpired, unused). Mark used. Return user_id or None."""
+    ensure_auth_tables()
+    clean = str(token or "").strip()
+    if not clean:
+        return None
+    conn = _connect()
+    try:
+        row = conn.execute(
+            "SELECT user_id, expires_at, used_at FROM email_verification_tokens WHERE token = ?",
+            (clean,),
+        ).fetchone()
+        if row is None:
+            return None
+        user_id, expires_at_str, used_at = row["user_id"], row["expires_at"], row["used_at"]
+        if used_at is not None:
+            return None
+        expires_at = datetime.fromisoformat(expires_at_str).replace(tzinfo=timezone.utc)
+        if _now() > expires_at:
+            return None
+        conn.execute(
+            "UPDATE email_verification_tokens SET used_at = ? WHERE token = ?",
+            (_iso(_now()), clean),
+        )
+        conn.commit()
+        return int(user_id)
+    finally:
+        conn.close()
+
+
+def mark_email_verified(user_id: int) -> None:
+    """Set email_verified=1 for user_id."""
+    ensure_auth_tables()
+    conn = _connect()
+    try:
+        conn.execute(
+            "UPDATE users SET email_verified = 1, updated_at = ? WHERE id = ?",
+            (_iso(_now()), user_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def google_oauth_config() -> dict[str, str]:
     return {
         "client_id": os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip(),

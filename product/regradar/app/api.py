@@ -39,6 +39,9 @@ from app.auth import (
     delete_session,
     consume_google_oauth_state,
     exchange_google_oauth_code,
+    generate_verification_token,
+    consume_verification_token,
+    mark_email_verified,
     get_user_by_email,
     google_oauth_authorization_url,
     google_oauth_available,
@@ -59,6 +62,7 @@ from app.config import (
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
 )
+from app.email_delivery import send_verification_email as _send_verification_email
 from app.profile import get_or_create_profile, update_profile
 from app.telegram import send_telegram_message
 from app.telegram_pairing import (
@@ -249,6 +253,11 @@ class _Handler(BaseHTTPRequestHandler):
         )
         return True
 
+    def _base_url(self) -> str:
+        host = self.headers.get("Host", "localhost:5001")
+        scheme = "https" if not host.startswith("localhost") and not host.startswith("127.") else "http"
+        return f"{scheme}://{host}"
+
     def _disabled_endpoint(self) -> None:
         self._send_json({"ok": False, "message": "This endpoint is not available."}, 403)
 
@@ -350,6 +359,8 @@ class _Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/api/auth/me":
             self._handle_auth_me()
+        elif path == "/api/auth/verify-email":
+            self._handle_auth_verify_email()
         elif path == "/api/auth/google/status":
             self._handle_auth_google_status()
         elif path == "/api/auth/google/start":
@@ -426,6 +437,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_auth_login()
         elif path == "/api/auth/logout":
             self._handle_auth_logout()
+        elif path == "/api/auth/resend-verification":
+            self._handle_auth_resend_verification()
         elif path == "/api/plan":
             self._handle_plan_set()
         elif path == "/api/telegram/pair/generate":
@@ -514,11 +527,18 @@ class _Handler(BaseHTTPRequestHandler):
                 company_type=company_type,
                 jurisdiction=jurisdiction,
             )
-            session_id = create_session(int(user["id"]))
+            # Generate verification token and send email (non-blocking)
+            token = generate_verification_token(int(user["id"]))
+            verification_url = f"{self._base_url()}/api/auth/verify-email?token={token}"
+            import threading as _threading
+            _threading.Thread(
+                target=_send_verification_email,
+                args=(user["email"], verification_url),
+                daemon=True,
+            ).start()
             self._send_json(
-                {"ok": True, "user": make_public_user(user)},
+                {"ok": True, "requires_verification": True, "email": user["email"]},
                 201,
-                [("Set-Cookie", self._session_cookie_header(session_id))],
             )
         except DuplicateEmailError:
             self._send_json({"ok": False, "message": "Email is already registered."}, 409)
@@ -545,6 +565,18 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "Invalid email or password."}, 401)
             return
 
+        if not user.get("email_verified"):
+            self._send_json(
+                {
+                    "ok": False,
+                    "message": "Please verify your email before signing in. Check your inbox for a verification link.",
+                    "requires_verification": True,
+                    "email": user.get("email"),
+                },
+                403,
+            )
+            return
+
         try:
             session_id = create_session(int(user["id"]))
             self._send_json(
@@ -565,6 +597,60 @@ class _Handler(BaseHTTPRequestHandler):
             200,
             [("Set-Cookie", self._clear_session_cookie_header())],
         )
+
+    def _handle_auth_verify_email(self) -> None:
+        qs = parse_qs(urlparse(self.path).query)
+        token = (qs.get("token") or [""])[0]
+        user_id = consume_verification_token(token)
+        if user_id is None:
+            self._send_json(
+                {"ok": False, "message": "Verification link is invalid or has expired. Please request a new one."},
+                400,
+            )
+            return
+        mark_email_verified(user_id)
+        try:
+            session_id = create_session(user_id)
+            self._send_json(
+                {"ok": True, "verified": True},
+                200,
+                [("Set-Cookie", self._session_cookie_header(session_id))],
+            )
+        except Exception:
+            logger.error("Email verify session creation failed for user_id=%s", user_id)
+            self._send_json(
+                {"ok": False, "message": "Verification succeeded but session creation failed. Please sign in."},
+                500,
+            )
+
+    def _handle_auth_resend_verification(self) -> None:
+        if self._rate_limited(_REGISTER_LIMITER, "auth_resend"):
+            return
+        body, error = self._read_json_strict()
+        if error or body is None:
+            self._send_json({"ok": False, "message": "Request body with email required."}, 400)
+            return
+        email = normalize_email(body.get("email", ""))
+        if not validate_email(email):
+            self._send_json({"ok": False, "message": "Enter a valid email address."}, 400)
+            return
+        user = get_user_by_email(email)
+        if not user:
+            # Don't reveal whether email exists
+            self._send_json({"ok": True, "message": "If that email is registered, a verification link has been sent."}, 200)
+            return
+        if user.get("email_verified"):
+            self._send_json({"ok": True, "message": "Email is already verified. Please sign in."}, 200)
+            return
+        token = generate_verification_token(int(user["id"]))
+        verification_url = f"{self._base_url()}/api/auth/verify-email?token={token}"
+        import threading as _threading
+        _threading.Thread(
+            target=_send_verification_email,
+            args=(user["email"], verification_url),
+            daemon=True,
+        ).start()
+        self._send_json({"ok": True, "message": "Verification email sent. Check your inbox."}, 200)
 
     def _handle_auth_me(self) -> None:
         user = require_auth(self)

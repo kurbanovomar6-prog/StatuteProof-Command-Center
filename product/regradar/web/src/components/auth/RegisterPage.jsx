@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle, Eye, EyeOff, FileCheck2, LockKeyhole, ShieldCheck } from 'lucide-react'
+import { CheckCircle, Eye, EyeOff, FileCheck2, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
 import { auth } from '../../api'
 
 const JOB_TITLES = [
@@ -98,6 +98,10 @@ export default function RegisterPage({ onRegister, onLogin }) {
     jurisdiction: 'Dubai / VARA',
   })
   const [showPass, setShowPass] = useState(false)
+  const [verificationSent, setVerificationSent] = useState(false)
+  const [verifiedEmail, setVerifiedEmail] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMessage, setResendMessage] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [disclaimerAcknowledged, setDisclaimerAcknowledged] = useState(false)
@@ -155,6 +159,11 @@ export default function RegisterPage({ onRegister, onLogin }) {
         company_type: form.companyType,
         jurisdiction: form.jurisdiction,
       })
+      if (data.requires_verification) {
+        setVerifiedEmail(data.email || form.email)
+        setVerificationSent(true)
+        return
+      }
       onRegister(data.user)
     } catch (err) {
       setError(err.message || 'Could not create workspace.')
@@ -170,6 +179,65 @@ export default function RegisterPage({ onRegister, onLogin }) {
       return
     }
     window.location.assign(auth.googleStartUrl('/app'))
+  }
+
+  async function handleResend() {
+    setResendLoading(true)
+    setResendMessage('')
+    try {
+      const data = await auth.resendVerification(verifiedEmail)
+      setResendMessage(data.message || 'Verification email sent. Check your inbox.')
+    } catch (err) {
+      setResendMessage(err.message || 'Could not resend verification email. Please try again.')
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
+  if (verificationSent) {
+    return (
+      <AuthLayout>
+        <div className="flex flex-col items-center gap-6 py-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-300/10">
+            <Mail className="h-8 w-8 text-cyan-300" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-950">Check your email</h1>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              We sent a verification link to{' '}
+              <span className="font-semibold text-slate-900">{verifiedEmail}</span>.
+              Click the link in that email to activate your account.
+            </p>
+            <p className="mt-2 text-xs text-slate-500">The link expires after 24 hours.</p>
+          </div>
+
+          {resendMessage && (
+            <div className="w-full rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
+              {resendMessage}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resendLoading}
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-cyan-400 hover:bg-cyan-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {resendLoading ? 'Sending...' : 'Resend verification email'}
+          </button>
+
+          <div className="border-t border-slate-200 pt-4 text-center text-sm text-slate-600">
+            Already verified?{' '}
+            <button
+              onClick={onLogin}
+              className="font-bold text-cyan-800 hover:underline focus:outline-none"
+            >
+              Sign in
+            </button>
+          </div>
+        </div>
+      </AuthLayout>
+    )
   }
 
   const inputCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'

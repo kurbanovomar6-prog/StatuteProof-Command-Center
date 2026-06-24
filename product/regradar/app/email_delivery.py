@@ -35,6 +35,44 @@ SUPPORTED_EMAIL_PROVIDERS = {"local_outbox", "smtp", "postmark", "sendgrid"}
 SECRET_ENV_NAMES = {"SMTP_PASSWORD", "POSTMARK_SERVER_TOKEN", "SENDGRID_API_KEY"}
 
 
+def send_verification_email(
+    recipient_email: str,
+    verification_url: str,
+    *,
+    env: Mapping[str, str] | None = None,
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Send an email verification link. Uses same provider config as brief delivery."""
+    source = env if env is not None else os.environ
+    from_email = _safe_email(source.get("STATUTEPROOF_EMAIL_FROM")) or "noreply@statuteproof.com"
+    sender_name = _safe_sender_name(source.get("STATUTEPROOF_EMAIL_SENDER_NAME")) or "StatuteProof"
+    subject = "Verify your StatuteProof email address"
+    body_text = (
+        f"Please verify your email address to activate your StatuteProof account.\n\n"
+        f"Click the link below (valid for 24 hours):\n{verification_url}\n\n"
+        f"If you did not create a StatuteProof account, ignore this email.\n\n"
+        f"StatuteProof — Monitoring intelligence only. Not legal advice."
+    )
+    body_html = (
+        f"<p>Please verify your email address to activate your StatuteProof account.</p>"
+        f'<p><a href="{verification_url}">Verify my email address</a></p>'
+        f"<p style='color:#888;font-size:12px'>Link valid for 24 hours. "
+        f"If you did not create a StatuteProof account, ignore this email.</p>"
+        f"<p style='color:#888;font-size:12px'>StatuteProof — Monitoring intelligence only. Not legal advice.</p>"
+    )
+    payload = {
+        "to": recipient_email,
+        "recipient_email": recipient_email,
+        "subject": subject,
+        "body_text": body_text,
+        "body_html": body_html,
+        "from_email": from_email,
+        "sender_name": sender_name,
+    }
+    root = base_dir if base_dir is not None else _BASE_DIR
+    return deliver_brief_email(payload, env=env, base_dir=root)
+
+
 def validate_email_provider_config(env: Mapping[str, str] | None = None) -> dict[str, Any]:
     source = env if env is not None else os.environ
     provider = str(source.get("STATUTEPROOF_EMAIL_PROVIDER") or "local_outbox").strip().lower() or "local_outbox"

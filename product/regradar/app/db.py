@@ -117,6 +117,18 @@ _CREATE_AUTH_TABLES = """
     CREATE INDEX IF NOT EXISTS idx_oauth_states_expires ON oauth_states(expires_at);
 """
 
+_CREATE_EMAIL_VERIFICATION_TOKENS_TABLE = """
+    CREATE TABLE IF NOT EXISTS email_verification_tokens (
+        token TEXT PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        created_at TIMESTAMP NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        used_at TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_evtokens_user_id ON email_verification_tokens(user_id);
+    CREATE INDEX IF NOT EXISTS idx_evtokens_expires ON email_verification_tokens(expires_at);
+"""
+
 _CREATE_ACTION_LOG_TABLE = """
     CREATE TABLE IF NOT EXISTS alert_action_log (
         id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -239,6 +251,7 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
             """
         )
         conn.executescript(_CREATE_ACTION_LOG_TABLE)
+        conn.executescript(_CREATE_EMAIL_VERIFICATION_TOKENS_TABLE)
         conn.commit()
     finally:
         if owned_conn:
