@@ -151,13 +151,13 @@ export const FAMILY_QUALITY = [
 export const KNOWN_LIMITATIONS = [
   {
     source: "ADGM/FSRA",
-    limitation: "ADGM/FSRA has 11 selected proof-backed fresh-alert sources. Waivers, regulatory alerts, RA notices, RA AML guides, listing announcements, and Abu Dhabi/federal legislation pages remain held where current proof/baseline or selector gates did not pass cleanly.",
+    limitation: "ADGM/FSRA has 9 selected proof-backed fresh-alert sources. Waivers, regulatory alerts, RA notices, RA AML guides, listing announcements, and Abu Dhabi/federal legislation pages remain held where current proof/baseline or selector gates did not pass cleanly.",
     impact: "partial_coverage",
     clientsAffected: ["adgm_fsra", "financial_services", "compliance_management"],
   },
   {
     source: "DIFC",
-    limitation: "DIFC has 11 selected proof-backed fresh-alert sources including the official Legal Database listing. This does not prove complete DIFC legal database coverage or item-level legal-change completeness.",
+    limitation: "DIFC has 9 selected proof-backed fresh-alert sources including the official Legal Database listing. This does not prove complete DIFC legal database coverage or item-level legal-change completeness.",
     impact: "partial_coverage",
     clientsAffected: ["difc_entities", "legal_operations", "compliance_management"],
   },
