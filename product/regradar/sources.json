@@ -10233,5 +10233,69 @@
     "category": "financial_regulator",
     "enabled": true,
     "status": "candidate"
+  },
+  {
+    "name": "Ministry of Justice UAE — News",
+    "url": "https://www.moj.gov.ae/en/media-center/news.aspx",
+    "jurisdiction": "AE",
+    "category": "ministry_justice",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DFM — Regulatory Circulars",
+    "url": "https://www.dfm.ae/the-exchange/regulation/circulars",
+    "jurisdiction": "AE",
+    "category": "stock_exchange",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "ICP UAE — News",
+    "url": "https://icp.gov.ae/en/media-center/news-and-video-post/",
+    "jurisdiction": "AE",
+    "category": "immigration_regulatory",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "Ministry of Justice UAE — Media Centre",
+    "url": "https://www.moj.gov.ae/en/media-center.aspx",
+    "jurisdiction": "AE",
+    "category": "ministry_justice",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "TDRA UAE — Media Centre",
+    "url": "https://tdra.gov.ae/en/media",
+    "jurisdiction": "AE",
+    "category": "data_protection",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "MOCCAE — Media Centre",
+    "url": "https://www.moccae.gov.ae/en/media-center",
+    "jurisdiction": "AE",
+    "category": "environmental_regulation",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "JAFZA — Media Centre",
+    "url": "https://www.jafza.ae/resource-centre/media/",
+    "jurisdiction": "AE",
+    "category": "freezone_authority",
+    "enabled": true,
+    "status": "candidate"
+  },
+  {
+    "name": "DMCC — Latest News and Regulatory Updates",
+    "url": "https://dmcc.ae/latest-news",
+    "jurisdiction": "AE",
+    "category": "freezone_authority",
+    "enabled": true,
+    "status": "candidate"
   }
 ]
