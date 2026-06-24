@@ -52,7 +52,10 @@ _PDF_MAX_BYTES = 15 * 1024 * 1024
 _JS_PAGE_THRESHOLD = 300
 
 def _clean(value: str | None, limit: int | None = None) -> str:
-    text = re.sub(r"[\s\xa0]+", " ", value or "").strip()
+    """Collapse horizontal whitespace only; preserve newlines for paragraph detection."""
+    text = re.sub(r"[ \t\xa0]+", " ", value or "")
+    # Collapse runs of 3+ newlines to double-newline (paragraph boundary)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
     if limit and len(text) > limit:
         return text[: limit - 1].rstrip() + "..."
     return text
@@ -76,9 +79,15 @@ def _is_pdf_url(url: str) -> bool:
 
 
 def _strip_noise(soup: BeautifulSoup) -> None:
-    """Remove boilerplate elements from FTA pages in-place."""
+    """Remove boilerplate elements from FTA pages in-place.
+
+    NOTE: Do NOT include 'form' here.  The FTA portal wraps its entire page
+    content — including the <main id="maincontent"> element — inside a single
+    top-level <form> tag (standard ASP.NET WebForms pattern).  Decomposing
+    form elements would destroy all page content.
+    """
     for tag in soup(["script", "style", "noscript", "nav", "footer", "header",
-                     "iframe", "form"]):
+                     "iframe"]):
         tag.decompose()
     # FTA has a persistent cookie and chat widget
     for sel in (".cookie-bar", ".chat-widget", "#CybotCookiebotDialog",
@@ -216,20 +225,35 @@ class FTAAdapter(SourceAdapter):
         # Trafilatura / readability via extract_text
         text = extract_text(response.text) or ""
 
-        # Target known FTA content containers when trafilatura is insufficient
+        # Target known FTA content containers when trafilatura is insufficient.
+        # #maincontent and the UpdatePanel ID are preferred because the FTA
+        # portal nests <main id="maincontent"> inside a top-level <form> tag;
+        # those selectors survive the noise-strip pass intact.
+        # Use "\n\n" as the get_text separator so block-level elements produce
+        # double newlines, which is what is_quality_content() splits on.
         if not is_quality_content(text):
-            for selector in ("main", ".content-area", ".page-content", "article",
-                             "#content", "[role='main']", ".tax-content", ".inner-content"):
+            for selector in (
+                "#maincontent",
+                "#ctrlContentArea_ctlOpenData_ctrlUpdatePanel",
+                "main",
+                ".content-area",
+                ".page-content",
+                "article",
+                "#content",
+                "[role='main']",
+                ".tax-content",
+                ".inner-content",
+            ):
                 region = soup.select_one(selector)
                 if region:
-                    candidate = _clean(region.get_text("\n", strip=True))
+                    candidate = _clean(region.get_text("\n\n", strip=True))
                     if len(candidate) > len(text):
                         text = candidate
                         break
 
         # Final fallback: full body text
         if not is_quality_content(text):
-            text = _clean(soup.get_text("\n", strip=True))
+            text = _clean(soup.get_text("\n\n", strip=True))
 
         return text or None
 
@@ -282,17 +306,25 @@ class FTAAdapter(SourceAdapter):
             # Try trafilatura on rendered HTML
             text = extract_text(html) or ""
             if not is_quality_content(text):
-                for selector in ("main", ".content-area", ".page-content", "article",
-                                 "#content", "[role='main']"):
+                for selector in (
+                    "#maincontent",
+                    "#ctrlContentArea_ctlOpenData_ctrlUpdatePanel",
+                    "main",
+                    ".content-area",
+                    ".page-content",
+                    "article",
+                    "#content",
+                    "[role='main']",
+                ):
                     region = soup.select_one(selector)
                     if region:
-                        candidate = _clean(region.get_text("\n", strip=True))
+                        candidate = _clean(region.get_text("\n\n", strip=True))
                         if len(candidate) > len(text):
                             text = candidate
                             break
 
             if not is_quality_content(text):
-                text = _clean(soup.get_text("\n", strip=True))
+                text = _clean(soup.get_text("\n\n", strip=True))
 
             return text or None
 
