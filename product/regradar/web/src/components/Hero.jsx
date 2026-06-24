@@ -245,7 +245,7 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             {/* Trust metrics */}
             <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-3">
               {[
-                ['102', 'UAE official sources monitored'],
+                ['112', 'UAE official sources monitored'],
                 ['SHA-256', 'Hash per run — evidence attached'],
                 ['Human-review', 'Gate before every delivery'],
               ].map(([stat, label]) => (
