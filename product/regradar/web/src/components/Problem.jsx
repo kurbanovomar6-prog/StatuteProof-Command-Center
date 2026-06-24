@@ -7,7 +7,7 @@ const problems = [
     iconBg: 'bg-amber-400/10 border border-amber-300/20',
     accentBg: 'bg-amber-400',
     title: 'Six UAE regulators. No shared feed. No alert when something changes.',
-    desc: 'CBUAE, VARA, DFSA, ADGM/FSRA, SCA, and UAE FIU each publish independently across PDFs, web pages, and consultation portals. There is no aggregated feed. Checking them manually means two to four hours a week per compliance officer — and every site you do not check that day is a gap in your monitoring record.',
+    desc: 'CBUAE, VARA, DFSA, ADGM/FSRA, UAE CMA, and UAE FIU each publish independently across PDFs, web pages, and consultation portals. There is no aggregated feed. Checking them manually means two to four hours a week per compliance officer — and every site you do not check that day is a gap in your monitoring record.',
   },
   {
     Icon: Clock,
@@ -49,7 +49,7 @@ export default function Problem() {
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
             UAE financial regulators publish circulars, guidance notes, and consultation papers across
-            CBUAE, VARA, DFSA, ADGM/FSRA, SCA, and UAE FIU — without notifying you.
+            CBUAE, VARA, DFSA, ADGM/FSRA, UAE CMA, and UAE FIU — without notifying you.
             Most compliance teams are monitoring manually, infrequently, and without a documented record that holds up in an enforcement review.
           </p>
         </div>

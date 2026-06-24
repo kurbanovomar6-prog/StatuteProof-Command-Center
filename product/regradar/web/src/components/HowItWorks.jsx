@@ -5,7 +5,7 @@ const STEPS = [
     n: '01',
     icon: MapPin,
     title: 'We map your regulatory scope',
-    desc: 'You tell us which UAE regulators apply to your licence type — DFSA, CBUAE, VARA, SCA, or others. We match those to the official sources we monitor and confirm which are active before your pilot begins.',
+    desc: 'You tell us which UAE regulators apply to your licence type — DFSA, CBUAE, VARA, UAE CMA, or others. We match those to the official sources we monitor and confirm which are active before your pilot begins.',
   },
   {
     n: '02',

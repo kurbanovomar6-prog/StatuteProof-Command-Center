@@ -37,9 +37,9 @@ const MATRIX_ROWS = [
     category: 'AML / FIU / sanctions',
     sourceCount: 'Selected-source AML depth',
     statusTone: 'active',
-    whatWeMonitor: 'UAE FIU public sources excluding circulars, publications hub, typology reports, AML/CFT laws; Executive Office for AML/CFT (EOCN) laws and news; selected SCA and CBUAE AML guidance',
+    whatWeMonitor: 'UAE FIU public sources excluding circulars, publications hub, typology reports, AML/CFT laws; Executive Office for AML/CFT (EOCN) laws and news; selected UAE CMA and CBUAE AML guidance',
     limitation: null,
-    whatThisMeans: 'Selected-source AML monitoring is strong in some families, but FIU circulars and broader SCA remain adapter/remediation work.',
+    whatThisMeans: 'Selected-source AML monitoring is strong in some families, but FIU circulars and broader UAE CMA coverage is in progress.',
   },
   {
     category: 'Tax / corporate',

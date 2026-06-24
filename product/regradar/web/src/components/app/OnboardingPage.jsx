@@ -15,7 +15,7 @@ const SOURCE_LAYERS = [
   'DIFC Laws',
   'Ministry of Economy',
   'FTA',
-  'Capital Market Authority / former SCA [Limited]',
+  'UAE Capital Market Authority (UAE CMA) [Limited]',
   'Other',
 ]
 
@@ -70,9 +70,9 @@ const SOURCE_READINESS_PREVIEW = {
     detail: 'Tax source monitoring is limited and should be validated against your actual VAT/corporate-tax needs.',
     tone: 'amber',
   },
-  'Capital Market Authority / former SCA [Limited]': {
+  'UAE Capital Market Authority (UAE CMA) [Limited]': {
     status: 'Limited but useful',
-    detail: 'SCA coverage includes AML/CFT, circulars/procedures, FATCA/CRS and corporate governance, but remains narrower than CBUAE.',
+    detail: 'UAE CMA coverage includes AML/CFT, circulars/procedures, FATCA/CRS and corporate governance, but remains narrower than CBUAE.',
     tone: 'amber',
   },
 }

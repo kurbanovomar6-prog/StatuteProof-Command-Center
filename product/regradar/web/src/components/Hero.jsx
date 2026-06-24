@@ -53,7 +53,7 @@ const chainSteps = [
 ]
 
 // Regulator name strip shown below headline
-const REGULATOR_STRIP = ['CBUAE', 'DFSA', 'ADGM / FSRA', 'VARA', 'SCA', 'UAE FIU']
+const REGULATOR_STRIP = ['CBUAE', 'DFSA', 'ADGM / FSRA', 'VARA', 'UAE CMA', 'UAE FIU']
 
 function EvidenceDossier() {
   const [idx, setIdx] = useState(0)
@@ -216,7 +216,7 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             {/* Bullets */}
             <ul className="sp-animate-fade-up sp-delay-2 mt-6 max-w-xl space-y-2.5">
               {[
-                'Reduce weekly manual checks across VARA, DFSA, FSRA, SCA and CBUAE.',
+                'Reduce weekly manual checks across VARA, DFSA, FSRA, UAE CMA and CBUAE.',
                 'See what changed, where it changed and why it may matter to your firm.',
                 'Give MLRO, CCO and Compliance one shared brief for review.',
               ].map(point => (

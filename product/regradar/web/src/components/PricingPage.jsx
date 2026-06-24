@@ -145,7 +145,7 @@ const FAQS = [
   },
   {
     q: 'Which regulators are covered on the UAE Monitor plan?',
-    a: 'Selected-source monitoring includes fresh-alert eligible sources across VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU public sources, Executive Office for AML/CFT, DIFC laws and data protection, Ministry of Finance, SCA, FTA tax PDFs, and related official public sources. MoJ/UAE legislation/gazette sources remain remediation or research, and broader FTA listing pages remain candidate/adapter work.',
+    a: 'Selected-source monitoring includes fresh-alert eligible sources across VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU public sources, Executive Office for AML/CFT, DIFC laws and data protection, Ministry of Finance, UAE CMA, FTA tax PDFs, and related official public sources. MoJ/UAE legislation/gazette sources remain remediation or research, and broader FTA listing pages remain candidate/adapter work.',
   },
 ]
 

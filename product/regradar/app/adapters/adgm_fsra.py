@@ -68,7 +68,13 @@ _OWNED_PATH_PREFIXES = (
 
 
 def _clean(value: str | None, limit: int | None = None) -> str:
-    text = re.sub(r"\s+", " ", value or "").strip()
+    # Collapse horizontal whitespace only (spaces, tabs, non-breaking spaces).
+    # Newlines are preserved so that paragraph delimiters (\n\n) survive when
+    # _clean() is called on multi-paragraph fallback body text — is_quality_content()
+    # relies on \n\n to detect real prose paragraphs.
+    text = re.sub(r"[ \t\xa0]+", " ", value or "")
+    # Normalise runs of 3+ newlines down to a paragraph break, then strip.
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
     if limit and len(text) > limit:
         return text[: limit - 1].rstrip() + "..."
     return text
@@ -180,7 +186,7 @@ class ADGMFSRAAdapter(SourceAdapter):
         if items:
             return self._format_listing(url, items)
 
-        text = extract_text(response.text) or _clean(soup.get_text("\n", strip=True))
+        text = extract_text(response.text) or _clean(soup.get_text("\n\n", strip=True))
         if len(text) < 500:
             return None
         return f"ADGM FSRA official listing\n\nURL: {url}\n\n{text}"

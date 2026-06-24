@@ -1,12 +1,21 @@
 """
-SCA (UAE Securities and Commodities Authority) adapter.
+UAE CMA / SCA (UAE Capital Market Authority, formerly Securities and Commodities
+Authority) adapter.
 
-Handles public sca.gov.ae URLs for:
-- Circulars:          https://www.sca.gov.ae/en/services/circulars.aspx
-- Decisions:          https://www.sca.gov.ae/en/services/decisions.aspx
-- Laws/Regulations:   https://www.sca.gov.ae/en/legislation/legislation.aspx
+The SCA was renamed to UAE Capital Market Authority (UAE CMA) on 1 January 2026.
+The old domain sca.gov.ae now redirects to uaecma.gov.ae.  This adapter handles
+both domains transparently so existing source records at sca.gov.ae and new
+sources at uaecma.gov.ae are both covered.
 
-SCA publishes in Arabic and English. The adapter prefers English text where
+Handles public URLs on sca.gov.ae and uaecma.gov.ae, for example:
+- Circulars:          https://www.uaecma.gov.ae/en/services/circulars.aspx
+- Decisions:          https://www.uaecma.gov.ae/en/services/decisions.aspx
+- Laws/Regulations:   https://www.uaecma.gov.ae/en/legislation/legislation.aspx
+
+Legacy equivalents (sca.gov.ae) redirect to the uaecma.gov.ae paths and are
+processed identically by this adapter.
+
+UAE CMA publishes in Arabic and English. The adapter prefers English text where
 present but does not strip Arabic — Arabic content is included in the stable
 text so Arabic-only changes are not silently dropped.
 
@@ -31,6 +40,9 @@ _HEADERS = {
     "User-Agent": REQUESTS_UA,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9,ar;q=0.8",
+    # Accept both the legacy domain and the new domain as valid referers so
+    # the server does not reject cross-domain requests after the redirect.
+    "Referer": "https://www.uaecma.gov.ae/",
 }
 
 _DATE_RE = re.compile(
@@ -86,8 +98,10 @@ def _row_hash(row: dict) -> str:
 
 
 def _is_sca_url(url: str) -> bool:
+    """Return True for both the legacy sca.gov.ae domain and the new uaecma.gov.ae domain."""
     try:
-        return "sca.gov.ae" in urlparse(url).netloc.lower()
+        netloc = urlparse(url).netloc.lower()
+        return "sca.gov.ae" in netloc or "uaecma.gov.ae" in netloc
     except Exception:
         return False
 
@@ -138,15 +152,18 @@ def _extract_items(soup: BeautifulSoup, source_page_url: str) -> list[dict]:
 
 
 class SCAAdapter(SourceAdapter):
-    """Adapter for UAE SCA circulars, decisions, and legislation listing pages."""
+    """Adapter for UAE CMA / SCA circulars, decisions, and legislation listing pages.
+
+    Matches both sca.gov.ae (legacy) and uaecma.gov.ae (current, post-2026 rename).
+    The adapter name remains "uae_sca" for backward compatibility with existing
+    source records and monitoring state.
+    """
 
     name = "uae_sca"
 
     def can_handle(self, url: str, source: dict | None = None) -> bool:
-        try:
-            return "sca.gov.ae" in urlparse(url).netloc.lower()
-        except Exception:
-            return False
+        """Return True for sca.gov.ae and uaecma.gov.ae URLs."""
+        return _is_sca_url(url)
 
     def fetch_content(self, url: str, source: dict | None = None) -> str | None:
         try:
@@ -166,17 +183,17 @@ class SCAAdapter(SourceAdapter):
         if items:
             return self._format_listing(url, items)
 
-        text = extract_text(response.text) or _clean(soup.get_text("\n", strip=True))
+        text = extract_text(response.text) or _clean(soup.get_text("\n\n", strip=True))
         if len(text) < 500:
             return None
-        return f"UAE SCA official listing\n\nURL: {url}\n\n{text}"
+        return f"UAE Capital Market Authority official listing\n\nURL: {url}\n\n{text}"
 
     def _format_listing(self, url: str, items: list[dict]) -> str:
-        blocks = ["UAE SCA regulatory listing", f"Source page: {url}"]
+        blocks = ["UAE CMA regulatory listing", f"Source page: {url}"]
         for item in items:
             blocks.append(
                 "\n".join([
-                    f"Title: {item.get('title') or 'Untitled SCA item'}",
+                    f"Title: {item.get('title') or 'Untitled UAE CMA item'}",
                     f"Date: {item.get('date') or 'not stated'}",
                     f"URL: {item.get('url') or ''}",
                     f"Type: {item.get('item_type') or ''}",

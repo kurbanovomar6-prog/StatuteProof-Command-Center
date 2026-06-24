@@ -486,7 +486,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={widgets?.enabledSources ?? 0}  sub="reviewed UAE source pack" isSourcesMonitored={true} />
           <InfoCard icon={CheckCircle} tone="emerald" label="Readiness-supported" value={widgets?.supportedSources ?? 0} sub="current registry review" />
-          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={widgets?.remediationSources ?? 0} sub="UAE Legislation, FIU homepage, SCA listing" />
+          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={widgets?.remediationSources ?? 0} sub="UAE Legislation, FIU homepage, UAE CMA listing" />
           <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with proof data" />
           <InfoCard icon={Bell}      tone="emerald" label="Changed sources"      value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
           <InfoCard icon={AlertTriangle} tone="amber" label="High-risk pending"  value={widgets?.highRiskPending ?? 0} sub="changes needing review" />

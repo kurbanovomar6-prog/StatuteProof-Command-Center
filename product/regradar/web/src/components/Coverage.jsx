@@ -25,7 +25,7 @@ const ACTIVE_SOURCES = [
   { source: 'DFSA Annual Reports',                    publishes: 'DFSA annual regulatory reports',                                              note: null },
   { source: 'DFSA Annual AML Reports',                publishes: 'DFSA annual AML and enforcement reports',                                     note: null },
   { source: 'UAE Ministry of Economy',                publishes: 'Commercial licensing and AML policy updates',                                 note: null },
-  { source: 'SCA selected sources',                   publishes: 'Limited SCA proof-backed sources, including sandbox and selected guidance',    note: 'Broader SCA regulations listing still needs adapter remediation' },
+  { source: 'UAE CMA selected sources',                publishes: 'Limited UAE CMA proof-backed sources, including sandbox and selected guidance',  note: 'Broader UAE CMA regulations listing still needs adapter remediation' },
 ]
 
 const CAVEAT_SOURCES = [
@@ -38,8 +38,8 @@ const CAVEAT_SOURCES = [
     why: '25 direct official FTA tax PDF endpoints are fresh-alert eligible. The FTA main portal and tested listing/sub-pages are not separately counted as fresh-alert because portal/listing extraction still needs item-level proof, repeat baseline, and MONITOR_OK gates.',
   },
   {
-    source: 'Capital Markets Authority (former SCA)',
-    why: 'SCA has 5 proof-backed fresh-alert eligible sources. Broader SCA regulations/circulars monitoring remains below Strong and needs adapter remediation before broader capital-markets claims.',
+    source: 'UAE Capital Market Authority (UAE CMA)',
+    why: 'UAE CMA has 6 active proof-backed fresh-alert eligible sources. UAE CMA broader coverage is actively expanding and needs adapter remediation before broader capital-markets claims.',
   },
   {
     source: 'UAE Legislation Portal',

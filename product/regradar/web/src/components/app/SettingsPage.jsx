@@ -15,7 +15,7 @@ const SOURCE_LAYERS = [
   'DIFC Laws',
   'Ministry of Economy',
   'FTA',
-  'Capital Market Authority / former SCA [Limited]',
+  'UAE Capital Market Authority (UAE CMA) [Limited]',
   'Other',
 ]
 
