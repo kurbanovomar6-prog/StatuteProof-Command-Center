@@ -23,7 +23,7 @@ import time
 from collections import defaultdict
 from http.cookies import SimpleCookie
 from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 import requests as _req
@@ -2776,9 +2776,9 @@ def _start_background_monitor() -> None:
 
 
 def run_server(host: str = "127.0.0.1", port: int = 5001) -> None:
-    """Start the blocking HTTP server and background monitor. Stops cleanly on Ctrl-C."""
+    """Start the threaded HTTP server and background monitor. Stops cleanly on Ctrl-C."""
     _start_background_monitor()
-    server = HTTPServer((host, port), _Handler)
+    server = ThreadingHTTPServer((host, port), _Handler)
     print(f"StatuteProof API listening on  http://{host}:{port}/api/")
     print(f"Vite dev proxy expects it at  http://localhost:5173/api/ → http://{host}:{port}/api/")
     print("Press Ctrl-C to stop.\n")
