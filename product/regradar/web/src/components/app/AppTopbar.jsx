@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Menu, ShieldCheck, WifiOff } from 'lucide-react'
+import { Menu, WifiOff } from 'lucide-react'
 
 function getWorkspace(currentUser) {
   try {
@@ -41,7 +41,9 @@ function useApiHealth() {
     fetch('/api/health')
       .then(r => r.json())
       .then(d => {
-        if (!cancelled) setStatus(d.status === 'ok' ? 'ok' : 'degraded')
+        // Health payload shape: {"ok": true, "db": "connected", ...}
+        const healthy = d.ok === true || d.status === 'ok'
+        if (!cancelled) setStatus(healthy ? 'ok' : 'degraded')
       })
       .catch(() => {
         if (!cancelled) setStatus('unreachable')
@@ -81,10 +83,6 @@ export default function AppTopbar({ page, onMenuClick, navigate, currentUser }) 
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-semibold px-2.5 py-1 rounded-full">
-            <ShieldCheck className="w-3 h-3" />
-            Sources staged after validation
-          </div>
         </div>
 
         {/* Right: workspace label + source review button + avatar */}

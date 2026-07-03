@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, Bell, CheckCircle, Clock, FileText, Globe, Link2, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { ArrowRight, CheckCircle, Clock } from 'lucide-react'
 
 import { telegramPair, sources as sourcesApi } from '../../api'
 import PlanBanner from './PlanBanner'
 import { getWorkspaceProfile, profileLabel } from '../../data/workspaceProfile'
 import DeadlinesPanel from './DeadlinesPanel'
 import PressureScore from './PressureScore'
+import StatusBadge from './ui/StatusBadge'
+import TimeStamp from './ui/TimeStamp'
+import ErrorState from './ui/ErrorState'
+import { hoursSince, fullStamp, timeAgo } from '../../utils/time'
 
 const COV_COLOR = {
   emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -34,28 +38,39 @@ function StatusPill({ tone = 'slate', children }) {
   )
 }
 
-function InfoCard({ icon: Icon, tone, label, value, sub, isSourcesMonitored }) {
-  const iconStyle = {
-    cyan: 'bg-cyan-500/10 text-cyan-300',
-    emerald: 'bg-emerald-500/10 text-emerald-300',
-    amber: 'bg-amber-500/10 text-amber-300',
-    slate: 'bg-slate-800 text-slate-400',
-  }[tone] || 'bg-slate-800 text-slate-400'
-
+/**
+ * Truthful monitoring freshness indicator derived from the most recent
+ * recorded run. Never claims "active" — states when the last check happened
+ * and flags staleness beyond 48 hours.
+ */
+function MonitoringFreshness({ lastRunAt }) {
+  if (!lastRunAt) {
+    return (
+      <span
+        title="No monitoring run has been recorded yet."
+        className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 bg-slate-800/80 px-2.5 py-1 text-[11px] font-semibold text-slate-300"
+      >
+        <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+        No runs recorded
+      </span>
+    )
+  }
+  const hours = hoursSince(lastRunAt)
+  const stale = hours != null && hours > 48
   return (
-    <div className="sp-glass p-4">
-      <div className="mb-3 flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-          {isSourcesMonitored && <span className="sp-live-dot" />}
-        </div>
-        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconStyle}`}>
-          <Icon className="h-4 w-4" />
-        </div>
-      </div>
-      <p className="sp-animate-stat text-2xl font-bold text-white">{value}</p>
-      {sub && <p className="mt-1 text-xs text-slate-500">{sub}</p>}
-    </div>
+    <span
+      title={`Most recent recorded monitoring run: ${fullStamp(lastRunAt)}. ${
+        stale ? 'This is older than 48 hours — treat monitored data as stale.' : ''
+      }`.trim()}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+        stale
+          ? 'border-amber-400/25 bg-amber-400/10 text-amber-300'
+          : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'
+      }`}
+    >
+      <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+      {stale ? `Last check ${timeAgo(lastRunAt)} — stale` : `Last check ${timeAgo(lastRunAt)}`}
+    </span>
   )
 }
 
@@ -121,7 +136,7 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
     { label: 'Account created', detail: 'Signed-in workspace account', status: 'Complete', tone: 'emerald' },
     { label: 'Profile saved', detail: hasProfile ? profileLabel(profile) : 'Add markets and licence profile', status: hasProfile ? 'Complete' : 'Pending', tone: hasProfile ? 'emerald' : 'amber', action: 'settings' },
     { label: 'Telegram connected', detail: connected ? 'Account pairing confirmed' : 'Connect Telegram in Integrations', status: connected ? 'Complete' : telegramLoading ? 'Checking' : 'Pending', tone: connected ? 'emerald' : 'amber', action: 'integrations' },
-    { label: 'Source map reviewed', detail: 'Review fresh-alert eligible, limited, and access-restricted sources', status: 'Needs review', tone: 'amber', action: 'sources' },
+    { label: 'Source map reviewed', detail: 'Review fresh-alert eligible, limited, and access-restricted sources', status: 'To do', tone: 'slate', action: 'sources' },
     { label: 'First reviewed brief', detail: 'Use email test-mode or Telegram preview only after review gates pass', status: 'Test mode', tone: 'slate', action: 'briefs' },
   ]
 
@@ -167,13 +182,6 @@ function SourceReadinessCard({ navigate }) {
         <StatusPill tone="cyan">Activation readiness in progress</StatusPill>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-2">
-        <StatusPill tone="emerald">Evidence confirmed</StatusPill>
-        <StatusPill tone="amber">Baseline pending</StatusPill>
-        <StatusPill tone="cyan">Needs adapter</StatusPill>
-        <StatusPill tone="slate">Limited</StatusPill>
-      </div>
-
       <div className="space-y-2.5 text-sm text-slate-400">
         {[
           'Monitoring activation requires evidence and baseline runs.',
@@ -212,24 +220,11 @@ function buildWidgets(sourcesData, sourceSummary) {
   const qualityDrop = summary.QUALITY_DROP || 0
   const firstSeen = summary.FIRST_SEEN  || 0
   const highRiskPending = sources.filter(s => s.change_status === 'CHANGED' || s.change_status === 'FIRST_SEEN').length
-  const mostRecentRunAt = sources
-    .map(s => s.last_run_at)
-    .filter(Boolean)
-    .sort()
-    .pop()
-  const lastCheck = mostRecentRunAt
-    ? new Date(mostRecentRunAt).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }) + ' UTC'
-    : 'No runs yet'
   return {
     enabledSources: sourceSummary?.enabled_count ?? sources.length,
-    supportedSources: sourceSummary?.readiness_supported_count ?? 0,
-    remediationSources: sourceSummary?.remediation_count ?? 0,
-    lastCheck,
     changedThisWeek: changed + firstSeen,
-    highRiskPending,
     failedSources: failed + qualityDrop,
     evidenceRecords: sources.filter(s => s.change_status !== 'NOT_RUN').length,
-    briefStatus: 'Test mode available',
     reviewRequired: highRiskPending,
   }
 }
@@ -241,36 +236,13 @@ const EXTRACTION_CLS = {
   UNKNOWN: 'text-slate-500',
 }
 
-function ReadinessBadge({ source }) {
-  let label = 'ACTIVATION PENDING'
-  let cls = 'border-slate-600/40 bg-slate-800/60 text-slate-300'
-  if (REMEDIATION_SOURCE_IDS.has(source.source_id)) {
-    label = 'NEEDS REVIEW'
-    cls = 'border-amber-400/30 bg-amber-400/10 text-amber-200'
-  } else if (source.change_status === 'FAILED' || source.access_status === 'failed') {
-    label = 'BLOCKED'
-    cls = 'border-rose-400/30 bg-rose-400/10 text-rose-200'
-  } else if (source.change_status === 'QUALITY_DROP') {
-    label = 'QUALITY DROP'
-    cls = 'border-amber-400/30 bg-amber-400/10 text-amber-200'
-  } else if (source.change_status && source.change_status !== 'NOT_RUN') {
-    label = 'READINESS'
-    cls = 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
-  }
-  return <span className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-bold ${cls}`}>{label}</span>
-}
-
-function EvidenceBadge({ source }) {
-  const hasEvidence = source.change_status && source.change_status !== 'NOT_RUN'
-  return (
-    <span className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-bold ${
-      hasEvidence
-        ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200'
-        : 'border-slate-600/40 bg-slate-800/60 text-slate-400'
-    }`}>
-      {hasEvidence ? 'PROOF RECORDED' : 'PENDING RUN'}
-    </span>
-  )
+// Map a source row to one canonical status code understood by StatusBadge.
+function readinessCode(source) {
+  if (REMEDIATION_SOURCE_IDS.has(source.source_id)) return 'Needs remediation'
+  if (source.change_status === 'FAILED' || source.access_status === 'failed') return 'FAILED'
+  if (source.change_status === 'QUALITY_DROP') return 'QUALITY_DROP'
+  if (source.change_status && source.change_status !== 'NOT_RUN') return 'Readiness supported'
+  return 'Monitoring not started'
 }
 
 function CommandMetric({ label, value, tone = 'slate', detail }) {
@@ -349,6 +321,9 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
     return () => { active = false }
   }, [])
 
+  // Same two API calls as before; reloadKey lets the error state retry them.
+  const [reloadKey, setReloadKey] = useState(0)
+
   useEffect(() => {
     let active = true
     Promise.all([sourcesApi.status('AE'), sourcesApi.summary('AE')])
@@ -356,11 +331,18 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         if (!active) return
         setSourcesData(statusData)
         setSourceSummary(summaryData)
+        setSourcesError('')
       })
       .catch(err => { if (active) setSourcesError(err.message || 'Could not load source status.') })
       .finally(() => { if (active) setSourcesLoading(false) })
     return () => { active = false }
-  }, [])
+  }, [reloadKey])
+
+  function retrySources() {
+    setSourcesLoading(true)
+    setSourcesError('')
+    setReloadKey(k => k + 1)
+  }
 
   const widgets = buildWidgets(sourcesData, sourceSummary)
   const attentionItems = [
@@ -401,25 +383,21 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
       <div className="sp-command-hero p-5 lg:p-6">
         <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
           <div>
-            <div className="mb-3 flex flex-wrap gap-2">
-              <StatusPill tone="amber">Operator command center</StatusPill>
-              <StatusPill tone="cyan">Evidence-readiness review</StatusPill>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 mt-2">
+            <div className="flex flex-wrap items-center gap-3">
               <h1 className="sp-heading max-w-4xl text-2xl font-semibold leading-tight text-white md:text-3xl">
                 {sourcesError
                   ? 'Source readiness summary is unavailable right now.'
                   : sourcesLoading
-                  ? 'Loading UAE source readiness summary...'
-                  : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} fresh-alert eligible sources, ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations to keep visible.`}
+                  ? 'Loading UAE source readiness summary…'
+                  : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} sources eligible for fresh alerts · ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations disclosed`}
               </h1>
               {!sourcesLoading && !sourcesError && (
-                <span className="sp-badge-trust">Monitoring active</span>
+                <MonitoringFreshness lastRunAt={sourceSummary?.last_run_at} />
               )}
             </div>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
-              Use this screen to decide what needs operator review before relying on any alert,
-              brief draft, or source claim. This is monitoring intelligence only, not legal advice.
+              Review what changed and what needs a decision before relying on any alert,
+              brief draft, or source claim. Monitoring intelligence only — not legal advice.
             </p>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -434,7 +412,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                     <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{item.label}</p>
                     <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Gated'}</StatusPill>
                   </div>
-                  <p className="sp-mono text-3xl font-semibold text-white">{item.value}</p>
+                  <p className={`text-3xl font-semibold text-white ${typeof item.value === 'number' ? 'sp-mono' : ''}`}>{item.value}</p>
                   <p className="mt-2 min-h-[2.4rem] text-xs leading-relaxed text-slate-500">{item.detail}</p>
                   <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-cyan-200">
                     Open <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
@@ -444,23 +422,25 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
             </div>
           </div>
 
-          <div className="sp-action-lane p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-amber-200">Next safest action</p>
-            <h2 className="mt-2 text-xl font-semibold text-white">Review source-health flags before any brief work.</h2>
-            <p className="mt-2 text-sm leading-relaxed text-amber-50/80">
-              Failed and quality-drop source runs are operator risks. Clear or document them before presenting source scope to a pilot buyer.
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/45 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended next step</p>
+            <h2 className="mt-2 text-lg font-semibold text-white">Review source-health flags before brief work.</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-400">
+              Failed and quality-drop runs should be cleared or documented before source scope
+              is presented to anyone outside the workspace.
             </p>
             <button
               type="button"
               onClick={() => navigate('sources')}
-              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-200 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-100"
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#16D9F5] px-4 py-2.5 text-sm font-semibold text-[#07111F] transition hover:bg-[#11c2db]"
             >
               Review source health <ArrowRight className="h-4 w-4" />
             </button>
-            <div className="mt-4 grid grid-cols-3 gap-2">
+            <div className="mt-4 grid grid-cols-2 gap-2">
               <CommandMetric label="Enabled" value={sourceSummary?.enabled_count ?? '—'} detail="source records" />
-              <CommandMetric label="Fresh-alert" value={sourceSummary?.readiness_supported_count ?? '—'} tone="emerald" detail="eligible" />
-              <CommandMetric label="Limited" value={(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'} tone="amber" detail="not claimed" />
+              <CommandMetric label="Fresh-alert eligible" value={sourceSummary?.readiness_supported_count ?? '—'} tone="emerald" detail="validated for alerts" />
+              <CommandMetric label="Limited scope" value={(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'} tone="amber" detail="excluded from claims" />
+              <CommandMetric label="Evidence records" value={widgets?.evidenceRecords ?? '—'} detail="runs with proof data" />
             </div>
           </div>
         </div>
@@ -470,29 +450,13 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
 
       <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} planState={planState} />
 
-      {/* 8-widget row — real data from /api/sources/status */}
-      {sourcesLoading ? (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="sp-skeleton h-24 w-full rounded-xl" />
-          ))}
-        </div>
-      ) : sourcesError ? (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 px-5 py-4 flex items-center gap-3">
-          <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-          <p className="text-sm text-rose-300">Could not load source status. Start the API server and refresh.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <InfoCard icon={Globe}     tone="cyan"    label="Sources enabled"      value={widgets?.enabledSources ?? 0}  sub="reviewed UAE source pack" isSourcesMonitored={true} />
-          <InfoCard icon={CheckCircle} tone="emerald" label="Readiness-supported" value={widgets?.supportedSources ?? 0} sub="current registry review" />
-          <InfoCard icon={AlertTriangle} tone="amber" label="Need remediation"  value={widgets?.remediationSources ?? 0} sub="UAE Legislation, FIU homepage, UAE CMA listing" />
-          <InfoCard icon={FileText}  tone="cyan"    label="Evidence records"     value={widgets?.evidenceRecords ?? 0} sub="runs with proof data" />
-          <InfoCard icon={Bell}      tone="emerald" label="Changed sources"      value={widgets?.changedThisWeek ?? 0} sub="CHANGED + FIRST SEEN" />
-          <InfoCard icon={AlertTriangle} tone="amber" label="High-risk pending"  value={widgets?.highRiskPending ?? 0} sub="changes needing review" />
-          <InfoCard icon={ShieldCheck} tone={widgets?.failedSources > 0 ? 'amber' : 'emerald'} label="Failed / quality drop" value={widgets?.failedSources ?? 0} sub="source health flags" />
-          <InfoCard icon={Link2}     tone={telegramStatus?.connected ? 'emerald' : 'amber'} label="Plan state" value={displayPlanName(planState)} sub={telegramStatus?.connected ? 'Telegram connected' : 'choose plan or connect delivery'} />
-        </div>
+      {sourcesError && (
+        <ErrorState
+          title="Could not load source status."
+          detail={sourcesError}
+          onRetry={retrySources}
+          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+        />
       )}
 
       <PressureScore />
@@ -505,7 +469,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               <h2 className="text-sm font-semibold text-white">Source status</h2>
               <p className="mt-1 text-xs text-slate-500">Current monitoring status and extraction readiness for all active UAE sources.</p>
             </div>
-            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300">LIVE API</span>
+            <span title="Rows come directly from the monitoring API for this workspace — no sample data." className="rounded-md border border-slate-700 bg-slate-800/60 px-2.5 py-1 text-[10px] font-semibold text-slate-300">Live data</span>
           </div>
           <div className="overflow-x-auto rounded-lg border border-slate-800">
             <table className="sp-table min-w-[860px]">
@@ -522,18 +486,16 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                     <td className="font-medium text-white max-w-[260px] truncate">{s.name}</td>
                     <td className="text-slate-400 whitespace-nowrap">{s.category?.replace(/_/g, ' ') || '—'}</td>
                     <td className="text-slate-500 whitespace-nowrap">
-                      {s.last_run_at
-                        ? new Date(s.last_run_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
-                        : 'Not run'}
+                      <TimeStamp value={s.last_run_at} fallback="Not run yet" />
                     </td>
                     <td className="whitespace-nowrap">
-                      <ReadinessBadge source={s} />
+                      <StatusBadge code={readinessCode(s)} />
                     </td>
-                    <td className={`whitespace-nowrap font-medium ${EXTRACTION_CLS[s.extraction_quality] || EXTRACTION_CLS.UNKNOWN}`}>
-                      {s.extraction_quality || 'UNKNOWN'}
+                    <td className={`whitespace-nowrap font-medium ${EXTRACTION_CLS[String(s.extraction_quality || '').toUpperCase()] || EXTRACTION_CLS.UNKNOWN}`}>
+                      {s.extraction_quality ? String(s.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'}
                     </td>
                     <td className="whitespace-nowrap">
-                      <EvidenceBadge source={s} />
+                      <StatusBadge code={s.change_status && s.change_status !== 'NOT_RUN' ? 'PROOF_RECORDED' : 'AWAITING_RUN'} />
                     </td>
                     <td className="whitespace-nowrap">
                       <a

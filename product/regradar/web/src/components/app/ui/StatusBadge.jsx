@@ -36,6 +36,10 @@ const REGISTRY = {
   rejected: { label: 'Rejected',       tone: 'critical', icon: XCircle,     explain: 'Rejected by a human reviewer.' },
   none:     { label: 'No decision',    tone: 'neutral', icon: CircleDashed, explain: 'No review decision has been recorded yet.' },
 
+  // ── evidence ─────────────────────────────────────────────────────────────
+  PROOF_RECORDED: { label: 'Evidence recorded', tone: 'success', icon: FileCheck2,   explain: 'A content hash and proof artifact are recorded for this source.' },
+  AWAITING_RUN:   { label: 'Awaiting first run', tone: 'neutral', icon: CircleDashed, explain: 'No evidence recorded yet. The first monitoring run creates the hash, snapshot, and proof artifact.' },
+
   // ── delivery / system ────────────────────────────────────────────────────
   test_mode:    { label: 'Test mode',    tone: 'neutral', icon: FlaskConical, explain: 'Deliveries are written to a local outbox. No external customer email is sent.' },
   local_outbox: { label: 'Local outbox', tone: 'neutral', icon: FlaskConical, explain: 'Email provider is not configured; payloads are written locally instead of being sent.' },
@@ -49,7 +53,7 @@ const TONE_CLS = {
   neutral:  'border-slate-600 bg-slate-800/80 text-slate-300',
 }
 
-export function statusMeta(code) {
+function statusMeta(code) {
   if (code == null || code === '') return null
   return REGISTRY[code] || REGISTRY[String(code).trim()] || null
 }
