@@ -94,7 +94,7 @@
   --text-primary:  #F8FAFC;
   --text-secondary:#A8B6CC;
   --text-muted:    #718099;
-  --accent:        #19D3F3;
+  --accent:        #16D9F5; /* single accent — matches component usage; was #19D3F3 (duplicate cyan) */
   --accent-hover:  #67E8F9;
   --accent-deep:   #0891B2;
   --success:       #37D399;
@@ -301,6 +301,7 @@
 .sp-table td {
   border-bottom: 1px solid rgba(23, 38, 62, 0.72);
   padding: 0.875rem 1rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .sp-table tr:hover td {
