@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, X, Loader2, CheckCircle, AlertTriangle, XCircle, Info, History, Hash } from 'lucide-react'
+import { Plus, X, Loader2, CheckCircle, AlertTriangle, XCircle, Info, History, Hash, Globe } from 'lucide-react'
 import { sources as sourcesApi } from '../../api'
 import { getWorkspaceProfile } from '../../data/workspaceProfile'
+import StatusBadge from './ui/StatusBadge'
+import TimeStamp from './ui/TimeStamp'
+import EmptyState from './ui/EmptyState'
+import ErrorState from './ui/ErrorState'
 
 // ── status display helpers ────────────────────────────────────────────────────
 
@@ -48,28 +52,8 @@ const INTAKE_STATUS_BG = {
   FAILED:                'bg-rose-500/10 border-rose-500/20',
 }
 
-// legacy source table styles
-const HEALTH_STYLE = {
-  PASS:                 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  MONITOR_OK:           'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  'Evidence confirmed': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  Review:               'text-amber-400   bg-amber-500/10   border-amber-500/20',
-  'Not yet started':     'text-slate-400   bg-slate-700      border-slate-600',
-  'Source health issue': 'text-amber-400   bg-amber-500/10   border-amber-500/20',
-  Limited:              'text-slate-400   bg-slate-700      border-slate-600',
-}
-const STATUS_STYLE = {
-  Confirmed:        'text-emerald-400',
-  'Readiness supported': 'text-emerald-400',
-  'Under validation': 'text-amber-400',
-  Limited:          'text-amber-400',
-  Partial:          'text-slate-400',
-  'Needs adapter':  'text-amber-400',
-  'Needs remediation': 'text-amber-400',
-  'Monitoring not started': 'text-slate-400',
-}
-
-const FILTERS   = ['All', 'Readiness supported', 'Needs remediation', 'Monitoring not started', 'Limited', 'Partial', 'Needs adapter', 'User source']
+// Only statuses this table actually produces — no phantom filter options.
+const FILTERS   = ['All', 'Readiness supported', 'Needs remediation', 'Monitoring not started', 'User source']
 const MARKETS   = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const CATEGORIES = [
   'Central bank', 'Financial regulator', 'Crypto regulator', 'AML authority',
@@ -96,10 +80,15 @@ function statusFromApiSource(row) {
   return 'Readiness supported'
 }
 
-function healthFromApiSource(row) {
-  if (row.change_status === 'FAILED' || row.change_status === 'QUALITY_DROP') return 'Source health issue'
-  if (!row.last_run_at || row.change_status === 'NOT_RUN') return 'Not yet started'
-  return 'MONITOR_OK'
+const CATEGORY_ACRONYMS = { aml: 'AML', cft: 'CFT', fiu: 'FIU', cma: 'CMA' }
+
+function prettyCategory(value) {
+  if (!value) return 'Official source'
+  return String(value)
+    .split('_')
+    .map(word => CATEGORY_ACRONYMS[word.toLowerCase()] || word)
+    .join(' ')
+    .replace(/^./, c => c.toUpperCase())
 }
 
 function mapApiSource(row) {
@@ -109,12 +98,10 @@ function mapApiSource(row) {
     url: row.url,
     name: row.name || row.source_id || 'Official source',
     market: 'UAE',
-    flag: '🇦🇪',
-    category: row.category || 'Official source',
+    category: prettyCategory(row.category),
     status: statusFromApiSource(row),
-    extraction: row.extraction_quality || 'UNKNOWN',
+    extraction: row.extraction_quality || 'Unknown',
     lastChecked: row.last_run_at || '',
-    health: healthFromApiSource(row),
     accessStatus: row.access_status || 'unknown',
     changeStatus: row.change_status || 'NOT_RUN',
     lastEvidenceAt: row.last_evidence_at || '',
@@ -184,6 +171,8 @@ export default function SourcesPage({ onAddCustomSource }) {
     return () => clearInterval(stepTimer.current)
   }, [testPhase])
 
+  const [reloadKey, setReloadKey] = useState(0)
+
   useEffect(() => {
     let active = true
     sourcesApi.status('AE')
@@ -201,24 +190,23 @@ export default function SourcesPage({ onAddCustomSource }) {
         if (active) setSourcesLoading(false)
       })
     return () => { active = false }
-  }, [])
+  }, [reloadKey])
+
+  function reloadSources() {
+    setSourcesLoading(true)
+    setSourcesError('')
+    setReloadKey(k => k + 1)
+  }
 
   const filteredReal = realSources.filter(s => {
     if (filter === 'User source') return false
     if (filter === 'All') return true
-    if (filter === 'Readiness supported') return sourceStatusLabel(s.status) === 'Readiness supported'
-    if (filter === 'Needs remediation') return s.status === 'Needs remediation'
-    if (filter === 'Monitoring not started') return s.status === 'Monitoring not started'
-    if (filter === 'Needs adapter') return s.status === 'Needs adapter' || s.extraction?.includes('adapter') || s.extraction?.includes('Geo')
-    return s.status === filter
+    return sourceStatusLabel(s.status) === filter
   })
 
   const filteredCustom = customSources.filter(s => {
     if (filter === 'All' || filter === 'User source') return true
-    if (filter === 'Readiness supported') return sourceStatusLabel(s.status) === 'Readiness supported'
-    if (filter === 'Needs remediation') return s.status === 'Needs remediation'
-    if (filter === 'Needs adapter') return s.status === 'Needs adapter'
-    return s.status === filter
+    return sourceStatusLabel(s.status) === filter
   })
 
   const allSources = [...filteredReal, ...filteredCustom.map(s => ({ ...s, userSource: true }))]
@@ -330,29 +318,6 @@ export default function SourcesPage({ onAddCustomSource }) {
     return status
   }
 
-  function sourceHealthLabel(health) {
-    return health === 'PASS' ? 'Evidence confirmed' : health
-  }
-
-  function lastCheckedLabel(source) {
-    if (source.userSource) return source.lastChecked || 'Saved for validation'
-    if (!source.lastChecked) return 'Monitoring not yet started'
-    try {
-      return new Date(source.lastChecked).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
-    } catch {
-      return source.lastChecked
-    }
-  }
-
-  function lastEvidenceLabel(source) {
-    if (!source.lastEvidenceAt) return 'No saved evidence yet'
-    try {
-      return new Date(source.lastEvidenceAt).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
-    } catch {
-      return source.lastEvidenceAt
-    }
-  }
-
   async function openTimeline(source) {
     if (source.userSource) return
     setTimelineSource(source)
@@ -421,16 +386,9 @@ export default function SourcesPage({ onAddCustomSource }) {
               Custom sources are saved for readiness review — monitoring is not activated automatically.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              ['Readiness supported', 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'],
-              ['Under validation', 'border-amber-400/25 bg-amber-400/10 text-amber-300'],
-              ['Needs adapter', 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'],
-              ['Limited', 'border-slate-600 bg-slate-800 text-slate-300'],
-            ].map(([label, cls]) => (
-              <span key={label} className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${cls}`}>
-                {label}
-              </span>
+          <div className="flex flex-wrap content-start gap-2">
+            {['Readiness supported', 'Needs remediation', 'Monitoring not started', 'Under validation'].map(code => (
+              <StatusBadge key={code} code={code} />
             ))}
           </div>
         </div>
@@ -456,86 +414,85 @@ export default function SourcesPage({ onAddCustomSource }) {
       {/* Table */}
       <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl overflow-hidden">
         {sourcesLoading ? (
-          <div className="px-5 py-10 text-center">
-            <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-[#16D9F5]" />
-            <p className="text-sm text-slate-400 mb-1">Loading live source status…</p>
-            <p className="text-xs text-slate-600">Authenticated source map uses the API, not sample source rows.</p>
+          <div className="space-y-0 p-4" aria-label="Loading source status">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 border-b border-slate-800/60 py-3 last:border-b-0">
+                <div className="sp-skeleton h-4 w-1/3 rounded" />
+                <div className="sp-skeleton h-4 w-24 rounded" />
+                <div className="sp-skeleton h-5 w-32 rounded-full" />
+                <div className="sp-skeleton h-4 w-28 rounded" />
+                <div className="sp-skeleton h-4 flex-1 rounded" />
+              </div>
+            ))}
           </div>
         ) : sourcesError ? (
-          <div className="px-5 py-10 text-center">
-            <AlertTriangle className="mx-auto mb-3 h-5 w-5 text-amber-400" />
-            <p className="text-sm text-amber-300 mb-1">Could not load live source status.</p>
-            <p className="text-xs text-slate-600">{sourcesError}</p>
-          </div>
+          <ErrorState title="Could not load live source status." detail={sourcesError} onRetry={reloadSources} />
         ) : allSources.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-slate-800/60 text-left">
-                  {['Source', 'Market', 'Category', 'Status', 'Extraction', 'Last checked', 'Last evidence', 'Health', 'Timeline'].map(h => (
-                    <th key={h} className="px-4 py-3 text-slate-400 font-medium whitespace-nowrap">{h}</th>
-                  ))}
+          <table className="sp-table w-full table-fixed text-xs">
+            <thead>
+              <tr>
+                <th className="w-[25%]">Source</th>
+                <th className="w-[14%]">Category</th>
+                <th className="w-[15%]">Status</th>
+                <th className="w-[8%]">Extraction</th>
+                <th className="w-[12%]">Last checked</th>
+                <th className="w-[15%]">Evidence</th>
+                <th className="w-[11%]">Timeline</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allSources.map(s => (
+                <tr key={s.id} className="transition-colors">
+                  <td>
+                    <p className="truncate font-medium text-white" title={`${s.name} — ${s.url}`}>{s.name}</p>
+                    <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                      {s.market}
+                      {s.userSource && <span className="ml-2 rounded-full border border-[#16D9F5]/30 px-1.5 py-0.5 text-[10px] text-[#16D9F5]">User source</span>}
+                    </p>
+                  </td>
+                  <td className="truncate text-slate-400" title={s.category}>{s.category}</td>
+                  <td>
+                    <StatusBadge
+                      code={sourceStatusLabel(s.status)}
+                      explainSuffix={s.remediationReason ? `Note: ${s.remediationReason}` : ''}
+                    />
+                  </td>
+                  <td className="text-slate-400">{String(s.extraction).toLowerCase().replace(/^./, c => c.toUpperCase())}</td>
+                  <td className="text-slate-500">
+                    {s.userSource
+                      ? <span>{s.lastChecked || 'Saved for validation'}</span>
+                      : <TimeStamp value={s.lastChecked} fallback="Not run yet" />}
+                  </td>
+                  <td className="text-slate-500">
+                    <TimeStamp value={s.lastEvidenceAt} fallback="No evidence yet" mode="relative" />
+                    <div className="mt-1 flex items-center gap-1 truncate font-mono text-[10px] text-slate-600" title={s.normalizedHash ? `Normalized content hash: ${s.normalizedHash}` : 'No hash recorded yet'}>
+                      <Hash className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{shortHash(s.normalizedHash)}</span>
+                    </div>
+                  </td>
+                  <td>
+                    {s.userSource ? (
+                      <span className="text-[11px] text-slate-500">Validation pending</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openTimeline(s)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+                      >
+                        <History className="h-3.5 w-3.5" />
+                        Timeline ({s.timelineEventCount})
+                      </button>
+                    )}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {allSources.map(s => (
-                  <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3 font-medium text-white whitespace-nowrap">
-                      {s.name}
-                      {s.userSource && (
-                        <span className="ml-2 text-[10px] text-[#16D9F5] border border-[#16D9F5]/30 px-1.5 py-0.5 rounded-full">
-                          User source
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-slate-300 whitespace-nowrap">{s.flag} {s.market}</td>
-                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.category}</td>
-                    <td className={`px-4 py-3 font-medium whitespace-nowrap ${STATUS_STYLE[sourceStatusLabel(s.status)] || STATUS_STYLE[s.status] || 'text-slate-400'}`}>
-                      {sourceStatusLabel(s.status)}
-                    </td>
-                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.extraction}</td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{lastCheckedLabel(s)}</td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
-                      <div>{lastEvidenceLabel(s)}</div>
-                      <div className="mt-1 flex items-center gap-1 text-[10px] font-mono text-slate-600">
-                        <Hash className="h-3 w-3" />
-                        {shortHash(s.normalizedHash)}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${HEALTH_STYLE[s.health] || 'text-slate-400 bg-slate-700 border-slate-600'}`}>
-                        {sourceHealthLabel(s.health)}
-                      </span>
-                      {s.remediationReason && s.status === 'Needs remediation' && (
-                        <p className="mt-1 max-w-[260px] truncate text-[10px] text-amber-300" title={s.remediationReason}>
-                          {s.remediationReason}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {s.userSource ? (
-                        <span className="text-[11px] text-slate-500">Validation pending</span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => openTimeline(s)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/25 px-2.5 py-1.5 text-[11px] font-semibold text-cyan-200 hover:border-cyan-300/50"
-                        >
-                          <History className="h-3.5 w-3.5" />
-                          View timeline ({s.timelineEventCount})
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         ) : (
-          <div className="px-5 py-10 text-center">
-            <p className="text-sm text-slate-400 mb-1">No sources match the current filter.</p>
-            <p className="text-xs text-slate-600">Try changing your filter or test a custom source. No sample sources are shown in authenticated source map.</p>
-          </div>
+          <EmptyState icon={Globe} title="No sources match the current filter.">
+            Change the filter above or test a custom source. Validated official sources
+            appear here with their monitoring status and evidence trail.
+          </EmptyState>
         )}
       </div>
 
@@ -569,8 +526,8 @@ export default function SourcesPage({ onAddCustomSource }) {
                   {timelineData.events.slice().reverse().map(event => (
                     <div key={event.event_id} className="rounded-lg border border-slate-800 bg-slate-950/35 px-4 py-3">
                       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-xs font-bold text-white">{event.event_type}</span>
-                        <span className="text-[11px] text-slate-500">{event.timestamp || 'Timestamp not recorded'}</span>
+                        <span className="text-xs font-bold text-white">{String(event.event_type || '').replace(/_/g, ' ')}</span>
+                        <TimeStamp value={event.timestamp} mode="absolute" fallback="Timestamp not recorded" className="text-[11px] text-slate-500" />
                       </div>
                       <p className="text-xs leading-relaxed text-slate-300">{event.customer_safe_message}</p>
                       <div className="mt-2 grid gap-2 text-[11px] text-slate-500 sm:grid-cols-2">
@@ -721,10 +678,10 @@ export default function SourcesPage({ onAddCustomSource }) {
                 {(testResult.nav_shell_detected || testResult.hash_collision) && (
                   <div className="bg-rose-500/5 border border-rose-500/20 rounded-lg px-3 py-2.5 text-xs space-y-1">
                     {testResult.nav_shell_detected && (
-                      <p className="text-rose-300">⚠ Nav shell detected — extracted text is primarily navigation items, not regulatory content.</p>
+                      <p className="flex items-start gap-1.5 text-rose-300"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />Navigation shell detected — extracted text is primarily navigation items, not regulatory content.</p>
                     )}
                     {testResult.hash_collision && (
-                      <p className="text-rose-300">⚠ Hash collision — this source produces identical content to {testResult.collision_source_id || 'another source'}.</p>
+                      <p className="flex items-start gap-1.5 text-rose-300"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />Hash collision — this source produces identical content to {testResult.collision_source_id || 'another source'}.</p>
                     )}
                   </div>
                 )}
