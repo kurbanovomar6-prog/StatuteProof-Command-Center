@@ -243,7 +243,7 @@ export default function ReviewQueuePage() {
             </div>
 
             <div className="hidden overflow-x-auto rounded-lg border border-slate-800 lg:block">
-              <table className="sp-table min-w-[1180px]">
+              <table className="sp-table w-full">
               <thead>
                 <tr>
                   {['Record', 'Source', 'Run', 'Record review', 'Latest decision', 'Reviewer note', 'Decision'].map(header => (
@@ -257,7 +257,7 @@ export default function ReviewQueuePage() {
                   const isSaving = state?.status === 'saving'
                   return (
                     <tr key={`${row.record_id}-${rowIndex}`} className="hover:bg-slate-800/35">
-                      <td className="max-w-[300px]">
+                      <td className="max-w-[220px]">
                         <p className="sp-mono truncate text-xs text-slate-300" title={row.record_id}>{row.record_id}</p>
                         <p className="mt-1 truncate text-[11px] text-slate-500" title={row.record_path}>{row.record_path}</p>
                       </td>
@@ -270,7 +270,7 @@ export default function ReviewQueuePage() {
                       </td>
                       <td><StatusBadge code={row.record_review_status || 'pending'} /></td>
                       <td><StatusBadge code={row.latest_review_decision || 'none'} /></td>
-                      <td className="min-w-[260px]">
+                      <td className="min-w-[180px]">
                         <input
                           type="text"
                           value={reviewNotes[row.record_id] || ''}
@@ -416,7 +416,7 @@ export default function ReviewQueuePage() {
           </div>
 
           <div className="hidden overflow-x-auto rounded-xl border border-slate-800 bg-[#0D1B2E] lg:block">
-            <table className="sp-table min-w-[1050px]">
+            <table className="sp-table w-full">
             <thead>
               <tr>
                 {['Source', 'Change', 'Source health', 'Quality', 'Hash', 'Assessment', 'Reviewer', 'Actions'].map(header => (
