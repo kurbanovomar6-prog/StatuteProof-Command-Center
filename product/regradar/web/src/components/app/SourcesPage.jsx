@@ -441,8 +441,8 @@ export default function SourcesPage({ onAddCustomSource }) {
               </tr>
             </thead>
             <tbody>
-              {allSources.map(s => (
-                <tr key={s.id} className="transition-colors">
+              {allSources.map((s, index) => (
+                <tr key={`${s.id || s.url || 'source'}-${index}`} className="transition-colors">
                   <td>
                     <p className="truncate font-medium text-white" title={`${s.name} — ${s.url}`}>{s.name}</p>
                     <p className="mt-0.5 truncate text-[11px] text-slate-500">
