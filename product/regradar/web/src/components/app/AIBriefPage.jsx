@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle, FileText, Search, ShieldCheck, ChevronDown, ChevronUp, Zap } from 'lucide-react'
 
 import { briefs as briefsApi } from '../../api'
+import StatusBadge from './ui/StatusBadge'
+import TimeStamp from './ui/TimeStamp'
 
 function GeneratedBriefPanel({ briefMarkdown, onDismiss }) {
   if (!briefMarkdown) return null
@@ -219,13 +221,6 @@ export default function AIBriefPage() {
               Brief drafts require canonical evidence, human review, legal-language scan, and explicit delivery approval. This is not legal advice.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {['Evidence-gated', 'Human review gate', 'No sample fallback', 'Delivery requires setup'].map(label => (
-              <span key={label} className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300">
-                {label}
-              </span>
-            ))}
-          </div>
         </div>
         <div className="mt-4 grid gap-2 md:grid-cols-4">
           {[
@@ -294,9 +289,7 @@ export default function AIBriefPage() {
                   <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLE[status]}`}>
                     {brief.delivery_approved ? 'Delivery approved' : brief.human_reviewed ? 'Reviewed' : 'Draft queue'}
                   </span>
-                  <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-200">
-                    {brief.change_status || 'UNKNOWN'}
-                  </span>
+<StatusBadge code={brief.change_status || 'NOT_RUN'} />
                 </div>
                 <h3 className="text-sm font-semibold text-white">{brief.source_id || 'Queued source'}</h3>
                 <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
@@ -310,7 +303,7 @@ export default function AIBriefPage() {
                   </div>
                   <div>
                     <p className="text-slate-500">Queued</p>
-                    <p className="text-slate-300">{brief.queued_at || brief.run_at || 'not recorded'}</p>
+                    <TimeStamp value={brief.queued_at || brief.run_at} mode="absolute" fallback="Not recorded" className="text-slate-300" />
                   </div>
                   <div>
                     <p className="text-slate-500">Hash</p>

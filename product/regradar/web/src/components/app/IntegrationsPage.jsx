@@ -11,10 +11,10 @@ import {
   Send,
   Trash2,
   Webhook,
-  XCircle,
-} from 'lucide-react'
+  XCircle, Check } from 'lucide-react'
 
 import { delivery, telegramPair } from '../../api'
+import StatusBadge from './ui/StatusBadge'
 
 function formatDate(value) {
   if (!value) return 'Not recorded'
@@ -42,14 +42,6 @@ function StatusNotice({ type, children }) {
       <span>{children}</span>
     </div>
   )
-}
-
-function emailStatusClass(status) {
-  if (status === 'test_mode') return 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'
-  if (status === 'ready_but_disabled') return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
-  if (status === 'production_enabled') return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
-  if (status === 'configuration_required') return 'border-amber-400/25 bg-amber-400/10 text-amber-200'
-  return 'border-slate-700 bg-slate-900 text-slate-300'
 }
 
 function emailModeLabel(state) {
@@ -516,14 +508,12 @@ export default function IntegrationsPage() {
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Current mode</p>
                       <p className="mt-0.5 text-xs font-semibold text-slate-200">{emailModeLabel(emailReadiness)}</p>
                     </div>
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${emailStatusClass(emailReadiness?.status)}`}>
-                      {emailReadiness?.status || 'unknown'}
-                    </span>
+                    <StatusBadge code={emailReadiness?.status || 'local_outbox'} />
                   </div>
                   <dl className="grid grid-cols-2 gap-2 text-[11px]">
                     <div>
                       <dt className="text-slate-500">Provider</dt>
-                      <dd className="text-slate-300">{emailReadiness?.provider || 'local_outbox'}</dd>
+                      <dd className="text-slate-300">{(emailReadiness?.provider || 'local_outbox') === 'local_outbox' ? 'Local outbox (no external provider)' : emailReadiness.provider}</dd>
                     </div>
                     <div>
                       <dt className="text-slate-500">External send</dt>
@@ -626,7 +616,7 @@ export default function IntegrationsPage() {
             'Global admin Telegram settings remain separate from account pairing',
           ].map(t => (
             <div key={t} className="flex items-start gap-2">
-              <span className="text-emerald-400 font-bold mt-0.5">✓</span>
+              <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-400" />
               <span>{t}</span>
             </div>
           ))}

@@ -122,7 +122,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
             <div className="rounded-lg border border-slate-800 bg-[#07111F]/60 px-2.5 py-2 text-[11px]">
               <div className="mb-1 flex items-center justify-between gap-2">
                 <span className="text-slate-500">Workspace</span>
-                <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 font-semibold text-cyan-200">
+                <span className="max-w-[140px] truncate rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 font-semibold text-cyan-200" title={planLabel}>
                   {planLabel}
                 </span>
               </div>

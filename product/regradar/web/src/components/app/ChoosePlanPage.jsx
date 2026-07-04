@@ -215,7 +215,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
                     : 'border border-slate-700 text-slate-300 hover:border-[#16D9F5]/40 hover:text-white'
                 }`}
               >
-                {selecting === p.id ? 'Saving…' : selected === p.id ? 'Selected ✓' : p.cta}
+                {selecting === p.id ? 'Saving…' : selected === p.id ? 'Selected' : p.cta}
               </button>
             </div>
           ))}

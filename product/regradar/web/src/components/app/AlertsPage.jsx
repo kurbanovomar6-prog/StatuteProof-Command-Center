@@ -98,13 +98,6 @@ export default function AlertsPage() {
               Alerts shown here come from approved local alert records matched against your workspace profile. This page does not create sample alerts.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {['Approved records only', 'Profile matched', 'Manual preview', 'Not legal advice'].map(label => (
-              <span key={label} className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300">
-                {label}
-              </span>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -132,7 +125,7 @@ export default function AlertsPage() {
                     : 'border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                {risk === 'All' ? 'All risk' : risk}
+                {risk === 'All' ? 'All risk' : risk.charAt(0) + risk.slice(1).toLowerCase() + ' risk'}
               </button>
             ))}
           </div>
@@ -186,8 +179,11 @@ export default function AlertsPage() {
             return (
               <article key={item.alert_id} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${RISK_DARK[risk] || RISK_DARK.MEDIUM}`}>
-                    {risk}
+                  <span
+                    title="Risk level assigned during human review of this alert."
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${RISK_DARK[risk] || RISK_DARK.MEDIUM}`}
+                  >
+                    {risk.charAt(0) + risk.slice(1).toLowerCase()} risk
                   </span>
                   <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                     {item.review_status || 'Approved'}

@@ -349,7 +349,7 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
               : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950'
           } disabled:opacity-60`}
         >
-          {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save settings'}
+          {saving ? 'Saving…' : saved ? 'Saved' : 'Save settings'}
         </button>
       </div>
       {saveError && (

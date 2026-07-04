@@ -48,6 +48,9 @@ const REGISTRY = {
   // ── delivery / system ────────────────────────────────────────────────────
   test_mode:    { label: 'Test mode',    tone: 'neutral', icon: FlaskConical, explain: 'Deliveries are written to a local outbox. No external customer email is sent.' },
   local_outbox: { label: 'Local outbox', tone: 'neutral', icon: FlaskConical, explain: 'Email provider is not configured; payloads are written locally instead of being sent.' },
+  ready_but_disabled:     { label: 'Ready, sending off', tone: 'success', icon: CheckCircle2,  explain: 'Provider is configured but external sending is disabled by server configuration.' },
+  production_enabled:     { label: 'Sending enabled',    tone: 'success', icon: CheckCircle2,  explain: 'Provider is configured and external sending is enabled server-side.' },
+  configuration_required: { label: 'Setup required',     tone: 'warning', icon: Wrench,        explain: 'Email provider configuration is incomplete; external sending is unavailable.' },
 }
 
 const TONE_CLS = {

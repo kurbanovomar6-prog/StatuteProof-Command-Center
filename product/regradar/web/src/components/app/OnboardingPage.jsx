@@ -426,7 +426,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                 disabled={saving}
                 className="bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] px-6 py-2 rounded-lg font-bold transition-colors disabled:opacity-60"
               >
-                {saving ? 'Saving profile…' : 'Create monitoring profile →'}
+                {saving ? 'Saving profile…' : 'Create monitoring profile'}
               </button>
             )}
           </div>
