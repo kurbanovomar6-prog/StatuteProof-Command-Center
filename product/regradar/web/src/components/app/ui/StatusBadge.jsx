@@ -36,6 +36,11 @@ const REGISTRY = {
   rejected: { label: 'Rejected',       tone: 'critical', icon: XCircle,     explain: 'Rejected by a human reviewer.' },
   none:     { label: 'No decision',    tone: 'neutral', icon: CircleDashed, explain: 'No review decision has been recorded yet.' },
 
+  // ── source health ────────────────────────────────────────────────────────
+  MONITOR_OK:     { label: 'Monitor OK',     tone: 'success',  icon: ShieldCheck,   explain: 'The latest monitoring run completed normally against the recorded baseline.' },
+  HASH_DRIFT:     { label: 'Hash drift',     tone: 'warning',  icon: AlertTriangle, explain: 'The content hash differs from the recorded baseline. A source-health review signal, not a regulatory conclusion.' },
+  ACCESS_BLOCKED: { label: 'Access blocked', tone: 'critical', icon: Ban,           explain: 'The source refused automated access on the latest run.' },
+
   // ── evidence ─────────────────────────────────────────────────────────────
   PROOF_RECORDED: { label: 'Evidence recorded', tone: 'success', icon: FileCheck2,   explain: 'A content hash and proof artifact are recorded for this source.' },
   AWAITING_RUN:   { label: 'Awaiting first run', tone: 'neutral', icon: CircleDashed, explain: 'No evidence recorded yet. The first monitoring run creates the hash, snapshot, and proof artifact.' },

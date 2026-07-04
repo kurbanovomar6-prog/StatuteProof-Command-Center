@@ -3,14 +3,9 @@ import { AlertTriangle, Download, ExternalLink, FileText, Search, ShieldCheck } 
 
 import { evidence } from '../../api'
 import AuditBinderExport from './AuditBinderExport'
-
-const STATUS_STYLE = {
-  CHANGED: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
-  FIRST_SEEN: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
-  UNCHANGED: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
-  FAILED: 'border-rose-400/30 bg-rose-400/10 text-rose-200',
-  QUALITY_DROP: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
-}
+import StatusBadge from './ui/StatusBadge'
+import TimeStamp from './ui/TimeStamp'
+import { formatGst } from '../../utils/time'
 
 function shortHash(value) {
   return value ? String(value).slice(0, 12) : 'not recorded'
@@ -96,13 +91,6 @@ export default function ReportsPage() {
               Reports are generated only from saved evidence records with proof/hash metadata. No fabricated report cards are shown.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {['Saved evidence only', 'PDF export', 'Markdown/HTML export', 'Not legal advice'].map(label => (
-              <span key={label} className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300">
-                {label}
-              </span>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -146,11 +134,11 @@ export default function ReportsPage() {
       {!loading && !error && filtered.length > 0 && (
         <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
           <div className="space-y-2">
-            {filtered.map(record => {
-              const status = String(record.change_status || 'UNKNOWN').toUpperCase()
+            {filtered.map((record, index) => {
+              const status = String(record.change_status || 'NOT_RUN').toUpperCase()
               return (
                 <button
-                  key={record.evidence_record_id}
+                  key={`${record.evidence_record_id}-${index}`}
                   type="button"
                   onClick={() => setSelectedId(record.evidence_record_id)}
                   className={`w-full rounded-xl border p-3.5 text-left transition-all ${
@@ -160,10 +148,8 @@ export default function ReportsPage() {
                   }`}
                 >
                   <div className="mb-2 flex items-start justify-between gap-2">
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLE[status] || 'border-slate-600 bg-slate-800 text-slate-300'}`}>
-                      {status}
-                    </span>
-                    <span className="text-[11px] text-slate-500">{record.timestamp_utc || 'No timestamp'}</span>
+                    <StatusBadge code={status} />
+                    <TimeStamp value={record.timestamp_utc} fallback="No timestamp" className="text-[11px] text-slate-500" />
                   </div>
                   <p className="text-xs font-semibold leading-snug text-white">{record.source_name || record.source_id}</p>
                   <p className="mt-1 text-[11px] text-slate-500">Hash {shortHash(record.normalized_hash || record.content_hash)}</p>
@@ -183,17 +169,15 @@ export default function ReportsPage() {
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Evidence record</p>
                       <h2 className="mt-1 text-base font-semibold text-white">{selected.source_name || selected.source_id}</h2>
                     </div>
-                    <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${STATUS_STYLE[String(selected.change_status || '').toUpperCase()] || 'border-slate-600 bg-slate-800 text-slate-300'}`}>
-                      {selected.change_status || 'UNKNOWN'}
-                    </span>
+                    <StatusBadge code={String(selected.change_status || 'NOT_RUN').toUpperCase()} />
                   </div>
                 </div>
                 <div className="divide-y divide-slate-800 text-xs">
                   {[
                     ['Official URL', selected.official_url || 'not recorded'],
                     ['Evidence ID', selected.evidence_record_id],
-                    ['Timestamp', selected.timestamp_utc || 'not recorded'],
-                    ['Extraction quality', selected.extraction_quality || 'UNKNOWN'],
+                    ['Timestamp', formatGst(selected.timestamp_utc) || 'Not recorded'],
+                    ['Extraction quality', selected.extraction_quality ? String(selected.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'],
                     ['Normalized hash', selected.normalized_hash || selected.content_hash || 'not recorded'],
                     ['Proof path', selected.proof_block_path || 'not recorded'],
                     ['Diff path', selected.diff_json_path || selected.diff_md_path || 'not recorded'],

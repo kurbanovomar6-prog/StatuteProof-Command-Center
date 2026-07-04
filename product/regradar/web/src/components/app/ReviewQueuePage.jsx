@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Ban, CheckCircle, ExternalLink, Filter, Search, ShieldCheck, XCircle } from 'lucide-react'
 
 import { reviews } from '../../api'
+import StatusBadge from './ui/StatusBadge'
+import TimeStamp from './ui/TimeStamp'
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending review' },
@@ -27,21 +29,6 @@ const CHANGE_OPTIONS = [
   { value: 'QUALITY_DROP', label: 'Quality drop' },
 ]
 
-const HEALTH_STYLE = {
-  MONITOR_OK: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200',
-  HASH_DRIFT: 'border-amber-400/25 bg-amber-400/10 text-amber-200',
-  QUALITY_DROP: 'border-amber-400/25 bg-amber-400/10 text-amber-200',
-  FAILED: 'border-rose-400/25 bg-rose-400/10 text-rose-200',
-  ACCESS_BLOCKED: 'border-rose-400/25 bg-rose-400/10 text-rose-200',
-}
-
-function StatusPill({ value, children }) {
-  return (
-    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${HEALTH_STYLE[value] || 'border-slate-700 bg-slate-900 text-slate-300'}`}>
-      {children || value || 'UNKNOWN'}
-    </span>
-  )
-}
 
 export default function ReviewQueuePage() {
   const [status, setStatus] = useState('pending')
@@ -157,17 +144,11 @@ export default function ReviewQueuePage() {
       <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white">MLRO review command center</h2>
+            <h2 className="text-sm font-semibold text-white">MLRO review</h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
-              Filter by pending/assessed status, source health, and change status. Hash drift is a source-health review signal, not a regulatory conclusion.
+              Filter by review status, source health, and change status. Rows are built only from
+              saved evidence records; hash drift is a source-health signal, not a regulatory conclusion.
             </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {['Saved evidence only', 'A&A linked', 'No fake rows', 'Not legal advice'].map(label => (
-              <span key={label} className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300">
-                {label}
-              </span>
-            ))}
           </div>
         </div>
       </div>
@@ -200,20 +181,18 @@ export default function ReviewQueuePage() {
         {!canonicalLoading && !canonicalError && canonicalRows.length > 0 && (
           <div>
             <div className="grid gap-3 lg:hidden">
-              {canonicalRows.map(row => {
+              {canonicalRows.map((row, rowIndex) => {
                 const state = reviewState[row.record_id]
                 const isSaving = state?.status === 'saving'
                 return (
-                  <article key={row.record_id} className="sp-mobile-card">
+                  <article key={`${row.record_id}-${rowIndex}`} className="sp-mobile-card">
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="sp-mono truncate text-xs text-slate-300">{row.record_id}</p>
                         <p className="mt-1 text-sm font-semibold text-white">{row.source_id || 'Unknown source'}</p>
                         <p className="text-xs text-slate-500">{row.regulator || 'Unknown regulator'} · {row.run_status || 'UNKNOWN'}</p>
                       </div>
-                      <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-200">
-                        {row.record_review_status || 'pending'}
-                      </span>
+                      <StatusBadge code={row.record_review_status || 'pending'} />
                     </div>
                     <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-3">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Record path</p>
@@ -273,26 +252,24 @@ export default function ReviewQueuePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {canonicalRows.map(row => {
+                {canonicalRows.map((row, rowIndex) => {
                   const state = reviewState[row.record_id]
                   const isSaving = state?.status === 'saving'
                   return (
-                    <tr key={row.record_id} className="hover:bg-slate-800/35">
+                    <tr key={`${row.record_id}-${rowIndex}`} className="hover:bg-slate-800/35">
                       <td className="max-w-[300px]">
-                        <p className="sp-mono truncate text-xs text-slate-300">{row.record_id}</p>
-                        <p className="mt-1 truncate text-[11px] text-slate-500">{row.record_path}</p>
+                        <p className="sp-mono truncate text-xs text-slate-300" title={row.record_id}>{row.record_id}</p>
+                        <p className="mt-1 truncate text-[11px] text-slate-500" title={row.record_path}>{row.record_path}</p>
                       </td>
                       <td>
                         <p className="font-semibold text-white">{row.source_id || 'Unknown source'}</p>
                         <p className="mt-1 text-[11px] text-slate-500">{row.regulator || 'Unknown regulator'}</p>
                       </td>
                       <td>
-                        <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-200">
-                          {row.run_status || 'UNKNOWN'}
-                        </span>
+                        <StatusBadge code={row.run_status || 'NOT_RUN'} />
                       </td>
-                      <td className="text-slate-300">{row.record_review_status || 'pending'}</td>
-                      <td className="text-slate-300">{row.latest_review_decision || 'none'}</td>
+                      <td><StatusBadge code={row.record_review_status || 'pending'} /></td>
+                      <td><StatusBadge code={row.latest_review_decision || 'none'} /></td>
                       <td className="min-w-[260px]">
                         <input
                           type="text"
@@ -399,25 +376,23 @@ export default function ReviewQueuePage() {
       {!loading && !error && filteredRows.length > 0 && (
         <div>
           <div className="grid gap-3 lg:hidden">
-            {filteredRows.map(row => (
-              <article key={row.evidence_record_id} className="sp-mobile-card">
+            {filteredRows.map((row, rowIndex) => (
+              <article key={`${row.evidence_record_id}-${rowIndex}`} className="sp-mobile-card">
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-white">{row.source_name || row.source_id}</p>
-                    <p className="mt-1 text-xs text-slate-500">{row.timestamp_utc || 'No timestamp'}</p>
+                    <TimeStamp value={row.timestamp_utc} mode="absolute" fallback="No timestamp" className="mt-1 block text-xs text-slate-500" />
                   </div>
-                  <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-200">
-                    {row.change_status || 'UNKNOWN'}
-                  </span>
+                  <StatusBadge code={row.change_status || 'NOT_RUN'} />
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
                     <p className="text-slate-500">Source health</p>
-                    <div className="mt-1"><StatusPill value={row.source_health_status} /></div>
+                    <div className="mt-1"><StatusBadge code={row.source_health_status || 'NOT_RUN'} /></div>
                   </div>
                   <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
                     <p className="text-slate-500">Quality</p>
-                    <p className="mt-1 font-semibold text-slate-300">{row.extraction_quality || 'UNKNOWN'}</p>
+                    <p className="mt-1 font-semibold text-slate-300">{row.extraction_quality ? String(row.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'}</p>
                   </div>
                   <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
                     <p className="text-slate-500">Hash</p>
@@ -450,19 +425,17 @@ export default function ReviewQueuePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {filteredRows.map(row => (
-                <tr key={row.evidence_record_id} className="hover:bg-slate-800/35">
+              {filteredRows.map((row, rowIndex) => (
+                <tr key={`${row.evidence_record_id}-${rowIndex}`} className="hover:bg-slate-800/35">
                   <td className="max-w-[280px]">
                     <p className="truncate font-semibold text-white">{row.source_name || row.source_id}</p>
-                    <p className="mt-1 text-[11px] text-slate-500">{row.timestamp_utc || 'No timestamp'}</p>
+                    <TimeStamp value={row.timestamp_utc} mode="absolute" fallback="No timestamp" className="mt-1 block text-[11px] text-slate-500" />
                   </td>
                   <td>
-                    <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-200">
-                      {row.change_status || 'UNKNOWN'}
-                    </span>
+                    <StatusBadge code={row.change_status || 'NOT_RUN'} />
                   </td>
-                  <td><StatusPill value={row.source_health_status} /></td>
-                  <td className="text-slate-300">{row.extraction_quality || 'UNKNOWN'}</td>
+                  <td><StatusBadge code={row.source_health_status || 'NOT_RUN'} /></td>
+                  <td className="text-slate-300">{row.extraction_quality ? String(row.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'}</td>
                   <td className="sp-mono text-slate-400">{row.normalized_hash_short || 'not recorded'}</td>
                   <td>
                     {row.pending_review ? (

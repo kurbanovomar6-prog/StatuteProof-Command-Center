@@ -3,14 +3,9 @@ import { AlertTriangle, CheckCircle, Clock, Download, FileText, Hash, History, L
 
 import { evidence as evidenceApi } from '../../api'
 import DiffViewer from '../DiffViewer'
-
-const STATUS_STYLES = {
-  CHANGED:      { bg: 'bg-blue-500/10 border-blue-500/30',     text: 'text-blue-400',   label: 'CHANGED' },
-  UNCHANGED:    { bg: 'bg-slate-700/30 border-slate-600/30',   text: 'text-slate-400',  label: 'UNCHANGED' },
-  FIRST_SEEN:   { bg: 'bg-violet-500/10 border-violet-500/30', text: 'text-violet-400', label: 'FIRST SEEN' },
-  FAILED:       { bg: 'bg-red-500/10 border-red-500/30',       text: 'text-red-400',    label: 'FAILED' },
-  QUALITY_DROP: { bg: 'bg-amber-500/10 border-amber-500/30',   text: 'text-amber-400',  label: 'QUALITY DROP' },
-}
+import StatusBadge from './ui/StatusBadge'
+import TimeStamp from './ui/TimeStamp'
+import { formatGst } from '../../utils/time'
 
 const IMPACT_OPTIONS = [
   ['monitor', 'Monitor'],
@@ -19,15 +14,6 @@ const IMPACT_OPTIONS = [
   ['escalate', 'Escalate'],
   ['external_counsel_review', 'External counsel review'],
 ]
-
-function StatusBadge({ status }) {
-  const style = STATUS_STYLES[status] || STATUS_STYLES.UNCHANGED
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${style.bg} ${style.text}`}>
-      {style.label}
-    </span>
-  )
-}
 
 function EvidenceCard({ record }) {
   const [impactLevel, setImpactLevel] = useState('monitor')
@@ -46,9 +32,7 @@ function EvidenceCard({ record }) {
   const [diffError, setDiffError] = useState('')
   const [diffExpanded, setDiffExpanded] = useState(false)
   const canAssess = Boolean(record.evidence_record_id)
-  const detectedDate = record.detected_at
-    ? new Date(record.detected_at).toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' }) + ' UTC'
-    : 'Not recorded'
+  const detectedDate = formatGst(record.detected_at) || 'Not recorded'
 
   useEffect(() => {
     if (!record.evidence_record_id) return
@@ -146,7 +130,7 @@ function EvidenceCard({ record }) {
           <h3 className="text-sm font-semibold text-white">{record.source}</h3>
           <p className="text-xs text-slate-500 mt-0.5">{record.regulator} · {record.evidence_record_id}</p>
         </div>
-        <StatusBadge status={record.status} />
+        <StatusBadge code={record.status} />
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs">
@@ -158,7 +142,7 @@ function EvidenceCard({ record }) {
         </div>
         <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
           <p className="text-slate-500 mb-0.5">Source health</p>
-          <p className="text-slate-200 font-medium">{record.source_health_status}</p>
+          <StatusBadge code={record.source_health_status} />
         </div>
         <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
           <p className="text-slate-500 mb-0.5 flex items-center gap-1">
@@ -284,7 +268,7 @@ function EvidenceCard({ record }) {
               <div key={event.event_id} className="rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2">
                 <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-[11px] font-bold text-slate-200">{event.event_type}</span>
-                  <span className="text-[10px] text-slate-500">{event.timestamp || 'Timestamp not recorded'}</span>
+                  <TimeStamp value={event.timestamp} mode="absolute" fallback="Timestamp not recorded" className="text-[10px] text-slate-500" />
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-400">{event.customer_safe_message}</p>
                 {event.assessment_impact_level && (
@@ -343,7 +327,7 @@ function mapEvidenceRecord(record, index) {
     evidence_record_id: record.evidence_record_id || record.run_id || `EVR-LIVE-${index + 1}`,
     source: record.source_name || record.source_id || 'Official source',
     source_id: record.source_id,
-    regulator: record.category || 'AE source',
+    regulator: record.category ? String(record.category).replace(/_/g, ' ').replace(/\baml\b/gi, 'AML').replace(/^./, c => c.toUpperCase()) : 'AE source',
     detected_at: record.timestamp_utc,
     run_id: record.run_id,
     status: record.change_status || 'UNCHANGED',
