@@ -5,14 +5,32 @@ Time estimates assume a 2 vCPU / 4 GB droplet and a registered domain with
 DNS A records (`statuteproof.com`, `www.statuteproof.com`) already pointing
 at the droplet — set DNS **before** droplet day, propagation is not counted.
 
-## 0. Prerequisites (before droplet day)
+## 0. Precondition gate (ABORT if any item fails)
 
-- DNS A records for `statuteproof.com` + `www` → droplet IP
-- A **fresh** Telegram alerts-bot token (the old one leaked into a local log
-  and must be rotated via @BotFather before it ever touches prod)
-- Email provider decision: `local_outbox` (pilot-safe default) or
-  postmark/sendgrid/smtp credentials
-- This repository reachable from the droplet (git remote or rsync)
+Patched 2026-07-05 after the first droplet-day abort (unexplained host-key
+change on the old IP). App code deploys from **pin c1ddb8a**.
+
+1. **Telegram token**: rotated via @BotFather; old token revoked; new token
+   staged in a local secret file (never chat, never git).
+2. **DNS**: `dig +short` for apex + www via **8.8.8.8 and 9.9.9.9** (1.1.1.1
+   is blocked on the operator network) both return the NEW droplet IP.
+3. **Email — real SMTP required on prod** (`local_outbox` is NOT acceptable;
+   the smoke test requires a real external delivery): Zoho app-specific
+   password; host `smtp.zoho.eu` or `smtp.zoho.com` per account region;
+   port 465 SSL; SMTP user = the alerts mailbox;
+   `STATUTEPROOF_EMAIL_FROM` matching it. Credentials entered only at the
+   .env step.
+4. **Host trust — no trust-on-first-use**: the operator captures the
+   expected fingerprint out-of-band from the DigitalOcean web console at
+   droplet creation (`ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`).
+   The first SSH connection must match it exactly; any mismatch = ABORT.
+5. **Old IP retired**: operator confirms 207.154.250.157 is destroyed (if
+   owned) or abandoned (if foreign) and no DNS record anywhere still
+   references it. **Zoho MX records stay untouched.**
+6. Repository reachable from the droplet: pin present on origin/main.
+
+Smoke-test addition: `dig TXT _dmarc.statuteproof.com` must return the new
+DMARC record — paste it in the deploy report.
 
 ## 1. Base system + user (≈4 min)
 
@@ -42,8 +60,9 @@ systemctl restart systemd-journald
 ## 3. App code + Python env (≈6 min)
 
 ```bash
-# as root; adjust the clone source to your remote
-git clone <YOUR_REPO_REMOTE> /srv/regradar-src
+# as root — clean clone at the pinned commit (never rsync a working tree)
+git clone https://github.com/kurbanovomar6-prog/StatuteProof-Command-Center.git /srv/regradar-src
+git -C /srv/regradar-src checkout c1ddb8a
 cp -r /srv/regradar-src/product/regradar/. /srv/regradar/
 cd /srv/regradar
 python3.12 -m venv .venv
@@ -63,7 +82,8 @@ cd /srv/regradar
 cp .env.example .env
 .venv/bin/python run.py generate-secret-key   # paste output into .env SECRET_KEY
 nano .env    # fill: SECRET_KEY, ENVIRONMENT=production, NEW telegram tokens,
-             # email provider block (leave local_outbox for the pilot)
+             # email: STATUTEPROOF_EMAIL_PROVIDER=smtp + Zoho app password
+             # (precondition 3 — local_outbox is NOT acceptable on prod)
 chown regradar:regradar .env && chmod 600 .env
 ```
 
