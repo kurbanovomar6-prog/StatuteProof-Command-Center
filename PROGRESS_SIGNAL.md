@@ -23,7 +23,17 @@ all tests isolated via STATUTEPROOF_BASE_DIR.
 
 ## Phase 1 — build cycles (hard cap 6)
 
-- [ ] F1 extraction truth + RESET_RUNBOOK.md (cycle 1) — IN PROGRESS
+- [x] F1 extraction truth + RESET_RUNBOOK.md (cycle 1) — DONE
+      Commits: 8cc4ce2 (dedup test .env hidden dependency — pre-existing
+      failure on main, fixed), f61c44f (v2 normalization).
+      Red→green: 16 new tests failed on import, then 24 green; full suite
+      672 passed / 0 failed. Real-data proof: 63 replayed CHANGED runs →
+      13 no-diff after clean (incl. both 05-Jul title-flips) + 2
+      error-page-filtered; 48 remain CHANGED (adapter-format noise — not
+      fixable by normalization; mitigated operationally by
+      normalization_version stamping + reset discipline).
+      Reset sizing measured: 300/316 snapshots flip, 86 of 116 enabled →
+      RESET_RUNBOOK.md (prepared, NOT executed).
 - [ ] F2 detected facts in alerts (cycle 2)
 - [ ] F3 Arabic lane (cycle 3)
 - [ ] F4 scoring depth (cycle 4)
