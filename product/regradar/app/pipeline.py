@@ -680,7 +680,9 @@ def run_pipeline_for_source(source: dict) -> dict:
     result["jurisdiction"]  = source.get("jurisdiction", "")
     result["category"]      = source.get("category", "")
     result["source_status"] = source.get("status", "active")
-    result["status"]        = "ok"
+    # F1 wiring fix (found by gate e2e): run_pipeline signals failure modes
+    # via "status" ("error_page", "quality_drop") — never clobber them.
+    result.setdefault("status", "ok")
 
     # ── D6: unchanged runs write a compact heartbeat to the trail ─────
     if not result.get("changed") and result.get("normalized_hash"):
