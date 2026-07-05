@@ -44,6 +44,10 @@ def _canonical_quality(value: str | None) -> str:
 
 _RUNS_CACHE: list[dict] | None = None
 _CACHE_VALID: bool = False
+# Fingerprint of the file the cache was built from (mtime_ns, size).
+# The API and the scheduler run as separate processes — a warm cache must
+# notice appends/rewrites made by the other process (eval finding N1).
+_CACHE_STAMP: tuple[int, int] | None = None
 
 
 def source_run_path() -> Path:
@@ -136,13 +140,23 @@ def write_snapshots(
     }
 
 
+def _file_stamp() -> tuple[int, int] | None:
+    try:
+        st = _RUN_FILE.stat()
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return None
+
+
 def _read_runs() -> list[dict]:
-    global _RUNS_CACHE, _CACHE_VALID
-    if _CACHE_VALID and _RUNS_CACHE is not None:
+    global _RUNS_CACHE, _CACHE_VALID, _CACHE_STAMP
+    stamp = _file_stamp()
+    if _CACHE_VALID and _RUNS_CACHE is not None and stamp == _CACHE_STAMP:
         return _RUNS_CACHE
     if not _RUN_FILE.exists():
         _RUNS_CACHE = []
         _CACHE_VALID = True
+        _CACHE_STAMP = None
         return _RUNS_CACHE
     rows: list[dict] = []
     try:
@@ -157,6 +171,7 @@ def _read_runs() -> list[dict]:
         rows = []
     _RUNS_CACHE = rows
     _CACHE_VALID = True
+    _CACHE_STAMP = stamp
     return _RUNS_CACHE
 
 
