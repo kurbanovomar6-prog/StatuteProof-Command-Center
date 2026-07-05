@@ -19,6 +19,7 @@ MEDIUM_MODERATE_KEYWORD, MEDIUM_ARABIC, LOW_NO_KEYWORDS, NON_MATERIAL).
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 
 FOOTER = "Monitoring information only. Not legal advice."
@@ -42,6 +43,20 @@ def _clean(text: str) -> str:
     while ".." in out.replace("…", ""):
         out = out.replace("..", ".")
     return out
+
+
+def _format_ts(value: str) -> str:
+    """Render timestamps as 'YYYY-MM-DD HH:MM UTC' (no microsecond noise)."""
+    raw = _clean(value)
+    if not raw:
+        return ""
+    try:
+        ts = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return raw
+    if ts.tzinfo:
+        ts = ts.astimezone(timezone.utc)
+    return ts.strftime("%Y-%m-%d %H:%M UTC")
 
 
 def _build_excerpt(added: list, removed: list, cap: int = _EXCERPT_CAP) -> str:
@@ -93,7 +108,7 @@ def build_alert_content(payload: dict[str, Any]) -> dict[str, Any]:
         "source_name": _clean(payload.get("source_name") or ""),
         "url": str(payload.get("url") or ""),
         "market": _clean(payload.get("jurisdiction") or ""),
-        "checked_at": _clean(payload.get("checked_at_utc") or payload.get("created_at") or ""),
+        "checked_at": _format_ts(payload.get("checked_at_utc") or payload.get("created_at") or ""),
         "excerpt": _build_excerpt(payload.get("added"), payload.get("removed")),
         "footer": FOOTER,
     }
