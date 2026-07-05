@@ -81,3 +81,32 @@ Phase 0 ground truth (all outputs real, this session):
 - deploy-check with blanked SECRET_KEY: exit code **1**.
 - All 11 app screens: **0 console errors**.
 - Adversarial diff grep (1,256 added lines): no weakened/removed assertions, no skips, no TODOs, no secrets, no debug prints.
+
+# ALERT QUALITY SPRINT — 2026-07-05 (branch alert-quality)
+
+## Phase 0 forensics: today's two live Telegram alerts (16:54 / 17:28 GST)
+- Trail records: run 17d38737 (12:54:44Z, CHANGED, hash 2be6fc54…) and run
+  4bc2127d (13:28:51Z, CHANGED, hash b80825e8…). Note: 4bc2127d's hash equals
+  the hash recorded at 12:54:12Z — the source OSCILLATES between two variants.
+- diff.json both runs: added=0 removed=0 changed=1 — the single changed chunk
+  is the page TITLE flipping between "…| DFSA" and "…| DFSA | THE INDEPENDENT
+  REGULATOR OF FINANCIAL SERVICES". Zero regulatory content changed.
+- Verdict per alert: (c) operator re-runs (this machine's e2e passes at those
+  exact timestamps; no scheduler process exists locally — pgrep empty) on top
+  of (b)-style churn (server-side title A/B). NOT a real regulatory change.
+- Why HIGH: pipeline diffs paragraph BLOCKS; the changed block = title + full
+  nav menu. Nav contains "Sanctions" (strong keyword) + "Compliance" (context
+  amplifier) → HIGH path 2. Reproduced: title-only diff scores MEDIUM; the
+  nav words are what upgraded it. The HIGH reason text ("deadline, penalty,
+  or mandatory obligation") describes context that was NEVER detected.
+- Sender: pipeline step-10 immediate Telegram send (ENABLE_TELEGRAM_ALERTS=
+  True in local .env, admin chat). The parallel alert-DRAFT layer scored the
+  same run MEDIUM / HOLD_FOR_REVIEW — two content layers disagree about the
+  same event, in customer-visible ways.
+
+## A1..A5 defect register (fix order)
+- A1 S1 duplicate alerting (no hash-transition dedup, no cooldown) — OPEN
+- A2 S1 untruthful boilerplate reasons; no diff excerpt; keywords not named — OPEN
+- A3 S2 empty-field scaffolding rendered to reader — OPEN
+- A4 S2 HIGH without stated indicator; no documented rubric — OPEN
+- A5 S3 cosmetics (double period, title inconsistency) — OPEN
