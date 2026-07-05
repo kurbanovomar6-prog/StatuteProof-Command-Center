@@ -1,7 +1,7 @@
 # PROGRESS — production readiness sprint (2026-07-05)
 
 ## Current phase
-Cycle 1 — heartbeats + canonical baseline + D8 (TDD, red first)
+Phase 2 — verification gate (fresh-clone sim running)
 
 ## Owner decisions locked
 1. D6 heartbeats: every run writes a record; unchanged = compact heartbeat
@@ -30,11 +30,22 @@ Cycle 1 — heartbeats + canonical baseline + D8 (TDD, red first)
   save_document hashes raw content, pipeline hashes normalized text);
   unchanged rulebook run writes NO record (D6).
 
+## Completed cycles
+- Cycle 1 (63fa726): D6 heartbeats + canonical JSONL baseline + derived
+  SQLite index + consistency check + retention compaction + D8 env base dir.
+  14 TDD tests red→green; suite 622.
+- Cycle 2 (2457137): email guardrails (loud misconfig failure, DRY_RUN,
+  attempt recording; 5 TDD tests) + decision 4 (API zero sweeps — proven,
+  2 restarts, 0 fetch lines). E2E alert→outbox delivery PASS. Suite 627.
+- Cycle 3 (f7688fb): deploy kit — systemd×5 (statically validated), Caddy,
+  logrotate, deploy-check (verified failing loudly), backup (44MB archive
+  verified), DEPLOY.md ≤30min, CORS allowlist, VITE_API_URL. Frontend 43/43.
+
 ## Open items
-- All cycles
+- Phase 2 gate: fresh-clone sim, JSONL/SQLite agreement demo, compaction
+  double-run demo, divergence seeding on a copy, scheduler kill test
+- Phase 3 adversarial review, final report
 
 ## Next action
-Write RED tests: tests/test_canonical_baseline_and_heartbeats.py +
-tests/test_heartbeat_compaction.py; then implement source_runs.record_heartbeat,
-pipeline canonical-baseline step, save_document(content_hash=...),
-app/retention.py, app/consistency.py, D8 env base dir.
+Fresh-clone: configure .env from example, deploy-check, start API on :5002,
+3× Tier-A real-network e2e, show JSONL+SQLite hashes side by side.
