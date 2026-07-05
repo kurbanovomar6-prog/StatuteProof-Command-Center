@@ -1,0 +1,102 @@
+{
+  "alert": {
+    "alert_file": "data/alert_queue/20260619T143025-AE-sca-aml-cft-intake-2-0572.json",
+    "delivery_approved": false,
+    "diff_json_path": "data/source_snapshots/2026-06-19/AE/AE-sca-aml-cft/intake-20260619T143025Z/diff.json",
+    "evidence_record_id": "evr_AE-sca-aml-cft_intake-20260619T143025Z",
+    "human_reviewed": false,
+    "proof_block_path": "data/source_snapshots/2026-06-19/AE/AE-sca-aml-cft/intake-20260619T143025Z/proof.json",
+    "run_id": "intake-20260619T143025Z",
+    "source_id": "AE-sca-aml-cft",
+    "status": "PENDING_REVIEW"
+  },
+  "brief_draft": {
+    "brief_draft_id": "brief-draft-55176b67bf47597a",
+    "business_action_required": "Review the SCA source change against internal AML/CFT and regulatory monitoring controls. Do not send to a customer until founder review, legal scan, and delivery approval are complete.",
+    "confidence": "LOW",
+    "current_hash": "sha256:e5709af71ecda2e41656880068dd4d1290f67d2d1064de9e4b11bb1550cd2328",
+    "customer_delivery": false,
+    "delivery_approved": false,
+    "delivery_blocked_reason": "Brief draft is not customer delivery; explicit delivery approval required.",
+    "diff_path": "evidence/sca/AE-sca-aml-cft/intake-20260619T143025Z/diff.txt",
+    "evidence_record_id": "evr_AE-sca-aml-cft_intake-20260619T143025Z",
+    "evidence_record_path": "evidence/sca/AE-sca-aml-cft/intake-20260619T143025Z/evidence-record.json",
+    "executive_summary": "Internal sample only: StatuteProof detected a saved change on UAE SCA Anti-Money Laundering and Terrorist Financing. The change is evidence-linked and requires human compliance review before any external use.",
+    "human_review_required": true,
+    "licence_scope": "Internal SCA AML/CFT monitoring sample; licence applicability requires human review.",
+    "not_legal_advice_disclaimer": "StatuteProof provides early-warning regulatory intelligence, not legal advice.",
+    "official_url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+    "previous_hash": "sha256:522e3b7c02294a618ab5d1894468b298e5812423237d52493dd3b5f301b67853",
+    "review_status": "approved",
+    "risk_level": "REVIEW",
+    "run_id": "intake-20260619T143025Z",
+    "run_status": "CHANGED",
+    "run_timestamp": "2026-06-19T14:30:25Z",
+    "source_id": "AE-sca-aml-cft",
+    "source_name": "UAE SCA Anti-Money Laundering and Terrorist Financing",
+    "specific_obligation": "No customer-specific obligation is asserted by this internal sample. The official-source change must be reviewed by qualified compliance or legal personnel before reliance.",
+    "status": "DRAFT"
+  },
+  "chain": [
+    "source run verified from saved source_runs.jsonl metadata",
+    "canonical evidence gate returned eligible",
+    "append-only evidence review checked and customer_delivery_approved=false",
+    "alert queue entry is linked to evidence_record_id",
+    "risk/brief draft built from approved canonical evidence",
+    "legal scan passed",
+    "delivery remains blocked"
+  ],
+  "customer_delivery": false,
+  "delivery_approved": false,
+  "delivery_blocked_reason": "Internal sample only; customer delivery requires explicit separate approval.",
+  "digest_triage": {
+    "blockers": [],
+    "noise_indicators": [
+      "possible_full_page_or_pdf_reflow",
+      "possible_locale_or_template_switch",
+      "transient_extraction_or_source_state_candidate"
+    ],
+    "review_reasons": [
+      "large diff requires human review before interpretation",
+      "normalized hash returned to an earlier baseline"
+    ],
+    "triage_status": "NEEDS_PARSER_REVIEW"
+  },
+  "evidence": {
+    "current_hash": "sha256:e5709af71ecda2e41656880068dd4d1290f67d2d1064de9e4b11bb1550cd2328",
+    "diff_path": "evidence/sca/AE-sca-aml-cft/intake-20260619T143025Z/diff.txt",
+    "evidence_record_id": "evr_AE-sca-aml-cft_intake-20260619T143025Z",
+    "evidence_record_path": "evidence/sca/AE-sca-aml-cft/intake-20260619T143025Z/evidence-record.json",
+    "external_review_id": "evrev_3490c5ce5edff7166010",
+    "official_url": "https://www.sca.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing",
+    "previous_hash": "sha256:522e3b7c02294a618ab5d1894468b298e5812423237d52493dd3b5f301b67853",
+    "review_status": "approved",
+    "run_id": "intake-20260619T143025Z",
+    "run_status": "CHANGED",
+    "run_timestamp": "2026-06-19T14:30:25Z",
+    "source_id": "AE-sca-aml-cft",
+    "source_name": "UAE SCA Anti-Money Laundering and Terrorist Financing"
+  },
+  "gated_cycle_complete": true,
+  "generated_at_utc": "2026-06-21T15:07:20Z",
+  "header": "INTERNAL SAMPLE / NOT CUSTOMER DELIVERY",
+  "internal_sample": true,
+  "legal_scan": {
+    "flags": [],
+    "passed": true
+  },
+  "report_id": "internal-cycle-2ff4d3116a27e796",
+  "review": {
+    "customer_delivery_approved": false,
+    "decision": "approved",
+    "note": "v4 audit live gate test - verifying approval path functions correctly",
+    "review_context": "audit_or_test_review",
+    "review_id": "evrev_3490c5ce5edff7166010",
+    "reviewed_at": "2026-06-21T13:58:45Z",
+    "reviewer": "test-auditor-v4"
+  },
+  "schema_version": "1.0",
+  "warnings": [
+    "Latest canonical evidence review appears to be audit/test context, not founder approval."
+  ]
+}

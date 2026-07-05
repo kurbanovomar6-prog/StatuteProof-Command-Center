@@ -1,0 +1,1820 @@
+[
+  {
+    "name": "Central Bank of the UAE",
+    "url": "https://www.centralbank.ae/",
+    "status_code": 403,
+    "final_url": "https://www.centralbank.ae/",
+    "size_bytes": 5545,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "Dubai Virtual Assets Regulatory Authority (VARA)",
+    "url": "https://www.vara.ae/",
+    "status_code": 200,
+    "final_url": "https://www.vara.ae/en/",
+    "size_bytes": 555059,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Rules and Standards",
+    "url": "https://www.dfsa.ae/rules-and-standards",
+    "status_code": 404,
+    "final_url": "https://www.dfsa.ae/rules-and-standards",
+    "size_bytes": 48407,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DFSA Financial Crime Prevention Notices and MLRO Letters",
+    "url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/financial-crime-prevention-notices-and-mlro-letters",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/what-we-do/aml-ctf-sanctions-compliance/financial-crime-prevention-notices-and-mlro-letters",
+    "size_bytes": 101195,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA AML Rulebook Module",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/anti-money-laundering-counter-terrorist-financing-and-sanctions-module-aml-ver3004-26",
+    "status_code": 200,
+    "final_url": "https://dfsaen.thomsonreuters.com/rulebook/anti-money-laundering-counter-terrorist-financing-and-sanctions-module-aml-ver3004-26",
+    "size_bytes": 165526,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Abu Dhabi Global Market (ADGM)",
+    "url": "https://www.adgm.com/fsra",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/financial-services-regulatory-authority",
+    "size_bytes": 167960,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Financial and Cyber Crime Prevention",
+    "url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/operating-in-adgm/financial-and-cyber-crime-prevention",
+    "size_bytes": 107347,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Rules and Regulations",
+    "url": "https://www.adgm.com/legal-framework/rules-and-regulations",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/legal-framework/rules-and-regulations",
+    "size_bytes": 94024,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM Public Consultations",
+    "url": "https://www.adgm.com/legal-framework/public-consultations",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/legal-framework/public-consultations",
+    "size_bytes": 498511,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance",
+    "url": "https://mof.gov.ae/",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/ar/home/",
+    "size_bytes": 572952,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Legislation Portal",
+    "url": "https://uaelegislation.gov.ae/",
+    "status_code": 403,
+    "final_url": "https://uaelegislation.gov.ae/",
+    "size_bytes": 5603,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "UAE CMA Circulars, Rules and Procedures",
+    "url": "https://www.uaecma.gov.ae/en/regulations/circulars-and-procedures.aspx",
+    "status_code": 200,
+    "final_url": "https://www.uaecma.gov.ae/en/home",
+    "size_bytes": 171869,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DIFC Laws and Regulations",
+    "url": "https://www.difc.com/business/laws-and-regulations/",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/",
+    "size_bytes": 33788,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Economy",
+    "url": "https://www.moet.gov.ae/en/",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/",
+    "size_bytes": 333536,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "VARA Enforcement Notices",
+    "url": "https://www.vara.ae/en/enforcement/",
+    "status_code": 200,
+    "final_url": "https://www.vara.ae/en/enforcement/",
+    "size_bytes": 583701,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "CBUAE Regulations Sub-page",
+    "url": "https://www.centralbank.ae/en/regulations/",
+    "status_code": 403,
+    "final_url": "https://www.centralbank.ae/en/regulations/",
+    "size_bytes": 5632,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "UAE FIU Publications Index (circulars not identified)",
+    "url": "https://www.uaefiu.gov.ae/en/Publications/",
+    "status_code": 403,
+    "final_url": "https://uaefiu.gov.ae/en/Publications/",
+    "size_bytes": 5609,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Guidance and Policy Statements",
+    "url": "https://www.adgm.com/legal-framework/guidance-and-policy-statements",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/legal-framework/guidance-and-policy-statements",
+    "size_bytes": 274190,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "EOCN AML/CFT Laws and Regulations",
+    "url": "https://www.eocn.gov.ae/en-us/laws-regulations-listing",
+    "status_code": 200,
+    "final_url": "https://www.eocn.gov.ae/en-us/laws-regulations-listing",
+    "size_bytes": 44207,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Waivers and Modifications Register",
+    "url": "https://www.adgm.com/financial-services-regulatory-authority/waivers-and-modifications",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/financial-services-regulatory-authority/waivers-and-modifications",
+    "size_bytes": 92429,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM Registration Authority Circulars",
+    "url": "https://www.adgm.com/registration-authority/circulars",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/registration-authority/circulars",
+    "size_bytes": 174730,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE FIU Trends and Typology Reports",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/trends-typology-reports/",
+    "status_code": 403,
+    "final_url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/trends-typology-reports/",
+    "size_bytes": 5811,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "EOCN News and Sanctions Updates",
+    "url": "https://www.eocn.gov.ae/en-us/news",
+    "status_code": 200,
+    "final_url": "https://www.eocn.gov.ae/en-us/news",
+    "size_bytes": 58097,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE CMA Regulations Listing",
+    "url": "https://www.uaecma.gov.ae/en/regulations/regulations-listing.aspx",
+    "status_code": 200,
+    "final_url": "https://www.uaecma.gov.ae/en/regulations/regulations-listing.aspx",
+    "size_bytes": 112978,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE CMA FATCA and CRS Guidance",
+    "url": "https://www.uaecma.gov.ae/en/regulations/automatic-exchange-of-information-fatca-and-crs.aspx",
+    "status_code": 200,
+    "final_url": "https://www.uaecma.gov.ae/en/regulations/automatic-exchange-of-information-fatca-and-crs.aspx",
+    "size_bytes": 107962,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Listing Authority Rules and Guidance",
+    "url": "https://www.adgm.com/financial-services-regulatory-authority/listing-authority/rules-and-guidance",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/financial-services-regulatory-authority/listing-authority/rules-and-guidance",
+    "size_bytes": 92758,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE CMA Corporate Governance Regulations",
+    "url": "https://www.uaecma.gov.ae/en/regulations/corporate-governance.aspx",
+    "status_code": 200,
+    "final_url": "https://www.uaecma.gov.ae/en/regulations/corporate-governance.aspx",
+    "size_bytes": 110423,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM Data Protection Guidance",
+    "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/guidance",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/guidance",
+    "size_bytes": 110382,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Enforcement",
+    "url": "https://www.adgm.com/fsra/enforcement",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com:443/operating-in-adgm/additional-obligations-of-financial-services-entities#enforcement",
+    "size_bytes": 154858,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE CMA Anti-Money Laundering and Terrorist Financing",
+    "url": "https://www.uaecma.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing.aspx",
+    "status_code": 200,
+    "final_url": "https://www.uaecma.gov.ae/en/regulations/anti-money-laundering-and-terrorist-financing.aspx",
+    "size_bytes": 106999,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Rulebook Modules",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/rulebook-modules",
+    "status_code": 200,
+    "final_url": "https://dfsaen.thomsonreuters.com/rulebook/rulebook-modules",
+    "size_bytes": 202905,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE FIU AML/CFT Laws and Related Decisions",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/",
+    "status_code": 403,
+    "final_url": "https://uaefiu.gov.ae/en/more/knowledge-centre/aml-cft-laws-related-decisions/",
+    "size_bytes": 5793,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "UAE FIU Publications Hub",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/",
+    "status_code": 403,
+    "final_url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/",
+    "size_bytes": 5696,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "CBUAE Rulebook Revision Updates",
+    "url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/view-revision-updates?f_days=on&changed=-365%20day",
+    "size_bytes": 126606,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "VARA Rulebook Revision Updates",
+    "url": "https://rulebooks.vara.ae/view-revision-updates?f_days=onchanged%3D-30+day",
+    "status_code": 200,
+    "final_url": "https://rulebooks.vara.ae/view-revision-updates?f_days=onchanged%3D-30+day",
+    "size_bytes": 367615,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Consultation Papers Current",
+    "url": "https://www.dfsa.ae/your-resources/regulatory/consultation-papers",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/your-resources/regulatory/consultation-papers",
+    "size_bytes": 56073,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Published Enforcement Decisions",
+    "url": "https://www.dfsa.ae/what-we-do/enforcement/published-decisions",
+    "status_code": 404,
+    "final_url": "https://www.dfsa.ae/what-we-do/enforcement/published-decisions",
+    "size_bytes": 47957,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DFSA Enforcement Regulatory Actions",
+    "url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/what-we-do/enforcement/regulatory-actions",
+    "size_bytes": 63366,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "CBUAE Retail Payment Services and Card Schemes Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/312-retail-payment-services-and-card-schemes-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/312-retail-payment-services-and-card-schemes-regulation",
+    "size_bytes": 133840,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Consultation Paper No.165",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/consultation-paper-no165-proposed-changes-dfsas-approach-licensed-functions-and-authorised",
+    "status_code": 200,
+    "final_url": "https://dfsaen.thomsonreuters.com/rulebook/consultation-paper-no165-proposed-changes-dfsas-approach-licensed-functions-and-authorised",
+    "size_bytes": 187767,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Supervisory Review Rulebook",
+    "url": "https://dfsaen.thomsonreuters.com/rulebook/supervisory-review-and-evaluation-process",
+    "status_code": 404,
+    "final_url": "https://dfsaen.thomsonreuters.com/rulebook/supervisory-review-and-evaluation-process",
+    "size_bytes": 131759,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "CBUAE AML/CFT Rulebook Document Links",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/amlcft",
+    "size_bytes": 164748,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "CBUAE AML/CFT Entire Section Document Links",
+    "url": "https://rulebook.centralbank.ae/en/entiresection/644",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/entiresection/644",
+    "size_bytes": 302624,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "CBUAE Consumer Protection Regulation Document Links",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/consumer-protection-regulation",
+    "size_bytes": 190877,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "CBUAE Open Finance Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/open-finance-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/open-finance-regulation",
+    "size_bytes": 206977,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "CBUAE Payment Token Services Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/payment-token-services-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/payment-token-services-regulation",
+    "size_bytes": 369760,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "CBUAE Risk Management Rulebook",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/risk-management",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/risk-management",
+    "size_bytes": 128148,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Stored Value Facilities",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/stored-value-facilities",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/stored-value-facilities",
+    "size_bytes": 237530,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Operational Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/operational-risk-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/operational-risk-regulation",
+    "size_bytes": 142295,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Market Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/market-risk-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/market-risk-regulation",
+    "size_bytes": 142133,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Large Exposures Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/large-exposures-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/large-exposures-regulation",
+    "size_bytes": 189700,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Exchange Business Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/exchange-business-regulation",
+    "size_bytes": 250234,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Capital Adequacy",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/capital-adequacy",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/capital-adequacy",
+    "size_bytes": 130446,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Large Value Payment Systems Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/large-value-payment-systems-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/large-value-payment-systems-regulation",
+    "size_bytes": 178055,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Federal Decree Law No. 6 of 2025",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/federal-decree-law-no-6-2025-regarding-central-bank-regulation-financial-institutions-and",
+    "size_bytes": 476285,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Country and Transfer Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/country-and-transfer-risk-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/country-and-transfer-risk-regulation",
+    "size_bytes": 138397,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Interest Rate and Rate of Return Risk Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/interest-rate-and-rate-return-risk-banking-book-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/interest-rate-and-rate-return-risk-banking-book-regulation",
+    "size_bytes": 141029,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Model Management Standards",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/model-management-standards",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/model-management-standards",
+    "size_bytes": 367416,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Retail Payment Systems Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/retail-payment-systems-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/retail-payment-systems-regulation",
+    "size_bytes": 192421,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "SME Customer Protection Regulation",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/small-medium-sized-enterprises-sme-customer-protection-regulation",
+    "size_bytes": 200744,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Islamic Banks Risk Management Standard",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/standard-re-risk-management-requirements-islamic-banks",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/standard-re-risk-management-requirements-islamic-banks",
+    "size_bytes": 195453,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Market Conduct Consumer Protection",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/market-conduct-consumer-protection",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/market-conduct-consumer-protection",
+    "size_bytes": 138338,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Proliferation Finance Guidance",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-proliferation-finance",
+    "size_bytes": 354820,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "TBML and Transshipment Guidance",
+    "url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%E2%80%9Ctbml%E2%80%9D",
+    "status_code": 200,
+    "final_url": "https://rulebook.centralbank.ae/en/rulebook/guidance-licensed-financial-institutions-risks-related-trade-based-money-laundering-%E2%80%9Ctbml%E2%80%9D",
+    "size_bytes": 367677,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DIFC Legal Database",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/legal-database/",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Commissioner of Data Protection",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Data Protection Supervision and Enforcement",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/supervision-enforcement",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/supervision-enforcement",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Data Protection Guidance",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/guidance",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/guidance",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Data Protection Regulation 10",
+    "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Data Protection Law 2020",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/data-protection-law-difc-law-no-5-2020",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/data-protection-law-difc-law-no-5-2020",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Companies Law 2018",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/companies-law-difc-law-no-5-2018",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/legal-database/difc-laws/companies-law-difc-law-no-5-2018",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DFSA Annual Reports",
+    "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-report",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/your-resources/publications-reports/annual-report",
+    "size_bytes": 84510,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Annual Anti-Money Laundering Reports",
+    "url": "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/your-resources/publications-reports/annual-anti-money-laundering-reports",
+    "size_bytes": 59227,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Supervision Circulars",
+    "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/supervision/circulars",
+    "size_bytes": 99343,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM FSRA Regulatory Alerts",
+    "url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/enforcement/regulatory-alerts",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/operating-in-adgm/additional-obligations-of-financial-services-entities/enforcement/regulatory-alerts",
+    "size_bytes": 163897,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Ministry of Economy \u2014 AML",
+    "url": "https://www.moet.gov.ae/aml",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/aml",
+    "size_bytes": 338987,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Ministry of Economy \u2014 Auditing Accounts Legislations",
+    "url": "https://www.moet.gov.ae/auditing-accounts-legislations",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/auditing-accounts-legislations",
+    "size_bytes": 242695,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Ministry of Economy \u2014 Economic Substance Regulations",
+    "url": "https://www.moet.gov.ae/economic-substance-regulations",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/economic-substance-regulations",
+    "size_bytes": 269017,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Ministry of Economy \u2014 Registering Companies In goAML",
+    "url": "https://www.moet.gov.ae/registering-companies-in-goaml",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/registering-companies-in-goaml",
+    "size_bytes": 254834,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Ministry of Economy \u2014 Regulation Of Business",
+    "url": "https://www.moet.gov.ae/regulation-of-business",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/regulation-of-business",
+    "size_bytes": 233330,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Ministry of Economy \u2014 Regulation Of Competition",
+    "url": "https://www.moet.gov.ae/regulation-of-competition",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/regulation-of-competition",
+    "size_bytes": 246347,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "Ministry of Economy \u2014 Targeted Financial Sanctions",
+    "url": "https://www.moet.gov.ae/targeted-financial-sanctions",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/en/targeted-financial-sanctions",
+    "size_bytes": 253833,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendment DFSA Forms 3",
+    "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-3",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-3",
+    "size_bytes": 50484,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendment DFSA Forms 4",
+    "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-4",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-4",
+    "size_bytes": 50664,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendment DFSA Forms 5",
+    "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-5",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-5",
+    "size_bytes": 50715,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendment DFSA Forms 6",
+    "url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-6",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendment-dfsa-forms-6",
+    "size_bytes": 50892,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments 1",
+    "url": "https://www.dfsa.ae/news/notice-amendments-1",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-1",
+    "size_bytes": 50337,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments",
+    "url": "https://www.dfsa.ae/news/notice-amendments",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments",
+    "size_bytes": 51371,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments DFSA Forms 1",
+    "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-1",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-1",
+    "size_bytes": 49903,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments DFSA Forms 2",
+    "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-2",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-2",
+    "size_bytes": 49594,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments DFSA Forms 3",
+    "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-3",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-3",
+    "size_bytes": 49896,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments DFSA Forms 4",
+    "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-4",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms-4",
+    "size_bytes": 50013,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments DFSA Forms",
+    "url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-dfsa-forms",
+    "size_bytes": 49629,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Legislation",
+    "url": "https://www.dfsa.ae/news/notice-amendments-legislation",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-legislation",
+    "size_bytes": 58145,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DIFC \u2014 Business AML CFT",
+    "url": "https://www.difc.com/business/aml-cft",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/aml-cft",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC \u2014 Business Economic Substance Regulations",
+    "url": "https://www.difc.com/business/economic-substance-regulations",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/economic-substance-regulations",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC \u2014 Whats On Insights DIFC Data Protection Law Pioneers",
+    "url": "https://www.difc.com/whats-on/insights/difc-data-protection-law-pioneers",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/insights/difc-data-protection-law-pioneers",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC \u2014 Whats On News DIFC Arbitration Law Consultation",
+    "url": "https://www.difc.com/whats-on/news/difc-arbitration-law-consultation",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-arbitration-law-consultation",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 Rulebook Official",
+    "url": "https://www.dfsa.ae/your-resources/regulatory/laws-and-rules",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/your-resources/regulatory/laws-and-rules",
+    "size_bytes": 57209,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 Consultation Papers",
+    "url": "https://www.dfsa.ae/your-resources/publications/consultation-papers",
+    "status_code": 404,
+    "final_url": "https://www.dfsa.ae/your-resources/publications/consultation-papers",
+    "size_bytes": 48407,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Relation CP90",
+    "url": "https://www.dfsa.ae/news/notice-relation-cp90",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-relation-cp90",
+    "size_bytes": 50616,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Discussion Paper",
+    "url": "https://www.dfsa.ae/news/notice-discussion-paper",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-discussion-paper",
+    "size_bytes": 50303,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Consultation Paper",
+    "url": "https://www.dfsa.ae/news/notice-consultation-paper",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-consultation-paper",
+    "size_bytes": 49574,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Rulebook",
+    "url": "https://www.dfsa.ae/news/notice-amendments-rulebook",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-rulebook",
+    "size_bytes": 51200,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Consultation Paper 1",
+    "url": "https://www.dfsa.ae/news/notice-consultation-paper-1",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-consultation-paper-1",
+    "size_bytes": 49811,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Consultation Paper 2",
+    "url": "https://www.dfsa.ae/news/notice-consultation-paper-2",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-consultation-paper-2",
+    "size_bytes": 50245,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Consultation Release",
+    "url": "https://www.dfsa.ae/news/notice-consultation-release",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-consultation-release",
+    "size_bytes": 50313,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Rulebook 1",
+    "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-1",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-rulebook-1",
+    "size_bytes": 50895,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Rulebook 2",
+    "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-2",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-rulebook-2",
+    "size_bytes": 51116,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Rulebook 3",
+    "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-3",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-rulebook-3",
+    "size_bytes": 51474,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Rulebook 4",
+    "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-4",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-rulebook-4",
+    "size_bytes": 51135,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Rulebook 5",
+    "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-5",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-rulebook-5",
+    "size_bytes": 51262,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Amendments Rulebook 6",
+    "url": "https://www.dfsa.ae/news/notice-amendments-rulebook-6",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-amendments-rulebook-6",
+    "size_bytes": 52166,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Call Evidence Release",
+    "url": "https://www.dfsa.ae/news/notice-call-evidence-release",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-call-evidence-release",
+    "size_bytes": 49733,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA \u2014 News Notice Consultation Release 1",
+    "url": "https://www.dfsa.ae/news/notice-consultation-release-1",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/news/notice-consultation-release-1",
+    "size_bytes": 50709,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2025 UAE National Risk Assessment Awareness",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+4+2025+Understanding+the+Importance+of+the+UAE+2024+National+Risk+Assessment.pdf/500d1a30-15b7-af72-0b2b-58d4bfb4b880?t=1750141437190",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+4+2025+Understanding+the+Importance+of+the+UAE+2024+National+Risk+Assessment.pdf/500d1a30-15b7-af72-0b2b-58d4bfb4b880?t=1750141437190",
+    "size_bytes": 507784,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2025 Sanctions and Terrorist List Screening",
+    "url": "https://www.moet.gov.ae/documents/20121/0/CIRCUL%7E2.DOC.pdf/640901bc-1407-c93f-071e-3b980e926aec?t=1743737387818",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/CIRCUL~2.DOC.pdf/640901bc-1407-c93f-071e-3b980e926aec?t=1743737387818",
+    "size_bytes": 476688,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2026 High-Risk Country List Update",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+%281%29+of+2026++on+Updating+the+List.pdf/0ebf54f1-a7f2-c6b6-b1ec-be478e7a6784?t=1773394013261",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+%281%29+of+2026++on+Updating+the+List.pdf/0ebf54f1-a7f2-c6b6-b1ec-be478e7a6784?t=1773394013261",
+    "size_bytes": 521036,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE Cabinet Decision 132 of 2023 Beneficial Owner Penalties",
+    "url": "https://www.moet.gov.ae/documents/20121/0/CD+132+2023+-+Final+English+Version+06062024+%281%29.pdf/768bd656-0caf-9bf7-4969-8b1754979a8c?t=1718255024413",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/CD+132+2023+-+Final+English+Version+06062024+%281%29.pdf/768bd656-0caf-9bf7-4969-8b1754979a8c?t=1718255024413",
+    "size_bytes": 227372,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE Cabinet Decision 109 of 2023 Beneficial Owner Procedures",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Cabinet+Decision+109-2023+English+Version+06062024.pdf/f7138fc2-fe12-cef3-077b-b4c49c12eabd?t=1718181974877",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Cabinet+Decision+109-2023+English+Version+06062024.pdf/f7138fc2-fe12-cef3-077b-b4c49c12eabd?t=1718181974877",
+    "size_bytes": 137843,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2025 High-Risk Jurisdiction Update 1",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+1+-+2025+update+of+the+List+High+Risk.pdf/c3768d4c-4972-626c-63b6-f90604661c9c?t=1743737197048",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+1+-+2025+update+of+the+List+High+Risk.pdf/c3768d4c-4972-626c-63b6-f90604661c9c?t=1743737197048",
+    "size_bytes": 539733,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2025 Iran UN Sanctions Re-Imposition",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+%287%29+of+2025+Regarding+the+Re-Imposition+of+United+Nations+S....pdf/56b27d4b-c701-46c3-a0c7-ce35aa7c6db6?t=1767097110619",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+%287%29+of+2025+Regarding+the+Re-Imposition+of+United+Nations+S....pdf/56b27d4b-c701-46c3-a0c7-ce35aa7c6db6?t=1767097110619",
+    "size_bytes": 1105940,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2025 High-Risk Jurisdiction Update 8",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+%288%29+of+2025++on+Updating+the+Lists+of+High-Risk+Countries%2C+....pdf/3504e628-32ae-2036-6aa0-c9e89d05369b?t=1767097123996",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+%288%29+of+2025++on+Updating+the+Lists+of+High-Risk+Countries%2C+....pdf/3504e628-32ae-2036-6aa0-c9e89d05369b?t=1767097123996",
+    "size_bytes": 1372145,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2025 Risk-Based Customer Due Diligence Measures",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+6+of+2025+on+Emphasizing+the+Implementation+of+Risk-Based+Customer+Due+Diligence+Measures%29+with+a+Focus+on+Simplifi.pdf/e5273cef-aa0a-a65c-428b-125c18280711?t=1754639637874",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+6+of+2025+on+Emphasizing+the+Implementation+of+Risk-Based+Customer+Due+Diligence+Measures%29+with+a+Focus+on+Simplifi.pdf/e5273cef-aa0a-a65c-428b-125c18280711?t=1754639637874",
+    "size_bytes": 1197444,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2024 Responsible Sourcing of Gold",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+2+2024+Responsible+Sourcing.pdf/758bf949-c177-a612-944d-431ba7010d59?t=1757912608944",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+2+2024+Responsible+Sourcing.pdf/758bf949-c177-a612-944d-431ba7010d59?t=1757912608944",
+    "size_bytes": 731889,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2024 High-Risk Jurisdiction Update 1",
+    "url": "https://www.moet.gov.ae/documents/20121/294745/Circular+No.+1+2024+Update+the+list+of++High+Risk+Jurisdictions.pdf/7f863876-a7ed-5750-ebd5-cf35c025f95c?t=1710226876851",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/294745/Circular+No.+1+2024+Update+the+list+of++High+Risk+Jurisdictions.pdf/7f863876-a7ed-5750-ebd5-cf35c025f95c?t=1710226876851",
+    "size_bytes": 809593,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2021 DPMS goAML Reporting Requirements",
+    "url": "https://www.moet.gov.ae/documents/20121/294745/Circular+No.+8-2021+for+DPMS+goAML+Circular.pdf/a8c348ed-b588-5a6b-e219-fadaace704d8?t=1673858893648",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/294745/Circular+No.+8-2021+for+DPMS+goAML+Circular.pdf/a8c348ed-b588-5a6b-e219-fadaace704d8?t=1673858893648",
+    "size_bytes": 1430061,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Guidelines March 2026",
+    "url": "https://www.moet.gov.ae/documents/20121/465917/DNFBP+Guidelines+-+March+2026.pdf/6e46414b-0878-bcf0-6054-235a86336f41?t=1781345717581",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/465917/DNFBP+Guidelines+-+March+2026.pdf/6e46414b-0878-bcf0-6054-235a86336f41?t=1781345717581",
+    "size_bytes": 977560,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Circular 2022 Targeted Financial Sanctions Requirements",
+    "url": "https://www.moet.gov.ae/documents/20121/387526/Circular+No.+2-2022+Updated+TFS+requirements+from+DNFBPs+%28002%29.pdf/da5b4c77-8c15-79a3-da9c-7a6d5477e5f0?t=1669359772601",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/387526/Circular+No.+2-2022+Updated+TFS+requirements+from+DNFBPs+%28002%29.pdf/da5b4c77-8c15-79a3-da9c-7a6d5477e5f0?t=1669359772601",
+    "size_bytes": 1970788,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE Federal Decree-Law 10 of 2025 AML/CFT/PF",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Federal+Decree+by+Law+No.+%2810%29+of+2025+Regarding+Anti-Money+Laundering%2C+....pdf/f1b57509-f374-822c-daa6-f3e15da756f7?t=1779431480167",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Federal+Decree+by+Law+No.+%2810%29+of+2025+Regarding+Anti-Money+Laundering%2C+....pdf/f1b57509-f374-822c-daa6-f3e15da756f7?t=1779431480167",
+    "size_bytes": 323009,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Supplemental Guidance for Real Estate Agents and Brokers 2026",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Real+Estate+Agents+%26+Brokers+-+2026.pdf/a9e1e9ef-899c-2926-b9b8-7759422b3347?t=1778575906998",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Real+Estate+Agents+%26+Brokers+-+2026.pdf/a9e1e9ef-899c-2926-b9b8-7759422b3347?t=1778575906998",
+    "size_bytes": 472056,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Supplemental Guidance for Dealers in Precious Metals and Stones 2026",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Dealers+in+Precious+Metals+%26+Stones+-+2026.pdf/65b36ca9-db7b-fedf-3304-c66c6bcfb6fa?t=1778575887493",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Dealers+in+Precious+Metals+%26+Stones+-+2026.pdf/65b36ca9-db7b-fedf-3304-c66c6bcfb6fa?t=1778575887493",
+    "size_bytes": 655306,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Supplemental Guidance for Trust and Company Service Providers 2026",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Trust+and+Company+Service+Providers+2026.pdf/839df691-4a66-929d-aa04-06b5d443bce5?t=1778577719426",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Trust+and+Company+Service+Providers+2026.pdf/839df691-4a66-929d-aa04-06b5d443bce5?t=1778577719426",
+    "size_bytes": 564394,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP Supplemental Guidance for Independent Accountants and Auditors 2026",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Independent+Accountants+%26+Auditors+-+2026.pdf/d68fc912-28bf-0099-be54-31b84ea2f952?t=1778577812144",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Independent+Accountants+%26+Auditors+-+2026.pdf/d68fc912-28bf-0099-be54-31b84ea2f952?t=1778577812144",
+    "size_bytes": 587801,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DIFC Legal Notices",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-notices",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/legal-notices",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation For Amendments To Difc Law On Application ",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-for-amendments-to-difc-law-on-application-of-civil-and-commercial-laws",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-for-amendments-to-difc-law-on-application-of-civil-and-commercial-laws",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation For Amendments To Select Difc Legislation ",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-for-amendments-to-select-difc-legislation-through-difc-law-amendment-law",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-for-amendments-to-select-difc-legislation-through-difc-law-amendment-law",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation Of Amended Prescribed Company Regulations",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-amended-prescribed-company-regulations",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-amended-prescribed-company-regulations",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation Of Amendments To The Difc Real Property La",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-amendments-to-the-difc-real-property-law-and-regulations",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-amendments-to-the-difc-real-property-law-and-regulations",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation Of New Variable Capital Company Regulation",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-new-variable-capital-company-regulations",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-new-variable-capital-company-regulations",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation Of Updated Prescribed Company Regulations",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-updated-prescribed-company-regulations",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-updated-prescribed-company-regulations",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation Of Updated Real Property Law And Regulatio",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-updated-real-property-law-and-regulations",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-of-updated-real-property-law-and-regulations",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Consultation Amended Data Protection Regulations",
+    "url": "https://www.difc.com/whats-on/news/difc-consultation-amended-data-protection-regulations",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-consultation-amended-data-protection-regulations",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Consultation New Digital Assets Law New Law Security",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-consultation-new-digital-assets-law-new-law-security",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-consultation-new-digital-assets-law-new-law-security",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces New Difc Venture Studio Regulations Consultation 1",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-new-difc-venture-studio-regulations-consultation-1",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-new-difc-venture-studio-regulations-consultation-1",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Difc Announces Proposed Amendments Real Property Law Consultation",
+    "url": "https://www.difc.com/whats-on/news/difc-announces-proposed-amendments-real-property-law-consultation",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/whats-on/news/difc-announces-proposed-amendments-real-property-law-consultation",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "DIFC Legal Database",
+    "url": "https://www.difc.com/business/laws-and-regulations/legal-database",
+    "status_code": 429,
+    "final_url": "https://www.difc.com/business/laws-and-regulations/legal-database",
+    "size_bytes": 33795,
+    "verdict": "BROKEN",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Adgm Fsra Launches Consultation On Enhancements To Insurance Regulator",
+    "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-insurance-regulatory-framework-and-climate-risk-management",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-insurance-regulatory-framework-and-climate-risk-management",
+    "size_bytes": 97169,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Adgm Fsra Launches Consultation On Enhancements To Its Aml Framework",
+    "url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-launches-consultation-on-enhancements-to-its-aml-framework",
+    "size_bytes": 96516,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Adgm Fsra Publishes Consultation Paper To Advance Its Capital Markets ",
+    "url": "https://www.adgm.com/media/announcements/adgm-fsra-publishes-consultation-paper-to-advance-its-capital-markets-framework-and-ecosystem",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/adgm-fsra-publishes-consultation-paper-to-advance-its-capital-markets-framework-and-ecosystem",
+    "size_bytes": 102203,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Fsra Commences Public Consultation For Broadening Participation In Pri",
+    "url": "https://www.adgm.com/media/announcements/fsra-commences-public-consultation-for-broadening-participation-in-private-capital-markets",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/fsra-commences-public-consultation-for-broadening-participation-in-private-capital-markets",
+    "size_bytes": 95582,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Fsra Issues Public Consultation On Updates To Its Pru Rulebook",
+    "url": "https://www.adgm.com/media/announcements/fsra-issues-public-consultation-on-updates-to-its-pru-rulebook",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/fsra-issues-public-consultation-on-updates-to-its-pru-rulebook",
+    "size_bytes": 95228,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Adgm Publishes Consultation Paper On A Comprehensive Sustainable Finan",
+    "url": "https://www.adgm.com/media/announcements/adgm-publishes-consultation-paper-on-a-comprehensive-sustainable-finance-regulatory-framework",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/adgm-publishes-consultation-paper-on-a-comprehensive-sustainable-finance-regulatory-framework",
+    "size_bytes": 100468,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Fsra Commences Public Consultation On Proposed 3Rd Party Fintech Provi",
+    "url": "https://www.adgm.com/media/announcements/fsra-commences-public-consultation-on-proposed-3rd-party-fintech-provider-regulatory-framework",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/fsra-commences-public-consultation-on-proposed-3rd-party-fintech-provider-regulatory-framework",
+    "size_bytes": 96511,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Public Consultation On Adgms Proposed Enhanced Auditors Framework",
+    "url": "https://www.adgm.com/media/announcements/public-consultation-on-adgms-proposed-enhanced-auditors-framework",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/public-consultation-on-adgms-proposed-enhanced-auditors-framework",
+    "size_bytes": 97369,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA The Ra Commences Public Consultation On Proposed Adgm Company Service ",
+    "url": "https://www.adgm.com/media/announcements/the-ra-commences-public-consultation-on-proposed-adgm-company-service-providers-framework",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/the-ra-commences-public-consultation-on-proposed-adgm-company-service-providers-framework",
+    "size_bytes": 96979,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Adgm Ra Publishes Consultation Paper On Its Insolvency Practitioner Re",
+    "url": "https://www.adgm.com/media/announcements/adgm-ra-publishes-consultation-paper-on-its-insolvency-practitioner-regime",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/adgm-ra-publishes-consultation-paper-on-its-insolvency-practitioner-regime",
+    "size_bytes": 96275,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA The Ra Of Adgm Publishes A Consultation Paper On Employment Regulation",
+    "url": "https://www.adgm.com/media/announcements/the-ra-of-adgm-publishes-a-consultation-paper-on-employment-regulations",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/the-ra-of-adgm-publishes-a-consultation-paper-on-employment-regulations",
+    "size_bytes": 96274,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Adgm Registration Authority Publishes Consultation Paper On Substantia",
+    "url": "https://www.adgm.com/media/announcements/adgm-registration-authority-publishes-consultation-paper-on-substantial-public-interest-rules-to-be-issued-under-the-data-protection-regulations-2021",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/adgm-registration-authority-publishes-consultation-paper-on-substantial-public-interest-rules-to-be-issued-under-the-data-protection-regulations-2021",
+    "size_bytes": 98174,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM/FSRA Adgm Commences Public Consultation On Proposed New Data Protection Reg",
+    "url": "https://www.adgm.com/media/announcements/adgm-commences-public-consultation-on-proposed-new-data-protection-regulations",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements/adgm-commences-public-consultation-on-proposed-new-data-protection-regulations",
+    "size_bytes": 97162,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-14503b23",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Cabinet+Decision+No.+%283%29+of+2025+On+the+Thresholds+Related+to+the+Implementation+of+Federal+Decree-Law+No.+%2836%29+of+2023+Regulati.pdf/0f228724-8dd5-9b9c-0ed8-0b94d5ae0873?t=1742552419931",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Cabinet+Decision+No.+%283%29+of+2025+On+the+Thresholds+Related+to+the+Implementation+of+Federal+Decree-Law+No.+%2836%29+of+2023+Regulati.pdf/0f228724-8dd5-9b9c-0ed8-0b94d5ae0873?t=1742552419931",
+    "size_bytes": 54878,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-413f733d",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+2+2025+ICA+%281%29.pdf/08071678-58b9-22b6-a5ba-2bac3b8b2d03?t=1757912656996",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+2+2025+ICA+%281%29.pdf/08071678-58b9-22b6-a5ba-2bac3b8b2d03?t=1757912656996",
+    "size_bytes": 479864,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-cba08cb2",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+5+of+2025+-+Update+of+the+List+High+Risk.pdf/be5ca9bb-34a1-36c7-59de-b9b32486bee6?t=1754639631909",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+5+of+2025+-+Update+of+the+List+High+Risk.pdf/be5ca9bb-34a1-36c7-59de-b9b32486bee6?t=1754639631909",
+    "size_bytes": 1131602,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-8dc715bc",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+4+-+2024+update+of+the+List+High+Risk.pdf/621f677e-e49b-9d77-b438-9f1ac34b403c?t=1730261363735",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Circular+No.+4+-+2024+update+of+the+List+High+Risk.pdf/621f677e-e49b-9d77-b438-9f1ac34b403c?t=1730261363735",
+    "size_bytes": 1066429,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 294745-96dd2a1f",
+    "url": "https://www.moet.gov.ae/documents/20121/294745/Circular+No.+3+-+2024+update+of+the+List+High+Risk.pdf/24a1e745-b3ec-1aed-f5e9-0ce87d15908d?t=1719989780711",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/294745/Circular+No.+3+-+2024+update+of+the+List+High+Risk.pdf/24a1e745-b3ec-1aed-f5e9-0ce87d15908d?t=1719989780711",
+    "size_bytes": 1065649,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-8b59c3ff",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Cabinet+Resolution+No.%2871%29+of+2024+Regulating+Violations%2C+Administrative+Penalties+Imposed+on+Violators+of+Measures+for+Confront.pdf/a20a7f19-088b-d0dc-3908-a733c5c0ba2e?t=1737017239826",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Cabinet+Resolution+No.%2871%29+of+2024+Regulating+Violations%2C+Administrative+Penalties+Imposed+on+Violators+of+Measures+for+Confront.pdf/a20a7f19-088b-d0dc-3908-a733c5c0ba2e?t=1737017239826",
+    "size_bytes": 110011,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-eb82ce7d",
+    "url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_107_2022_pdf.pdf/0c76cccf-bf19-33d4-2b5d-0cc260499c1b?t=1715054474477",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_107_2022_pdf.pdf/0c76cccf-bf19-33d4-2b5d-0cc260499c1b?t=1715054474477",
+    "size_bytes": 91711,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-d74dc341",
+    "url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_102_2022_pdf.pdf/41746ffd-968a-e455-2798-769b1456174d?t=1715054424946",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_102_2022_pdf.pdf/41746ffd-968a-e455-2798-769b1456174d?t=1715054424946",
+    "size_bytes": 146832,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-5b75bd0d",
+    "url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_47_2022_pdf.pdf/deccddc2-536a-2123-d02c-dd84bffcc5a5?t=1656667925081",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_47_2022_pdf.pdf/deccddc2-536a-2123-d02c-dd84bffcc5a5?t=1656667925081",
+    "size_bytes": 100823,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 387526-b8403d56",
+    "url": "https://www.moet.gov.ae/documents/20121/387526/Circular+No.+5-2021+goAML+deadline+circular.pdf/ef37b58a-01b6-6984-e6eb-8aa44e7cd359?t=1630991951246",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/387526/Circular+No.+5-2021+goAML+deadline+circular.pdf/ef37b58a-01b6-6984-e6eb-8aa44e7cd359?t=1630991951246",
+    "size_bytes": 1501337,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-70b480a7",
+    "url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_109_2023.pdf/760f4a4f-9f7e-d638-0676-55742892b679?t=1781343174957",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/CabinetDecision_109_2023.pdf/760f4a4f-9f7e-d638-0676-55742892b679?t=1781343174957",
+    "size_bytes": 108259,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 469920-023470db",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Auditors.pdf/d9a67ba2-65e2-2819-13a7-3edb4410c1dd?t=1633853482359",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Auditors.pdf/d9a67ba2-65e2-2819-13a7-3edb4410c1dd?t=1633853482359",
+    "size_bytes": 563507,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 469920-47d93221",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Dealers+in+Precious+Metals+and+Stones.pdf/12912d52-51f0-af9b-aad3-0d69f6b07229?t=1633853502393",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Dealers+in+Precious+Metals+and+Stones.pdf/12912d52-51f0-af9b-aad3-0d69f6b07229?t=1633853502393",
+    "size_bytes": 486770,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 469920-6d81bc73",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+the+Real+Estate+Sector.pdf/da4ac847-1bdd-f2e6-70d4-5794123b4872?t=1633853523622",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+the+Real+Estate+Sector.pdf/da4ac847-1bdd-f2e6-70d4-5794123b4872?t=1633853523622",
+    "size_bytes": 417692,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 469920-11ae906d",
+    "url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Trust+and+Company+Service+Providers.pdf/37a1e06b-b4cd-8a7b-06cb-67816643b5ce?t=1633853543080",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/469920/Supplemental+Guidance+for+Trust+and+Company+Service+Providers.pdf/37a1e06b-b4cd-8a7b-06cb-67816643b5ce?t=1633853543080",
+    "size_bytes": 447077,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "MoE DNFBP AML/TFS Document 0-cc0a0a0e",
+    "url": "https://www.moet.gov.ae/documents/20121/0/Federal+Decree+by+Law+No.+%2810%29+of+2025+Regarding+Anti-Money+Laundering%2C+and+Combating+the+Financing+of+Terrorism+and+Proliferati+%281%29.pdf/12dbc414-edc8-7e8e-534a-83b663aea491?t=1772612408811",
+    "status_code": 200,
+    "final_url": "https://www.moet.gov.ae/documents/20121/0/Federal+Decree+by+Law+No.+%2810%29+of+2025+Regarding+Anti-Money+Laundering%2C+and+Combating+the+Financing+of+Terrorism+and+Proliferati+%281%29.pdf/12dbc414-edc8-7e8e-534a-83b663aea491?t=1772612408811",
+    "size_bytes": 219368,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE FIU - AE-uaefiu-annual-reports",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/annual-report",
+    "status_code": 403,
+    "final_url": "https://uaefiu.gov.ae/en/more/knowledge-centre/publications/annual-report",
+    "size_bytes": 5757,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "UAE FIU - AE-uaefiu-press-releases",
+    "url": "https://uaefiu.gov.ae/en/more/media/press-releases",
+    "status_code": 403,
+    "final_url": "https://uaefiu.gov.ae/en/more/media/press-releases",
+    "size_bytes": 5666,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "DFSA Laws and Rules Legal Resources",
+    "url": "https://www.dfsa.ae/laws-rules/legal-resources",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/laws-rules/legal-resources/legislation",
+    "size_bytes": 58392,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Innovation and Testing Licence Updates",
+    "url": "https://www.dfsa.ae/innovation",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/innovation",
+    "size_bytes": 83822,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Enforcement Overview and Updates",
+    "url": "https://www.dfsa.ae/what-we-do/enforcement",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/what-we-do/enforcement/about-enforcement-119",
+    "size_bytes": 57761,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE CMA FinTech Regulatory Sandbox",
+    "url": "https://www.uaecma.gov.ae/en/regulations/fintech-regulatory-sandbox.aspx",
+    "status_code": 200,
+    "final_url": "https://www.uaecma.gov.ae/en/regulations/fintech-regulatory-sandbox.aspx",
+    "size_bytes": 107385,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "EOCN UN Sanctions/TFS Page",
+    "url": "https://www.eocn.gov.ae/en-us/un-page",
+    "status_code": 200,
+    "final_url": "https://www.eocn.gov.ae/en-us/un-page",
+    "size_bytes": 255490,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "VARA News, Circulars and Regulatory Publications",
+    "url": "https://www.vara.ae/en/news",
+    "status_code": 200,
+    "final_url": "https://www.vara.ae/en/news/",
+    "size_bytes": 624654,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Laws and Rules",
+    "url": "https://www.dfsa.ae/laws-rules",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/laws-rules",
+    "size_bytes": 54155,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM Courts Legislation and Procedures",
+    "url": "https://www.adgm.com/adgm-courts/legislation-and-procedures",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/adgm-courts/legislation-and-procedures",
+    "size_bytes": 122187,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM Courts Forms, Fees and Guides",
+    "url": "https://www.adgm.com/adgm-courts/forms-fees-and-guides",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/adgm-courts/forms-fees-and-guides",
+    "size_bytes": 145021,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance Publications and Releases",
+    "url": "https://mof.gov.ae/en/media-center/publications-and-releases",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/en/media-center/publications-and-releases/",
+    "size_bytes": 433266,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance Financial Legislation",
+    "url": "https://mof.gov.ae/en/financial-legislation",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/en/financial-legislation/",
+    "size_bytes": 299925,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance Economic Substance Regulations",
+    "url": "https://mof.gov.ae/en/public-finance/international-relations/economic-substance-regulations/",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/en/public-finance/international-relations/economic-substance-regulations-esr/",
+    "size_bytes": 344732,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE FIU System Guides",
+    "url": "https://uaefiu.gov.ae/en/more/knowledge-centre/system-guides/",
+    "status_code": 403,
+    "final_url": "https://uaefiu.gov.ae/en/more/knowledge-centre/system-guides/",
+    "size_bytes": 5721,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "UAE Legislation Platform - Legislations Listing",
+    "url": "https://www.uaelegislation.gov.ae/en/legislations",
+    "status_code": 403,
+    "final_url": "https://www.uaelegislation.gov.ae/en/legislations",
+    "size_bytes": 5674,
+    "verdict": "GEO_BLOCKED",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance Domestic Minimum Top-up Tax",
+    "url": "https://mof.gov.ae/en/public-finance/tax/top-up-tax/",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/en/public-finance/tax/top-up-tax/",
+    "size_bytes": 256225,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance Corporate Tax in the UAE",
+    "url": "https://mof.gov.ae/en/public-finance/tax/corporate-tax-in-the-uae/",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/en/public-finance/tax/corporate-tax-in-the-uae/",
+    "size_bytes": 278869,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance AEOI FATCA and CRS",
+    "url": "https://mof.gov.ae/en/public-finance/international-relations/automatic-exchange-of-information-aeoi-fatca-crs/",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/en/public-finance/international-relations/automatic-exchange-of-information-aeoi-fatca-crs/",
+    "size_bytes": 373549,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "UAE Ministry of Finance UAE Financial Framework",
+    "url": "https://mof.gov.ae/en/public-finance/uae-financial-sustainability/uae-financial-framework/",
+    "status_code": 200,
+    "final_url": "https://mof.gov.ae/en/public-finance/uae-financial-sustainability/uae-financial-framework/",
+    "size_bytes": 317788,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "VARA Regulatory Notices and Enforcement Index",
+    "url": "https://www.vara.ae/en/regulations/regulatory-notices/",
+    "status_code": 200,
+    "final_url": "https://www.vara.ae/en/regulations/regulatory-notices/",
+    "size_bytes": 607892,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DFSA Public Register",
+    "url": "https://www.dfsa.ae/public-register/",
+    "status_code": 200,
+    "final_url": "https://www.dfsa.ae/public-register/firms",
+    "size_bytes": 71120,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM Office of Data Protection",
+    "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/",
+    "size_bytes": 101715,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DIFC Courts \u2014 Practice Directions",
+    "url": "https://www.difccourts.ae/rules-decisions/practice-directions",
+    "status_code": 200,
+    "final_url": "https://www.difccourts.ae/rules-decisions/practice-directions",
+    "size_bytes": 60454,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "DIFC Courts \u2014 Registrar's Directions",
+    "url": "https://www.difccourts.ae/rules-decisions/registrars-directions",
+    "status_code": 200,
+    "final_url": "https://www.difccourts.ae/rules-decisions/registrars-directions",
+    "size_bytes": 58992,
+    "verdict": "OK",
+    "error": null
+  },
+  {
+    "name": "ADGM \u2014 Media Announcements Hub",
+    "url": "https://www.adgm.com/media/announcements",
+    "status_code": 200,
+    "final_url": "https://www.adgm.com/media/announcements",
+    "size_bytes": 117853,
+    "verdict": "OK",
+    "error": null
+  }
+]

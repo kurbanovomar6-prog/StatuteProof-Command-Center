@@ -1,0 +1,295 @@
+{
+  "audit_date": "2026-06-24",
+  "auditor": "Multi-role automated audit (CTO / Product / QA / Legal / Sales / Security)",
+  "current_counts": {
+    "sources_total": 432,
+    "sources_enabled": 116,
+    "sources_active_and_enabled": 116,
+    "sources_candidate": 0,
+    "sources_geo_blocked": 18,
+    "sources_by_disabled_status": {
+      "disabled_non_uae": 86,
+      "disabled_static_pdf": 48,
+      "disabled_covered_by_hub": 56,
+      "disabled_static_doc": 35,
+      "disabled_path_moved": 15,
+      "disabled_external_access": 13,
+      "disabled_duplicate": 3,
+      "disabled_navigation_only": 4,
+      "disabled_needs_playwright": 2,
+      "disabled_geo_blocked": 1,
+      "disabled": 6
+    },
+    "sources_by_family_active": {
+      "CBUAE": 25,
+      "DFSA": 16,
+      "ADGM_FSRA": 14,
+      "DIFC": 12,
+      "MoE": 9,
+      "MoF": 8,
+      "VARA": 6,
+      "UAE_CMA_SCA": 6,
+      "FTA": 6,
+      "EOCN": 5,
+      "MoJ": 2,
+      "other": 7
+    },
+    "source_runs_total": 866,
+    "source_runs_unique_sources": 289,
+    "source_runs_by_change_status": {
+      "UNCHANGED": 453,
+      "FIRST_SEEN": 286,
+      "CHANGED": 66,
+      "FAILED": 51,
+      "QUALITY_DROP": 10
+    },
+    "source_runs_by_access_status": {
+      "accessible": 804,
+      "restricted": 41,
+      "failed": 10,
+      "dynamic_adapter_needed": 11
+    },
+    "source_runs_with_proof": 773,
+    "source_runs_with_hash": 815,
+    "alert_queue_pending_review": 7,
+    "canonical_evidence_records_with_review": 0,
+    "stale_audit_claimed_enabled": 246,
+    "stale_audit_claimed_fresh_alert_eligible": 180,
+    "test_total": 598,
+    "test_passing": 593,
+    "test_failing": 5,
+    "frontend_build_status": "pass",
+    "frontend_main_chunk_gzipped_kb": 72.37
+  },
+  "scores": {
+    "product_clarity": 6,
+    "commercial_value": 7,
+    "source_quality": 6,
+    "evidence_integrity": 8,
+    "monitoring_reliability": 5,
+    "backend_maturity": 4,
+    "frontend_maturity": 7,
+    "legal_claim_safety": 7,
+    "sales_readiness": 4,
+    "production_readiness": 4,
+    "overall_readiness": 5.8
+  },
+  "current_stage": "Internal Alpha",
+  "stage_reasoning": "Pipeline is real and functional. Evidence design is correct. 116 active sources. 866 monitored runs. But: zero paying customers, no Stripe, no completed review cycle, no customer delivery, stale counts in 3 surfaces, 5 failing tests, no email verification, global rate limiter, no nginx config documented.",
+  "days_to_paid_pilot_ready": "14-21 with focused execution on P0 blockers",
+  "blockers": [
+    {
+      "id": "P0-1",
+      "title": "Stale source counts in sourceQualityAudit.ts and audit reports (246 vs actual 116)",
+      "severity": "P0",
+      "files": [
+        "product/regradar/web/src/data/sourceQualityAudit.ts",
+        "product/regradar/reports/source_signal_quality_audit.md",
+        "product/regradar/reports/source_signal_quality_audit.json"
+      ],
+      "failing_tests": 5
+    },
+    {
+      "id": "P0-2",
+      "title": "SourceTransparencyMatrix per-family counts are wrong (VARA: 24 vs 25, ADGM: 10 vs 11, DIFC/DFSA: 26 vs 27)",
+      "severity": "P0",
+      "files": ["product/regradar/web/src/components/SourceTransparencyMatrix.jsx"]
+    },
+    {
+      "id": "P0-3",
+      "title": "BuyerSourcePacks vs SourceTransparencyMatrix legislation claim contradiction",
+      "severity": "P0",
+      "files": [
+        "product/regradar/web/src/components/BuyerSourcePacks.jsx",
+        "product/regradar/web/src/components/SourceTransparencyMatrix.jsx"
+      ]
+    },
+    {
+      "id": "P0-4",
+      "title": "Stripe payment links are empty strings — no payment flow exists",
+      "severity": "P0",
+      "files": ["product/regradar/web/src/data/constants.js"]
+    },
+    {
+      "id": "P0-5",
+      "title": "Zero human-reviewed alerts — 7 PENDING_REVIEW items from June 11-15 not processed",
+      "severity": "P0",
+      "files": ["product/regradar/data/alert_queue/"]
+    },
+    {
+      "id": "P0-6",
+      "title": "Rate limiter is global in-memory, not per-IP",
+      "severity": "P0",
+      "files": ["product/regradar/app/api.py"]
+    },
+    {
+      "id": "P0-7",
+      "title": "No email verification on registration",
+      "severity": "P0",
+      "files": ["product/regradar/app/auth.py", "product/regradar/app/api.py"]
+    },
+    {
+      "id": "P0-8",
+      "title": "No nginx / SSL configuration documented in repo",
+      "severity": "P0",
+      "files": ["product/regradar/deploy/"]
+    },
+    {
+      "id": "P0-9",
+      "title": "24h check cycle metric is ambiguous (default is hourly, not daily)",
+      "severity": "P0",
+      "files": ["product/regradar/web/src/components/Hero.jsx"]
+    },
+    {
+      "id": "P0-10",
+      "title": "Default SECRET_KEY must not be in use on production VPS",
+      "severity": "P0",
+      "files": ["product/regradar/.env on VPS"]
+    }
+  ],
+  "strengths": [
+    "Pipeline design with SHA-256 hash, diff, proof file, and canonical evidence gate is genuinely correct",
+    "Evidence record schema enforces hash verification and blocked statuses before customer brief gates",
+    "Legal copy is well-hedged with no forbidden claims and SAMPLE/FAKE labels on all demo content",
+    "54 test files, 598 tests, 593 passing — strong test coverage for the stage",
+    "Source transparency with disclosed limitations, NOT_AVAILABLE sources, and caveats",
+    "Rate limiting on auth endpoints present",
+    "Security headers on all API responses",
+    "PBKDF2 at 600k iterations — correct password hashing strength",
+    "Two-bot Telegram architecture properly separated",
+    "Circuit breaker with disk persistence for monitoring resilience"
+  ],
+  "weaknesses": [
+    "Stale source counts in 3 surfaces (totalEnabled: 246 actual: 116)",
+    "Rate limiter is global/in-memory, not per-IP",
+    "Hand-rolled http.server — not WSGI/ASGI, no async, no connection pooling",
+    "No email verification on registration",
+    "7 un-reviewed CHANGED alerts in queue from 13 days ago",
+    "Stripe payment links are empty — no payment flow",
+    "No frontend tests (0 files)",
+    "No nginx/SSL config documented",
+    "sourceQualityAudit.ts is stale and marked auto-generated but wrong"
+  ],
+  "missing_features": [
+    "Stripe payment integration",
+    "Email verification",
+    "Per-IP rate limiting",
+    "nginx config with SSL termination",
+    "Frontend test suite",
+    "Completed human review workflow",
+    "Completed customer delivery",
+    "Production WSGI/ASGI server",
+    "Customer onboarding documentation",
+    "Source reliability dashboard (7/30-day metrics)"
+  ],
+  "unsafe_claims_found": [
+    {
+      "location": "product/regradar/web/src/data/sourceQualityAudit.ts",
+      "claim": "totalEnabled: 246",
+      "truth": "116",
+      "severity": "HIGH"
+    },
+    {
+      "location": "product/regradar/web/src/data/sourceQualityAudit.ts",
+      "claim": "freshAlertEligible: 180",
+      "truth": "stale figure",
+      "severity": "HIGH"
+    },
+    {
+      "location": "product/regradar/web/src/components/SourceTransparencyMatrix.jsx",
+      "claim": "VARA: 24 fresh-alert eligible",
+      "truth": "internal audit says 25",
+      "severity": "MEDIUM"
+    },
+    {
+      "location": "product/regradar/web/src/components/SourceTransparencyMatrix.jsx",
+      "claim": "ADGM/FSRA: 10 fresh-alert eligible",
+      "truth": "internal audit says 11",
+      "severity": "MEDIUM"
+    },
+    {
+      "location": "product/regradar/web/src/components/SourceTransparencyMatrix.jsx",
+      "claim": "DIFC/DFSA: 26 fresh-alert eligible",
+      "truth": "internal audit says DFSA=16, DIFC=11 (27 total)",
+      "severity": "MEDIUM"
+    },
+    {
+      "location": "product/regradar/web/src/components/BuyerSourcePacks.jsx",
+      "claim": "UAE Legislation Portal is fresh-alert eligible",
+      "truth": "SourceTransparencyMatrix says 0 fresh-alert for legislation; portal is in remediation",
+      "severity": "HIGH"
+    },
+    {
+      "location": "product/regradar/web/src/components/Hero.jsx",
+      "claim": "Monitoring active (live dot implies real-time)",
+      "truth": "Scheduled batch monitoring, default 60-minute interval",
+      "severity": "MEDIUM"
+    }
+  ],
+  "safe_claims": [
+    "116 enabled official UAE sources monitored on a scheduled cycle",
+    "SHA-256 hash and UTC timestamp on every monitoring run",
+    "Human review gate before any brief is delivered",
+    "Selected-source UAE regulatory monitoring — not complete UAE regulatory coverage",
+    "Monitoring intelligence only — not legal advice",
+    "CBUAE: 25 active sources covering rulebook modules",
+    "DFSA: 16 fresh-alert eligible sources",
+    "ADGM/FSRA: 14 active sources",
+    "DIFC: 12 active sources",
+    "Official Gazette and UAE e-Laws Portal are geo-IP blocked and not monitored"
+  ],
+  "recommended_next_tasks": [
+    "Regenerate source_signal_quality_audit.json from sources.json and update all stale files",
+    "Fix SourceTransparencyMatrix per-family counts",
+    "Remove or caveat BuyerSourcePacks legislation claim",
+    "Wire Stripe payment links",
+    "Complete human review for 7 pending alert queue items",
+    "Add per-IP rate limiting",
+    "Add email verification",
+    "Add nginx config to deploy/",
+    "Fix 5 failing tests",
+    "Clarify 24h vs hourly check cycle in Hero"
+  ],
+  "sellability_assessment": {
+    "can_sell_paid_pilots_now": "conditional",
+    "condition": "Only as hand-held founder pilots at $199/mo with manual payment collection and manual activation. Self-serve paid pilots require Stripe integration, email verification, and at least one completed review cycle.",
+    "best_pilot_scope": "3 sources from strong family (e.g., CBUAE AML/CFT, DFSA AML, VARA compliance rulebook) with daily check cycle, 30-day retention, human-reviewed brief on CHANGED detection",
+    "best_icp": "VASP compliance teams (VARA), DFSA-regulated firms, ADGM-regulated firms — these have the deepest source coverage today"
+  },
+  "source_quality_summary": {
+    "strongest_families": ["CBUAE (25)", "DFSA (16)", "ADGM/FSRA (14)", "DIFC (12)", "MoE (9)"],
+    "weakest_families": ["MoJ/Legislation (2, 0 fresh-alert)", "UAE FIU (limited circulars)", "SCA/UAE CMA (6, partial)"],
+    "geo_blocked_critical": ["Official Gazette", "UAE e-Laws Portal", "TDRA federal PDPL"],
+    "in_remediation": ["UAE Legislation Portal", "UAE FIU circulars"],
+    "sources_in_candidate_stage": 0,
+    "note": "Stale audit claims 246 enabled/180 fresh-alert. Actual count is 116 enabled."
+  },
+  "evidence_gap_summary": {
+    "completed_canonical_evidence_records": 0,
+    "completed_human_reviews": 0,
+    "pending_review_alerts": 7,
+    "proof_files_exist": 773,
+    "hash_records_exist": 815,
+    "monitor_ok_flagged": 0,
+    "gap_to_first_customer_delivery": "Complete one human review cycle, generate canonical evidence record, deliver brief"
+  },
+  "validation_results": {
+    "adapters_import": "OK",
+    "pipeline_import": "OK",
+    "pytest_total": 598,
+    "pytest_passed": 593,
+    "pytest_failed": 5,
+    "pytest_failing_tests": [
+      "tests/test_ideal_product_workflow.py::IdealProductWorkflowTests::test_source_summary_reads_current_registry_truth",
+      "tests/test_source_signal_quality_audit_truth.py::test_source_signal_quality_audit_matches_current_registry_truth",
+      "tests/test_source_signal_quality_audit_truth.py::test_source_signal_quality_family_readiness_matches_registry_truth",
+      "tests/test_source_signal_quality_audit_truth.py::test_source_signal_quality_audit_validator_rejects_stale_counts",
+      "tests/test_source_signal_quality_audit_truth.py::test_frontend_source_quality_export_matches_safe_audit_claims"
+    ],
+    "frontend_build": "PASS (387ms, main chunk 72KB gzipped)",
+    "stripe_links_configured": false,
+    "production_db_present_on_dev": false,
+    "paying_customers_confirmed": 0,
+    "secret_key_default_risk": "Cannot verify production .env from dev machine — validate on VPS"
+  }
+}
