@@ -164,68 +164,10 @@ def send_telegram_alert(result: dict) -> bool:
         logger.debug("Telegram alert skipped — risk=%s below threshold", risk)
         return False
 
-    icon    = _RISK_ICON.get(risk, "")
-    url     = result.get("url", "unknown")
-    summary = _safe(result.get("executive_summary", result.get("reason", "No summary")), _MAX_SUMMARY_LEN)
-    action  = _safe(result.get("business_action_required", "Review manually"),           _MAX_ACTION_LEN)
+    from app.alert_content import build_alert_content, render_telegram
 
-    source_name  = result.get("source_name", "")
-    jurisdiction = result.get("jurisdiction", "")
+    message = render_telegram(build_alert_content(result))
 
-    flag        = _JURISDICTION_FLAG.get(jurisdiction, "")
-    market_str  = f"{flag} {jurisdiction}".strip() if jurisdiction else "—"
-    source_line = _safe(source_name, 100) if source_name else _safe(url, 100)
-
-    affected  = result.get("affected_entities", [])
-    deadline  = result.get("deadline")
-    rev_req   = result.get("review_required", False)
-    rev_rsn   = _safe(result.get("review_reason", ""), _MAX_REASON_LEN)
-
-    # Urgency: prefer standardised brief field, fall back to raw value
-    urgency_std = result.get("urgency", "")
-    urgency_label = _URGENCY_LABEL.get(urgency_std, urgency_std.capitalize() if urgency_std else "—")
-
-    # Materiality: prefer standardised brief field from ai_brief layer
-    materiality_std = result.get("materiality", "")
-    if not materiality_std:
-        # derive from semantic_findings for pipeline results that skip ai_brief
-        sf_mat = result.get("semantic_findings", {}).get("materiality", "")
-        from app.ai_brief import _MATERIALITY_MAP
-        materiality_std = _MATERIALITY_MAP.get(sf_mat, "")
-    materiality_label = _MATERIALITY_LABEL.get(materiality_std, materiality_std.capitalize() if materiality_std else "—")
-
-    ai_badge = "✅ AI" if result.get("ai_used") else "📏 Rule-based"
-
-    lines: list[str] = [
-        f"🚨 *StatuteProof Alert* — {icon} {risk}",
-        "",
-        f"*Market:* {market_str}",
-        f"*Source:* {source_line}",
-        f"*Analysis:* {ai_badge}",
-    ]
-
-    if affected:
-        entities_str = ", ".join(str(e) for e in affected[:4])
-        lines.append(f"*Affected:* {_safe(entities_str, 120)}")
-    else:
-        lines.append("*Affected:* Not specified")
-
-    lines.append(f"*Urgency:* {urgency_label or 'Not specified'}")
-    lines.append(f"*Deadline:* {_safe(str(deadline), 60) if deadline else 'Not specified'}")
-    lines.append(f"*Materiality:* {materiality_label or 'Not specified'}")
-    lines.append("")
-    lines.append(f"*Summary:*\n{summary}")
-    lines.append("")
-    lines.append(f"*Action required:*\n{action}")
-
-    if rev_req:
-        rev_text = _safe(rev_rsn, 200) if rev_rsn else "Yes"
-        lines.append(f"\n⚠️ *Legal review required:* {rev_text}")
-
-    lines.append(f"\n🔗 {url}")
-    lines.append("\n_Monitoring information only. Not legal advice._")
-
-    message = "\n".join(lines)
 
     # ── Step 1: deliver to subscribed customers via ALERTS bot ──────────────
     # Falls back to founder chat during pilot phase;

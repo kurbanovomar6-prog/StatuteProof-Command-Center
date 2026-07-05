@@ -582,6 +582,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "ai_used":                  ai_used,
         "telegram_sent":            telegram_sent,
         "alert_suppressed_reason":  alert_suppressed_reason,
+        "risk_details":             rule_risk,
         "executive_summary":        executive_summary,
         "business_action_required": business_action,
         "source_language":          source_language,
@@ -773,6 +774,28 @@ def run_pipeline_for_source(source: dict) -> dict:
 
                     alert = build_alert_draft(final_record, diff_artifact, proof_block)
                     if alert:
+                        # Attach the shared content layer so the draft/email
+                        # channel renders the same alert body as Telegram.
+                        try:
+                            from app.alert_content import build_alert_content, render_markdown
+                            alert["alert_content_markdown"] = render_markdown(build_alert_content({
+                                "url": source.get("url", ""),
+                                "source_name": source.get("name", ""),
+                                "jurisdiction": source.get("jurisdiction", ""),
+                                "risk_level": result.get("risk_level", ""),
+                                "risk_reason": result.get("risk_reason", ""),
+                                "risk_details": result.get("risk_details") or {},
+                                "added": result.get("added", []),
+                                "removed": result.get("removed", []),
+                                "executive_summary": result.get("executive_summary", ""),
+                                "business_action_required": result.get("business_action_required", ""),
+                                "deadline": result.get("deadline"),
+                                "urgency": result.get("urgency", ""),
+                                "affected_entities": result.get("affected_entities", []),
+                                "checked_at_utc": final_record.get("timestamp_utc", ""),
+                            }))
+                        except Exception as _sc_err:
+                            logger.warning("Shared alert content attach failed (non-fatal): %s", _sc_err)
                         # Resolve the snapshot directory for writing alert artifacts
                         snap_raw = final_record.get("snapshot_raw_path")
                         if snap_raw:
