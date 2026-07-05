@@ -113,7 +113,9 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
   const [mediumAlerts,  setMediumAlerts]  = useState(thresholds.medium)
   const [lowAlerts,     setLowAlerts]     = useState(thresholds.low)
   const [tgEnabled,     setTgEnabled]     = useState(Boolean(profile.telegramAlertsEnabled))
-  const [emailEnabled,  setEmailEnabled]  = useState(Boolean(profile.emailAlertsEnabled))
+  // Round-tripped from the saved profile unchanged — no UI control edits
+  // this value yet (tracked in DEFECT_LOG D3 note).
+  const [emailEnabled]  = useState(Boolean(profile.emailAlertsEnabled))
   const [aiEnabled,     setAiEnabled]     = useState(profile.aiEnabled !== false)
   const [reviewFlag,    setReviewFlag]    = useState(true)
   const [language,      setLanguage]      = useState(languageLabel(profile.briefLanguage))

@@ -1,4 +1,4 @@
-import { FileText, Lock, AlertTriangle, CheckCircle2, ExternalLink } from 'lucide-react'
+import { FileText, Lock, ExternalLink } from 'lucide-react'
 
 // SAMPLE / FAKE — illustrative content only, not real regulatory data
 

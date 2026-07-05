@@ -64,9 +64,17 @@ function useTypewriter(text, speed = 22, startDelay = 400) {
   const indexRef = useRef(0)
   const timerRef = useRef(null)
 
-  useEffect(() => {
+  // Reset during render when the target text changes (lint-safe pattern),
+  // instead of a synchronous setState inside the effect.
+  const [prevText, setPrevText] = useState(text)
+  if (prevText !== text) {
+    setPrevText(text)
     setDisplayed('')
     setDone(false)
+    // indexRef is reset inside the effect (refs must not be written during render)
+  }
+
+  useEffect(() => {
     indexRef.current = 0
 
     const startTimer = setTimeout(() => {

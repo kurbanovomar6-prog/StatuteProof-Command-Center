@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { LockKeyhole, Zap, TriangleAlert, ListChecks, Info } from 'lucide-react'
+import { LockKeyhole, Zap, ListChecks, Info } from 'lucide-react'
 
 // ─── Sample diff lines ───────────────────────────────────────────────────────
 // Realistic CBUAE AML threshold change. Labeled SAMPLE throughout.
@@ -93,20 +93,17 @@ function DiffPanel({ visible }) {
           <tbody>
             {DIFF_LINES.map((line, i) => {
               let rowBg = 'transparent'
-              let textColor = 'text-slate-500'
+              let textColor
               let lineNumColor = 'text-slate-700'
-              let prefix = ' '
 
               if (line.type === 'removed') {
                 rowBg = 'rgba(239,68,68,0.10)'
                 textColor = 'text-red-300'
                 lineNumColor = 'text-red-700'
-                prefix = line.text.startsWith('-') ? '' : '-'
               } else if (line.type === 'added') {
                 rowBg = 'rgba(52,211,153,0.10)'
                 textColor = 'text-emerald-300'
                 lineNumColor = 'text-emerald-700'
-                prefix = line.text.startsWith('+') ? '' : '+'
               } else {
                 textColor = 'text-slate-400'
               }

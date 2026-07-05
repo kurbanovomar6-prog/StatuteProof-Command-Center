@@ -18,9 +18,16 @@ export default function ActionLogPanel({ alertId }) {
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
 
+  // Reset loading when the alert changes — render-phase adjustment instead
+  // of a synchronous setState inside the effect (react-hooks lint rule).
+  const [loadedAlertId, setLoadedAlertId] = useState(alertId)
+  if (loadedAlertId !== alertId) {
+    setLoadedAlertId(alertId)
+    setLoading(true)
+  }
+
   useEffect(() => {
     let active = true
-    setLoading(true)
     actionLog.list(alertId)
       .then(data => { if (active) setEntries(data.entries || []) })
       .catch(() => {})

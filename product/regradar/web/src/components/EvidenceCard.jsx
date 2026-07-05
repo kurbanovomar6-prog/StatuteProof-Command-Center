@@ -13,7 +13,6 @@ export default function EvidenceCard({ record }) {
   const statusStyle = STATUS_STYLES[record.change_status] || 'text-slate-300 bg-slate-800 border-slate-700'
   const chainOk     = record.proof_chain?.chain_verified ?? false
   const fullHash    = record.normalized_hash ?? ''
-  const shortHash   = fullHash.length > 20 ? `${fullHash.slice(0, 20)}…${fullHash.slice(-8)}` : fullHash
 
   // Prefer an explicit UTC timestamp; fall back to run_at
   const rawTs    = record.proof_chain?.captured_at ?? record.run_at ?? ''

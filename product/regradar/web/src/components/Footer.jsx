@@ -1,4 +1,3 @@
-import { ShieldCheck, Lock, FileCheck2 } from 'lucide-react'
 
 const footerLinks = [
   { label: 'How It Works', href: '#how-it-works' },
