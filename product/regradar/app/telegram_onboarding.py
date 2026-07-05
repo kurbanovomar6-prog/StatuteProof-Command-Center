@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 
 import requests
 
@@ -174,9 +175,23 @@ def handle_update(update: dict, bot_token: str) -> None:
     )
 
 
-def fetch_updates(bot_token: str, offset: int = 0, timeout: int = 0) -> list[dict]:
+def _scrub_token(text: str, bot_token: str) -> str:
+    """Remove the bot token from any message before it reaches a log file."""
+    if bot_token:
+        text = text.replace(bot_token, "<bot-token-redacted>")
+    return text
+
+
+def _failure_backoff_seconds(consecutive_failures: int) -> float:
+    """Exponential backoff for transport failures: 1s, 2s, 4s … capped at 60s."""
+    return float(min(60, 2 ** max(0, consecutive_failures - 1)))
+
+
+def fetch_updates(bot_token: str, offset: int = 0, timeout: int = 0) -> list[dict] | None:
     """
-    Call getUpdates once.  Returns list of update dicts.  Never raises.
+    Call getUpdates once.  Returns a list of update dicts on success
+    (possibly empty), or None on a transport error so callers can back off.
+    Never raises.
     """
     try:
         params: dict = {"timeout": timeout}
@@ -193,8 +208,10 @@ def fetch_updates(bot_token: str, offset: int = 0, timeout: int = 0) -> list[dic
         logger.warning("getUpdates error: %s", data.get("description"))
         return []
     except Exception as exc:
-        logger.warning("fetch_updates failed: %s", exc)
-        return []
+        # The exception message embeds the request URL, which contains the
+        # bot token — scrub it before logging (defect D5).
+        logger.warning("fetch_updates failed: %s", _scrub_token(str(exc), bot_token))
+        return None
 
 
 def run_listen_loop(bot_token: str, bot_username: str = "") -> None:
@@ -209,9 +226,17 @@ def run_listen_loop(bot_token: str, bot_username: str = "") -> None:
     print("Waiting for /start, /id, /connect … (Ctrl-C to stop)\n")
 
     offset = 0
+    consecutive_failures = 0
     try:
         while True:
             updates = fetch_updates(bot_token, offset=offset, timeout=_POLL_TIMEOUT_S)
+            if updates is None:
+                # Transport failure (network down / DNS). Without backoff this
+                # loop wrote thousands of log lines per minute (defect D5).
+                consecutive_failures += 1
+                time.sleep(_failure_backoff_seconds(consecutive_failures))
+                continue
+            consecutive_failures = 0
             for upd in updates:
                 upd_id = upd.get("update_id", 0)
                 if upd_id >= offset:
