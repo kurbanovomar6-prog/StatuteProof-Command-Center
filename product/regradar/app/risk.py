@@ -85,20 +85,32 @@ def derive_urgency_from_text(diff_text: str) -> str:
             return urgency
     return "MONITOR"
 
+# F4: matching is WORD-BOUNDED (see _match_terms) — Phase-0 replay proved
+# substring matching fired 'ban' inside 'bank' on both CBUAE recorded false
+# HIGHs (docs/signal/SIGNAL_QUALITY.md §A defect 1). Topic terms measured as
+# letterhead/page-title noise ('vasp', 'virtual asset', 'circular') moved to
+# the moderate tier — presence of the topic is not a change of obligation.
 _HIGH_KEYWORDS: tuple[str, ...] = (
     "ban",
+    "banned",
+    "prohibition",
     "restriction",
     "license",
     "licence",   # UK spelling — DFSA/DIFC write UK English
+    "licensing",
     "penalty",
+    "penalties",
+    "fine",
+    "fines",
     "sanction",
-    "circular",
-    "vasp",
-    "virtual asset",
+    "sanctions",
     "revoke",
+    "revoked",
     "revocation",
     "cease",
     "suspend",
+    "suspended",
+    "suspension",
     "enforcement action",
 )
 
@@ -130,6 +142,18 @@ _MEDIUM_KEYWORDS: tuple[str, ...] = (
     "cft",
     "fit and proper",
     "prudential",
+    # F4 demotions — topic/letterhead terms (Phase-0: matched VARA
+    # marketing and page titles, never an obligation):
+    "circular",
+    "vasp",
+    "vasps",
+    "virtual asset",
+    "virtual assets",
+    # F4 additions measured in the delta corpus (SIGNAL_QUALITY.md §B):
+    "decree-law",
+    "cabinet decision",
+    "cabinet resolution",
+    "federal law",
 )
 
 # ── F3: Arabic detection lane ─────────────────────────────────────────────────
@@ -250,6 +274,37 @@ def is_non_material(diff_result: dict) -> bool:
     return True
 
 
+def _match_terms(terms: tuple[str, ...], text: str) -> list[str]:
+    """Word-bounded term matching (F4).
+
+    Substring matching fired 'ban' inside 'bank' on both CBUAE recorded
+    false HIGHs (2026-06-12). Multi-word terms are matched as phrases.
+    """
+    matched: list[str] = []
+    for term in terms:
+        if re.search(rf"(?<!\w){re.escape(term)}(?!\w)", text):
+            matched.append(term)
+    return matched
+
+
+_ADAPTER_BANNER = "listing items"
+
+
+def _is_format_shift(diff_result: dict) -> bool:
+    """True when the adapter output format flipped between runs (F4).
+
+    22 of 63 historical CHANGED runs were adapter-format shifts: the page
+    did not change, our extraction did (nav-scrape ↔ structured
+    '... listing items'). Detector: the adapter banner appears on exactly
+    one side of a two-sided diff.
+    """
+    added_txt = " ".join(str(a) for a in (diff_result.get("added") or [])).lower()
+    removed_txt = " ".join(str(x) for x in (diff_result.get("removed") or [])).lower()
+    if not added_txt.strip() or not removed_txt.strip():
+        return False
+    return (_ADAPTER_BANNER in added_txt) != (_ADAPTER_BANNER in removed_txt)
+
+
 def _delta_scoring_text(added: list, removed: list) -> str:
     """
     Cycle 3 (delta-only severity scoring): when a block appears in both
@@ -311,6 +366,23 @@ def analyze_risk(diff_result: dict) -> dict:
             "non_material": True,
         }
 
+    # F4: extraction-format shifts are OUR change, not the regulator's —
+    # cap severity and say so instead of scoring adapter banners as risk.
+    if _is_format_shift(diff_result):
+        return {
+            "risk_level": "MEDIUM",
+            "rule": "FORMAT_SHIFT_REVIEW",
+            "matched_keywords": [],
+            "matched_context": [],
+            "reason": (
+                "Extraction format shift detected: the adapter output format "
+                "changed between runs (structured listing on one side only). "
+                "This is an extraction-layer change, not a confirmed "
+                "regulatory change — adapter review recommended before "
+                "relying on this diff."
+            ),
+        }
+
     combined_text = _delta_scoring_text(
         diff_result.get("added", []),
         diff_result.get("removed", []),
@@ -319,8 +391,8 @@ def analyze_risk(diff_result: dict) -> dict:
     all_text = combined_text.lower()
     has_arabic = bool(_ARABIC_RE.search(combined_text))
 
-    matched_high    = [kw for kw in _HIGH_KEYWORDS      if kw in all_text]
-    matched_context = [cw for cw in _HIGH_CONTEXT_WORDS if cw in all_text]
+    matched_high    = _match_terms(_HIGH_KEYWORDS, all_text)
+    matched_context = _match_terms(_HIGH_CONTEXT_WORDS, all_text)
     matched_medium_ar: list[str] = []
 
     # F3: Arabic lane — match measured AR terms on folded text; merge into
@@ -392,19 +464,20 @@ def analyze_risk(diff_result: dict) -> dict:
         }
 
     # MEDIUM: moderate-change language
-    for keyword in _MEDIUM_KEYWORDS:
-        if keyword in all_text:
-            return {
-                "risk_level": "MEDIUM",
-                "rule": "MEDIUM_MODERATE_KEYWORD",
-                "matched_keywords": [keyword],
-                "matched_context": [],
-                "reason": (
-                    f"Medium risk: moderate-change keyword '{keyword}' matched. "
-                    "No strong regulatory indicators matched. Compliance review "
-                    "is recommended."
-                ),
-            }
+    matched_medium = _match_terms(_MEDIUM_KEYWORDS, all_text)
+    if matched_medium:
+        keyword = matched_medium[0]
+        return {
+            "risk_level": "MEDIUM",
+            "rule": "MEDIUM_MODERATE_KEYWORD",
+            "matched_keywords": [keyword],
+            "matched_context": [],
+            "reason": (
+                f"Medium risk: moderate-change keyword '{keyword}' matched. "
+                "No strong regulatory indicators matched. Compliance review "
+                "is recommended."
+            ),
+        }
 
     # F3: Arabic moderate-change terms (law/decree/decision/regulation refs)
     if matched_medium_ar:
