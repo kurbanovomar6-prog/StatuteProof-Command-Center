@@ -80,7 +80,11 @@ from app.diff import get_diff
 from app.extractors import extract_best_text
 from app.risk import analyze_risk
 from app.scraper import fetch_page
-from app.text_normalization import normalize_for_change_hash, stable_content_hash
+from app.text_normalization import (
+    NORMALIZATION_VERSION,
+    normalize_for_change_hash,
+    stable_content_hash,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -220,6 +224,25 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
 
+    # ── Guard (F1): error pages are fetch failures, never baselines ────
+    # A Cloudflare 502 / VARA 404 stored as baseline made the *recovery*
+    # alert as CHANGED (2026-06-11, docs/signal/judgment_table.md).
+    from app.text_normalization import looks_like_error_page
+    if looks_like_error_page(content):
+        logger.warning("Error page detected for %s — recording as failed, no baseline", url)
+        return {
+            "url":                url,
+            "changed":            False,
+            "status":             "error_page",
+            "access_status":      "error_page",
+            "extracted_chars":    extracted_chars,
+            "extraction_quality": "failed",
+            "extraction_method":  extraction_method,
+            "error":              "Fetched content is an HTTP error/challenge page — not stored as baseline",
+            "ai_skipped_reason":  "error_page",
+            "ai_calls_used":      _AI_RUN_BUDGET["count"],
+        }
+
     # Detect source language for AI prompt context and result metadata.
     # Runs on clean extracted text (not raw HTML) for best accuracy.
     src_lang = detect_language_hint(content) if AI_DETECT_LANGUAGE else "unknown"
@@ -279,6 +302,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "raw_hash":           _sha256_or_none(content),
             "raw_chars":          len(content or ""),
             "normalized_chars":   len(normalized_for_hash or ""),
+            "normalization_version": NORMALIZATION_VERSION,
             "ai_skipped_reason":  "",
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
@@ -611,6 +635,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "raw_hash":                 _sha256_or_none(content),
         "raw_chars":                len(content or ""),
         "normalized_chars":         len(normalized_for_hash or ""),
+        "normalization_version":    NORMALIZATION_VERSION,
         # Snapshot fields — populated when source context is present
         "run_id":                   _run_id,
         "snapshot_raw_path":        _snapshot_paths_result.get("snapshot_raw_path"),
@@ -715,6 +740,7 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "raw_hash":                 result.get("raw_hash"),
                 "raw_chars":                result.get("raw_chars", 0),
                 "normalized_chars":         result.get("normalized_chars", 0),
+                "normalization_version":    result.get("normalization_version"),
                 "snapshot_raw_path":        result.get("snapshot_raw_path"),
                 "snapshot_normalized_path": result.get("snapshot_normalized_path"),
                 "snapshot_pdf_text_path":   result.get("snapshot_pdf_text_path"),

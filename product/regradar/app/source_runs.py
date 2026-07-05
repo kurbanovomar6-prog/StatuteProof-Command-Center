@@ -19,7 +19,7 @@ from pathlib import Path
 
 from app.chunk_diff import build_chunk_diff, build_incomplete_diff, render_diff_markdown, utc_now
 from app.proof import build_source_proof
-from app.text_normalization import normalize_for_change_hash, stable_content_hash, stable_normalized_hash
+from app.text_normalization import NORMALIZATION_VERSION, normalize_for_change_hash, stable_content_hash, stable_normalized_hash
 
 
 # D8: the artifact base dir is resolved from the environment with a sane
@@ -476,7 +476,7 @@ def record_from_source_result(
         "limitations_notes": "; ".join(n for n in notes if n),
         "error": result.get("error") or (result.get("reason") if result.get("status") != "ok" else None),
         "pipeline_version": "4.2",
-        "normalization_version": "1.0",
+        "normalization_version": str(NORMALIZATION_VERSION),
     }
 
 
@@ -535,7 +535,7 @@ def restricted_record(
         "limitations_notes": "; ".join(limitations_notes),
         "error": "Source is marked restricted/blocked in sources.json.",
         "pipeline_version": "4.2",
-        "normalization_version": "1.0",
+        "normalization_version": str(NORMALIZATION_VERSION),
     }
 
 
