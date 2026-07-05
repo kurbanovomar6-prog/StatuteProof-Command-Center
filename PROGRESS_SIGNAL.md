@@ -59,11 +59,28 @@ all tests isolated via STATUTEPROOF_BASE_DIR.
       docs/signal/severity_regression_f4.md. Residual 11 HIGHs are
       PDF-reflow / wrong-page / adapter-jitter classes addressed
       operationally by the F1 reset + stable adapters — stated, not hidden.
-- [ ] F5 QUALITY_DROP retention (cycle 5)
-- [ ] F6 activation-ready pack (cycle 6)
-- [ ] Verification gate (suites green with counts; 3 historical alert
-      regenerations incl. 05-Jul title-flip + genuine change; e2e EN+AR+PDF
-      in isolated dir; fresh-clone sim)
+- [x] F5 QUALITY_DROP retention (cycle 5) — DONE, commit 68e858a
+      compact_quality_drop_repeats: transitions forever, old repeats to
+      last-of-day; idempotent; CLI-wired. Real split: 122 QD = 103
+      transitions + 19 repeats. 3 tests red->green; suite 708 green.
+- [x] F6 activation-ready pack (cycle 6) — DONE, commit 31c2834
+      One real probe per top-10: ADGM waivers (1,931ch good) + RA circulars
+      (9,291ch good) proven fresh-alert; 5 FTA = nav-shell (11-66ch, JS
+      adapter needed); UAEFIU fetched OK today (geo-block intermittent) BUT
+      circulars & typology render the same Publications shell — flagged.
+      Probe found 2 normalization leaks (Total visitors, bare hex colors)
+      — fixed red->green. Sources remain DISABLED; sources.json untouched.
+- [x] Verification gate — DONE (commit c4b4414 + this one)
+      Backend 714 passed / 0 failed. Frontend vitest 43/43, build OK,
+      eslint 0 errors (3 pre-existing warnings, untouched files). Ruff
+      clean on sprint files. Alert regenerations
+      (docs/signal/ALERT_REGENERATION.md): both 05-Jul title-flips
+      (recorded HIGH + queued) -> UNCHANGED, NO alert; UAEFIU 61->62 -> LOW
+      rendered honestly; SAMPLE/FAKE genuine circular -> HIGH with 5
+      detected facts in Telegram + email bodies. e2e EN+AR+PDF lifecycle
+      green in isolated dir (baseline -> alert-once -> heartbeat;
+      error-page never baselines; found+fixed status-clobber defect in
+      run_pipeline_for_source). Fresh-clone simulation: see final report.
 
 NOTE for gate: history contains NO unambiguous genuine regulatory change.
 Closest real candidates: UAEFIU publications count 61→62 (2026-06-11),
