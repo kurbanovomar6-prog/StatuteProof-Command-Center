@@ -1,7 +1,7 @@
 # PROGRESS — production readiness sprint (2026-07-05)
 
 ## Current phase
-Phase 2 — verification gate (fresh-clone sim running)
+DONE — final report delivered (all cycles + gate + adversarial review complete)
 
 ## Owner decisions locked
 1. D6 heartbeats: every run writes a record; unchanged = compact heartbeat

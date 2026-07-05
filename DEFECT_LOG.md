@@ -41,17 +41,18 @@ Phase 0 ground truth (all outputs real, this session):
 - PROD-ONLY follow-up: **rotate the alerts-bot token** — it sat in a local 438MB log for two weeks.
 - Status: FIXED (rotation pending, founder action)
 
-## D6 — S2 — UNCHANGED monitor runs write no run record
-- Evidence: E2E run 3 (`AE-dfsa-aml-rulebook-module`): `changed: False` → no JSONL record, no snapshot. Evidence trail has gaps between change events; landing copy promises "CHANGED and UNCHANGED runs" both recorded.
-- Status: OPEN — needs product decision (recording 116×24 unchanged runs/day grows JSONL unboundedly). Not fixing silently this session.
+## D6 — S2 — **FIXED** (commit 63fa726, sprint 2026-07-05) — UNCHANGED monitor runs write no run record
+- Owner decision: every run writes a record; unchanged runs append a compact ~916-byte heartbeat (verified live: fresh-clone run 2, `AE-dfsa-financial-crime-mlro-letters` heartbeat UNCHANGED with matching hash). Retention: `run.py compact-heartbeats` (idempotent, TDD; daily systemd timer) compacts >30-day heartbeats to last-of-day per source. Proof: fixture demo kept=4/removed=9 then kept=4/removed=0 byte-identical.
+- Note (policy follow-up): heartbeats that classify as QUALITY_DROP (thin-but-stable sources, normalized <500 chars, e.g. `AE-dfsa-aml-rulebook-module`) are kept forever by the defensive keep rule — ~8 MB/yr per permanently-thin source at hourly cadence.
+- Status: FIXED
 
 ## D7 — S3 — workspace hygiene (out of scope this session)
 - `.claude/agents/` third-party dump (hundreds of files) untracked; `.github/` untracked; two stray «Без названия» files at repo root.
 
 
-## D8 — S2 — pipeline alert-artifact writer hardcodes repo base dir
-- Location: `app/pipeline.py` alert-draft block: `_base_dir = _Path(__file__).resolve().parents[1]` ignores `source_runs._BASE_DIR`, so isolated tests wrote `AE-test-regulator-source` artifacts into the real `data/source_snapshots/` (cleaned up this session; 0 rows leaked into source_runs.jsonl).
-- Status: OPEN (low; fix by resolving through source_runs paths)
+## D8 — S2 — **FIXED** (commit 63fa726) — pipeline alert-artifact writer hardcodes repo base dir
+- Base dir now resolves from STATUTEPROOF_BASE_DIR (default: app root); alert writer goes through it. Test proves artifacts stay inside the configured base and the repo data dir stays untouched.
+- Status: FIXED
 
 ## Phase 2 verification gate (2026-07-05, all outputs real)
 - Backend suite: **608 passed, 0 failed, 0 skipped** (10.31s). Frontend: **43/43**, build ✓ 376ms, eslint **0 errors**.
@@ -61,3 +62,22 @@ Phase 0 ground truth (all outputs real, this session):
 - E2E monitoring (Tier-A): VARA / DFSA MLRO / DFSA rulebook. Every written record has proof URL, GST-consistent UTC timestamp, normalized hash, baseline comparison, change status; DFSA MLRO produced CHANGED + diff.json (GOOD) + alert draft. Unchanged rulebook run writes no record (D6, OPEN by design decision needed).
 - Counter cross-check (must match, three ways):
   UI badge/headline: "Last check 2 min ago" · "83 sources eligible" — API: summary enabled_count=116, readiness_supported=83, last_run_at=2026-07-05T12:54:44 = health sources_active=116 — Files: sources.json enabled=116, newest JSONL run 2026-07-05T12:54:44. **All three agree.**
+
+
+## D-dual-baseline — S0 — **FIXED** (commit 63fa726) — JSONL trail vs SQLite documents could disagree on CHANGED
+- Root cause: save_document hashed raw content while the pipeline hashed normalized text — different values by construction (the VARA changed:True-every-run case).
+- Fix (owner decision 2): JSONL normalized_hash is canonical for classification; save_document(content_hash=...) stores the same hash in the same step; divergent index rows realigned with loud WARNING; check_baseline_consistency() at API+scheduler startup logs BASELINE DIVERGENCE, never heals.
+- Proof: fresh-clone e2e — all 3 sources JSONL hash == SQLite hash (values pasted in final report); seeded divergence on a data COPY detected (17th alongside 16 known legacy) and loudly logged; legacy divergences remain visible by design.
+- Status: FIXED
+
+## D9 — S1 — **FIXED** (commit 89e4365) — .env.example empty-value inline comments became variable values
+- python-dotenv keeps `# comment` as the VALUE for `VAR=   # comment` lines. Fresh install: REGRADAR_DB_PATH literally contained the comment string; sqlite unreachable (caught by deploy-check on the fresh clone). 18 lines rewritten; DB_PATH uses `or` fallback; verified zero comment-valued vars remain.
+- Status: FIXED
+
+## Sprint verification gate (2026-07-05, second pass — all outputs real)
+- Suites: backend **627 passed, 0 failed, 0 skipped**; frontend **43/43**; build ✓; eslint 0 errors / 3 known warnings.
+- Fresh-clone sim (/tmp/sp-fresh, removed after): venv+deps, .env from template only, deploy-check PASSED, API on :5002 health 200 with **0 sweep lines**, real-network e2e ×2 on 3 Tier-A sources → FIRST_SEEN baselines then 1×CHANGED + 2×heartbeats, JSONL==SQLite for all 3 (hashes identical).
+- Scheduler SIGKILL mid-sweep: trail 6→15 records, **0 corrupt/partial lines**.
+- deploy-check with blanked SECRET_KEY: exit code **1**.
+- All 11 app screens: **0 console errors**.
+- Adversarial diff grep (1,256 added lines): no weakened/removed assertions, no skips, no TODOs, no secrets, no debug prints.
