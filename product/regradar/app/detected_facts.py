@@ -98,6 +98,11 @@ def extract_detected_facts(added_blocks: list | None) -> list[dict[str, Any]]:
     if not text.strip():
         return []
 
+    # F3: unify Arabic-Indic digit forms so ٥٠٠٬٠٠٠ درهم and قانون رقم (٢٠)
+    # match the same patterns as their ASCII-digit forms.
+    from app.arabic_text import normalize_arabic_digits
+    text = normalize_arabic_digits(text)
+
     facts: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
     for kind, pattern in _PATTERNS:

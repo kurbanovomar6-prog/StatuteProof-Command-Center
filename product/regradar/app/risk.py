@@ -132,6 +132,49 @@ _MEDIUM_KEYWORDS: tuple[str, ...] = (
     "prudential",
 )
 
+# ── F3: Arabic detection lane ─────────────────────────────────────────────────
+# Terms and tiers are grounded in measured trail frequencies
+# (docs/signal/SIGNAL_QUALITY.md §B). Matching runs on
+# arabic_text.normalize_arabic()-folded delta text. Arabic deadline
+# vocabulary is effectively absent from the trail — no AR deadline term is
+# claimed; unmatched Arabic routes to MEDIUM_ARABIC (human review).
+
+_AR_STRONG_KEYWORDS: tuple[str, ...] = (
+    "ترخيص",             # licence (35 delta hits)
+    "رخصة",              # licence (variant)
+    "عقوبة",             # penalty (85 delta hits with جزاء)
+    "عقوبات",
+    "جزاء",
+    "جزاءات",
+    "غرامة",             # fine (11 doc hits; 0 delta — kept, obligation-bearing)
+    "تعميم",             # circular (58 delta hits)
+)
+
+# Topic/entity-name terms measured as weak discriminators: الأصول الافتراضية
+# is VARA's own letterhead (339 delta hits, overwhelmingly chrome);
+# غسل الأموال / تمويل الإرهاب sit in the UAEFIU mission tagline. High delta
+# frequency here signals PRESENCE OF THE REGULATOR, not a change of
+# obligation — moderate tier only (noise-guard tests in test_arabic_lane.py).
+
+_AR_CONTEXT_WORDS: tuple[str, ...] = (
+    "التزام",   # obligation (369 delta hits with يجب/يتعين)
+    "يجب",      # must
+    "يتعين",    # shall/required to
+    "ملزم",     # binding
+    "الزامي",   # mandatory (alef-folded)
+    "نافذ",     # in force (13 delta hits)
+)
+
+_AR_MEDIUM_KEYWORDS: tuple[str, ...] = (
+    "قانون اتحادي",       # federal law (242 delta hits)
+    "مرسوم بقانون",       # decree-law (149 delta hits)
+    "قرار",               # decision/resolution (257 delta hits)
+    "لائحة",              # regulation (81 delta hits)
+    "الاصول الافتراضية",   # virtual assets — demoted, letterhead noise
+    "غسل الاموال",         # AML — demoted, mission-tagline noise
+    "تمويل الارهاب",       # CFT — demoted, mission-tagline noise
+)
+
 # ── NON_MATERIAL tier constants ───────────────────────────────────────────────
 
 NON_MATERIAL_MAX_CHARS = 80  # net diff length threshold
@@ -273,19 +316,35 @@ def analyze_risk(diff_result: dict) -> dict:
         diff_result.get("removed", []),
     )
 
-    if _ARABIC_RE.search(combined_text):
-        return {
-            "risk_level": "MEDIUM",
-            "reason": (
-                "Arabic regulatory content detected. Rule-based keyword matching "
-                "is English-only — manual review required to assess risk."
-            ),
-        }
-
     all_text = combined_text.lower()
+    has_arabic = bool(_ARABIC_RE.search(combined_text))
 
     matched_high    = [kw for kw in _HIGH_KEYWORDS      if kw in all_text]
     matched_context = [cw for cw in _HIGH_CONTEXT_WORDS if cw in all_text]
+    matched_medium_ar: list[str] = []
+
+    # F3: Arabic lane — match measured AR terms on folded text; merge into
+    # the same severity ladder so EN and AR sentences rank alike.
+    if has_arabic:
+        from app.arabic_text import normalize_arabic
+
+        ar_text = normalize_arabic(combined_text)
+        matched_high    += [kw for kw in _AR_STRONG_KEYWORDS if kw in ar_text]
+        matched_context += [cw for cw in _AR_CONTEXT_WORDS if cw in ar_text]
+        matched_medium_ar = [kw for kw in _AR_MEDIUM_KEYWORDS if kw in ar_text]
+
+        if not matched_high and not matched_medium_ar:
+            # No measured term matched — no fake confidence: human review.
+            return {
+                "risk_level": "MEDIUM",
+                "rule": "MEDIUM_ARABIC",
+                "matched_keywords": [],
+                "matched_context": [],
+                "reason": (
+                    "Arabic regulatory content detected with no matched "
+                    "detection terms — human review required to assess risk."
+                ),
+            }
 
     # A2 (alert-quality sprint): every reason names the ACTUAL matches.
     # Rule ids form the documented severity rubric (see module docstring).
@@ -346,6 +405,20 @@ def analyze_risk(diff_result: dict) -> dict:
                     "is recommended."
                 ),
             }
+
+    # F3: Arabic moderate-change terms (law/decree/decision/regulation refs)
+    if matched_medium_ar:
+        return {
+            "risk_level": "MEDIUM",
+            "rule": "MEDIUM_MODERATE_KEYWORD",
+            "matched_keywords": matched_medium_ar[:4],
+            "matched_context": [],
+            "reason": (
+                "Medium risk: Arabic legislative reference term(s) matched: "
+                f"{', '.join(matched_medium_ar[:4])}. Compliance review is "
+                "recommended."
+            ),
+        }
 
     return {
         "risk_level": "LOW",
