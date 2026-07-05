@@ -89,6 +89,7 @@ _HIGH_KEYWORDS: tuple[str, ...] = (
     "ban",
     "restriction",
     "license",
+    "licence",   # UK spelling — DFSA/DIFC write UK English
     "penalty",
     "sanction",
     "circular",
@@ -206,6 +207,33 @@ def is_non_material(diff_result: dict) -> bool:
     return True
 
 
+def _delta_scoring_text(added: list, removed: list) -> str:
+    """
+    Cycle 3 (delta-only severity scoring): when a block appears in both
+    removed and added form, only the tokens that actually differ are scored.
+    Keywords that merely sit inside a changed block (site navigation, page
+    chrome) must not drive severity — that is what turned a DFSA title
+    tagline flip into a false HIGH on 2026-07-05.
+
+    Wholly new or wholly removed content is scored in full.
+    """
+    from difflib import SequenceMatcher
+
+    added_tokens = " ".join(str(a) for a in (added or [])).split()
+    removed_tokens = " ".join(str(r) for r in (removed or [])).split()
+    if not added_tokens or not removed_tokens:
+        return " ".join(added_tokens + removed_tokens)
+
+    matcher = SequenceMatcher(a=removed_tokens, b=added_tokens, autojunk=False)
+    delta: list[str] = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag in ("replace", "delete"):
+            delta.extend(removed_tokens[i1:i2])
+        if tag in ("replace", "insert"):
+            delta.extend(added_tokens[j1:j2])
+    return " ".join(delta)
+
+
 def analyze_risk(diff_result: dict) -> dict:
     """
     Score a structured diff result and return a risk assessment.
@@ -240,9 +268,9 @@ def analyze_risk(diff_result: dict) -> dict:
             "non_material": True,
         }
 
-    combined_text = " ".join(
-        diff_result.get("added",   []) +
-        diff_result.get("removed", [])
+    combined_text = _delta_scoring_text(
+        diff_result.get("added", []),
+        diff_result.get("removed", []),
     )
 
     if _ARABIC_RE.search(combined_text):

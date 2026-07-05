@@ -16,6 +16,7 @@ Message limits:
 """
 
 import logging
+import os
 
 import requests
 
@@ -168,6 +169,13 @@ def send_telegram_alert(result: dict) -> bool:
 
     url = result.get("url", "unknown")
     message = render_telegram(build_alert_content(result))
+
+    # Cycle 3: verification/e2e runs must never send real alerts. With
+    # ALERT_DRY_RUN set, log the fully rendered message and report not-sent
+    # so dedup state (alert_sent) is not poisoned by test traffic.
+    if str(os.getenv("ALERT_DRY_RUN") or "").strip().lower() in {"1", "true", "yes"}:
+        logger.info("ALERT_DRY_RUN — alert not sent. Rendered message:\n%s", message)
+        return False
 
 
     # ── Step 1: deliver to subscribed customers via ALERTS bot ──────────────
