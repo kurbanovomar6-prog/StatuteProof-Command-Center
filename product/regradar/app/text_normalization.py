@@ -101,6 +101,7 @@ _CHROME_FRAGMENT_RE = re.compile(
     (
         rate\s+this\s+page(\s+rated\s+by\s+[\d,]+\s+people)?(\s+thanks\s+for\s+rating)?|
         rated\s+by\s+[\d,]+\s+people(\s+thanks\s+for\s+rating)?|
+        total\s+visitors\s*:?\s*[\d,]+|
         قيّ?م\s+هذه\s+الصفحة|
         قُ?يّ?مت\s+الصفحة\s+من\s+قبلِ?\s*[\d,]+\s*مستخدما?ً?|
         شكراً\s+على\s+التقيّ?م|
@@ -116,6 +117,10 @@ _CHROME_FRAGMENT_RE = re.compile(
 
 # Carousel/pagination position indicators rendered as bare "1/6" lines.
 _CAROUSEL_LINE_RE = re.compile(r"^\s*\d{1,2}\s*/\s*\d{1,2}\s*$")
+
+# Bare theme-color lines ("#1E8800") — found by the F6 activation probe on
+# UAEFIU pages where hex codes render without the "Theme color" label.
+_HEX_COLOR_LINE_RE = re.compile(r"^\s*(#[0-9A-Fa-f]{3,8}\s*)+$")
 
 # Site taglines appended to <title>-derived lines as pipe-separated ALL-CAPS
 # segments, e.g. "… | DFSA | THE INDEPENDENT REGULATOR OF FINANCIAL SERVICES".
@@ -175,6 +180,8 @@ def _is_volatile_line(line: str) -> bool:
     if not line:
         return True
     if _CAROUSEL_LINE_RE.match(line):
+        return True
+    if _HEX_COLOR_LINE_RE.match(line):
         return True
     if _DATE_WORD_RE.search(line):
         return False

@@ -147,6 +147,20 @@ class ChromeStrippingTests(unittest.TestCase):
         )
         self.assertEqual(stable_normalized_hash(a), stable_normalized_hash(b))
 
+    def test_english_visitor_counter_removed(self):
+        # Found by the F6 activation probe: UAEFIU pages carry
+        # "Total visitors 59333" which flips every visit.
+        a = "Total visitors 59333\n" + _REGULATORY_BODY
+        b = "Total visitors 59334\n" + _REGULATORY_BODY
+        self.assertEqual(stable_normalized_hash(a), stable_normalized_hash(b))
+
+    def test_bare_hex_color_lines_removed(self):
+        theme = "#1E8800\n#000000\n#DA291C\n"
+        self.assertEqual(
+            normalize_for_change_hash(theme + _REGULATORY_BODY),
+            normalize_for_change_hash(_REGULATORY_BODY),
+        )
+
     def test_normalization_version_exported(self):
         self.assertGreaterEqual(int(NORMALIZATION_VERSION), 2)
 
