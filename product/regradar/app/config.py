@@ -29,7 +29,8 @@ except Exception:
 
 BASE_DIR = Path(__file__).parent.parent
 
-DB_PATH = os.getenv("REGRADAR_DB_PATH", str(BASE_DIR / "regradar.db"))
+# `or` (not a getenv default): an empty/blank env value must fall back too.
+DB_PATH = os.getenv("REGRADAR_DB_PATH") or str(BASE_DIR / "regradar.db")
 
 # ── scraper ───────────────────────────────────────────────────────────────────
 
