@@ -1,7 +1,10 @@
 # PROGRESS — production readiness sprint (2026-07-05)
 
 ## Current phase
-Alert-quality sprint DONE on branch alert-quality (unmerged; deploy pin c1ddb8a untouched)
+EXCELLENCE sprint — Phase 0 checkpoint done (backlog: 5×S0, 5×S1, 9×S2, 1×S3
+in DEFECT_LOG.md). Prereq alert-quality cycle 3 merged to main (1e10e9f).
+Branch excellence @ 1e10e9f. Next: C1 fix S0 claims (Hero/HowItWorks/Problem/
+planCapabilities/disclaimers) with before-after table.
 
 ## Owner decisions locked
 1. D6 heartbeats: every run writes a record; unchanged = compact heartbeat
