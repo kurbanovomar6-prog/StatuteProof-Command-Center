@@ -80,7 +80,10 @@ all tests isolated via STATUTEPROOF_BASE_DIR.
       detected facts in Telegram + email bodies. e2e EN+AR+PDF lifecycle
       green in isolated dir (baseline -> alert-once -> heartbeat;
       error-page never baselines; found+fixed status-clobber defect in
-      run_pipeline_for_source). Fresh-clone simulation: see final report.
+      run_pipeline_for_source). Fresh-clone simulation: clone of
+      signal-max + fresh venv + pip install -r requirements.txt ->
+      714 passed / 0 failed (20.8s). SPRINT COMPLETE — Phase 2 remains
+      LOCKED until the operator says "PROD IS LIVE — SIGNAL".
 
 NOTE for gate: history contains NO unambiguous genuine regulatory change.
 Closest real candidates: UAEFIU publications count 61→62 (2026-06-11),
