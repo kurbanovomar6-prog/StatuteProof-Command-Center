@@ -205,8 +205,13 @@ def fetch_updates(bot_token: str, offset: int = 0, timeout: int = 0) -> list[dic
         data = resp.json()
         if data.get("ok"):
             return data.get("result", [])
-        logger.warning("getUpdates error: %s", data.get("description"))
-        return []
+        # ok:false (revoked token 401, second consumer 409, …) must back off
+        # exactly like a transport error — returning [] here hot-loops.
+        logger.warning(
+            "getUpdates error %s: %s",
+            data.get("error_code"), _scrub_token(str(data.get("description")), bot_token),
+        )
+        return None
     except Exception as exc:
         # The exception message embeds the request URL, which contains the
         # bot token — scrub it before logging (defect D5).

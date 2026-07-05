@@ -51,3 +51,15 @@ def test_failure_backoff_grows_and_caps():
     assert _failure_backoff_seconds(30) <= 60, "backoff must cap (<= 60s)"
     # No zero/negative sleeps that would recreate the tight loop.
     assert all(_failure_backoff_seconds(n) > 0 for n in range(1, 10))
+
+
+def test_api_error_response_returns_none_for_backoff():
+    """A 200-with-ok:false reply (revoked token 401, second consumer 409)
+    must trigger the same backoff path as a transport error — otherwise the
+    listener hot-loops against the Telegram API (D5, second branch)."""
+    class _Resp:
+        def json(self):
+            return {"ok": False, "error_code": 401, "description": "Unauthorized"}
+
+    with patch("app.telegram_onboarding.requests.get", return_value=_Resp()):
+        assert fetch_updates(_TOKEN, offset=0, timeout=0) is None
