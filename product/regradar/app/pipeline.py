@@ -117,6 +117,14 @@ def reset_ai_call_counter(limit: int | None = None) -> None:
     _AI_RUN_BUDGET["limit"] = limit if limit is not None else AI_MAX_CALLS_PER_RUN
 
 
+def _sha256_or_none(text: str | None) -> str | None:
+    """SHA-256 of the given text — same convention as source_runs._raw_hash."""
+    if not text:
+        return None
+    import hashlib
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def _extraction_quality(chars: int) -> str:
     if chars >= 500:
         return "good"
@@ -515,6 +523,13 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "extraction_quality":       _extraction_quality(extracted_chars),
         "extraction_method":        extraction_method,
         "created_at":               created_at,
+        # Hash/measurement fields — the same values used for change
+        # detection must reach the evidence record (see D1 in DEFECT_LOG).
+        "normalized_hash":          new_hash,
+        "content_hash":             new_hash,
+        "raw_hash":                 _sha256_or_none(content),
+        "raw_chars":                len(content or ""),
+        "normalized_chars":         len(normalized_for_hash or ""),
         # Snapshot fields — populated when source context is present
         "run_id":                   _run_id,
         "snapshot_raw_path":        _snapshot_paths_result.get("snapshot_raw_path"),
@@ -586,6 +601,13 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "extracted_chars":          result.get("extracted_chars", 0),
                 "extraction_quality":       result.get("extraction_quality", ""),
                 "extraction_method":        result.get("extraction_method", ""),
+                # Hash fields — without these classify_change cannot compare
+                # runs and downgrades real changes to UNCHANGED (defect D1).
+                "normalized_hash":          result.get("normalized_hash"),
+                "content_hash":             result.get("content_hash"),
+                "raw_hash":                 result.get("raw_hash"),
+                "raw_chars":                result.get("raw_chars", 0),
+                "normalized_chars":         result.get("normalized_chars", 0),
                 "snapshot_raw_path":        result.get("snapshot_raw_path"),
                 "snapshot_normalized_path": result.get("snapshot_normalized_path"),
                 "snapshot_pdf_text_path":   result.get("snapshot_pdf_text_path"),

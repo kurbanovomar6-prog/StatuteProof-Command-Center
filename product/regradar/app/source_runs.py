@@ -28,6 +28,16 @@ _SNAPSHOT_DIR = _BASE_DIR / "data" / "source_snapshots"
 _GOOD_ORDER = {"FAILED": 0, "THIN": 1, "MEDIUM": 2, "GOOD": 3}
 _MIN_NORMALIZED_CHARS = 500
 
+# The intake path records quality as GOOD/MEDIUM/THIN/FAILED while the
+# monitor pipeline records good/low_content/failed — normalize both
+# vocabularies before ranking so classification never depends on casing.
+_QUALITY_ALIASES = {"LOW_CONTENT": "THIN", "OK": "MEDIUM"}
+
+
+def _canonical_quality(value: str | None) -> str:
+    label = str(value or "FAILED").strip().upper()
+    return _QUALITY_ALIASES.get(label, label)
+
 _RUNS_CACHE: list[dict] | None = None
 _CACHE_VALID: bool = False
 
@@ -200,7 +210,7 @@ def changed_runs(
 
 
 def classify_change(current: dict, previous: dict | None) -> str:
-    quality = current.get("extraction_quality", "FAILED")
+    quality = _canonical_quality(current.get("extraction_quality"))
     chars = int(current.get("extracted_chars") or 0)
     normalized_chars = int(current.get("normalized_chars") or 0)
     if current.get("access_status") == "failed" or quality == "FAILED":
@@ -208,7 +218,7 @@ def classify_change(current: dict, previous: dict | None) -> str:
     if previous is None:
         return "FIRST_SEEN"
 
-    prev_quality = previous.get("extraction_quality", "FAILED")
+    prev_quality = _canonical_quality(previous.get("extraction_quality"))
     prev_chars = int(previous.get("extracted_chars") or 0)
     prev_norm_chars = int(previous.get("normalized_chars") or 0)
     if prev_quality == "FAILED" and quality != "FAILED":
