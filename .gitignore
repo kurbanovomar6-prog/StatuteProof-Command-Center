@@ -77,3 +77,9 @@ product/regradar/data/diagnostics/
 
 # Office temp files
 product/**/*~$*
+
+# Generated audit artifacts (current-state screenshots regenerated per session)
+audit-screens/current-*.png
+
+# Claude Code generated worktrees
+.claude/worktrees/
