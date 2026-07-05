@@ -374,14 +374,20 @@ def save_document(
     risk_reason:     str       = "",
     ai_summary:      str | None = None,
     business_action: str | None = None,
+    content_hash:    str | None = None,
 ) -> None:
     """
     Insert a new historical row for `url`.
 
     Every call creates a new row — full audit trail preserved.
-    SHA-256 is computed internally.
+
+    `content_hash`: when provided, this exact hash is stored. The monitoring
+    pipeline passes the canonical normalized hash from the JSONL evidence
+    trail so `documents` stays a derived index of the same value (owner
+    decision 2). When omitted (legacy callers), the hash is computed
+    internally from raw content as before.
     """
-    content_hash = (
+    content_hash = content_hash or (
         stable_content_hash(content)
         or hashlib.sha256(content.encode("utf-8")).hexdigest()
     )

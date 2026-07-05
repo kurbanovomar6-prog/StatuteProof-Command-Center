@@ -2777,6 +2777,9 @@ def _start_background_monitor() -> None:
 
 def run_server(host: str = "127.0.0.1", port: int = 5001) -> None:
     """Start the threaded HTTP server and background monitor. Stops cleanly on Ctrl-C."""
+    # Decision 2: detect (never heal) trail/index divergence at startup.
+    from app.consistency import check_baseline_consistency
+    check_baseline_consistency()
     _start_background_monitor()
     server = ThreadingHTTPServer((host, port), _Handler)
     print(f"StatuteProof API listening on  http://{host}:{port}/api/")

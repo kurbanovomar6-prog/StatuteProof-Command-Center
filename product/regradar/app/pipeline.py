@@ -232,24 +232,59 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     normalized_for_hash = normalize_for_change_hash(content)
     new_hash = stable_content_hash(normalized_for_hash)
 
-    # ── Step 4: Load latest version ──────────────────────────────────
+    # ── Step 4: Resolve canonical baseline ────────────────────────────
+    # Owner decision 2: the JSONL evidence-trail normalized hash is the
+    # single source of truth for change classification. SQLite `documents`
+    # is a derived index only — used as a fallback baseline solely when the
+    # trail has no usable hash (legacy records, bare-URL CLI runs).
     latest = get_latest_document(url)
+    prev_trail_record = None
+    baseline_hash = None
+    baseline_origin = "none"
+    if source is not None:
+        from app.source_runs import previous_run as _previous_run, make_source_id as _make_sid
+        prev_trail_record = _previous_run(_make_sid(source))
+        if prev_trail_record is not None:
+            baseline_hash = (
+                prev_trail_record.get("normalized_hash")
+                or prev_trail_record.get("content_hash")
+            )
+            if baseline_hash:
+                baseline_origin = "jsonl"
+    if not baseline_hash and latest is not None:
+        baseline_hash = latest["content_hash"]
+        baseline_origin = "sqlite"
 
-    # ── Step 5: Hash comparison ───────────────────────────────────────
-    if latest is not None and latest["content_hash"] == new_hash:
-        logger.info("No changes: %s", url)
+    # ── Step 5: Hash comparison against the canonical baseline ────────
+    if baseline_hash and baseline_hash == new_hash:
+        logger.info("No changes: %s (baseline=%s)", url, baseline_origin)
+        # Keep the derived index aligned with the canonical hash. This is a
+        # deliberate, loudly-logged realignment — not a silent auto-heal.
+        if source is not None and (latest is None or latest["content_hash"] != new_hash):
+            logger.warning(
+                "DERIVED INDEX REALIGNED: sqlite documents hash %s != canonical %s "
+                "for %s — inserting aligned row (evidence trail is authoritative)",
+                (latest["content_hash"][:12] if latest is not None else "<missing>"),
+                new_hash[:12], url,
+            )
+            save_document(url=url, content=content, content_hash=new_hash)
         return {
             "url":                url,
             "changed":            False,
             "extracted_chars":    extracted_chars,
             "extraction_quality": _extraction_quality(extracted_chars),
             "extraction_method":  extraction_method,
+            "normalized_hash":    new_hash,
+            "content_hash":       new_hash,
+            "raw_hash":           _sha256_or_none(content),
+            "raw_chars":          len(content or ""),
+            "normalized_chars":   len(normalized_for_hash or ""),
             "ai_skipped_reason":  "",
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
 
     # ── Step 6: Build diff / baseline diff ───────────────────────────
-    is_new = latest is None
+    is_new = baseline_hash is None
 
     if is_new:
         # Baseline run: treat entire content as "added" for risk scoring.
@@ -262,9 +297,26 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "modified_count": 0,
         }
     else:
-        normalized_old = normalize_for_change_hash(latest["content"])
-        normalized_new = normalize_for_change_hash(content)
-        diff_result = get_diff(normalized_old, normalized_new)
+        # Old text for diffing: prefer the SQLite copy; fall back to the
+        # previous trail record's normalized snapshot; if neither is
+        # available, treat this run as a fresh baseline.
+        old_text = latest["content"] if latest is not None else None
+        if old_text is None and prev_trail_record is not None:
+            from app.source_runs import _read_snapshot_text as _read_snap
+            old_text = _read_snap(prev_trail_record.get("snapshot_normalized_path"))
+        if old_text is None:
+            is_new = True
+            all_paras   = [p.strip() for p in content.split("\n\n") if p.strip()]
+            diff_result = {
+                "has_changes":    True,
+                "added":          all_paras,
+                "removed":        [],
+                "modified_count": 0,
+            }
+        else:
+            normalized_old = normalize_for_change_hash(old_text)
+            normalized_new = normalize_for_change_hash(content)
+            diff_result = get_diff(normalized_old, normalized_new)
 
     # ── Step 3b: Write snapshot files ────────────────────────────────
     # Runs after diff is confirmed real (past hash-check early-exit).
@@ -413,6 +465,9 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         risk_reason     = final_risk_reason,
         ai_summary      = executive_summary if ai_used else None,
         business_action = business_action   if ai_used else None,
+        # Decision 2: the derived index stores the same canonical hash the
+        # evidence trail records — never a separately computed one.
+        content_hash    = new_hash,
     )
     logger.info(
         "Saved version: url=%s risk=%s ai=%s added=%d removed=%d",
@@ -568,6 +623,29 @@ def run_pipeline_for_source(source: dict) -> dict:
     result["source_status"] = source.get("status", "active")
     result["status"]        = "ok"
 
+    # ── D6: unchanged runs write a compact heartbeat to the trail ─────
+    if not result.get("changed") and result.get("normalized_hash"):
+        try:
+            from app.source_runs import record_heartbeat
+
+            heartbeat = record_heartbeat(
+                source,
+                normalized_hash=result["normalized_hash"],
+                raw_hash=result.get("raw_hash"),
+                extracted_chars=result.get("extracted_chars", 0),
+                raw_chars=result.get("raw_chars", 0),
+                normalized_chars=result.get("normalized_chars", 0),
+                extraction_quality=result.get("extraction_quality", ""),
+            )
+            result["run_record"] = heartbeat
+            logger.info(
+                "Heartbeat recorded: source=%s run_id=%s hash=%s",
+                source.get("name"), heartbeat.get("run_id"),
+                str(result["normalized_hash"])[:12],
+            )
+        except Exception as _hb_err:
+            logger.warning("Heartbeat write failed (non-fatal): %s", _hb_err)
+
     # ── Wire source_runs: append full run record, write diffs/proofs ──
     if result.get("changed") and result.get("run_id"):
         try:
@@ -628,8 +706,12 @@ def run_pipeline_for_source(source: dict) -> dict:
                 try:
                     from pathlib import Path as _Path
                     from app.alert_drafts import build_alert_draft, write_alert_artifacts, load_json_artifact
+                    import app.source_runs as _sr_mod
 
-                    _base_dir = _Path(__file__).resolve().parents[1]
+                    # D8: resolve through the configured base dir (env
+                    # STATUTEPROOF_BASE_DIR or repo default) — never a
+                    # hardcoded path relative to this file.
+                    _base_dir = _Path(_sr_mod._BASE_DIR)
 
                     # Load diff artifact — written by append_run into diff_json_path
                     diff_artifact = load_json_artifact(final_record.get("diff_json_path"), _base_dir)

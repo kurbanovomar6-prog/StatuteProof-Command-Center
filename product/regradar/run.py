@@ -1797,6 +1797,10 @@ def _cmd_ai_brief_test() -> None:
 def _cmd_watch(extra_args: list[str]) -> None:
     """Parse optional --interval N and start the watch loop."""
     from app.scheduler import run_watch_loop
+    from app.consistency import check_baseline_consistency
+
+    # Decision 2: detect (never heal) trail/index divergence at startup.
+    check_baseline_consistency()
 
     interval: int | None = None
     i = 0
@@ -2271,6 +2275,19 @@ def main() -> None:
 
     elif cmd == "all":
         _cmd_all()
+
+    elif cmd == "compact-heartbeats":
+        from app.retention import compact_heartbeats
+
+        days = 30
+        extra = args[1:]
+        if extra and extra[0] == "--days":
+            if len(extra) < 2 or not extra[1].isdigit():
+                print("Error: --days requires a positive integer.", file=sys.stderr)
+                sys.exit(2)
+            days = int(extra[1])
+        stats = compact_heartbeats(days_threshold=days)
+        print(f"Heartbeat compaction: kept={stats['kept']} removed={stats['removed']} (threshold={days}d)")
 
     elif cmd == "health":
         _cmd_health()

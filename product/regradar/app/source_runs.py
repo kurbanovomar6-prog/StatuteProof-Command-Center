@@ -11,7 +11,9 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import os
 import re
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -20,7 +22,9 @@ from app.proof import build_source_proof
 from app.text_normalization import normalize_for_change_hash, stable_content_hash, stable_normalized_hash
 
 
-_BASE_DIR = Path(__file__).parent.parent
+# D8: the artifact base dir is resolved from the environment with a sane
+# default (repo root). Everything under data/ derives from this one anchor.
+_BASE_DIR = Path(os.environ.get("STATUTEPROOF_BASE_DIR") or Path(__file__).parent.parent).resolve()
 _RUN_DIR = _BASE_DIR / "data" / "source_runs"
 _RUN_FILE = _RUN_DIR / "source_runs.jsonl"
 _SNAPSHOT_DIR = _BASE_DIR / "data" / "source_snapshots"
@@ -274,6 +278,48 @@ def append_run(record: dict) -> dict:
     if record.get("change_status") == "CHANGED":
         queue_changed_alert(record)  # type: ignore[reportUndefinedVariable]
     return record
+
+
+def record_heartbeat(
+    source: dict,
+    *,
+    normalized_hash: str,
+    raw_hash: str | None = None,
+    extracted_chars: int = 0,
+    raw_chars: int = 0,
+    normalized_chars: int = 0,
+    extraction_quality: str = "",
+) -> dict:
+    """
+    D6: write a compact heartbeat record for an UNCHANGED monitor run so the
+    evidence trail can prove "we checked on date X" between change events.
+
+    The record goes through append_run, so classification is re-verified
+    against the previous trail record — a heartbeat is never trusted blindly.
+    No snapshots or proof artifacts are written (compact by design).
+    """
+    market = str(source.get("jurisdiction", source.get("market", "AE"))).upper()
+    record = {
+        "record_type": "heartbeat",
+        "run_id": uuid.uuid4().hex[:8],
+        "timestamp_utc": now_utc(),
+        "source_id": make_source_id(source),
+        "source_name": source.get("name", ""),
+        "official_url": source.get("url", ""),
+        "url": source.get("url", ""),
+        "market": market,
+        "jurisdiction": source.get("jurisdiction", market),
+        "category": source.get("category", ""),
+        "change_status": "UNCHANGED",
+        "normalized_hash": normalized_hash,
+        "content_hash": normalized_hash,
+        "raw_hash": raw_hash,
+        "extraction_quality": extraction_quality,
+        "extracted_chars": extracted_chars,
+        "raw_chars": raw_chars,
+        "normalized_chars": normalized_chars,
+    }
+    return append_run(record)
 
 
 def _append_limitation(record: dict, note: str) -> None:
