@@ -81,3 +81,57 @@ Phase 0 ground truth (all outputs real, this session):
 - deploy-check with blanked SECRET_KEY: exit code **1**.
 - All 11 app screens: **0 console errors**.
 - Adversarial diff grep (1,256 added lines): no weakened/removed assertions, no skips, no TODOs, no secrets, no debug prints.
+
+# ALERT QUALITY SPRINT — 2026-07-05 (branch alert-quality)
+
+## Phase 0 forensics: today's two live Telegram alerts (16:54 / 17:28 GST)
+- Trail records: run 17d38737 (12:54:44Z, CHANGED, hash 2be6fc54…) and run
+  4bc2127d (13:28:51Z, CHANGED, hash b80825e8…). Note: 4bc2127d's hash equals
+  the hash recorded at 12:54:12Z — the source OSCILLATES between two variants.
+- diff.json both runs: added=0 removed=0 changed=1 — the single changed chunk
+  is the page TITLE flipping between "…| DFSA" and "…| DFSA | THE INDEPENDENT
+  REGULATOR OF FINANCIAL SERVICES". Zero regulatory content changed.
+- Verdict per alert: (c) operator re-runs (this machine's e2e passes at those
+  exact timestamps; no scheduler process exists locally — pgrep empty) on top
+  of (b)-style churn (server-side title A/B). NOT a real regulatory change.
+- Why HIGH: pipeline diffs paragraph BLOCKS; the changed block = title + full
+  nav menu. Nav contains "Sanctions" (strong keyword) + "Compliance" (context
+  amplifier) → HIGH path 2. Reproduced: title-only diff scores MEDIUM; the
+  nav words are what upgraded it. The HIGH reason text ("deadline, penalty,
+  or mandatory obligation") describes context that was NEVER detected.
+- Sender: pipeline step-10 immediate Telegram send (ENABLE_TELEGRAM_ALERTS=
+  True in local .env, admin chat). The parallel alert-DRAFT layer scored the
+  same run MEDIUM / HOLD_FOR_REVIEW — two content layers disagree about the
+  same event, in customer-visible ways.
+
+## A1..A5 defect register — all FIXED on branch alert-quality
+- A1 FIXED (72ce88a): app/alert_dedup.py — never re-alert an already-alerted
+  hash per source; ALERT_COOLDOWN_HOURS (default 24) between alerts; dedup
+  state = alert_sent in the trail itself. 8 TDD tests; pipeline-level
+  once-then-zero proven. Gate: forced diff → 1 alert, re-run → 0, trail
+  records FIRST_SEEN/CHANGED/UNCHANGED.
+- A2 FIXED (71b24ae): shared layer app/alert_content.py — severity names
+  matched rule+keywords; ≤400-char excerpt of the real diff; risk reasons
+  rewritten to name actual matches (boilerplate 'deadline, penalty, or
+  mandatory obligation' removed). Both channels (Telegram + alert_draft.md +
+  outbox email) render the same block — proven in gate output.
+- A3 FIXED (71b24ae): absent fields omitted entirely; regression tests forbid
+  'Not specified' and '—' scaffolding.
+- A4 FIXED (71b24ae): severity rubric documented in app/risk.py (rule ids
+  HIGH_MULTIPLE_STRONG / HIGH_STRONG_PLUS_CONTEXT / MEDIUM_* / LOW / NON_
+  MATERIAL); HIGH without recorded matches states 'severity basis not
+  recorded' and claims nothing.
+- A5 FIXED (71b24ae, c75abe8): double periods cleaned, consistent title,
+  human timestamps (YYYY-MM-DD HH:MM UTC).
+- KEEP guards: footer/proof-URL/timestamp mandatory — regression-tested.
+
+## Alert-quality open items (owner decisions needed)
+- Keyword scan runs over the whole changed BLOCK including site navigation —
+  the nav words ('Sanctions', 'Compliance') are what made today's title-flip
+  HIGH. Scoring only the intra-block delta would fix it but changes scoring
+  semantics — owner call.
+- Keyword list is US-English only ('license'); DFSA/DIFC write UK English
+  ('licence', 'authorisation', 'penalise') — real changes phrased in UK
+  spelling can only reach MEDIUM via moderate keywords. Owner call.
+- Suites at gate: backend 649 passed / frontend 43 passed / eslint 0 errors
+  (3 known warnings). Branch NOT merged — merge is the owner's decision.

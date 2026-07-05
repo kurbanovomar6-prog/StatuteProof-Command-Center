@@ -1,7 +1,7 @@
 # PROGRESS — production readiness sprint (2026-07-05)
 
 ## Current phase
-DONE — final report delivered (all cycles + gate + adversarial review complete)
+Alert-quality sprint DONE on branch alert-quality (unmerged; deploy pin c1ddb8a untouched)
 
 ## Owner decisions locked
 1. D6 heartbeats: every run writes a record; unchanged = compact heartbeat

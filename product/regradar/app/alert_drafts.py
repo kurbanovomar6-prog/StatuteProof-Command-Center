@@ -288,7 +288,13 @@ def render_alert_markdown(alert: dict[str, Any]) -> str:
     title = f"{HUMAN_REVIEW_BANNER}: {alert.get('source_name') or 'Source'}"
     lines = [
         f"# {title}",
-        "",
+        "",]
+    # Shared customer-facing content layer (app/alert_content.py) — the same
+    # block Telegram renders, so both channels never diverge (defect A2).
+    shared_block = str(alert.get("alert_content_markdown") or "").strip()
+    if shared_block:
+        lines += [shared_block, "", "---", ""]
+    lines += [
         f"- Source: {alert.get('source_name')}",
         f"- URL: {alert.get('source_url')}",
         f"- Checked: {alert.get('checked_at_utc')}",

@@ -20,6 +20,17 @@ Scoring rules (evaluated in order — first match wins):
           • Moderate-change keyword: update, change, amendment
 
   LOW     Everything else (no keywords matched)
+
+Severity rubric — rule identifiers returned in analyze_risk()["rule"]:
+  HIGH_MULTIPLE_STRONG      ≥2 strong keywords matched in changed text
+  HIGH_STRONG_PLUS_CONTEXT  1 strong keyword + ≥1 context amplifier
+  MEDIUM_SINGLE_STRONG      1 strong keyword, no context support
+  MEDIUM_MODERATE_KEYWORD   moderate-change keyword only
+  MEDIUM_ARABIC             Arabic content — English-only matcher, human review
+  LOW_NO_KEYWORDS           nothing matched
+  NON_MATERIAL              below materiality threshold
+An alert may only claim what its rule actually matched; matched keywords are
+carried alongside so the alert layer can name them (defect A2/A4).
 """
 
 from __future__ import annotations
@@ -248,14 +259,20 @@ def analyze_risk(diff_result: dict) -> dict:
     matched_high    = [kw for kw in _HIGH_KEYWORDS      if kw in all_text]
     matched_context = [cw for cw in _HIGH_CONTEXT_WORDS if cw in all_text]
 
+    # A2 (alert-quality sprint): every reason names the ACTUAL matches.
+    # Rule ids form the documented severity rubric (see module docstring).
+
     # HIGH path 1: two or more strong keywords
     if len(matched_high) >= 2:
         return {
             "risk_level": "HIGH",
+            "rule": "HIGH_MULTIPLE_STRONG",
+            "matched_keywords": matched_high,
+            "matched_context": matched_context,
             "reason": (
-                "High risk: multiple strong regulatory risk indicators were "
-                "detected (such as penalties, licensing requirements, sanctions, "
-                "or mandatory reporting obligations). Compliance review is required."
+                "High risk: multiple strong regulatory indicators matched in "
+                f"the changed text: {', '.join(matched_high)}. "
+                "Compliance review is required."
             ),
         }
 
@@ -263,10 +280,13 @@ def analyze_risk(diff_result: dict) -> dict:
     if len(matched_high) == 1 and matched_context:
         return {
             "risk_level": "HIGH",
+            "rule": "HIGH_STRONG_PLUS_CONTEXT",
+            "matched_keywords": matched_high,
+            "matched_context": matched_context,
             "reason": (
-                "High risk: a strong regulatory risk indicator was detected "
-                "alongside supporting compliance context (such as a deadline, "
-                "penalty, or mandatory obligation). Compliance review is required."
+                f"High risk: strong indicator '{matched_high[0]}' matched "
+                f"together with context term(s): {', '.join(matched_context)}. "
+                "Compliance review is required."
             ),
         }
 
@@ -274,10 +294,13 @@ def analyze_risk(diff_result: dict) -> dict:
     if len(matched_high) == 1:
         return {
             "risk_level": "MEDIUM",
+            "rule": "MEDIUM_SINGLE_STRONG",
+            "matched_keywords": matched_high,
+            "matched_context": [],
             "reason": (
-                "Medium risk: one strong regulatory keyword was detected, but "
-                "there is not enough supporting context for a high-risk "
-                "classification. Compliance review is recommended."
+                f"Medium risk: strong regulatory keyword '{matched_high[0]}' "
+                "matched without supporting context. Compliance review is "
+                "recommended."
             ),
         }
 
@@ -286,19 +309,23 @@ def analyze_risk(diff_result: dict) -> dict:
         if keyword in all_text:
             return {
                 "risk_level": "MEDIUM",
+                "rule": "MEDIUM_MODERATE_KEYWORD",
+                "matched_keywords": [keyword],
+                "matched_context": [],
                 "reason": (
-                    "Medium risk: the change contains a regulatory signal "
-                    "(such as an update, amendment, or policy change), but does "
-                    "not include high-risk indicators. Compliance review is "
-                    "recommended."
+                    f"Medium risk: moderate-change keyword '{keyword}' matched. "
+                    "No strong regulatory indicators matched. Compliance review "
+                    "is recommended."
                 ),
             }
 
     return {
         "risk_level": "LOW",
+        "rule": "LOW_NO_KEYWORDS",
+        "matched_keywords": [],
+        "matched_context": [],
         "reason": (
-            "Low risk: no clear signs of new penalties, licensing duties, "
-            "reporting deadlines, sanctions, or mandatory compliance obligations "
-            "were detected. Continue routine monitoring."
+            "Low risk: no strong regulatory keywords matched in the changed "
+            "text. Continue routine monitoring."
         ),
     }

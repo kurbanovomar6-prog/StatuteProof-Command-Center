@@ -530,21 +530,45 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
 
     # ── Step 10: Telegram alert (MEDIUM/HIGH, never on baseline) ──────
     telegram_sent = False
+    alert_suppressed_reason = ""
 
     if ENABLE_TELEGRAM_ALERTS and not is_new and final_risk_level in _ALERT_THRESHOLD:
-        from app.telegram import send_telegram_alert
+        # A1 dedup gate: one alert per unique hash transition per source,
+        # plus a cooldown between alerts for the same source.
+        alert_allowed = True
+        if source is not None:
+            from app.alert_dedup import should_send_alert
+            from app.source_runs import make_source_id as _mk_sid
+            alert_allowed, alert_suppressed_reason = should_send_alert(
+                _mk_sid(source), new_hash,
+            )
+            if not alert_allowed:
+                logger.info(
+                    "Telegram alert suppressed (%s): source=%s hash=%s",
+                    alert_suppressed_reason, source.get("name"), str(new_hash)[:12],
+                )
 
-        alert_payload = {
-            "url":                     url,
-            "risk_level":              final_risk_level,
-            "risk_reason":             final_risk_reason,
-            "executive_summary":       executive_summary,
-            "business_action_required":business_action,
-            "ai_used":                 ai_used,
-            "added_count":             len(diff_result["added"]),
-            "removed_count":           len(diff_result["removed"]),
-        }
-        telegram_sent = send_telegram_alert(alert_payload)
+        if alert_allowed:
+            from app.telegram import send_telegram_alert
+
+            alert_payload = {
+                "url":                     url,
+                "source_name":             (source or {}).get("name", ""),
+                "jurisdiction":            (source or {}).get("jurisdiction", ""),
+                "risk_level":              final_risk_level,
+                "risk_reason":             final_risk_reason,
+                "executive_summary":       executive_summary,
+                "business_action_required":business_action,
+                "ai_used":                 ai_used,
+                "added_count":             len(diff_result["added"]),
+                "removed_count":           len(diff_result["removed"]),
+                "added":                   diff_result.get("added", []),
+                "removed":                 diff_result.get("removed", []),
+                "risk_details":            rule_risk,
+                "normalized_hash":         new_hash,
+                "checked_at_utc":          created_at,
+            }
+            telegram_sent = send_telegram_alert(alert_payload)
 
     # ── Step 11: Return structured result ─────────────────────────────
     return {
@@ -557,6 +581,8 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "review_reason":            review_reason,
         "ai_used":                  ai_used,
         "telegram_sent":            telegram_sent,
+        "alert_suppressed_reason":  alert_suppressed_reason,
+        "risk_details":             rule_risk,
         "executive_summary":        executive_summary,
         "business_action_required": business_action,
         "source_language":          source_language,
@@ -672,6 +698,9 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "deadline":                 result.get("deadline"),
                 "review_required":          result.get("review_required", False),
                 "review_reason":            result.get("review_reason", ""),
+                # A1: the trail is the dedup state — record delivered alerts.
+                "alert_sent":               bool(result.get("telegram_sent")),
+                "alert_suppressed_reason":  result.get("alert_suppressed_reason", ""),
                 "added_count":              result.get("added_count", 0),
                 "removed_count":            result.get("removed_count", 0),
                 "modified_count":           result.get("modified_count", 0),
@@ -745,6 +774,28 @@ def run_pipeline_for_source(source: dict) -> dict:
 
                     alert = build_alert_draft(final_record, diff_artifact, proof_block)
                     if alert:
+                        # Attach the shared content layer so the draft/email
+                        # channel renders the same alert body as Telegram.
+                        try:
+                            from app.alert_content import build_alert_content, render_markdown
+                            alert["alert_content_markdown"] = render_markdown(build_alert_content({
+                                "url": source.get("url", ""),
+                                "source_name": source.get("name", ""),
+                                "jurisdiction": source.get("jurisdiction", ""),
+                                "risk_level": result.get("risk_level", ""),
+                                "risk_reason": result.get("risk_reason", ""),
+                                "risk_details": result.get("risk_details") or {},
+                                "added": result.get("added", []),
+                                "removed": result.get("removed", []),
+                                "executive_summary": result.get("executive_summary", ""),
+                                "business_action_required": result.get("business_action_required", ""),
+                                "deadline": result.get("deadline"),
+                                "urgency": result.get("urgency", ""),
+                                "affected_entities": result.get("affected_entities", []),
+                                "checked_at_utc": final_record.get("timestamp_utc", ""),
+                            }))
+                        except Exception as _sc_err:
+                            logger.warning("Shared alert content attach failed (non-fatal): %s", _sc_err)
                         # Resolve the snapshot directory for writing alert artifacts
                         snap_raw = final_record.get("snapshot_raw_path")
                         if snap_raw:
