@@ -1,0 +1,42 @@
+# StatuteProof — Caddy reverse proxy (auto-TLS via Let's Encrypt).
+# Install to /etc/caddy/Caddyfile and reload: systemctl reload caddy
+#
+# DNS prerequisites: A records for statuteproof.com and www.statuteproof.com
+# pointing at this droplet. Caddy obtains and renews certificates itself.
+
+www.statuteproof.com {
+	redir https://statuteproof.com{uri} permanent
+}
+
+statuteproof.com {
+	encode gzip zstd
+
+	# API — proxied to the localhost-bound Python server.
+	# Health endpoint is routed through the same path (/api/health).
+	handle /api/* {
+		reverse_proxy 127.0.0.1:5001
+	}
+
+	# Frontend — static SPA build.
+	handle {
+		root * /srv/regradar/web/dist
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	log {
+		output file /var/log/caddy/statuteproof.log {
+			roll_size 50MiB
+			roll_keep 10
+		}
+	}
+}

@@ -84,15 +84,32 @@ _CONTACT_QUEUE = BASE_DIR / "data" / "contact_requests.jsonl"
 # CORS_ALLOWED_ORIGIN env var controls which origin is permitted.
 # Leave unset in production (same-origin deployment) — no CORS headers will be sent.
 # Set to http://localhost:5173 for local development against the Vite dev server.
-_ALLOWED_ORIGIN = os.environ.get("CORS_ALLOWED_ORIGIN", "")
+# Comma-separated allowlist, e.g. "https://statuteproof.com,https://www.statuteproof.com".
+# Single-value configs keep working unchanged. Unset = same-origin deployment,
+# no CORS headers sent (the production default behind the reverse proxy).
+_ALLOWED_ORIGINS = [
+    o.strip() for o in os.environ.get("CORS_ALLOWED_ORIGIN", "").split(",") if o.strip()
+]
 
 _CORS: dict[str, str] = {
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Credentials": "true",
 }
-if _ALLOWED_ORIGIN:
-    _CORS["Access-Control-Allow-Origin"] = _ALLOWED_ORIGIN
+if len(_ALLOWED_ORIGINS) == 1:
+    _CORS["Access-Control-Allow-Origin"] = _ALLOWED_ORIGINS[0]
+
+
+def _cors_headers(request_origin: str | None) -> dict[str, str]:
+    """CORS headers for one response. With a multi-origin allowlist the
+    matching request Origin is echoed; unlisted origins get no CORS grant."""
+    if len(_ALLOWED_ORIGINS) <= 1:
+        return _CORS
+    headers = {k: v for k, v in _CORS.items()}
+    if request_origin and request_origin in _ALLOWED_ORIGINS:
+        headers["Access-Control-Allow-Origin"] = request_origin
+        headers["Vary"] = "Origin"
+    return headers
 
 # Security headers — applied to every API response.
 _SECURITY_HEADERS: dict[str, str] = {
@@ -174,7 +191,7 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        for k, v in _CORS.items():
+        for k, v in _cors_headers(self.headers.get("Origin")).items():
             self.send_header(k, v)
         for k, v in _SECURITY_HEADERS.items():
             self.send_header(k, v)
@@ -335,7 +352,7 @@ class _Handler(BaseHTTPRequestHandler):
     ) -> None:
         self.send_response(status)
         self.send_header("Location", location)
-        for k, v in _CORS.items():
+        for k, v in _cors_headers(self.headers.get("Origin")).items():
             self.send_header(k, v)
         for k, v in _SECURITY_HEADERS.items():
             self.send_header(k, v)
@@ -347,7 +364,7 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(204)
-        for k, v in _CORS.items():
+        for k, v in _cors_headers(self.headers.get("Origin")).items():
             self.send_header(k, v)
         for k, v in _SECURITY_HEADERS.items():
             self.send_header(k, v)
@@ -1511,7 +1528,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
             self.send_header("Content-Length", str(len(data)))
-            for k, v in _CORS.items():
+            for k, v in _cors_headers(self.headers.get("Origin")).items():
                 self.send_header(k, v)
             for k, v in _SECURITY_HEADERS.items():
                 self.send_header(k, v)

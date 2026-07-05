@@ -1,0 +1,11 @@
+[Unit]
+Description=Run StatuteProof heartbeat compaction daily (idempotent — safe to re-run)
+
+[Timer]
+OnCalendar=*-*-* 03:10:00 UTC
+Persistent=true
+RandomizedDelaySec=600
+Unit=statuteproof-compaction.service
+
+[Install]
+WantedBy=timers.target

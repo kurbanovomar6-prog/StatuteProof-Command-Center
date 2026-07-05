@@ -1,5 +1,5 @@
 [Unit]
-Description=StatuteProof Customer Alerts Bot (@statuteproofalerts_bot)
+Description=StatuteProof Customer Alerts Bot (@statuteproofalerts_bot pairing listener)
 After=network-online.target
 Wants=network-online.target
 
@@ -11,8 +11,17 @@ WorkingDirectory=/srv/regradar
 EnvironmentFile=/srv/regradar/.env
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/srv/regradar/.venv/bin/python run.py telegram-listen
-Restart=always
+Restart=on-failure
 RestartSec=10
+# The 438MB-log lesson: the listener now backs off on failures and journald
+# (SystemMaxUse, see DEPLOY.md) caps its output — no unbounded log growth.
+MemoryMax=256M
+CPUQuota=25%
+TasksMax=32
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar
 StandardOutput=journal
 StandardError=journal
 

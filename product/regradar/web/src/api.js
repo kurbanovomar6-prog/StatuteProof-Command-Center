@@ -1,10 +1,16 @@
+// API base URL. Empty (default) = same-origin — correct for dev (Vite proxy)
+// and for production behind the reverse proxy. Set VITE_API_URL only for
+// split-origin deployments; it must never point at localhost in a prod build
+// (deploy-check enforces this).
+const API_BASE = (import.meta.env?.VITE_API_URL || '').replace(/\/$/, '')
+
 export async function apiFetch(path, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
   }
 
-  const response = await fetch(path, {
+  const response = await fetch(API_BASE + path, {
     credentials: 'include',
     ...options,
     headers,

@@ -1,0 +1,31 @@
+[Unit]
+Description=StatuteProof monitoring scheduler (watch loop — the ONLY process that sweeps sources)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=regradar
+Group=regradar
+WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
+Environment=PYTHONUNBUFFERED=1
+# Full sweep of enabled sources every 60 minutes. The first cycle runs
+# immediately at startup by design (monitor is current from minute one).
+ExecStart=/srv/regradar/.venv/bin/python run.py watch --interval 60
+Restart=on-failure
+RestartSec=60
+# Sweeps fetch 100+ external sites: allow more memory/CPU than the API,
+# but still cap so a leak cannot take the droplet down.
+MemoryMax=1G
+CPUQuota=80%
+TasksMax=128
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

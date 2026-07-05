@@ -1,5 +1,5 @@
 [Unit]
-Description=StatuteProof API Server
+Description=StatuteProof API Server (no monitoring sweeps — see statuteproof-scheduler)
 After=network-online.target
 Wants=network-online.target
 
@@ -10,9 +10,19 @@ Group=regradar
 WorkingDirectory=/srv/regradar
 EnvironmentFile=/srv/regradar/.env
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/srv/regradar/.venv/bin/python run.py api --host 0.0.0.0 --port 5001
-Restart=always
+# Bind localhost only — Caddy terminates TLS and proxies /api/*.
+ExecStart=/srv/regradar/.venv/bin/python run.py api --host 127.0.0.1 --port 5001
+Restart=on-failure
 RestartSec=5
+# Resource limits — the API serves JSON; it must never eat the box.
+MemoryMax=512M
+CPUQuota=50%
+TasksMax=64
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar
 StandardOutput=journal
 StandardError=journal
 

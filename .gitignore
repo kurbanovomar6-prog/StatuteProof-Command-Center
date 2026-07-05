@@ -89,3 +89,4 @@ product/regradar/.coverage
 product/regradar/coverage.json
 product/regradar/logs/
 product/regradar/data/outbox/
+backups/

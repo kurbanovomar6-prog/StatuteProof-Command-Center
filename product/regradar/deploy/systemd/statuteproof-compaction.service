@@ -1,0 +1,18 @@
+[Unit]
+Description=StatuteProof heartbeat compaction (retention: old heartbeats -> 1/day/source)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=regradar
+Group=regradar
+WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/regradar/.venv/bin/python run.py compact-heartbeats --days 30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar
+StandardOutput=journal
+StandardError=journal
