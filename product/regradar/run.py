@@ -2288,6 +2288,11 @@ def main() -> None:
             days = int(extra[1])
         stats = compact_heartbeats(days_threshold=days)
         print(f"Heartbeat compaction: kept={stats['kept']} removed={stats['removed']} (threshold={days}d)")
+        # F5: steady-state QUALITY_DROP repeats compact under the same
+        # threshold; transitions are kept forever.
+        from app.retention import compact_quality_drop_repeats
+        qd = compact_quality_drop_repeats(days_threshold=days)
+        print(f"QUALITY_DROP compaction: kept={qd['kept']} removed={qd['removed']} (threshold={days}d)")
 
     elif cmd == "health":
         _cmd_health()
