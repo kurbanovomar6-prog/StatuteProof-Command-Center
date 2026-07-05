@@ -44,8 +44,21 @@ all tests isolated via STATUTEPROOF_BASE_DIR.
       "Status: In-Force"; SCA delta -> 8 law refs incl. Federal Decree-Law
       No. (20) of 2018; EOCN delta -> AR ref قرار مجلس الوزراء رقم (134)
       لسنة 2025 detected.
-- [ ] F3 Arabic lane (cycle 3)
-- [ ] F4 scoring depth (cycle 4)
+- [x] F3 Arabic lane (cycle 3) — DONE, commit e3e0b6a
+      app/arabic_text.py (diacritics/kashida/directional/digit folding);
+      measured AR term lane merged into the severity ladder; MEDIUM_ARABIC
+      human-review rule id restored; letterhead noise-guards (VARA name,
+      UAEFIU tagline demoted after replay showed noise upgrades 17->32 HIGH;
+      corrected before commit). 11 AR tests red->green; suite 696 green.
+- [x] F4 scoring depth (cycle 4) — DONE, commit f223635
+      Word-bounded matching (ban-in-bank dead), topic terms demoted,
+      FORMAT_SHIFT_REVIEW guard for adapter output flips, EN additions.
+      9 tests red->green; suite 705 green. Full-stack regression over all
+      63 historical runs: HIGH 23->11, 13 NO_DIFF, 2 error-filtered; every
+      shift justified per judgment class in
+      docs/signal/severity_regression_f4.md. Residual 11 HIGHs are
+      PDF-reflow / wrong-page / adapter-jitter classes addressed
+      operationally by the F1 reset + stable adapters — stated, not hidden.
 - [ ] F5 QUALITY_DROP retention (cycle 5)
 - [ ] F6 activation-ready pack (cycle 6)
 - [ ] Verification gate (suites green with counts; 3 historical alert
