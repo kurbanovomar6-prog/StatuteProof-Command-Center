@@ -65,17 +65,24 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
           </button>
         )}
         {collapsed && (
-          <img
-            src="/brand/regradar-favicon-512.png"
-            alt="StatuteProof"
-            className="h-6 w-6 mx-auto cursor-pointer object-contain"
+          <button
+            type="button"
             onClick={() => navigate('dashboard')}
-          />
+            aria-label="Go to dashboard"
+            className="mx-auto flex items-center justify-center"
+          >
+            <img
+              src="/brand/regradar-favicon-512.png"
+              alt="StatuteProof"
+              className="h-6 w-6 object-contain"
+            />
+          </button>
         )}
         <button
           onClick={onToggle}
           className="flex min-h-9 min-w-9 flex-shrink-0 items-center justify-center rounded text-slate-600 transition-colors hover:text-slate-300"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed
             ? <ChevronRight className="w-3.5 h-3.5" />

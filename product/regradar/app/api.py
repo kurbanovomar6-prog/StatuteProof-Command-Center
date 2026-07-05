@@ -113,6 +113,8 @@ def _cors_headers(request_origin: str | None) -> dict[str, str]:
 
 # Security headers — applied to every API response.
 _SECURITY_HEADERS: dict[str, str] = {
+    # API responses carry private account/evidence data — never cacheable.
+    "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
