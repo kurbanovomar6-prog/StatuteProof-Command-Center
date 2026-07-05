@@ -167,7 +167,6 @@ class PipelineWiringTests(unittest.TestCase):
         )
         sends: list[dict] = []
         init_pipeline(0)
-        import app.text_normalization as tn
         from app.text_normalization import normalize_for_change_hash, stable_content_hash
         old_hash = stable_content_hash(normalize_for_change_hash(old))
         with mock.patch("app.pipeline.fetch_page", return_value="<html>x</html>"), \
