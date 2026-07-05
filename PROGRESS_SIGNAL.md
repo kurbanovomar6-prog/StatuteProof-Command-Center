@@ -34,7 +34,16 @@ all tests isolated via STATUTEPROOF_BASE_DIR.
       normalization_version stamping + reset discipline).
       Reset sizing measured: 300/316 snapshots flip, 86 of 116 enabled →
       RESET_RUNBOOK.md (prepared, NOT executed).
-- [ ] F2 detected facts in alerts (cycle 2)
+- [x] F2 detected facts in alerts (cycle 2) — DONE
+      Commit a6d1ed4. Red first (module missing), then 13 tests green;
+      full suite 684 passed / 0 failed. One legacy test
+      (test_detected_deadline_is_rendered_when_present) updated to the new
+      contract: deadline renders ONLY from a rule detection with a span.
+      Real-delta proof (docs/signal/detected_facts_real_deltas.txt):
+      CBUAE retail-payment delta -> "Effective from 1/8/2022",
+      "Status: In-Force"; SCA delta -> 8 law refs incl. Federal Decree-Law
+      No. (20) of 2018; EOCN delta -> AR ref قرار مجلس الوزراء رقم (134)
+      لسنة 2025 detected.
 - [ ] F3 Arabic lane (cycle 3)
 - [ ] F4 scoring depth (cycle 4)
 - [ ] F5 QUALITY_DROP retention (cycle 5)
