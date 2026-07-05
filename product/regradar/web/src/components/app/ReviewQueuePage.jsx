@@ -4,6 +4,8 @@ import { AlertTriangle, Ban, CheckCircle, ExternalLink, Filter, Search, ShieldCh
 import { reviews } from '../../api'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
+import EmptyState from './ui/EmptyState'
+import ErrorState from './ui/ErrorState'
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending review' },
@@ -173,10 +175,22 @@ export default function ReviewQueuePage() {
 
         {canonicalLoading && <p className="text-sm text-slate-400">Loading canonical evidence records...</p>}
         {!canonicalLoading && canonicalError && (
-          <p className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2 text-xs text-rose-200">{canonicalError}</p>
+          <ErrorState
+            title="Could not load canonical evidence records."
+            detail={canonicalError}
+            onRetry={loadCanonicalEvidence}
+            className="rounded-lg border border-slate-800 bg-slate-950/35"
+          />
         )}
         {!canonicalLoading && !canonicalError && canonicalRows.length === 0 && (
-          <p className="rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3 text-sm text-slate-500">No canonical evidence records found.</p>
+          <EmptyState
+            icon={CheckCircle}
+            title="No canonical evidence records yet."
+            className="rounded-lg border border-slate-800 bg-slate-950/35"
+          >
+            Canonical records appear after monitoring runs save evidence for
+            review. Run a source check or adjust filters above.
+          </EmptyState>
         )}
         {!canonicalLoading && !canonicalError && canonicalRows.length > 0 && (
           <div>

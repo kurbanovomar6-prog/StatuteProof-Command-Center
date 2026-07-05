@@ -249,8 +249,14 @@ export default function AIBriefPage() {
       </div>
 
       {loading && (
-        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-8 text-sm text-slate-400">
-          Loading monitoring briefs...
+        <div className="grid gap-3 lg:grid-cols-2" aria-label="Loading monitoring briefs">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+              <div className="sp-skeleton mb-3 h-5 w-40 rounded-full" />
+              <div className="sp-skeleton mb-2 h-4 w-3/4 rounded" />
+              <div className="sp-skeleton h-16 w-full rounded" />
+            </div>
+          ))}
         </div>
       )}
 

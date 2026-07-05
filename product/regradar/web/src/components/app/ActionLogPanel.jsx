@@ -17,6 +17,7 @@ export default function ActionLogPanel({ alertId }) {
   const [reviewerName, setReviewerName] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [loadError, setLoadError] = useState('')
 
   // Reset loading when the alert changes — render-phase adjustment instead
   // of a synchronous setState inside the effect (react-hooks lint rule).
@@ -29,8 +30,8 @@ export default function ActionLogPanel({ alertId }) {
   useEffect(() => {
     let active = true
     actionLog.list(alertId)
-      .then(data => { if (active) setEntries(data.entries || []) })
-      .catch(() => {})
+      .then(data => { if (active) { setEntries(data.entries || []); setLoadError('') } })
+      .catch(err => { if (active) setLoadError(err.message || 'Could not load the action log.') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [alertId])
@@ -128,7 +129,11 @@ export default function ActionLogPanel({ alertId }) {
 
       {loading && <div className="sp-skeleton h-8 w-full rounded-lg" />}
 
-      {!loading && entries.length === 0 && (
+      {!loading && loadError && (
+        <p className="text-xs text-amber-300">{loadError} Reopen this alert to retry.</p>
+      )}
+
+      {!loading && !loadError && entries.length === 0 && (
         <p className="text-xs text-slate-600">No response logged yet. Log your team's decision above.</p>
       )}
 

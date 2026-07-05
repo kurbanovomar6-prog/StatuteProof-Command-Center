@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-react'
+import { Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-react'
 
 import { evidence } from '../../api'
 import AuditBinderExport from './AuditBinderExport'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
 import { formatGst } from '../../utils/time'
+import ErrorState from './ui/ErrorState'
 
 function shortHash(value) {
   return value ? String(value).slice(0, 12) : 'not recorded'
@@ -18,6 +19,8 @@ export default function ReportsPage() {
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [exportState, setExportState] = useState({})
+
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -35,7 +38,13 @@ export default function ReportsPage() {
         if (active) setLoading(false)
       })
     return () => { active = false }
-  }, [])
+  }, [reloadKey])
+
+  function retryReports() {
+    setLoading(true)
+    setError('')
+    setReloadKey(k => k + 1)
+  }
 
   const filtered = useMemo(() => records.filter(record => {
     const haystack = [
@@ -112,13 +121,12 @@ export default function ReportsPage() {
       )}
 
       {!loading && error && (
-        <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/5 px-5 py-4">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-400" />
-          <div>
-            <p className="text-sm font-semibold text-rose-200">Could not load report records.</p>
-            <p className="mt-1 text-xs text-rose-300/80">{error}</p>
-          </div>
-        </div>
+        <ErrorState
+          title="Could not load report records."
+          detail={error}
+          onRetry={retryReports}
+          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+        />
       )}
 
       {!loading && !error && filtered.length === 0 && (
