@@ -11,7 +11,7 @@ const STEPS = [
     n: "02",
     icon: ScanLine,
     title: "We monitor the official sources",
-    desc: "StatuteProof checks each configured official source every 24 hours (high-priority regulatory sources checked twice daily) and records a timestamped evidence snapshot every monitoring run. Source access status, extraction method, and quality score are logged on every check. Each source is fetched on a 24-hour cycle. The detection timestamp, extraction quality score, and SHA-256 hash are recorded for every run — whether the content changed or not.",
+    desc: "StatuteProof checks each configured official source on an operator-set schedule and records a timestamped evidence snapshot on every monitoring run — whether the content changed or not. Source access status, extraction method, extraction quality score, and the SHA-256 content hash are logged on every check.",
   },
   {
     n: "03",

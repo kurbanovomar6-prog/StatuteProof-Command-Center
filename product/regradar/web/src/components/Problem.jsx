@@ -72,7 +72,7 @@ export default function Problem() {
 
         <div className="mt-12 rounded-xl border border-cyan-400/20 bg-[#0D1B2E] px-8 py-6 text-center">
           <p className="text-slate-300 text-base leading-relaxed max-w-3xl mx-auto">
-            StatuteProof monitors 116 selected UAE official sources on a defined schedule. When text changes, it delivers a structured brief — source URL, change diff, detection timestamp, SHA-256 hash — with a logged MLRO review gate before anything reaches your team. Monitoring intelligence only. Not legal advice.
+            StatuteProof monitors selected UAE official sources on an operator-set schedule. When monitored text changes, it delivers a structured brief — source URL, change diff, detection timestamp, SHA-256 hash — with a logged MLRO review gate before anything reaches your team. Monitoring intelligence only. Not legal advice. Not complete UAE coverage.
           </p>
         </div>
 

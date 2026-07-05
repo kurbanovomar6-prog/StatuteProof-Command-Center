@@ -1,7 +1,7 @@
 import { CheckCircle, Radio, User2, Filter, ListChecks, ShieldCheck } from 'lucide-react'
 
 const points = [
-  'Monitors official UAE regulatory sources across all major licence types on a scheduled basis',
+  'Monitors selected official UAE regulatory sources for configured licence types on an operator-set schedule',
   'Detects content changes and creates a timestamped evidence record per run',
   'Generates a structured monitoring brief — what changed, which source, when',
   'Assigns a risk tier to each change: High, Medium, Low, or Non-material',
