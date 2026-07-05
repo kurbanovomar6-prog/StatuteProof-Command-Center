@@ -1,0 +1,37 @@
+total sources: 432
+tiers: {'REMEDIATION': 27, 'EXCLUDE-REVIEW': 153, 'INACTIVE-POOL': 136, 'C': 33, 'B': 27, 'A': 56}
+
+-- enabled-but-not-eligible (tier C), exact reasons --
+  AE-dubai-virtual-assets-regulatory-authority-vara    mode=evidence_library elig=False | VARA homepage; JS SPA degrades to minimal text; no substantive regulatory conten
+  AE-uae-ministry-of-finance                           mode=evidence_library elig=False | UAE MoF homepage; generic government portal; no specific regulatory text monitor
+  AE-uae-ministry-of-economy                           mode=evidence_library elig=False | MoE homepage; generic entry point; low regulatory signal.
+  AE-adgm-fsra-waivers                                 mode=candidate        elig=False | ADGM FSRA waivers and modifications register; useful regulatory intelligence but
+  AE-adgm-ra-circulars                                 mode=candidate        elig=False | ADGM Registration Authority circulars; official communications; actionable for A
+  AE-dfsa-consultation-paper-165                       mode=evidence_library elig=False | DFSA official rulebook via Thomson Reuters platform; canonical rulebook text; an
+  AE-fta-tax-legislation-listing                       mode=candidate        elig=None  | Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-sh
+  AE-fta-vat-guides-references                         mode=candidate        elig=None  | Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-sh
+  AE-fta-corporate-tax-guides-references               mode=candidate        elig=None  | Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-sh
+  AE-fta-media-centre                                  mode=candidate        elig=None  | Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-sh
+  AE-fta-corporate-tax-legislation                     mode=candidate        elig=None  | Candidate only after 2026-06-18 no-save retest: rendered FTA page exposed nav-sh
+  AE-adgm-fsra-regulatory-alerts                       mode=candidate        elig=None  | Candidate only after 2026-06-18 no-save retest: official ADGM page is public but
+  VARA Public Register — Licensed Entities             mode=None             elig=None  | (no reason field recorded)
+  VARA Regulatory Notices and Enforcement Index        mode=None             elig=None  | (no reason field recorded)
+  DFSA Public Register                                 mode=None             elig=None  | (no reason field recorded)
+  UAE Ministry of Economy — AML/CFT Hub (formerly Exec mode=None             elig=None  | (no reason field recorded)
+  FTA VAT Public Clarifications                        mode=None             elig=None  | (no reason field recorded)
+  ADGM Office of Data Protection                       mode=None             elig=None  | (no reason field recorded)
+  Dubai Legislation Portal — Laws Search               mode=None             elig=None  | (no reason field recorded)
+  DIFC Courts — Practice Directions                    mode=None             elig=None  | (no reason field recorded)
+  DIFC Courts — Registrar's Directions                 mode=None             elig=None  | (no reason field recorded)
+  DIFC — News and Announcements Hub                    mode=None             elig=None  | (no reason field recorded)
+  ADGM — Media Announcements Hub                       mode=None             elig=None  | (no reason field recorded)
+  DFSA — News Hub (legislative amendment notices)      mode=None             elig=None  | (no reason field recorded)
+  DFSA — SEO Letters                                   mode=None             elig=None  | (no reason field recorded)
+  Ministry of Justice UAE — News                       mode=None             elig=None  | (no reason field recorded)
+  DFM — Regulatory Circulars                           mode=None             elig=None  | (no reason field recorded)
+  ICP UAE — News                                       mode=None             elig=None  | (no reason field recorded)
+  Ministry of Justice UAE — Media Centre               mode=None             elig=None  | (no reason field recorded)
+  TDRA UAE — Media Centre                              mode=None             elig=None  | (no reason field recorded)
+  MOCCAE — Media Centre                                mode=None             elig=None  | (no reason field recorded)
+  JAFZA — Media Centre                                 mode=None             elig=None  | (no reason field recorded)
+  DMCC — Latest News and Regulatory Updates            mode=None             elig=None  | (no reason field recorded)
