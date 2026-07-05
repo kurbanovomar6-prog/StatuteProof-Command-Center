@@ -1,17 +1,9 @@
 # PROGRESS — production readiness sprint (2026-07-05)
 
 ## Current phase
-EXCELLENCE sprint — cycles C1-C5 committed on branch excellence:
-C1 442e0de claims (live source count, cadence promises removed)
-C2 40f5845 states (retry everywhere, no silent failures — Playwright-proven)
-C3 70660f2 a11y + Cache-Control no-store (TDD)
-C4 e82c5dd assets 673KB→53KB, zero TODOs
-C5 <this> npm audit 0 vulnerabilities
-Findings closed as INVALID after main-agent verification: sourceLimit-as-
-coverage, missing Problem/Solution disclaimers, 8 rel-less links, unlabeled
-checkboxes, missing ReviewQueue empty state, missing AIBrief loading.
-Next: Phase 2 verification gate (suites, screens rewalk, demo path E2E,
-login burst 429, claims table) → Phase 3 adversarial → final report.
+EXCELLENCE sprint COMPLETE on branch excellence (unmerged; deploy pin
+c1ddb8a + deploy/ untouched). All cycles C1-C7 + Phase 2 gate + Phase 3
+adversarial done, evidence in DEFECT_LOG.md. Ready for owner review/merge.
 
 ## Owner decisions locked
 1. D6 heartbeats: every run writes a record; unchanged = compact heartbeat

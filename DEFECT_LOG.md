@@ -192,3 +192,50 @@ cookies, PBKDF2-SHA256 600k, 24h single-use tokens, no secrets in repo.
 
 ## Fix plan (max 8 cycles): C1 S0 claims → C2 S1+state gaps → C3 a11y/links/
 Cache-Control → C4 assets+debris → C5 npm CVE → C6 gate+adversarial+report.
+
+# EXCELLENCE SPRINT — resolution (2026-07-05, branch excellence, base 600bf98)
+Prereq alert-quality cycle 3 executed + merged first (1e10e9f: delta-only
+severity scoring, UK 'licence', ALERT_DRY_RUN — 6 TDD tests).
+
+FIXED (commit):
+- S0 claims (442e0de): Hero live source count + operator-set cadence;
+  HowItWorks/PricingPage cadence promises removed; Problem 'defined schedule'
+  -> operator-set + 'Not complete UAE coverage'; Solution 'all major licence
+  types' -> 'configured'. VERIFIED live: 'every hour'/'24 hours'/'twice
+  daily' = 0 matches on rendered landing.
+- S1 states (40f5845): ActionLogPanel silent catch -> visible error;
+  EvidencePage/AlertsPage/ReportsPage/ReviewQueue -> shared ErrorState+Retry
+  and EmptyState; DashboardHome telegram failure distinguishable; AIBrief
+  skeleton. PROVEN: Playwright endpoint-abort -> ErrorState+Retry renders ->
+  unblock+click Retry -> content loads (evidence + alerts).
+- S1/S2 sec+a11y (70660f2): Cache-Control: no-store (TDD, live-verified);
+  form label/id association (SourcesPage modal, Onboarding), sidebar
+  aria-labels, img-as-button fixed.
+- S2 hygiene (e82c5dd): brand assets 673KB->53KB, dead 428KB logo deleted,
+  0 TODOs in src, console.warn DEV-guarded.
+- S1 deps (1bc6471, 43086cb): npm audit 0 vulnerabilities (vite patched);
+  pip-audit 0 vulnerabilities (pypdf/deepdiff/pdfminer.six/requests bumped,
+  pdfplumber aligned; pip install --dry-run resolves with 0 errors).
+- S3 responsive (4dd56fb): AuditBinderSample tables scroll on mobile instead
+  of clipping. Residual: landing 320px document overflow 10px with NO
+  protruding element (scrollbar/sub-pixel on sample-table scroll containers);
+  dashboard/sources/evidence 0px. Honest S3-negligible.
+
+CLOSED AS INVALID after main-agent verification (subagent false positives):
+- SA-1 sourceLimit-as-coverage (172/25 never render to customers; PlanBanner/
+  BillingPage show >100 as 'Custom').
+- SA-1 Problem/Solution missing disclaimers (both already present).
+- SA-5 '8 rel-less links' (all carry rel on the next JSX line).
+- SA-5 unlabeled SourceLab/SourcesPage checkboxes (already <label>-wrapped).
+- SA-3 ReviewQueue missing empty state / AIBrief missing loading (existed;
+  re-severitied and improved anyway).
+
+Phase 2 gate (all real output): backend 656 passed / frontend 43 passed /
+build clean / eslint 0 errors; 15 screens rewalked 0 console errors; demo
+path register->verify(outbox)->login->onboarding->dashboard/sources/evidence/
+alerts/briefs = 27.9s, 0 dead ends (dashboard 31 actionable elements on
+standalone probe; fresh-user timing artifact in script noted); login burst
+401x6 then 429x6; forced diff -> 1 alert (new truthful format) -> re-run 0.
+Phase 3 adversarial: double-submit login 4 clicks -> 1 POST; keyboard reaches
+inputs+buttons; API-killed mid-path -> graceful login redirect, no crash,
+0 JS errors; diff grep -> no debris/secrets/weakened assertions.
