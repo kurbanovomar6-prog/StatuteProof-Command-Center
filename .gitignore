@@ -83,3 +83,9 @@ audit-screens/current-*.png
 
 # Claude Code generated worktrees
 .claude/worktrees/
+
+# Runtime noise
+product/regradar/.coverage
+product/regradar/coverage.json
+product/regradar/logs/
+product/regradar/data/outbox/
