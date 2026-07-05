@@ -46,3 +46,50 @@ Composite = 6×1.5 + 4×1.5 + 5×1.5 + 6×1 + 3×1 + 5×1 + 6×1 + 2×1 + 4×0.5
 ## Phase 2 plan (gated)
 Fix (new, unowned, small, outside rails): N1 (cache mtime), N2 (env-aware
 base dirs), N3 (truthful monitoring badge). File the rest.
+
+
+## Phase 2 — fixed with proof
+- N1 (f4e3131): _read_runs mtime+size stamp. 3 TDD tests red→green; live
+  re-verify: cross-process CHANGED run → /api/briefs/generate 200 with NO
+  restart (the SCORE_BEFORE dead end).
+- N2 (52d34ef): config.BASE_DIR + email_delivery honor STATUTEPROOF_BASE_DIR.
+  3 TDD tests; live re-verify: verification email lands in the configured
+  base dir.
+- N3 (e1f97aa): MonitoringStatusBadge — "Monitoring active" only when
+  /api/health last_run_at < 24h; honest fallback otherwise. 4 vitest tests;
+  frontend 47/47, build clean, eslint 0 errors.
+Suite state per commit: backend 660 passed / 1 failed (the KNOWN
+.env-dependent dedup test, fix exists on signal-max 8cc4ce2 — not
+double-fixed here to avoid a merge conflict).
+
+## Filed items (owner + effort)
+- Merge excellence branch (owner: founder): pip 10 CVE findings + npm 1
+  HIGH, Cache-Control no-store, state/retry gaps, hero hardcoded
+  count/cadence. Effort: merge + gate re-run (hours).
+- Merge signal-max branch + schedule RESET_RUNBOOK (owner: founder):
+  ban⊂bank false HIGH, chrome noise, error-page baselines, detected facts,
+  Arabic lane, dedup-test env fix. Effort: merge + Update Day.
+- Commit .github/workflows/test.yml and turn on CI (owner: founder). S1,
+  minutes.
+- Rotate alerts-bot token (owner: founder, D5 follow-up). S1.
+- Restart telegram listener locally or accept prod-only (owner: founder).
+- N4 (S3): verification emails written as brief_unknown_*.json;
+  /api/alerts/action-log 400 without params. Effort: small.
+- Janitor Phase 1 deletions remain locked (dead landing cluster, dead routes).
+
+## SCORE_AFTER = 51.5 / 100
+
+| Dim | Before | After | Why changed |
+|---|---|---|---|
+| A | 6 | 7 | stale-cache defect fixed + verified; remaining caveats owned/unmerged |
+| B | 4 | 4 | unchanged (owned by signal-max) |
+| C | 5 | 7 | dead end removed (verified restart-free brief); full path clean |
+| D | 6 | 6 | unchanged |
+| E | 3 | 3 | unchanged |
+| F | 5 | 5 | unchanged (CI still absent, CVEs unmerged) |
+| G | 6 | 6 | unchanged |
+| H | 2 | 2 | still nothing serving customers |
+| I | 4 | 5 | hero badge now truthful; market evidence still ~zero |
+
+Composite after = 7×1.5 + 4×1.5 + 7×1.5 + 6 + 3 + 5 + 6 + 2 + 5×0.5
+               = 10.5 + 6 + 10.5 + 6 + 3 + 5 + 6 + 2 + 2.5 = **51.5**
