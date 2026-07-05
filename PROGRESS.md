@@ -1,10 +1,17 @@
 # PROGRESS — production readiness sprint (2026-07-05)
 
 ## Current phase
-EXCELLENCE sprint — Phase 0 checkpoint done (backlog: 5×S0, 5×S1, 9×S2, 1×S3
-in DEFECT_LOG.md). Prereq alert-quality cycle 3 merged to main (1e10e9f).
-Branch excellence @ 1e10e9f. Next: C1 fix S0 claims (Hero/HowItWorks/Problem/
-planCapabilities/disclaimers) with before-after table.
+EXCELLENCE sprint — cycles C1-C5 committed on branch excellence:
+C1 442e0de claims (live source count, cadence promises removed)
+C2 40f5845 states (retry everywhere, no silent failures — Playwright-proven)
+C3 70660f2 a11y + Cache-Control no-store (TDD)
+C4 e82c5dd assets 673KB→53KB, zero TODOs
+C5 <this> npm audit 0 vulnerabilities
+Findings closed as INVALID after main-agent verification: sourceLimit-as-
+coverage, missing Problem/Solution disclaimers, 8 rel-less links, unlabeled
+checkboxes, missing ReviewQueue empty state, missing AIBrief loading.
+Next: Phase 2 verification gate (suites, screens rewalk, demo path E2E,
+login burst 429, claims table) → Phase 3 adversarial → final report.
 
 ## Owner decisions locked
 1. D6 heartbeats: every run writes a record; unchanged = compact heartbeat
