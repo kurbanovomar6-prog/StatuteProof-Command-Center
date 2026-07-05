@@ -113,9 +113,19 @@ def build_alert_content(payload: dict[str, Any]) -> dict[str, Any]:
         "footer": FOOTER,
     }
 
-    # Optional facts — included ONLY when actually detected (A3).
-    if payload.get("deadline"):
-        content["deadline"] = _clean(payload["deadline"])
+    # Optional facts — included ONLY when actually detected (A3/F2).
+    # F2: detected_facts are rule-extracted from the ADDED delta with matched
+    # spans. A deadline line renders ONLY from a real detection — an
+    # AI-supplied deadline with no detected span is not rendered (truth over
+    # boilerplate; docs/signal/BUILD_BACKLOG.md F2).
+    facts = [f for f in (payload.get("detected_facts") or []) if str(f.get("value") or "").strip()]
+    if facts:
+        from app.detected_facts import format_facts_lines
+        content["detected_facts"] = facts
+        content["facts_lines"] = format_facts_lines(facts)
+        deadline_values = [f["value"] for f in facts if f.get("kind") == "deadline"]
+        if deadline_values:
+            content["deadline"] = _clean("; ".join(deadline_values))
     if payload.get("urgency"):
         content["urgency"] = _clean(payload["urgency"])
     entities = [e for e in (payload.get("affected_entities") or []) if str(e).strip()]
@@ -150,6 +160,9 @@ def render_telegram(content: dict[str, Any]) -> str:
         lines.append(f"*What changed (excerpt):*\n{content['excerpt']}")
     if content.get("summary"):
         lines.append(f"*Summary:* {content['summary']}")
+    if content.get("facts_lines"):
+        lines.append("*Detected in this change:*")
+        lines.extend(f"• {fl}" for fl in content["facts_lines"])
     if content.get("deadline"):
         lines.append(f"*Deadline stated in source:* {content['deadline']}")
     if content.get("urgency"):
@@ -181,6 +194,10 @@ def render_markdown(content: dict[str, Any]) -> str:
     if content.get("summary"):
         lines.append("")
         lines.append(f"**Summary:** {content['summary']}")
+    if content.get("facts_lines"):
+        lines.append("")
+        lines.append("**Detected in this change:**")
+        lines.extend(f"- {fl}" for fl in content["facts_lines"])
     if content.get("deadline"):
         lines.append(f"**Deadline stated in source:** {content['deadline']}")
     if content.get("urgency"):

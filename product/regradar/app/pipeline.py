@@ -378,6 +378,12 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             logger.warning("Snapshot write failed (non-fatal): %s", _snap_err)
             _snapshot_paths_result = {}
 
+    # ── Step 6b (F2): rule-detected facts from the added delta ────────
+    # Facts (deadlines, effective dates, amounts, law/licence refs) may be
+    # stated in an alert ONLY when truly detected; spans prove each claim.
+    from app.detected_facts import extract_detected_facts
+    detected_facts = [] if is_new else extract_detected_facts(diff_result.get("added"))
+
     # ── Step 7: Rule-based risk (always) ─────────────────────────────
     rule_risk = analyze_risk(diff_result)
     logger.info(
@@ -589,6 +595,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 "added":                   diff_result.get("added", []),
                 "removed":                 diff_result.get("removed", []),
                 "risk_details":            rule_risk,
+                "detected_facts":          detected_facts,
                 "normalized_hash":         new_hash,
                 "checked_at_utc":          created_at,
             }
@@ -614,6 +621,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "affected_entities":        affected_entities,
         "urgency":                  urgency,
         "deadline":                 deadline,
+        "detected_facts":           detected_facts,
         "semantic_findings":        semantic_findings,
         "confidence":               confidence,
         "added_count":              len(diff_result["added"]),
@@ -816,6 +824,7 @@ def run_pipeline_for_source(source: dict) -> dict:
                                 "executive_summary": result.get("executive_summary", ""),
                                 "business_action_required": result.get("business_action_required", ""),
                                 "deadline": result.get("deadline"),
+                                "detected_facts": result.get("detected_facts", []),
                                 "urgency": result.get("urgency", ""),
                                 "affected_entities": result.get("affected_entities", []),
                                 "checked_at_utc": final_record.get("timestamp_utc", ""),
