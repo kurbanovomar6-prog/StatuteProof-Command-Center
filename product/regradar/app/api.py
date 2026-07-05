@@ -2736,51 +2736,16 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
 
-def _start_background_monitor() -> None:
-    """
-    Launch the monitoring watch loop in a background daemon thread.
-
-    Controlled by the AUTO_MONITOR_INTERVAL environment variable:
-      - 0 or unset-to-0  → disabled (no background monitoring)
-      - any positive int  → interval in minutes between full scan cycles
-
-    Default when the variable is not set: 60 minutes.
-    Setting AUTO_MONITOR_INTERVAL=0 disables background monitoring entirely
-    (useful for local development where you trigger scans manually).
-    """
-    import os as _os
-
-    raw = _os.getenv("AUTO_MONITOR_INTERVAL", "60").strip()
-    try:
-        interval = int(raw)
-    except ValueError:
-        interval = 60
-
-    if interval <= 0:
-        print("Background monitor disabled (AUTO_MONITOR_INTERVAL=0).")
-        return
-
-    from app.scheduler import run_watch_loop
-
-    t = threading.Thread(
-        target=run_watch_loop,
-        args=(interval,),
-        daemon=True,
-        name="auto-monitor",
-    )
-    t.start()
-    print(
-        f"Background monitor started — scanning every {interval} min "
-        f"(thread: auto-monitor, daemon=True)."
-    )
-
-
 def run_server(host: str = "127.0.0.1", port: int = 5001) -> None:
-    """Start the threaded HTTP server and background monitor. Stops cleanly on Ctrl-C."""
+    """Start the threaded HTTP API server. Stops cleanly on Ctrl-C.
+
+    Decision 4 (production readiness sprint): the API process performs NO
+    monitoring sweeps. Scheduling is a separate process — run it with
+    `python run.py watch --interval N` (see deploy/ for the systemd unit).
+    """
     # Decision 2: detect (never heal) trail/index divergence at startup.
     from app.consistency import check_baseline_consistency
     check_baseline_consistency()
-    _start_background_monitor()
     server = ThreadingHTTPServer((host, port), _Handler)
     print(f"StatuteProof API listening on  http://{host}:{port}/api/")
     print(f"Vite dev proxy expects it at  http://localhost:5173/api/ → http://{host}:{port}/api/")

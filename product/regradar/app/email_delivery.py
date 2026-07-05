@@ -19,6 +19,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import logging
 import os
 import re
 from datetime import datetime, timezone
@@ -30,6 +31,8 @@ from app.weekly_brief import render_weekly_brief_html, render_weekly_brief_markd
 
 
 _BASE_DIR = Path(__file__).parent.parent
+
+logger = logging.getLogger(__name__)
 
 SUPPORTED_EMAIL_PROVIDERS = {"local_outbox", "smtp", "postmark", "sendgrid"}
 SECRET_ENV_NAMES = {"SMTP_PASSWORD", "POSTMARK_SERVER_TOKEN", "SENDGRID_API_KEY"}
@@ -450,6 +453,36 @@ def build_monitoring_brief_email(
     }
 
 
+def _record_delivery_attempt(
+    root: Path,
+    *,
+    provider: str,
+    status: str,
+    source_id: str,
+    payload: dict[str, Any],
+    detail: str = "",
+) -> None:
+    """Append one delivery-attempt row. Every deliver_brief_email outcome
+    (queued, sent, dry_run, error, failed_configuration) is recorded so the
+    delivery trail is auditable. Never raises."""
+    try:
+        status_path = root / "data" / "email_outbox" / "delivery_status.jsonl"
+        _append_status({
+            "channel": "email",
+            "kind": "delivery_attempt",
+            "provider": provider,
+            "status": status,
+            "source_id": source_id,
+            "to": _safe_email(payload.get("to")),
+            "subject": str(payload.get("subject") or "")[:200],
+            "detail": detail,
+            "external_send": status == "sent",
+            "created_at": now_utc(),
+        }, status_path)
+    except Exception as exc:  # recording must never break delivery
+        logger.warning("delivery attempt record failed: %s", exc)
+
+
 def deliver_brief_email(
     payload: dict[str, Any],
     *,
@@ -485,6 +518,28 @@ def deliver_brief_email(
         send_enabled = config.get("send_enabled", False)
         from_email = config.get("from_email") or "noreply@statuteproof.com"
         sender_name = config.get("sender_name") or "StatuteProof Monitoring"
+        source_env_top = env if env is not None else os.environ
+        dry_run = _truthy(source_env_top.get("STATUTEPROOF_EMAIL_DRY_RUN"))
+
+        # A selected-but-misconfigured provider must fail loudly — never a
+        # silent outbox fallback (owner decision, cycle 2).
+        if provider != "local_outbox" and config.get("missing_config"):
+            missing = list(config["missing_config"])
+            logger.error(
+                "EMAIL DELIVERY MISCONFIGURED: provider=%s missing=%s — "
+                "delivery refused, nothing queued to outbox",
+                provider, ",".join(missing),
+            )
+            _record_delivery_attempt(
+                root, provider=provider, status="failed_configuration",
+                source_id=source_id, payload=payload,
+                detail=f"missing: {', '.join(missing)}",
+            )
+            return {
+                "status": "error",
+                "message": f"Email provider {provider} is misconfigured. Missing: {', '.join(missing)}",
+                "missing_config": missing,
+            }
 
         outbox_dir = root / "data" / "outbox"
         outbox_dir.mkdir(parents=True, exist_ok=True)
@@ -503,6 +558,10 @@ def deliver_brief_email(
             result: dict[str, Any] = {"status": "queued_local", "outbox_path": str(outbox_path)}
             if reason:
                 result["reason"] = reason
+            _record_delivery_attempt(
+                root, provider=provider, status="queued_local",
+                source_id=source_id, payload=payload, detail=reason,
+            )
             return result
 
         if provider == "local_outbox":
@@ -510,6 +569,19 @@ def deliver_brief_email(
 
         if not send_enabled:
             return _write_outbox(reason="send_not_enabled")
+
+        if dry_run:
+            # Prod smoke test: exercise the full provider path with zero
+            # network I/O; the attempt is recorded like any other outcome.
+            logger.info(
+                "EMAIL DRY_RUN: provider=%s to=%s subject=%r — no send performed",
+                provider, _safe_email(payload.get("to")), str(payload.get("subject"))[:80],
+            )
+            _record_delivery_attempt(
+                root, provider=provider, status="dry_run",
+                source_id=source_id, payload=payload,
+            )
+            return {"status": "dry_run", "provider": provider, "to": payload.get("to"), "subject": payload.get("subject")}
 
         # ── SendGrid ──────────────────────────────────────────────────────────
         if provider == "sendgrid":
@@ -538,8 +610,14 @@ def deliver_brief_email(
             try:
                 with _urllib_req.urlopen(req, timeout=15) as resp:
                     message_id = resp.headers.get("X-Message-Id", "")
+                _record_delivery_attempt(root, provider="sendgrid", status="sent",
+                                         source_id=source_id, payload=payload, detail=message_id)
                 return {"status": "sent", "provider": "sendgrid", "message_id": message_id}
             except _urllib_err.HTTPError as exc:
+                logger.error("EMAIL DELIVERY FAILED: SendGrid HTTP %s: %s", exc.code, exc.reason)
+                _record_delivery_attempt(root, provider="sendgrid", status="error",
+                                         source_id=source_id, payload=payload,
+                                         detail=f"HTTP {exc.code}: {exc.reason}")
                 return {"status": "error", "message": f"SendGrid HTTP {exc.code}: {exc.reason}"}
 
         # ── Postmark ──────────────────────────────────────────────────────────
@@ -570,8 +648,14 @@ def deliver_brief_email(
                 with _urllib_req.urlopen(req, timeout=15) as resp:
                     resp_data = _json.loads(resp.read().decode("utf-8"))
                 message_id = str(resp_data.get("MessageID") or "")
+                _record_delivery_attempt(root, provider="postmark", status="sent",
+                                         source_id=source_id, payload=payload, detail=message_id)
                 return {"status": "sent", "provider": "postmark", "message_id": message_id}
             except _urllib_err.HTTPError as exc:
+                logger.error("EMAIL DELIVERY FAILED: Postmark HTTP %s: %s", exc.code, exc.reason)
+                _record_delivery_attempt(root, provider="postmark", status="error",
+                                         source_id=source_id, payload=payload,
+                                         detail=f"HTTP {exc.code}: {exc.reason}")
                 return {"status": "error", "message": f"Postmark HTTP {exc.code}: {exc.reason}"}
 
         # ── SMTP ──────────────────────────────────────────────────────────────
@@ -593,12 +677,22 @@ def deliver_brief_email(
             with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15) as server:
                 server.login(smtp_user, smtp_pass)
                 server.sendmail(from_email, [payload["to"]], msg.as_string())
+            _record_delivery_attempt(root, provider="smtp", status="sent",
+                                     source_id=source_id, payload=payload)
             return {"status": "sent", "provider": "smtp"}
 
         # Unknown provider fallback
         return _write_outbox(reason="send_not_enabled")
 
     except Exception as exc:
+        logger.error("EMAIL DELIVERY FAILED: %s: %s", type(exc).__name__, exc)
+        try:
+            _record_delivery_attempt(
+                (base_dir or _BASE_DIR), provider="unknown", status="error",
+                source_id=source_id, payload=payload, detail=str(exc)[:300],
+            )
+        except Exception:
+            pass
         return {"status": "error", "message": str(exc)}
 
 
