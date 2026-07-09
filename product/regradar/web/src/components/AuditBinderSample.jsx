@@ -134,8 +134,8 @@ export default function AuditBinderSample() {
                     Monitoring Run Log
                   </h4>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs border-collapse">
+                <div className="min-w-0 overflow-x-auto">
+                  <table className="w-full min-w-[420px] text-xs border-collapse">
                     <thead>
                       <tr className="border-b border-slate-200 bg-slate-50">
                         {['Date', 'Source', 'Regulator', 'Status', 'Hash (truncated)', 'Extraction Quality'].map(h => (
@@ -249,8 +249,8 @@ export default function AuditBinderSample() {
                   </h4>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 overflow-hidden">
-                  <table className="w-full text-xs border-collapse">
+                <div className="min-w-0 overflow-x-auto rounded-lg border border-slate-200">
+                  <table className="w-full min-w-[420px] text-xs border-collapse">
                     <tbody>
                       {[
                         ['Brief Delivered', '2026-01-15 09:14 UTC'],

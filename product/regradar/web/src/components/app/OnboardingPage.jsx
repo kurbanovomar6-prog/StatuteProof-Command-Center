@@ -217,10 +217,11 @@ export default function OnboardingPage({ navigate, currentUser }) {
               <h2 className="text-xl font-bold text-white mb-6">Your workspace profile</h2>
 
               <div ref={companyRef}>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
+                <label htmlFor="onboarding-company" className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
                   Company name *
                 </label>
                 <input
+                  id="onboarding-company"
                   type="text"
                   placeholder="Your company"
                   value={company}
@@ -235,10 +236,11 @@ export default function OnboardingPage({ navigate, currentUser }) {
               </div>
 
               <div ref={emailRef}>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
+                <label htmlFor="onboarding-email" className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
                   Work email *
                 </label>
                 <input
+                  id="onboarding-email"
                   type="email"
                   placeholder="you@company.com"
                   value={email}

@@ -205,6 +205,19 @@ function ChainStrip() {
 }
 
 export default function Hero({ onCreateWorkspace, onViewSample }) {
+  // Live source count — landing must never hardcode coverage numbers.
+  const [liveSourceCount, setLiveSourceCount] = useState(null);
+  useEffect(() => {
+    let active = true;
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => {
+        if (active && Number.isFinite(d?.sources_active)) setLiveSourceCount(d.sources_active);
+      })
+      .catch(() => {}); // fallback: the card shows "—", not a stale number
+    return () => { active = false; };
+  }, []);
+
   return (
     <section
       className="sp-page-orbit px-4 pb-16 pt-24 lg:pb-20 lg:pt-28"
@@ -274,11 +287,16 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
               ))}
             </div>
 
-            {/* Trust metrics */}
+            {/* Trust metrics — the source count is fetched live from the
+                API (never hardcoded); cadence is stated as operator-set,
+                not promised. */}
             <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-4">
               {[
-                ["116", "UAE official sources monitored"],
-                ["60-min", "Check cycle — every source, every hour"],
+                [liveSourceCount != null ? String(liveSourceCount) : "—",
+                 liveSourceCount != null
+                   ? "UAE official sources configured (live count)"
+                   : "UAE official sources — live count unavailable"],
+                ["Scheduled", "Checks run on an operator-set interval"],
                 ["SHA-256", "Hash + timestamp per run"],
                 ["Your MLRO", "Reviews every brief before action"],
               ].map(([stat, label]) => (
