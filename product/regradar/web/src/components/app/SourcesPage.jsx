@@ -779,8 +779,9 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </p>
 
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Source URL *</label>
+                  <label htmlFor="custom-source-url" className="block text-xs text-slate-400 mb-1.5">Source URL *</label>
                   <input
+                    id="custom-source-url"
                     type="url"
                     placeholder="https://regulator.gov/publications"
                     value={form.url}
@@ -791,8 +792,9 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Market *</label>
+                  <label htmlFor="custom-source-market" className="block text-xs text-slate-400 mb-1.5">Market *</label>
                   <select
+                    id="custom-source-market"
                     value={form.market}
                     onChange={e => { setForm(f => ({ ...f, market: e.target.value })); setFormErrors(er => ({ ...er, market: '' })) }}
                     className={`${inputCls('market')} ${!form.market ? 'text-slate-500' : ''}`}
@@ -804,8 +806,9 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Category *</label>
+                  <label htmlFor="custom-source-category" className="block text-xs text-slate-400 mb-1.5">Category *</label>
                   <select
+                    id="custom-source-category"
                     value={form.category}
                     onChange={e => { setForm(f => ({ ...f, category: e.target.value })); setFormErrors(er => ({ ...er, category: '' })) }}
                     className={`${inputCls('category')} ${!form.category ? 'text-slate-500' : ''}`}
@@ -817,8 +820,9 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Notes (optional)</label>
+                  <label htmlFor="custom-source-notes" className="block text-xs text-slate-400 mb-1.5">Notes (optional)</label>
                   <textarea
+                    id="custom-source-notes"
                     rows={2}
                     placeholder="Any context about this source…"
                     value={form.notes}

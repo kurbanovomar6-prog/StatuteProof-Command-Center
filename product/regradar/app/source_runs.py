@@ -19,7 +19,7 @@ from pathlib import Path
 
 from app.chunk_diff import build_chunk_diff, build_incomplete_diff, render_diff_markdown, utc_now
 from app.proof import build_source_proof
-from app.text_normalization import normalize_for_change_hash, stable_content_hash, stable_normalized_hash
+from app.text_normalization import NORMALIZATION_VERSION, normalize_for_change_hash, stable_content_hash, stable_normalized_hash
 
 
 # D8: the artifact base dir is resolved from the environment with a sane
@@ -44,6 +44,10 @@ def _canonical_quality(value: str | None) -> str:
 
 _RUNS_CACHE: list[dict] | None = None
 _CACHE_VALID: bool = False
+# Fingerprint of the file the cache was built from (mtime_ns, size).
+# The API and the scheduler run as separate processes — a warm cache must
+# notice appends/rewrites made by the other process (eval finding N1).
+_CACHE_STAMP: tuple[int, int] | None = None
 
 
 def source_run_path() -> Path:
@@ -136,13 +140,23 @@ def write_snapshots(
     }
 
 
+def _file_stamp() -> tuple[int, int] | None:
+    try:
+        st = _RUN_FILE.stat()
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return None
+
+
 def _read_runs() -> list[dict]:
-    global _RUNS_CACHE, _CACHE_VALID
-    if _CACHE_VALID and _RUNS_CACHE is not None:
+    global _RUNS_CACHE, _CACHE_VALID, _CACHE_STAMP
+    stamp = _file_stamp()
+    if _CACHE_VALID and _RUNS_CACHE is not None and stamp == _CACHE_STAMP:
         return _RUNS_CACHE
     if not _RUN_FILE.exists():
         _RUNS_CACHE = []
         _CACHE_VALID = True
+        _CACHE_STAMP = None
         return _RUNS_CACHE
     rows: list[dict] = []
     try:
@@ -157,6 +171,7 @@ def _read_runs() -> list[dict]:
         rows = []
     _RUNS_CACHE = rows
     _CACHE_VALID = True
+    _CACHE_STAMP = stamp
     return _RUNS_CACHE
 
 
@@ -476,7 +491,7 @@ def record_from_source_result(
         "limitations_notes": "; ".join(n for n in notes if n),
         "error": result.get("error") or (result.get("reason") if result.get("status") != "ok" else None),
         "pipeline_version": "4.2",
-        "normalization_version": "1.0",
+        "normalization_version": str(NORMALIZATION_VERSION),
     }
 
 
@@ -535,7 +550,7 @@ def restricted_record(
         "limitations_notes": "; ".join(limitations_notes),
         "error": "Source is marked restricted/blocked in sources.json.",
         "pipeline_version": "4.2",
-        "normalization_version": "1.0",
+        "normalization_version": str(NORMALIZATION_VERSION),
     }
 
 

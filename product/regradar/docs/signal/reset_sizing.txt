@@ -1,0 +1,3 @@
+sources with latest snapshot: 316
+baseline FLIPS under v2 normalization: 300 (of which currently-enabled: 86)
+unchanged hash: 6; error-page snapshots: 10; missing files: 0

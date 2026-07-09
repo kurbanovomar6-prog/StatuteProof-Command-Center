@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, ExternalLink, Search, Send, ShieldCheck } from 'lucide-react'
+import { CheckCircle, ExternalLink, Search, Send, ShieldCheck } from 'lucide-react'
 
 import { delivery } from '../../api'
 import ActionLogPanel from './ActionLogPanel'
+import EmptyState from './ui/EmptyState'
+import ErrorState from './ui/ErrorState'
 
 const RISK_DARK = {
   HIGH: 'text-red-400 bg-red-500/15 border border-red-500/30',
@@ -10,16 +12,17 @@ const RISK_DARK = {
   LOW: 'text-emerald-400 bg-emerald-500/15 border border-emerald-500/30',
 }
 
-function EmptyState() {
+function AlertsEmpty() {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/35 px-6 py-12 text-center">
-      <ShieldCheck className="mx-auto mb-3 h-8 w-8 text-slate-600" />
-      <p className="text-sm font-semibold text-white">No reviewed alerts yet.</p>
-      <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
-        Reviewed alerts will appear after monitored changes are detected, evidence is saved, and the item is approved for review.
-        No sample alerts are shown in the authenticated workspace.
-      </p>
-    </div>
+    <EmptyState
+      icon={ShieldCheck}
+      title="No reviewed alerts yet."
+      className="rounded-xl border border-slate-800 bg-slate-950/35"
+    >
+      Reviewed alerts will appear after monitored changes are detected, evidence
+      is saved, and the item is approved for review. No sample alerts are shown
+      in the authenticated workspace.
+    </EmptyState>
   )
 }
 export default function AlertsPage() {
@@ -31,11 +34,13 @@ export default function AlertsPage() {
   const [licenceFilter, setLicenceFilter] = useState('All')
   const [sendState, setSendState] = useState({})
 
+  const [reloadKey, setReloadKey] = useState(0)
+
   useEffect(() => {
     let active = true
     delivery.preview(14)
       .then(data => {
-        if (active) setPreview(data.preview || {})
+        if (active) { setPreview(data.preview || {}); setError('') }
       })
       .catch(err => {
         if (active) setError(err.message || 'Could not load reviewed alerts.')
@@ -44,7 +49,13 @@ export default function AlertsPage() {
         if (active) setLoading(false)
       })
     return () => { active = false }
-  }, [])
+  }, [reloadKey])
+
+  function retryAlerts() {
+    setLoading(true)
+    setError('')
+    setReloadKey(k => k + 1)
+  }
 
   const filtered = useMemo(() => (preview?.matches || []).filter(item => {
     const risk = String(item.risk_level || 'MEDIUM').toUpperCase()
@@ -154,16 +165,15 @@ export default function AlertsPage() {
       )}
 
       {!loading && error && (
-        <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/5 px-5 py-4">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-400" />
-          <div>
-            <p className="text-sm font-semibold text-rose-200">Could not load reviewed alerts.</p>
-            <p className="mt-1 text-xs text-rose-300/80">{error}</p>
-          </div>
-        </div>
+        <ErrorState
+          title="Could not load reviewed alerts."
+          detail={error}
+          onRetry={retryAlerts}
+          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+        />
       )}
 
-      {!loading && !error && filtered.length === 0 && <EmptyState />}
+      {!loading && !error && filtered.length === 0 && <AlertsEmpty />}
 
       {!loading && !error && filtered.length > 0 && (
         <div className="grid gap-3 xl:grid-cols-2">

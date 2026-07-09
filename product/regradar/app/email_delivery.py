@@ -30,7 +30,7 @@ from app.evidence_assessment import LEGAL_DISCLAIMER
 from app.weekly_brief import render_weekly_brief_html, render_weekly_brief_markdown
 
 
-_BASE_DIR = Path(__file__).parent.parent
+_BASE_DIR = Path(os.environ.get("STATUTEPROOF_BASE_DIR") or Path(__file__).parent.parent).resolve()
 
 logger = logging.getLogger(__name__)
 

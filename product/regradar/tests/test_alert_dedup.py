@@ -143,8 +143,11 @@ def test_pipeline_sends_once_then_suppresses_on_rerun(trail, tmp_path):
 
     sends = []
     init_pipeline(0)
-    common = dict()
-    with patch("app.pipeline.fetch_page", return_value="<html>x</html>"), \
+    # The alert path must not depend on the developer's .env — enable it
+    # explicitly (hidden-dependency defect found in the signal-max sprint:
+    # the test only passed when .env set ENABLE_TELEGRAM_ALERTS=true).
+    with patch("app.pipeline.ENABLE_TELEGRAM_ALERTS", True), \
+         patch("app.pipeline.fetch_page", return_value="<html>x</html>"), \
          patch("app.pipeline.extract_best_text", return_value={"text": _TEXT_V2, "method": "t"}), \
          patch("app.pipeline.get_latest_document", return_value={"content": _TEXT_V1, "content_hash": v1_hash}), \
          patch("app.pipeline.save_document", return_value=None), \
@@ -158,7 +161,8 @@ def test_pipeline_sends_once_then_suppresses_on_rerun(trail, tmp_path):
         "trail must record that this run alerted"
 
     v2_hash = stable_content_hash(normalize_for_change_hash(_TEXT_V2))
-    with patch("app.pipeline.fetch_page", return_value="<html>x</html>"), \
+    with patch("app.pipeline.ENABLE_TELEGRAM_ALERTS", True), \
+         patch("app.pipeline.fetch_page", return_value="<html>x</html>"), \
          patch("app.pipeline.extract_best_text", return_value={"text": _TEXT_V2, "method": "t"}), \
          patch("app.pipeline.get_latest_document", return_value={"content": _TEXT_V2, "content_hash": v2_hash}), \
          patch("app.pipeline.save_document", return_value=None), \

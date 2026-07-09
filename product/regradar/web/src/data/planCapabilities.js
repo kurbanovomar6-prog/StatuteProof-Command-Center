@@ -75,7 +75,7 @@ export const PLAN_CAPABILITIES = {
   },
   professional: {
     liveMonitoring: false,
-    sourceLimit: 172,          // selected fresh-alert eligible UAE sources after readiness gates
+    sourceLimit: 172,          // internal plan cap — UI renders >100 as 'Custom'; actual scope set by readiness review
     customSources: 2,          // requires activation
     weeklyBriefs: true,        // Telegram; email requires_activation
     auditExport: true,

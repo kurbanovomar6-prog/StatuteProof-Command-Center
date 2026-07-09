@@ -1,7 +1,9 @@
 # PROGRESS — production readiness sprint (2026-07-05)
 
 ## Current phase
-Alert-quality sprint DONE on branch alert-quality (unmerged; deploy pin c1ddb8a untouched)
+EXCELLENCE sprint COMPLETE on branch excellence (unmerged; deploy pin
+c1ddb8a + deploy/ untouched). All cycles C1-C7 + Phase 2 gate + Phase 3
+adversarial done, evidence in DEFECT_LOG.md. Ready for owner review/merge.
 
 ## Owner decisions locked
 1. D6 heartbeats: every run writes a record; unchanged = compact heartbeat

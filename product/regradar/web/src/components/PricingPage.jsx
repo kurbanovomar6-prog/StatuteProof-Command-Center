@@ -156,7 +156,7 @@ const COMPARISON_ROWS = [
 const FAQS = [
   {
     q: "How often is each source checked?",
-    a: "Every configured source is fetched on a 24-hour cycle. High-priority regulatory sources — including VARA, DFSA active consultations, and CBUAE rulebook modules — are checked every 12 hours. Every run is recorded with a SHA-256 hash and timestamp regardless of whether content changed. The monitoring log shows both CHANGED and UNCHANGED runs, giving you a complete evidence trail of consistent monitoring — not just change events.",
+    a: "Every configured source is fetched on an operator-set schedule, agreed during pilot onboarding and disclosed in your workspace. Every run is recorded with a SHA-256 hash and timestamp regardless of whether content changed — the monitoring log shows both CHANGED and UNCHANGED runs, so the evidence trail covers checks, not just change events.",
   },
   {
     q: "Is this legal advice?",

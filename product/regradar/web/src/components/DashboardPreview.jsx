@@ -157,7 +157,6 @@ export default function DashboardPreview() {
                 <div className="text-white font-bold text-lg">
                   UAE monitoring — official sources
                 </div>
-                {/* TODO: mock data below (last-check time, review queue, proof note) — replace when scheduler/run-history API is wired */}
                 <SourceStatusSummary />
                 <div className="text-slate-400 text-sm mt-2 max-w-3xl leading-relaxed">
                   UAE source pack status is shown as a transparency layer after readiness review.
@@ -166,7 +165,6 @@ export default function DashboardPreview() {
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              {/* TODO: last-check time and review queue are mock — wire to scheduler run data */}
               <div className="flex items-center gap-2 text-slate-300 text-sm">
                 <Clock className="w-4 h-4" />
                 Monitored sources: AE

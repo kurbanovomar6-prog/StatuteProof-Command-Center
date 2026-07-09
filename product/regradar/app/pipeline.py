@@ -80,7 +80,11 @@ from app.diff import get_diff
 from app.extractors import extract_best_text
 from app.risk import analyze_risk
 from app.scraper import fetch_page
-from app.text_normalization import normalize_for_change_hash, stable_content_hash
+from app.text_normalization import (
+    NORMALIZATION_VERSION,
+    normalize_for_change_hash,
+    stable_content_hash,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -220,6 +224,25 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
 
+    # ── Guard (F1): error pages are fetch failures, never baselines ────
+    # A Cloudflare 502 / VARA 404 stored as baseline made the *recovery*
+    # alert as CHANGED (2026-06-11, docs/signal/judgment_table.md).
+    from app.text_normalization import looks_like_error_page
+    if looks_like_error_page(content):
+        logger.warning("Error page detected for %s — recording as failed, no baseline", url)
+        return {
+            "url":                url,
+            "changed":            False,
+            "status":             "error_page",
+            "access_status":      "error_page",
+            "extracted_chars":    extracted_chars,
+            "extraction_quality": "failed",
+            "extraction_method":  extraction_method,
+            "error":              "Fetched content is an HTTP error/challenge page — not stored as baseline",
+            "ai_skipped_reason":  "error_page",
+            "ai_calls_used":      _AI_RUN_BUDGET["count"],
+        }
+
     # Detect source language for AI prompt context and result metadata.
     # Runs on clean extracted text (not raw HTML) for best accuracy.
     src_lang = detect_language_hint(content) if AI_DETECT_LANGUAGE else "unknown"
@@ -279,6 +302,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "raw_hash":           _sha256_or_none(content),
             "raw_chars":          len(content or ""),
             "normalized_chars":   len(normalized_for_hash or ""),
+            "normalization_version": NORMALIZATION_VERSION,
             "ai_skipped_reason":  "",
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
@@ -353,6 +377,12 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         except Exception as _snap_err:
             logger.warning("Snapshot write failed (non-fatal): %s", _snap_err)
             _snapshot_paths_result = {}
+
+    # ── Step 6b (F2): rule-detected facts from the added delta ────────
+    # Facts (deadlines, effective dates, amounts, law/licence refs) may be
+    # stated in an alert ONLY when truly detected; spans prove each claim.
+    from app.detected_facts import extract_detected_facts
+    detected_facts = [] if is_new else extract_detected_facts(diff_result.get("added"))
 
     # ── Step 7: Rule-based risk (always) ─────────────────────────────
     rule_risk = analyze_risk(diff_result)
@@ -565,6 +595,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 "added":                   diff_result.get("added", []),
                 "removed":                 diff_result.get("removed", []),
                 "risk_details":            rule_risk,
+                "detected_facts":          detected_facts,
                 "normalized_hash":         new_hash,
                 "checked_at_utc":          created_at,
             }
@@ -590,6 +621,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "affected_entities":        affected_entities,
         "urgency":                  urgency,
         "deadline":                 deadline,
+        "detected_facts":           detected_facts,
         "semantic_findings":        semantic_findings,
         "confidence":               confidence,
         "added_count":              len(diff_result["added"]),
@@ -611,6 +643,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "raw_hash":                 _sha256_or_none(content),
         "raw_chars":                len(content or ""),
         "normalized_chars":         len(normalized_for_hash or ""),
+        "normalization_version":    NORMALIZATION_VERSION,
         # Snapshot fields — populated when source context is present
         "run_id":                   _run_id,
         "snapshot_raw_path":        _snapshot_paths_result.get("snapshot_raw_path"),
@@ -647,7 +680,9 @@ def run_pipeline_for_source(source: dict) -> dict:
     result["jurisdiction"]  = source.get("jurisdiction", "")
     result["category"]      = source.get("category", "")
     result["source_status"] = source.get("status", "active")
-    result["status"]        = "ok"
+    # F1 wiring fix (found by gate e2e): run_pipeline signals failure modes
+    # via "status" ("error_page", "quality_drop") — never clobber them.
+    result.setdefault("status", "ok")
 
     # ── D6: unchanged runs write a compact heartbeat to the trail ─────
     if not result.get("changed") and result.get("normalized_hash"):
@@ -715,6 +750,7 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "raw_hash":                 result.get("raw_hash"),
                 "raw_chars":                result.get("raw_chars", 0),
                 "normalized_chars":         result.get("normalized_chars", 0),
+                "normalization_version":    result.get("normalization_version"),
                 "snapshot_raw_path":        result.get("snapshot_raw_path"),
                 "snapshot_normalized_path": result.get("snapshot_normalized_path"),
                 "snapshot_pdf_text_path":   result.get("snapshot_pdf_text_path"),
@@ -790,6 +826,7 @@ def run_pipeline_for_source(source: dict) -> dict:
                                 "executive_summary": result.get("executive_summary", ""),
                                 "business_action_required": result.get("business_action_required", ""),
                                 "deadline": result.get("deadline"),
+                                "detected_facts": result.get("detected_facts", []),
                                 "urgency": result.get("urgency", ""),
                                 "affected_entities": result.get("affected_entities", []),
                                 "checked_at_utc": final_record.get("timestamp_utc", ""),

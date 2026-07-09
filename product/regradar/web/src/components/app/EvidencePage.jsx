@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, CheckCircle, Clock, Download, FileText, Hash, History, Loader2, Shield } from 'lucide-react'
+import { CheckCircle, Clock, Download, FileText, Hash, History, Loader2, Shield } from 'lucide-react'
 
 import { evidence as evidenceApi } from '../../api'
 import DiffViewer from '../DiffViewer'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
+import ErrorState from './ui/ErrorState'
 import { formatGst } from '../../utils/time'
 
 const IMPACT_OPTIONS = [
@@ -345,6 +346,8 @@ export default function EvidencePage() {
   const [apiChecked, setApiChecked] = useState(false)
   const [apiError, setApiError] = useState('')
 
+  const [reloadKey, setReloadKey] = useState(0)
+
   useEffect(() => {
     let active = true
     evidenceApi.list('AE', 100)
@@ -362,7 +365,13 @@ export default function EvidencePage() {
         if (active) setApiChecked(true)
       })
     return () => { active = false }
-  }, [])
+  }, [reloadKey])
+
+  function retryEvidence() {
+    setApiChecked(false)
+    setApiError('')
+    setReloadKey(k => k + 1)
+  }
 
   return (
     <div className="space-y-5 p-5">
@@ -417,12 +426,12 @@ export default function EvidencePage() {
           <p className="text-sm text-slate-400">Loading live evidence records…</p>
         </div>
       ) : apiError ? (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-4 py-3">
-          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-          <p className="text-xs text-amber-300">
-            {apiError} No sample evidence is shown in authenticated workspace.
-          </p>
-        </div>
+        <ErrorState
+          title="Could not load live evidence records."
+          detail={`${apiError} No sample evidence is shown in the authenticated workspace.`}
+          onRetry={retryEvidence}
+          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+        />
       ) : records.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-10 text-center">
           <FileText className="mx-auto mb-3 h-5 w-5 text-slate-500" />

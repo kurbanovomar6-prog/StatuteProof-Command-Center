@@ -25,7 +25,7 @@ export function saveWorkspaceProfile(updates) {
       JSON.stringify({ ...current, ...updates }),
     )
   } catch (e) {
-    console.warn('saveWorkspaceProfile failed', e)
+    if (import.meta.env?.DEV) console.warn('saveWorkspaceProfile failed', e)
   }
 }
 

@@ -1,0 +1,33 @@
+== AE-cbuae-retail-payment-services-rulebook 2026-06-19T14:55 — 4 facts
+   effective_date: Effective from 1/8/2022
+   in_force_status: Status: In-Force
+   article_reference: Article 12
+   article_reference: Article 18
+
+== AE-sca-aml-cft 2026-06-19T14:29 — 12 facts
+   law_reference: Federal Decree-Law No. (20) of 2018
+   law_reference: Cabinet Decision No. (10) of 2019
+   law_reference: Cabinet Resolution No. (74) of 2020
+   law_reference: Cabinet Resolution No. (134) of 2025
+   law_reference: Cabinet Resolution No. (109) of 2023
+   law_reference: Cabinet Decision No. (134) of 2025
+   law_reference: Circular No. (1) of 2015
+   law_reference: Circular No. (2) of 2015
+
+== AE-eocn-laws-regulations-en 2026-06-19T15:00 — 5 facts
+   law_reference: Cabinet Decision No. (141) of 2024
+   law_reference: Cabinet Resolution No. 156 of 2025
+   law_reference: Federal Law No (40) of 2006
+   law_reference: Federal Law No. (12) of 2009
+   law_reference: قرار مجلس الوزراء رقم (134) لسنة 2025
+
+== AE-cbuae-exchange-business-regulation-doclist 2026-06-19T14:57 — 12 facts
+   law_reference: Cabinet Decision No. (10) of 2019
+   law_reference: Federal Law No. (20) of 2018
+   article_reference: Articles 8
+   article_reference: Articles 8 and 9
+   article_reference: Article (6)
+   article_reference: Article (65)
+   article_reference: Article 1
+   article_reference: Article 10
+

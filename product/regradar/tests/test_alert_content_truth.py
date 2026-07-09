@@ -157,9 +157,19 @@ def test_high_without_recorded_matches_claims_only_what_it_knows():
 
 
 def test_detected_deadline_is_rendered_when_present():
+    # F2 (signal-max): a deadline renders ONLY when rule-detected in the
+    # actual delta with a matched span — a bare payload field is an
+    # unbacked claim and must not render.
     from app.alert_content import build_alert_content, render_telegram
-    msg = render_telegram(build_alert_content(_payload(deadline="2026-08-01")))
-    assert "2026-08-01" in msg
+    from app.detected_facts import extract_detected_facts
+
+    added = ["All returns are due no later than 1 August 2026."]
+    payload = _payload(added=added, detected_facts=extract_detected_facts(added))
+    msg = render_telegram(build_alert_content(payload))
+    assert "1 August 2026" in msg
+
+    unbacked = render_telegram(build_alert_content(_payload(deadline="2026-08-01")))
+    assert "2026-08-01" not in unbacked, "unbacked deadline field must not render"
 
 
 def test_markdown_render_shares_the_same_content():

@@ -135,3 +135,107 @@ Phase 0 ground truth (all outputs real, this session):
   spelling can only reach MEDIUM via moderate keywords. Owner call.
 - Suites at gate: backend 649 passed / frontend 43 passed / eslint 0 errors
   (3 known warnings). Branch NOT merged — merge is the owner's decision.
+
+# EXCELLENCE SPRINT — Phase 0 backlog (2026-07-05, branch excellence @ base 1e10e9f)
+
+Audit inputs: SA-1 claims (94 files), SA-3 UX states (15 screens), SA-5 perf/
+hygiene, SA-6 security — subagent reports; SA-2 walkthrough (16 screenshots,
+0 console errors on 8 pages), SA-4 numbers (API==storage: enabled 116==116,
+last_run_at exact match), SA-7/SA-8 deferred to gate. Landing height: 24,926px.
+
+## S0 — truth/integrity (5)
+1. Hero.jsx:280-281 — hardcoded "116 UAE official sources monitored" +
+   "60-min check cycle — every source, every hour". Static count will drift;
+   cadence unproven (no scheduler running in prod) and contradicts #2.
+2. HowItWorks.jsx:14 + PricingPage.jsx FAQ — "every 24 hours … twice daily":
+   unproven AND contradicts Hero's "every hour" on the same page flow.
+3. Problem.jsx:75 — "StatuteProof monitors 116 selected UAE official
+   sources on a defined schedule" (hardcoded, no schedule running).
+4. planCapabilities.js — sourceLimit 172 vs 116 vs 25 conflicting hardcoded
+   counts shown during plan selection.
+5. Problem.jsx / Solution.jsx — mandated "Monitoring intelligence only. Not
+   legal advice." footer absent while sibling sections carry it.
+
+## S1 — broken (5)
+6. ActionLogPanel.jsx:33 — .catch(() => {}) swallows fetch errors, no UI.
+7. EvidencePage error state has no retry (user stuck; ErrorState exists,
+   unused here).
+8. DashboardHome telegram status: failure leaves checklist stuck "Checking".
+9. AIBriefPage — NO loading state at all (blank during fetch).
+10. npm audit: 1 HIGH (vite 8.0.x GHSA-v6wh-96g9-6wx3 / GHSA-fx2h-pf6j-xcff,
+    Windows-specific; fix available).
+
+## S2 — quality/trust (9)
+11. ReviewQueuePage queue section: no empty state; AlertsPage uses custom
+    empty instead of shared; text-only loading on Alerts/Reports/ReviewQueue.
+12. Landing is 24,926px tall (~27 viewports) — demo-path liability (flag;
+    trimming is an owner-scope decision).
+13. Brand PNGs unoptimized: 428KB + 145KB + 100KB.
+14. 8 external links missing rel="noopener noreferrer" (4 app screens +
+    4 landing components).
+15. Form a11y: label/id association missing (SourcesPage modal, Onboarding,
+    SourceLab checkboxes); sidebar toggle uses title not aria-label;
+    img-as-button in collapsed sidebar.
+16. No Cache-Control: no-store on auth responses.
+17. DashboardPreview.jsx:160,169 — TODO comments + mock last-check/review
+    numbers in a landing component (debris + soft untruth; has SAMPLE badge
+    elsewhere but this block reads real).
+18. workspaceProfile.js:28 console.warn unguarded.
+19. Solution.jsx "all major licence types" — overbroad wording.
+
+## S3 — polish
+20. Mixed loading-state patterns across screens (spinner/text/skeleton).
+
+Security PASS baseline (SA-6): rate limits (login 10/h, register 5/h, 429),
+security headers, CORS allowlist, HttpOnly/SameSite=Strict/conditional-Secure
+cookies, PBKDF2-SHA256 600k, 24h single-use tokens, no secrets in repo.
+
+## Fix plan (max 8 cycles): C1 S0 claims → C2 S1+state gaps → C3 a11y/links/
+Cache-Control → C4 assets+debris → C5 npm CVE → C6 gate+adversarial+report.
+
+# EXCELLENCE SPRINT — resolution (2026-07-05, branch excellence, base 600bf98)
+Prereq alert-quality cycle 3 executed + merged first (1e10e9f: delta-only
+severity scoring, UK 'licence', ALERT_DRY_RUN — 6 TDD tests).
+
+FIXED (commit):
+- S0 claims (442e0de): Hero live source count + operator-set cadence;
+  HowItWorks/PricingPage cadence promises removed; Problem 'defined schedule'
+  -> operator-set + 'Not complete UAE coverage'; Solution 'all major licence
+  types' -> 'configured'. VERIFIED live: 'every hour'/'24 hours'/'twice
+  daily' = 0 matches on rendered landing.
+- S1 states (40f5845): ActionLogPanel silent catch -> visible error;
+  EvidencePage/AlertsPage/ReportsPage/ReviewQueue -> shared ErrorState+Retry
+  and EmptyState; DashboardHome telegram failure distinguishable; AIBrief
+  skeleton. PROVEN: Playwright endpoint-abort -> ErrorState+Retry renders ->
+  unblock+click Retry -> content loads (evidence + alerts).
+- S1/S2 sec+a11y (70660f2): Cache-Control: no-store (TDD, live-verified);
+  form label/id association (SourcesPage modal, Onboarding), sidebar
+  aria-labels, img-as-button fixed.
+- S2 hygiene (e82c5dd): brand assets 673KB->53KB, dead 428KB logo deleted,
+  0 TODOs in src, console.warn DEV-guarded.
+- S1 deps (1bc6471, 43086cb): npm audit 0 vulnerabilities (vite patched);
+  pip-audit 0 vulnerabilities (pypdf/deepdiff/pdfminer.six/requests bumped,
+  pdfplumber aligned; pip install --dry-run resolves with 0 errors).
+- S3 responsive (4dd56fb): AuditBinderSample tables scroll on mobile instead
+  of clipping. Residual: landing 320px document overflow 10px with NO
+  protruding element (scrollbar/sub-pixel on sample-table scroll containers);
+  dashboard/sources/evidence 0px. Honest S3-negligible.
+
+CLOSED AS INVALID after main-agent verification (subagent false positives):
+- SA-1 sourceLimit-as-coverage (172/25 never render to customers; PlanBanner/
+  BillingPage show >100 as 'Custom').
+- SA-1 Problem/Solution missing disclaimers (both already present).
+- SA-5 '8 rel-less links' (all carry rel on the next JSX line).
+- SA-5 unlabeled SourceLab/SourcesPage checkboxes (already <label>-wrapped).
+- SA-3 ReviewQueue missing empty state / AIBrief missing loading (existed;
+  re-severitied and improved anyway).
+
+Phase 2 gate (all real output): backend 656 passed / frontend 43 passed /
+build clean / eslint 0 errors; 15 screens rewalked 0 console errors; demo
+path register->verify(outbox)->login->onboarding->dashboard/sources/evidence/
+alerts/briefs = 27.9s, 0 dead ends (dashboard 31 actionable elements on
+standalone probe; fresh-user timing artifact in script noted); login burst
+401x6 then 429x6; forced diff -> 1 alert (new truthful format) -> re-run 0.
+Phase 3 adversarial: double-submit login 4 clicks -> 1 POST; keyboard reaches
+inputs+buttons; API-killed mid-path -> graceful login redirect, no crash,
+0 JS errors; diff grep -> no debris/secrets/weakened assertions.

@@ -135,7 +135,7 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
   const items = [
     { label: 'Account created', detail: 'Signed-in workspace account', status: 'Complete', tone: 'emerald' },
     { label: 'Profile saved', detail: hasProfile ? profileLabel(profile) : 'Add markets and licence profile', status: hasProfile ? 'Complete' : 'Pending', tone: hasProfile ? 'emerald' : 'amber', action: 'settings' },
-    { label: 'Telegram connected', detail: connected ? 'Account pairing confirmed' : 'Connect Telegram in Integrations', status: connected ? 'Complete' : telegramLoading ? 'Checking' : 'Pending', tone: connected ? 'emerald' : 'amber', action: 'integrations' },
+    { label: 'Telegram connected', detail: connected ? 'Account pairing confirmed' : telegramStatus?.status_error ? 'Status check failed — open Integrations to retry' : 'Connect Telegram in Integrations', status: connected ? 'Complete' : telegramLoading ? 'Checking' : telegramStatus?.status_error ? 'Unavailable' : 'Pending', tone: connected ? 'emerald' : 'amber', action: 'integrations' },
     { label: 'Source map reviewed', detail: 'Review fresh-alert eligible, limited, and access-restricted sources', status: 'To do', tone: 'slate', action: 'sources' },
     { label: 'First reviewed brief', detail: 'Use email test-mode or Telegram preview only after review gates pass', status: 'Test mode', tone: 'slate', action: 'briefs' },
   ]
@@ -316,7 +316,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
     let active = true
     telegramPair.status()
       .then(data => { if (active) setTelegramStatus(data) })
-      .catch(() => { if (active) setTelegramStatus(null) })
+      .catch(() => { if (active) setTelegramStatus({ status_error: true }) })
       .finally(() => { if (active) setTelegramLoading(false) })
     return () => { active = false }
   }, [])
