@@ -53,7 +53,11 @@ const PLANS_DATA = [
     ctaPrimary: false,
     features: [
       { label: "Official UAE sources", value: "Up to 3" },
-      { label: "Monitoring cycle", value: "24h per source" },
+      {
+        label: "Monitoring cycle",
+        value:
+          "Target once activated: up to every 24h per source; actual cadence is operator-set and confirmed at pilot onboarding",
+      },
       { label: "Source readiness review", value: true },
       { label: "Evidence records", value: true },
       { label: "Diff view", value: true },
@@ -86,7 +90,11 @@ const PLANS_DATA = [
         label: "Official UAE sources",
         value: "Selected official endpoints after source readiness review",
       },
-      { label: "Monitoring cycle", value: "24h per source (priority: 12h)" },
+      {
+        label: "Monitoring cycle",
+        value:
+          "Target once activated: up to every 24h per source (priority target 12h); actual cadence is operator-set and confirmed at pilot onboarding",
+      },
       { label: "Source readiness review", value: true },
       { label: "Evidence records + full diff view", value: true },
       { label: "Custom sources", value: "Up to 2 — requires activation" },
@@ -119,7 +127,11 @@ const PLANS_DATA = [
     ctaPrimary: false,
     features: [
       { label: "Official UAE sources", value: "Custom scope" },
-      { label: "Monitoring cycle", value: "24h per source (priority: 12h)" },
+      {
+        label: "Monitoring cycle",
+        value:
+          "Target once activated: up to every 24h per source (priority target 12h); actual cadence is operator-set and confirmed at pilot onboarding",
+      },
       { label: "Source readiness review", value: true },
       { label: "Evidence records + full diff view", value: true },
       { label: "Custom sources", value: "Custom — pilot roadmap" },
@@ -156,7 +168,7 @@ const COMPARISON_ROWS = [
 const FAQS = [
   {
     q: "How often is each source checked?",
-    a: "Every configured source is fetched on an operator-set schedule, agreed during pilot onboarding and disclosed in your workspace. Every run is recorded with a SHA-256 hash and timestamp regardless of whether content changed — the monitoring log shows both CHANGED and UNCHANGED runs, so the evidence trail covers checks, not just change events.",
+    a: "Once monitoring is activated, each configured source is fetched on an operator-set schedule, agreed during pilot onboarding and disclosed in your workspace. Once activated, every run is recorded with a SHA-256 hash and timestamp regardless of whether content changed — the monitoring log shows both CHANGED and UNCHANGED runs, so the evidence trail covers checks, not just change events.",
   },
   {
     q: "Is this legal advice?",
@@ -184,7 +196,7 @@ const FAQS = [
   },
   {
     q: "What does the audit binder export contain?",
-    a: "The PDF audit binder includes: (1) a complete monitoring run log for the period — every source, every check date, CHANGED / UNCHANGED status; (2) full diff records with SHA-256 hashes for before and after states; (3) the source URL and detection timestamp for each change event; (4) the structured brief text as delivered to your team; (5) a chain integrity verification record. The binder is designed to be presented directly to a regulator, internal auditor, or board risk committee as evidence of systematic monitoring. Markdown and HTML exports are also available for integration into GRC systems.",
+    a: "The PDF audit binder includes: (1) a complete monitoring run log for the period — every source, every check date, CHANGED / UNCHANGED status; (2) full diff records with SHA-256 hashes for before and after states; (3) the source URL and detection timestamp for each change event; (4) the structured brief text as delivered to your team; (5) a chain integrity verification record. The binder is designed to be presented directly to a regulator, internal auditor, or board risk committee: it documents the monitoring runs that were performed; it is not a certification of completeness or compliance. Markdown and HTML exports are also available for integration into GRC systems.",
   },
   {
     q: "Which regulators are covered on the UAE Monitor plan?",

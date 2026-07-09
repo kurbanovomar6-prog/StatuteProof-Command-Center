@@ -101,7 +101,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
               Which regulators. Which sources. What you get.
             </h2>
             <p className="max-w-3xl text-slate-400">
-              Every sector below shows exactly which official sources are active, what content is monitored, and any known limitations — disclosed before activation.
+              Every sector below shows exactly which official sources are in scope, what content is configured for monitoring, and any known limitations — disclosed before activation.
             </p>
           </div>
 

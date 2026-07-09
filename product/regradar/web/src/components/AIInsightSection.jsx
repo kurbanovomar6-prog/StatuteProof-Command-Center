@@ -263,9 +263,9 @@ export default function AIInsightSection() {
             {' '}exactly what changed and what to do about it
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-400">
-            StatuteProof detects the change in the official source, stores a hash-verified evidence record,
-            and runs AI analysis that tells your team what shifted, why it matters, and what action to take.
-            Your compliance officer reviews and decides — the AI does not decide for you.
+            StatuteProof is built to detect a change in a selected official source, store a hash-verified
+            evidence record, and run AI analysis that tells your team what shifted, why it may matter, and what
+            to consider. Your compliance officer reviews and decides — the AI does not decide for you.
           </p>
         </div>
 

@@ -269,7 +269,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
           {[
             [
               "bg-emerald-400",
-              "Fresh-alert eligible — source is proof-backed and actively monitored",
+              "Fresh-alert eligible — source is proof-backed and eligible for monitoring once activated",
             ],
             ["bg-amber-400", "Roadmap / pending"],
             ["bg-slate-600", "Outside current scope"],
@@ -283,8 +283,9 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
         </div>
         <p className="mb-4 text-xs text-slate-500 max-w-2xl">
           Fresh-alert eligible means a source has passed proof-backed baseline
-          validation, produces reliable text extraction, and is checked on a
-          24-hour cycle. Sources on the roadmap or pending validation are not
+          validation, produces reliable text extraction, and is configured for
+          checking on an operator-set cycle once monitoring is activated (target
+          up to every 24h). Sources on the roadmap or pending validation are not
           delivered as alerts until they pass the same gate.
         </p>
 
@@ -378,9 +379,10 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
           ratings reflect the current number of active sources — not regulatory
           significance. Roadmap and pending sources are not delivered to clients
           until they pass proof-backed baseline checks. Geo-restricted sources
-          are documented, not hidden. All active sources run on a 24-hour
-          monitoring cycle. Source check timestamps and SHA-256 hashes are
-          stored for every run and available in the evidence log.
+          are documented, not hidden. Once monitoring is activated, active
+          sources are checked on an operator-set cycle (target up to every 24h).
+          Source check timestamps and SHA-256 hashes are stored for every run
+          and available in the evidence log.
         </div>
       </div>
     </section>
