@@ -1,0 +1,74 @@
+
+===== DELTA CORPUS (63 replayed CHANGED runs, added+removed): 3,396,661 chars (EN 2,785,324 / AR 611,336) =====
+-- top 35 EN tokens (231,260 total) --
+difc:12100, media:7218, law:5089, assets:4891, documents:3719, pdf:3707, production:3592, project:3580, edge:3578, dubaiintern:3576, difcexperie:3576, difcexperiences:3576, difcwebsite:3576, images:3556, docs:2714, regulations:2702, lang:2254, dfsa:1587, vara:1566, annex:1491, laws:1483, virtual:1445, financial:1343, uae:1314, risk:1287, vasp:1092, rulebook:1022, vasps:990, aml:978, services:935, regulatory:856, client:755, including:739, must:726, asset:725
+-- top 35 AR tokens (76,910 total) --
+في:2001, على:1125, الإمارات:897, من:625, المركزي:462, دولة:438, المزيد:415, المالية:414, إ:396, مجلس:364, أو:361, شكراً:360, التقيّم:354, تنزيل:354, العربية:328, مع:326, إلى:325, الرمز:313, المتحدة:305, المصرف:303, الوزراء:301, المصرفية:294, يجب:278, فبراير:277, رد:268, قرار:257, وزارة:254, النقدية:253, اقرأ:245, إدارە:240, بقانون:238, مايو:234, المالي:226, الأصول:222, وا:216
+-- EN fact patterns --
+  law_ref (Decree-Law/Cabinet Decision/Federal Law No.): 629
+  article_ref (Article (n)): 167
+  effective_date: 200
+  deadline_phrases: 6
+  amount_AED: 145
+  percentage: 182
+  penalty_fine: 593
+  licence_category: 23
+  must_shall: 1589
+  date_dmy: 19
+  date_month: 777
+  in_force_status: 54
+  consultation: 58
+-- AR fact patterns --
+  قانون اتحادي (federal law): 242
+  مرسوم بقانون (decree-law): 149
+  قرار (decision/resolution): 257
+  تعميم (circular): 58
+  لائحة (regulation): 81
+  مادة (article): 0
+  غرامة (fine): 0
+  عقوبة/جزاء (penalty): 85
+  ترخيص (licence): 35
+  التزام/يجب (obligation/must): 369
+  موعد نهائي/مهلة (deadline): 0
+  نافذ/ساري (in force): 13
+  درهم (dirham amount): 233
+  غسل الأموال (AML): 54
+  تمويل الإرهاب (CFT): 53
+  الأصول الافتراضية (virtual assets): 339
+
+===== DOCUMENT CORPUS (latest normalized snapshot x 316 sources): 7,970,062 chars (EN 7,655,670 / AR 314,386) =====
+-- top 35 EN tokens (642,236 total) --
+financial:5842, dfsa:5793, risk:5315, must:4827, bank:4135, article:3815, services:3681, business:3498, law:3313, tax:3208, central:3140, person:2786, should:2768, customer:2566, including:2387, licensed:2327, payment:2310, legal:2253, regulatory:2238, assets:2225, uae:2217, management:2209, transactions:2162, authority:2080, virtual:2060, regulations:2023, activities:2020, data:1873, aml:1831, company:1815, decision:1750, transaction:1745, related:1728, requirements:1710, reports:1703
+-- top 35 AR tokens (42,702 total) --
+من:1034, في:1032, على:764, أو:715, المالية:533, رقم:332, لسنة:295, الضريبية:262, غير:248, الإمارات:239, الشركات:232, التي:224, إلى:197, المادة:196, أي:191, القوائم:186, عن:180, مجلس:177, ضريبة:172, دبي:161, قانون:161, الأموال:160, أن:160, مع:152, يجب:140, لا:136, جمعية:136, قبل:135, البيانات:134, البند:132, الأصول:127, الوزراء:126, هذا:117, لأغراض:117, المجموعة:116
+-- EN fact patterns --
+  law_ref (Decree-Law/Cabinet Decision/Federal Law No.): 1050
+  article_ref (Article (n)): 3351
+  effective_date: 208
+  deadline_phrases: 106
+  amount_AED: 509
+  percentage: 481
+  penalty_fine: 2300
+  licence_category: 52
+  must_shall: 8990
+  date_dmy: 789
+  date_month: 800
+  in_force_status: 222
+  consultation: 273
+-- AR fact patterns --
+  قانون اتحادي (federal law): 75
+  مرسوم بقانون (decree-law): 74
+  قرار (decision/resolution): 101
+  تعميم (circular): 45
+  لائحة (regulation): 23
+  مادة (article): 225
+  غرامة (fine): 11
+  عقوبة/جزاء (penalty): 60
+  ترخيص (licence): 54
+  التزام/يجب (obligation/must): 267
+  موعد نهائي/مهلة (deadline): 1
+  نافذ/ساري (in force): 25
+  درهم (dirham amount): 133
+  غسل الأموال (AML): 87
+  تمويل الإرهاب (CFT): 78
+  الأصول الافتراضية (virtual assets): 98

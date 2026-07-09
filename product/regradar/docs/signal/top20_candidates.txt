@@ -1,0 +1,23 @@
+#   sc  source_id                                               category           status                     risk/class
+1   6   AE-adgm-fsra-waivers                                    financial_regulator active                     candidate — needs retest (fresh-alert potential)
+2   6   AE-adgm-ra-circulars                                    financial_regulator active                     candidate — needs retest (fresh-alert potential)
+3   6   AE-fta-tax-legislation-listing                          tax                active                     candidate — needs retest (fresh-alert potential)
+4   6   AE-fta-vat-guides-references                            tax                active                     candidate — needs retest (fresh-alert potential)
+5   6   AE-fta-corporate-tax-guides-references                  tax                active                     candidate — needs retest (fresh-alert potential)
+6   6   AE-fta-media-centre                                     tax                active                     candidate — needs retest (fresh-alert potential)
+7   6   AE-fta-corporate-tax-legislation                        tax                active                     candidate — needs retest (fresh-alert potential)
+8   5   AE-uae-financial-intelligence-unit-uaefiu               aml                geo_blocked                geo-blocked (fetch risk)
+9   5   AE-uaefiu-circulars                                     aml                geo_blocked                geo-blocked (fetch risk)
+10  5   AE-uaefiu-typology-reports                              aml                geo_blocked                geo-blocked (fetch risk)
+11  5   AE-uaefiu-aml-cft-laws                                  aml                geo_blocked                geo-blocked (fetch risk)
+12  5   AE-uaefiu-publications-hub                              aml                geo_blocked                geo-blocked (fetch risk)
+13  5   AE-uaefiu-annual-reports                                uae_fiu            geo_blocked                geo-blocked (fetch risk)
+14  5   AE-uaefiu-press-releases                                uae_fiu            geo_blocked                geo-blocked (fetch risk)
+15  5   AE-uaefiu-system-guides                                 aml                geo_blocked                geo-blocked (fetch risk)
+16  5   DIFC Consultation Papers Index                          financial_regulator disabled_needs_playwright  JS rendering needed
+17  5   UAE FIU Laws and Regulations                            aml                geo_blocked                geo-blocked (fetch risk)
+18  4   AE-central-bank-of-the-uae                              central_bank       geo_blocked                geo-blocked (fetch risk)
+19  4   UAE Federal Tax Authority (FTA)                         tax                disabled_external_access   external access blocked
+20  4   AE-cbuae-regulations                                    central_bank       geo_blocked                geo-blocked (fetch risk)
+
+pool size (AE only): 115
