@@ -40,16 +40,16 @@ const BEFORE = [
 
 const AFTER = [
   {
-    headline: 'Change detected automatically from the official source',
-    detail: 'Scheduled checks run against official portals on a defined cadence. No manual portal visits. No spreadsheet rows to maintain.',
+    headline: 'Changes captured from the official source once monitoring is activated',
+    detail: 'Once activated, scheduled checks run against selected official portals on an operator-set cadence. No manual portal visits. No spreadsheet rows to maintain.',
   },
   {
-    headline: 'Brief delivered with action steps — usually the same day',
-    detail: 'When a change is detected, the system produces a structured AI-written analysis: what changed, why it matters, what to do. Scoped to your licence type.',
+    headline: 'Draft brief prepared for review when a change is detected',
+    detail: 'When a change is detected, the system prepares a structured AI-written draft analysis: what changed, why it may matter, what to consider. Scoped to your licence type.',
   },
   {
-    headline: 'Cryptographic timestamp proves exactly when it was caught',
-    detail: 'SHA-256 hash, detection timestamp, and source URL are stored at the moment of detection. Your evidence record is audit-ready from day one.',
+    headline: 'Cryptographic timestamp records when a change was captured',
+    detail: 'SHA-256 hash, detection timestamp, and source URL are stored at the moment of detection, so your evidence record is available for audit review from the first captured run.',
   },
   {
     headline: 'AI writes the first draft — you review and decide',

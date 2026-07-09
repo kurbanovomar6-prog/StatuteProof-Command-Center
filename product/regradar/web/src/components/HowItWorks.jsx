@@ -11,7 +11,7 @@ const STEPS = [
     n: "02",
     icon: ScanLine,
     title: "We monitor the official sources",
-    desc: "StatuteProof checks each configured official source on an operator-set schedule and records a timestamped evidence snapshot on every monitoring run — whether the content changed or not. Source access status, extraction method, extraction quality score, and the SHA-256 content hash are logged on every check.",
+    desc: "Once monitoring is activated, StatuteProof checks each configured official source on an operator-set schedule and records a timestamped evidence snapshot on every monitoring run — whether the content changed or not. Source access status, extraction method, extraction quality score, and the SHA-256 content hash are logged on every check.",
   },
   {
     n: "03",

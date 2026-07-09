@@ -194,7 +194,7 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  "StatuteProof has 83 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 21, 2026.",
+  "StatuteProof has 83 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 21, 2026.",
   "StatuteProof also maintains 4 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
   "83 UAE source records currently have MONITOR_OK status overall; all 83 of those are fresh-alert eligible.",
   "StatuteProof maintains source-level proof files for 86 of 116 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
@@ -236,6 +236,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: "83 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, source-level proof files, hashes, and baseline confirmation",
+  recommendedSalesClaim: "83 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK, source-level proof files, hashes, and baseline confirmation",
   riskBriefBoundary: "Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist.",
 } as const

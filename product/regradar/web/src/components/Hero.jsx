@@ -250,10 +250,11 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
 
             {/* Subheadline */}
             <p className="sp-animate-fade-up sp-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              StatuteProof watches official UAE regulator sources and sends your
-              team a concise brief when relevant text changes. Instead of
-              spending hours checking pages manually, Compliance gets a reviewed
-              signal with source links, change context and evidence.
+              StatuteProof is built to watch selected official UAE regulator
+              sources and prepare a draft brief for review when relevant text
+              changes. Instead of spending hours checking pages manually,
+              Compliance gets a reviewed signal with source links, change
+              context and evidence.
             </p>
 
             {/* Bullets */}
@@ -276,7 +277,7 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             {/* Regulator strip */}
             <div className="sp-animate-fade-up sp-delay-2 mt-6 flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-medium text-slate-500 mr-1">
-                Sources monitored include:
+                Selected sources in scope include:
               </span>
               {REGULATOR_STRIP.map((name) => (
                 <span

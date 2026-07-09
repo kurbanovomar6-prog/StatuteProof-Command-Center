@@ -25,7 +25,7 @@ export const riskTrendData = [
 ]
 
 export const features = [
-  { icon: 'Search',        title: 'Official-source monitoring',      desc: 'Your monitored UAE regulatory sources are checked on a defined schedule — CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, and more. When something changes on an official portal, you know about it from the source, not from a peer.' },
+  { icon: 'Search',        title: 'Official-source monitoring',      desc: 'Your selected UAE regulatory sources are configured to be checked on a defined schedule once monitoring is activated — CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, and more. When something changes on an official portal, the change is captured from the source, not from a peer.' },
   { icon: 'FileText',      title: 'Source-backed compliance briefs', desc: 'Detected changes can produce a structured brief for human review: what changed, which official source published it, and what your team may need to review. No raw text dumps.' },
   { icon: 'Globe',         title: 'Documented extraction methods',    desc: 'You see exactly how each source is monitored — HTML, PDF, or page snapshot — and any known limitations are disclosed upfront. If a source has restricted access, that is documented before your pilot begins.' },
   { icon: 'MessageSquare', title: 'Profile-scoped alert delivery',    desc: 'Alerts are filtered to the regulators and business activities relevant to your licence type. A VARA update does not reach a payments firm with no virtual asset exposure.' },
@@ -132,7 +132,7 @@ export const pricingPlans = [
 
 export const steps = [
   { n: '01', title: 'Source readiness assessment', desc: 'Each official source is tested before monitoring begins: is it accessible? What extraction method does it require? What is the quality of extracted content? Readiness-supported, limited, and blocked sources are documented. You see this before agreeing to a pilot.' },
-  { n: '02', title: 'Scheduled source monitoring', desc: 'Configured sources are checked on a defined schedule. Each run produces a delta status: FIRST_SEEN, UNCHANGED, CHANGED, FAILED, or QUALITY_DROP.' },
+  { n: '02', title: 'Scheduled source monitoring', desc: 'Once monitoring is activated, configured sources are checked on a defined schedule. Each run produces a delta status: FIRST_SEEN, UNCHANGED, CHANGED, FAILED, or QUALITY_DROP.' },
   { n: '03', title: 'Change detection and quality check', desc: 'When a source returns CHANGED, extracted content is compared against the prior run. When extraction quality drops below threshold, the run is flagged for human review before any alert is issued.' },
   { n: '04', title: 'Profile relevance matching', desc: 'Detected changes are evaluated against your regulatory profile — your licence type, business activity, and monitored regulators. A VARA update does not go to a payments firm with no virtual asset exposure.' },
   { n: '05', title: 'Evidence-gated draft brief', desc: 'Your team receives a structured draft: what changed, the official source URL, timestamp, extraction quality, evidence snippet, known limitations, and a not-legal-advice disclaimer. Every draft is verifiable against the original source before delivery approval.' },
