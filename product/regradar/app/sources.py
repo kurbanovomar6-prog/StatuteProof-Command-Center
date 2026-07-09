@@ -35,6 +35,18 @@ _VALID_STATUSES = {
     "remediation",                # temporarily disabled pending fix
     "duplicate_url",              # URL is already covered by another active source
     "replaced",                   # superseded by a different source record
+    # Disabled-reason statuses present in sources.json — these remain
+    # non-eligible for monitoring but must load (not be dropped) so the
+    # catalogue stays complete and the loader does not log-spam.
+    "disabled_covered_by_hub",    # coverage provided by an aggregating hub source
+    "disabled_duplicate",         # duplicate of another catalogue entry
+    "disabled_geo_blocked",       # disabled: source geo-restricts access
+    "disabled_needs_playwright",  # disabled: requires headless browser rendering
+    "disabled_non_uae",           # disabled: out of UAE monitoring scope
+    "disabled_path_moved",        # disabled: source URL/path relocated
+    "disabled_static_doc",        # disabled: static document, no change signal
+    "disabled_static_pdf",        # disabled: static PDF, no change signal
+    "geo_blocked",                # source geo-restricts access
 }
 
 
