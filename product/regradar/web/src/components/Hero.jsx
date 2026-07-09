@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import MonitoringStatusBadge from "./MonitoringStatusBadge";
 import {
   ArrowRight,
   CheckCircle,
@@ -331,10 +332,7 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
             {/* Live indicator + disclaimer */}
             <div className="sp-animate-fade-up sp-delay-3 mt-5 flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-4">
-                <div className="inline-flex items-center gap-2 text-sm font-medium text-emerald-300">
-                  <span className="sp-live-dot" />
-                  Monitoring active
-                </div>
+                <MonitoringStatusBadge />
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/50 px-3 py-1 text-xs font-medium text-slate-300">
                   Email delivery included — Telegram optional
                 </div>

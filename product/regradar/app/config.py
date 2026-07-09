@@ -27,7 +27,10 @@ except Exception:
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 
-BASE_DIR = Path(__file__).parent.parent
+# Honors STATUTEPROOF_BASE_DIR so all stores (trail, DB, outbox, API readers)
+# resolve the same tree — source_runs already did; config/email did not
+# (split-brain found in the 2026-07-06 evaluation, finding N2).
+BASE_DIR = Path(os.getenv("STATUTEPROOF_BASE_DIR") or Path(__file__).parent.parent).resolve()
 
 # `or` (not a getenv default): an empty/blank env value must fall back too.
 DB_PATH = os.getenv("REGRADAR_DB_PATH") or str(BASE_DIR / "regradar.db")
