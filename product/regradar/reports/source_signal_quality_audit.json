@@ -147,7 +147,7 @@
     }
   ],
   "safe_claims": [
-    "StatuteProof has 83 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 21, 2026.",
+    "StatuteProof has 83 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 21, 2026.",
     "StatuteProof also maintains 4 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
     "83 UAE source records currently have MONITOR_OK status overall; all 83 of those are fresh-alert eligible.",
     "StatuteProof maintains source-level proof files for 86 of 116 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
@@ -256,6 +256,6 @@
   ],
   "audit_meta": {
     "generatedAt": "2026-06-21T21:55:00Z",
-    "recommendedSalesClaim": "83 fresh-alert eligible UAE official-source daily monitors with MONITOR_OK, source-level proof files, hashes, and baseline confirmation"
+    "recommendedSalesClaim": "83 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK, source-level proof files, hashes, and baseline confirmation"
   }
 }
