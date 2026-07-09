@@ -8,7 +8,8 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 from app.db import _connect, ensure_auth_tables
-from app.profile import get_or_create_profile
+from app.profile import get_or_create_profile, normalize_regulators
+from app.regulator_map import resolve_regulator
 from app.telegram import send_telegram_message
 from app.telegram_pairing import get_telegram_link
 from app.user_delivery import (
@@ -95,6 +96,7 @@ def user_profile_to_routing_profile(user_id: int) -> dict:
         "industries": [str(item).strip() for item in _safe_list(profile.get("industries")) if str(item).strip()],
         "topics": [str(item).strip() for item in _safe_list(profile.get("topics")) if str(item).strip()],
         "sources": [],
+        "regulators": normalize_regulators(profile.get("regulators")),
         "custom_sources": _safe_list(profile.get("custom_sources")),
         "alert_threshold": alert_threshold,
         "risk_threshold": alert_threshold,
@@ -261,6 +263,26 @@ def score_alert_for_user(user_profile: dict, alert: dict) -> dict:
     score = 0
     reasons: list[str] = []
     limitations: list[str] = []
+
+    # Authoritative regulator scope gate (hard exclusion, not a penalty).
+    # If the customer has scoped to specific regulators and this alert's
+    # resolved regulator is outside that scope, exclude it outright before
+    # any risk/market/topic scoring. Empty/absent scope = all regulators
+    # (backward compatible), so scoring proceeds as before.
+    scoped_regulators = normalize_regulators(user_profile.get("regulators"))
+    if scoped_regulators:
+        alert_regulator = resolve_regulator(alert)
+        if alert_regulator not in scoped_regulators:
+            return {
+                "score": 0,
+                "matched": False,
+                "reasons": [
+                    f"Outside your regulator scope "
+                    f"(alert regulator {alert_regulator}; you receive "
+                    f"{', '.join(scoped_regulators)})"
+                ],
+                "limitations": [],
+            }
 
     if _threshold_allows(alert.get("risk_level"), user_profile.get("alert_threshold")):
         score += 40

@@ -8,6 +8,49 @@ from datetime import datetime, timezone
 from typing import Any
 
 from app.db import _connect
+from app.regulator_map import REGULATOR_CODES
+
+# Regulator scope codes a customer may subscribe to. Empty/absent scope
+# means "all regulators" (backward compatible). Mirrors the resolver's
+# allow-list so profile validation and routing stay in lock-step.
+ALLOWED_REGULATOR_CODES: frozenset[str] = frozenset(REGULATOR_CODES)
+
+
+def normalize_regulators(value) -> list[str]:
+    """Coerce arbitrary input into an ordered, deduped list of valid codes.
+
+    Uppercases entries, drops anything outside ALLOWED_REGULATOR_CODES, and
+    preserves first-seen order. ``None`` / empty input -> ``[]`` (= all).
+    """
+    if value is None:
+        return []
+    if isinstance(value, str):
+        items = [part.strip() for part in value.split(",")]
+    elif isinstance(value, (list, tuple)):
+        items = list(value)
+    else:
+        return []
+    seen: list[str] = []
+    for item in items:
+        code = str(item or "").strip().upper()
+        if code and code in ALLOWED_REGULATOR_CODES and code not in seen:
+            seen.append(code)
+    return seen
+
+
+def _regulators_input_nonempty(value) -> bool:
+    """True if the caller supplied at least one non-blank scope token.
+
+    Distinguishes an explicit "all regulators" request ([] / None / "") from
+    a scoping attempt that happened to contain only invalid codes (["TYPO"]).
+    """
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return any(part.strip() for part in value.split(","))
+    if isinstance(value, (list, tuple)):
+        return any(str(item or "").strip() for item in value)
+    return False
 
 
 _CREATE_PROFILE_TABLE = """
@@ -20,6 +63,7 @@ _CREATE_PROFILE_TABLE = """
         topics TEXT,
         licence_type TEXT,
         custom_sources TEXT,
+        regulators TEXT,
 
         alert_threshold TEXT NOT NULL DEFAULT 'MEDIUM',
         brief_language TEXT NOT NULL DEFAULT 'en',
@@ -42,6 +86,7 @@ _ALLOWED_FIELDS = {
     "topics",
     "licence_type",
     "custom_sources",
+    "regulators",
     "alert_threshold",
     "brief_language",
     "weekly_brief_enabled",
@@ -60,6 +105,12 @@ def ensure_profile_table() -> None:
     conn = _connect()
     try:
         conn.executescript(_CREATE_PROFILE_TABLE)
+        # Additive migration for pre-existing tables: CREATE TABLE IF NOT
+        # EXISTS never adds a column to an already-created table, so add the
+        # regulators column when missing. Additive only — no data change.
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(user_profiles)")}
+        if "regulators" not in columns:
+            conn.execute("ALTER TABLE user_profiles ADD COLUMN regulators TEXT")
         conn.commit()
     finally:
         conn.close()
@@ -136,6 +187,7 @@ def _profile_row_to_dict(row) -> dict:
         "topics": _parse_json_list(data.get("topics")),
         "licence_type": data.get("licence_type"),
         "custom_sources": _parse_json_list(data.get("custom_sources")),
+        "regulators": normalize_regulators(_parse_json_list(data.get("regulators"))),
         "alert_threshold": data.get("alert_threshold") or "MEDIUM",
         "brief_language": data.get("brief_language") or "en",
         "weekly_brief_enabled": bool(data.get("weekly_brief_enabled")),
@@ -171,11 +223,11 @@ def get_or_create_profile(user_id: int, seed: dict | None = None) -> dict:
             """
             INSERT INTO user_profiles (
                 user_id, company_name, industries, markets, topics, licence_type,
-                custom_sources, alert_threshold, brief_language,
+                custom_sources, regulators, alert_threshold, brief_language,
                 weekly_brief_enabled, ai_enabled, telegram_alerts_enabled,
                 email_alerts_enabled, onboarding_completed, created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 user_id,
@@ -184,6 +236,7 @@ def get_or_create_profile(user_id: int, seed: dict | None = None) -> dict:
                 _json_list([]),
                 _json_list([]),
                 None,
+                _json_list([]),
                 _json_list([]),
                 "MEDIUM",
                 "en",
@@ -217,6 +270,18 @@ def _sanitize_updates(updates: dict[str, Any]) -> dict[str, Any]:
             sanitized[key] = _sanitize_str(value, 200)
         elif key == "custom_sources":
             sanitized[key] = _json_list(_sanitize_custom_sources(value))
+        elif key == "regulators":
+            normalized = normalize_regulators(value)
+            # Fail closed at the boundary: a non-empty input that yields no
+            # valid codes (e.g. ["TYPO"]) must NOT be stored as [] — that
+            # would silently un-scope the customer to "all regulators".
+            # An explicitly empty input still means "all" (backward compatible).
+            if not normalized and _regulators_input_nonempty(value):
+                raise ValueError(
+                    "regulators must be valid codes: "
+                    + ", ".join(sorted(ALLOWED_REGULATOR_CODES))
+                )
+            sanitized[key] = _json_list(normalized)
         elif key == "alert_threshold":
             threshold = str(value or "").strip().upper()
             if threshold not in {"LOW", "MEDIUM", "HIGH"}:
