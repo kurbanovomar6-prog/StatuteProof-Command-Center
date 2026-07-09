@@ -12,9 +12,12 @@ Scoring rules (evaluated in order — first match wins):
   HIGH    requires one of:
             • ≥ 2 strong-risk keywords matched, OR
             • 1 strong-risk keyword + ≥ 1 context-amplifier word
-          strong-risk keywords:   ban, restriction, license, rate, penalty, sanction
+          strong-risk keywords:   ban, restriction, license/licence, penalty,
+                                   sanction, fine, revoke, suspend, cease …
           context-amplifier words: deadline, compliance, reporting, obligation,
-                                   mandatory, enforcement, fine
+                                   mandatory, enforcement
+          Context amplifiers are DISTINCT from strong keywords — a single
+          strong word cannot self-pair into HIGH (fix-self-pairing).
 
   MEDIUM  • 1 strong-risk keyword without context support, OR
           • Moderate-change keyword: update, change, amendment
@@ -117,17 +120,39 @@ _HIGH_KEYWORDS: tuple[str, ...] = (
 # Words that amplify a single HIGH keyword into a confirmed HIGH signal.
 # They indicate a concrete regulatory obligation rather than incidental usage
 # (e.g. "exchange rate update" vs "penalty for non-compliance by deadline").
+#
+# fix-self-pairing: context amplifiers MUST be terms DISTINCT from
+# _HIGH_KEYWORDS. Previously `license`, `sanction`, `penalty`, and `fine`
+# appeared in BOTH lists, so a single occurrence of one such token matched
+# _HIGH_KEYWORDS and _HIGH_CONTEXT_WORDS independently — self-pairing one
+# strong word into a false HIGH via HIGH path 2 ("A penalty applies." -> HIGH).
+# Removing the overlap keeps those terms strong (still in _HIGH_KEYWORDS)
+# while requiring a genuinely different obligation term to confirm HIGH.
+#
+# `enforcement` STAYS here: standing alone it is a genuine obligation
+# amplifier ("a ban ... with immediate enforcement" -> real HIGH). It is,
+# however, a word-bounded SUBSTRING of the strong keyword "enforcement
+# action", which would let that phrase self-pair. That case — and any future
+# exact/substring overlap between the two lists — is neutralised structurally
+# by _drop_self_pairs() in analyze_risk, which removes a context term only
+# when it is contained in an actually-matched strong keyword. This keeps the
+# legitimate amplifier while blocking the self-pair.
 _HIGH_CONTEXT_WORDS: tuple[str, ...] = (
     "deadline",
-    "penalty",
-    "license",
-    "sanction",
     "compliance",
     "reporting",
     "obligation",
     "mandatory",
     "enforcement",
-    "fine",
+    # Obligation / deadline markers — genuine, DISTINCT amplifiers (none of
+    # these appear in _HIGH_KEYWORDS, so they cannot self-pair a strong term).
+    # They confirm a concrete obligation attached to a single strong keyword,
+    # e.g. "A penalty applies ... must file ... no later than <date>" (a real
+    # HIGH) versus "It was a fine morning" (no obligation marker -> not HIGH).
+    "must",
+    "shall",
+    "required",
+    "no later than",
 )
 
 _MEDIUM_KEYWORDS: tuple[str, ...] = (
@@ -287,6 +312,27 @@ def _match_terms(terms: tuple[str, ...], text: str) -> list[str]:
     return matched
 
 
+def _drop_self_pairs(
+    matched_context: list[str], matched_high: list[str]
+) -> list[str]:
+    """Structural self-pairing guard (fix-self-pairing, rework).
+
+    HIGH path 2 (one strong keyword + a context amplifier) must be confirmed
+    by a GENUINELY DISTINCT context signal. A context term that is equal to,
+    or a substring of, a matched strong keyword is the SAME token acting as
+    its own amplifier — e.g. context "enforcement" inside strong keyword
+    "enforcement action", or a future exact duplicate across the two lists.
+
+    Drop any such context term so a lone strong keyword can never self-amplify
+    into HIGH. Order-preserving; distinct context terms are untouched.
+    """
+    return [
+        ctx
+        for ctx in matched_context
+        if not any(ctx in strong for strong in matched_high)
+    ]
+
+
 _ADAPTER_BANNER = "listing items"
 
 
@@ -417,6 +463,13 @@ def analyze_risk(diff_result: dict) -> dict:
                     "detection terms — human review required to assess risk."
                 ),
             }
+
+    # fix-self-pairing (structural guard): a context amplifier that is equal
+    # to — or a word-bounded substring of — a matched strong keyword is the
+    # SAME token self-pairing (e.g. "enforcement" inside "enforcement action").
+    # Drop it so HIGH path 2 always requires a genuinely DISTINCT context
+    # signal. Runs after the EN + AR context lists are fully assembled.
+    matched_context = _drop_self_pairs(matched_context, matched_high)
 
     # A2 (alert-quality sprint): every reason names the ACTUAL matches.
     # Rule ids form the documented severity rubric (see module docstring).

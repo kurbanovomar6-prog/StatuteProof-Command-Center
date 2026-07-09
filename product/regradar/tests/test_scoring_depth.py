@@ -111,6 +111,85 @@ class FormatShiftGuardTests(unittest.TestCase):
         self.assertEqual(r["risk_level"], "HIGH", r)
 
 
+class SelfPairingGuardTests(unittest.TestCase):
+    """A single strong keyword must not self-amplify to HIGH by acting as
+    its own context amplifier.
+
+    Defect (fix-self-pairing): `license`, `licence`, `sanction(s)`,
+    `fine(s)`, `penalty(ies)` appeared in BOTH _HIGH_KEYWORDS and
+    _HIGH_CONTEXT_WORDS. A single occurrence of one such token matched both
+    lists independently, so HIGH path 2 (1 strong + context) fired from ONE
+    word pairing with itself. Verified live on main:
+      "A penalty applies."                 -> HIGH (matched=['penalty'], context=['penalty'])
+      "It was a fine morning ... picnic."  -> HIGH (matched=['fine'],    context=['fine'])
+    A genuine context amplifier must be a DISTINCT term (deadline,
+    compliance, reporting, obligation, mandatory, enforcement).
+    """
+
+    def test_single_penalty_alone_is_medium_not_high(self):
+        r = analyze_risk(_diff(["A penalty applies."]))
+        self.assertEqual(r["risk_level"], "MEDIUM", r)
+        self.assertEqual(r.get("rule"), "MEDIUM_SINGLE_STRONG", r)
+        self.assertEqual(r.get("matched_keywords"), ["penalty"], r)
+        self.assertEqual(r.get("matched_context"), [], r)
+
+    def test_single_fine_non_regulatory_not_high(self):
+        r = analyze_risk(
+            _diff(["It was a fine morning for the staff picnic."])
+        )
+        self.assertNotEqual(r["risk_level"], "HIGH", r)
+
+    def test_single_license_alone_not_high(self):
+        r = analyze_risk(_diff(["A single license issued."]))
+        self.assertNotEqual(r["risk_level"], "HIGH", r)
+
+    def test_single_sanction_alone_not_high(self):
+        r = analyze_risk(_diff(["One sanction referenced in the notice."]))
+        self.assertNotEqual(r["risk_level"], "HIGH", r)
+
+    def test_enforcement_action_alone_not_high(self):
+        # Residual SUBSTRING self-pair: "enforcement" (context) is a
+        # word-bounded substring of the strong keyword "enforcement action".
+        # A single "enforcement action" phrase, standing alone, must NOT
+        # self-pair to HIGH — it is one strong keyword with no distinct
+        # context signal.
+        r = analyze_risk(_diff(["enforcement action"]))
+        self.assertEqual(r["risk_level"], "MEDIUM", r)
+        self.assertEqual(r.get("rule"), "MEDIUM_SINGLE_STRONG", r)
+        self.assertEqual(r.get("matched_keywords"), ["enforcement action"], r)
+        self.assertEqual(r.get("matched_context"), [], r)
+
+    def test_enforcement_action_plus_distinct_context_still_high(self):
+        # "enforcement action" (strong) + a genuinely distinct context word
+        # (deadline) must still confirm HIGH.
+        r = analyze_risk(
+            _diff(["An enforcement action follows. The reporting deadline is fixed."])
+        )
+        self.assertEqual(r["risk_level"], "HIGH", r)
+        self.assertEqual(r.get("rule"), "HIGH_STRONG_PLUS_CONTEXT", r)
+        self.assertIn("deadline", r.get("matched_context", []), r)
+        # The substring self-pair token must NOT survive in context.
+        self.assertNotIn("enforcement", r.get("matched_context", []), r)
+
+    def test_genuine_multi_strong_still_high(self):
+        # Three distinct strong keywords — path 1 (>=2 strong) still fires.
+        r = analyze_risk(
+            _diff(["A ban and a penalty apply, with revocation of the licence."])
+        )
+        self.assertEqual(r["risk_level"], "HIGH", r)
+
+    def test_strong_plus_distinct_context_still_high(self):
+        # One strong keyword + a genuine DISTINCT context word (deadline).
+        r = analyze_risk(
+            _diff(["A penalty applies. The reporting deadline is fixed."])
+        )
+        self.assertEqual(r["risk_level"], "HIGH", r)
+        self.assertEqual(r.get("rule"), "HIGH_STRONG_PLUS_CONTEXT", r)
+        self.assertIn("deadline", r.get("matched_context", []), r)
+        # The self-pairing token must NOT appear in the context list.
+        self.assertNotIn("penalty", r.get("matched_context", []), r)
+
+
 class RuleNamingTests(unittest.TestCase):
     def test_every_verdict_carries_rule_and_matches(self):
         cases = [
