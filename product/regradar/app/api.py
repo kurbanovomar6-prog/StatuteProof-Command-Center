@@ -402,8 +402,6 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_sources_summary()
         elif path == "/api/sources/status":
             self._handle_sources_status()
-        elif path == "/api/sources/readiness":
-            self._handle_sources_readiness()
         elif path == "/api/custom-sources":
             self._handle_custom_sources_list()
         elif path == "/api/evidence":
@@ -432,8 +430,6 @@ class _Handler(BaseHTTPRequestHandler):
             self._disabled_endpoint()
         elif path == "/api/reports/monthly-assurance":
             self._handle_monthly_assurance_report()
-        elif path == "/api/email/delivery-status":
-            self._handle_email_delivery_status()
         elif path in ("/api/health", "/api/"):
             self._handle_health()
         else:
@@ -492,8 +488,6 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_custom_source_test()
         elif path == "/api/custom-sources":
             self._handle_custom_sources_add()
-        elif path == "/api/review/action":
-            self._handle_review_action()
         elif path == "/api/canonical-evidence/review":
             self._handle_canonical_evidence_review_action()
         elif path == "/api/audit/vault":
@@ -2291,26 +2285,6 @@ class _Handler(BaseHTTPRequestHandler):
         })
 
 
-    def _handle_sources_readiness(self) -> None:
-        """
-        Return readiness summary for all enabled sources.
-
-        Uses latest run records — no live fetch. Safe to call frequently.
-        GET /api/sources/readiness
-        """
-        user = require_auth(self)
-        if not user:
-            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
-            return
-        try:
-            from app.source_intake import readiness_summary, load_sources_json
-            sources = load_sources_json()
-            summary = readiness_summary(sources)
-            self._send_json({"ok": True, **summary})
-        except Exception as exc:
-            logger.error("sources/readiness error: %s", exc)
-            self._send_json({"ok": False, "message": "Failed to load readiness data."}, 500)
-
     def _handle_custom_sources_list(self) -> None:
         """
         List custom (user-added) sources for the authenticated user.
@@ -2620,56 +2594,6 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             logger.error("monthly-assurance error: %s", type(exc).__name__)
             self._send_json({"status": "error", "message": "Internal server error."}, 500)
-
-    # ── GET /api/email/delivery-status ────────────────────────────────────────
-
-    def _handle_email_delivery_status(self) -> None:
-        """Return email provider configuration status (authenticated users only)."""
-        user = require_auth(self)
-        if not user:
-            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
-            return
-        from app.email_delivery import validate_email_provider_config
-        try:
-            config = validate_email_provider_config()
-            self._send_json({"status": "ok", **config})
-        except Exception as exc:
-            logger.error("email delivery-status error: %s", type(exc).__name__)
-            self._send_json({"status": "error", "message": "Unable to retrieve email configuration."}, 500)
-
-    # ── POST /api/review/action ───────────────────────────────────────────────
-
-    def _handle_review_action(self) -> None:
-        """Record an accountability action on a review queue item."""
-        user = require_auth(self)
-        if not user:
-            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
-            return
-        from app.review_queue import record_review_action
-        body, error = self._read_json_strict()
-        if error:
-            self._send_json({"ok": False, "message": error}, 400)
-            return
-        if body is None:
-            self._send_json({"ok": False, "message": "Request body required."}, 400)
-            return
-        record_id = str(body.get("record_id") or "").strip()
-        action = str(body.get("action") or "").strip()
-        # Derive user_id from the authenticated session; ignore any client-supplied value.
-        user_id = str(user.get("id") or "").strip()
-        reason = str(body.get("reason") or "").strip()
-        if not record_id or not action or not user_id:
-            self._send_json({"ok": False, "message": "record_id, action, and user_id are required."}, 400)
-            return
-        try:
-            result = record_review_action(record_id, action, user_id, reason=reason)
-            if result.get("status") == "error":
-                self._send_json({"ok": False, **result}, 400)
-            else:
-                self._send_json({"ok": True, **result})
-        except Exception as exc:
-            logger.error("review action error: %s", type(exc).__name__)
-            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_canonical_evidence_review_action(self) -> None:
         """Append an approval/rejection/block decision for canonical evidence."""
