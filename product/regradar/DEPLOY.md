@@ -8,7 +8,10 @@ at the droplet — set DNS **before** droplet day, propagation is not counted.
 ## 0. Precondition gate (ABORT if any item fails)
 
 Patched 2026-07-05 after the first droplet-day abort (unexplained host-key
-change on the old IP). App code deploys from **pin c1ddb8a**.
+change on the old IP). App code deploys from **origin/main** — the converged,
+gate-green build (HEAD `679c0a3` at time of writing). The previous `c1ddb8a`
+pin was **56 commits stale and pre-convergence** (missing the loader-status,
+false-HIGH signal, relevance-scope, and claims fixes); do **not** deploy it.
 
 1. **Telegram token**: rotated via @BotFather; old token revoked; new token
    staged in a local secret file (never chat, never git).
@@ -60,9 +63,9 @@ systemctl restart systemd-journald
 ## 3. App code + Python env (≈6 min)
 
 ```bash
-# as root — clean clone at the pinned commit (never rsync a working tree)
+# as root — clean clone of the converged main branch (never rsync a working tree)
 git clone https://github.com/kurbanovomar6-prog/StatuteProof-Command-Center.git /srv/regradar-src
-git -C /srv/regradar-src checkout c1ddb8a
+git -C /srv/regradar-src checkout main   # converged gate-green build (was: stale pin c1ddb8a)
 cp -r /srv/regradar-src/product/regradar/. /srv/regradar/
 cd /srv/regradar
 python3.12 -m venv .venv
