@@ -81,6 +81,41 @@ logger = logging.getLogger(__name__)
 _TELEGRAM_TIMEOUT_S = 10
 _CONTACT_QUEUE = BASE_DIR / "data" / "contact_requests.jsonl"
 
+
+def _notify_founder_registration(
+    email: str, full_name: str = "", company_name: str = ""
+) -> None:
+    """Best-effort Telegram note to the founder when a new user registers.
+
+    Fire-and-forget: runs in a daemon thread from _handle_auth_register and
+    must NEVER raise — a Telegram outage or missing config cannot be allowed
+    to affect the registration path.
+    """
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+    try:
+        lines = ["🆕 New user registered", f"Email: {email}"]
+        if full_name:
+            lines.append(f"Name: {full_name}")
+        if company_name:
+            lines.append(f"Company: {company_name}")
+        lines.append(
+            f"Time (UTC): {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}"
+        )
+        resp = _req.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={
+                "chat_id": TELEGRAM_CHAT_ID,
+                "text": "\n".join(lines),
+                "disable_web_page_preview": True,
+            },
+            timeout=_TELEGRAM_TIMEOUT_S,
+        )
+        if not resp.json().get("ok"):
+            logger.warning("Founder registration notify: Telegram API returned not-ok")
+    except Exception as exc:  # noqa: BLE001 — deliberately swallow everything
+        logger.warning("Founder registration notify failed: %s", type(exc).__name__)
+
 # CORS_ALLOWED_ORIGIN env var controls which origin is permitted.
 # Leave unset in production (same-origin deployment) — no CORS headers will be sent.
 # Set to http://localhost:5173 for local development against the Vite dev server.
@@ -547,6 +582,13 @@ class _Handler(BaseHTTPRequestHandler):
             _threading.Thread(
                 target=_send_verification_email,
                 args=(user["email"], verification_url),
+                daemon=True,
+            ).start()
+            # Founder heads-up via the admin bot — best-effort, never blocks
+            # or fails the registration (see _notify_founder_registration).
+            _threading.Thread(
+                target=_notify_founder_registration,
+                args=(user["email"], str(full_name or ""), company_name),
                 daemon=True,
             ).start()
             self._send_json(
