@@ -93,7 +93,11 @@ chown regradar:regradar .env && chmod 600 .env
 ## 5. Frontend build (≈3 min)
 
 ```bash
-apt-get install -y nodejs npm       # Ubuntu 24.04 ships Node 18+
+# Ubuntu 24.04's apt nodejs is 18.x — TOO OLD for our Vite (needs Node 20+;
+# apt node fails with "ReferenceError: CustomEvent is not defined").
+# Install Node 22 LTS from NodeSource instead:
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt-get install -y nodejs
 cd /srv/regradar/web && npm ci && npm run build
 # Same-origin deployment: do NOT set VITE_API_URL.
 ```
