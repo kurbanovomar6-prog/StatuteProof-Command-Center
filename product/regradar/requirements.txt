@@ -12,6 +12,10 @@
 
 # -- core ---------------------------------------------------------------------
 requests==2.33.0
+# brotli: lets urllib3 decode Content-Encoding: br. Without it, any client
+# that advertises "br" receives compressed bytes it cannot decode
+# (VARA public-register mojibake incident, 2026-07-10).
+brotli==1.2.0
 python-dotenv==1.2.2
 
 # -- scraper/parser imports ---------------------------------------------------

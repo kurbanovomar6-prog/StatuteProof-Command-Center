@@ -35,7 +35,9 @@ _HEADERS = {
     "User-Agent": REQUESTS_UA,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
+    # No explicit Accept-Encoding: urllib3 advertises only codecs it can
+    # actually decode — hardcoded "br" without the brotli package corrupts
+    # the body (see adapters/vara.py, 2026-07-10 incident).
     "Referer": "https://tax.gov.ae/",
 }
 
