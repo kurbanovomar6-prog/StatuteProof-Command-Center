@@ -90,3 +90,6 @@ product/regradar/coverage.json
 product/regradar/logs/
 product/regradar/data/outbox/
 backups/
+/ecc/
+/agent-browser/
+.claude/.review-approved
