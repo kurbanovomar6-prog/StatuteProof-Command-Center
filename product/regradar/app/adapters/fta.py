@@ -24,7 +24,12 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from app.adapters.base import SourceAdapter, is_quality_content
+from app.adapters.base import (
+    SourceAdapter,
+    fetch_text_bounded,
+    is_quality_content,
+    read_bytes_bounded,
+)
 from app.config import HTTP_TIMEOUT_S, PAGE_TIMEOUT_MS, REQUESTS_UA
 from app.document_extractor import extract_pdf_text
 from app.parser import extract_text
@@ -159,14 +164,9 @@ class FTAAdapter(SourceAdapter):
             logger.warning("FTAAdapter: PDF too large (%d bytes) for %s", content_length, url)
             return None
 
-        try:
-            pdf_bytes = response.content
-        except Exception as exc:
-            logger.warning("FTAAdapter: PDF read failed for %s: %s", url, exc)
-            return None
-
-        if len(pdf_bytes) > _PDF_MAX_BYTES:
-            logger.warning("FTAAdapter: PDF content exceeded size limit for %s", url)
+        # Chunked read bounds peak memory even when Content-Length lies
+        pdf_bytes = read_bytes_bounded(response, _PDF_MAX_BYTES, label="FTAAdapter")
+        if pdf_bytes is None:
             return None
 
         result = extract_pdf_text(pdf_bytes)
@@ -209,23 +209,17 @@ class FTAAdapter(SourceAdapter):
 
     def _fetch_via_requests(self, url: str) -> str | None:
         """Fast path: requests + BeautifulSoup."""
-        try:
-            response = requests.get(
-                url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, allow_redirects=True
-            )
-        except Exception as exc:
-            logger.debug("FTAAdapter: requests failed for %s: %s", url, exc)
+        html = fetch_text_bounded(
+            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="FTAAdapter"
+        )
+        if html is None:
             return None
 
-        if response.status_code != 200:
-            logger.debug("FTAAdapter: HTTP %d for %s", response.status_code, url)
-            return None
-
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")
         _strip_noise(soup)
 
         # Trafilatura / readability via extract_text
-        text = extract_text(response.text) or ""
+        text = extract_text(html) or ""
 
         # Target known FTA content containers when trafilatura is insufficient.
         # #maincontent and the UpdatePanel ID are preferred because the FTA

@@ -22,13 +22,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.adapters.base import is_quality_content
+from app.adapters.base import is_quality_content, read_bytes_bounded
 from app.alert_content import (
+    _EXCERPT_CAP,
     _OMITTED_CONTENT_NOTE,
     _UNREADABLE_EXCERPT_NOTE,
     _build_excerpt,
     build_alert_content,
 )
+from app.text_quality import is_unreadable_char
 
 
 def _mojibake(chars: int = 800) -> str:
@@ -92,6 +94,83 @@ def test_excerpt_keeps_readable_chunks_and_flags_omitted_garbage():
 def test_excerpt_unchanged_for_clean_diffs():
     excerpt = _build_excerpt(["New fine schedule applies."], ["Old fine schedule."])
     assert excerpt == "+ New fine schedule applies.  − Old fine schedule."
+
+
+def test_excerpt_total_length_capped_even_with_omission_note():
+    long_readable = ("Administrative Resolution concerning licensing fees. " * 20).strip()
+    excerpt = _build_excerpt([long_readable, _mojibake(200)], [])
+    assert len(excerpt) <= _EXCERPT_CAP
+    assert excerpt.endswith(_OMITTED_CONTENT_NOTE)
+
+
+def test_excerpt_strips_markdown_metacharacters_from_kept_chunks():
+    chunk = "See [Click here](https://evil.example/phish) *bold* _italic_ `code`"
+    excerpt = _build_excerpt([chunk], [])
+    for ch in "*_`[]":
+        assert ch not in excerpt
+    # Parentheses are legitimate legal-text characters and must survive —
+    # without brackets they cannot form a Markdown link.
+    assert "(39)" in _build_excerpt(["Resolution No. (39) of 2026"], [])
+
+
+def test_excerpt_strips_stray_control_bytes_from_kept_chunks():
+    # 2 BEL bytes in a ~70-char chunk is under the 5% drop threshold,
+    # so the chunk is kept — but the control bytes must not survive.
+    chunk = "Penalty schedule updated\x07 for licensed entities\x07 effective 2026."
+    excerpt = _build_excerpt([chunk], [])
+    assert "\x07" not in excerpt
+    assert "Penalty schedule updated" in excerpt
+
+
+# ── shared predicate: DEL and C1 range count as unreadable ────────────────────
+
+def test_unreadable_predicate_covers_del_and_c1_range():
+    assert is_unreadable_char("\x7f")   # DEL
+    assert is_unreadable_char("\x85")   # NEL (C1)
+    assert is_unreadable_char("\x9f")   # C1 upper bound
+    assert is_unreadable_char("�")
+    assert not is_unreadable_char("\n")
+    assert not is_unreadable_char("ب")   # Arabic
+    assert not is_unreadable_char("ж")   # Cyrillic
+    assert not is_unreadable_char("😀")  # emoji
+
+
+def test_quality_gate_boundary_floor_and_ratio_are_strict():
+    para = "Licensing conditions apply to registered providers.\n\n"
+    # 8 junk chars == floor → must pass regardless of ratio (strict >)
+    base = (para * 12)[:492]
+    assert is_quality_content(base + "�" * 8)
+    # 10 junk in 500 chars == exactly the 2% ratio → still passes (strict >)
+    assert is_quality_content((para * 12)[:490] + "�" * 10)
+    # 11 junk in 500 chars → 2.2% > 2% → rejected
+    assert not is_quality_content((para * 12)[:489] + "�" * 11)
+
+
+# ── layer 1b: bounded reads stop decompression bombs ──────────────────────────
+
+class _StubResponse:
+    url = "https://example.test/page"
+
+    def __init__(self, chunks: list[bytes]):
+        self._chunks = chunks
+        self.closed = False
+
+    def iter_content(self, chunk_size: int):
+        yield from self._chunks
+
+    def close(self):
+        self.closed = True
+
+
+def test_read_bytes_bounded_returns_body_within_limit():
+    stub = _StubResponse([b"a" * 1000] * 5)
+    assert read_bytes_bounded(stub, 10_000) == b"a" * 5000
+
+
+def test_read_bytes_bounded_aborts_oversized_decompressed_body():
+    stub = _StubResponse([b"a" * 1024] * 20)  # 20 KB decompressed
+    assert read_bytes_bounded(stub, 10 * 1024) is None
+    assert stub.closed, "connection must be closed on abort"
 
 
 def test_alert_content_end_to_end_never_contains_replacement_chars():

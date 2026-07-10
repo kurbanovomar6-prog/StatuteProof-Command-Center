@@ -23,7 +23,12 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from app.adapters.base import SourceAdapter, is_quality_content
+from app.adapters.base import (
+    SourceAdapter,
+    fetch_text_bounded,
+    is_quality_content,
+    read_bytes_bounded,
+)
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.document_extractor import extract_pdf_text
 from app.parser import extract_text
@@ -270,14 +275,9 @@ class VARAAdapter(SourceAdapter):
             logger.warning("VARAAdapter: PDF too large (%d bytes) for %s", content_length, url)
             return None
 
-        try:
-            pdf_bytes = response.content
-        except Exception as exc:
-            logger.warning("VARAAdapter: PDF read failed for %s: %s", url, exc)
-            return None
-
-        if len(pdf_bytes) > _PDF_MAX_BYTES:
-            logger.warning("VARAAdapter: PDF content exceeded size limit for %s", url)
+        # Chunked read bounds peak memory even when Content-Length lies
+        pdf_bytes = read_bytes_bounded(response, _PDF_MAX_BYTES, label="VARAAdapter")
+        if pdf_bytes is None:
             return None
 
         result = extract_pdf_text(pdf_bytes)
@@ -298,19 +298,13 @@ class VARAAdapter(SourceAdapter):
 
     def _fetch_revision_listing(self, url: str) -> str | None:
         logger.debug("VARAAdapter: fetching revision listing %s", url)
-        try:
-            response = requests.get(
-                url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, allow_redirects=True
-            )
-        except Exception as exc:
-            logger.warning("VARAAdapter: revision listing request failed for %s: %s", url, exc)
+        html = fetch_text_bounded(
+            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="VARAAdapter"
+        )
+        if html is None:
             return None
 
-        if response.status_code != 200:
-            logger.warning("VARAAdapter: HTTP %d for revision listing %s", response.status_code, url)
-            return None
-
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")
         for tag in soup(["script", "style", "noscript", "nav", "footer", "header"]):
             tag.decompose()
 
@@ -318,7 +312,7 @@ class VARAAdapter(SourceAdapter):
         if not items:
             logger.debug("VARAAdapter: no items found in revision listing %s", url)
             # Fall through to generic HTML extraction
-            text = extract_text(response.text) or _clean(soup.get_text("\n", strip=True))
+            text = extract_text(html) or _clean(soup.get_text("\n", strip=True))
             if not is_quality_content(text):
                 return None
             return f"VARA revision listing\n\nURL: {url}\n\n{text}"
@@ -333,19 +327,13 @@ class VARAAdapter(SourceAdapter):
 
     def _fetch_html_page(self, url: str) -> str | None:
         logger.debug("VARAAdapter: fetching HTML page %s", url)
-        try:
-            response = requests.get(
-                url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, allow_redirects=True
-            )
-        except Exception as exc:
-            logger.warning("VARAAdapter: HTML request failed for %s: %s", url, exc)
+        html = fetch_text_bounded(
+            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="VARAAdapter"
+        )
+        if html is None:
             return None
 
-        if response.status_code != 200:
-            logger.warning("VARAAdapter: HTTP %d for %s", response.status_code, url)
-            return None
-
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")
         for tag in soup(["script", "style", "noscript", "nav", "footer", "header"]):
             tag.decompose()
 
@@ -357,7 +345,7 @@ class VARAAdapter(SourceAdapter):
                 return result
 
         # Trafilatura / readability via extract_text
-        text = extract_text(response.text) or ""
+        text = extract_text(html) or ""
 
         # BeautifulSoup fallback — target known VARA content regions
         if not is_quality_content(text):
