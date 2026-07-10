@@ -59,19 +59,50 @@ def _format_ts(value: str) -> str:
     return ts.strftime("%Y-%m-%d %H:%M UTC")
 
 
-def _build_excerpt(added: list, removed: list, cap: int = _EXCERPT_CAP) -> str:
+# A diff chunk this saturated with replacement/control characters is not
+# human-readable (binary or mis-decoded source body) — showing it to a
+# customer is worse than saying plainly that it could not be rendered.
+_UNREADABLE_CHUNK_RATIO = 0.05
+
+_UNREADABLE_EXCERPT_NOTE = (
+    "The changed content could not be rendered as readable text "
+    "(binary or improperly encoded source data). Verify the source page "
+    "directly and review the stored evidence record."
+)
+
+_OMITTED_CONTENT_NOTE = "(Some changed content was not machine-readable and was omitted.)"
+
+
+def _unreadable_ratio(text: str) -> float:
+    """Fraction of U+FFFD replacement chars and non-whitespace control bytes."""
+    if not text:
+        return 0.0
+    junk = sum(
+        1 for ch in text if ch == "�" or (ord(ch) < 32 and ch not in "\n\r\t")
+    )
+    return junk / len(text)
+
+
+def _build_excerpt(added: list | None, removed: list | None, cap: int = _EXCERPT_CAP) -> str:
     """Capped excerpt of the real diff: additions first, then removals."""
     parts: list[str] = []
+    dropped_unreadable = False
     for prefix, chunks in (("+", added or []), ("−", removed or [])):
         for chunk in chunks:
             text = _clean(chunk)
-            if text:
-                parts.append(f"{prefix} {text}")
+            if not text:
+                continue
+            if _unreadable_ratio(text) > _UNREADABLE_CHUNK_RATIO:
+                dropped_unreadable = True
+                continue
+            parts.append(f"{prefix} {text}")
     if not parts:
-        return ""
+        return _UNREADABLE_EXCERPT_NOTE if dropped_unreadable else ""
     excerpt = "  ".join(parts)
     if len(excerpt) > cap:
         excerpt = excerpt[: cap - 1].rstrip() + "…"
+    if dropped_unreadable:
+        excerpt += f"  {_OMITTED_CONTENT_NOTE}"
     return excerpt
 
 

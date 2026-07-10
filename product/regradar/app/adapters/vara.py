@@ -34,7 +34,10 @@ _HEADERS = {
     "User-Agent": REQUESTS_UA,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
+    # No explicit Accept-Encoding: urllib3 advertises only codecs it can
+    # actually decode (br/zstd only when the libs are installed). Hardcoding
+    # "br" without the brotli package shipped compressed bytes into the
+    # pipeline as mojibake (VARA public-register incident, 2026-07-10).
 }
 
 _PDF_HEADERS = {
