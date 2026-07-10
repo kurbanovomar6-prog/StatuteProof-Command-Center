@@ -22,6 +22,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
+from app.text_quality import strip_unreadable_chars, unreadable_ratio
+
 FOOTER = "Monitoring information only. Not legal advice."
 
 _EXCERPT_CAP = 400
@@ -59,9 +61,11 @@ def _format_ts(value: str) -> str:
     return ts.strftime("%Y-%m-%d %H:%M UTC")
 
 
-# A diff chunk this saturated with replacement/control characters is not
+# A diff chunk this saturated with unreadable characters is not
 # human-readable (binary or mis-decoded source body) — showing it to a
 # customer is worse than saying plainly that it could not be rendered.
+# Character classification is shared with the adapter quality gate:
+# see app/text_quality.py.
 _UNREADABLE_CHUNK_RATIO = 0.05
 
 _UNREADABLE_EXCERPT_NOTE = (
@@ -72,19 +76,21 @@ _UNREADABLE_EXCERPT_NOTE = (
 
 _OMITTED_CONTENT_NOTE = "(Some changed content was not machine-readable and was omitted.)"
 
-
-def _unreadable_ratio(text: str) -> float:
-    """Fraction of U+FFFD replacement chars and non-whitespace control bytes."""
-    if not text:
-        return 0.0
-    junk = sum(
-        1 for ch in text if ch == "�" or (ord(ch) < 32 and ch not in "\n\r\t")
-    )
-    return junk / len(text)
+# Telegram renders alerts with parse_mode=Markdown; these metacharacters in
+# page-derived text could inject live links or corrupt message formatting.
+# Stripped (not escaped) to match the house pattern in telegram.py _safe().
+_MARKDOWN_METACHARS = str.maketrans("", "", "*_`[]")
 
 
 def _build_excerpt(added: list | None, removed: list | None, cap: int = _EXCERPT_CAP) -> str:
-    """Capped excerpt of the real diff: additions first, then removals."""
+    """
+    Capped excerpt of the real diff: additions first, then removals.
+
+    Chunks saturated with unreadable characters are dropped; surviving
+    chunks are stripped of stray unreadable bytes and Markdown
+    metacharacters. The cap bounds the FINAL string, including any
+    appended omission note.
+    """
     parts: list[str] = []
     dropped_unreadable = False
     for prefix, chunks in (("+", added or []), ("−", removed or [])):
@@ -92,15 +98,18 @@ def _build_excerpt(added: list | None, removed: list | None, cap: int = _EXCERPT
             text = _clean(chunk)
             if not text:
                 continue
-            if _unreadable_ratio(text) > _UNREADABLE_CHUNK_RATIO:
+            if unreadable_ratio(text) > _UNREADABLE_CHUNK_RATIO:
                 dropped_unreadable = True
                 continue
-            parts.append(f"{prefix} {text}")
+            text = strip_unreadable_chars(text).translate(_MARKDOWN_METACHARS)
+            if text.strip():
+                parts.append(f"{prefix} {text}")
     if not parts:
         return _UNREADABLE_EXCERPT_NOTE if dropped_unreadable else ""
     excerpt = "  ".join(parts)
-    if len(excerpt) > cap:
-        excerpt = excerpt[: cap - 1].rstrip() + "…"
+    budget = cap - (len(_OMITTED_CONTENT_NOTE) + 2 if dropped_unreadable else 0)
+    if len(excerpt) > budget:
+        excerpt = excerpt[: budget - 1].rstrip() + "…"
     if dropped_unreadable:
         excerpt += f"  {_OMITTED_CONTENT_NOTE}"
     return excerpt
