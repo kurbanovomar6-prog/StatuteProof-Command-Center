@@ -168,6 +168,7 @@ def send_telegram_alert(result: dict) -> bool:
     from app.alert_content import build_alert_content, render_telegram
 
     url = result.get("url", "unknown")
+    source_name = str(result.get("source_name") or "")
     message = render_telegram(build_alert_content(result))
 
     # Cycle 3: verification/e2e runs must never send real alerts. With

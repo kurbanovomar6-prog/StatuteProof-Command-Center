@@ -25,9 +25,8 @@ from __future__ import annotations
 import logging
 import xml.etree.ElementTree as ET
 
-import requests
 
-from app.adapters.base import SourceAdapter
+from app.adapters.base import fetch_bytes_bounded, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 
 logger = logging.getLogger(__name__)
@@ -51,23 +50,18 @@ class FCARSSAdapter(SourceAdapter):
         Returns None when the feed cannot be reached or yields no items.
         Never raises.
         """
-        try:
-            resp = requests.get(
-                _RSS_URL,
-                headers={"User-Agent": REQUESTS_UA},
-                timeout=HTTP_TIMEOUT_S,
-                allow_redirects=True,
-            )
-        except Exception as exc:
-            logger.warning("FCA RSS fetch error: %s", exc)
-            return None
-
-        if resp.status_code != 200:
-            logger.warning("FCA RSS: HTTP %d for %s", resp.status_code, _RSS_URL)
+        data = fetch_bytes_bounded(
+            _RSS_URL,
+            headers={"User-Agent": REQUESTS_UA},
+            timeout=HTTP_TIMEOUT_S,
+            label="FCARSSAdapter",
+        )
+        if data is None:
+            logger.warning("FCA RSS fetch failed")
             return None
 
         try:
-            root = ET.fromstring(resp.content)
+            root = ET.fromstring(data)
         except ET.ParseError as exc:
             logger.warning("FCA RSS XML parse error: %s", exc)
             return None

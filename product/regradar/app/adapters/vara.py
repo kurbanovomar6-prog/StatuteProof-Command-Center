@@ -20,14 +20,13 @@ import logging
 import re
 from urllib.parse import urljoin, urlparse
 
-import requests
 from bs4 import BeautifulSoup
 
 from app.adapters.base import (
+    fetch_bytes_bounded,
     SourceAdapter,
     fetch_text_bounded,
     is_quality_content,
-    read_bytes_bounded,
 )
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.document_extractor import extract_pdf_text
@@ -253,30 +252,13 @@ class VARAAdapter(SourceAdapter):
 
     def _fetch_pdf(self, url: str) -> str | None:
         logger.debug("VARAAdapter: fetching PDF %s", url)
-        try:
-            response = requests.get(
-                url,
-                headers=_PDF_HEADERS,
-                timeout=HTTP_TIMEOUT_S,
-                allow_redirects=True,
-                stream=True,
-            )
-        except Exception as exc:
-            logger.warning("VARAAdapter: PDF request failed for %s: %s", url, exc)
-            return None
-
-        if response.status_code != 200:
-            logger.warning("VARAAdapter: PDF HTTP %d for %s", response.status_code, url)
-            return None
-
-        # Guard against oversized documents
-        content_length = int(response.headers.get("Content-Length", 0) or 0)
-        if content_length > _PDF_MAX_BYTES:
-            logger.warning("VARAAdapter: PDF too large (%d bytes) for %s", content_length, url)
-            return None
-
-        # Chunked read bounds peak memory even when Content-Length lies
-        pdf_bytes = read_bytes_bounded(response, _PDF_MAX_BYTES, label="VARAAdapter")
+        pdf_bytes = fetch_bytes_bounded(
+            url,
+            headers=_PDF_HEADERS,
+            timeout=HTTP_TIMEOUT_S,
+            max_bytes=_PDF_MAX_BYTES,
+            label="VARAAdapter",
+        )
         if pdf_bytes is None:
             return None
 

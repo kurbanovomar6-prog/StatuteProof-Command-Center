@@ -37,9 +37,8 @@ No authentication, no cookies, no stealth techniques are used.
 import logging
 import xml.etree.ElementTree as ET
 
-import requests
 
-from app.adapters.base import SourceAdapter
+from app.adapters.base import fetch_bytes_bounded, fetch_text_bounded, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.parser import extract_text
 
@@ -106,23 +105,18 @@ class MinfinAdapter(SourceAdapter):
 
         Handles both standard <urlset> and <sitemapindex> formats.
         """
-        try:
-            resp = requests.get(
-                _SITEMAP_URL,
-                headers={"User-Agent": REQUESTS_UA},
-                timeout=_SITEMAP_TIMEOUT_S,
-                allow_redirects=True,
-            )
-        except requests.RequestException as exc:
-            logger.warning("Minfin sitemap fetch error: %s", exc)
-            return []
-
-        if resp.status_code != 200:
-            logger.warning("Minfin sitemap: HTTP %d", resp.status_code)
+        data = fetch_bytes_bounded(
+            _SITEMAP_URL,
+            headers={"User-Agent": REQUESTS_UA},
+            timeout=_SITEMAP_TIMEOUT_S,
+            label="MinfinAdapter",
+        )
+        if data is None:
+            logger.warning("Minfin sitemap fetch failed")
             return []
 
         try:
-            root = ET.fromstring(resp.text)
+            root = ET.fromstring(data)
         except ET.ParseError as exc:
             logger.warning("Minfin sitemap XML parse error: %s", exc)
             return []
@@ -174,13 +168,14 @@ class MinfinAdapter(SourceAdapter):
             if not loc:
                 continue
             try:
-                resp = requests.get(
+                sub_data = fetch_bytes_bounded(
                     loc,
                     headers={"User-Agent": REQUESTS_UA},
                     timeout=_SITEMAP_TIMEOUT_S,
+                    label="MinfinAdapter",
                 )
-                if resp.status_code == 200:
-                    sub_root = ET.fromstring(resp.text)
+                if sub_data is not None:
+                    sub_root = ET.fromstring(sub_data)
                     all_urls.extend(self._extract_urls(sub_root))
             except Exception as exc:
                 logger.debug("Minfin sub-sitemap %s error: %s", loc, exc)
@@ -190,19 +185,15 @@ class MinfinAdapter(SourceAdapter):
 
     def _fetch_page_text(self, page_url: str) -> str | None:
         """Fetch a single page and return extracted paragraph text."""
-        try:
-            resp = requests.get(
-                page_url,
-                headers={
-                    "User-Agent":      REQUESTS_UA,
-                    "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
-                },
-                timeout=HTTP_TIMEOUT_S,
-                allow_redirects=True,
-            )
-            if resp.status_code != 200:
-                return None
-            return extract_text(resp.text) or None
-        except Exception as exc:
-            logger.debug("Minfin page fetch %s: %s", page_url, exc)
+        html = fetch_text_bounded(
+            page_url,
+            headers={
+                "User-Agent":      REQUESTS_UA,
+                "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+            },
+            timeout=HTTP_TIMEOUT_S,
+            label="MinfinAdapter",
+        )
+        if html is None:
             return None
+        return extract_text(html) or None

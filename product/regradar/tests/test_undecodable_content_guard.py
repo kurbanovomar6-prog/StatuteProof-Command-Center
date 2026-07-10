@@ -146,6 +146,36 @@ def test_quality_gate_boundary_floor_and_ratio_are_strict():
     assert not is_quality_content((para * 12)[:489] + "�" * 11)
 
 
+# ── structural guard: adapters cannot bypass the bounded transport ───────────
+
+def test_no_adapter_imports_requests_directly():
+    """
+    Transport policy (size caps, encoding, timeouts) lives in
+    adapters/base.py. An adapter that imports requests directly can silently
+    reintroduce the unbounded-fetch bug class — ban it at the import level.
+    """
+    import re as _re
+    adapters_dir = Path(__file__).parent.parent / "app" / "adapters"
+    offenders = []
+    for f in sorted(adapters_dir.glob("*.py")):
+        if f.name == "base.py":
+            continue
+        if _re.search(r"^\s*(import requests|from requests)", f.read_text(), _re.M):
+            offenders.append(f.name)
+    assert not offenders, (
+        f"adapters must use base.fetch_*_bounded, not requests directly: {offenders}"
+    )
+
+
+def test_is_mostly_unreadable_shared_thresholds():
+    from app.text_quality import is_mostly_unreadable
+    assert is_mostly_unreadable(_mojibake(500))
+    assert not is_mostly_unreadable("")
+    assert not is_mostly_unreadable("clean regulatory text " * 40)
+    # 8 junk chars == floor → strict > means not saturated
+    assert not is_mostly_unreadable(("x" * 92) + "�" * 8)
+
+
 # ── layer 1b: bounded reads stop decompression bombs ──────────────────────────
 
 class _StubResponse:

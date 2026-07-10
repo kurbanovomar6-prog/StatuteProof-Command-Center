@@ -22,7 +22,7 @@ import logging
 
 import requests
 
-from app.text_quality import unreadable_char_count
+from app.text_quality import is_mostly_unreadable
 
 logger = logging.getLogger(__name__)
 
@@ -72,23 +72,24 @@ def read_bytes_bounded(response, max_bytes: int, label: str = "adapter") -> byte
     return b"".join(chunks)
 
 
-def fetch_text_bounded(
+def fetch_bytes_bounded(
     url: str,
     *,
     headers: dict,
     timeout: float,
     max_bytes: int = MAX_FETCH_BYTES,
     label: str = "adapter",
-) -> str | None:
+    verify: bool = True,
+) -> bytes | None:
     """
-    HTTP GET with a hard cap on decompressed body size.
+    HTTP GET returning raw (decompressed) bytes with a hard size cap.
 
-    Returns decoded text on success, None on any failure (request error,
-    non-200 status, oversized body). Never raises.
+    For XML/RSS payloads where the parser handles encoding declarations
+    itself. Returns None on any failure. Never raises.
     """
     try:
         response = requests.get(
-            url, headers=headers, timeout=timeout, allow_redirects=True, stream=True
+            url, headers=headers, timeout=timeout, allow_redirects=True, stream=True, verify=verify
         )
     except Exception as exc:
         logger.warning("%s: request failed for %s: %s", label, url, exc)
@@ -98,7 +99,6 @@ def fetch_text_bounded(
         if response.status_code != 200:
             logger.warning("%s: HTTP %d for %s", label, response.status_code, url)
             return None
-
         declared_len = response.headers.get("Content-Length")
         if declared_len is not None:
             try:
@@ -110,16 +110,81 @@ def fetch_text_bounded(
                     return None
             except ValueError:
                 pass  # malformed header; the bounded read below still protects us
+        return read_bytes_bounded(response, max_bytes, label=label)
+
+
+def fetch_text_bounded_status(
+    url: str,
+    *,
+    headers: dict,
+    timeout: float,
+    max_bytes: int = MAX_FETCH_BYTES,
+    label: str = "adapter",
+    verify: bool = True,
+) -> tuple[int | None, str | None]:
+    """
+    HTTP GET with a hard cap on decompressed body size, preserving status.
+
+    Returns (status_code, text). status_code is None when the request itself
+    failed; text is None on any failure (request error, non-200 status,
+    oversized body). Never raises.
+    """
+    try:
+        response = requests.get(
+            url, headers=headers, timeout=timeout, allow_redirects=True, stream=True, verify=verify
+        )
+    except Exception as exc:
+        logger.warning("%s: request failed for %s: %s", label, url, exc)
+        return None, None
+
+    with response:
+        status = response.status_code
+        if status != 200:
+            logger.warning("%s: HTTP %d for %s", label, status, url)
+            return status, None
+
+        declared_len = response.headers.get("Content-Length")
+        if declared_len is not None:
+            try:
+                if int(declared_len) > max_bytes:
+                    logger.warning(
+                        "%s: Content-Length %s exceeds %d MB limit for %s",
+                        label, declared_len, max_bytes // (1024 * 1024), url,
+                    )
+                    return status, None
+            except ValueError:
+                pass  # malformed header; the bounded read below still protects us
 
         data = read_bytes_bounded(response, max_bytes, label=label)
         if data is None:
-            return None
+            return status, None
 
         encoding = response.encoding or response.apparent_encoding or "utf-8"
         try:
-            return data.decode(encoding, errors="replace")
+            return status, data.decode(encoding, errors="replace")
         except LookupError:
-            return data.decode("utf-8", errors="replace")
+            return status, data.decode("utf-8", errors="replace")
+
+
+def fetch_text_bounded(
+    url: str,
+    *,
+    headers: dict,
+    timeout: float,
+    max_bytes: int = MAX_FETCH_BYTES,
+    label: str = "adapter",
+    verify: bool = True,
+) -> str | None:
+    """
+    HTTP GET with a hard cap on decompressed body size.
+
+    Returns decoded text on success, None on any failure (request error,
+    non-200 status, oversized body). Never raises.
+    """
+    _, text = fetch_text_bounded_status(
+        url, headers=headers, timeout=timeout, max_bytes=max_bytes, label=label, verify=verify
+    )
+    return text
 
 
 def is_quality_content(text: str | None) -> bool:
@@ -138,12 +203,11 @@ def is_quality_content(text: str | None) -> bool:
     paras = [p.strip() for p in text.split("\n\n") if p.strip()]
     if len(paras) < _MIN_CONTENT_PARAS:
         return False
-    unreadable = unreadable_char_count(text)
-    if unreadable > _UNREADABLE_CHAR_FLOOR and unreadable / len(text) > _UNREADABLE_CHAR_RATIO:
+    if is_mostly_unreadable(
+        text, floor=_UNREADABLE_CHAR_FLOOR, ratio=_UNREADABLE_CHAR_RATIO
+    ):
         logger.warning(
-            "is_quality_content: rejecting undecodable content — %d/%d (%.1f%%) "
-            "replacement/control chars",
-            unreadable, len(text), 100.0 * unreadable / len(text),
+            "is_quality_content: rejecting undecodable content (%d chars)", len(text)
         )
         return False
     return True

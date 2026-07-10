@@ -35,9 +35,8 @@ import json
 import logging
 from datetime import datetime, timedelta, timezone
 
-import requests
 
-from app.adapters.base import SourceAdapter
+from app.adapters.base import fetch_text_bounded, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 
 logger = logging.getLogger(__name__)
@@ -66,27 +65,19 @@ class FederalRegisterAdapter(SourceAdapter):
         Returns None when the API cannot be reached or yields no usable results.
         Never raises.
         """
-        try:
-            resp = requests.get(
-                url,
-                headers={
-                    "User-Agent": REQUESTS_UA,
-                    "Accept":     "application/json",
-                },
-                timeout=HTTP_TIMEOUT_S,
-                allow_redirects=True,
-            )
-        except Exception as exc:
-            logger.warning("Federal Register fetch error for %s: %s", url, exc)
+        body = fetch_text_bounded(
+            url,
+            headers={
+                "User-Agent": REQUESTS_UA,
+                "Accept":     "application/json",
+            },
+            timeout=HTTP_TIMEOUT_S,
+            label="FederalRegisterAdapter",
+        )
+        if body is None:
             return None
 
-        if resp.status_code != 200:
-            logger.warning(
-                "Federal Register: HTTP %d for %s", resp.status_code, url
-            )
-            return None
-
-        return self._parse_json_text(resp.text, url)
+        return self._parse_json_text(body, url)
 
     def run(self, html: str, url: str, source: dict | None = None) -> str | None:
         """
