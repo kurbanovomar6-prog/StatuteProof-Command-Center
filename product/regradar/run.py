@@ -2184,6 +2184,7 @@ def main() -> None:
         print("  python run.py api --host 0.0.0.0        bind to all interfaces (production behind nginx)", file=sys.stderr)
         print("  python run.py generate-brief --source-id <id>               generate brief for latest CHANGED run", file=sys.stderr)
         print("  python run.py generate-brief --source-id <id> --run-id <r>  generate brief for a specific run", file=sys.stderr)
+        print("  python run.py rebaseline --source-id <id>                   reset ONE source's baseline (no scheduler stop, no alert)", file=sys.stderr)
         print("  python run.py discover-source <url>                      discover candidate endpoints without saving evidence", file=sys.stderr)
         print("  python run.py discover-source <url> --json               print structured source discovery JSON", file=sys.stderr)
         print("  python run.py discover-source <url> --jurisdiction CODE  tag with jurisdiction code (e.g. AE, SG, KZ)", file=sys.stderr)
@@ -3449,6 +3450,34 @@ def main() -> None:
             sys.exit(2)
         _cmd_generate_brief(source_id=_gb_source_id, run_id=_gb_run_id)
 
+    elif cmd == "rebaseline":
+        _rb_source_id: str | None = None
+        _rb_extra = args[1:]
+        _rb_i = 0
+        while _rb_i < len(_rb_extra):
+            tok = _rb_extra[_rb_i]
+            if tok == "--source-id":
+                if _rb_i + 1 >= len(_rb_extra):
+                    print("Error: --source-id requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                _rb_source_id = _rb_extra[_rb_i + 1].strip()
+                _rb_i += 2
+            else:
+                print(
+                    f"Error: unknown argument {tok!r} for 'rebaseline'.\n"
+                    "  Usage: python run.py rebaseline --source-id <id>",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+        if not _rb_source_id:
+            print(
+                "Error: 'rebaseline' requires --source-id.\n"
+                "  Usage: python run.py rebaseline --source-id <id>",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        _cmd_rebaseline(source_id=_rb_source_id)
+
     elif cmd == "generate-secret-key":
         import secrets as _secrets
         key = _secrets.token_hex(32)
@@ -3465,7 +3494,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | generate-secret-key | validate-config",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | generate-secret-key | validate-config",
             file=sys.stderr,
         )
         sys.exit(2)
@@ -3575,6 +3604,55 @@ def _find_latest_changed_run(source_id: str, run_id: str | None) -> dict | None:
         if rec.get("source_id") == source_id:
             return rec
     return None
+
+
+def _cmd_rebaseline(*, source_id: str) -> None:
+    """
+    Rebaseline ONE source in place — repair a poisoned baseline without
+    stopping the scheduler or running a full suppressed cycle.
+
+    Fetches + normalizes the source using the monitor pipeline machinery,
+    applies the same quality / undecodable / error-page guards, and only when
+    the content is good writes a fresh FIRST_SEEN baseline that supersedes the
+    current one. Never sends a Telegram/email alert.
+
+    Usage:
+        python run.py rebaseline --source-id AE-vara-rulebook
+    """
+    from app.source_runs import rebaseline_source
+
+    _hr("═")
+    print(f"  {_BOLD}StatuteProof — Rebaseline Source{_R}")
+    print(f"  {_DIM}Source: {source_id}{_R}")
+    _hr("═")
+
+    result = rebaseline_source(source_id)
+    status = result.get("status")
+
+    if status == "not_found":
+        print(f"\n  {_RED}✗  {result.get('message')}{_R}\n", file=sys.stderr)
+        sys.exit(1)
+
+    if status == "refused":
+        print(
+            f"\n  {_RED}✗  Rebaseline refused ({result.get('reason')}).{_R}\n"
+            f"  {result.get('message')}\n"
+            f"  {_DIM}Nothing written to the trail — the current baseline is unchanged.{_R}\n",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    print(f"\n  {_GREEN}✓  New baseline written.{_R}")
+    _label("Run ID:", str(result.get("run_id", "")))
+    _label("Change status:", str(result.get("change_status", "")))
+    _label("Extracted characters:", f"{result.get('extracted_chars', 0):,}")
+    _label("Extraction quality:", str(result.get("extraction_quality", "")))
+    _label("Normalized hash:", str(result.get("normalized_hash", ""))[:16])
+    print(
+        f"\n  {_DIM}No alert sent. This baseline supersedes the previous one for "
+        f"future change detection.{_R}\n"
+    )
+    sys.exit(0)
 
 
 def _cmd_generate_brief(*, source_id: str, run_id: str | None = None) -> None:

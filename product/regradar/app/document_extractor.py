@@ -23,9 +23,9 @@ import logging
 import re
 from urllib.parse import urljoin, urlparse
 
-import requests
 from bs4 import BeautifulSoup
 
+from app.adapters.base import _FETCH_CHUNK_BYTES, _guarded_get
 from app.config import REQUESTS_UA
 
 logger = logging.getLogger(__name__)
@@ -231,62 +231,70 @@ def fetch_document(
         result["error"]  = f"Unsupported scheme: {parsed.scheme!r}"
         return result
 
+    # SSRF-guarded fetch: every redirect hop is resolved and vetted BEFORE
+    # connecting, and dialled via a pinned IP (see app/adapters/base._guarded_get).
+    # A document link parsed out of an untrusted regulator page that 30x-redirects
+    # to cloud metadata / loopback / RFC1918 is rejected here instead of being
+    # transparently followed by requests(allow_redirects=True).
+    resp = _guarded_get(
+        url,
+        headers={
+            "User-Agent":      REQUESTS_UA,
+            "Accept":          "application/pdf,application/octet-stream,*/*",
+            "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+        },
+        timeout=timeout,
+        verify=True,
+        label="document_extractor",
+    )
+    if resp is None:
+        # Guard blocked the target (non-public / disallowed scheme), the host
+        # did not resolve, a redirect had no Location or exceeded the cap, or
+        # the transport failed. _guarded_get has already logged the reason.
+        result["error"] = "fetch blocked or failed (SSRF guard / transport)"
+        return result
+
     try:
-        resp = requests.get(
-            url,
-            headers={
-                "User-Agent":      REQUESTS_UA,
-                "Accept":          "application/pdf,application/octet-stream,*/*",
-                "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
-            },
-            timeout=timeout,
-            stream=True,
-            allow_redirects=True,
-        )
-        result["http_status"]  = resp.status_code
-        result["content_type"] = resp.headers.get("content-type", "").split(";")[0].strip()
+        with resp:
+            result["http_status"]  = resp.status_code
+            result["content_type"] = resp.headers.get("content-type", "").split(";")[0].strip()
 
-        if not resp.ok:
-            result["error"] = f"HTTP {resp.status_code}"
-            return result
+            if not resp.ok:
+                result["error"] = f"HTTP {resp.status_code}"
+                return result
 
-        # Content-Length guard (skip before streaming)
-        cl = resp.headers.get("content-length")
-        if cl:
-            try:
-                if int(cl) > max_bytes:
-                    result["status"] = "skipped"
-                    result["error"]  = (
-                        f"File too large: Content-Length {int(cl):,} > "
-                        f"limit {max_bytes:,} bytes"
-                    )
-                    return result
-            except ValueError:
-                pass
+            # Content-Length guard (skip before streaming)
+            cl = resp.headers.get("content-length")
+            if cl:
+                try:
+                    if int(cl) > max_bytes:
+                        result["status"] = "skipped"
+                        result["error"]  = (
+                            f"File too large: Content-Length {int(cl):,} > "
+                            f"limit {max_bytes:,} bytes"
+                        )
+                        return result
+                except ValueError:
+                    pass
 
-        # Stream with running size cap
-        chunks: list[bytes] = []
-        total = 0
-        for chunk in resp.iter_content(chunk_size=65_536):
-            if chunk:
-                total += len(chunk)
-                if total > max_bytes:
-                    result["status"] = "skipped"
-                    result["error"]  = (
-                        f"File too large: stopped at {total:,} bytes "
-                        f"(limit {max_bytes:,})"
-                    )
-                    return result
-                chunks.append(chunk)
+            # Stream with running size cap
+            chunks: list[bytes] = []
+            total = 0
+            for chunk in resp.iter_content(chunk_size=_FETCH_CHUNK_BYTES):
+                if chunk:
+                    total += len(chunk)
+                    if total > max_bytes:
+                        result["status"] = "skipped"
+                        result["error"]  = (
+                            f"File too large: stopped at {total:,} bytes "
+                            f"(limit {max_bytes:,})"
+                        )
+                        return result
+                    chunks.append(chunk)
 
-        result["data"]   = b"".join(chunks)
-        result["bytes"]  = len(result["data"])
-        result["status"] = "ok"
-
-    except requests.Timeout:
-        result["error"] = f"Timeout after {timeout}s"
-    except requests.RequestException as exc:
-        result["error"] = str(exc)[:200]
+            result["data"]   = b"".join(chunks)
+            result["bytes"]  = len(result["data"])
+            result["status"] = "ok"
     except Exception as exc:
         result["error"] = f"{type(exc).__name__}: {exc}"
 

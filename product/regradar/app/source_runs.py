@@ -838,6 +838,247 @@ def deduplicate_alerts(
     return kept
 
 
+# ── Rebaseline primitive (D) ────────────────────────────────────────────────
+#
+# Repairing a poisoned baseline (e.g. the VARA mojibake incident, 2026-07-10)
+# previously required stopping the scheduler and re-running the full suppressed
+# 116-source cycle. rebaseline_source() rebaselines ONE source in place: it
+# fetches + normalizes exactly like the monitor pipeline, applies the SAME
+# guards (empty / undecodable / quality gate), and — only when the content is
+# good — appends a fresh FIRST_SEEN baseline record that supersedes the current
+# baseline. It never alerts and never requires stopping the scheduler.
+
+_REBASELINE_STATUS = "FIRST_SEEN"
+
+
+def _find_source_by_id(source_id: str) -> dict | None:
+    """Return the source dict whose make_source_id() matches source_id, or None."""
+    from app.sources import load_sources
+
+    for src in load_sources():
+        if make_source_id(src) == source_id:
+            return src
+    return None
+
+
+def _rebaseline_fetch(url: str, source: dict) -> str:
+    """
+    Fetch source content using the SAME adapter-aware path the monitor uses.
+
+    Mirrors run_pipeline Step 0: prefer the source adapter when it returns
+    quality content, otherwise fall back to the generic fetch_page +
+    extract_best_text seams (which the guard tests patch). Fetching through the
+    exact path the monitor prefers guarantees the baselined text — and therefore
+    the baselined hash — matches what the next sweep will compute for an
+    adapter-backed source, closing the second route to a spurious CHANGED.
+
+    Returns the extracted text (possibly empty); guards in rebaseline_source
+    decide whether it is fit to baseline. May raise on network/scrape failure —
+    the caller converts that into a fetch_failed refusal.
+    """
+    from app.adapters.base import is_quality_content
+    from app.adapters.registry import get_adapter_for_url
+    from app.pipeline import fetch_page, extract_best_text  # patched by tests
+
+    adapter = get_adapter_for_url(url, source)
+    if adapter is not None:
+        try:
+            adapter_text = adapter.fetch_content(url, source)
+        except Exception:  # adapter failure → fall through to generic scraper
+            adapter_text = None
+        if is_quality_content(adapter_text):
+            return adapter_text or ""
+
+    html = fetch_page(url)
+    extraction = extract_best_text(html, url)
+    return (extraction.get("text") or "") if extraction else ""
+
+
+def _append_baseline_record(record: dict) -> dict:
+    """
+    Append a record to the trail as an authoritative new baseline.
+
+    Unlike append_run(), the change_status is forced (never recomputed by
+    classify_change) so a rebaseline is treated as the new canonical baseline
+    even when the prior record was poisoned. Proof artifacts are written; no
+    diff and no alert are produced (a baseline supersedes rather than diffs).
+    """
+    _RUN_DIR.mkdir(parents=True, exist_ok=True)
+    record["change_status"] = _REBASELINE_STATUS
+    record["rebaseline"] = True
+    snapshot_base = _snapshot_base_from_record(record)
+    if snapshot_base is not None:
+        _write_proof_artifact(record, None, snapshot_base)
+    with _RUN_FILE.open("a", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+    global _CACHE_VALID
+    _CACHE_VALID = False
+    return record
+
+
+def rebaseline_source(source_id: str) -> dict:
+    """
+    Rebaseline a single source in place, reusing the monitor fetch/extract path.
+
+    Returns a result dict describing the outcome:
+        {"status": "rebaselined", "source_id", "run_id", "normalized_hash",
+         "extracted_chars", "extraction_quality", "change_status"}   on success
+        {"status": "not_found",  "source_id", "message"}             unknown id
+        {"status": "refused",    "source_id", "reason", "message"}   bad content
+
+    On refusal or an unknown id, NOTHING is written to the trail — a poisoned or
+    undecodable body can never become a baseline. No Telegram/email alert is
+    ever sent, and the scheduler does not need to be stopped.
+    """
+    import uuid as _uuid
+
+    from app.text_quality import is_mostly_unreadable
+
+    source = _find_source_by_id(source_id)
+    if source is None:
+        return {
+            "status": "not_found",
+            "source_id": source_id,
+            "message": f"No source in sources.json matches source_id={source_id!r}.",
+        }
+
+    url = source.get("url", "")
+
+    # ── Fetch + extract (same adapter-aware path the monitor pipeline uses) ─
+    try:
+        content = _rebaseline_fetch(url, source).strip()
+    except Exception as exc:  # network / scrape failure → refuse, write nothing
+        return {
+            "status": "refused",
+            "source_id": source_id,
+            "reason": "fetch_failed",
+            "message": f"Fetch/extract failed for {url}: {type(exc).__name__}: {exc}",
+        }
+
+    # ── Guard 1: empty content ────────────────────────────────────────────
+    if not content:
+        return {
+            "status": "refused",
+            "source_id": source_id,
+            "reason": "empty_content",
+            "message": f"No extractable text from {url}; refusing to baseline.",
+        }
+
+    # ── Guard 2: undecodable / mojibake / error-page bytes ────────────────
+    # Same write-layer chokepoint the pipeline applies (VARA mojibake incident):
+    # a mis-decoded or binary body is saturated with replacement/control chars
+    # and must never be hashed, snapshotted, or baselined.
+    if is_mostly_unreadable(content):
+        return {
+            "status": "refused",
+            "source_id": source_id,
+            "reason": "undecodable_content",
+            "message": (
+                f"Content from {url} is undecodable/error-page text "
+                "(saturated with replacement/control characters); refusing to baseline."
+            ),
+        }
+
+    # ── Guard 3: quality gate (same threshold as the pipeline) ────────────
+    from app.adapters.base import is_quality_content
+
+    if not is_quality_content(content):
+        return {
+            "status": "refused",
+            "source_id": source_id,
+            "reason": "low_quality",
+            "message": (
+                f"Content from {url} failed the quality gate "
+                f"({len(content)} chars); refusing to baseline."
+            ),
+        }
+
+    # ── Build the record via the shared machinery, then baseline it ───────
+    run_id = _uuid.uuid4().hex[:8]
+    result = {
+        "url": url,
+        "final_url": url,
+        "status": "ok",
+        "extracted_text": content,
+        "extracted_chars": len(content),
+        "fetch_method": "rebaseline",
+        "reason": "",
+    }
+    record = record_from_source_result(
+        run_id=run_id,
+        source=source,
+        result=result,
+        limitations_notes=["Baseline reset via rebaseline primitive."],
+    )
+
+    # ── Align the baseline hash with what the LIVE pipeline will compute ───
+    # run_pipeline resolves the baseline from this record's normalized_hash and
+    # compares it against stable_content_hash(normalize_for_change_hash(content))
+    # (pipeline.py Step 3/5). record_from_source_result stores the *normalized*
+    # hash flavor — sha256(normalize_for_change_hash(text)) — which collapses
+    # whitespace differently, so a byte-identical next sweep would read
+    # baseline != new and fire a spurious CHANGED alert. Overwrite both hash
+    # fields with the pipeline's canonical content-flavor hash so the trail
+    # baseline and the SQLite derived index carry the exact value the monitor
+    # compares against. `content` here == combined_raw_text (no PDF text on the
+    # rebaseline path) and normalize_for_change_hash strips internally, so this
+    # is identical to run_pipeline's new_hash for the same fetched content.
+    canonical_hash = stable_content_hash(normalize_for_change_hash(content))
+    record["normalized_hash"] = canonical_hash
+    record["content_hash"] = canonical_hash
+
+    # Contract guard: the stored baseline hash MUST equal the hash the live
+    # pipeline computes for byte-identical content, or the next sweep spuriously
+    # reclassifies CHANGED. run_pipeline's new_hash is
+    # stable_content_hash(normalize_for_change_hash(content)); we recompute it
+    # here through the pipeline's own imported hashing functions so this can't
+    # silently drift if the pipeline changes its hashing.
+    from app.pipeline import (
+        normalize_for_change_hash as _pl_normalize,
+        stable_content_hash as _pl_content_hash,
+    )
+
+    pipeline_new_hash = _pl_content_hash(_pl_normalize(content))
+    assert record["normalized_hash"] == pipeline_new_hash, (
+        "rebaseline baseline hash must equal run_pipeline's new_hash for the "
+        f"same content; got {record['normalized_hash']!r} != {pipeline_new_hash!r} "
+        "— hash flavors have drifted apart"
+    )
+
+    final = _append_baseline_record(record)
+
+    # ── Align the SQLite derived index (consistency.py, owner decision 2) ──
+    # check_baseline_consistency compares the trail normalized_hash against the
+    # SQLite documents content_hash for the same URL. Insert an aligned row so a
+    # freshly rebaselined source reports no divergence. Non-fatal: the derived
+    # index is repopulated by the next monitor run if this write fails.
+    try:
+        from app.db import save_document
+
+        save_document(url=url, content=content, content_hash=canonical_hash)
+    except Exception as _db_err:  # derived index is best-effort; trail is truth
+        import logging as _logging
+
+        _logging.getLogger(__name__).warning(
+            "rebaseline: SQLite derived-index alignment failed (non-fatal): %s",
+            _db_err,
+        )
+
+    return {
+        "status": "rebaselined",
+        "source_id": source_id,
+        "run_id": final.get("run_id"),
+        "normalized_hash": final.get("normalized_hash"),
+        "extracted_chars": final.get("extracted_chars"),
+        "extraction_quality": final.get("extraction_quality"),
+        "change_status": final.get("change_status"),
+    }
+
+
 def render_history_terminal(
     *,
     market: str = "AE",

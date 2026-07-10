@@ -25,9 +25,9 @@ import socket
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
-import requests as _requests
 from bs4 import BeautifulSoup
 
+from app.adapters.base import fetch_text_bounded_status
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.extractors import extract_best_text
 from app.scraper import _fetch_via_playwright, is_low_content_html
@@ -276,9 +276,10 @@ def test_source_url(
 
     Flow
     ----
-    1. validate_public_url()    — reject dangerous URLs immediately
-    2. requests.get()           — Tier 1; captures http_status + HTML
-    3. is_low_content_html()    — decide whether to escalate to Playwright
+    1. validate_public_url()          — reject dangerous URLs immediately
+    2. fetch_text_bounded_status()    — Tier 1; SSRF-guarded per-hop, captures
+                                        http_status + HTML
+    3. is_low_content_html()          — decide whether to escalate to Playwright
     4. _fetch_via_playwright()  — Tier 2 fallback when Tier 1 is insufficient
     5. _count_links()           — count href links for diagnostics
     6. extract_text()           — measure clean extracted chars
@@ -319,33 +320,38 @@ def test_source_url(
             "reason":               f"URL failed safety validation: {safety_msg}",
         }
 
-    # ── 2. Tier 1 — requests.get() ───────────────────────────────────
-    http_status: int | None = None
-    tier1_html:  str | None = None
-
-    try:
-        resp = _requests.get(
-            url,
-            headers={
-                "User-Agent":      REQUESTS_UA,
-                "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
-            },
-            timeout=HTTP_TIMEOUT_S,
-            allow_redirects=True,
-        )
-        http_status = resp.status_code
-        if resp.ok:
-            tier1_html = resp.text
-        else:
+    # ── 2. Tier 1 — SSRF-guarded bounded fetch ───────────────────────
+    # Routes through app.adapters.base.fetch_text_bounded_status, which
+    # follows redirects MANUALLY, re-validates and IP-pins every hop before
+    # connecting, and caps the decompressed body at 10 MB. This URL is
+    # user-supplied via the authenticated /api source-test endpoint, so a
+    # one-shot validate_public_url() check (kept above as defence-in-depth)
+    # is not enough — a live DNS-rebind or a 30x redirect toward a
+    # private/loopback/metadata address must be refused per-hop. The helper
+    # never raises: it returns (status, text) where text is None on any
+    # failure, non-200 status, oversized body, or an SSRF-blocked hop.
+    status, tier1_html = fetch_text_bounded_status(
+        url,
+        headers={
+            "User-Agent":      REQUESTS_UA,
+            "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+        },
+        timeout=HTTP_TIMEOUT_S,
+        label="test_source",
+    )
+    http_status: int | None = status
+    if tier1_html is None:
+        if status is None:
             logger.info(
-                "test_source: Tier 1 HTTP %d for %s", resp.status_code, url
+                "test_source: Tier 1 fetch failed or blocked for %s — will try Playwright",
+                url,
             )
-    except _requests.RequestException as exc:
-        logger.info("test_source: Tier 1 failed: %s — will try Playwright", exc)
-        print(
-            f"  Tier 1 (requests) failed: {exc} — escalating to Playwright",
-            flush=True,
-        )
+            print(
+                "  Tier 1 (guarded fetch) failed or blocked — escalating to Playwright",
+                flush=True,
+            )
+        else:
+            logger.info("test_source: Tier 1 HTTP %d for %s", status, url)
 
     # ── 3. Evaluate Tier 1 quality; escalate to Playwright if needed ──
     raw_html:      str | None = None

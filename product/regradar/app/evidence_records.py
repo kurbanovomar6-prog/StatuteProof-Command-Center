@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from app.text_quality import is_mostly_unreadable
+
 
 _BASE_DIR = Path(__file__).parent.parent
 _SHA256_RE = re.compile(r"^sha256:[a-f0-9]{64}$")
@@ -117,6 +119,45 @@ def create_canonical_evidence_record(
         current_path = _copy_artifact(current_input, record_dir / "current.normalized.txt")
         metadata_path = _copy_artifact(metadata_input, record_dir / "metadata.json")
         previous_path = _copy_artifact(previous_input, record_dir / "previous.normalized.txt") if previous_input else None
+
+        # Integrity is not just "the hash matches the bytes" — undecodable
+        # content (the VARA mojibake incident, 2026-07-10) hashes perfectly
+        # and would otherwise be stamped VERIFIED. Refuse certification when
+        # the normalized content the customer brief would rest on is
+        # saturated with replacement/control characters (or empty). Both the
+        # current AND previous normalized snapshots must be checked: a CHANGED
+        # record with clean current but mojibake previous still bakes garbled
+        # previous-side lines into the customer diff, so an unreadable previous
+        # side must quarantine too. Quarantine the record with a clear reason
+        # instead of raising, so the failure is auditable and never
+        # brief-eligible.
+        unreadable_reason = _normalized_content_integrity_reason(
+            current_path, side="current"
+        ) or _normalized_content_integrity_reason(previous_path, side="previous")
+        if unreadable_reason is not None:
+            record = _build_quarantined_record(
+                source_id=source_id,
+                run_id=run_id,
+                run_status=run_status,
+                timestamp=timestamp,
+                source_name=source_name,
+                official_url=official_url,
+                regulator_name=regulator_name,
+                current_path=current_path,
+                raw_path=raw_path,
+                snapshot_path=snapshot_path,
+                metadata_path=metadata_path,
+                run_record=run_record,
+                root=root,
+                reason=unreadable_reason,
+                human_review_required=human_review_required,
+            )
+            record_path.write_text(
+                json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+            return record
+
         diff_path, lines_added, lines_removed = _canonical_diff_artifact(
             run_record=run_record,
             previous_path=previous_path,
@@ -239,6 +280,18 @@ def validate_evidence_record(record: dict[str, Any], base_dir: Path | None = Non
         if f"sha256:{recomputed}" != current_hash:
             errors.append("content.current_hash does not match normalized_current_path.")
 
+    # A matching hash over mojibake (or over empty content) is still not
+    # readable regulatory text. Report the integrity problem so no gate can
+    # treat a certified hash of undecodable bytes as brief-eligible (VARA
+    # mojibake incident).
+    current_unreadable_reason = (
+        _normalized_content_integrity_reason(normalized_current_path, side="current")
+        if normalized_current_path is not None
+        else None
+    )
+    if current_unreadable_reason is not None:
+        errors.append(current_unreadable_reason)
+
     if run_status and run_status != "FIRST_SEEN":
         previous_hash = _require_text(content, "previous_hash", errors, "content.previous_hash")
         if previous_hash and not _SHA256_RE.match(previous_hash):
@@ -252,6 +305,18 @@ def validate_evidence_record(record: dict[str, Any], base_dir: Path | None = Non
         )
         if previous_path is not None and previous_hash and f"sha256:{_sha256_path(previous_path)}" != previous_hash:
             errors.append("content.previous_hash does not match normalized_previous_path.")
+        # The previous normalized snapshot feeds the customer-facing diff just
+        # as the current side does. A CHANGED record with clean current but
+        # undecodable/empty previous still certifies VERIFIED and bakes garbled
+        # previous-side lines into the diff, so the previous side must fail
+        # integrity too, naming which side broke.
+        previous_unreadable_reason = (
+            _normalized_content_integrity_reason(previous_path, side="previous")
+            if previous_path is not None
+            else None
+        )
+        if previous_unreadable_reason is not None:
+            errors.append(previous_unreadable_reason)
 
     change = _require_dict(record, "change", errors)
     _require_text(change, "summary", errors, "change.summary")
@@ -734,6 +799,111 @@ def _canonical_diff_artifact(
     lines_added = sum(1 for line in text.splitlines() if line.startswith("+") and not line.startswith("+++"))
     lines_removed = sum(1 for line in text.splitlines() if line.startswith("-") and not line.startswith("---"))
     return diff_path, lines_added, lines_removed
+
+
+def _normalized_content_integrity_reason(
+    path: Path | None, *, side: str = "current"
+) -> str | None:
+    """Return a clear integrity reason when normalized content is unusable.
+
+    ``side`` names the affected path ("current" or "previous") so the reason
+    string tells a reviewer which normalized snapshot failed. Returns ``None``
+    for readable content.
+
+    Two conditions fail integrity:
+
+    * Empty / whitespace-only content. ``is_mostly_unreadable("")`` returns
+      False, so a zero-length normalized.txt would otherwise hash to a valid
+      sha256 and certify VERIFIED with nothing to review. Empty regulatory
+      content is not certifiable. (This gate is deliberately local; the shared
+      ``is_mostly_unreadable`` contract is unchanged because other callers
+      depend on its empty-string behaviour.)
+    * A body saturated with replacement / control characters — a mis-decoded
+      or binary body (VARA mojibake incident). It hashes perfectly but must
+      never be certified VERIFIED.
+
+    Callers treat a non-None reason as an integrity failure.
+    """
+    field = "normalized_current_path" if side == "current" else "normalized_previous_path"
+    if path is None or not path.exists() or path.is_dir():
+        return None
+    text = path.read_text(encoding="utf-8", errors="replace")
+    if not text.strip():
+        return (
+            f"content.{field} is empty or whitespace-only; "
+            "content cannot be certified VERIFIED."
+        )
+    if is_mostly_unreadable(text):
+        return (
+            f"content.{field} is saturated with undecodable "
+            "characters; content cannot be certified VERIFIED."
+        )
+    return None
+
+
+def _build_quarantined_record(
+    *,
+    source_id: str,
+    run_id: str,
+    run_status: str,
+    timestamp: str,
+    source_name: str,
+    official_url: str,
+    regulator_name: str,
+    current_path: Path,
+    raw_path: Path,
+    snapshot_path: Path,
+    metadata_path: Path,
+    run_record: dict[str, Any],
+    root: Path,
+    reason: str,
+    human_review_required: bool,
+) -> dict[str, Any]:
+    """Build a non-VERIFIED quarantine record for undecodable normalized content."""
+
+    return {
+        "schema_version": "2.0",
+        "record_id": _canonical_record_id(source_id, run_id),
+        "record_status": "integrity_error",
+        "source": {
+            "source_id": source_id,
+            "regulator": regulator_name,
+            "official_url": official_url,
+            "source_name": source_name,
+        },
+        "run": {
+            "run_id": run_id,
+            "timestamp": timestamp,
+            "status": run_status,
+        },
+        "content": {
+            "current_hash": f"sha256:{_sha256_path(current_path)}",
+            "raw_content_path": _relative_or_absolute(raw_path, root),
+            "normalized_current_path": _relative_or_absolute(current_path, root),
+        },
+        "change": {
+            "summary": _change_summary(run_record, run_status),
+            "lines_added": 0,
+            "lines_removed": 0,
+        },
+        "files": {
+            "snapshot_path": _relative_or_absolute(snapshot_path, root),
+            "raw_path": _relative_or_absolute(raw_path, root),
+            "normalized_path": _relative_or_absolute(current_path, root),
+            "metadata_path": _relative_or_absolute(metadata_path, root),
+        },
+        "integrity": {
+            "hash_verified": False,
+            "integrity_status": "FAILED",
+            "verified_at": _utc_now(),
+            "reason": reason,
+        },
+        "review": {
+            "human_review_required": bool(human_review_required),
+            "review_status": "quarantined",
+            "review_reason": reason,
+        },
+    }
 
 
 def _find_previous_evidence_run(record: dict[str, Any], root: Path) -> dict[str, Any] | None:
