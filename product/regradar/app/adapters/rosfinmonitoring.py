@@ -27,10 +27,9 @@ import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 
-import requests
 import urllib3
 
-from app.adapters.base import SourceAdapter
+from app.adapters.base import fetch_bytes_bounded, fetch_text_bounded, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 
 # fedsfm.ru has a cert chain issue — suppress the resulting urllib3 noise.
@@ -94,24 +93,19 @@ class RosfinmonitoringAdapter(SourceAdapter):
 
     def _fetch_rss(self, base: str) -> str | None:
         rss_url = base.rstrip("/") + _RSS_PATH
-        try:
-            resp = requests.get(
-                rss_url,
-                headers={"User-Agent": REQUESTS_UA},
-                timeout=HTTP_TIMEOUT_S,
-                verify=False,
-                allow_redirects=True,
-            )
-        except Exception as exc:
-            logger.warning("Rosfinmonitoring RSS fetch error: %s", exc)
-            return None
-
-        if resp.status_code != 200:
-            logger.warning("Rosfinmonitoring RSS: HTTP %d", resp.status_code)
+        data = fetch_bytes_bounded(
+            rss_url,
+            headers={"User-Agent": REQUESTS_UA},
+            timeout=HTTP_TIMEOUT_S,
+            label="RosfinmonitoringAdapter",
+            verify=False,
+        )
+        if data is None:
+            logger.warning("Rosfinmonitoring RSS fetch failed")
             return None
 
         try:
-            root = ET.fromstring(resp.content)
+            root = ET.fromstring(data)
         except ET.ParseError as exc:
             logger.warning("Rosfinmonitoring RSS XML parse error: %s", exc)
             return None
@@ -151,19 +145,19 @@ class RosfinmonitoringAdapter(SourceAdapter):
         from app.parser import extract_text
         page_url = base.rstrip("/") + path
         try:
-            resp = requests.get(
+            html = fetch_text_bounded(
                 page_url,
                 headers={
                     "User-Agent":      REQUESTS_UA,
                     "Accept-Language": "ru-RU,ru;q=0.9",
                 },
                 timeout=HTTP_TIMEOUT_S,
+                label="RosfinmonitoringAdapter",
                 verify=False,
-                allow_redirects=True,
             )
-            if resp.status_code != 200:
+            if html is None:
                 return None
-            text = extract_text(resp.text) or None
+            text = extract_text(html) or None
             if text:
                 logger.info(
                     "Rosfinmonitoring adapter: %d chars from fallback %s",

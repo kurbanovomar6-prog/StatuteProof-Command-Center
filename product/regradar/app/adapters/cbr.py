@@ -25,10 +25,9 @@ from __future__ import annotations
 import logging
 from urllib.parse import urljoin, urlparse
 
-import requests
 from bs4 import BeautifulSoup
 
-from app.adapters.base import SourceAdapter
+from app.adapters.base import fetch_text_bounded, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.parser import extract_text
 
@@ -72,19 +71,12 @@ _HEADERS = {
 
 def _fetch_page_text(url: str) -> str | None:
     """GET one page and return extracted paragraph text, or None on any error."""
-    try:
-        resp = requests.get(
-            url,
-            headers=_HEADERS,
-            timeout=HTTP_TIMEOUT_S,
-            allow_redirects=True,
-        )
-        if resp.status_code != 200:
-            return None
-        return extract_text(resp.text) or None
-    except Exception as exc:
-        logger.debug("CBR adapter: page fetch %s failed: %s", url, exc)
+    html = fetch_text_bounded(
+        url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="CBRAdapter"
+    )
+    if html is None:
         return None
+    return extract_text(html) or None
 
 
 def _sitemap_candidates() -> list[str]:
@@ -92,21 +84,14 @@ def _sitemap_candidates() -> list[str]:
     Fetch CBR's HTML sitemap and return up to _MAX_SITEMAP_CANDIDATES
     internal links that are plausible SSR pages (not known SPA patterns).
     """
-    try:
-        resp = requests.get(
-            _SITEMAP_URL,
-            headers=_HEADERS,
-            timeout=HTTP_TIMEOUT_S,
-            allow_redirects=True,
-        )
-        if resp.status_code != 200:
-            logger.warning("CBR sitemap: HTTP %d", resp.status_code)
-            return []
-    except Exception as exc:
-        logger.warning("CBR sitemap fetch error: %s", exc)
+    html = fetch_text_bounded(
+        _SITEMAP_URL, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="CBRAdapter"
+    )
+    if html is None:
+        logger.warning("CBR sitemap fetch failed")
         return []
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+    soup = BeautifulSoup(html, "html.parser")
     seen: set[str] = set()
     candidates: list[str] = []
 

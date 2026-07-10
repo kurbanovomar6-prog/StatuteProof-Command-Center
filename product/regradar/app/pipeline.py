@@ -85,6 +85,7 @@ from app.text_normalization import (
     normalize_for_change_hash,
     stable_content_hash,
 )
+from app.text_quality import is_mostly_unreadable
 
 logger = logging.getLogger(__name__)
 
@@ -240,6 +241,27 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "extraction_method":  extraction_method,
             "error":              "Fetched content is an HTTP error/challenge page — not stored as baseline",
             "ai_skipped_reason":  "error_page",
+            "ai_calls_used":      _AI_RUN_BUDGET["count"],
+        }
+
+    # ── Guard: undecodable content → quality_drop ─────────────────────
+    # Write-layer chokepoint (VARA mojibake incident, 2026-07-10): no
+    # matter which fetch path produced `content`, text saturated with
+    # replacement/control characters is a mis-decoded body, not page
+    # text — it must never be hashed, diffed, baselined, or alerted on.
+    if is_mostly_unreadable(content):
+        logger.warning(
+            "Undecodable content for %s (%d chars) — aborting with quality_drop",
+            url, len(content),
+        )
+        return {
+            "url":                url,
+            "changed":            False,
+            "status":             "quality_drop",
+            "extracted_chars":    extracted_chars,
+            "extraction_quality": "failed",
+            "extraction_method":  extraction_method,
+            "ai_skipped_reason":  "quality_drop",
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
 

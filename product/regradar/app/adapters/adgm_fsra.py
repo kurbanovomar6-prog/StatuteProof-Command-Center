@@ -23,10 +23,9 @@ import hashlib
 import re
 from urllib.parse import urljoin, urlparse
 
-import requests  # type: ignore
 from bs4 import BeautifulSoup  # type: ignore
 
-from app.adapters.base import SourceAdapter
+from app.adapters.base import fetch_text_bounded, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.parser import extract_text  # type: ignore
 
@@ -169,16 +168,13 @@ class ADGMFSRAAdapter(SourceAdapter):
         return any(path.startswith(prefix) for prefix in _OWNED_PATH_PREFIXES)
 
     def fetch_content(self, url: str, source: dict | None = None) -> str | None:
-        try:
-            response = requests.get(
-                url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, allow_redirects=True
-            )
-        except Exception:
-            return None
-        if response.status_code != 200:
+        html = fetch_text_bounded(
+            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="ADGMFSRAAdapter"
+        )
+        if html is None:
             return None
 
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")
         for tag in soup(["script", "style", "noscript", "nav", "footer", "header"]):
             tag.decompose()
 
@@ -186,7 +182,7 @@ class ADGMFSRAAdapter(SourceAdapter):
         if items:
             return self._format_listing(url, items)
 
-        text = extract_text(response.text) or _clean(soup.get_text("\n\n", strip=True))
+        text = extract_text(html) or _clean(soup.get_text("\n\n", strip=True))
         if len(text) < 500:
             return None
         return f"ADGM FSRA official listing\n\nURL: {url}\n\n{text}"

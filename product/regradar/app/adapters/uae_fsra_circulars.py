@@ -15,10 +15,9 @@ import hashlib
 import re
 from urllib.parse import urljoin, urlparse
 
-import requests
 from bs4 import BeautifulSoup
 
-from app.adapters.base import SourceAdapter
+from app.adapters.base import fetch_text_bounded, fetch_text_bounded_status, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.parser import extract_text
 
@@ -129,35 +128,38 @@ def extract_fsra_circular_items(
     The function never raises to callers. A failed fetch returns a result with
     extraction_status="failed" and an empty items list.
     """
-    try:
-        response = requests.get(
-            source_page_url,
-            headers=_HEADERS,
-            timeout=timeout,
-            allow_redirects=True,
-        )
-        http_status = response.status_code
-    except Exception as exc:
+    http_status, html = fetch_text_bounded_status(
+        source_page_url,
+        headers=_HEADERS,
+        timeout=timeout,
+        label="FSRACircularsAdapter",
+    )
+    if http_status is None:
         return {
             "source_page_url": source_page_url,
             "http_status": None,
             "item_count": 0,
             "items": [],
             "extraction_status": "failed",
-            "limitation_notes": [f"Request failed: {type(exc).__name__}"],
+            "limitation_notes": ["Request failed."],
         }
 
-    if http_status != 200:
+    if html is None:
+        note = (
+            f"HTTP {http_status}; source not extractable in this run."
+            if http_status != 200
+            else "Response body unusable (oversized or unreadable)."
+        )
         return {
             "source_page_url": source_page_url,
             "http_status": http_status,
             "item_count": 0,
             "items": [],
             "extraction_status": "failed",
-            "limitation_notes": [f"HTTP {http_status}; source not extractable in this run."],
+            "limitation_notes": [note],
         }
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
 
@@ -280,20 +282,14 @@ class FSRACircularsAdapter(SourceAdapter):
         return "\n\n".join(blocks)
 
     def _fetch_generic_adgm_listing(self, url: str) -> str | None:
-        try:
-            response = requests.get(
-                url,
-                headers=_HEADERS,
-                timeout=HTTP_TIMEOUT_S,
-                allow_redirects=True,
-            )
-        except Exception:
+        html = fetch_text_bounded(
+            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="FSRACircularsAdapter"
+        )
+        if html is None:
             return None
-        if response.status_code != 200:
-            return None
-        text = extract_text(response.text) or ""
+        text = extract_text(html) or ""
         if len(text) < 500:
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(html, "html.parser")
             for tag in soup(["script", "style", "noscript", "nav", "footer", "header"]):
                 tag.decompose()
             text = _clean_text(soup.get_text("\n", strip=True))

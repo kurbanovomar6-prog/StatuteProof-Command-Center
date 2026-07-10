@@ -49,3 +49,25 @@ def unreadable_ratio(text: str) -> float:
 def strip_unreadable_chars(text: str) -> str:
     """Remove unreadable characters, keeping all legitimate content."""
     return "".join(ch for ch in text if not is_unreadable_char(ch))
+
+
+# Shared saturation thresholds: tolerate a stray character or two from a
+# sloppy server encoding (absolute floor), reject saturation (ratio).
+DEFAULT_UNREADABLE_FLOOR = 8
+DEFAULT_UNREADABLE_RATIO = 0.02
+
+
+def is_mostly_unreadable(
+    text: str,
+    *,
+    floor: int = DEFAULT_UNREADABLE_FLOOR,
+    ratio: float = DEFAULT_UNREADABLE_RATIO,
+) -> bool:
+    """
+    True when text is saturated with unreadable characters — the signature
+    of a mis-decoded or binary body. Both thresholds are strict (>).
+    """
+    if not text:
+        return False
+    junk = unreadable_char_count(text)
+    return junk > floor and junk / len(text) > ratio

@@ -37,10 +37,10 @@ import re
 import sys
 import threading
 
-import requests
 from bs4 import BeautifulSoup
 from playwright.sync_api import Browser as PWBrowser, TimeoutError as PWTimeout, sync_playwright
 
+from app.adapters.base import fetch_text_bounded
 from app.config import HTTP_TIMEOUT_S, PAGE_TIMEOUT_MS, REQUESTS_UA
 
 logger = logging.getLogger(__name__)
@@ -193,58 +193,33 @@ _MAX_RESPONSE_BYTES = 10 * 1024 * 1024  # 10 MB hard limit
 
 def _fetch_via_requests(url: str) -> str | None:
     """
-    Attempt a plain HTTP GET.
+    Attempt a plain HTTP GET with a bounded, streamed read.
 
     Returns the response text on success, or None when the request fails.
     Does NOT apply the content-quality check — that is done in fetch_page()
     so the caller can log the decision with full context.
 
-    Size guard: if Content-Length is declared and exceeds 10 MB, or the
-    decoded body exceeds 10 MB, the response is discarded and None is
-    returned rather than buffering a huge file into memory.
+    Size guard: the body is read in chunks and the read ABORTS once the
+    DECOMPRESSED size exceeds 10 MB, bounding peak memory even against
+    decompression bombs (Content-Length reflects wire size, not inflated
+    size, so a post-hoc check would be too late).
     """
-    try:
-        resp = requests.get(
-            url,
-            headers={
-                "User-Agent":      REQUESTS_UA,
-                "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
-            },
-            timeout=HTTP_TIMEOUT_S,
-            allow_redirects=True,
-        )
-        resp.raise_for_status()
-
-        # ── Size guard ────────────────────────────────────────────────
-        declared_len = resp.headers.get("Content-Length")
-        if declared_len is not None:
-            try:
-                if int(declared_len) > _MAX_RESPONSE_BYTES:
-                    logger.warning(
-                        "Tier 1 (requests): Content-Length %s bytes exceeds "
-                        "%d MB limit for %s — skipping",
-                        declared_len, _MAX_RESPONSE_BYTES // (1024 * 1024), url,
-                    )
-                    return None
-            except ValueError:
-                pass  # malformed header; proceed and check body length
-
-        body = resp.text
-        if len(body.encode("utf-8", errors="replace")) > _MAX_RESPONSE_BYTES:
-            logger.warning(
-                "Tier 1 (requests): decoded body (%d chars) exceeds %d MB "
-                "limit for %s — skipping",
-                len(body), _MAX_RESPONSE_BYTES // (1024 * 1024), url,
-            )
-            return None
-
-        logger.info("Tier 1 (requests) HTTP OK — %d chars from %s", len(body), url)
-        return body
-
-    except requests.RequestException as exc:
-        logger.warning("Tier 1 (requests) failed: %s — escalating to Playwright", exc)
-        print(f"  Tier 1 (requests) failed: {exc} — escalating to Playwright", file=sys.stderr, flush=True)
+    body = fetch_text_bounded(
+        url,
+        headers={
+            "User-Agent":      REQUESTS_UA,
+            "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+        },
+        timeout=HTTP_TIMEOUT_S,
+        max_bytes=_MAX_RESPONSE_BYTES,
+        label="Tier 1 (requests)",
+    )
+    if body is None:
+        print("  Tier 1 (requests) failed — escalating to Playwright", file=sys.stderr, flush=True)
         return None
+
+    logger.info("Tier 1 (requests) HTTP OK — %d chars from %s", len(body), url)
+    return body
 
 
 # ── Tier 2: Playwright ────────────────────────────────────────────────────────
@@ -344,6 +319,15 @@ def _fetch_via_playwright(url: str) -> str:
 
     if not html or len(html) < 200:
         raise ValueError(f"Playwright returned empty HTML for {url}")
+
+    # Same ceiling as Tier 1: a rendered page this large is not a monitorable
+    # regulatory document. Reject rather than truncate — partial HTML would
+    # produce a bogus content diff.
+    if len(html) > _MAX_RESPONSE_BYTES:
+        raise ValueError(
+            f"Playwright HTML ({len(html):,} chars) exceeds "
+            f"{_MAX_RESPONSE_BYTES // (1024 * 1024)} MB limit for {url}"
+        )
 
     logger.info("Tier 2 (Playwright) OK — %d chars from %s", len(html), url)
     print(f"  Playwright succeeded — {len(html):,} chars fetched", file=sys.stderr, flush=True)
