@@ -31,6 +31,40 @@ logger = logging.getLogger(__name__)
 _KEEP_FOREVER = {"CHANGED", "FIRST_SEEN", "FAILED", "QUALITY_DROP"}
 
 
+def _parse_records(lines: list[str]) -> list[dict | None]:
+    """
+    Parse each non-blank JSONL line into a dict, keeping index alignment with
+    ``lines``. A malformed line (e.g. a truncated partial write from a killed
+    process) yields ``None`` instead of raising — the rest of the codebase
+    (source_runs._read_runs, audit_export) already tolerates such lines, so a
+    single corrupt line must never abort compaction and wedge every subsequent
+    retention run. ``None`` entries are treated as always-keep by both jobs.
+    """
+    parsed: list[dict | None] = []
+    for line in lines:
+        if not line.strip():
+            parsed.append(None)
+            continue
+        try:
+            parsed.append(json.loads(line))
+        except json.JSONDecodeError:
+            parsed.append(None)
+    return parsed
+
+
+def _removed_count(records: list[dict | None], lines: list[str], keep: list[int]) -> int:
+    """
+    Count how many non-blank lines the compaction pass dropped.
+
+    Blank/whitespace-only lines are never re-emitted (they carry nothing), so
+    they are excluded from the denominator — otherwise a file that only needs a
+    blank line trimmed would rewrite on every run and break idempotency. A
+    rewrite happens only when this returns > 0.
+    """
+    non_blank = sum(1 for ln in lines if ln.strip())
+    return non_blank - len(keep)
+
+
 def _parse_ts(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -62,13 +96,15 @@ def compact_quality_drop_repeats(days_threshold: int = 30, now: datetime | None 
         fcntl.flock(fh, fcntl.LOCK_EX)
         try:
             lines = fh.read().splitlines()
-            records = [json.loads(line) for line in lines if line.strip()]
+            records = _parse_records(lines)
 
             # Pass 1: mark repeats (previous same-source record is also
             # QUALITY_DROP) — file order is append-only chronological.
             prev_status: dict[str, str] = {}
             is_repeat: dict[int, bool] = {}
             for idx, rec in enumerate(records):
+                if rec is None:
+                    continue
                 sid = str(rec.get("source_id"))
                 status = str(rec.get("change_status") or "")
                 if status == "QUALITY_DROP":
@@ -78,7 +114,7 @@ def compact_quality_drop_repeats(days_threshold: int = 30, now: datetime | None 
             # Pass 2: among OLD repeats, the last per (source, utc-day) wins.
             last_of_day: dict[tuple, int] = {}
             for idx, rec in enumerate(records):
-                if not is_repeat.get(idx):
+                if rec is None or not is_repeat.get(idx):
                     continue
                 ts = _parse_ts(rec.get("timestamp_utc"))
                 if ts is None or ts >= cutoff:
@@ -87,6 +123,14 @@ def compact_quality_drop_repeats(days_threshold: int = 30, now: datetime | None 
 
             keep: list[int] = []
             for idx, rec in enumerate(records):
+                if rec is None:
+                    # Blank/malformed line: preserve verbatim (the trail is
+                    # evidence — never silently discard a line compaction did
+                    # not set out to remove) unless it is an empty/whitespace
+                    # line, which carries nothing.
+                    if lines[idx].strip():
+                        keep.append(idx)
+                    continue
                 if not is_repeat.get(idx):
                     keep.append(idx)  # non-QD and transitions: forever
                     continue
@@ -97,7 +141,7 @@ def compact_quality_drop_repeats(days_threshold: int = 30, now: datetime | None 
                 if last_of_day.get((rec.get("source_id"), ts.date().isoformat())) == idx:
                     keep.append(idx)
 
-            removed = len(records) - len(keep)
+            removed = _removed_count(records, lines, keep)
             if removed > 0:
                 tmp_path = run_file.with_suffix(".jsonl.qd-compact-tmp")
                 with tmp_path.open("w", encoding="utf-8") as tmp:
@@ -135,12 +179,12 @@ def compact_heartbeats(days_threshold: int = 30, now: datetime | None = None) ->
         fcntl.flock(fh, fcntl.LOCK_EX)
         try:
             lines = fh.read().splitlines()
-            records = [json.loads(line) for line in lines if line.strip()]
+            records = _parse_records(lines)
 
             # Last old heartbeat per (source_id, utc-date) survives.
             last_of_day: dict[tuple, int] = {}
             for idx, rec in enumerate(records):
-                if rec.get("record_type") != "heartbeat":
+                if rec is None or rec.get("record_type") != "heartbeat":
                     continue
                 ts = _parse_ts(rec.get("timestamp_utc"))
                 if ts is None or ts >= cutoff:
@@ -150,6 +194,13 @@ def compact_heartbeats(days_threshold: int = 30, now: datetime | None = None) ->
 
             keep: list[int] = []
             for idx, rec in enumerate(records):
+                if rec is None:
+                    # Blank/malformed line: preserve a corrupt partial write
+                    # verbatim (evidence trail — never silently discard), drop
+                    # only truly empty lines.
+                    if lines[idx].strip():
+                        keep.append(idx)
+                    continue
                 if rec.get("record_type") != "heartbeat":
                     keep.append(idx)
                     continue
@@ -164,7 +215,7 @@ def compact_heartbeats(days_threshold: int = 30, now: datetime | None = None) ->
                 if last_of_day.get(key) == idx:
                     keep.append(idx)
 
-            removed = len(records) - len(keep)
+            removed = _removed_count(records, lines, keep)
             if removed > 0:
                 tmp_path = run_file.with_suffix(".jsonl.compact-tmp")
                 with tmp_path.open("w", encoding="utf-8") as tmp:

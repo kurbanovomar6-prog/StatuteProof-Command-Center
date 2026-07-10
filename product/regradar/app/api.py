@@ -186,11 +186,28 @@ class _RateLimiter:
         self.window_seconds = int(window_seconds)
         self._hits = defaultdict(list)
         self._lock = threading.Lock()
+        self._last_sweep = time.monotonic()
+
+    def _sweep_expired(self, cutoff: float) -> None:
+        """Drop keys whose entire hit window has expired.
+
+        Called under ``self._lock``. Without this the dict grows one permanent
+        entry per distinct key (e.g. per client IP) forever — a memory leak,
+        since ``is_allowed`` otherwise writes back even an empty list.
+        """
+        stale = [k for k, v in self._hits.items() if not [ts for ts in v if ts > cutoff]]
+        for k in stale:
+            del self._hits[k]
+        self._last_sweep = time.monotonic()
 
     def is_allowed(self, key: str) -> bool:
         now = time.monotonic()
         cutoff = now - self.window_seconds
         with self._lock:
+            # Periodic full sweep so keys that stop receiving traffic are
+            # eventually reclaimed (bounded to at most once per window).
+            if now - self._last_sweep >= self.window_seconds:
+                self._sweep_expired(cutoff)
             hits = [ts for ts in self._hits[key] if ts > cutoff]
             if len(hits) >= self.limit:
                 self._hits[key] = hits
@@ -224,6 +241,13 @@ class _Handler(BaseHTTPRequestHandler):
         status: int = 200,
         extra_headers: list[tuple[str, str]] | None = None,
     ) -> None:
+        # One-shot guard: never write a second response on the same connection.
+        # A double response (e.g. _read_json emits 413, then the handler emits a
+        # second status on the empty body) corrupts the HTTP stream the client
+        # sees. The first response wins; subsequent calls are silently dropped.
+        if getattr(self, "_response_sent", False):
+            return
+        self._response_sent = True
         body = json.dumps(data, ensure_ascii=False).encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -244,6 +268,9 @@ class _Handler(BaseHTTPRequestHandler):
         if not length:
             return {}
         if length > self._MAX_BODY_BYTES:
+            # Close the connection: the oversized body is left unread on the
+            # socket, so the connection cannot be safely kept alive.
+            self.close_connection = True
             self._send_json({"ok": False, "message": "Request body too large."}, 413)
             return {}
         try:
@@ -256,6 +283,7 @@ class _Handler(BaseHTTPRequestHandler):
         if not length:
             return {}, None
         if length > self._MAX_BODY_BYTES:
+            self.close_connection = True
             self._send_json({"ok": False, "message": "Request body too large."}, 413)
             return None, "Request body too large."
         try:
@@ -289,9 +317,26 @@ class _Handler(BaseHTTPRequestHandler):
         return cookie.output(header="").strip()
 
     def _client_ip(self) -> str:
+        """Return the client IP from a proxy-trusted source only.
+
+        Security: the leftmost X-Forwarded-For token is fully client-controlled,
+        so trusting it lets an attacker mint a fresh rate-limit key per request
+        (brute-force / spam bypass) and grow the limiter dict unbounded. The
+        bundled nginx sets ``X-Real-IP $remote_addr`` (overwriting any client
+        value) and appends the real peer to ``X-Forwarded-For`` via
+        ``$proxy_add_x_forwarded_for`` — so the *rightmost* XFF token, not the
+        leftmost, is the trustworthy one. Prefer X-Real-IP, then the rightmost
+        XFF hop, then the socket peer.
+        """
+        real_ip = self.headers.get("X-Real-IP", "")
+        if real_ip and real_ip.strip():
+            return str(real_ip.strip())
         xff = self.headers.get("X-Forwarded-For", "")
         if xff:
-            return str(xff.split(",")[0].strip() or "unknown")
+            # Rightmost entry is the hop appended by the trusted reverse proxy.
+            hops = [part.strip() for part in xff.split(",") if part.strip()]
+            if hops:
+                return str(hops[-1])
         try:
             return str(self.client_address[0] or "unknown")
         except Exception:
@@ -664,19 +709,20 @@ class _Handler(BaseHTTPRequestHandler):
             )
             return
         mark_email_verified(user_id)
-        try:
-            session_id = create_session(user_id)
-            self._send_json(
-                {"ok": True, "verified": True},
-                200,
-                [("Set-Cookie", self._session_cookie_header(session_id))],
-            )
-        except Exception:
-            logger.error("Email verify session creation failed for user_id=%s", user_id)
-            self._send_json(
-                {"ok": False, "message": "Verification succeeded but session creation failed. Please sign in."},
-                500,
-            )
+        # Security: do NOT mint a login session here. This is a GET link
+        # delivered by email; a mailbox security scanner or shared-inbox viewer
+        # can fetch it before the real user clicks. Auto-issuing a Set-Cookie
+        # would hand that party a valid 7-day session for the victim account
+        # (token-in-URL becoming a login credential). Verifying the email is
+        # sufficient; the user then signs in normally with their password.
+        self._send_json(
+            {
+                "ok": True,
+                "verified": True,
+                "message": "Email verified. Please sign in to continue.",
+            },
+            200,
+        )
 
     def _handle_auth_resend_verification(self) -> None:
         if self._rate_limited(_REGISTER_LIMITER, "auth_resend"):

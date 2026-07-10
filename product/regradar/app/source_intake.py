@@ -419,24 +419,58 @@ def apply_quality_gate_fields(result: dict) -> None:
     )
 
 
+def _trail_content_hashes() -> dict[str, str]:
+    """
+    Map source_id -> latest stored content_hash from the run trail.
+
+    sources.json entries carry no content_hash (they are static config); the
+    only place a source's content hash is persisted is source_runs.jsonl (the
+    intake evidence-write path stores the same _content_hash(normalized_text)
+    value under the record's content_hash field). Reading it from the trail is
+    what makes duplicate-boilerplate / hash-collision detection actually
+    compare against other sources' real content. Returns {} on any error so a
+    missing/unreadable trail simply yields "no known collisions".
+    """
+    try:
+        from app.source_runs import latest_runs
+
+        mapping: dict[str, str] = {}
+        for sid, run in latest_runs().items():
+            h = run.get("content_hash")
+            if h:
+                mapping[str(sid)] = str(h)
+        return mapping
+    except Exception:  # pragma: no cover - trail is best-effort
+        return {}
+
+
 def _check_hash_collision(
     text_hash: str,
     source_id: str,
     all_sources: list[dict],
 ) -> tuple[bool, str | None]:
     """
-    Check whether `text_hash` matches the stored hash of any other enabled source.
+    Check whether `text_hash` matches the stored content hash of any other
+    enabled source.
+
+    A source's stored content hash is resolved from the source entry's own
+    'content_hash' field when present (backward compatible for callers that
+    inline it), otherwise from the run trail keyed by source_id. sources.json
+    entries have no content_hash of their own, so without the trail fallback
+    this check was permanently inert on the live intake path.
 
     Returns (collision_found, colliding_source_id | None).
-    Requires all_sources to have 'source_id' and 'content_hash' fields.
     """
+    trail_hashes = _trail_content_hashes()
     for s in all_sources:
         if not s.get("enabled"):
             continue
-        if s.get("source_id") == source_id:
+        other_id = s.get("source_id")
+        if not other_id or other_id == source_id:
             continue
-        if s.get("content_hash") == text_hash:
-            return True, s["source_id"]
+        stored = s.get("content_hash") or trail_hashes.get(str(other_id))
+        if stored and stored == text_hash:
+            return True, other_id
     return False, None
 
 

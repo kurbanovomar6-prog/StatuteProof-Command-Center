@@ -128,10 +128,9 @@ class MinfinAdapter(SourceAdapter):
             return self._process_sitemap_index(root)
         return self._extract_urls(root)
 
-    def _extract_urls(self, root: ET.Element) -> list[str]:
+    def _extract_entries(self, root: ET.Element) -> list[tuple[str, str]]:
         """
-        Extract (lastmod, loc) pairs from a <urlset> element,
-        sort by lastmod DESC, and return the loc list.
+        Extract (lastmod, loc) pairs from a <urlset> element (unsorted).
 
         Falls back to no-namespace lookup when the namespace-qualified
         lookup returns nothing.
@@ -151,13 +150,25 @@ class MinfinAdapter(SourceAdapter):
             if loc and loc.startswith("http"):
                 entries.append((lastmod, loc))
 
+        return entries
+
+    @staticmethod
+    def _sort_entries(entries: list[tuple[str, str]]) -> list[str]:
+        """Sort (lastmod, loc) pairs newest-first (URL tie-break) and return locs."""
         # Sort newest first, then by URL for deterministic tie-breaking
         entries.sort(key=lambda x: (x[0], x[1]), reverse=True)
         return [loc for _, loc in entries]
 
+    def _extract_urls(self, root: ET.Element) -> list[str]:
+        """
+        Extract (lastmod, loc) pairs from a <urlset> element,
+        sort by lastmod DESC, and return the loc list.
+        """
+        return self._sort_entries(self._extract_entries(root))
+
     def _process_sitemap_index(self, root: ET.Element) -> list[str]:
         """Fetch sub-sitemaps from a <sitemapindex> and collect URLs."""
-        all_urls: list[str] = []
+        all_entries: list[tuple[str, str]] = []
         sm_els = root.findall("sm:sitemap", _NS)
         if not sm_els:
             sm_els = root.findall("sitemap")
@@ -176,12 +187,14 @@ class MinfinAdapter(SourceAdapter):
                 )
                 if sub_data is not None:
                     sub_root = ET.fromstring(sub_data)
-                    all_urls.extend(self._extract_urls(sub_root))
+                    all_entries.extend(self._extract_entries(sub_root))
             except Exception as exc:
                 logger.debug("Minfin sub-sitemap %s error: %s", loc, exc)
 
-        # Re-sort across all sub-sitemaps
-        return all_urls     # already sorted within each sub-sitemap
+        # Re-sort by lastmod DESC across ALL sub-sitemaps so the most
+        # recently-modified sections rank first regardless of which
+        # sub-sitemap file they came from.
+        return self._sort_entries(all_entries)
 
     def _fetch_page_text(self, page_url: str) -> str | None:
         """Fetch a single page and return extracted paragraph text."""

@@ -219,37 +219,47 @@ def get_or_create_profile(user_id: int, seed: dict | None = None) -> dict:
         industry = _sanitize_str(seed.get("industry"), 100)
         industries = [industry] if industry else []
         now = _now()
-        conn.execute(
-            """
-            INSERT INTO user_profiles (
-                user_id, company_name, industries, markets, topics, licence_type,
-                custom_sources, regulators, alert_threshold, brief_language,
-                weekly_brief_enabled, ai_enabled, telegram_alerts_enabled,
-                email_alerts_enabled, onboarding_completed, created_at, updated_at
+        try:
+            conn.execute(
+                """
+                INSERT INTO user_profiles (
+                    user_id, company_name, industries, markets, topics, licence_type,
+                    custom_sources, regulators, alert_threshold, brief_language,
+                    weekly_brief_enabled, ai_enabled, telegram_alerts_enabled,
+                    email_alerts_enabled, onboarding_completed, created_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    user_id,
+                    _sanitize_str(seed.get("company_name"), 200),
+                    _json_list(industries),
+                    _json_list([]),
+                    _json_list([]),
+                    None,
+                    _json_list([]),
+                    _json_list([]),
+                    "MEDIUM",
+                    "en",
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    now,
+                    now,
+                ),
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                user_id,
-                _sanitize_str(seed.get("company_name"), 200),
-                _json_list(industries),
-                _json_list([]),
-                _json_list([]),
-                None,
-                _json_list([]),
-                _json_list([]),
-                "MEDIUM",
-                "en",
-                1,
-                1,
-                0,
-                0,
-                0,
-                now,
-                now,
-            ),
-        )
-        conn.commit()
+            conn.commit()
+        except sqlite3.IntegrityError:
+            # Concurrent first request already inserted this user_id (PRIMARY
+            # KEY) between our SELECT and INSERT. That is not an error — read
+            # back the row the other thread committed instead of 500-ing.
+            conn.rollback()
+            existing = _get_profile_row(conn, user_id)
+            if existing is not None:
+                return _profile_row_to_dict(existing)
+            raise
         return _profile_row_to_dict(_get_profile_row(conn, user_id))
     finally:
         conn.close()

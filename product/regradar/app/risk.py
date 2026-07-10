@@ -245,7 +245,45 @@ _OBLIGATION_KEYWORDS: tuple[str, ...] = (
     "suspend",
     "cease",
     "ban",
+    # Absent-strong-keyword fix: restriction/licence are strong obligation
+    # signals in _HIGH_KEYWORDS but were missing here, so a small diff that
+    # introduced or altered a licence restriction slipped through the
+    # materiality gate as NON_MATERIAL. Keep them (and common variants)
+    # aligned with the strong keyword list.
+    "restriction",
+    "restrictions",
+    "prohibition",
+    "licence",
+    "license",
+    "licensing",
+    "revocation",
+    "suspension",
+    "revoked",
+    "suspended",
 )
+
+
+def _edited_char_count(removed_str: str, added_str: str) -> int:
+    """Number of characters that actually differ between two texts.
+
+    Uses a character-level diff and sums the inserted and deleted characters.
+    A pure whitespace/formatting tweak yields a small count; a same-length
+    content swap (e.g. "allowance" -> "restriction") yields a count equal to
+    the combined length of the differing spans — the true edit magnitude,
+    unlike a bare ``|len(added) - len(removed)|`` length delta.
+    """
+    from difflib import SequenceMatcher
+
+    matcher = SequenceMatcher(a=removed_str, b=added_str, autojunk=False)
+    changed = 0
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "delete":
+            changed += i2 - i1
+        elif tag == "insert":
+            changed += j2 - j1
+        elif tag == "replace":
+            changed += (i2 - i1) + (j2 - j1)
+    return changed
 
 
 def is_non_material(diff_result: dict) -> bool:
@@ -254,11 +292,20 @@ def is_non_material(diff_result: dict) -> bool:
     A change is NON_MATERIAL when ALL of the following are true:
 
     a. ``diff_result["changed"]`` is True (there is a change).
-    b. Net character change (|added_len - removed_len|) < NON_MATERIAL_MAX_CHARS.
+    b. Edited-content size (characters that actually differ between the
+       removed and added text) < NON_MATERIAL_MAX_CHARS.
     c. None of the _OBLIGATION_KEYWORDS appear in the combined added+removed text.
     d. ``diff_result["risk_level"]`` is not already "HIGH".
 
     Returns False (conservative fallback) if the diff has no added/removed text fields.
+
+    Note on (b): the magnitude is measured as the number of characters that
+    actually changed between the two sides (via a character-level diff), NOT a
+    pure length delta ``|added_len - removed_len|``. A same-length swap such as
+    replacing "allowance" with "restriction" inside an otherwise-identical
+    paragraph has a length delta of only a couple of characters but is a real,
+    material edit — the edited-content metric captures it while pure
+    formatting/whitespace edits still fall below the threshold.
     """
     if not diff_result.get("changed"):
         return False
@@ -281,8 +328,10 @@ def is_non_material(diff_result: dict) -> bool:
     else:
         removed_str = str(removed_text or "")
 
-    # (b) Net character change
-    net_change = abs(len(added_str) - len(removed_str))
+    # (b) Edited-content size — count characters that actually differ between
+    # the two sides, so a same-length material swap (allowance -> restriction)
+    # is not masked by a near-zero length delta.
+    net_change = _edited_char_count(removed_str, added_str)
     if net_change >= NON_MATERIAL_MAX_CHARS:
         return False
 
@@ -351,6 +400,19 @@ def _is_format_shift(diff_result: dict) -> bool:
     return (_ADAPTER_BANNER in added_txt) != (_ADAPTER_BANNER in removed_txt)
 
 
+# Single-word obligation-bearing terms that must survive delta extraction even
+# when they sit in the UNCHANGED portion of a MODIFIED block. Chrome/navigation
+# words are deliberately excluded so the delta filter keeps suppressing them;
+# only genuine obligation/severity signal is preserved. Built from the strong
+# keyword and obligation lists, restricted to single tokens (multi-word phrases
+# are matched later against the full delta text, not token-by-token here).
+_DELTA_PRESERVE_TERMS: frozenset[str] = frozenset(
+    term
+    for term in (*_HIGH_KEYWORDS, *_OBLIGATION_KEYWORDS)
+    if " " not in term
+)
+
+
 def _delta_scoring_text(added: list, removed: list) -> str:
     """
     Cycle 3 (delta-only severity scoring): when a block appears in both
@@ -358,6 +420,14 @@ def _delta_scoring_text(added: list, removed: list) -> str:
     Keywords that merely sit inside a changed block (site navigation, page
     chrome) must not drive severity — that is what turned a DFSA title
     tagline flip into a false HIGH on 2026-07-05.
+
+    Exception (obligation-signal preservation): a strong obligation keyword
+    (penalty, fine, restriction, ban, …) that sits in the UNCHANGED part of a
+    MODIFIED block is still scored. Otherwise a sentence like
+    "The penalty ... is now AED 50000" vs "The penalty ... is AED 10000" would
+    strip the word "penalty" (it is common to both sides) and a 5x penalty
+    increase would score LOW with no alert. Only obligation-bearing tokens are
+    preserved from equal spans; page-chrome words remain suppressed.
 
     Wholly new or wholly removed content is scored in full.
     """
@@ -375,7 +445,24 @@ def _delta_scoring_text(added: list, removed: list) -> str:
             delta.extend(removed_tokens[i1:i2])
         if tag in ("replace", "insert"):
             delta.extend(added_tokens[j1:j2])
+        if tag == "equal":
+            # Preserve obligation-bearing keywords that happen to be common to
+            # both sides of a modified block; drop everything else (chrome).
+            delta.extend(
+                tok
+                for tok in added_tokens[j1:j2]
+                if _strip_token(tok) in _DELTA_PRESERVE_TERMS
+            )
     return " ".join(delta)
+
+
+def _strip_token(token: str) -> str:
+    """Lowercase a token and strip surrounding punctuation for keyword lookup.
+
+    Keeps internal characters (e.g. hyphenated forms) intact; only trims
+    leading/trailing non-word characters so "penalty," or "(penalty)" match.
+    """
+    return token.strip(".,;:!?()[]{}\"'").lower()
 
 
 def analyze_risk(diff_result: dict) -> dict:

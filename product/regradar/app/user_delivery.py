@@ -127,6 +127,45 @@ def create_delivery_log(
         conn.close()
 
 
+def reclaim_failed_delivery_log(idempotency_key: str) -> int | None:
+    """Atomically flip a previously-*failed* delivery-log row back to
+    'pending' so a genuine retry can re-send it, returning its id.
+
+    Because create_delivery_log uses INSERT OR IGNORE against the UNIQUE
+    idempotency_key, a row left at status='failed' by a transient send
+    failure blocks every subsequent INSERT (created=False) — so the alert
+    could never be retried. This recovers that row for exactly one retry.
+
+    Returns the row id if a 'failed' row existed and was reset to 'pending';
+    returns None if no row exists or the existing row is 'pending'/'sent'
+    (idempotency preserved — an already-sent alert is never re-sent).
+    """
+    key = str(idempotency_key or "").strip()
+    if not key:
+        return None
+    ensure_delivery_log_table()
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            """
+            UPDATE user_delivery_log
+            SET status = 'pending', error_message = NULL
+            WHERE idempotency_key = ? AND status = 'failed'
+            """,
+            (key,),
+        )
+        conn.commit()
+        if not cur.rowcount:
+            return None
+        row = conn.execute(
+            "SELECT id FROM user_delivery_log WHERE idempotency_key = ? LIMIT 1",
+            (key,),
+        ).fetchone()
+        return int(row["id"]) if row else None
+    finally:
+        conn.close()
+
+
 def update_delivery_log_sent(log_id: int) -> None:
     ensure_delivery_log_table()
     now = _now_iso()

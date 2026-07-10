@@ -196,7 +196,7 @@ def extract_cbuae_rulebook_update_items(
 
     return {
         "source_page_url": source_page_url,
-        "http_status": response.status_code,
+        "http_status": http_status,
         "item_count": len(rows),
         "items": rows,
         "extraction_status": "ok" if rows else "empty",

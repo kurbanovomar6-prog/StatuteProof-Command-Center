@@ -31,6 +31,7 @@ from urllib.parse import urljoin, urlparse
 import requests as _req
 from bs4 import BeautifulSoup
 
+from app.adapters.base import _guarded_get
 from app.config import (
     DISCOVERY_MAX_LINKS,
     DISCOVERY_MAX_SAMPLE_DOCS,
@@ -43,6 +44,31 @@ from app.scraper import _fetch_via_playwright, is_low_content_html
 from app.source_tester import validate_public_url
 
 logger = logging.getLogger(__name__)
+
+
+def _safe_get(
+    url: str,
+    *,
+    headers: dict,
+    timeout: float,
+):
+    """
+    SSRF-guarded GET that follows redirects with PER-HOP revalidation.
+
+    `validate_public_url` only vets the ORIGINAL host and makes no HTTP call,
+    so it cannot constrain a 30x redirect target — a public source can bounce
+    the fetch to a private/link-local address (e.g. cloud metadata
+    169.254.169.254). Delegating to base._guarded_get re-vets and IP-pins every
+    hop before connecting, closing the authenticated-SSRF-via-redirect hole in
+    the discovery path.
+
+    Returns a live streamed requests.Response (body not yet read; caller must
+    close/exhaust it) on success, or None when the request fails or any hop is
+    blocked by the SSRF guard. Never raises.
+    """
+    return _guarded_get(
+        url, headers=headers, timeout=timeout, verify=True, label="discovery"
+    )
 
 # ── constants ─────────────────────────────────────────────────────────────────
 
@@ -534,9 +560,19 @@ def capture_playwright_network_candidates(
 
     candidates: list[dict] = []
     seen: set[str] = set()
-    browser = _get_shared_browser()
-    context = browser.new_context(user_agent=REQUESTS_UA)
-    page = context.new_page()
+    try:
+        browser = _get_shared_browser()
+        context = browser.new_context(user_agent=REQUESTS_UA)
+        page = context.new_page()
+    except Exception as exc:
+        return [{
+            "candidate_url": url,
+            "source_type": "unknown",
+            "discovery_method": "playwright_network",
+            "candidate_status": "rejected",
+            "failure_reason": f"Browser context unavailable: {type(exc).__name__}: {exc}",
+            "next_action": "manual_review",
+        }]
 
     def _on_response(response) -> None:
         if len(candidates) >= max_responses:
@@ -908,20 +944,26 @@ def discover_source(
         if use_js:
             html = _fetch_via_playwright(url)
         else:
-            resp = _req.get(url, headers={"User-Agent": REQUESTS_UA, "Accept-Language": "en,ru;q=0.8"}, timeout=HTTP_TIMEOUT_S, allow_redirects=True)
-            final_url = resp.url or url
-            http_status = resp.status_code
-            html = resp.text if resp.ok else ""
-            if not resp.ok:
-                warnings.append(f"HTTP {resp.status_code}")
+            resp = _safe_get(url, headers={"User-Agent": REQUESTS_UA, "Accept-Language": "en,ru;q=0.8"}, timeout=HTTP_TIMEOUT_S)
+            if resp is None:
+                warnings.append("Fetch failed or blocked by SSRF guard")
+            else:
+                with resp:
+                    final_url = resp.url or url
+                    http_status = resp.status_code
+                    html = resp.text if resp.ok else ""
+                    if not resp.ok:
+                        warnings.append(f"HTTP {resp.status_code}")
     except Exception as exc:
         warnings.append(f"Fetch failed: {type(exc).__name__}: {exc}")
 
     robots_text = ""
     if include_sitemap:
         try:
-            robots_resp = _req.get(_origin(final_url) + "/robots.txt", headers={"User-Agent": REQUESTS_UA}, timeout=_PROBE_TIMEOUT, allow_redirects=True)
-            robots_text = robots_resp.text if robots_resp.ok else ""
+            robots_resp = _safe_get(_origin(final_url) + "/robots.txt", headers={"User-Agent": REQUESTS_UA}, timeout=_PROBE_TIMEOUT)
+            if robots_resp is not None:
+                with robots_resp:
+                    robots_text = robots_resp.text if robots_resp.ok else ""
         except Exception as exc:
             warnings.append(f"robots.txt fetch failed: {type(exc).__name__}")
 
@@ -980,14 +1022,16 @@ def _probe(url: str) -> tuple[int | None, str, str | None]:
     if not safe:
         return None, "", None
     try:
-        resp = _req.get(
+        resp = _safe_get(
             url,
             headers={"User-Agent": REQUESTS_UA, "Accept-Language": "ru,en;q=0.8"},
             timeout=_PROBE_TIMEOUT,
-            allow_redirects=True,
         )
-        ct = resp.headers.get("content-type", "")
-        return resp.status_code, ct, (resp.text if resp.ok else None)
+        if resp is None:
+            return None, "", None
+        with resp:
+            ct = resp.headers.get("content-type", "")
+            return resp.status_code, ct, (resp.text if resp.ok else None)
     except _req.RequestException as exc:
         logger.debug("discovery._probe %s: %s", url, exc)
         return None, "", None
@@ -1124,22 +1168,23 @@ def _sample_documents(doc_links: list[str]) -> tuple[list[dict], int]:
         if not safe:
             continue
         try:
-            resp = _req.get(
+            resp = _safe_get(
                 url,
                 headers={"User-Agent": REQUESTS_UA},
                 timeout=_PROBE_TIMEOUT,
-                allow_redirects=True,
-                stream=True,
             )
-            if not resp.ok:
+            if resp is None or not resp.ok:
+                if resp is not None:
+                    resp.close()
                 samples.append({"url": url, "status": "failed", "chars": 0})
                 continue
 
-            buf = b""
-            for chunk in resp.iter_content(chunk_size=65_536):
-                buf += chunk
-                if len(buf) >= max_bytes:
-                    break
+            with resp:
+                buf = b""
+                for chunk in resp.iter_content(chunk_size=65_536):
+                    buf += chunk
+                    if len(buf) >= max_bytes:
+                        break
 
             hl = url.lower()
             if hl.endswith(".pdf"):
@@ -1351,16 +1396,17 @@ def discover_source_capabilities(url: str, deep: bool = False) -> dict:
     html_chars:  int        = 0
 
     try:
-        resp = _req.get(
+        resp = _safe_get(
             url,
             headers={"User-Agent": REQUESTS_UA, "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8"},
             timeout=HTTP_TIMEOUT_S,
-            allow_redirects=True,
         )
-        http_status = resp.status_code
-        if resp.ok:
-            raw_html   = resp.text
-            html_chars = len(raw_html)
+        if resp is not None:
+            with resp:
+                http_status = resp.status_code
+                if resp.ok:
+                    raw_html   = resp.text
+                    html_chars = len(raw_html)
     except _req.RequestException as exc:
         logger.debug("discovery: Layer 1 failed for %s: %s", url, exc)
 

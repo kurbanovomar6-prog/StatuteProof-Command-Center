@@ -225,7 +225,7 @@ def _group_metrics(records: list[dict]) -> dict:
     pts  = sum(_source_pts(r) for r in records)   # restricted return 0.0
     mx   = _max_pts(sc_enabled, sc_disabled)
     sc   = _score(pts, mx)
-    lbl  = _coverage_level_label(_score_label(sc), restricted)
+    lbl  = _coverage_level_label(_score_label(sc), restricted, total)
 
     return {
         "total":         total,
@@ -428,7 +428,12 @@ def generate_coverage_report(use_existing_audit: bool = True) -> dict:
     # ── Global totals ─────────────────────────────────────────────────────────
     total      = len(records)
     restricted = sum(1 for r in records if r.get("source_status", "") in _EXCLUDED_FROM_SCORE)
-    enabled    = sum(1 for r in records if r.get("enabled"))
+    # Count only non-restricted (scoreable) sources as "enabled" so the three
+    # buckets — restricted, enabled, disabled — partition `total` without
+    # overlap. A source that is BOTH restricted-status and enabled=True would
+    # otherwise be counted in both `enabled` and `restricted`, double-subtracted
+    # here, and render a negative "Disabled / mapped" figure.
+    enabled    = sum(1 for r in records if r.get("enabled") and _source_scores(r))
     disabled   = total - enabled - restricted
     good       = sum(1 for r in records if r.get("extraction_quality") == "good")
     low        = sum(1 for r in records if r.get("extraction_quality") == "low_content")
@@ -451,7 +456,7 @@ def generate_coverage_report(use_existing_audit: bool = True) -> dict:
     all_pts  = sum(_source_pts(r) for r in records)
     all_max  = _max_pts(sc_enabled, sc_disabled)
     overall  = _score(all_pts, all_max)
-    overall_label = _coverage_level_label(_score_label(overall), restricted)
+    overall_label = _coverage_level_label(_score_label(overall), restricted, total)
 
     # ── By jurisdiction ───────────────────────────────────────────────────────
     by_j_raw: dict[str, list[dict]] = defaultdict(list)

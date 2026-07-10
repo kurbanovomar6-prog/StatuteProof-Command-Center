@@ -294,7 +294,12 @@ def validate_date_range(date_from: str, date_to: str) -> tuple[bool, str]:
         return False, f"date_to '{date_to}' is not a valid YYYY-MM-DD date."
 
     today = date.today()
-    two_years_ago = date(today.year - 2, today.month, today.day)
+    # Guard against Feb 29: year-2 is never a leap year (leap years are 4 apart),
+    # so date(today.year - 2, 2, 29) would raise ValueError. Fall back to Feb 28.
+    try:
+        two_years_ago = date(today.year - 2, today.month, today.day)
+    except ValueError:
+        two_years_ago = date(today.year - 2, today.month, 28)
 
     if d_from > d_to:
         return False, "date_from must not be after date_to."
@@ -432,6 +437,32 @@ def build_period_audit_vault(
         return {"status": "error", "message": str(exc)}
 
 
+def _naive_ts(ts: str) -> str:
+    """Strip a trailing UTC offset/'Z' so string comparison against a naive bound works.
+
+    Run records use offset-aware timestamps like '2026-07-11T23:59:59+00:00'
+    (source_runs.now_utc()), but the vault date bounds are naive
+    ('YYYY-MM-DDT23:59:59'). Without normalization, string comparison drops
+    records at the final second of date_to because the '+00:00' suffix sorts
+    after the bound. Returns the timestamp truncated to seconds precision.
+    """
+    ts = ts.strip()
+    if not ts:
+        return ts
+    if ts.endswith("Z"):
+        return ts[:-1]
+    # A trailing timezone offset is the last 6 chars: '+HH:MM' or '-HH:MM'.
+    # The 'T' separator guarantees the date-portion hyphens are earlier, so we
+    # only inspect the tail after the 'T'.
+    t_idx = ts.find("T")
+    tail = ts[t_idx:] if t_idx != -1 else ts
+    for sign in ("+", "-"):
+        pos = tail.rfind(sign)
+        if pos != -1:
+            return (ts[:t_idx] if t_idx != -1 else "") + tail[:pos]
+    return ts
+
+
 def _fetch_runs_for_vault(
     root: Path,
     source_ids: list[str],
@@ -459,7 +490,7 @@ def _fetch_runs_for_vault(
             sid = str(row.get("source_id") or "").strip()
             if sid not in wanted_ids:
                 continue
-            ts = str(row.get("timestamp_utc") or row.get("run_at") or "")
+            ts = _naive_ts(str(row.get("timestamp_utc") or row.get("run_at") or ""))
             if ts and ts >= date_from and ts <= date_to_end:
                 matching.append(row)
         if matching:

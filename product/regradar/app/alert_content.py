@@ -40,9 +40,17 @@ _RULE_LABEL = {
 
 
 def _clean(text: str) -> str:
-    """Collapse whitespace; fix double periods (defect A5)."""
+    """Collapse whitespace; fix double periods (defect A5).
+
+    Only collapses runs of *actual adjacent* periods (``..`` -> ``.``); a
+    literal ellipsis character (``…``) is left untouched. The loop condition
+    and the mutation must operate on the same string, otherwise input such as
+    ``.….`` (period-ellipsis-period, no adjacent ``..``) spins forever: the
+    ``…``-stripped view reads ``..`` (condition true) while ``out`` itself
+    never changes (defect A5 hang fix).
+    """
     out = " ".join(str(text or "").split())
-    while ".." in out.replace("…", ""):
+    while ".." in out:
         out = out.replace("..", ".")
     return out
 

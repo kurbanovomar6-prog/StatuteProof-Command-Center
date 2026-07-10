@@ -36,7 +36,7 @@ def _deliver_alert_to_subscribed_users(message: str) -> int:
     Falls back to 0 without raising if anything goes wrong.
     """
     try:
-        from app.telegram_pairing import get_all_linked_chat_ids  # type: ignore[import]
+        from app.telegram_pairing import get_all_linked_chat_ids
         chat_ids = get_all_linked_chat_ids()
     except Exception as exc:
         logger.debug("_deliver_alert_to_subscribed_users: could not fetch linked chat_ids: %s", exc)

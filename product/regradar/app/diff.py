@@ -31,11 +31,17 @@ _MIN_FRAGMENT = 20
 
 def _parse_hunks(
     diff_lines: list[str],
+    min_fragment: int = _MIN_FRAGMENT,
 ) -> list[tuple[list[str], list[str]]]:
     """
     Break unified_diff output into (removed_lines, added_lines) per hunk.
 
     Each hunk boundary is marked by a line starting with '@@'.
+
+    Lines whose stripped text is shorter than ``min_fragment`` are dropped as
+    formatting artifacts. ``min_fragment=0`` disables that filter (used as a
+    fallback when the length filter would otherwise erase a real change — see
+    ``get_diff``).
     """
     hunks: list[tuple[list[str], list[str]]] = []
     rem:   list[str] = []
@@ -51,17 +57,39 @@ def _parse_hunks(
         elif in_hunk:
             if line.startswith("-") and not line.startswith("---"):
                 text = line[1:].strip()
-                if len(text) >= _MIN_FRAGMENT:
+                if text and len(text) >= min_fragment:
                     rem.append(text)
             elif line.startswith("+") and not line.startswith("+++"):
                 text = line[1:].strip()
-                if len(text) >= _MIN_FRAGMENT:
+                if text and len(text) >= min_fragment:
                     add.append(text)
 
     if in_hunk:
         hunks.append((rem, add))
 
     return hunks
+
+
+def _collect_hunks(
+    hunks: list[tuple[list[str], list[str]]],
+) -> tuple[list[str], list[str], int]:
+    """Flatten parsed hunks into (added, removed, modified_count)."""
+    added:          list[str] = []
+    removed:        list[str] = []
+    modified_count: int       = 0
+
+    for rem, add in hunks:
+        if rem and add:
+            # Both sides present → modification
+            modified_count += 1
+            removed.extend(rem)
+            added.extend(add)
+        elif rem:
+            removed.extend(rem)
+        elif add:
+            added.extend(add)
+
+    return added, removed, modified_count
 
 
 def get_diff(old_text: str, new_text: str) -> dict:
@@ -112,20 +140,18 @@ def get_diff(old_text: str, new_text: str) -> dict:
     if not hunks:
         return _EMPTY
 
-    added:          list[str] = []
-    removed:        list[str] = []
-    modified_count: int       = 0
+    added, removed, modified_count = _collect_hunks(hunks)
 
-    for rem, add in hunks:
-        if rem and add:
-            # Both sides present → modification
-            modified_count += 1
-            removed.extend(rem)
-            added.extend(add)
-        elif rem:
-            removed.extend(rem)
-        elif add:
-            added.extend(add)
+    # Short-change safeguard: the _MIN_FRAGMENT filter drops sub-20-char lines
+    # as formatting artifacts, but when EVERY changed line is short (e.g.
+    # "Fee: 100" -> "Fee: 999") the filter erases the entire diff and reports
+    # has_changes=False for a real content change. get_diff is only reached
+    # after the content hash already proved the text differs, so silently
+    # reporting "no change" hides the edit from risk scoring and alerting.
+    # Fall back to an unfiltered parse so a genuine short change stays visible.
+    if not added and not removed:
+        raw_hunks = _parse_hunks(raw_diff, min_fragment=0)
+        added, removed, modified_count = _collect_hunks(raw_hunks)
 
     has_changes = bool(added or removed)
 

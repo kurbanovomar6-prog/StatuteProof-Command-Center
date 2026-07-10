@@ -99,6 +99,59 @@ def _classify_access_status(exc: Exception) -> str:
     return "error"
 
 
+def _persist_failure_record(source: dict, error_msg: str, access_status: str) -> None:
+    """
+    Write a FAILED run record to source_runs.jsonl for a source whose pipeline
+    raised on both attempts.
+
+    Without this, a raising failure (timeout/403) never reaches
+    run_pipeline's append_run path — the exception propagates before any trail
+    record is written — so _consecutive_failures() always reads 0 and the
+    circuit breaker can never open. Persisting a change_status="FAILED" record
+    here is what makes _consecutive_failures() count the failure and lets the
+    breaker trip after _CIRCUIT_OPEN_THRESHOLD consecutive failures.
+
+    Best-effort: a failure to write the trail record must never break the
+    monitor loop (the in-memory error result is already recorded by the caller).
+    """
+    try:
+        import uuid as _uuid
+
+        from app.source_runs import append_run, make_source_id
+
+        url = source.get("url", "")
+        record = {
+            "run_id":         _uuid.uuid4().hex[:8],
+            "source_id":      make_source_id(source),
+            "source_name":    source.get("name", ""),
+            "official_url":   url,
+            "url":            url,
+            "market":         str(source.get("jurisdiction", "AE")).upper(),
+            "jurisdiction":   source.get("jurisdiction", ""),
+            "category":       source.get("category", ""),
+            # classify_change() returns "FAILED" when access_status == "failed"
+            # or extraction_quality == "FAILED"; set both so the record is
+            # unambiguously a failure regardless of classification order.
+            "access_status":  "failed",
+            "extraction_quality": "FAILED",
+            "monitor_access_status": access_status,
+            "extracted_chars": 0,
+            "normalized_chars": 0,
+            "raw_hash":       None,
+            "normalized_hash": None,
+            "content_hash":   None,
+            "error":          error_msg,
+            "timestamp_utc":  datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "pipeline_version": "4.2",
+        }
+        append_run(record)
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning(
+            "circuit_breaker: could not persist FAILED run record for %s: %s",
+            source.get("name", source.get("url", "")), exc,
+        )
+
+
 def _consecutive_failures(source_url: str) -> int:
     """
     Count consecutive FAILED statuses for source_url from source_runs.jsonl,
@@ -109,9 +162,15 @@ def _consecutive_failures(source_url: str) -> int:
     the first non-failure.  Returns 0 when the file is absent or unreadable.
     """
     try:
-        if not _SOURCE_RUNS_JSONL.exists():
+        # Resolve the run file the SAME way append_run does (honoring
+        # STATUTEPROOF_BASE_DIR) so the breaker reads exactly the file the
+        # failure record was just written to, not a stale hardcoded path.
+        from app.source_runs import source_run_path
+
+        run_file = source_run_path()
+        if not run_file.exists():
             return 0
-        raw_lines = _SOURCE_RUNS_JSONL.read_text(encoding="utf-8").splitlines()
+        raw_lines = run_file.read_text(encoding="utf-8").splitlines()
     except Exception as exc:
         logger.warning("circuit_breaker: cannot read source_runs.jsonl: %s", exc)
         return 0
@@ -266,6 +325,10 @@ def monitor_all_sources(
             }
             results.append(error_record)
             _counter["failed"] += 1
+
+            # Persist a FAILED trail record so _consecutive_failures() can see
+            # this failure — a raising pipeline never reaches append_run itself.
+            _persist_failure_record(source, error_msg, access_status)
 
             # ── circuit-breaker check ─────────────────────────────────────
             source_url = source.get("url", "")

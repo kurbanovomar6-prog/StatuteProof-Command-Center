@@ -58,6 +58,60 @@ def source_snapshot_dir() -> Path:
     return _SNAPSHOT_DIR
 
 
+# Max attempts to re-acquire the append lock on the CURRENT inode when a
+# retention rewrite swaps the file out from under us mid-append.
+_APPEND_RELOCK_ATTEMPTS = 5
+
+
+def _locked_append_line(line: str) -> None:
+    """
+    Append one line to _RUN_FILE under an exclusive flock, safe against a
+    concurrent os.replace() inode swap (retention compaction).
+
+    flock is bound to the open file description (the inode), not the path.
+    A naive ``open('a') → flock`` can therefore win the lock on an inode that
+    a retention rewrite already unlinked via os.replace(): the write lands in
+    the dead inode and is silently lost while the path now points at a fresh
+    file. After acquiring the lock we re-stat the path and compare its inode
+    to the fd's inode; if they differ the file was replaced, so we drop the
+    lock, reopen the current path, and retry. Only when the locked fd and the
+    live path agree on the inode do we write — guaranteeing the record lands
+    in the file readers will see.
+    """
+    _RUN_DIR.mkdir(parents=True, exist_ok=True)
+    for _ in range(_APPEND_RELOCK_ATTEMPTS):
+        fh = _RUN_FILE.open("a", encoding="utf-8")
+        try:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            fd_ino = os.fstat(fh.fileno()).st_ino
+            try:
+                path_ino = os.stat(_RUN_FILE).st_ino
+            except OSError:
+                path_ino = None
+            if path_ino is not None and path_ino != fd_ino:
+                # The file was replaced (retention rewrite) after we opened but
+                # before we locked. Our fd points at the now-unlinked old inode;
+                # writing here would be lost. Reopen the current path and retry.
+                fcntl.flock(fh, fcntl.LOCK_UN)
+                fh.close()
+                continue
+            try:
+                fh.write(line)
+            finally:
+                fcntl.flock(fh, fcntl.LOCK_UN)
+            return
+        finally:
+            if not fh.closed:
+                fh.close()
+    # Last-ditch: append without the inode dance rather than dropping the record.
+    with _RUN_FILE.open("a", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            fh.write(line)
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+
+
 def make_source_id(source: dict) -> str:
     existing = source.get("id") or source.get("source_id")
     if existing:
@@ -282,12 +336,7 @@ def append_run(record: dict) -> dict:
         if record["change_status"] == "CHANGED":
             diff_artifact = _write_diff_artifacts(record, prev, snapshot_base)
         _write_proof_artifact(record, diff_artifact, snapshot_base)
-    with _RUN_FILE.open("a", encoding="utf-8") as fh:
-        fcntl.flock(fh, fcntl.LOCK_EX)
-        try:
-            fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
-        finally:
-            fcntl.flock(fh, fcntl.LOCK_UN)
+    _locked_append_line(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
     global _CACHE_VALID
     _CACHE_VALID = False
     if record.get("change_status") == "CHANGED":
@@ -909,12 +958,7 @@ def _append_baseline_record(record: dict) -> dict:
     snapshot_base = _snapshot_base_from_record(record)
     if snapshot_base is not None:
         _write_proof_artifact(record, None, snapshot_base)
-    with _RUN_FILE.open("a", encoding="utf-8") as fh:
-        fcntl.flock(fh, fcntl.LOCK_EX)
-        try:
-            fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
-        finally:
-            fcntl.flock(fh, fcntl.LOCK_UN)
+    _locked_append_line(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
     global _CACHE_VALID
     _CACHE_VALID = False
     return record

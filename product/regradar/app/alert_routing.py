@@ -14,6 +14,7 @@ from app.telegram import send_telegram_message
 from app.telegram_pairing import get_telegram_link
 from app.user_delivery import (
     create_delivery_log,
+    reclaim_failed_delivery_log,
     update_delivery_log_failed,
     update_delivery_log_sent,
 )
@@ -71,11 +72,19 @@ def _normalize_risk_level(value: str | None) -> str:
     text = str(value or "").strip().upper()
     if text in {"LOW", "MEDIUM", "HIGH"}:
         return text
+    # REVIEW is a distinct, non-deliverable classification from
+    # alert_drafts.classify_risk() (LIMITED/INCOMPLETE diff/proof quality or
+    # UNKNOWN change type). It must NOT be silently relabeled as a deliverable
+    # MEDIUM alert — preserve it so the scorer can exclude it outright.
+    if text == "REVIEW":
+        return "REVIEW"
     return "MEDIUM"
 
 
 def _risk_rank(level: str) -> int:
-    return {"LOW": 1, "MEDIUM": 2, "HIGH": 3}.get(_normalize_risk_level(level), 2)
+    # REVIEW ranks below every deliverable threshold so it never satisfies a
+    # user's LOW/MEDIUM/HIGH alert threshold.
+    return {"REVIEW": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}.get(_normalize_risk_level(level), 2)
 
 
 def _threshold_allows(alert_risk: str, user_threshold: str) -> bool:
@@ -284,6 +293,21 @@ def score_alert_for_user(user_profile: dict, alert: dict) -> dict:
                 "limitations": [],
             }
 
+    # REVIEW-grade drafts are not deliverable — the diff/proof quality or
+    # change classification requires manual review before any customer
+    # dispatch. Exclude outright (hard exclusion, not a score penalty) so
+    # market/topic points can never push a REVIEW draft to "matched".
+    if _normalize_risk_level(alert.get("risk_level")) == "REVIEW":
+        return {
+            "score": 0,
+            "matched": False,
+            "reasons": [
+                "Held for manual review — diff/proof quality or source "
+                "structure requires review before any customer dispatch"
+            ],
+            "limitations": [],
+        }
+
     if _threshold_allows(alert.get("risk_level"), user_profile.get("alert_threshold")):
         score += 40
         reasons.append(f"{alert.get('risk_level')} risk meets your {user_profile.get('alert_threshold')} threshold")
@@ -484,6 +508,7 @@ def send_preview_alert_to_user(user_id: int, alert_id: str) -> dict:
 
     user_profile = user_profile_to_routing_profile(int(user_id))
     message = build_alert_telegram_message(user_profile, match)
+    idempotency_key = f"{int(user_id)}:reviewed_alert_preview:{safe_alert_id}"
     log = create_delivery_log(
         int(user_id),
         delivery_type="reviewed_alert_preview",
@@ -493,17 +518,24 @@ def send_preview_alert_to_user(user_id: int, alert_id: str) -> dict:
         message_preview=message,
         source_id=match.get("source_id"),
         alert_id=safe_alert_id,
-        idempotency_key=f"{int(user_id)}:reviewed_alert_preview:{safe_alert_id}",
+        idempotency_key=idempotency_key,
         metadata={
             "preview": True,
             "relevance_score": match.get("score"),
             "review_status": match.get("review_status"),
         },
     )
-    if not log.get("created"):
-        return {"ok": False, "reason": "This preview alert was already sent.", "code": "duplicate"}
-
-    log_id = int(log["id"])
+    if log.get("created"):
+        log_id = int(log["id"])
+    else:
+        # A prior send may have failed, leaving the idempotency row at
+        # status='failed'. That row blocks a fresh INSERT OR IGNORE forever;
+        # reclaim it so the user's retry can actually re-send. An already
+        # pending/sent row is NOT reclaimable (idempotency preserved).
+        reclaimed_id = reclaim_failed_delivery_log(idempotency_key)
+        if reclaimed_id is None:
+            return {"ok": False, "reason": "This preview alert was already sent.", "code": "duplicate"}
+        log_id = reclaimed_id
     if send_telegram_message(str(chat_id), message):
         update_delivery_log_sent(log_id)
         return {"ok": True, "message": "Preview alert sent to your Telegram.", "log_id": log_id}

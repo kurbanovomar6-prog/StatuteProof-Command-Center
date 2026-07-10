@@ -353,3 +353,37 @@ def touch_telegram_test_sent(user_id: int) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+def get_all_linked_chat_ids() -> list[str]:
+    """Return the Telegram chat_id of every user who has paired a chat AND
+    left Telegram alerts enabled.
+
+    Used by the customer broadcast path in app/telegram.py. Users who have
+    unlinked (chat_id NULL/empty) or opted out of Telegram alerts
+    (telegram_alerts_enabled = 0) are excluded. Duplicate chat_ids (should
+    not happen, but a shared chat could) are de-duplicated while preserving
+    order. Never raises — returns [] if the table is not yet provisioned.
+    """
+    ensure_telegram_pairing_tables()
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            """
+            SELECT telegram_chat_id
+            FROM user_profiles
+            WHERE telegram_chat_id IS NOT NULL
+              AND TRIM(telegram_chat_id) != ''
+              AND telegram_alerts_enabled = 1
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+    seen: set[str] = set()
+    chat_ids: list[str] = []
+    for row in rows:
+        chat_id = str(row["telegram_chat_id"]).strip()
+        if chat_id and chat_id not in seen:
+            seen.add(chat_id)
+            chat_ids.append(chat_id)
+    return chat_ids
