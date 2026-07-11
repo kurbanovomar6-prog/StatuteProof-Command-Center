@@ -100,10 +100,18 @@ def build_review_queue(
     source_health_status: str | None = None,
     change_status: str | None = None,
     source_id: str | None = None,
+    excluded_source_ids: set[str] | None = None,
     limit: int = 50,
     base_dir: Path | None = None,
 ) -> dict[str, Any]:
-    """Return review queue rows from recorded evidence and Acknowledge & Assess records."""
+    """Return review queue rows from recorded evidence and Acknowledge & Assess records.
+
+    ``excluded_source_ids`` fail-closes cross-tenant leakage: any run whose
+    ``source_id`` is in the set is dropped before it can reach the caller. The
+    HTTP layer passes the caller's denied custom-source set here so another
+    tenant's private custom source never appears in the review queue. Official /
+    shared sources are never in that set and stay visible to everyone.
+    """
     root = base_dir or _BASE_DIR
     market_code = str(market or "AE").upper().strip() or "AE"
     requested_status = str(status or "pending").lower().strip()
@@ -124,6 +132,8 @@ def build_review_queue(
             continue
 
         row_source_id = str(run.get("source_id") or "").strip()
+        if excluded_source_ids and row_source_id in excluded_source_ids:
+            continue
         row_change_status = str(run.get("change_status") or "UNKNOWN").upper()
         row_health = _source_health_status(run)
         row_impact = str((assessment or {}).get("impact_level") or "").strip()
@@ -154,12 +164,26 @@ def build_review_queue(
 
 def build_canonical_evidence_review_queue(
     *,
+    excluded_source_ids: set[str] | None = None,
     base_dir: Path | None = None,
 ) -> dict[str, Any]:
-    """Return append-only canonical evidence review state for operator review."""
+    """Return append-only canonical evidence review state for operator review.
+
+    ``excluded_source_ids`` drops any canonical record whose ``source_id`` is in
+    the set BEFORE it (or its counts) reach the caller, so another tenant's
+    private custom source can never leak through the canonical queue. Official /
+    shared sources are never in that set. The counts are computed on the
+    filtered set so they never disclose the existence of hidden records.
+    """
 
     root = base_dir or _BASE_DIR
     records = list_canonical_evidence_records(base_dir=root)
+    if excluded_source_ids:
+        records = [
+            r
+            for r in records
+            if str(r.get("source_id") or "").strip() not in excluded_source_ids
+        ]
     counts = {"pending": 0, "approved": 0, "rejected": 0, "blocked": 0}
     for row in records:
         latest = str(row.get("latest_review_decision") or "").strip()

@@ -551,23 +551,66 @@ class _Handler(BaseHTTPRequestHandler):
     def _evidence_source_out_of_scope(self, user: dict, evidence_id: str) -> bool:
         """True when an evidence record belongs to another tenant's custom source.
 
-        Cheap tenancy guard for the by-run_id evidence-export paths (IDOR
-        defense): it resolves the record's ``source_id`` and denies access only
-        when that source is a *custom* source owned by someone else. Official /
-        shared sources — and records that cannot be resolved (unknown id,
-        unreadable list) — are left to the normal handler path, so this guard
-        only ever *adds* a denial and never changes not-found/error behavior.
+        Tenancy guard for EVERY by-id evidence endpoint — export, diff, review,
+        review-history, and the assess write path (IDOR defense). It resolves the
+        record's ``source_id`` from BOTH stores that a downstream handler might
+        read (the run log via ``find_evidence_record`` AND the assessment store
+        via ``latest_assessment_for``) and denies if EITHER resolves to a *custom*
+        source owned by someone else. Consulting both is required: an assessment
+        can outlive its run row (orphan), and a handler like ``review`` reads the
+        assessment store directly — resolving only the run log would let an orphan
+        leak. Official / shared sources, and ids that resolve nowhere, are left to
+        the normal handler path, so this guard only ever *adds* a denial and never
+        changes not-found/error behavior.
         """
+        candidates: set[str] = set()
         try:
-            from app.evidence_assessment import find_evidence_record
+            from app.evidence_assessment import find_evidence_record, latest_assessment_for
 
-            record = find_evidence_record(evidence_id)
-        except Exception:  # noqa: BLE001 — let the normal export path emit 400/404
+            try:
+                record = find_evidence_record(evidence_id)
+                sid = str(record.get("source_id") or "").strip()
+                if sid:
+                    candidates.add(sid)
+            except Exception:  # noqa: BLE001 — id may live only in the assessment store
+                pass
+            assessment = latest_assessment_for(evidence_id)
+            if assessment:
+                sid = str(assessment.get("source_id") or "").strip()
+                if sid:
+                    candidates.add(sid)
+        except Exception:  # noqa: BLE001 — let the normal handler path emit 400/404
             return False
-        source_id = str(record.get("source_id") or "").strip()
-        if not source_id:
+        if not candidates:
             return False
-        return source_id in self._denied_custom_source_ids(user)
+        denied = self._denied_custom_source_ids(user)
+        return any(sid in denied for sid in candidates)
+
+    def _canonical_record_out_of_scope(self, user: dict, record_id: str) -> bool:
+        """True when a canonical evidence record belongs to another tenant's custom source.
+
+        IDOR guard for the canonical review-action WRITE path: it resolves the
+        canonical ``record_id`` to its ``source_id`` (via the canonical record
+        index) and denies only when that source is a *custom* source owned by
+        someone else. Official / shared sources — and record_ids that resolve
+        nowhere — fall through to the normal handler, so the guard only ever
+        *adds* a denial. Never raises.
+        """
+        rid = str(record_id or "").strip()
+        if not rid:
+            return False
+        try:
+            from app.evidence_records import list_canonical_evidence_records
+
+            for row in list_canonical_evidence_records():
+                if str(row.get("record_id") or "").strip() == rid:
+                    sid = str(row.get("source_id") or "").strip()
+                    if not sid:
+                        return False
+                    return sid in self._denied_custom_source_ids(user)
+        except Exception:  # noqa: BLE001 — let the normal handler path emit its own error
+            return False
+        return False
 
     def _base_url(self) -> str:
         host = self.headers.get("Host", "localhost:5001")
@@ -1688,6 +1731,7 @@ class _Handler(BaseHTTPRequestHandler):
             runs_path = BASE_DIR / "data" / "source_runs" / "source_runs.jsonl"
             diff_md_path: str | None = None
             diff_json_path: str | None = None
+            run_source_id: str = ""
             if runs_path.exists():
                 with runs_path.open(encoding="utf-8") as fh:
                     for line in fh:
@@ -1701,7 +1745,14 @@ class _Handler(BaseHTTPRequestHandler):
                         if rec.get("run_id") == run_id:
                             diff_md_path = rec.get("diff_md_path")
                             diff_json_path = rec.get("diff_json_path")
+                            run_source_id = str(rec.get("source_id") or "").strip()
                             break
+            # Tenancy: a diff for another tenant's private custom source must not
+            # leak. Return the SAME 404 as "no diff" so the response never
+            # confirms the run exists for a source the caller cannot see.
+            if run_source_id and not self._source_visible_to(user, run_source_id):
+                self._send_json({"ok": False, "message": "No diff available for this run."}, 404)
+                return
             if not diff_md_path and not diff_json_path:
                 self._send_json({"ok": False, "message": "No diff available for this run."}, 404)
                 return
@@ -1734,6 +1785,9 @@ class _Handler(BaseHTTPRequestHandler):
         if not evidence_id:
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
+        if self._evidence_source_out_of_scope(user, evidence_id):
+            self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
+            return
         try:
             from app.evidence_assessment import latest_assessment_for
 
@@ -1758,6 +1812,9 @@ class _Handler(BaseHTTPRequestHandler):
         if not evidence_id:
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
+        if self._evidence_source_out_of_scope(user, evidence_id):
+            self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
+            return
         try:
             from app.source_health_timeline import build_evidence_review_history
 
@@ -1781,11 +1838,17 @@ class _Handler(BaseHTTPRequestHandler):
         if body is None:
             self._send_json({"ok": False, "message": "Request body required."}, 400)
             return
+        assess_evidence_id = str(body.get("evidence_record_id") or body.get("run_id") or "").strip()
+        # IDOR guard: a reviewer must not write an assessment against another
+        # tenant's private custom-source evidence record.
+        if assess_evidence_id and self._evidence_source_out_of_scope(user, assess_evidence_id):
+            self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
+            return
         try:
             from app.evidence_assessment import create_assessment
 
             assessment = create_assessment(
-                evidence_record_id=str(body.get("evidence_record_id") or body.get("run_id") or "").strip(),
+                evidence_record_id=assess_evidence_id,
                 impact_level=str(body.get("impact_level") or "").strip(),
                 internal_note=str(body.get("internal_note") or body.get("note") or "").strip(),
                 next_action=str(body.get("next_action") or "").strip(),
@@ -1905,6 +1968,7 @@ class _Handler(BaseHTTPRequestHandler):
                 source_health_status=str((params.get("source_health_status") or [""])[0]).strip() or None,
                 change_status=str((params.get("change_status") or [""])[0]).strip() or None,
                 source_id=str((params.get("source_id") or [""])[0]).strip() or None,
+                excluded_source_ids=self._denied_custom_source_ids(user),
                 limit=limit,
             )
             self._send_json(queue)
@@ -1921,7 +1985,9 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             from app.review_queue import build_canonical_evidence_review_queue
 
-            self._send_json(build_canonical_evidence_review_queue())
+            self._send_json(build_canonical_evidence_review_queue(
+                excluded_source_ids=self._denied_custom_source_ids(user),
+            ))
         except Exception as exc:
             logger.error("canonical evidence list failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
@@ -2009,6 +2075,9 @@ class _Handler(BaseHTTPRequestHandler):
 
             import glob as _glob
             alert_dir = BASE_DIR / "data" / "alert_queue"
+            # Tenancy: never surface a brief for another tenant's private custom
+            # source (source_id + run_id + internal notes).
+            denied_source_ids = self._denied_custom_source_ids(user)
             briefs: list[dict] = []
             if alert_dir.exists():
                 for fpath in _glob.glob(str(alert_dir / "*.json")):
@@ -2018,6 +2087,8 @@ class _Handler(BaseHTTPRequestHandler):
                     except Exception:
                         continue
                     source_id = str(rec.get("source_id") or "")
+                    if source_id.strip() in denied_source_ids:
+                        continue
                     if not source_id.startswith(market + "-") and market != "ALL":
                         continue
                     briefs.append({
@@ -2083,6 +2154,14 @@ class _Handler(BaseHTTPRequestHandler):
         import re as _re
         if not _re.match(r'^[\w\-\.]+$', source_id):
             self._send_json({"ok": False, "message": "Invalid source_id format."}, 400)
+            return
+
+        # Tenancy (IDOR): the caller supplies source_id directly. A brief exposes
+        # the source name, official URL and diff-derived summary, so a custom
+        # source owned by another tenant must never be generatable here. Official
+        # / shared sources — and unknown ids — fall through to the normal path.
+        if not self._source_visible_to(user, source_id):
+            self._send_json({"ok": False, "message": "That source is not in your scope."}, 403)
             return
 
         try:
@@ -2771,6 +2850,14 @@ class _Handler(BaseHTTPRequestHandler):
 
             contract = build_source_lab_contract(result)
             normalized_hash = result.get("normalized_hash") or result.get("content_hash", "")
+            # Tenancy: a hash collision against another tenant's PRIVATE custom
+            # source must not disclose that source's id. Keep the collision signal
+            # (so the caller knows the content is a duplicate) but hide whose it is
+            # unless the colliding source is visible to this caller (official, or
+            # the caller's own custom source).
+            collision_source_id = result.get("collision_source_id") or ""
+            if collision_source_id and not self._source_visible_to(user, collision_source_id):
+                collision_source_id = ""
             self._send_json({
                 "ok": True,
                 "status": result["status"],
@@ -2808,7 +2895,7 @@ class _Handler(BaseHTTPRequestHandler):
                 # safety flags
                 "nav_shell_detected": result["nav_shell_detected"],
                 "hash_collision": result["hash_collision"],
-                "collision_source_id": result["collision_source_id"],
+                "collision_source_id": collision_source_id,
                 "official_status": result.get("official_status", ""),
                 "access_status": result.get("access_status", ""),
                 "meaningful_content": result.get("meaningful_content", False),
@@ -3094,6 +3181,11 @@ class _Handler(BaseHTTPRequestHandler):
         reviewer = str(user.get("full_name") or user.get("email") or f"user:{user.get('id')}" or "").strip()
         if not record_id or not decision or not note:
             self._send_json({"ok": False, "message": "record_id, decision, and note are required."}, 400)
+            return
+        # IDOR guard: a reviewer must not append a decision against another
+        # tenant's private custom-source canonical record.
+        if self._canonical_record_out_of_scope(user, record_id):
+            self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
         try:
             from app.review_queue import record_canonical_review_action
