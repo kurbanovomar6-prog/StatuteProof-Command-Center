@@ -14,7 +14,14 @@ statuteproof.com {
 	# API — proxied to the localhost-bound Python server.
 	# Health endpoint is routed through the same path (/api/health).
 	handle /api/* {
-		reverse_proxy 127.0.0.1:5001
+		reverse_proxy 127.0.0.1:5001 {
+			# Rate-limit trust boundary: strip any client-supplied X-Real-IP
+			# then set it to the real peer address Caddy sees. The backend's
+			# _client_ip() trusts ONLY this header, so a client cannot spoof
+			# its rate-limit key. {remote_host} is the immediate TCP peer.
+			header_up -X-Real-IP
+			header_up X-Real-IP {remote_host}
+		}
 	}
 
 	# Frontend — static SPA build.

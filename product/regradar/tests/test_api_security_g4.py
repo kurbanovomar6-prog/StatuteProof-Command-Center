@@ -1,8 +1,9 @@
 """Regression tests for G4-api security/robustness bugs.
 
 Covered:
-- _client_ip must not trust the client-controlled leftmost X-Forwarded-For token
-  (rate-limit bypass / brute-force protection).
+- _client_ip must trust ONLY the Caddy-overwritten X-Real-IP and must not read
+  client-controlled X-Forwarded-For at all; the Caddyfile must overwrite
+  X-Real-IP (rate-limit bypass / brute-force protection). See BLOCK-1.
 - _RateLimiter must not leak dict keys once a key's window has fully expired.
 - _send_json is one-shot: an oversized body must not yield a double HTTP response.
 - verify-email GET must NOT mint a login session (token-in-URL as credential).
@@ -82,43 +83,69 @@ def _make_handler(
     return handler
 
 
-# ── Bug: X-Forwarded-For spoofing defeats rate limiting ──────────────────────
+# ── Bug (BLOCK-1): rate-limit trust boundary under Caddy ─────────────────────
+#
+# Production runs behind CADDY (deploy/Caddyfile), not nginx. Caddy's
+# reverse_proxy block for /api/* overwrites X-Real-IP with {remote_host} (the
+# real TCP peer) on every request, so X-Real-IP is the ONLY header the backend
+# may trust. X-Forwarded-For is client-appendable and Caddy passes it through,
+# so _client_ip() must NOT read it at all — otherwise a client could mint a
+# fresh limiter key per request. The proxy-side override is asserted by
+# test_caddyfile_overwrites_x_real_ip below.
 
-def test_client_ip_ignores_client_controlled_leftmost_xff():
-    """Behind a proxy that appends the real IP, the trusted hop is the rightmost.
+def test_client_ip_does_not_trust_x_forwarded_for():
+    """X-Forwarded-For is client-controlled under Caddy and must be ignored.
 
-    A client that spoofs a fresh leftmost XFF token each request must still map
-    to a stable IP (the proxy-appended rightmost value / X-Real-IP), so the
-    limiter key does not change per request.
+    With ONLY XFF present (no proxy-set X-Real-IP), _client_ip must fall back
+    to the socket peer, never to any XFF token. Distinct spoofed XFF values
+    therefore map to the SAME key — no per-request limiter-key bypass.
     """
-    # Attacker spoofs leftmost; nginx appended the real peer as rightmost.
     h1 = _make_handler(headers={"X-Forwarded-For": "1.1.1.1, 203.0.113.9"})
-    h2 = _make_handler(headers={"X-Forwarded-For": "2.2.2.2, 203.0.113.9"})
-    assert h1._client_ip() == "203.0.113.9"
-    assert h2._client_ip() == h1._client_ip()
+    h2 = _make_handler(headers={"X-Forwarded-For": "2.2.2.2, 8.8.8.8"})
+    # Socket peer, not any XFF hop (neither leftmost nor rightmost).
+    assert h1._client_ip() == "127.0.0.1"
+    assert h1._client_ip() == h2._client_ip()
 
 
-def test_client_ip_prefers_x_real_ip():
-    """X-Real-IP (nginx overwrites client value) takes precedence."""
+def test_client_ip_trusts_only_x_real_ip():
+    """X-Real-IP (Caddy-overwritten) is the trusted source; XFF is not read."""
     h = _make_handler(
-        headers={"X-Real-IP": "198.51.100.7", "X-Forwarded-For": "1.1.1.1, 198.51.100.7"}
+        headers={"X-Real-IP": "198.51.100.7", "X-Forwarded-For": "1.1.1.1, 9.9.9.9"}
     )
     assert h._client_ip() == "198.51.100.7"
 
 
-def test_rate_limiter_not_bypassed_by_spoofed_leftmost_xff():
-    """Repeated logins with distinct leftmost XFF must still be rate limited."""
+def test_client_ip_falls_back_to_socket_peer_when_no_x_real_ip():
+    """A direct/non-proxied call (no X-Real-IP) uses the socket peer only."""
+    h = _make_handler(headers={})  # no proxy headers at all
+    assert h._client_ip() == "127.0.0.1"
+
+
+def test_rate_limiter_not_bypassed_by_spoofed_xff():
+    """Repeated logins with distinct XFF tokens must still share one limiter key."""
     limiter = _RateLimiter(3, 3600)
     keys = set()
     for i in range(10):
-        h = _make_handler(headers={"X-Forwarded-For": f"9.9.9.{i}, 203.0.113.9"})
+        h = _make_handler(headers={"X-Forwarded-For": f"9.9.9.{i}, 203.0.113.{i}"})
         keys.add(f"{h._client_ip()}:login")
-    # All requests share one trusted IP → one limiter key, not 10.
-    assert keys == {"203.0.113.9:login"}
+    # XFF ignored → all map to the socket peer → one limiter key, not 10.
+    assert keys == {"127.0.0.1:login"}
     # And that single key is actually throttled after `limit` allows.
-    allowed = [limiter.is_allowed("203.0.113.9:login") for _ in range(10)]
+    allowed = [limiter.is_allowed("127.0.0.1:login") for _ in range(10)]
     assert allowed.count(True) == 3
     assert allowed.count(False) == 7
+
+
+def test_caddyfile_overwrites_x_real_ip():
+    """The trust boundary is enforced by Caddy: the reverse_proxy block that
+    proxies /api/* to 127.0.0.1:5001 must strip any client X-Real-IP and set it
+    to the real peer, so the header the backend trusts is proxy-controlled.
+    """
+    caddyfile = (
+        Path(__file__).resolve().parents[1] / "deploy" / "Caddyfile"
+    ).read_text(encoding="utf-8")
+    assert "header_up -X-Real-IP" in caddyfile
+    assert "header_up X-Real-IP {remote_host}" in caddyfile
 
 
 # ── Bug: rate-limiter dict grows unbounded ───────────────────────────────────

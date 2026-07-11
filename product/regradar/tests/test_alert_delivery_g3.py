@@ -240,3 +240,78 @@ def test_send_preview_alert_retries_after_failed_send(isolated_db, monkeypatch):
             if row["delivery_type"] == "reviewed_alert_preview"]
     assert len(logs) == 1
     assert logs[0]["status"] == "sent"
+
+
+# ── WARN-7: a raising send must mark the row failed (reclaimable), not stuck ──
+
+def test_send_preview_alert_marks_failed_when_send_raises(isolated_db, monkeypatch):
+    """If send_telegram_message RAISES, the freshly-'pending' row must be flipped
+    to 'failed' (reclaimable) and the exception re-raised — never left stuck at
+    'pending', which reclaim_failed_delivery_log cannot recover.
+    """
+    import app.alert_routing as ar
+    from app.user_delivery import get_user_delivery_logs
+
+    user_id = _make_paired_user("raise@co.com", "777777", alerts_enabled=True)
+    from app.profile import update_profile
+    update_profile(user_id, {"onboarding_completed": 1})
+
+    alert_id = "reviewed-alert-raise"
+    match = {
+        "alert_id": alert_id,
+        "source_id": "AE-1",
+        "source_name": "DFSA",
+        "source_url": "https://example.ae/x",
+        "url": "https://example.ae/x",
+        "title": "Raising alert",
+        "risk_level": "MEDIUM",
+        "change_type": "REGULATORY_UPDATE",
+        "market": "AE",
+        "jurisdiction": "AE",
+        "topics": ["aml"],
+        "executive_summary": "Something changed.",
+        "business_action": "",
+        "affected_entities": [],
+        "review_status": "APPROVED_FOR_URGENT",
+        "limitations": [],
+        "score": 85,
+        "matched": True,
+        "delivery_ready": True,
+        "reviewed_at": "2026-07-10T00:00:00+00:00",
+    }
+    monkeypatch.setattr(
+        ar,
+        "build_routing_preview_for_user",
+        lambda uid, days=14: {"matches": [dict(match)]},
+    )
+    monkeypatch.setattr(ar, "_is_still_approved", lambda aid: True)
+
+    # The send raises an unexpected exception.
+    def _boom(chat_id, text):
+        raise RuntimeError("telegram client blew up")
+
+    monkeypatch.setattr(ar, "send_telegram_message", _boom)
+    with pytest.raises(RuntimeError):
+        ar.send_preview_alert_to_user(user_id, alert_id)
+
+    # The row must be 'failed' (reclaimable), NOT stuck at 'pending'.
+    logs = [row for row in get_user_delivery_logs(user_id, limit=50)
+            if row["delivery_type"] == "reviewed_alert_preview"]
+    assert len(logs) == 1
+    assert logs[0]["status"] == "failed"
+
+    # And because it is failed, a genuine retry with a working send re-delivers.
+    sent: list[str] = []
+
+    def _ok(chat_id, text):
+        sent.append(str(chat_id))
+        return True
+
+    monkeypatch.setattr(ar, "send_telegram_message", _ok)
+    retry = ar.send_preview_alert_to_user(user_id, alert_id)
+    assert retry["ok"] is True
+    assert sent == ["777777"]
+    logs2 = [row for row in get_user_delivery_logs(user_id, limit=50)
+             if row["delivery_type"] == "reviewed_alert_preview"]
+    assert len(logs2) == 1
+    assert logs2[0]["status"] == "sent"

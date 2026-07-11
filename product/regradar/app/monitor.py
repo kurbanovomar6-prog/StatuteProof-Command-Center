@@ -52,8 +52,20 @@ _CIRCUIT_STATE_FILE = _BASE_DIR / "data" / "circuit_breaker_state.json"
 # How many consecutive historical failures before a circuit opens.
 _CIRCUIT_OPEN_THRESHOLD = 3
 
+# Half-open cadence: an OPEN circuit is skipped for this many cycles, then a
+# single probe is allowed through. A successful probe auto-resets the breaker
+# (WARN-6) so a source recovers on its own after a transient outage instead of
+# staying skipped forever; a failing probe re-arms the skip. Must be >= 1 so
+# the cycle immediately after opening still skips.
+_CIRCUIT_PROBE_EVERY_N_CYCLES = 5
+
 # How many recent JSONL records to scan per source when checking history.
 _CIRCUIT_HISTORY_SCAN = 200
+
+# Per-source count of cycles skipped while the circuit is open; drives the
+# half-open probe cadence. Not persisted — a process restart simply probes
+# sooner, which is safe.
+_circuit_skip_counts: dict[str, int] = {}
 
 # Seconds to wait before a single retry.
 _RETRY_DELAY_SECONDS = 5
@@ -85,6 +97,26 @@ def _save_circuit_state(open_sources: set[str]) -> None:
 # Module-level circuit-breaker registry.
 # Loaded from disk on module init; persisted on every change.
 _circuit_open: set[str] = _load_circuit_state()
+
+
+def _clear_circuit(name: str) -> None:
+    """Auto-reset the breaker for a source after a successful probe/run.
+
+    Without this, a transient N-cycle outage that trips the breaker would keep
+    the source skipped forever (until process restart or manual state-file
+    deletion), because nothing ever removes it from _circuit_open. A single
+    successful run is the recovery signal: drop the source and persist so the
+    reset survives restarts too. No-op when the source is not currently open.
+    """
+    _circuit_skip_counts.pop(name, None)
+    if name in _circuit_open:
+        _circuit_open.discard(name)
+        _save_circuit_state(_circuit_open)
+        logger.info(
+            "CIRCUIT_BREAKER auto-reset for %s after a successful run — "
+            "monitoring resumes",
+            name,
+        )
 
 
 def _classify_access_status(exc: Exception) -> str:
@@ -244,29 +276,45 @@ def monitor_all_sources(
         name = source.get("name", source["url"])
         jur  = source.get("jurisdiction", "")
 
-        # ── circuit-breaker: skip sources with too many consecutive failures ──
+        # ── circuit-breaker: skip open sources, with a half-open probe ────────
+        # An OPEN circuit is skipped for _CIRCUIT_PROBE_EVERY_N_CYCLES cycles,
+        # after which one probe is allowed through (fall past this block). A
+        # successful probe auto-resets the breaker (see _clear_circuit on the
+        # success path); a failing probe re-arms the skip. This is what lets a
+        # source recover from a transient outage without a process restart.
         if name in _circuit_open:
-            logger.warning(
-                "CIRCUIT_OPEN [%d/%d]: %s — skipping (>= %d consecutive "
-                "historical failures; delete %s to reset)",
-                idx, total, name, _CIRCUIT_OPEN_THRESHOLD, _CIRCUIT_STATE_FILE,
+            skipped = _circuit_skip_counts.get(name, 0)
+            if skipped < _CIRCUIT_PROBE_EVERY_N_CYCLES:
+                _circuit_skip_counts[name] = skipped + 1
+                logger.warning(
+                    "CIRCUIT_OPEN [%d/%d]: %s — skipping (>= %d consecutive "
+                    "historical failures; auto-probe in %d cycle(s), or delete "
+                    "%s to reset now)",
+                    idx, total, name, _CIRCUIT_OPEN_THRESHOLD,
+                    _CIRCUIT_PROBE_EVERY_N_CYCLES - skipped, _CIRCUIT_STATE_FILE,
+                )
+                if verbose:
+                    print(f"  [{idx}/{total}] {name}  — SKIPPED (circuit open)", flush=True)
+                results.append({
+                    "source_name":   name,
+                    "url":           source.get("url", ""),
+                    "jurisdiction":  source.get("jurisdiction", ""),
+                    "category":      source.get("category", ""),
+                    "source_status": source.get("status", "active"),
+                    "changed":       False,
+                    "status":        "error",
+                    "access_status": "circuit_open",
+                    "error":         "Circuit open: too many consecutive failures",
+                    "circuit_open":  True,
+                })
+                _counter["failed"] += 1
+                continue
+            # Cooldown elapsed — allow a single half-open probe this cycle.
+            _circuit_skip_counts[name] = 0
+            logger.info(
+                "CIRCUIT_HALF_OPEN [%d/%d]: %s — probing after cooldown",
+                idx, total, name,
             )
-            if verbose:
-                print(f"  [{idx}/{total}] {name}  — SKIPPED (circuit open)", flush=True)
-            results.append({
-                "source_name":   name,
-                "url":           source.get("url", ""),
-                "jurisdiction":  source.get("jurisdiction", ""),
-                "category":      source.get("category", ""),
-                "source_status": source.get("status", "active"),
-                "changed":       False,
-                "status":        "error",
-                "access_status": "circuit_open",
-                "error":         "Circuit open: too many consecutive failures",
-                "circuit_open":  True,
-            })
-            _counter["failed"] += 1
-            continue
 
         if verbose:
             label = f"{name}  ({jur})" if jur else name
@@ -347,6 +395,10 @@ def monitor_all_sources(
         # ── success path ─────────────────────────────────────────────────────
         assert result is not None
         results.append(result)
+
+        # Auto-reset the breaker: a successful run clears a previously-open
+        # circuit so a source recovers on its own after a transient outage.
+        _clear_circuit(name)
 
         if result.get("changed"):
             _counter["ok"] += 1

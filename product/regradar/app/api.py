@@ -317,26 +317,29 @@ class _Handler(BaseHTTPRequestHandler):
         return cookie.output(header="").strip()
 
     def _client_ip(self) -> str:
-        """Return the client IP from a proxy-trusted source only.
+        """Return the client IP from a proxy-controlled source only.
 
-        Security: the leftmost X-Forwarded-For token is fully client-controlled,
-        so trusting it lets an attacker mint a fresh rate-limit key per request
-        (brute-force / spam bypass) and grow the limiter dict unbounded. The
-        bundled nginx sets ``X-Real-IP $remote_addr`` (overwriting any client
-        value) and appends the real peer to ``X-Forwarded-For`` via
-        ``$proxy_add_x_forwarded_for`` — so the *rightmost* XFF token, not the
-        leftmost, is the trustworthy one. Prefer X-Real-IP, then the rightmost
-        XFF hop, then the socket peer.
+        Security / topology: production runs behind Caddy (see DEPLOY.md and
+        deploy/Caddyfile). The API server binds to 127.0.0.1:5001 and Caddy's
+        reverse_proxy block for ``/api/*`` **overwrites** X-Real-IP on every
+        request::
+
+            header_up -X-Real-IP           # drop any client-supplied value
+            header_up X-Real-IP {remote_host}  # set the real TCP peer
+
+        so X-Real-IP is guaranteed proxy-controlled and is the ONLY header we
+        trust for the rate-limit key.
+
+        X-Forwarded-For is deliberately NOT trusted: it is client-appendable
+        and Caddy passes the inbound value through, so an attacker could mint a
+        fresh rate-limit key per request (brute-force / spam bypass) and grow
+        the limiter dict unbounded. When X-Real-IP is absent (a direct,
+        non-proxied call — e.g. localhost dev or a probe hitting :5001), fall
+        back to the socket peer, never to any client-supplied header.
         """
         real_ip = self.headers.get("X-Real-IP", "")
         if real_ip and real_ip.strip():
             return str(real_ip.strip())
-        xff = self.headers.get("X-Forwarded-For", "")
-        if xff:
-            # Rightmost entry is the hop appended by the trusted reverse proxy.
-            hops = [part.strip() for part in xff.split(",") if part.strip()]
-            if hops:
-                return str(hops[-1])
         try:
             return str(self.client_address[0] or "unknown")
         except Exception:

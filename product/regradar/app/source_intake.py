@@ -448,6 +448,7 @@ def _check_hash_collision(
     text_hash: str,
     source_id: str,
     all_sources: list[dict],
+    text_len: int | None = None,
 ) -> tuple[bool, str | None]:
     """
     Check whether `text_hash` matches the stored content hash of any other
@@ -459,8 +460,23 @@ def _check_hash_collision(
     entries have no content_hash of their own, so without the trail fallback
     this check was permanently inert on the live intake path.
 
+    Length floor: two sources that both extract to empty/trivial content
+    hash to the SAME value (``_content_hash("") == _content_hash("")``), so the
+    second was falsely flagged as a duplicate/NAV_SHELL_ONLY collision of the
+    first. A collision is only meaningful for substantive content, so when the
+    caller's normalized text is below ``_GLOBAL_MIN_CHARS`` we skip the
+    comparison entirely. Trivial/empty stored hashes are likewise excluded from
+    the candidate set so short sources on both sides never pair up.
+
     Returns (collision_found, colliding_source_id | None).
     """
+    # Length floor: below the global minimum, empty/trivial content collisions
+    # are noise, not real duplicate boilerplate — do not compare.
+    if text_len is not None and text_len < _GLOBAL_MIN_CHARS:
+        return False, None
+    trivial_hashes = {_content_hash(""), _content_hash(" ")}
+    if text_hash in trivial_hashes:
+        return False, None
     trail_hashes = _trail_content_hashes()
     for s in all_sources:
         if not s.get("enabled"):
@@ -469,7 +485,7 @@ def _check_hash_collision(
         if not other_id or other_id == source_id:
             continue
         stored = s.get("content_hash") or trail_hashes.get(str(other_id))
-        if stored and stored == text_hash:
+        if stored and stored not in trivial_hashes and stored == text_hash:
             return True, other_id
     return False, None
 
@@ -794,7 +810,9 @@ def run_source_intake(
     result["normalized_hash"] = _sha256_hash(normalized_text) if normalized_text else ""
     collision_id: str | None = None
     if all_sources and source_id:
-        collision, collision_id = _check_hash_collision(content_hash, source_id, all_sources)
+        collision, collision_id = _check_hash_collision(
+            content_hash, source_id, all_sources, text_len=len(normalized_text)
+        )
         result["hash_collision"] = collision
         result["collision_source_id"] = collision_id
     else:

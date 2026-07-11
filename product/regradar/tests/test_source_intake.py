@@ -15,6 +15,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.source_intake import (
+    _GLOBAL_MIN_CHARS,
     SourceIntakeStatus,
     _check_hash_collision,
     _content_hash,
@@ -451,6 +452,70 @@ def test_disabled_source_not_collision_candidate():
     h = "abc123def456abcd"
     collision, cid = _check_hash_collision(h, "AE-other", disabled_sources)
     assert collision is False
+
+
+# ── WARN-5: empty/trivial-content sources must not falsely collide ────────────
+
+
+def test_empty_sources_do_not_collide():
+    """Two sources that both extract to empty content share the same hash
+    (_content_hash("") == _content_hash("")) but must NOT be flagged as a
+    duplicate/NAV_SHELL_ONLY collision — the length floor and trivial-hash
+    exclusion suppress the noise.
+    """
+    empty_hash = _content_hash("")
+    sources = [
+        {"source_id": "AE-empty-1", "enabled": True, "content_hash": empty_hash},
+    ]
+    # text_len below the 500-char floor → skip comparison entirely.
+    collision, cid = _check_hash_collision(
+        empty_hash, "AE-empty-2", sources, text_len=0
+    )
+    assert collision is False
+    assert cid is None
+
+
+def test_short_sources_do_not_collide():
+    """Two short (< 500 char) sources with the same hash must not collide."""
+    short_text = "a" * 100
+    short_hash = _content_hash(short_text)
+    sources = [
+        {"source_id": "AE-short-1", "enabled": True, "content_hash": short_hash},
+    ]
+    collision, cid = _check_hash_collision(
+        short_hash, "AE-short-2", sources, text_len=len(short_text)
+    )
+    assert collision is False
+
+
+def test_trivial_hash_excluded_even_without_text_len():
+    """An empty/whitespace hash is excluded from the candidate set even when the
+    caller does not pass text_len (defense in depth against the trail-hash set).
+    """
+    empty_hash = _content_hash("")
+    ws_hash = _content_hash(" ")
+    sources = [
+        {"source_id": "AE-ws", "enabled": True, "content_hash": ws_hash},
+    ]
+    collision, cid = _check_hash_collision(empty_hash, "AE-other", sources)
+    assert collision is False
+
+
+def test_identical_substantial_sources_still_collide():
+    """Two identical ≥500-char sources must STILL be flagged as a collision —
+    the length floor must not suppress genuine duplicate boilerplate.
+    """
+    big_text = "The quick brown fox jumps over the lazy dog. " * 20  # >> 500 chars
+    assert len(big_text) >= _GLOBAL_MIN_CHARS
+    big_hash = _content_hash(big_text)
+    sources = [
+        {"source_id": "AE-dup-1", "enabled": True, "content_hash": big_hash},
+    ]
+    collision, cid = _check_hash_collision(
+        big_hash, "AE-dup-2", sources, text_len=len(big_text)
+    )
+    assert collision is True
+    assert cid == "AE-dup-1"
 
 
 # ── 4. Full intake run (mocked fetch + extract) ───────────────────────────────

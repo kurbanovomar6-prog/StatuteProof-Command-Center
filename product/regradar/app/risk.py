@@ -271,7 +271,21 @@ def _edited_char_count(removed_str: str, added_str: str) -> int:
     content swap (e.g. "allowance" -> "restriction") yields a count equal to
     the combined length of the differing spans — the true edit magnitude,
     unlike a bare ``|len(added) - len(removed)|`` length delta.
+
+    Performance short-circuit: SequenceMatcher is O(n·m). The only consumer,
+    is_non_material(), compares the result against NON_MATERIAL_MAX_CHARS and
+    treats any count >= that threshold identically ("material"). The edit
+    count can never exceed len(removed) + len(added) (every char replaced), so
+    when the combined length already dwarfs the threshold (> 4×) the outcome is
+    fixed regardless of the exact diff — return the combined length (which is
+    >= threshold) and skip the expensive matcher. Small/borderline inputs
+    (combined length within 4× of the threshold) fall through to the exact
+    character-level diff, preserving behaviour.
     """
+    combined_len = len(removed_str) + len(added_str)
+    if combined_len > 4 * NON_MATERIAL_MAX_CHARS:
+        return combined_len
+
     from difflib import SequenceMatcher
 
     matcher = SequenceMatcher(a=removed_str, b=added_str, autojunk=False)
@@ -335,11 +349,13 @@ def is_non_material(diff_result: dict) -> bool:
     if net_change >= NON_MATERIAL_MAX_CHARS:
         return False
 
-    # (c) Obligation keywords
+    # (c) Obligation keywords — WORD-BOUNDED, via the same _match_terms regex
+    # used by _HIGH_KEYWORDS. Raw substring matching (``kw in combined_lower``)
+    # fired "ban" inside "urban", falsely flagging a short volatile numeric
+    # fragment as material. Word-bounding closes that false-positive path.
     combined_lower = (added_str + " " + removed_str).lower()
-    for kw in _OBLIGATION_KEYWORDS:
-        if kw in combined_lower:
-            return False
+    if _match_terms(_OBLIGATION_KEYWORDS, combined_lower):
+        return False
 
     # (d) Do not downgrade already-HIGH
     if str(diff_result.get("risk_level") or "").upper() == "HIGH":

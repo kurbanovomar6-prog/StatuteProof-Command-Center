@@ -106,6 +106,69 @@ def test_raising_source_persists_failed_record_and_opens_circuit(trail, tmp_path
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# WARN-6 — circuit breaker must AUTO-RESET on a successful probe/run so a
+#          transient outage does not skip a source forever.
+# ══════════════════════════════════════════════════════════════════════════
+def test_circuit_auto_resets_after_successful_probe(trail, tmp_path, monkeypatch):
+    import app.monitor as monitor
+
+    source = {
+        "name": "Flaky Source",
+        "url": "https://flaky.example/probe",
+        "jurisdiction": "AE",
+        "category": "banking",
+        "status": "active",
+        "enabled": True,
+    }
+
+    monkeypatch.setattr(monitor, "get_enabled_sources", lambda: [source])
+    monkeypatch.setattr(monitor, "init_pipeline", lambda *_a, **_k: None)
+    monkeypatch.setattr(monitor.time, "sleep", lambda *_a, **_k: None)
+    monkeypatch.setattr(monitor, "_CIRCUIT_STATE_FILE", tmp_path / "circuit_state.json")
+    monkeypatch.setattr(monitor, "_circuit_open", set())
+    monkeypatch.setattr(monitor, "_circuit_skip_counts", {})
+
+    # ── Phase 1: N failing cycles trip the breaker ────────────────────────────
+    def _always_raises(_src):
+        raise TimeoutError("connection timed out")
+
+    monkeypatch.setattr(monitor, "run_pipeline_for_source", _always_raises)
+    for _ in range(monitor._CIRCUIT_OPEN_THRESHOLD):
+        monitor.monitor_all_sources(verbose=False)
+    assert source["name"] in monitor._circuit_open, "breaker should be open"
+
+    # ── Phase 2: the source recovers. Advance cycles: the open circuit skips
+    #    during cooldown, then a half-open probe is allowed through and succeeds,
+    #    which must AUTO-RESET the breaker.
+    def _succeeds(_src):
+        return {
+            "source_name":  source["name"],
+            "url":          source["url"],
+            "jurisdiction": source["jurisdiction"],
+            "category":     source["category"],
+            "changed":      False,
+            "status":       "ok",
+        }
+
+    monkeypatch.setattr(monitor, "run_pipeline_for_source", _succeeds)
+
+    resumed = False
+    # Enough cycles to cross the cooldown and probe (cadence + slack).
+    for _ in range(monitor._CIRCUIT_PROBE_EVERY_N_CYCLES + 2):
+        results = monitor.monitor_all_sources(verbose=False)
+        if not results[0].get("circuit_open") and results[0].get("status") == "ok":
+            resumed = True
+            break
+
+    assert resumed, "a successful half-open probe must resume monitoring"
+    # Breaker is cleared and stays cleared on subsequent successful cycles.
+    assert source["name"] not in monitor._circuit_open
+    follow_up = monitor.monitor_all_sources(verbose=False)
+    assert follow_up[0].get("status") == "ok"
+    assert not follow_up[0].get("circuit_open")
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # Bug 2 — inode race: append must land in the live file after an os.replace
 # ══════════════════════════════════════════════════════════════════════════
 def test_locked_append_survives_inode_swap(trail, monkeypatch):

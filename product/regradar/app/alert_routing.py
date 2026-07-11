@@ -536,7 +536,19 @@ def send_preview_alert_to_user(user_id: int, alert_id: str) -> dict:
         if reclaimed_id is None:
             return {"ok": False, "reason": "This preview alert was already sent.", "code": "duplicate"}
         log_id = reclaimed_id
-    if send_telegram_message(str(chat_id), message):
+    # The row is now 'pending' (freshly created or reclaimed). If the send call
+    # itself raises (network error, unexpected Telegram-client fault), the row
+    # must NOT be left stuck at 'pending' — only 'failed' rows are reclaimable,
+    # so a stuck 'pending' row would block every future retry forever. Mark it
+    # 'failed' on any unexpected exception, then re-raise so the failure is
+    # surfaced (the API caller logs it and returns 500) rather than swallowed.
+    try:
+        sent = send_telegram_message(str(chat_id), message)
+    except Exception:
+        update_delivery_log_failed(log_id, "Telegram send raised an exception.")
+        raise
+
+    if sent:
         update_delivery_log_sent(log_id)
         return {"ok": True, "message": "Preview alert sent to your Telegram.", "log_id": log_id}
 
