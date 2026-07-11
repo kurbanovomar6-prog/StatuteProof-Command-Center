@@ -1,3 +1,9 @@
+# ⚠️ UNUSED / NOT DEPLOYED. The live deployment uses Caddy (see DEPLOY.md + deploy/Caddyfile),
+# which sets the X-Real-IP trust boundary the app relies on. This nginx example is kept
+# for reference only. Do NOT deploy it as-is: app/api.py _client_ip() trusts ONLY X-Real-IP
+# (proxy-set), so an nginx config must `proxy_set_header X-Real-IP $remote_addr;` AND strip
+# any client-supplied X-Real-IP before it can be a safe trust anchor.
+
 # StatuteProof nginx configuration example
 #
 # Copy to /etc/nginx/sites-available/statuteproof and symlink:

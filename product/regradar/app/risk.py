@@ -275,16 +275,19 @@ def _edited_char_count(removed_str: str, added_str: str) -> int:
     Performance short-circuit: SequenceMatcher is O(n·m). The only consumer,
     is_non_material(), compares the result against NON_MATERIAL_MAX_CHARS and
     treats any count >= that threshold identically ("material"). The edit
-    count can never exceed len(removed) + len(added) (every char replaced), so
-    when the combined length already dwarfs the threshold (> 4×) the outcome is
-    fixed regardless of the exact diff — return the combined length (which is
-    >= threshold) and skip the expensive matcher. Small/borderline inputs
-    (combined length within 4× of the threshold) fall through to the exact
-    character-level diff, preserving behaviour.
+    count is ALWAYS >= abs(len(added) - len(removed)) (you cannot reconcile a
+    length difference with fewer than that many inserts/deletes), so when the
+    pure length delta already meets the threshold the answer is "material"
+    regardless of the exact diff — return the length delta and skip the
+    matcher. This lower-bound short-circuit is exactly behaviour-preserving
+    (it never fires when the true edit count is below threshold, unlike a
+    combined-length heuristic which can over-report on long near-identical
+    texts). Same-length or near-same-length inputs fall through to the exact
+    character-level diff.
     """
-    combined_len = len(removed_str) + len(added_str)
-    if combined_len > 4 * NON_MATERIAL_MAX_CHARS:
-        return combined_len
+    length_delta = abs(len(added_str) - len(removed_str))
+    if length_delta >= NON_MATERIAL_MAX_CHARS:
+        return length_delta
 
     from difflib import SequenceMatcher
 
