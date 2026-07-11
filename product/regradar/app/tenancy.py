@@ -102,16 +102,22 @@ def is_custom_source(source_id: object) -> bool:
 
 
 def custom_source_owner(source_id: object) -> int | None:
-    """Return the ``owner_user_id`` of a custom source, or None.
+    """Return the SINGLE unambiguous ``owner_user_id`` of a custom source, or None.
 
-    None means the source is official/shared, unknown, or a custom source whose
-    owner cannot be resolved to an int. Callers on the delivery path must treat
-    a None owner for a ``is_custom_source`` id as "deliver to nobody" (fail
-    closed), never as "broadcast".
+    None means the source is official/shared, unknown, unreadable, OR a custom
+    source with an ambiguous owner — more than one distinct owner across matching
+    rows, or a row whose owner cannot be resolved to an int. This mirrors the
+    fail-closed "any conflicting row denies" rule of ``denied_custom_source_ids``:
+    since this drives DELIVERY routing (Telegram alerts, deadline reminders), a
+    duplicate/attacker row must never be able to misroute one tenant's private
+    alert to another. Callers on the delivery path must treat a None owner for a
+    ``is_custom_source`` id as "deliver to nobody" (fail closed), never broadcast.
     """
     sid = str(source_id or "").strip()
     if not sid:
         return None
+    owners: set[int] = set()
+    saw_unresolvable = False
     try:
         from app.source_intake import load_sources_json
 
@@ -122,12 +128,14 @@ def custom_source_owner(source_id: object) -> int | None:
                 and s.get("custom") is True
             ):
                 try:
-                    return int(s.get("owner_user_id"))
+                    owners.add(int(s.get("owner_user_id")))  # type: ignore[arg-type]
                 except (TypeError, ValueError):
-                    return None
+                    saw_unresolvable = True
     except Exception:  # noqa: BLE001 — unreadable list → unattributable
         return None
-    return None
+    if saw_unresolvable or len(owners) != 1:
+        return None
+    return next(iter(owners))
 
 
 def source_visible_to(user_id: object, source_id: str) -> bool:

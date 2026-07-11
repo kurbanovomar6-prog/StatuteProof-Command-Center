@@ -603,13 +603,27 @@ def send_due_reminders(
 
     if send_fn is None:
         from app.telegram import send_telegram_message as send_fn  # type: ignore
+    # Broadcast pool for OFFICIAL / shared sources (and legacy entries with no
+    # source_id). A PRIVATE custom source's reminder — source_name, private
+    # official_url, and a verbatim diff excerpt — is scoped PER ENTRY to its
+    # owner below and never broadcast to every paired customer (tenancy).
     if recipients is None:
         try:
             from app.telegram_pairing import get_all_linked_chat_ids
-            recipients = [str(c) for c in (get_all_linked_chat_ids() or [])]
+            broadcast_recipients = [str(c) for c in (get_all_linked_chat_ids() or [])]
         except Exception as exc:  # pragma: no cover - defensive
             logger.warning("deadline radar: could not resolve recipients: %s", exc)
-            recipients = []
+            broadcast_recipients = []
+    else:
+        broadcast_recipients = [str(c) for c in recipients]
+
+    try:
+        from app.tenancy import custom_source_owner, is_custom_source
+        from app.telegram_pairing import get_alert_chat_ids_for_user
+        _tenancy_ok = True
+    except Exception:  # pragma: no cover - defensive
+        _tenancy_ok = False
+        is_custom_source = custom_source_owner = get_alert_chat_ids_for_user = None  # type: ignore[assignment]
 
     stamp_fn = now_fn or now_utc
 
@@ -621,12 +635,24 @@ def send_due_reminders(
             summary["failed"] += 1
             continue
 
-        if not recipients:
+        # Tenancy: a custom source's reminder goes ONLY to its owner; a custom
+        # source with no resolvable owner (or when the tenancy helpers are
+        # unavailable) goes to NOBODY — never broadcast. The ``custom-`` prefix
+        # is a fail-closed belt so this holds even if sources.json is unreadable.
+        sid = str(entry.get("source_id") or "").strip()
+        looks_custom = sid.startswith("custom-") or (_tenancy_ok and bool(sid) and is_custom_source(sid))
+        if looks_custom:
+            owner = custom_source_owner(sid) if _tenancy_ok else None
+            entry_recipients = get_alert_chat_ids_for_user(owner) if (_tenancy_ok and owner is not None) else []
+        else:
+            entry_recipients = broadcast_recipients
+
+        if not entry_recipients:
             summary["skipped_no_recipients"] += 1
             continue
 
         delivered = 0
-        for chat_id in recipients:
+        for chat_id in entry_recipients:
             try:
                 if send_fn(str(chat_id), message):
                     delivered += 1
