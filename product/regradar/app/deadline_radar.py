@@ -208,7 +208,15 @@ def extract_deadlines(diff_text: str) -> list[dict[str, Any]]:
     from app.risk import derive_urgency_and_dates
 
     _, captures = derive_urgency_and_dates(diff_text or "")
-    by_date: dict[str, dict[str, Any]] = {}
+    # Dedupe so one phrase matching several patterns does not create duplicate
+    # reminders, WITHOUT collapsing two genuinely distinct obligations that fall
+    # on the same date. Rule: for each date keep every DISTINCT kind at the
+    # highest specificity present, and drop only lower-specificity kinds (a bare
+    # "deadline" folds into a co-located "effective"/"consultation_close", but an
+    # "effective" date and a "consultation_close" date on the same day are two
+    # separate records). Identical (date, kind) collapses to the first match.
+    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    max_spec_by_date: dict[str, int] = {}
     for cap in captures:
         date_text = cap.get("date_text", "")
         parsed = _parse_deadline_date(date_text)
@@ -216,21 +224,22 @@ def extract_deadlines(diff_text: str) -> list[dict[str, Any]]:
             continue
         iso = parsed.isoformat()
         kind = cap.get("kind", "deadline")
-        candidate = {
-            "deadline_date": iso,
-            "deadline_kind": kind,
-            "extracted_from_diff_excerpt": (cap.get("excerpt") or date_text or "").strip(),
-            "urgency": cap.get("urgency", ""),
-            "date_text": date_text,
-            "date_ambiguous": _is_ambiguous_numeric_date(date_text),
-        }
-        existing = by_date.get(iso)
-        # First appearance wins position; a strictly more-specific kind replaces
-        # the stored candidate (patterns are ordered most-specific first, so a tie
-        # keeps the earlier, more-specific match).
-        if existing is None or _kind_specificity(kind) > _kind_specificity(existing["deadline_kind"]):
-            by_date[iso] = candidate
-    return list(by_date.values())
+        key = (iso, kind)
+        if key not in by_key:
+            by_key[key] = {
+                "deadline_date": iso,
+                "deadline_kind": kind,
+                "extracted_from_diff_excerpt": (cap.get("excerpt") or date_text or "").strip(),
+                "urgency": cap.get("urgency", ""),
+                "date_text": date_text,
+                "date_ambiguous": _is_ambiguous_numeric_date(date_text),
+            }
+        max_spec_by_date[iso] = max(max_spec_by_date.get(iso, 0), _kind_specificity(kind))
+    return [
+        candidate
+        for (iso, kind), candidate in by_key.items()
+        if _kind_specificity(kind) >= max_spec_by_date[iso]
+    ]
 
 
 # ── register store (mirror of evidence_assessment.assessments.jsonl) ──────────

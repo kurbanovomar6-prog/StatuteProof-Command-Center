@@ -467,3 +467,24 @@ def test_run_py_deadlines_subcommand_lists_with_disclaimer(tmp_path):
     assert proc.returncode == 0, proc.stderr
     assert LEGAL_DISCLAIMER in proc.stdout
     assert "No upcoming deadlines" in proc.stdout
+
+
+def test_distinct_same_date_kinds_are_kept_separate():
+    """Two genuinely distinct obligations on the same date must not collapse
+    (regression: date-only dedup dropped the 'effective' date)."""
+    from app.deadline_radar import extract_deadlines
+    items = extract_deadlines(
+        "The amended rules take effect on 30 September 2026. Separately, the "
+        "public consultation closes on 30 September 2026."
+    )
+    kinds = sorted(i["deadline_kind"] for i in items)
+    assert kinds == ["consultation_close", "effective"], items
+    assert all(i["deadline_date"] == "2026-09-30" for i in items)
+
+
+def test_generic_deadline_folds_into_specific_same_date():
+    """One phrase matching consultation_close + generic 'deadline' yields ONE record."""
+    from app.deadline_radar import extract_deadlines
+    items = extract_deadlines("Comments are due by 30 September 2026.")
+    assert len(items) == 1
+    assert items[0]["deadline_kind"] == "consultation_close"
