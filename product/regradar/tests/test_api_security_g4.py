@@ -148,6 +148,31 @@ def test_caddyfile_overwrites_x_real_ip():
     assert "header_up X-Real-IP {remote_host}" in caddyfile
 
 
+def test_caddyfile_spa_csp_allows_google_fonts():
+    """The SPA CSS (web/src/index.css) @imports fonts.googleapis.com and pulls
+    font files from fonts.gstatic.com. The SPA CSP must permit both, or the
+    stylesheet is blocked and text falls back to the system font. The API-side
+    default-src 'none' CSP is intentionally NOT relaxed.
+    """
+    root = Path(__file__).resolve().parents[1]
+    caddyfile = (root / "deploy" / "Caddyfile").read_text(encoding="utf-8")
+
+    # The SPA CSS still imports Google Fonts — if this ever stops being true the
+    # CSP allowances below can be dropped.
+    index_css = (root / "web" / "src" / "index.css").read_text(encoding="utf-8")
+    assert "fonts.googleapis.com" in index_css
+
+    # style-src must allow the stylesheet host; font-src must allow the font host.
+    csp_line = next(
+        line for line in caddyfile.splitlines()
+        if "Content-Security-Policy" in line and "style-src" in line
+    )
+    assert "style-src" in csp_line and "https://fonts.googleapis.com" in csp_line
+    assert "font-src" in csp_line and "https://fonts.gstatic.com" in csp_line
+    # The API CSP (default-src 'none') must remain strict — no font hosts leaked.
+    assert "default-src 'none'" not in csp_line
+
+
 # ── Bug: rate-limiter dict grows unbounded ───────────────────────────────────
 
 def test_rate_limiter_prunes_expired_keys():

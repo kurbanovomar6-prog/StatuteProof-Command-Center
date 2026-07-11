@@ -2,11 +2,22 @@
 G-hashchain — tamper-evident hash chain over the evidence trail.
 
 The evidence trail is "append-only by convention" (a flat JSONL file). The hash
-chain makes it "append-only by construction": every appended record carries
-``prev_record_hash`` (the record_hash of the immediately preceding trail line)
-and ``record_hash`` (sha256 over this record's identifying fields, folding in
-prev_record_hash). Inserting, deleting, reordering, or editing an identifying
-field of any middle record breaks the link there, detectable by recomputation.
+chain makes it "append-only by construction" for IN-PLACE, UN-RELINKED edits:
+every appended record carries ``prev_record_hash`` (the record_hash of the
+immediately preceding trail line) and ``record_hash`` (sha256 over this record's
+identifying fields, folding in prev_record_hash). Inserting, deleting,
+reordering, or editing an identifying field of any middle record WITHOUT
+rebuilding the downstream links breaks the link there, detectable by
+recomputation. It verifies on-disk integrity of the trail since the last head.
+
+SCOPE (honest): the chain is NOT proof against an actor who can ALSO relink.
+``relink_chain`` is a public, un-anchored self-repair (used by legitimate
+retention compaction): anyone with write access who deletes records and relinks
+the survivors produces a clean-verifying chain. The separately-persisted head
+anchor (data/evidence_chain_head.json) is the advisory signal for that case —
+the verifier REPORTS a divergence but never fails hard, because legitimate
+compaction moves the head too. A tamper-PROOF guarantee needs an off-box /
+signed anchor (documented follow-up).
 
 These tests lock:
 
@@ -15,9 +26,12 @@ These tests lock:
   * the chain is ADDITIVE — record_hash never changes normalized_hash /
     content_hash, so it can't cause a spurious CHANGED and doesn't invalidate
     baselines;
-  * tampering with a middle record's identifying content breaks verification at
-    exactly that link (and the FIRST break is reported);
-  * inserting / deleting / reordering records breaks the chain;
+  * tampering with a middle record's identifying content (WITHOUT relinking)
+    breaks verification at exactly that link (and the FIRST break is reported);
+  * inserting / deleting / reordering records (without relinking) breaks the
+    chain;
+  * a delete-then-RELINK verifies clean in-file but is surfaced by the head
+    anchor (advisory divergence), and a legitimate compaction is NOT flagged;
   * retention compaction (heartbeat + QUALITY_DROP) re-links survivors so the
     chain stays verifiable, and stays idempotent;
   * legacy pre-chain records (no record_hash) are tolerated — the chain starts
@@ -435,3 +449,79 @@ def test_relink_chain_noop_on_legacy_records(isolated_trail):
     sr.relink_chain(legacy)
     assert "record_hash" not in legacy[0]
     assert "record_hash" not in legacy[1]
+
+
+# ── G-anchor: separate head-hash file catches delete-then-relink ─────────────
+
+def test_head_anchor_written_on_append_and_matches(isolated_trail):
+    """Each chained append updates the head anchor to the new tail, and the
+    verifier reports the anchor matching the live head."""
+    _seed("AE-one", "run00001", _long_text("A"))
+    _seed("AE-one", "run00002", _long_text("B"))
+    records = sr._read_runs()
+
+    anchor = sr.read_chain_head()
+    assert anchor is not None, "the head anchor must be written on append"
+    assert anchor["head_record_hash"] == records[-1]["record_hash"]
+
+    report = vt.verify_trail()
+    assert report.chain.ok is True
+    assert report.chain.anchor_status == "match"
+
+
+def test_head_anchor_flags_delete_then_relink(isolated_trail):
+    """The keystone honesty test: a delete-then-RELINK verifies clean IN-FILE
+    (the chain cannot catch it), but the head anchor still holds the OLD head, so
+    the verifier reports an advisory divergence — WITHOUT failing the run.
+    """
+    _seed("AE-one", "run00001", _long_text("A"))
+    _seed("AE-two", "run00002", _long_text("B"))
+    _seed("AE-three", "run00003", _long_text("C"))
+
+    records = sr._read_runs()
+    # Attacker drops the middle record and RELINKS the survivors so the in-file
+    # chain verifies clean. Critically, they do NOT (cannot legitimately) stamp a
+    # compaction on the anchor — so the anchor still points at the old head.
+    survivors = [dict(records[0]), dict(records[2])]
+    sr.relink_chain(survivors)
+    _rewrite(survivors)
+
+    report = vt.verify_trail()
+    # In-file chain: clean (this is exactly what relink hides).
+    assert report.chain.ok is True
+    assert report.chain.status == vt.CHAIN_OK
+    # But the head anchor still holds the pre-tamper head → advisory divergence.
+    assert report.chain.anchor_status == "diverged", report.chain.anchor_reason
+    assert "relink" in (report.chain.anchor_reason or "")
+
+
+def test_head_anchor_compaction_is_not_flagged(isolated_trail, monkeypatch):
+    """A LEGITIMATE compaction moves the head and updates the anchor with a
+    compaction marker, so the verifier does NOT report a false divergence."""
+    from app.retention import compact_heartbeats
+
+    source = {
+        "id": "src-a", "name": "T", "url": "https://ex.gov.ae/a",
+        "jurisdiction": "AE", "category": "financial_regulator",
+    }
+    old = NOW - timedelta(days=45)
+    for h in (1, 6, 12, 23):
+        _monkeytime(monkeypatch, old.replace(hour=h))
+        sr.record_heartbeat(source, normalized_hash="a" * 64, extracted_chars=1000,
+                            normalized_chars=900, extraction_quality="GOOD")
+    _monkeytime(monkeypatch, NOW - timedelta(days=2))
+    sr.record_heartbeat(source, normalized_hash="a" * 64, extracted_chars=1000,
+                        normalized_chars=900, extraction_quality="GOOD")
+
+    # Compaction drops old same-day heartbeats and relinks survivors.
+    stats = compact_heartbeats(days_threshold=30, now=NOW)
+    assert stats["removed"] == 2
+    sr._CACHE_VALID = False
+    sr._RUNS_CACHE = None
+
+    report = vt.verify_trail()
+    assert report.chain.ok is True
+    # The head moved (records were relinked) but the anchor recorded it as a
+    # compaction, so it is NOT a false "diverged".
+    assert report.chain.anchor_status in ("compaction", "match"), report.chain.anchor_reason
+    assert report.chain.anchor_status != "diverged"

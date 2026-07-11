@@ -97,6 +97,23 @@ def _emit_relinked(
     return out
 
 
+def _update_head_anchor_after_compaction() -> None:
+    """G-anchor: after a relinking compaction rewrote the trail, move the head
+    anchor to the new tail record_hash and mark it as a compaction so the
+    verifier does not misread the expected head change as tampering.
+
+    Best-effort: reads the just-written trail's tail and updates the anchor.
+    The anchor is an ADDITIVE signal, so any failure here is non-fatal.
+    """
+    run_file = source_runs.source_run_path()
+    try:
+        lines = run_file.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return
+    new_head = source_runs._last_record_hash_from_lines(lines)
+    source_runs._write_chain_head(new_head, compaction=True)
+
+
 def _parse_ts(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -184,6 +201,7 @@ def compact_quality_drop_repeats(days_threshold: int = 30, now: datetime | None 
                 os.replace(tmp_path, run_file)
                 source_runs._CACHE_VALID = False
                 source_runs._RUNS_CACHE = None
+                _update_head_anchor_after_compaction()
             logger.info(
                 "QUALITY_DROP compaction: kept=%d removed=%d (threshold=%dd)",
                 len(keep), removed, days_threshold,
@@ -258,6 +276,7 @@ def compact_heartbeats(days_threshold: int = 30, now: datetime | None = None) ->
                 os.replace(tmp_path, run_file)
                 source_runs._CACHE_VALID = False
                 source_runs._RUNS_CACHE = None
+                _update_head_anchor_after_compaction()
             logger.info(
                 "Heartbeat compaction: kept=%d removed=%d (threshold=%dd)",
                 len(keep), removed, days_threshold,

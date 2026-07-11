@@ -452,6 +452,30 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 "baseline left intact (likely scraper break, not a real change)",
                 url, _shrink_reason,
             )
+            # A-MEDIUM(1): write a durable QUALITY_DROP audit record so the
+            # suppression is auditable (an evidence product must not have gaps
+            # that live only in a log line). The record carries NO usable hash,
+            # so it can never become the baseline — the true baseline survives
+            # the scraper break, and no alert is issued. Non-fatal: a failed
+            # write must never break the pipeline.
+            if source is not None:
+                try:
+                    from app.source_runs import record_quality_drop
+                    record_quality_drop(
+                        source,
+                        reason=_shrink_reason,
+                        alert_suppressed_reason="content_shrink",
+                        observed_raw_chars=extracted_chars,
+                        observed_normalized_chars=len(normalized_for_hash or ""),
+                        prev_raw_chars=prev_raw_chars,
+                        prev_normalized_chars=prev_normalized_chars,
+                        extraction_method=extraction_method,
+                    )
+                except Exception as _qd_err:
+                    logger.warning(
+                        "QUALITY_DROP audit record write failed (non-fatal): %s",
+                        _qd_err,
+                    )
             return {
                 "url":                    url,
                 "changed":                False,
@@ -854,14 +878,22 @@ def run_pipeline_for_source(source: dict) -> dict:
     if result.get("changed") and result.get("run_id"):
         try:
             import uuid as _uuid2
-            from app.source_runs import append_run, make_source_id
+            from app.source_runs import append_run, make_source_id, mark_alert_sent
 
             # Durability ordering (A-durability, fix 2): a vetted alert waits in
             # result["_deferred_alert"] and is sent ONLY after append_run has
-            # durably (fsync) recorded the CHANGED evidence below. We commit the
-            # trail record to alert_sent=True up front so the A1 dedup gate keys
-            # correctly on the next sweep — but the actual Telegram send happens
-            # strictly after the append returns. A failed append aborts the send.
+            # durably (fsync) recorded the CHANGED evidence below. The actual
+            # Telegram send happens strictly after the append returns; a failed
+            # append aborts the send.
+            #
+            # A-HIGH: the record is appended with alert_sent=False (delivery not
+            # yet confirmed) and flipped to True by mark_alert_sent ONLY after a
+            # confirmed send. Keying the record on the not-yet-sent intent would
+            # wrongly stamp alert_sent=True even when the send later fails
+            # (Telegram outage), and the next sweep's dedup gate would then
+            # return "hash_already_alerted" and never retry the lost alert. With
+            # alert_sent reflecting actual delivery, a failed send leaves it
+            # False and the next sweep re-attempts the alert for the same hash.
             _deferred_alert = result.pop("_deferred_alert", None)
             _will_alert = _deferred_alert is not None
 
@@ -885,11 +917,19 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "deadline":                 result.get("deadline"),
                 "review_required":          result.get("review_required", False),
                 "review_reason":            result.get("review_reason", ""),
-                # A1: the trail is the dedup state — record delivered alerts.
-                # fix 2: on the source path the send is deferred until AFTER this
-                # record is durably appended, so key on the committed intent
-                # (_will_alert) rather than the not-yet-sent telegram_sent flag.
-                "alert_sent":               bool(result.get("telegram_sent")) or _will_alert,
+                # A1: the trail is the dedup state — it must record ACTUAL
+                # delivery, never mere intent. On the source path telegram_sent
+                # is still False here (the send is deferred to AFTER this durable
+                # append), so the record is written alert_sent=False and flipped
+                # to True by mark_alert_sent only after a confirmed send below.
+                # A-MEDIUM(2): alert_sent may only be True on a genuinely CHANGED
+                # record — never on a FIRST_SEEN baseline (guarded here) nor on a
+                # run the trail downgrades (append_run re-runs classify_change;
+                # the confirmed-send path below re-checks change_status too).
+                "alert_sent": (
+                    bool(result.get("telegram_sent"))
+                    and not result.get("is_new")
+                ),
                 "alert_suppressed_reason":  result.get("alert_suppressed_reason", ""),
                 "added_count":              result.get("added_count", 0),
                 "removed_count":            result.get("removed_count", 0),
@@ -934,11 +974,26 @@ def run_pipeline_for_source(source: dict) -> dict:
                 from app.telegram import send_telegram_alert
                 telegram_sent = send_telegram_alert(_deferred_alert)
                 result["telegram_sent"] = telegram_sent
-                if not telegram_sent:
+                if telegram_sent:
+                    # A-HIGH: confirmed delivery — flip the persisted record's
+                    # alert_sent to True so the dedup gate suppresses re-alerting
+                    # this hash next sweep. alert_sent is not a chain field, so
+                    # this patch leaves the tamper-evident chain intact.
+                    mark_alert_sent(
+                        final_record.get("source_id"),
+                        final_record.get("run_id"),
+                        alert_sent=True,
+                    )
+                    result["run_record"]["alert_sent"] = True
+                else:
+                    # Send failed AFTER durable evidence append: the record stays
+                    # alert_sent=False, so the next sweep re-attempts the alert
+                    # for this same hash instead of suppressing it forever.
                     logger.warning(
                         "Deferred Telegram send returned falsy AFTER durable "
                         "evidence append: source=%s run_id=%s (evidence recorded, "
-                        "alert delivery not confirmed)",
+                        "alert delivery NOT confirmed — record left alert_sent=False "
+                        "so the next sweep retries this alert)",
                         source.get("name"), final_record.get("run_id"),
                     )
             elif _will_alert:

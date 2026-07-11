@@ -118,7 +118,7 @@ cp /srv/regradar/deploy/systemd/statuteproof-*.{service,timer} /etc/systemd/syst
 systemctl daemon-reload
 systemctl enable --now statuteproof-api statuteproof-scheduler \
     statuteproof-telegram-bot statuteproof-compaction.timer \
-    statuteproof-backup.timer
+    statuteproof-backup.timer statuteproof-heartbeat.timer
 systemctl status statuteproof-api --no-pager | head -5   # expect: active (running)
 curl -s http://127.0.0.1:5001/api/health                  # expect: {"ok": true, ...}
 ```

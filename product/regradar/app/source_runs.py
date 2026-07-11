@@ -67,11 +67,24 @@ _APPEND_RELOCK_ATTEMPTS = 5
 #
 # Each appended record carries prev_record_hash (the record_hash of the
 # immediately preceding trail line) and record_hash (a sha256 over this
-# record's identifying fields plus prev_record_hash). Chaining turns
-# "append-only by convention" into "append-only by construction": inserting,
-# deleting, reordering, or editing an identifying field of any middle record
-# breaks the link at that point, and the break is detectable by recomputation
-# (see tools/verify_evidence_trail.py --chain).
+# record's identifying fields plus prev_record_hash).
+#
+# SCOPE — what the chain does and does NOT prove (be honest here):
+#   The chain detects IN-PLACE, UN-RELINKED tampering: inserting, deleting,
+#   reordering, or editing an identifying field of a record WITHOUT rebuilding
+#   the downstream links breaks the chain at that point, detectable by
+#   recomputation (see tools/verify_evidence_trail.py --chain). It verifies the
+#   on-disk integrity of the trail since the last known head.
+#
+#   It is NOT proof against an actor who can ALSO relink. relink_chain() is a
+#   public, un-anchored self-repair (used by legitimate retention compaction):
+#   anyone with write access who deletes records and then relinks the survivors
+#   produces a chain that verifies clean. Detecting that requires an EXTERNAL
+#   anchor the local trail cannot forge — e.g. the head-hash file this module
+#   also maintains (compared by the verifier, reported not fail-hard because
+#   legitimate compaction moves the head), or ultimately an off-box/signed
+#   anchor. Absent such an anchor, "the chain verifies" means only "no in-place,
+#   un-relinked tampering since the last head", not "no tampering at all".
 #
 # The chain is ADDITIVE: record_hash is derived from — but never feeds back
 # into — normalized_hash / content_hash, so it can never change the values the
@@ -138,6 +151,60 @@ def _apply_chain_fields(record: dict, prev_record_hash: str) -> dict:
     return record
 
 
+# ── G-anchor: separate head-hash file (a lightweight external anchor) ────────
+#
+# The in-file chain alone cannot catch a delete-then-relink (see the SCOPE note
+# above): an actor who relinks produces a clean-verifying chain. This anchor
+# persists the CURRENT chain head record_hash to a SEPARATE file on every
+# chained append AND on the retention relink path. The verifier compares the
+# live head to the anchored head and REPORTS (never fails hard) when they
+# diverge without a recorded compaction — legitimate compaction moves the head
+# and updates the anchor, so it never flags as tampering.
+#
+# This is deliberately NOT tamper-proof on its own (an attacker with write
+# access to data/ can also rewrite this file). It raises the bar one notch and
+# gives an honest signal; a truly tamper-proof guarantee needs an off-box /
+# signed anchor — tracked as a documented follow-up.
+def _chain_head_file() -> Path:
+    # Derived from the live _RUN_DIR so test monkeypatching of the trail dirs
+    # relocates the anchor too (kept beside the trail, under data/).
+    return _RUN_DIR.parent / "evidence_chain_head.json"
+
+
+def _write_chain_head(head_record_hash: str, *, compaction: bool = False) -> None:
+    """Persist the current chain head record_hash to the anchor file.
+
+    ``compaction=True`` records that the head moved because of a legitimate
+    retention compaction (relink), so the verifier does not misread the expected
+    head change as tampering. Best-effort: a failed write is non-fatal (the
+    anchor is an ADDITIVE signal, never a gate on evidence durability).
+    """
+    try:
+        path = _chain_head_file()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "head_record_hash": str(head_record_hash or ""),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "last_update_kind": "compaction" if compaction else "append",
+        }
+        tmp = path.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+        tmp.replace(path)
+    except OSError:
+        pass
+
+
+def read_chain_head() -> dict | None:
+    """Return the anchored head payload dict, or None if no anchor exists."""
+    path = _chain_head_file()
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
 def _locked_append_record(record: dict) -> dict:
     """Chain-and-append one record under a single exclusive flock.
 
@@ -176,6 +243,8 @@ def _locked_append_record(record: dict) -> dict:
                 os.fsync(fh.fileno())
             finally:
                 fcntl.flock(fh, fcntl.LOCK_UN)
+            # G-anchor: this record is now the chain head — persist it.
+            _write_chain_head(record.get("record_hash", ""))
             return record
         finally:
             if not fh.closed:
@@ -194,6 +263,8 @@ def _locked_append_record(record: dict) -> dict:
             os.fsync(fh.fileno())
         finally:
             fcntl.flock(fh, fcntl.LOCK_UN)
+    # G-anchor: update the head after the last-ditch append too.
+    _write_chain_head(record.get("record_hash", ""))
     return record
 
 
@@ -211,6 +282,13 @@ def relink_chain(records: list[dict]) -> list[dict]:
     a compaction of an all-legacy trail is a no-op and stays byte-identical
     (idempotency): chaining only takes effect once records carry record_hash.
     Mutates the dicts in place and returns the same list for convenience.
+
+    NOTE (G-anchor): relink is exactly the operation the in-file chain CANNOT
+    detect — a relinked trail always verifies clean. Legitimate callers
+    (retention compaction) MUST update the head anchor after relinking (they
+    call ``_write_chain_head(new_head, compaction=True)`` once the survivors are
+    persisted) so the verifier reads the moved head as an expected compaction,
+    not tampering. See the SCOPE note at the top of this module.
     """
     prev_hash = ""
     for record in records:
@@ -517,6 +595,63 @@ def append_run(record: dict) -> dict:
     return record
 
 
+def mark_alert_sent(source_id: str, run_id: str, *, alert_sent: bool = True) -> bool:
+    """Patch a persisted trail record's ``alert_sent`` flag in place.
+
+    A-HIGH: the dedup gate (``alert_dedup.should_send_alert``) keys on the trail
+    record's ``alert_sent``. So the record must reflect ACTUAL delivery: a run is
+    appended with ``alert_sent=False`` (evidence recorded, but delivery not yet
+    confirmed), and this flips it to True ONLY after a confirmed Telegram send.
+    If the send fails, the record stays ``alert_sent=False`` and the next sweep
+    re-attempts the alert for the same hash instead of suppressing it forever.
+
+    ``alert_sent`` is NOT a chain field (see ``_CHAIN_FIELDS``), so flipping it
+    does not change any ``record_hash`` and leaves the tamper-evident chain
+    intact — no re-link is needed. The rewrite is atomic (temp file + rename)
+    under the same exclusive flock the appenders use, so it is safe against a
+    concurrent append/compaction.
+
+    Returns True if a matching record was found and updated, else False.
+    """
+    if not _RUN_FILE.exists():
+        return False
+    _RUN_DIR.mkdir(parents=True, exist_ok=True)
+    with _RUN_FILE.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            rows: list[dict] = []
+            updated = False
+            for line in fh.read().splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if (
+                    str(rec.get("source_id") or "") == str(source_id)
+                    and str(rec.get("run_id") or "") == str(run_id)
+                ):
+                    if bool(rec.get("alert_sent")) != bool(alert_sent):
+                        rec["alert_sent"] = bool(alert_sent)
+                        updated = True
+                rows.append(rec)
+            if not updated:
+                return False
+            tmp = _RUN_FILE.with_suffix(".jsonl.mark.tmp")
+            with tmp.open("w", encoding="utf-8") as out:
+                for row in rows:
+                    out.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+                out.flush()
+                os.fsync(out.fileno())
+            tmp.replace(_RUN_FILE)
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+    global _CACHE_VALID
+    _CACHE_VALID = False
+    return True
+
+
 def record_heartbeat(
     source: dict,
     *,
@@ -557,6 +692,78 @@ def record_heartbeat(
         "normalized_chars": normalized_chars,
     }
     return append_run(record)
+
+
+def record_quality_drop(
+    source: dict,
+    *,
+    reason: str,
+    alert_suppressed_reason: str = "content_shrink",
+    observed_raw_chars: int = 0,
+    observed_normalized_chars: int = 0,
+    prev_raw_chars: int | None = None,
+    prev_normalized_chars: int | None = None,
+    extraction_method: str = "",
+) -> dict:
+    """A-MEDIUM(1): write a durable QUALITY_DROP audit record for a suppressed
+    run (e.g. a content-shrink scraper break) so the gap is auditable instead of
+    living only in a log line.
+
+    Critical baseline-safety invariants:
+
+      * ``normalized_hash`` / ``content_hash`` are BOTH None, so
+        ``previous_run`` can never resolve this record as a baseline — the true
+        baseline (SQLite / the prior good trail record) survives the scraper
+        break, exactly as before this record existed.
+      * ``change_status`` is forced to ``"QUALITY_DROP"`` and the record is
+        chain-appended DIRECTLY (bypassing ``append_run``/``classify_change``),
+        so nothing reclassifies it to CHANGED/UNCHANGED and it emits no alert or
+        alert queue entry.
+      * ``alert_sent`` is False (nothing was delivered) and
+        ``alert_suppressed_reason`` records WHY, so the dedup gate is untouched.
+      * The baseline-relevant size fields (``extracted_chars`` /
+        ``normalized_chars``) carry the PREVIOUS good sizes forward so the next
+        sweep's shrink guard still compares against the true baseline size, not
+        the shrunk one. The shrunk sizes are kept under ``observed_*`` for audit.
+
+    Chained like any other trail record, so the tamper-evident chain stays
+    continuous. No snapshots/proof/diff artifacts (compact, by design).
+    """
+    market = str(source.get("jurisdiction", source.get("market", "AE"))).upper()
+    record = {
+        "record_type": "quality_drop",
+        "run_id": uuid.uuid4().hex[:8],
+        "timestamp_utc": now_utc(),
+        "source_id": make_source_id(source),
+        "source_name": source.get("name", ""),
+        "official_url": source.get("url", ""),
+        "url": source.get("url", ""),
+        "market": market,
+        "jurisdiction": source.get("jurisdiction", market),
+        "category": source.get("category", ""),
+        "change_status": "QUALITY_DROP",
+        # Baseline-safety: no usable hash → never resolved as a baseline.
+        "normalized_hash": None,
+        "content_hash": None,
+        "raw_hash": None,
+        "extraction_quality": "FAILED",
+        "extraction_method": extraction_method,
+        # Carry the previous good sizes forward so the next shrink guard still
+        # compares against the true baseline size (0/None when unknown).
+        "extracted_chars": int(prev_raw_chars or 0),
+        "normalized_chars": int(prev_normalized_chars or 0),
+        # The shrunk sizes actually observed this run — audit only.
+        "observed_raw_chars": int(observed_raw_chars or 0),
+        "observed_normalized_chars": int(observed_normalized_chars or 0),
+        "alert_sent": False,
+        "alert_suppressed_reason": alert_suppressed_reason,
+        "limitations_notes": reason,
+    }
+    _RUN_DIR.mkdir(parents=True, exist_ok=True)
+    _locked_append_record(record)
+    global _CACHE_VALID
+    _CACHE_VALID = False
+    return record
 
 
 def _append_limitation(record: dict, note: str) -> None:

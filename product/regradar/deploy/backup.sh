@@ -41,13 +41,27 @@ echo "backup written: $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
 # 3) Optional off-box copy so the archive survives droplet loss. No-op unless
 # STATUTEPROOF_BACKUP_REMOTE is set. Value is an rclone remote (e.g. s3:bucket/path)
 # when rclone is installed, otherwise an scp target (e.g. user@host:/path).
+#
+# F-MEDIUM: the push is NON-FATAL. Under `set -euo pipefail` a failed rclone/scp
+# (network down, bad creds) would otherwise abort the script BEFORE step 4, so
+# retention pruning would stop running and old backups would pile up. The whole
+# block runs in a guarded `if` (a failing command inside an `if` condition does
+# not trip errexit), and any failure logs a warning and continues. The local
+# archive is already safely written above (step 2), so a failed off-box copy
+# never loses data — it only skips the remote copy for this run.
 if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
   if command -v rclone >/dev/null 2>&1; then
-    rclone copy "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"
-    echo "off-box copy (rclone): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+    if rclone copy "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"; then
+      echo "off-box copy (rclone): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+    else
+      echo "WARNING: off-box copy (rclone) failed; local archive kept, continuing to retention" >&2
+    fi
   else
-    scp "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"
-    echo "off-box copy (scp): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+    if scp "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"; then
+      echo "off-box copy (scp): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+    else
+      echo "WARNING: off-box copy (scp) failed; local archive kept, continuing to retention" >&2
+    fi
   fi
 fi
 

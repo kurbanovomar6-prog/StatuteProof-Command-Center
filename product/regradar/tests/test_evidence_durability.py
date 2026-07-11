@@ -283,8 +283,30 @@ def test_content_shrink_suppresses_alert_and_preserves_baseline(isolated_dirs):
     # The trail must NOT gain a superseding CHANGED record — baseline hash stands.
     records = _trail_records()
     assert all(r.get("change_status") != "CHANGED" for r in records)
-    latest_hash = records[-1].get("normalized_hash") if records else None
-    assert latest_hash == _BASE_HASH, "the true baseline hash must survive the scraper break"
+    # A-MEDIUM(1): a durable QUALITY_DROP audit record IS written so the gap is
+    # auditable — but it carries no usable hash, so it can never become the
+    # baseline. The most recent record with a usable hash is still the baseline.
+    qd = [r for r in records if r.get("change_status") == "QUALITY_DROP"]
+    assert len(qd) == 1, "a durable QUALITY_DROP audit record must be written"
+    assert qd[0].get("alert_suppressed_reason") == "content_shrink"
+    assert qd[0].get("alert_sent") in (False, None), "a suppressed run never alerts"
+    assert qd[0].get("normalized_hash") is None and qd[0].get("content_hash") is None, (
+        "the QUALITY_DROP record must carry NO hash so it can never be a baseline"
+    )
+    hashed = [r for r in records if r.get("normalized_hash")]
+    assert hashed[-1].get("normalized_hash") == _BASE_HASH, (
+        "the true baseline hash must survive the scraper break"
+    )
+
+    # The baseline must still resolve to the true baseline for the NEXT sweep:
+    # previous_run returns the QUALITY_DROP record (no hash) → baseline falls
+    # through to the prior good record, never the shrunk content.
+    import app.source_runs as sr
+    prev = sr.previous_run(_SOURCE_ID)
+    assert prev.get("change_status") == "QUALITY_DROP"
+    assert not (prev.get("normalized_hash") or prev.get("content_hash")), (
+        "the QUALITY_DROP record must not offer a hash that could poison the baseline"
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -336,6 +358,63 @@ def test_normal_changed_run_records_evidence_before_alert(isolated_dirs):
     assert changed[0].get("alert_sent") is True, (
         "the persisted evidence record must mark that this run alerted"
     )
+
+
+def test_healthy_sweep_after_shrink_diffs_against_true_baseline(isolated_dirs):
+    """After a shrink QUALITY_DROP record is written, a subsequent HEALTHY sweep
+    that re-fetches the original baseline content must classify as UNCHANGED
+    (baseline resolved to the true prior good record, not the hash-less
+    QUALITY_DROP record) — no spurious CHANGED, no alert.
+    """
+    from app.pipeline import init_pipeline, run_pipeline_for_source
+
+    _seed_baseline(
+        isolated_dirs,
+        _BASE_HASH,
+        text=normalize_for_change_hash(_BASE_TEXT),
+        extracted_chars=len(_BASE_TEXT),
+        normalized_chars=len(normalize_for_change_hash(_BASE_TEXT)),
+    )
+    init_pipeline(0)
+
+    # 1) A shrink sweep writes the QUALITY_DROP audit record.
+    with patch("app.pipeline.ENABLE_TELEGRAM_ALERTS", True), patch(
+        "app.pipeline.fetch_page", return_value=_HTML
+    ), patch(
+        "app.pipeline.extract_best_text", return_value={"text": _SHRUNK_TEXT, "method": "t"}
+    ), patch(
+        "app.pipeline.get_latest_document", return_value={"content": _BASE_TEXT, "content_hash": _BASE_HASH}
+    ), patch(
+        "app.pipeline.save_document", return_value=None
+    ), patch(
+        "app.telegram.send_telegram_alert", return_value=True
+    ), patch(
+        "app.pipeline.get_adapter_for_url", return_value=None
+    ):
+        run_pipeline_for_source(_SOURCE)
+
+    # 2) A healthy sweep re-fetches the ORIGINAL baseline content.
+    sends: list = []
+    with patch("app.pipeline.ENABLE_TELEGRAM_ALERTS", True), patch(
+        "app.pipeline.fetch_page", return_value=_HTML
+    ), patch(
+        "app.pipeline.extract_best_text", return_value={"text": _BASE_TEXT, "method": "t"}
+    ), patch(
+        "app.pipeline.get_latest_document", return_value={"content": _BASE_TEXT, "content_hash": _BASE_HASH}
+    ), patch(
+        "app.pipeline.save_document", return_value=None
+    ), patch(
+        "app.telegram.send_telegram_alert", side_effect=lambda p: sends.append(p) or True
+    ), patch(
+        "app.pipeline.get_adapter_for_url", return_value=None
+    ):
+        result = run_pipeline_for_source(_SOURCE)
+
+    assert result.get("changed") is False, (
+        "re-fetching the baseline content must NOT be seen as a change — the "
+        "QUALITY_DROP record must not have poisoned the baseline"
+    )
+    assert sends == [], "a return to the baseline must not alert"
 
 
 def test_moderate_removal_still_alerts_not_suppressed(isolated_dirs):
@@ -436,3 +515,91 @@ def test_normal_changed_run_alerts_exactly_once(isolated_dirs):
         run_pipeline_for_source(_SOURCE)
 
     assert len(sends) == 1, "a genuine change must alert exactly once"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# (v) A-HIGH: a failed Telegram send must NOT permanently suppress the retry
+# ══════════════════════════════════════════════════════════════════════════
+def _changed_hash() -> str:
+    return stable_content_hash(normalize_for_change_hash(_CHANGED_TEXT))
+
+
+def _run_changed(*, send_ok: bool):
+    """Run one CHANGED sweep with the deferred send returning send_ok."""
+    from app.pipeline import init_pipeline, run_pipeline_for_source
+
+    init_pipeline(0)
+    sends: list = []
+    with patch("app.pipeline.ENABLE_TELEGRAM_ALERTS", True), patch(
+        "app.pipeline.fetch_page", return_value=_HTML
+    ), patch(
+        "app.pipeline.extract_best_text", return_value={"text": _CHANGED_TEXT, "method": "t"}
+    ), patch(
+        "app.pipeline.get_latest_document", return_value={"content": _BASE_TEXT, "content_hash": _BASE_HASH}
+    ), patch(
+        "app.pipeline.save_document", return_value=None
+    ), patch(
+        "app.telegram.send_telegram_alert", side_effect=lambda p: sends.append(p) or bool(send_ok)
+    ), patch(
+        "app.pipeline.get_adapter_for_url", return_value=None
+    ):
+        result = run_pipeline_for_source(_SOURCE)
+    return result, sends
+
+
+def test_failed_send_leaves_trail_retryable_next_sweep(isolated_dirs):
+    """A CHANGED run whose deferred send returns falsy (Telegram outage) must:
+      * still durably record the CHANGED evidence, but
+      * leave alert_sent=False so the dedup gate re-attempts the SAME hash next
+        sweep — should_send_alert(source_id, same_hash) == (True, "").
+    Regression: the pre-fix code stamped alert_sent=True on committed intent, so
+    the next sweep returned 'hash_already_alerted' and the alert was lost.
+    """
+    from app.alert_dedup import should_send_alert
+
+    _seed_baseline(isolated_dirs, _BASE_HASH)
+
+    result, sends = _run_changed(send_ok=False)
+
+    assert result["changed"] is True
+    assert len(sends) == 1, "the send was attempted"
+    assert result.get("telegram_sent") is False, "the outage means delivery is unconfirmed"
+
+    # Evidence is durable: a CHANGED record landed.
+    changed = [r for r in _trail_records() if r.get("change_status") == "CHANGED"]
+    assert len(changed) == 1, "the CHANGED evidence must still be durably recorded"
+    assert changed[0].get("alert_sent") in (False, None), (
+        "a failed send must NOT mark the record alert_sent=True"
+    )
+
+    # The dedup gate must allow a retry of the SAME hash next sweep.
+    allowed, reason = should_send_alert(
+        _SOURCE_ID, _changed_hash(), cooldown_hours=0,
+    )
+    assert allowed is True and reason == "", (
+        f"next sweep must retry the lost alert; got allowed={allowed} reason={reason!r}"
+    )
+
+
+def test_successful_send_suppresses_retry_next_sweep(isolated_dirs):
+    """The mirror case: a confirmed send marks alert_sent=True, so the dedup gate
+    suppresses re-alerting the same hash next sweep (hash_already_alerted).
+    """
+    from app.alert_dedup import should_send_alert
+
+    _seed_baseline(isolated_dirs, _BASE_HASH)
+
+    result, sends = _run_changed(send_ok=True)
+
+    assert result.get("telegram_sent") is True
+    assert len(sends) == 1
+    changed = [r for r in _trail_records() if r.get("change_status") == "CHANGED"]
+    assert len(changed) == 1
+    assert changed[0].get("alert_sent") is True, "a confirmed send marks alert_sent=True"
+
+    allowed, reason = should_send_alert(
+        _SOURCE_ID, _changed_hash(), cooldown_hours=0,
+    )
+    assert allowed is False and reason == "hash_already_alerted", (
+        f"a delivered alert must not re-fire; got allowed={allowed} reason={reason!r}"
+    )

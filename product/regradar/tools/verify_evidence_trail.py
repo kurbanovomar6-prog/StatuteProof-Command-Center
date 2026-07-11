@@ -14,6 +14,13 @@ Guarantees / non-goals:
   * No network. It only touches the local evidence trail on disk.
   * It reuses ``app.source_runs`` for trail reading and path resolution, so it
     verifies the exact same records and snapshot files the pipeline writes.
+  * The hash-chain check detects IN-PLACE, UN-RELINKED tampering (inserting,
+    deleting, reordering, or editing a record without rebuilding the downstream
+    links) and verifies on-disk integrity of the trail since the last known
+    head. It is NOT proof against an actor who can ALSO relink: a relinked trail
+    verifies clean. The head-anchor comparison (advisory, never fails the run)
+    surfaces a likely delete-then-relink; a tamper-PROOF guarantee requires an
+    off-box / signed anchor (documented follow-up).
 
 Verification model (both hash flavors the codebase produces are accepted):
 
@@ -149,6 +156,16 @@ class ChainResult:
     at the record_hash of the immediately preceding chained trail line. Only the
     FIRST broken link is reported — once the chain breaks, everything after it is
     already unprovable, so the first break is the actionable fact.
+
+    SCOPE (honest): a clean chain proves only that there was no IN-PLACE,
+    UN-RELINKED tampering since the last known head — it verifies on-disk
+    integrity of the trail. It is NOT proof against an actor who can also relink
+    (``source_runs.relink_chain`` produces a clean-verifying chain over any
+    survivor set). The head-anchor comparison below raises the bar one notch by
+    checking the live head against a separately-persisted head file; it REPORTS
+    divergence (``anchor_status``) but never fails the run, because legitimate
+    compaction legitimately moves the head. A tamper-PROOF guarantee needs an
+    off-box / signed anchor — a documented follow-up.
     """
 
     status: str = CHAIN_EMPTY
@@ -157,6 +174,13 @@ class ChainResult:
     break_source_id: str | None = None
     break_run_id: str | None = None
     reason: str | None = None
+    # Head-anchor comparison (advisory, never fails the run):
+    #   "match"      — live head equals the anchored head.
+    #   "compaction" — heads differ but the anchor marks a legitimate compaction.
+    #   "diverged"   — heads differ with no recorded compaction (investigate).
+    #   "no_anchor"  — no head-anchor file present (nothing to compare).
+    anchor_status: str = "no_anchor"
+    anchor_reason: str | None = None
 
     @property
     def ok(self) -> bool:
@@ -171,6 +195,8 @@ class ChainResult:
             "break_source_id": self.break_source_id,
             "break_run_id": self.break_run_id,
             "reason": self.reason,
+            "anchor_status": self.anchor_status,
+            "anchor_reason": self.anchor_reason,
         }
 
 
@@ -187,9 +213,16 @@ def verify_chain(records: list[dict]) -> ChainResult:
          (via ``source_runs.compute_record_hash``).
 
     Inserting, deleting, reordering, or editing any identifying field of a
-    chained record breaks one of these invariants at that record. A legacy
-    record appearing AFTER the chain has started (i.e. a chained record without
-    a record_hash) is itself a break — the chain must be continuous once begun.
+    chained record WITHOUT relinking the downstream records breaks one of these
+    invariants at that record. A legacy record appearing AFTER the chain has
+    started (i.e. a chained record without a record_hash) is itself a break —
+    the chain must be continuous once begun.
+
+    SCOPE (honest): this catches IN-PLACE, UN-RELINKED tampering only. An actor
+    who deletes records and then RELINKS the survivors
+    (``source_runs.relink_chain``) produces a chain that passes both invariants
+    — the in-file chain cannot detect that. The head-anchor comparison
+    (``_annotate_head_anchor``) is the advisory signal for that case.
     """
     result = ChainResult()
     prev_hash = ""
@@ -254,6 +287,51 @@ def verify_chain(records: list[dict]) -> ChainResult:
     result.checked = chained_seen
     result.status = CHAIN_OK if chained_seen else CHAIN_EMPTY
     return result
+
+
+def _annotate_head_anchor(result: ChainResult, records: list[dict]) -> None:
+    """Compare the live chain head to the separately-persisted head anchor.
+
+    ADVISORY only: this never changes ``result.ok`` / the exit code — it sets
+    ``anchor_status`` (+ reason) so an operator can SEE a delete-then-relink that
+    the in-file chain alone cannot catch. Legitimate compaction moves the head
+    and stamps ``last_update_kind == "compaction"`` on the anchor, so an expected
+    head change reports "compaction", not a false "diverged".
+    """
+    anchor = source_runs.read_chain_head()
+    if not anchor:
+        result.anchor_status = "no_anchor"
+        result.anchor_reason = "no head-anchor file present"
+        return
+
+    anchored_head = str(anchor.get("head_record_hash") or "")
+    # The live head is the record_hash of the last chained trail line.
+    live_head = ""
+    for record in reversed(records):
+        rh = str(record.get("record_hash") or "")
+        if rh:
+            live_head = rh
+            break
+
+    if anchored_head == live_head:
+        result.anchor_status = "match"
+        result.anchor_reason = None
+        return
+
+    if str(anchor.get("last_update_kind")) == "compaction":
+        result.anchor_status = "compaction"
+        result.anchor_reason = (
+            "live head differs from the anchored head, but the anchor records a "
+            "legitimate compaction (expected head move after relink)"
+        )
+        return
+
+    result.anchor_status = "diverged"
+    result.anchor_reason = (
+        "live head does not match the anchored head and no compaction is "
+        f"recorded (anchored {anchored_head[:16]}…, live {live_head[:16] or '∅'}…) "
+        "— investigate a possible delete-then-relink"
+    )
 
 
 @dataclass
@@ -519,6 +597,7 @@ def verify_trail(source_id: str | None = None) -> TrailReport:
         report.records.append(verify_record(record))
 
     report.chain = verify_chain(all_records)
+    _annotate_head_anchor(report.chain, all_records)
     return report
 
 
@@ -531,6 +610,10 @@ def _chain_lines(chain: ChainResult) -> list[str]:
     out: list[str] = []
     if chain.status == CHAIN_OK:
         out.append(f"Hash chain: intact — {chain.checked} chained record(s) verified.")
+        out.append(
+            "  (scope: detects in-place, un-relinked tampering since the last "
+            "head; a relinked trail can still verify — see head anchor below)"
+        )
     elif chain.status == CHAIN_EMPTY:
         out.append("Hash chain: none (no chained records yet — legacy/empty trail).")
     else:  # CHAIN_BROKEN
@@ -540,6 +623,16 @@ def _chain_lines(chain: ChainResult) -> list[str]:
             f"({chain.break_source_id} / {chain.break_run_id}): {chain.reason}"
         )
         out.append(f"  {chain.checked} record(s) verified before the break.")
+
+    # Head-anchor verdict (advisory — never changes PASS/FAIL).
+    if chain.anchor_status == "match":
+        out.append("Head anchor: matches live head.")
+    elif chain.anchor_status == "compaction":
+        out.append("Head anchor: moved by a recorded compaction (expected).")
+    elif chain.anchor_status == "diverged":
+        out.append(f"Head anchor: ⚠ DIVERGED (advisory) — {chain.anchor_reason}")
+    else:  # no_anchor
+        out.append("Head anchor: none present (no external head to compare).")
     return out
 
 
