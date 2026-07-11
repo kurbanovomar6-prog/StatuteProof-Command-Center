@@ -345,3 +345,35 @@ def test_canonical_review_action_write_idor_blocked(monkeypatch, tmp_path):
     )
     h2._handle_canonical_evidence_review_action()
     assert _status(h2) != 403
+
+
+def test_canonical_review_action_path_form_idor_blocked(monkeypatch, tmp_path):
+    """Round-5 finding: the guard must resolve the record the SAME way the write
+    does (via load_evidence_record), so addressing it by its raw
+    evidence-record.json PATH instead of its record_id cannot bypass the guard.
+    """
+    _seed_canonical_record(tmp_path)
+    monkeypatch.setattr(evidence_records, "_BASE_DIR", tmp_path)
+    monkeypatch.setattr(review_queue, "_BASE_DIR", tmp_path)
+    _patch_sources(monkeypatch)
+
+    path_form = "evidence/custom-A/run-1/evidence-record.json"
+
+    # Guard denies BOTH the record_id form and the path form for the attacker.
+    attacker = {"id": _ATTACKER_ID}
+    h = _make_handler("POST", "/api/canonical-evidence/review")
+    assert h._canonical_record_out_of_scope(attacker, "rec-A") is True
+    assert h._canonical_record_out_of_scope(attacker, path_form) is True
+    # Owner is not denied via the path form (fix is scoped, not a blanket block).
+    assert h._canonical_record_out_of_scope({"id": _OWNER_ID}, path_form) is False
+
+    # End-to-end: the path-addressed write returns the scope 403, not a business
+    # error — proving the request is stopped at the authorization gate.
+    _auth(monkeypatch, _ATTACKER_ID)
+    h2 = _make_handler("POST", "/api/canonical-evidence/review")
+    h2._read_json_strict = lambda: (  # type: ignore[method-assign]
+        {"record_id": path_form, "decision": "approve", "note": "attacker-forged"},
+        None,
+    )
+    h2._handle_canonical_evidence_review_action()
+    assert _status(h2) == 403

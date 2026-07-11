@@ -15,3 +15,15 @@
 {"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/api.py","success":true,"timestamp":1783780860870,"sessionId":null}
 {"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_evidence_endpoint_tenancy.py","success":true,"timestamp":1783780979952,"sessionId":null}
 {"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_evidence_endpoint_tenancy.py","success":true,"timestamp":1783781001073,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/.claude/projects/-Users-kurbnovomar-StatuteProof-Command-Center/memory/uplift-findings-and-roadmap.md","success":true,"timestamp":1783781111735,"sessionId":null}
+{"type":"edit","file":"/private/tmp/claude-501/-Users-kurbnovomar-StatuteProof-Command-Center/7e336118-9c72-4dab-9782-4414896930bf/scratchpad/test_alert_routing_leak_repro.py","success":true,"timestamp":1783781275356,"sessionId":null}
+{"type":"edit","file":"/private/tmp/claude-501/-Users-kurbnovomar-StatuteProof-Command-Center/7e336118-9c72-4dab-9782-4414896930bf/scratchpad/test_alert_routing_leak_repro.py","success":true,"timestamp":1783781294814,"sessionId":null}
+{"type":"edit","file":"/private/tmp/claude-501/-Users-kurbnovomar-StatuteProof-Command-Center/7e336118-9c72-4dab-9782-4414896930bf/scratchpad/test_alert_routing_leak_repro.py","success":true,"timestamp":1783781298631,"sessionId":null}
+{"type":"edit","file":"/private/tmp/claude-501/-Users-kurbnovomar-StatuteProof-Command-Center/7e336118-9c72-4dab-9782-4414896930bf/scratchpad/test_canonical_guard_bypass_repro.py","success":true,"timestamp":1783781444866,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/tenancy.py","success":true,"timestamp":1783781946651,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/api.py","success":true,"timestamp":1783781964630,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/api.py","success":true,"timestamp":1783781978016,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/alert_routing.py","success":true,"timestamp":1783782010157,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/alert_routing.py","success":true,"timestamp":1783782020523,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_evidence_endpoint_tenancy.py","success":true,"timestamp":1783782081723,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_alert_routing_tenancy.py","success":true,"timestamp":1783782108317,"sessionId":null}

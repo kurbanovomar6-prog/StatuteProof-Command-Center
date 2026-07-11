@@ -479,31 +479,19 @@ class _Handler(BaseHTTPRequestHandler):
     def _denied_custom_source_ids(self, user: dict) -> set[str]:
         """Custom source_ids the caller does NOT own.
 
-        Used to scope *default* (unfiltered) exports that would otherwise return
-        rows for every source: any custom source not owned by the caller — and
+        Thin delegate to the single tenancy primitive
+        (``app.tenancy.denied_custom_source_ids``) so this HTTP layer and the
+        alert-routing / digest pipeline compute the denied set identically. Used
+        to scope *default* (unfiltered) surfaces that would otherwise return rows
+        for every source: any custom source not owned by the caller — and
         legacy/unowned custom sources — is denied so another customer's private
         source can never appear. Official (non-custom) sources are shared and are
-        never denied. Never raises: on an unreadable source list it returns an
-        empty set (matching ``_entitle_source_ids``' "no custom sources" fallback).
+        never denied. Never raises.
         """
-        try:
-            user_id = int(user["id"])
-        except (KeyError, TypeError, ValueError):
-            # No usable user id → attribute nothing; deny every custom source.
-            user_id = -1
-        denied: set[str] = set()
-        try:
-            from app.source_intake import load_sources_json
+        from app.tenancy import denied_custom_source_ids
 
-            for s in load_sources_json():
-                if not isinstance(s, dict) or s.get("custom") is not True:
-                    continue
-                sid = str(s.get("source_id") or "").strip()
-                if sid and not _same_owner(s.get("owner_user_id"), user_id):
-                    denied.add(sid)
-        except Exception:  # noqa: BLE001 — unreadable list → no per-source exclusion
-            logger.warning("change register: could not load sources.json for owner filter")
-        return denied
+        user_id = user.get("id") if isinstance(user, dict) else None
+        return denied_custom_source_ids(user_id)
 
     def _visible_sources_for(self, user: dict, sources: list) -> list[dict]:
         """Filter a source-row list to what the caller may see (cross-tenant scope).
@@ -589,28 +577,31 @@ class _Handler(BaseHTTPRequestHandler):
     def _canonical_record_out_of_scope(self, user: dict, record_id: str) -> bool:
         """True when a canonical evidence record belongs to another tenant's custom source.
 
-        IDOR guard for the canonical review-action WRITE path: it resolves the
-        canonical ``record_id`` to its ``source_id`` (via the canonical record
-        index) and denies only when that source is a *custom* source owned by
-        someone else. Official / shared sources — and record_ids that resolve
-        nowhere — fall through to the normal handler, so the guard only ever
-        *adds* a denial. Never raises.
+        IDOR guard for the canonical review-action WRITE path. It resolves the
+        target through the SAME ``load_evidence_record`` the write itself uses
+        (``record_canonical_evidence_review`` → ``load_evidence_record``), which
+        accepts EITHER a bare ``record_id`` OR a raw ``evidence-record.json``
+        path. Resolving via that exact function guarantees resolution parity, so
+        an attacker cannot bypass the guard by addressing the record with its
+        path instead of its id. The record's ``source.source_id`` is denied only
+        when it is a *custom* source owned by someone else. If resolution raises
+        (unknown id/path), the write raises identically and mutates nothing, so
+        returning False here is safe — the guard only ever *adds* a denial.
         """
         rid = str(record_id or "").strip()
         if not rid:
             return False
         try:
-            from app.evidence_records import list_canonical_evidence_records
+            from app.evidence_records import load_evidence_record
 
-            for row in list_canonical_evidence_records():
-                if str(row.get("record_id") or "").strip() == rid:
-                    sid = str(row.get("source_id") or "").strip()
-                    if not sid:
-                        return False
-                    return sid in self._denied_custom_source_ids(user)
-        except Exception:  # noqa: BLE001 — let the normal handler path emit its own error
+            record, _path = load_evidence_record(rid)
+        except Exception:  # noqa: BLE001 — write resolves identically and no-ops → safe
             return False
-        return False
+        source = record.get("source") if isinstance(record.get("source"), dict) else {}
+        sid = str(source.get("source_id") or "").strip()
+        if not sid:
+            return False
+        return sid in self._denied_custom_source_ids(user)
 
     def _base_url(self) -> str:
         host = self.headers.get("Host", "localhost:5001")

@@ -164,7 +164,7 @@ def _review_decision(review: dict | None, draft: dict) -> str | None:
     )
 
 
-def load_approved_alert_candidates(days: int = 14) -> list[dict]:
+def load_approved_alert_candidates(days: int = 14, *, user_id: int | None = None) -> list[dict]:
     try:
         from app.alert_review import latest_review_for, list_alert_drafts
     except Exception as exc:
@@ -173,6 +173,20 @@ def load_approved_alert_candidates(days: int = 14) -> list[dict]:
 
     approved = _get_approved_statuses()
     cutoff = _now_utc() - timedelta(days=max(1, int(days or 14)))
+
+    # Tenancy: the alert-draft pool is global (every source, custom or official).
+    # When scoping to a specific user, drop drafts for CUSTOM sources the user
+    # does not own so another tenant's private source can never enter this user's
+    # routing preview, digest, or Telegram/email delivery. Official / shared
+    # sources are never denied. Uses the single tenancy primitive so this matches
+    # the HTTP layer's scoping exactly. ``denied_custom_source_ids`` never raises
+    # (empty set on an unreadable source list — the same fallback used everywhere).
+    denied_source_ids: set[str] = set()
+    if user_id is not None:
+        from app.tenancy import denied_custom_source_ids
+
+        denied_source_ids = denied_custom_source_ids(user_id)
+
     candidates: list[dict] = []
 
     for draft in list_alert_drafts():
@@ -180,6 +194,8 @@ def load_approved_alert_candidates(days: int = 14) -> list[dict]:
             continue
         alert_id = str(draft.get("alert_id") or "").strip()
         if not alert_id:
+            continue
+        if denied_source_ids and str(draft.get("source_id") or "").strip() in denied_source_ids:
             continue
         try:
             review = latest_review_for(alert_id)
@@ -407,7 +423,7 @@ def get_sent_alert_ids_for_user(user_id: int) -> set[str]:
 def build_routing_preview_for_user(user_id: int, days: int = 14) -> dict:
     safe_days = max(1, min(int(days or 14), 60))
     user_profile = user_profile_to_routing_profile(int(user_id))
-    candidates = load_approved_alert_candidates(safe_days)
+    candidates = load_approved_alert_candidates(safe_days, user_id=int(user_id))
     link = get_telegram_link(int(user_id))
     sent_ids = get_sent_alert_ids_for_user(int(user_id))
     not_ready_reasons = []
