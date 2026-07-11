@@ -271,6 +271,35 @@ def _build_impact(
     }
 
 
+def impact_tag_for_delivery(
+    match: dict[str, Any],
+    recipient_profile: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Per-recipient impact tag for a routing/digest match (customer send path).
+
+    Adapts a routing match + a customer profile onto the shared ``_build_impact``
+    contract so the SAME evidence-grounded, guard-checked tag reaches a real
+    recipient (this is the piece that was dead code): the recipient's topics
+    become ``topics_in_scope``, and the match's carried real diff excerpt is the
+    evidence-grounding gate. Accepts either a routing profile (``topics``) or a
+    client profile (``topics_in_scope``). Returns ``None`` — unchanged output —
+    whenever the recipient has no profile/topics, the source topics do not
+    intersect, or there is no readable diff excerpt to point the reader at.
+    """
+    if not recipient_profile:
+        return None
+    topics = recipient_profile.get("topics_in_scope")
+    if topics is None:
+        topics = recipient_profile.get("topics")
+    payload = {
+        "source_id": match.get("source_id"),
+        "source_name": match.get("source_name"),
+        "change_type": match.get("change_type"),
+    }
+    excerpt = str(match.get("diff_excerpt") or "")
+    return _build_impact(payload, {"topics_in_scope": topics or []}, excerpt)
+
+
 def build_alert_content(
     payload: dict[str, Any],
     client_profile: dict[str, Any] | None = None,

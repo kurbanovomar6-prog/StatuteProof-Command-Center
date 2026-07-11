@@ -188,6 +188,63 @@ class CoverageCertificateTest(unittest.TestCase):
         self.assertIn("No coverage", md)
         self.assertIn("UNVERIFIED", md)
 
+    # ── BLOCK-2: default customer path scopes to CONFIGURED (enabled) sources ──
+
+    def _write_enabled_sources(self, rows: list[dict]) -> None:
+        # Full, valid enabled source rows (app.sources.validate_source requires
+        # name/url/jurisdiction/category/enabled). Explicit source_id so
+        # make_source_id returns it verbatim, matching the run keys.
+        (self.base / "sources.json").write_text(json.dumps(rows), encoding="utf-8")
+
+    def test_configured_zero_run_source_is_no_coverage_in_default_path(self):
+        # A configured (enabled) source that was NEVER checked in the period must
+        # surface as NO_COVERAGE on the DEFAULT (source_ids=None) customer path —
+        # not be silently omitted, which would defeat negative assurance.
+        self._write_enabled_sources([
+            {"source_id": "AE-live", "name": "Live Source", "url": "https://live.example/",
+             "jurisdiction": "AE", "category": "financial_regulator", "enabled": True},
+            {"source_id": "AE-dark", "name": "Dark Source", "url": "https://dark.example/",
+             "jurisdiction": "AE", "category": "financial_regulator", "enabled": True},
+        ])
+        _write_runs(self.base, [_run("AE-live", d) for d in range(1, 16)])
+
+        cert = self._cert()  # source_ids=None → default customer scope
+        by_id = {r["source_id"]: r for r in cert["sources"]}
+        self.assertIn("AE-dark", by_id, "a fully-dark configured source must not be omitted")
+        self.assertEqual(by_id["AE-dark"]["change_state"], "NO_PROOF")
+        self.assertEqual(by_id["AE-dark"]["continuity_status"], "NO_COVERAGE")
+        self.assertEqual(by_id["AE-dark"]["successful_checks"], 0)
+        self.assertGreaterEqual(cert["summary"]["sources_no_coverage"], 1)
+
+    def test_disabled_source_not_forced_into_default_scope(self):
+        # An enabled source is in scope; a disabled one with no runs is not.
+        self._write_enabled_sources([
+            {"source_id": "AE-on", "name": "On", "url": "https://on.example/",
+             "jurisdiction": "AE", "category": "financial_regulator", "enabled": True},
+            {"source_id": "AE-off", "name": "Off", "url": "https://off.example/",
+             "jurisdiction": "AE", "category": "financial_regulator", "enabled": False},
+        ])
+        _write_runs(self.base, [_run("AE-on", d) for d in range(1, 16)])
+        cert = self._cert()
+        ids = {r["source_id"] for r in cert["sources"]}
+        self.assertIn("AE-on", ids)
+        self.assertNotIn("AE-off", ids)
+
+    def test_enabled_source_ids_returns_configured_scope(self):
+        # This is exactly what _handle_coverage_certificate passes by default.
+        from app.coverage_certificate import enabled_source_ids
+
+        self._write_enabled_sources([
+            {"source_id": "AE-a", "name": "A", "url": "https://a.example/",
+             "jurisdiction": "AE", "category": "financial_regulator", "enabled": True},
+            {"source_id": "AE-b", "name": "B", "url": "https://b.example/",
+             "jurisdiction": "AE", "category": "financial_regulator", "enabled": True},
+            {"source_id": "AE-c", "name": "C", "url": "https://c.example/",
+             "jurisdiction": "AE", "category": "financial_regulator", "enabled": False},
+        ])
+        ids = enabled_source_ids(base_dir=self.base)
+        self.assertEqual(ids, ["AE-a", "AE-b"])
+
     # ── legal-safety contract ───────────────────────────────────────────────
 
     def test_carries_full_and_short_disclaimer(self):

@@ -177,8 +177,18 @@ def build_change_register_rows(
         ) or {}
 
         # Action-log decision join (scoped to the requesting client) -----------
+        # A customer's act/monitor/no_action decision is stored under the alert
+        # DRAFT id (app.alert_drafts.make_draft_alert_id), NOT under record_id or
+        # run_id. Re-derive that draft id from this record's (source_id, run_id,
+        # normalized_hash) so the join actually matches; keep record_id/run_id as
+        # extra fallbacks in case a decision was ever logged against them.
+        draft_alert_id = _draft_alert_id_for_record(
+            source_id=str(source.get("source_id") or "").strip(),
+            run_id=run_id,
+            normalized_hash=str(content.get("current_hash") or "").strip(),
+        )
         action_decision = _latest_action_decision(
-            lookup, user_id, [record_id, run_id]
+            lookup, user_id, [draft_alert_id, record_id, run_id]
         )
 
         canonical_review = (
@@ -268,6 +278,29 @@ def _build_run_risk_index(root: Path) -> dict[str, str]:
     except OSError as exc:  # pragma: no cover - defensive
         logger.warning("change register risk index read failed: %s", exc)
     return index
+
+
+def _draft_alert_id_for_record(
+    *, source_id: str, run_id: str, normalized_hash: str
+) -> str:
+    """Re-derive the dashboard's real alert id for a canonical evidence record.
+
+    The alert draft id is seeded from the BARE normalized hash the monitoring
+    pipeline stored on the run (``app.alert_drafts.make_draft_alert_id`` →
+    ``sha256(source_id|run_id|normalized_hash)``). The canonical record persists
+    that same hash as ``content.current_hash`` in ``sha256:<hex>`` form, so the
+    ``sha256:`` prefix is stripped before re-deriving — otherwise the id never
+    matches the one the action log is keyed by. Returns ``""`` when any input is
+    missing (the caller then falls back to record_id / run_id).
+    """
+    if not (source_id and run_id and normalized_hash):
+        return ""
+    bare_hash = normalized_hash.removeprefix("sha256:").strip()
+    if not bare_hash:
+        return ""
+    from app.alert_drafts import make_draft_alert_id
+
+    return make_draft_alert_id(source_id, run_id, bare_hash)
 
 
 def _latest_action_decision(
@@ -439,15 +472,19 @@ def render_change_register_xlsx(rows: list[dict[str, Any]], meta: dict[str, str]
     worksheet = workbook.active
     worksheet.title = "Change Register"
 
-    guard_parts: list[str] = [_REGISTER_TITLE, LEGAL_DISCLAIMER]
-    worksheet.append([_REGISTER_TITLE])
-    worksheet["A1"].font = Font(bold=True, size=14)
-    worksheet.append([f"Disclaimer: {LEGAL_DISCLAIMER}"])
-    worksheet.append([
+    # The meta line carries free-form filter values (source_id / regulator), so
+    # it MUST be guarded like every other cell — otherwise a forbidden phrase
+    # injected via a filter ships in XLSX while CSV/HTML correctly raise.
+    meta_line = (
         "Generated: {generated_at_utc} | Rows: {row_count} | "
         "Range: {date_from}..{date_to} | Source: {source_id} | "
         "Regulator: {regulator}".format(**meta)
-    ])
+    )
+    guard_parts: list[str] = [_REGISTER_TITLE, LEGAL_DISCLAIMER, meta_line]
+    worksheet.append([_REGISTER_TITLE])
+    worksheet["A1"].font = Font(bold=True, size=14)
+    worksheet.append([f"Disclaimer: {LEGAL_DISCLAIMER}"])
+    worksheet.append([meta_line])
     worksheet.append([])
 
     header_row_idx = worksheet.max_row + 1

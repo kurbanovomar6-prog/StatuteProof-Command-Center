@@ -16,6 +16,20 @@ SEND_DECISION = "HOLD_FOR_REVIEW"
 HUMAN_REVIEW_BANNER = "DRAFT \u2014 HUMAN REVIEW REQUIRED"
 
 
+def make_draft_alert_id(source_id: Any, run_id: Any, normalized_hash: Any) -> str:
+    """Deterministic draft alert id: ``draft-<sha256(source_id|run_id|hash)[:16]>``.
+
+    This is THE id a customer's act / monitor / no_action decision is saved under
+    (``app.alert_actions.save_action_log_entry``) and the id the dashboard shows,
+    so any consumer that later needs to join back to an action-log entry (e.g.
+    ``app.change_register``) MUST derive the id exactly this way. Interpolation is
+    kept byte-for-byte identical to the historical inline seed so existing draft
+    ids never shift.
+    """
+    seed = f"{source_id}|{run_id}|{normalized_hash}"
+    return "draft-" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:16]
+
+
 def _joined_diff_text(diff_artifact: dict[str, Any]) -> str:
     chunks: list[str] = []
     chunks.extend(diff_artifact.get("added_chunks") or [])
@@ -181,8 +195,9 @@ def build_alert_draft(
         confidence = "LOW"
 
     run_id = str(source_run.get("run_id") or source_run.get("timestamp_utc") or "")
-    seed = f"{source_run.get('source_id')}|{run_id}|{proof_block.get('normalized_hash')}"
-    alert_id = "draft-" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:16]
+    alert_id = make_draft_alert_id(
+        source_run.get("source_id"), run_id, proof_block.get("normalized_hash")
+    )
 
     what_changed = diff_artifact.get("diff_summary") or "Source change detected; diff summary unavailable."
     return {

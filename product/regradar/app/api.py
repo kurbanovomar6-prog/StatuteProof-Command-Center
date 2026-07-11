@@ -2736,6 +2736,7 @@ class _Handler(BaseHTTPRequestHandler):
             return
         from app.coverage_certificate import (
             build_coverage_certificate,
+            enabled_source_ids,
             month_period,
             render_coverage_certificate_markdown,
             render_coverage_certificate_html,
@@ -2760,6 +2761,12 @@ class _Handler(BaseHTTPRequestHandler):
 
         source_ids_raw = (qs.get("source_ids") or [""])[0]
         source_ids = [s.strip() for s in source_ids_raw.split(",") if s.strip()] or None
+        # Default customer scope: when the caller does not restrict the source
+        # set, certify the customer's monitored (enabled) sources so a fully-dark
+        # configured source surfaces as NO_COVERAGE instead of vanishing. Falls
+        # back to None (run-derived scope) when no enabled sources are configured.
+        if source_ids is None:
+            source_ids = enabled_source_ids() or None
         client_name = (qs.get("client_name") or [""])[0]
         fmt = ((qs.get("format") or ["markdown"])[0]).lower().strip()
 

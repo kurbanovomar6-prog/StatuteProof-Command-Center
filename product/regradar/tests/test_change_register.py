@@ -164,13 +164,30 @@ def test_validate_register_date_range_rejects_bad_format():
 
 # ── the join ────────────────────────────────────────────────────────────────────
 
+def _real_draft_alert_id(record: dict) -> str:
+    """Re-derive the dashboard's real alert id for a canonical record fixture.
+
+    Mirrors app.alert_drafts.make_draft_alert_id, seeded from the BARE normalized
+    hash (the record stores it as ``sha256:<hex>``; the draft id used the bare
+    hex). This is the id a customer's act/monitor/no_action decision is keyed by.
+    """
+    from app.alert_drafts import make_draft_alert_id
+
+    bare_hash = record["content"]["current_hash"].removeprefix("sha256:")
+    return make_draft_alert_id(record["source"]["source_id"], record["run"]["run_id"], bare_hash)
+
+
 def test_rows_join_evidence_assessment_and_action(tmp_path):
     record = _make_canonical_record(tmp_path)
     run_id = record["run"]["run_id"]
     record_id = record["record_id"]
     _write_assessment(tmp_path, evidence_record_id=run_id)
+    # The action-log decision is keyed by the REAL draft alert id (source_id |
+    # run_id | normalized_hash), NOT by run_id — the register must re-derive it.
+    draft_id = _real_draft_alert_id(record)
+    assert draft_id.startswith("draft-")
     lookup = _action_lookup(
-        {run_id: [{"decision": "monitor", "created_at": "2026-06-20T02:00:00Z"}]}
+        {draft_id: [{"decision": "monitor", "created_at": "2026-06-20T02:00:00Z"}]}
     )
 
     rows = build_change_register_rows(
@@ -200,6 +217,45 @@ def test_rows_join_evidence_assessment_and_action(tmp_path):
     assert row["status"]  # non-empty
     assert record_id in row["proof_reference"]
     assert "evidence-record.json" in row["proof_reference"]
+
+
+def test_action_decision_joins_only_on_real_draft_id(tmp_path):
+    """BLOCK-3: a decision logged ONLY under the real draft id (not run_id or
+    record_id) must still surface — proving the register derives the true key."""
+    record = _make_canonical_record(tmp_path)
+    draft_id = _real_draft_alert_id(record)
+    # Keyed exclusively by the draft id — a run_id/record_id lookup would miss it.
+    lookup = _action_lookup(
+        {draft_id: [{"decision": "act", "created_at": "2026-06-20T09:00:00Z"}]}
+    )
+
+    rows = build_change_register_rows(user_id=42, base_dir=tmp_path, action_log_lookup=lookup)
+
+    assert len(rows) == 1
+    assert rows[0]["action_decision"] == "act"
+    assert "action: act" in rows[0]["impact_action"]
+
+
+def test_action_decision_real_action_log_round_trip(tmp_path, monkeypatch):
+    """Save a real action-log entry under the real draft id via the production
+    store, then assert the register (default get_action_log) shows the decision."""
+    from app import db as db_module
+    from app.alert_actions import get_action_log, save_action_log_entry
+
+    monkeypatch.setattr(db_module, "DB_PATH", str(tmp_path / "actions.db"))
+    db_module.ensure_auth_tables()  # creates the alert_action_log table
+
+    record = _make_canonical_record(tmp_path)
+    draft_id = _real_draft_alert_id(record)
+    saved = save_action_log_entry(user_id=88, alert_id=draft_id, decision="no_action", notes="reviewed")
+    assert saved is not None
+    assert get_action_log(88, draft_id), "entry must be retrievable under the draft id"
+
+    # No injected lookup → the register uses the real get_action_log store.
+    rows = build_change_register_rows(user_id=88, base_dir=tmp_path)
+    assert len(rows) == 1
+    assert rows[0]["action_decision"] == "no_action"
+    assert "action: no_action" in rows[0]["impact_action"]
 
 
 def test_action_decision_absent_without_user_context(tmp_path):
@@ -375,6 +431,27 @@ def test_render_blocks_forbidden_claim_in_row_content():
         render_change_register_html(poisoned, meta)
     with pytest.raises(ChangeRegisterError):
         render_change_register_xlsx(poisoned, meta)
+
+
+@pytest.mark.parametrize(
+    "renderer",
+    [render_change_register_csv, render_change_register_html, render_change_register_xlsx],
+)
+def test_forbidden_phrase_in_meta_filter_blocks_all_formats(renderer):
+    """MEDIUM-6: a forbidden phrase injected via a filter value (which lands in
+    the metadata line, not a data cell) must block ALL three renders equally —
+    previously XLSX skipped the meta line and shipped it."""
+    meta = {
+        "generated_at_utc": "2026-07-11T00:00:00Z",
+        "row_count": "0",
+        "date_from": "(unbounded)",
+        "date_to": "(unbounded)",
+        "source_id": "(all)",
+        # The regulator filter is free-form and echoed verbatim into the meta line.
+        "regulator": "we guarantee compliance",
+    }
+    with pytest.raises(ChangeRegisterError):
+        renderer([], meta)
 
 
 # ── export (writes files) + empty-but-valid register ────────────────────────────

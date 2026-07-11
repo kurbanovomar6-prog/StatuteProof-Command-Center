@@ -183,3 +183,94 @@ def test_topic_label_cap_keeps_tag_concise():
     assert "(+1 more)" in c["impact_tag"]
     # All five matched slugs are still recorded even though the tag is trimmed.
     assert len(c["impact_topics"]) == 5
+
+
+# ── BUG-4: the impact tag reaches the REAL per-recipient delivery path ────────
+# A DFSA routing match with a real diff excerpt; profiles use the routing shape
+# (``topics``) rather than a raw client profile (``topics_in_scope``).
+
+def _routing_match(**over):
+    base = {
+        "alert_id": "draft-abc123",
+        "source_id": "AE-dfsa",
+        # Exact SOURCE_METADATA name so DFSA topics resolve.
+        "source_name": "Dubai Financial Services Authority (DFSA)",
+        "market": "DIFC",
+        "jurisdiction": "DIFC",
+        "change_type": "RULEBOOK_UPDATE",
+        "risk_level": "HIGH",
+        "executive_summary": "A monitored rulebook change was reviewed.",
+        "source_url": "https://example.gov.ae/rules",
+        "reviewed_at": "2026-07-10T10:00:00Z",
+        "reasons": ["HIGH risk meets your threshold"],
+        "limitations": [],
+        # The real diff excerpt is the evidence-grounding gate for the tag.
+        "diff_excerpt": "+ A new administrative penalty of AED 50,000 applies to late STR filing.",
+    }
+    base.update(over)
+    return base
+
+
+# Overlaps DFSA on financial_services + aml_cft.
+_ROUTING_PROFILE_MATCH = {"topics": ["financial_services", "aml_cft", "securities"]}
+# A tax firm — no overlap with a DFSA financial-crime source.
+_ROUTING_PROFILE_NO_MATCH = {"topics": ["tax", "vat", "corporate_tax"]}
+
+
+def test_impact_tag_in_delivered_telegram_message_when_topics_intersect():
+    from app.alert_routing import build_alert_telegram_message
+
+    msg = build_alert_telegram_message(_ROUTING_PROFILE_MATCH, _routing_match())
+    assert "May affect:" in msg
+    assert "may be relevant to your" in msg
+    # The mandatory legal boundary is still present alongside the new tag.
+    assert "Not legal advice" in msg
+
+
+def test_impact_tag_absent_in_delivered_message_without_topic_overlap():
+    from app.alert_routing import build_alert_telegram_message
+
+    msg = build_alert_telegram_message(_ROUTING_PROFILE_NO_MATCH, _routing_match())
+    assert "May affect:" not in msg
+    assert "may be relevant to your" not in msg
+    assert "Not legal advice" in msg
+
+
+def test_impact_tag_absent_in_delivered_message_without_readable_excerpt():
+    from app.alert_routing import build_alert_telegram_message
+
+    # No diff excerpt → nothing to point the reader at → no tag (evidence gate).
+    msg = build_alert_telegram_message(_ROUTING_PROFILE_MATCH, _routing_match(diff_excerpt=""))
+    assert "May affect:" not in msg
+
+
+def test_impact_tag_in_digest_message_per_recipient():
+    from app.digest_cadence import render_digest_message
+    from app.evidence_assessment import LEGAL_DISCLAIMER
+
+    bundle = [_routing_match(risk_level="MEDIUM")]
+    msg = render_digest_message(
+        _ROUTING_PROFILE_MATCH, bundle, cadence="daily", period_label="2026-07-11"
+    )
+    assert "may be relevant to your" in msg
+    assert LEGAL_DISCLAIMER in msg
+
+    # A non-overlapping recipient gets the same digest WITHOUT an impact line.
+    msg_no = render_digest_message(
+        _ROUTING_PROFILE_NO_MATCH, bundle, cadence="daily", period_label="2026-07-11"
+    )
+    assert "may be relevant to your" not in msg_no
+    assert LEGAL_DISCLAIMER in msg_no
+
+
+def test_normalize_alert_for_routing_carries_diff_excerpt():
+    from app.alert_routing import normalize_alert_for_routing
+
+    normalized = normalize_alert_for_routing({
+        "alert_id": "draft-x",
+        "source_id": "AE-dfsa",
+        "source_name": "Dubai Financial Services Authority (DFSA)",
+        "added_chunks": ["A new penalty of AED 50,000 applies."],
+        "removed_chunks": ["Old text."],
+    })
+    assert "AED 50,000" in normalized["diff_excerpt"]

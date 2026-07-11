@@ -395,10 +395,30 @@ def _sanitize_updates(updates: dict[str, Any]) -> dict[str, Any]:
 
 def update_profile(user_id: int, updates: dict) -> dict:
     ensure_profile_table()
-    get_or_create_profile(user_id)
+    current = get_or_create_profile(user_id)
     sanitized = _sanitize_updates(updates if isinstance(updates, dict) else {})
     if not sanitized:
-        return get_or_create_profile(user_id)
+        return current
+
+    # Cross-validate the two digest thresholds against the RESULTING profile so
+    # the weekly tier can never be dead-lettered. If urgent_threshold falls below
+    # weekly_threshold, every weekly-eligible alert clears the urgent gate first
+    # and short-circuits into the instant path — the weekly digest becomes
+    # unreachable. A partial update is checked against the currently stored value
+    # of whichever threshold is not being changed.
+    if "urgent_threshold" in sanitized or "weekly_threshold" in sanitized:
+        resulting_urgent = int(
+            sanitized.get("urgent_threshold", current.get("urgent_threshold", DEFAULT_URGENT_THRESHOLD))
+        )
+        resulting_weekly = int(
+            sanitized.get("weekly_threshold", current.get("weekly_threshold", DEFAULT_WEEKLY_THRESHOLD))
+        )
+        if resulting_urgent < resulting_weekly:
+            raise ValueError(
+                "urgent_threshold must be greater than or equal to weekly_threshold "
+                f"(got urgent={resulting_urgent}, weekly={resulting_weekly}); a lower "
+                "urgent threshold makes the weekly digest tier unreachable."
+            )
 
     sanitized["updated_at"] = _now()
     assignments = ", ".join(f"{key} = ?" for key in sanitized)

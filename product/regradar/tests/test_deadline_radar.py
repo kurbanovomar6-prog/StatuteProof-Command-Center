@@ -165,6 +165,61 @@ def test_record_deadlines_include_past_stores(tmp_path):
     assert len(persisted) == 1
 
 
+def test_one_date_two_patterns_yields_single_deadline_and_reminder(tmp_path):
+    # WARN-5: "comments are due by <date>" matches BOTH consultation_close AND
+    # the generic 'deadline' pattern. It must collapse to ONE deadline (keeping
+    # the most specific kind) so it fires ONE reminder per lead stage, not two.
+    text = "Comments are due by 30 September 2026 for the consultation."
+    items = dr.extract_deadlines(text)
+    assert len(items) == 1
+    assert items[0]["deadline_kind"] == "consultation_close"  # specific beats generic
+
+    persisted = dr.record_deadlines_for_change(
+        evidence_record_id="run_c1",
+        added_blocks=[text],
+        as_of=date(2026, 9, 1),
+        base_dir=tmp_path,
+    )
+    assert len(persisted) == 1
+    assert len(dr.load_deadlines(tmp_path)) == 1
+    # One deadline record → exactly one due reminder (pre-fix this was two).
+    due = dr.due_reminders(as_of=date(2026, 9, 1), base_dir=tmp_path)
+    assert len(due) == 1
+
+
+def test_reminder_surfaces_raw_date_text_and_flags_ambiguous_numeric(tmp_path):
+    # WARN-5 (low): surface the raw captured text next to the parsed ISO date and
+    # flag a dd/mm↔mm/dd numeric form for human verification.
+    text = "The framework is effective from 01/09/2026."
+    persisted = dr.record_deadlines_for_change(
+        evidence_record_id="run_amb",
+        added_blocks=[text],
+        as_of=date(2026, 1, 1),
+        base_dir=tmp_path,
+    )
+    assert len(persisted) == 1
+    rec = persisted[0]
+    assert rec["deadline_date"] == "2026-09-01"       # day-first by convention
+    assert rec["raw_date_text"] == "01/09/2026"
+    assert rec["date_ambiguous"] is True
+
+    entry = {**rec, "lead_stage": 30, "days_until": 30}
+    msg = dr.render_reminder_message(entry)
+    assert "01/09/2026" in msg               # raw source text surfaced
+    assert "ambiguous" in msg.lower()        # flagged for human verification
+    assert LEGAL_DISCLAIMER in msg
+
+
+def test_named_month_date_is_not_flagged_ambiguous(tmp_path):
+    persisted = dr.record_deadlines_for_change(
+        evidence_record_id="run_named",
+        added_blocks=["effective from 1 September 2026"],
+        as_of=date(2026, 1, 1),
+        base_dir=tmp_path,
+    )
+    assert persisted[0]["date_ambiguous"] is False
+
+
 def test_record_deadline_requires_evidence_grounding(tmp_path):
     # Missing evidence_record_id -> refuse (not evidence-grounded).
     with pytest.raises(ValueError):

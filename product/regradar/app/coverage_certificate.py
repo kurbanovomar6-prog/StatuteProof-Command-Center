@@ -178,6 +178,29 @@ def _load_runs_by_source(root: Path) -> dict[str, list[dict[str, Any]]]:
     return out
 
 
+def enabled_source_ids(base_dir: Path | None = None) -> list[str]:
+    """The customer's CONFIGURED/subscribed source set (enabled sources).
+
+    Returns the deterministic ``make_source_id`` for every ``enabled=True`` source
+    in ``sources.json`` so the ids line up with the ``source_runs`` record keys.
+    This is what scopes the default customer certificate: a configured source that
+    went fully dark for the whole period MUST still surface (as NO_COVERAGE)
+    rather than being silently dropped, which is the entire point of a
+    negative-assurance instrument. Best-effort — any read/parse error yields an
+    empty list (the caller then falls back to run-derived ids).
+    """
+    root = Path(base_dir) if base_dir is not None else _BASE_DIR
+    path = root / "sources.json"
+    try:
+        from app.source_runs import make_source_id
+        from app.sources import get_enabled_sources
+
+        return sorted({make_source_id(src) for src in get_enabled_sources(path)})
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("coverage certificate: enabled-source scope read failed: %s", exc)
+        return []
+
+
 def _load_sources(root: Path) -> dict[str, dict[str, Any]]:
     path = root / "sources.json"
     if not path.exists():
@@ -420,9 +443,12 @@ def build_coverage_certificate(
     period_start, period_end:
         Inclusive ISO dates (``YYYY-MM-DD``). ``period_end`` must be >= start.
     source_ids:
-        Sources to certify. ``None`` certifies every source that has at least one
-        recorded run inside the period. Explicitly named sources with no runs in
-        the period are still listed (as NO_COVERAGE) so gaps are never hidden.
+        Sources to certify. ``None`` scopes the certificate to the customer's
+        CONFIGURED source set (``enabled=True`` in ``sources.json``) unioned with
+        any source that recorded a run in the period — so a configured source that
+        went fully dark all period still surfaces as NO_COVERAGE rather than being
+        silently omitted. Explicitly named sources with no runs in the period are
+        likewise listed (as NO_COVERAGE) so gaps are never hidden.
     client_name:
         Optional customer name for the certificate header.
     base_dir:
@@ -455,18 +481,25 @@ def build_coverage_certificate(
     runs_by_source = _load_runs_by_source(root)
     sources = _load_sources(root)
 
+    ran_in_period = {
+        sid
+        for sid, runs in runs_by_source.items()
+        if any(
+            (ts := _run_ts(run)) is not None and start_dt <= ts <= end_dt
+            for run in runs
+        )
+    }
     if source_ids:
         target_ids = [str(sid).strip() for sid in source_ids if str(sid).strip()]
     else:
-        # Every source with at least one run inside the period.
-        target_ids = sorted(
-            sid
-            for sid, runs in runs_by_source.items()
-            if any(
-                (ts := _run_ts(run)) is not None and start_dt <= ts <= end_dt
-                for run in runs
-            )
-        )
+        # Default (customer) path: scope to the CONFIGURED/subscribed source set
+        # so a source that went fully dark all period surfaces as NO_COVERAGE
+        # instead of being silently omitted (negative assurance must never hide a
+        # gap). Union with any source that actually recorded a run in the period
+        # so nothing monitored is dropped either. When no sources.json is
+        # configured, this collapses to the historical run-derived behaviour.
+        configured = set(enabled_source_ids(root))
+        target_ids = sorted(configured | ran_in_period)
 
     rows = [
         _source_continuity(

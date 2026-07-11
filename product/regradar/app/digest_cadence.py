@@ -165,13 +165,17 @@ def render_digest_message(
     """
     label = _CADENCE_LABEL.get(cadence, "Monitoring")
     count = len(bundle)
-    lines = [
+    header_lines = [
         f"StatuteProof - {label} monitoring digest",
         period_label,
         "",
         f"{count} human-reviewed change(s) matched your saved profile:",
         "",
     ]
+
+    from app.alert_content import impact_tag_for_delivery
+
+    body_lines: list[str] = []
     for index, match in enumerate(bundle[:_MAX_BUNDLE_ITEMS], start=1):
         risk = str(match.get("risk_level") or "MEDIUM").upper()
         source = match.get("source_name") or "Official source"
@@ -180,26 +184,53 @@ def render_digest_message(
         reviewed = str(match.get("reviewed_at") or "").split("T")[0] or "reviewed"
         summary = _truncate(match.get("executive_summary") or "", 240)
         proof = match.get("source_url") or "Source URL unavailable"
-        lines.append(f"{index}) [{risk}] {source} ({market})")
-        lines.append(f"   Type: {change_type} | Reviewed: {reviewed}")
+        body_lines.append(f"{index}) [{risk}] {source} ({market})")
+        body_lines.append(f"   Type: {change_type} | Reviewed: {reviewed}")
         if summary:
-            lines.append(f"   {summary}")
-        lines.append(f"   Source: {proof}")
-        lines.append("")
+            body_lines.append(f"   {summary}")
+        # Per-recipient impact tag (additive; only when THIS customer's topics
+        # overlap the source topics and a real diff excerpt backs it).
+        impact = impact_tag_for_delivery(match, user_profile)
+        if impact:
+            body_lines.append(f"   {impact['impact_line']}")
+        body_lines.append(f"   Source: {proof}")
+        body_lines.append("")
     remaining = count - min(count, _MAX_BUNDLE_ITEMS)
     if remaining > 0:
-        lines.append(f"...and {remaining} more in your dashboard.")
-        lines.append("")
-    lines.append(
-        "Each item was reviewed by a human editor and matched to your saved "
-        "profile. This digest describes what changed and what you may wish to "
-        "review against the official source and evidence record."
-    )
-    lines.append(LEGAL_DISCLAIMER)
-    lines.append("Manage alerts: StatuteProof -> Integrations")
-    message = "\n".join(lines)
+        body_lines.append(f"...and {remaining} more in your dashboard.")
+        body_lines.append("")
+
+    # The legal boundary (context paragraph + disclaimer + manage line) is
+    # RESERVED: it is appended AFTER the bundle body is truncated to fit, so a
+    # large bundle can never truncate the mandatory "Not legal advice" boundary
+    # off the end of the delivered message (BLOCK-1 fail-closed contract).
+    footer_lines = [
+        (
+            "Each item was reviewed by a human editor and matched to your saved "
+            "profile. This digest describes what changed and what you may wish to "
+            "review against the official source and evidence record."
+        ),
+        LEGAL_DISCLAIMER,
+        "Manage alerts: StatuteProof -> Integrations",
+    ]
+
+    header = "\n".join(header_lines)
+    footer = "\n".join(footer_lines)
+    # Reserve header + footer + the two "\n" separators joining header/body/footer.
+    reserved = len(header) + len(footer) + 2
+    body_budget = max(0, _MESSAGE_LIMIT - reserved)
+    body = "\n".join(body_lines)
+    if len(body) > body_budget:
+        body = body[: max(0, body_budget - 3)].rstrip() + "..."
+
+    message = "\n".join([header, body, footer])
+
+    # Fail closed on the FINAL string: re-run the forbidden-claims guard on the
+    # exact bytes we will send, and hard-assert the mandatory disclaimer survived.
     assert_no_forbidden_claims(message)
-    return _truncate(message, _MESSAGE_LIMIT)
+    if LEGAL_DISCLAIMER not in message:
+        raise ValueError("Digest message is missing the mandatory legal disclaimer boundary.")
+    return message
 
 
 def render_heartbeat_message(

@@ -114,6 +114,35 @@ class TestProfileFields:
         with pytest.raises(ValueError):
             update_profile(105, {"urgent_threshold": "loud"})
 
+    def test_urgent_below_weekly_rejected_in_one_write(self, isolated_db):
+        # MINOR-7: urgent < weekly makes the weekly tier unreachable (everything
+        # >= weekly also clears urgent → instant), so the write is rejected.
+        from app.profile import update_profile
+
+        with pytest.raises(ValueError):
+            update_profile(1105, {"urgent_threshold": 30, "weekly_threshold": 60})
+
+    def test_urgent_below_weekly_rejected_against_stored_value(self, isolated_db):
+        # A partial update is cross-checked against the STORED other threshold:
+        # weekly stays 50 (default), lowering urgent to 40 would dead-letter it.
+        from app.profile import get_or_create_profile, update_profile
+
+        get_or_create_profile(1106)  # defaults: urgent=80, weekly=50
+        with pytest.raises(ValueError):
+            update_profile(1106, {"urgent_threshold": 40})
+        # Stored values are unchanged after the rejected write.
+        reread = get_or_create_profile(1106)
+        assert reread["urgent_threshold"] == 80
+        assert reread["weekly_threshold"] == 50
+
+    def test_urgent_equal_to_weekly_allowed(self, isolated_db):
+        from app.profile import get_or_create_profile, update_profile
+
+        update_profile(1107, {"urgent_threshold": 50, "weekly_threshold": 50})
+        reread = get_or_create_profile(1107)
+        assert reread["urgent_threshold"] == 50
+        assert reread["weekly_threshold"] == 50
+
     def test_routing_profile_reads_profile_not_hardcoded(self, isolated_db):
         from app.alert_routing import user_profile_to_routing_profile
         from app.profile import update_profile
@@ -561,3 +590,63 @@ class TestRunScheduledDigests:
         assert s1["digests_sent"] == 1
         assert s2["digests_sent"] == 0  # idempotent per period
         assert len(bundle_sent) == 1
+
+
+# ---------------------------------------------------------------------------
+# 8. BLOCK-1: the mandatory legal boundary survives bundle truncation
+# ---------------------------------------------------------------------------
+
+
+_LONG_SUMMARY = (
+    "The regulator published a substantive amendment to its rulebook affecting "
+    "licensing, reporting obligations, and supervisory expectations for regulated "
+    "firms; affected entities should review the full official text against the "
+    "stored evidence record and diff before taking any action. " * 2
+)
+
+
+class TestDigestDisclaimerSurvivesTruncation:
+    def _max_bundle(self):
+        from app.digest_cadence import _MAX_BUNDLE_ITEMS
+
+        # A full-size bundle with long summaries: the joined body far exceeds the
+        # 4096-char Telegram limit, so pre-fix this truncated off the disclaimer.
+        return [
+            _match(f"a{i}", score=60, summary=_LONG_SUMMARY)
+            for i in range(_MAX_BUNDLE_ITEMS)
+        ]
+
+    def test_max_size_bundle_keeps_disclaimer_within_limit(self):
+        from app.digest_cadence import _MESSAGE_LIMIT, render_digest_message
+        from app.evidence_assessment import LEGAL_DISCLAIMER
+
+        message = render_digest_message(
+            {}, self._max_bundle(), cadence="daily", period_label="2026-07-11"
+        )
+        # The body was large enough to force truncation...
+        assert len(message) <= _MESSAGE_LIMIT
+        # ...yet the reserved legal boundary + manage line still survive.
+        assert LEGAL_DISCLAIMER in message
+        assert "Manage alerts:" in message
+
+    def test_send_bundle_delivered_message_contains_disclaimer(self, isolated_db):
+        from app.digest_cadence import dispatch_digest_for_user
+        from app.evidence_assessment import LEGAL_DISCLAIMER
+
+        user_id = _make_paired_user("boundary@co.com", "900050")
+        preview = _preview(self._max_bundle())
+        now = datetime(2026, 7, 11, 9, 0, tzinfo=timezone.utc)
+        sent: list[str] = []
+
+        def fake_send(chat_id, text):
+            sent.append(text)
+            return True
+
+        result = dispatch_digest_for_user(
+            user_id, cadence="daily", now=now, preview=preview, send_fn=fake_send
+        )
+        assert result["status"] == "sent"
+        assert len(sent) == 1
+        # The exact bytes delivered to the customer carry the legal boundary.
+        assert LEGAL_DISCLAIMER in sent[0]
+        assert len(sent[0]) <= 4096

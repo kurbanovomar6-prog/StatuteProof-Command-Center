@@ -245,6 +245,14 @@ def normalize_alert_for_routing(alert: dict) -> dict:
     affected = _safe_list(alert.get("affected_entities"))
     topics = _safe_list(alert.get("topics")) + affected + _safe_list(alert.get("change_type"))
     market = alert.get("market") or alert.get("jurisdiction") or relevance.get("market")
+    # Carry a bounded, readable excerpt of the REAL diff through routing so the
+    # per-recipient delivery path can ground a "Does this affect me?" impact tag
+    # in what actually changed (see build_alert_telegram_message / the digest
+    # render). Built with the shared alert-content excerpt builder so it drops
+    # unreadable chunks exactly like the alert body does.
+    from app.alert_content import _build_excerpt
+
+    diff_excerpt = _build_excerpt(alert.get("added_chunks"), alert.get("removed_chunks"))
     if not source_url:
         limitations.append("Source URL unavailable in alert draft.")
     if not market:
@@ -265,6 +273,7 @@ def normalize_alert_for_routing(alert: dict) -> dict:
         "topics": [str(item) for item in topics if str(item).strip()],
         "executive_summary": str(summary),
         "business_action": str(business_action),
+        "diff_excerpt": diff_excerpt,
         "affected_entities": [str(item) for item in affected if str(item).strip()],
         "detected_at": alert.get("detected_at") or alert.get("checked_at_utc") or alert.get("created_at"),
         "review_status": alert.get("review_status"),
@@ -482,6 +491,18 @@ def build_alert_telegram_message(user_profile: dict, alert_match: dict) -> str:
         "Why it matches your profile:",
     ]
     lines.extend(f"- {_truncate(reason, 180)}" for reason in reasons[:4])
+
+    # Per-recipient "Does this affect me?" impact tag — strictly additive and
+    # evidence-grounded. Only appears when THIS recipient's saved topics overlap
+    # the source topics AND a real, readable diff excerpt exists; otherwise the
+    # message is unchanged. The phrasing is monitoring-info and passes the shared
+    # forbidden-claims guard inside impact_tag_for_delivery.
+    from app.alert_content import impact_tag_for_delivery
+
+    impact = impact_tag_for_delivery(alert_match, user_profile)
+    if impact:
+        lines.extend(["", impact["impact_tag"], impact["impact_line"]])
+
     lines.extend(["", "Source proof:", str(alert_match.get("source_url") or "Source URL unavailable")])
     lines.extend(["", "Limitations:"])
     lines.extend(f"- {_truncate(note, 220)}" for note in limitations[:4])

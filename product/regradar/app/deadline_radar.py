@@ -56,6 +56,23 @@ LEAD_STAGES: tuple[int, ...] = (30, 7, 1)
 _ALLOWED_KINDS = frozenset({"effective", "consultation_close", "transition", "deadline"})
 _OPEN_STATUSES = frozenset({"", "open"})
 
+# Specificity ranking for de-duplication: one real-world date can match several
+# capture patterns at once (e.g. "comments are due by 30 September 2026" hits both
+# consultation_close AND the generic deadline pattern). When two captures resolve
+# to the SAME calendar date we keep the most specific kind — a named lifecycle
+# kind (consultation_close / effective / transition) always beats a bare
+# "deadline" — so one date yields one record and one reminder per lead stage.
+_KIND_SPECIFICITY = {
+    "effective": 3,
+    "consultation_close": 3,
+    "transition": 3,
+    "deadline": 1,
+}
+
+
+def _kind_specificity(kind: str) -> int:
+    return _KIND_SPECIFICITY.get(str(kind or "").strip().lower(), 0)
+
 _KIND_LABEL = {
     "effective": "effective date",
     "consultation_close": "consultation close",
@@ -153,44 +170,67 @@ def _parse_deadline_date(date_text: str) -> date | None:
 
 # ── extraction (evidence-grounded) ────────────────────────────────────────────
 
+def _is_ambiguous_numeric_date(date_text: str) -> bool:
+    """True for a purely numeric ``d/m`` (or ``d-m``) form that is dd/mm↔mm/dd ambiguous.
+
+    ``01/09/2026`` is read day-first by convention, but the very same digits are a
+    valid month-first date, so a human should verify it against the source. A form
+    where one component exceeds 12 (``15/09/2026``) is NOT ambiguous — only one
+    reading is possible — and named-month / ISO forms are never ambiguous.
+    """
+    low = " ".join(str(date_text or "").split()).lower()
+    m = re.fullmatch(r"(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})", low)
+    if not m:
+        return False
+    first, second = int(m.group(1)), int(m.group(2))
+    return first <= 12 and second <= 12 and first != second
+
+
 def extract_deadlines(diff_text: str) -> list[dict[str, Any]]:
     """Return concrete future-or-dated deadlines carried by the change text.
 
     Delegates date capture to ``app.risk.derive_urgency_and_dates`` (so the
     urgency ladder and the deadline radar never drift), then resolves each
     captured span to a concrete calendar date. Spans that do not resolve to a
-    real date are dropped — nothing invented. Deduplicated on
-    ``(kind, deadline_date)``.
+    real date are dropped — nothing invented.
+
+    Deduplicated on the RESOLVED calendar date (not on kind): a single real-world
+    date that matches several patterns collapses to ONE entry, keeping the most
+    specific kind (see ``_KIND_SPECIFICITY``). This is what stops one date from
+    producing two deadline records — and therefore two reminders per lead stage.
 
     Each item::
 
         {"deadline_date": "YYYY-MM-DD", "deadline_kind": str,
-         "extracted_from_diff_excerpt": str, "urgency": str, "date_text": str}
+         "extracted_from_diff_excerpt": str, "urgency": str, "date_text": str,
+         "date_ambiguous": bool}
     """
     from app.risk import derive_urgency_and_dates
 
     _, captures = derive_urgency_and_dates(diff_text or "")
-    out: list[dict[str, Any]] = []
-    seen: set[tuple[str, str]] = set()
+    by_date: dict[str, dict[str, Any]] = {}
     for cap in captures:
-        parsed = _parse_deadline_date(cap.get("date_text", ""))
+        date_text = cap.get("date_text", "")
+        parsed = _parse_deadline_date(date_text)
         if parsed is None:
             continue
         iso = parsed.isoformat()
-        key = (cap.get("kind", "deadline"), iso)
-        if key in seen:
-            continue
-        seen.add(key)
-        out.append(
-            {
-                "deadline_date": iso,
-                "deadline_kind": cap.get("kind", "deadline"),
-                "extracted_from_diff_excerpt": (cap.get("excerpt") or cap.get("date_text") or "").strip(),
-                "urgency": cap.get("urgency", ""),
-                "date_text": cap.get("date_text", ""),
-            }
-        )
-    return out
+        kind = cap.get("kind", "deadline")
+        candidate = {
+            "deadline_date": iso,
+            "deadline_kind": kind,
+            "extracted_from_diff_excerpt": (cap.get("excerpt") or date_text or "").strip(),
+            "urgency": cap.get("urgency", ""),
+            "date_text": date_text,
+            "date_ambiguous": _is_ambiguous_numeric_date(date_text),
+        }
+        existing = by_date.get(iso)
+        # First appearance wins position; a strictly more-specific kind replaces
+        # the stored candidate (patterns are ordered most-specific first, so a tie
+        # keeps the earlier, more-specific match).
+        if existing is None or _kind_specificity(kind) > _kind_specificity(existing["deadline_kind"]):
+            by_date[iso] = candidate
+    return list(by_date.values())
 
 
 # ── register store (mirror of evidence_assessment.assessments.jsonl) ──────────
@@ -249,6 +289,8 @@ def record_deadline(
     source_name: str = "",
     official_url: str = "",
     status: str = "open",
+    date_text: str = "",
+    date_ambiguous: bool = False,
     base_dir: Path | None = None,
 ) -> dict[str, Any] | None:
     """Persist one evidence-grounded deadline; return it (or the existing dupe).
@@ -294,6 +336,11 @@ def record_deadline(
         "deadline_date": iso,
         "deadline_kind": kind,
         "extracted_from_diff_excerpt": excerpt,
+        # Keep the raw captured text next to the parsed ISO date so the reminder
+        # can show exactly what the source said, and flag numeric dd/mm↔mm/dd
+        # forms for human verification (human_review_required is always set too).
+        "raw_date_text": str(date_text or "").strip(),
+        "date_ambiguous": bool(date_ambiguous),
         "status": str(status or "open").strip() or "open",
         "detected_at": detected_at,
         "human_review_required": True,
@@ -348,6 +395,8 @@ def record_deadlines_for_change(
                 regulator=regulator,
                 source_name=source_name,
                 official_url=official_url,
+                date_text=item.get("date_text", ""),
+                date_ambiguous=bool(item.get("date_ambiguous")),
                 base_dir=base_dir,
             )
         except ValueError as exc:
@@ -455,17 +504,30 @@ def render_reminder_message(entry: dict[str, Any]) -> str:
     official_url = str(entry.get("official_url") or "").strip()
     excerpt = str(entry.get("extracted_from_diff_excerpt") or "").strip()
 
+    raw_date_text = str(entry.get("raw_date_text") or "").strip()
+    date_ambiguous = bool(entry.get("date_ambiguous"))
+
     when = (
         f"{days_until} day(s) away"
         if isinstance(days_until, int)
         else "approaching"
     )
+    # Surface the parsed ISO date AND the raw text the source used, so the reader
+    # can verify the parse against the original wording.
+    monitored_line = f"Monitored {kind_label}: {entry.get('deadline_date')}"
+    if raw_date_text and raw_date_text.lower() != str(entry.get("deadline_date") or "").lower():
+        monitored_line += f" (source text: \"{raw_date_text}\")"
     lines = [
         f"StatuteProof deadline radar — a monitored {kind_label} is {when}.",
         "",
         f"Source: {source}{reg_suffix}",
-        f"Monitored {kind_label}: {entry.get('deadline_date')}",
+        monitored_line,
     ]
+    if date_ambiguous:
+        lines.append(
+            "Date format is ambiguous (day/month vs month/day); read here as "
+            "day-first. Verify the exact date against the official source."
+        )
     if isinstance(stage, int):
         lines.append(f"Lead-time reminder: {stage}-day stage")
     if excerpt:
