@@ -1,0 +1,11 @@
+[Unit]
+Description=Run StatuteProof evidence-trail backup daily (idempotent — safe to re-run)
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 UTC
+Persistent=true
+RandomizedDelaySec=600
+Unit=statuteproof-backup.service
+
+[Install]
+WantedBy=timers.target

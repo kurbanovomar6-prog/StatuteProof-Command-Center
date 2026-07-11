@@ -63,6 +63,167 @@ def source_snapshot_dir() -> Path:
 _APPEND_RELOCK_ATTEMPTS = 5
 
 
+# ── G-hashchain: tamper-evident hash chain over the evidence trail ───────────
+#
+# Each appended record carries prev_record_hash (the record_hash of the
+# immediately preceding trail line) and record_hash (a sha256 over this
+# record's identifying fields plus prev_record_hash). Chaining turns
+# "append-only by convention" into "append-only by construction": inserting,
+# deleting, reordering, or editing an identifying field of any middle record
+# breaks the link at that point, and the break is detectable by recomputation
+# (see tools/verify_evidence_trail.py --chain).
+#
+# The chain is ADDITIVE: record_hash is derived from — but never feeds back
+# into — normalized_hash / content_hash, so it can never change the values the
+# monitor compares for change detection and can never cause a spurious CHANGED.
+# The identifying fields are the ones a consumer relies on to prove "this source
+# had this content/status at this time"; a tamperer who edits any of them is
+# caught. Fields that are cosmetic or derivable (paths, chars, notes) are left
+# out so unrelated cosmetic edits do not require a chain rewrite.
+_CHAIN_FIELDS = (
+    "source_id",
+    "timestamp_utc",
+    "change_status",
+    "normalized_hash",
+    "content_hash",
+    "prev_record_hash",
+)
+
+
+def _chain_payload(record: dict) -> str:
+    """Canonical serialization of a record's identifying fields for hashing.
+
+    Deterministic and order-stable: a JSON object of exactly _CHAIN_FIELDS,
+    sorted keys, missing values rendered as null. Because the field set and the
+    serialization are fixed, the same record always hashes to the same value on
+    any machine and across Python versions.
+    """
+    payload = {field: record.get(field) for field in _CHAIN_FIELDS}
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True)
+
+
+def compute_record_hash(record: dict, prev_record_hash: str) -> str:
+    """Compute record_hash = sha256 over the record's identifying fields.
+
+    ``prev_record_hash`` is folded in (via the record's own field) so the hash
+    binds each record to its predecessor — the essence of the chain. This does
+    NOT read or mutate normalized_hash/content_hash; it only reads them.
+    """
+    staged = dict(record)
+    staged["prev_record_hash"] = prev_record_hash
+    return hashlib.sha256(_chain_payload(staged).encode("utf-8")).hexdigest()
+
+
+def _last_record_hash_from_lines(lines: list[str]) -> str:
+    """Return the record_hash of the last non-blank JSONL line, or "".
+
+    Tolerates legacy pre-chain records (no record_hash) and malformed lines:
+    the chain simply (re)starts at the first record that carries a record_hash.
+    """
+    for line in reversed(lines):
+        if not line.strip():
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            return ""
+        return str(rec.get("record_hash") or "")
+    return ""
+
+
+def _apply_chain_fields(record: dict, prev_record_hash: str) -> dict:
+    """Set prev_record_hash + record_hash on ``record`` in place and return it."""
+    record["prev_record_hash"] = prev_record_hash
+    record["record_hash"] = compute_record_hash(record, prev_record_hash)
+    return record
+
+
+def _locked_append_record(record: dict) -> dict:
+    """Chain-and-append one record under a single exclusive flock.
+
+    The tamper-evident chain requires the tail read (last record_hash) and the
+    write to be atomic with respect to other appenders, so both happen while the
+    SAME flock is held on the current inode. Reuses the inode-swap safety and
+    fsync durability of _locked_append_line, then mutates ``record`` in place
+    with the computed chain fields (so callers see record_hash/prev_record_hash
+    on the returned dict).
+    """
+    _RUN_DIR.mkdir(parents=True, exist_ok=True)
+    for _ in range(_APPEND_RELOCK_ATTEMPTS):
+        fh = _RUN_FILE.open("a+", encoding="utf-8")
+        try:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            fd_ino = os.fstat(fh.fileno()).st_ino
+            try:
+                path_ino = os.stat(_RUN_FILE).st_ino
+            except OSError:
+                path_ino = None
+            if path_ino is not None and path_ino != fd_ino:
+                fcntl.flock(fh, fcntl.LOCK_UN)
+                fh.close()
+                continue
+            # Read the current tail under the SAME lock so the prev pointer is
+            # consistent with the file we are about to append to.
+            fh.seek(0)
+            existing_lines = fh.read().splitlines()
+            prev_hash = _last_record_hash_from_lines(existing_lines)
+            _apply_chain_fields(record, prev_hash)
+            line = json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n"
+            try:
+                fh.seek(0, os.SEEK_END)
+                fh.write(line)
+                fh.flush()
+                os.fsync(fh.fileno())
+            finally:
+                fcntl.flock(fh, fcntl.LOCK_UN)
+            return record
+        finally:
+            if not fh.closed:
+                fh.close()
+    # Last-ditch: append without the inode dance rather than dropping the record.
+    with _RUN_FILE.open("a+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            fh.seek(0)
+            existing_lines = fh.read().splitlines()
+            prev_hash = _last_record_hash_from_lines(existing_lines)
+            _apply_chain_fields(record, prev_hash)
+            fh.seek(0, os.SEEK_END)
+            fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+    return record
+
+
+def relink_chain(records: list[dict]) -> list[dict]:
+    """Re-link a list of trail records into a valid chain, in order.
+
+    Used by retention compaction: after heartbeat / QUALITY_DROP repeats are
+    dropped, the survivors' prev_record_hash pointers reference records that no
+    longer exist, so the chain must be rebuilt over the survivors. Each survivor
+    is re-pointed at its predecessor's freshly recomputed record_hash and its
+    own record_hash is recomputed — producing a chain that verifies clean over
+    exactly the records that remain.
+
+    Legacy pre-chain records (those without a record_hash) are left untouched so
+    a compaction of an all-legacy trail is a no-op and stays byte-identical
+    (idempotency): chaining only takes effect once records carry record_hash.
+    Mutates the dicts in place and returns the same list for convenience.
+    """
+    prev_hash = ""
+    for record in records:
+        if not record.get("record_hash"):
+            # Pre-chain record: do not manufacture a chain over legacy data.
+            # A later chained survivor links from the last chained record_hash
+            # (prev_hash), so legacy records simply pass through.
+            continue
+        _apply_chain_fields(record, prev_hash)
+        prev_hash = record["record_hash"]
+    return records
+
+
 def _locked_append_line(line: str) -> None:
     """
     Append one line to _RUN_FILE under an exclusive flock, safe against a
@@ -97,6 +258,14 @@ def _locked_append_line(line: str) -> None:
                 continue
             try:
                 fh.write(line)
+                # Durability (A-durability): the evidence record must be on
+                # stable storage before this function returns, so an "alert
+                # sent" state can never outrun an "evidence recorded" state
+                # across a crash/power-loss. flush() empties Python's buffer
+                # into the kernel; os.fsync() forces the kernel page cache for
+                # this fd out to disk. Done while the flock is still held.
+                fh.flush()
+                os.fsync(fh.fileno())
             finally:
                 fcntl.flock(fh, fcntl.LOCK_UN)
             return
@@ -108,6 +277,8 @@ def _locked_append_line(line: str) -> None:
         fcntl.flock(fh, fcntl.LOCK_EX)
         try:
             fh.write(line)
+            fh.flush()
+            os.fsync(fh.fileno())
         finally:
             fcntl.flock(fh, fcntl.LOCK_UN)
 
@@ -336,7 +507,9 @@ def append_run(record: dict) -> dict:
         if record["change_status"] == "CHANGED":
             diff_artifact = _write_diff_artifacts(record, prev, snapshot_base)
         _write_proof_artifact(record, diff_artifact, snapshot_base)
-    _locked_append_line(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+    # G-hashchain: chain-and-append under one flock (reads the current tail's
+    # record_hash and stamps prev_record_hash + record_hash on this record).
+    _locked_append_record(record)
     global _CACHE_VALID
     _CACHE_VALID = False
     if record.get("change_status") == "CHANGED":
@@ -958,7 +1131,8 @@ def _append_baseline_record(record: dict) -> dict:
     snapshot_base = _snapshot_base_from_record(record)
     if snapshot_base is not None:
         _write_proof_artifact(record, None, snapshot_base)
-    _locked_append_line(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+    # G-hashchain: a rebaseline record is chained like any other trail record.
+    _locked_append_record(record)
     global _CACHE_VALID
     _CACHE_VALID = False
     return record

@@ -49,6 +49,12 @@ _BASE_DIR = Path(__file__).parent.parent
 _SOURCE_RUNS_JSONL = _BASE_DIR / "data" / "source_runs" / "source_runs.jsonl"
 _CIRCUIT_STATE_FILE = _BASE_DIR / "data" / "circuit_breaker_state.json"
 
+# Deadman state: tracks whether the LAST cycle was catastrophic so the founder
+# alert fires only on the transition into the bad state, not every cycle while
+# a wide outage persists (which would spam the founder's Telegram). Persisted
+# so the transition edge survives a process restart mid-outage.
+_DEADMAN_STATE_FILE = _BASE_DIR / "data" / "deadman_state.json"
+
 # How many consecutive historical failures before a circuit opens.
 _CIRCUIT_OPEN_THRESHOLD = 3
 
@@ -117,6 +123,99 @@ def _clear_circuit(name: str) -> None:
             "monitoring resumes",
             name,
         )
+
+
+def _load_deadman_degraded() -> bool:
+    """Read the persisted "last cycle was catastrophic" flag. False on any error."""
+    try:
+        if _DEADMAN_STATE_FILE.exists():
+            data = json.loads(_DEADMAN_STATE_FILE.read_text(encoding="utf-8"))
+            return bool(data.get("degraded", False))
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("deadman: could not load state file: %s", exc)
+    return False
+
+
+def _save_deadman_degraded(degraded: bool) -> None:
+    """Persist the catastrophic-cycle flag so the alert edge survives restarts."""
+    try:
+        _DEADMAN_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _DEADMAN_STATE_FILE.write_text(
+            json.dumps(
+                {
+                    "degraded": bool(degraded),
+                    "updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("deadman: could not save state file: %s", exc)
+
+
+def _is_catastrophic_cycle(summary: dict) -> bool:
+    """
+    Decide whether a completed cycle is catastrophic enough to alert the founder.
+
+    Catastrophic means the monitor produced no useful monitoring this cycle:
+
+      • every source failed:            sources_failed == sources_total  (total > 0)
+      • OR nothing succeeded at all:    sources_ok + sources_unchanged == 0
+
+    An empty cycle (no enabled sources, total == 0) is NOT catastrophic — there
+    is simply nothing to monitor, which is a configuration state, not an outage.
+    """
+    total = int(summary.get("sources_total", 0) or 0)
+    if total <= 0:
+        return False
+    failed = int(summary.get("sources_failed", 0) or 0)
+    ok = int(summary.get("sources_ok", 0) or 0)
+    unchanged = int(summary.get("sources_unchanged", 0) or 0)
+    return failed == total or (ok + unchanged) == 0
+
+
+def _maybe_alert_catastrophic_cycle(summary: dict) -> None:
+    """
+    Fire a founder deadman alert on the transition INTO a catastrophic cycle.
+
+    Rate-limited by a persisted degraded flag: the alert fires once when the
+    monitor first goes catastrophic and stays quiet on every subsequent
+    catastrophic cycle until a healthy cycle clears the flag. Best-effort —
+    a notify/IO failure must never break the monitor loop.
+    """
+    try:
+        catastrophic = _is_catastrophic_cycle(summary)
+        was_degraded = _load_deadman_degraded()
+
+        if catastrophic and not was_degraded:
+            from app.ops_alert import notify_founder
+
+            total = int(summary.get("sources_total", 0) or 0)
+            failed = int(summary.get("sources_failed", 0) or 0)
+            text = (
+                "🚨 StatuteProof monitor: CATASTROPHIC cycle\n"
+                f"All monitoring failed this cycle — {failed}/{total} sources "
+                "failed and 0 produced content.\n"
+                f"cycle_id: {summary.get('cycle_id', '?')}\n"
+                f"completed_at (UTC): {summary.get('completed_at', '?')}\n"
+                "Customers are NOT receiving alerts. Check the scheduler, "
+                "network, and source access now."
+            )
+            notify_founder(text)
+            _save_deadman_degraded(True)
+        elif not catastrophic and was_degraded:
+            # Recovered — clear the flag (and optionally note recovery) so the
+            # next outage transition alerts again.
+            from app.ops_alert import notify_founder
+
+            notify_founder(
+                "✅ StatuteProof monitor: recovered — a cycle produced content "
+                f"again (cycle_id {summary.get('cycle_id', '?')})."
+            )
+            _save_deadman_degraded(False)
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("deadman: catastrophic-cycle alert check failed: %s", exc)
 
 
 def _classify_access_status(exc: Exception) -> str:
@@ -439,5 +538,9 @@ def monitor_all_sources(
         "sources_failed":    _counter["failed"],
     }
     logger.info("CYCLE_SUMMARY %s", json.dumps(summary))
+
+    # Deadman: alert the founder on the transition into a catastrophic cycle
+    # (all-fail / nothing-succeeded). Best-effort — never breaks the loop.
+    _maybe_alert_catastrophic_cycle(summary)
 
     return results

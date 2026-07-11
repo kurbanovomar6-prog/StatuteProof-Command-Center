@@ -11,10 +11,10 @@ No external scheduler library is used — just time.sleep().
 
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
-from app.config import WATCH_INTERVAL_MINUTES
+from app.config import BASE_DIR, WATCH_INTERVAL_MINUTES
 from app.monitor import monitor_all_sources
 from app.pipeline import run_pipeline_for_source
 
@@ -57,6 +57,32 @@ _DEFAULT_PRIORITY = "standard"
 
 # sources.json lives one level above this module (project root)
 _SOURCES_JSON = Path(__file__).parent.parent / "sources.json"
+
+# Heartbeat file — touched at the end of every FULL cycle. An external watchdog
+# (deploy/systemd/statuteproof-heartbeat.timer) reads its mtime and alerts the
+# founder if it is older than 2× the interval. This catches a wedged loop that
+# is alive (so Restart=on-failure never fires) but has stopped making progress.
+# Resolved via config.BASE_DIR (honors STATUTEPROOF_BASE_DIR) so the writer here
+# and the watchdog reader in app/ops_alert.py agree on exactly one file.
+_HEARTBEAT_FILE = Path(BASE_DIR) / "data" / "monitor_heartbeat"
+
+
+def write_heartbeat() -> bool:
+    """Touch the monitor heartbeat file with the current UTC time.
+
+    Best-effort: a heartbeat write failure must never break the watch loop, so
+    this swallows all errors and returns False. Returns True on success.
+    """
+    try:
+        _HEARTBEAT_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _HEARTBEAT_FILE.write_text(
+            datetime.now(timezone.utc).isoformat(timespec="seconds") + "\n",
+            encoding="utf-8",
+        )
+        return True
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("heartbeat: could not write %s: %s", _HEARTBEAT_FILE, exc)
+        return False
 
 
 def get_sources_by_priority(priority: str) -> list[dict]:
@@ -248,6 +274,10 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
                     results = monitor_all_sources(verbose=True)
                     _print_cycle_summary(results)
                     last_full_run_at = time.monotonic()
+                    # Progress marker for the external watchdog. Written only
+                    # after a full cycle completes without an orchestrator-level
+                    # exception, so a wedged/aborted cycle leaves the file stale.
+                    write_heartbeat()
                 except Exception as exc:
                     # Per-source errors are handled inside monitor_all_sources.
                     # This catches unexpected failures at the orchestrator level.

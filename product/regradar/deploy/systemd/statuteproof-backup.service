@@ -1,0 +1,18 @@
+[Unit]
+Description=StatuteProof evidence-trail backup (SQLite online copy + tar of data/, 14-copy retention)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=regradar
+Group=regradar
+WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/regradar/deploy/backup.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar
+StandardOutput=journal
+StandardError=journal

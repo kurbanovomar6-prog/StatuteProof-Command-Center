@@ -43,6 +43,11 @@ data/source_runs/*.jsonl
 data/source_snapshots/
 data/alert_reviews/
 
+# Monitor self-monitoring runtime state (regenerated each cycle)
+data/circuit_breaker_state.json
+data/deadman_state.json
+data/monitor_heartbeat
+
 # OS
 .DS_Store
 Thumbs.db

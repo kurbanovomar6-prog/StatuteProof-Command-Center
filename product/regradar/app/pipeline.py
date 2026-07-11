@@ -92,6 +92,50 @@ logger = logging.getLogger(__name__)
 _ALERT_THRESHOLD = {"MEDIUM", "HIGH"}
 _RISK_ORDER: dict[str, int] = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
 
+# Content-shrink guard (A-durability, fix 3). A large drop in content length
+# between the baseline and this run is almost always a scraper break (blocked
+# page, truncated fetch, layout change) rather than a genuine "content removed"
+# regulatory change. These thresholds MIRROR app.source_runs.classify_change's
+# QUALITY_DROP heuristics so a run that would classify as a quality drop can
+# never alert or overwrite the baseline:
+#   * extracted (raw) content below 40% of the previous run, or
+#   * normalized content below 70% of the previous run.
+_SHRINK_RAW_RATIO = 0.4
+_SHRINK_NORMALIZED_RATIO = 0.7
+
+
+def _detect_content_shrink(
+    *,
+    prev_raw_chars: int | None,
+    prev_normalized_chars: int | None,
+    new_raw_chars: int,
+    new_normalized_chars: int,
+) -> str | None:
+    """
+    Return a human-readable reason string when this run's content shrank far
+    enough to look like a scraper break rather than a real change, else None.
+
+    Mirrors classify_change's content-shrink thresholds (source_runs.py). Only
+    trips when a positive previous size is known — a first run or a run with no
+    recorded previous size can never trip the guard.
+    """
+    if prev_raw_chars and prev_raw_chars > 0 and new_raw_chars < prev_raw_chars * _SHRINK_RAW_RATIO:
+        return (
+            f"extracted content shrank to {new_raw_chars} chars "
+            f"(< {_SHRINK_RAW_RATIO:.0%} of previous {prev_raw_chars})"
+        )
+    if (
+        prev_normalized_chars
+        and prev_normalized_chars > 0
+        and new_normalized_chars
+        and new_normalized_chars < prev_normalized_chars * _SHRINK_NORMALIZED_RATIO
+    ):
+        return (
+            f"normalized content shrank to {new_normalized_chars} chars "
+            f"(< {_SHRINK_NORMALIZED_RATIO:.0%} of previous {prev_normalized_chars})"
+        )
+    return None
+
 # Per-run AI call budget.  Initialised at module load; reset by
 # reset_ai_call_counter() before each batch (monitor_all_sources / watch loop).
 # _AI_BUDGET_LOCK guards the check-then-increment to prevent over-spending under
@@ -300,6 +344,27 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         baseline_hash = latest["content_hash"]
         baseline_origin = "sqlite"
 
+    # Previous content sizes for the content-shrink guard (fix 3). Prefer the
+    # trail record's recorded sizes; fall back to the length of the previous
+    # stored SQLite content. Only used to decide whether a would-be alert is a
+    # scraper break rather than a real change.
+    prev_raw_chars: int | None = None
+    prev_normalized_chars: int | None = None
+    if prev_trail_record is not None:
+        try:
+            prev_raw_chars = int(prev_trail_record.get("extracted_chars") or 0) or None
+        except (TypeError, ValueError):
+            prev_raw_chars = None
+        try:
+            prev_normalized_chars = int(prev_trail_record.get("normalized_chars") or 0) or None
+        except (TypeError, ValueError):
+            prev_normalized_chars = None
+    if prev_raw_chars is None and latest is not None:
+        try:
+            prev_raw_chars = len(latest["content"]) or None
+        except (KeyError, TypeError):
+            prev_raw_chars = None
+
     # ── Step 5: Hash comparison against the canonical baseline ────────
     if baseline_hash and baseline_hash == new_hash:
         logger.info("No changes: %s (baseline=%s)", url, baseline_origin)
@@ -363,6 +428,43 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             normalized_old = normalize_for_change_hash(old_text)
             normalized_new = normalize_for_change_hash(content)
             diff_result = get_diff(normalized_old, normalized_new)
+
+    # ── Shrink guard (fix 3): scraper break, not a real "content removed" ──
+    # A large drop in content length between the baseline and this run is
+    # almost always a scraper break (blocked/challenge page, truncated fetch,
+    # layout change) rather than a genuine regulatory removal. Detecting it
+    # here — BEFORE Step 9 (save_document) and Step 10 (alert) — means the
+    # shrunk content NEVER overwrites the baseline (no save_document, no trail
+    # append: the early return omits normalized_hash, so run_pipeline_for_source
+    # skips both its heartbeat and its CHANGED-append blocks) and NEVER fires an
+    # alert. The next healthy sweep therefore still diffs against the true
+    # baseline instead of a poisoned shrunk one.
+    if not is_new:
+        _shrink_reason = _detect_content_shrink(
+            prev_raw_chars=prev_raw_chars,
+            prev_normalized_chars=prev_normalized_chars,
+            new_raw_chars=extracted_chars,
+            new_normalized_chars=len(normalized_for_hash or ""),
+        )
+        if _shrink_reason:
+            logger.warning(
+                "CONTENT SHRINK SUPPRESSED for %s: %s — alert suppressed and "
+                "baseline left intact (likely scraper break, not a real change)",
+                url, _shrink_reason,
+            )
+            return {
+                "url":                    url,
+                "changed":                False,
+                "status":                 "quality_drop",
+                "shrink_suppressed":      True,
+                "shrink_reason":          _shrink_reason,
+                "extracted_chars":        extracted_chars,
+                "extraction_quality":     "failed",
+                "extraction_method":      extraction_method,
+                "alert_suppressed_reason": "content_shrink",
+                "ai_skipped_reason":      "quality_drop",
+                "ai_calls_used":          _AI_RUN_BUDGET["count"],
+            }
 
     # ── Step 3b: Write snapshot files ────────────────────────────────
     # Runs after diff is confirmed real (past hash-check early-exit).
@@ -581,8 +683,18 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         )
 
     # ── Step 10: Telegram alert (MEDIUM/HIGH, never on baseline) ──────
+    # Durability ordering (A-durability, fix 2): the invariant is that an
+    # "alert sent" state can never outrun an "evidence recorded" state. The
+    # evidence-trail append happens in run_pipeline_for_source (append_run),
+    # AFTER this function returns. So when a source context is present we do NOT
+    # send here — we build the vetted payload (dedup gate included) and DEFER it
+    # in the result under "_deferred_alert". run_pipeline_for_source sends it
+    # only after append_run has durably recorded the CHANGED evidence, and a
+    # failed append aborts the send. The bare-URL path (source is None) never
+    # appends a trail record, so it keeps sending inline exactly as before.
     telegram_sent = False
     alert_suppressed_reason = ""
+    deferred_alert: dict | None = None
 
     if ENABLE_TELEGRAM_ALERTS and not is_new and final_risk_level in _ALERT_THRESHOLD:
         # A1 dedup gate: one alert per unique hash transition per source,
@@ -601,8 +713,6 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 )
 
         if alert_allowed:
-            from app.telegram import send_telegram_alert
-
             alert_payload = {
                 "url":                     url,
                 "source_name":             (source or {}).get("name", ""),
@@ -621,7 +731,14 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 "normalized_hash":         new_hash,
                 "checked_at_utc":          created_at,
             }
-            telegram_sent = send_telegram_alert(alert_payload)
+            if source is None:
+                # Bare-URL path: no trail append will follow, so send inline.
+                from app.telegram import send_telegram_alert
+                telegram_sent = send_telegram_alert(alert_payload)
+            else:
+                # Source path: defer the send until append_run has durably
+                # recorded the evidence (run_pipeline_for_source).
+                deferred_alert = alert_payload
 
     # ── Step 11: Return structured result ─────────────────────────────
     return {
@@ -634,6 +751,10 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         "review_reason":            review_reason,
         "ai_used":                  ai_used,
         "telegram_sent":            telegram_sent,
+        # Deferred alert payload (fix 2): non-None only on the source path when
+        # an alert is vetted-and-ready but must wait for durable evidence.
+        # run_pipeline_for_source consumes and clears this after append_run.
+        "_deferred_alert":          deferred_alert,
         "alert_suppressed_reason":  alert_suppressed_reason,
         "risk_details":             rule_risk,
         "executive_summary":        executive_summary,
@@ -735,6 +856,15 @@ def run_pipeline_for_source(source: dict) -> dict:
             import uuid as _uuid2
             from app.source_runs import append_run, make_source_id
 
+            # Durability ordering (A-durability, fix 2): a vetted alert waits in
+            # result["_deferred_alert"] and is sent ONLY after append_run has
+            # durably (fsync) recorded the CHANGED evidence below. We commit the
+            # trail record to alert_sent=True up front so the A1 dedup gate keys
+            # correctly on the next sweep — but the actual Telegram send happens
+            # strictly after the append returns. A failed append aborts the send.
+            _deferred_alert = result.pop("_deferred_alert", None)
+            _will_alert = _deferred_alert is not None
+
             run_record = {
                 "run_id":                   result.get("run_id") or _uuid2.uuid4().hex[:8],
                 "source_id":                make_source_id(source),
@@ -756,7 +886,10 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "review_required":          result.get("review_required", False),
                 "review_reason":            result.get("review_reason", ""),
                 # A1: the trail is the dedup state — record delivered alerts.
-                "alert_sent":               bool(result.get("telegram_sent")),
+                # fix 2: on the source path the send is deferred until AFTER this
+                # record is durably appended, so key on the committed intent
+                # (_will_alert) rather than the not-yet-sent telegram_sent flag.
+                "alert_sent":               bool(result.get("telegram_sent")) or _will_alert,
                 "alert_suppressed_reason":  result.get("alert_suppressed_reason", ""),
                 "added_count":              result.get("added_count", 0),
                 "removed_count":            result.get("removed_count", 0),
@@ -787,6 +920,35 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "source_runs.append_run completed: source=%s run_id=%s status=%s",
                 source.get("name"), final_record.get("run_id"), final_record.get("change_status"),
             )
+
+            # ── Send the deferred alert — ONLY now that the evidence is durable ──
+            # Invariant (A-durability, fix 2): "alert sent" can never outrun
+            # "evidence recorded". append_run() above has fsync'd the CHANGED
+            # record to disk; only then do we release the Telegram send. If
+            # append_run had raised, control jumped to the non-fatal except below
+            # and this send is never reached — no alert without durable evidence.
+            # We also re-confirm the persisted classification is genuinely
+            # CHANGED (append_run re-runs classify_change), so a run the trail
+            # downgraded never alerts.
+            if _will_alert and final_record.get("change_status") == "CHANGED":
+                from app.telegram import send_telegram_alert
+                telegram_sent = send_telegram_alert(_deferred_alert)
+                result["telegram_sent"] = telegram_sent
+                if not telegram_sent:
+                    logger.warning(
+                        "Deferred Telegram send returned falsy AFTER durable "
+                        "evidence append: source=%s run_id=%s (evidence recorded, "
+                        "alert delivery not confirmed)",
+                        source.get("name"), final_record.get("run_id"),
+                    )
+            elif _will_alert:
+                logger.warning(
+                    "Deferred alert NOT sent: trail reclassified run as %s "
+                    "(not CHANGED) for source=%s run_id=%s — evidence recorded, "
+                    "no alert issued",
+                    final_record.get("change_status"), source.get("name"),
+                    final_record.get("run_id"),
+                )
 
             # ── Wire alert drafts for CHANGED runs (not FIRST_SEEN baseline) ──
             if not result.get("is_new") and final_record.get("change_status") == "CHANGED":
@@ -876,4 +1038,7 @@ def run_pipeline_for_source(source: dict) -> dict:
         except Exception as _sr_err:
             logger.warning("source_runs.append_run failed (non-fatal): %s", _sr_err)
 
+    # Internal marker never belongs in the returned contract. On the CHANGED
+    # path it was already pop'd; on every other path it is None and dropped here.
+    result.pop("_deferred_alert", None)
     return result

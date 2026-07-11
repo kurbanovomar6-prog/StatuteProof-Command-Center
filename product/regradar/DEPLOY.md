@@ -117,7 +117,8 @@ exact missing var/file.
 cp /srv/regradar/deploy/systemd/statuteproof-*.{service,timer} /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now statuteproof-api statuteproof-scheduler \
-    statuteproof-telegram-bot statuteproof-compaction.timer
+    statuteproof-telegram-bot statuteproof-compaction.timer \
+    statuteproof-backup.timer
 systemctl status statuteproof-api --no-pager | head -5   # expect: active (running)
 curl -s http://127.0.0.1:5001/api/health                  # expect: {"ok": true, ...}
 ```
@@ -145,11 +146,22 @@ curl -s https://statuteproof.com/api/health          # expect {"ok": true, ...}
 ```bash
 cp /srv/regradar/deploy/logrotate.d/statuteproof /etc/logrotate.d/statuteproof
 logrotate -d /etc/logrotate.d/statuteproof   # dry-run parse check
-# nightly backup at 02:30 UTC
-( crontab -u regradar -l 2>/dev/null; \
-  echo '30 2 * * * cd /srv/regradar && bash deploy/backup.sh >> logs/backup.log 2>&1' ) \
-  | crontab -u regradar -
+# Nightly backup runs via statuteproof-backup.timer (enabled in step 7, ~02:30 UTC).
 sudo -u regradar bash /srv/regradar/deploy/backup.sh   # first backup now
+systemctl list-timers statuteproof-backup.timer --no-pager   # confirm scheduled
+```
+
+**Off-box copies (recommended — survives droplet loss).** Backups above are
+kept only on the droplet, so a lost droplet loses the evidence trail. Set
+`STATUTEPROOF_BACKUP_REMOTE` in `/srv/regradar/.env` (mode 600) to push the
+newest archive off-box each run. The step is a no-op when the var is unset:
+
+```bash
+# rclone remote (preferred; e.g. an S3/B2 bucket) — install rclone + configure it first
+echo 'STATUTEPROOF_BACKUP_REMOTE=s3remote:statuteproof-backups' >> /srv/regradar/.env
+# ...or an scp target with key-based auth
+echo 'STATUTEPROOF_BACKUP_REMOTE=backups@offbox.example:/srv/statuteproof-backups/' >> /srv/regradar/.env
+systemctl restart statuteproof-backup.timer   # timer re-reads EnvironmentFile on next run
 ```
 
 **Total: ≈30 min.**
@@ -168,8 +180,8 @@ sudo -u regradar bash /srv/regradar/deploy/backup.sh   # first backup now
 6. Telegram: send `/start` to @statuteproofalerts_bot → reply arrives
    (NEW token only)
 7. `systemctl restart statuteproof-api` → health returns 200 within 10 s
-8. Reboot the droplet once: all three services + timer come back
-   (`systemctl list-timers | grep statuteproof`)
+8. Reboot the droplet once: all three services + both timers come back
+   (`systemctl list-timers | grep statuteproof` — expect compaction + backup)
 9. Email dry-run (if a provider is configured):
    set `STATUTEPROOF_EMAIL_DRY_RUN=true`, restart api, trigger a test brief
    → `data/email_outbox/delivery_status.jsonl` gains a `dry_run` row → set
@@ -178,9 +190,14 @@ sudo -u regradar bash /srv/regradar/deploy/backup.sh   # first backup now
 
 ## Restore from backup
 
+If the droplet was lost, first pull the newest archive back from the off-box
+remote (`STATUTEPROOF_BACKUP_REMOTE`) into `/srv/regradar/backups/` — e.g.
+`rclone copy <remote> /srv/regradar/backups/` — then restore it locally:
+
 ```bash
 systemctl stop statuteproof-api statuteproof-scheduler statuteproof-telegram-bot
 cd /srv/regradar
+mkdir -p /tmp/restore
 tar -xzf backups/statuteproof-backup-<STAMP>.tar.gz -C /tmp/restore
 rsync -a /tmp/restore/data/ data/
 cp /tmp/restore/regradar.db "$(.venv/bin/python -c 'import sys; sys.path.insert(0,"."); from app.config import DB_PATH; print(DB_PATH)')"
@@ -194,6 +211,10 @@ systemctl start statuteproof-api statuteproof-scheduler statuteproof-telegram-bo
 
 - **Evidence retention**: `statuteproof-compaction.timer` runs daily; job is
   idempotent. Manual run: `run.py compact-heartbeats --days 30`.
+- **Evidence backups**: `statuteproof-backup.timer` runs daily (~02:30 UTC);
+  keeps the newest 14 archives in `backups/`. Manual run:
+  `bash deploy/backup.sh`. Set `STATUTEPROOF_BACKUP_REMOTE` in `.env` to also
+  push each archive off-box (see § 9); unset means on-box copies only.
 - **Scheduler cadence**: change `--interval` in
   `statuteproof-scheduler.service`, then `systemctl daemon-reload && restart`.
 - **Never** run two schedulers against the same data dir.

@@ -2120,6 +2120,7 @@ def main() -> None:
         print("  python run.py watch                     watch mode (default 60 min)", file=sys.stderr)
         print("  python run.py watch --interval <min>    watch mode (custom interval)", file=sys.stderr)
         print("  python run.py sources                   list sources", file=sys.stderr)
+        print("  python run.py heartbeat-check           deadman: alert founder if monitor loop is wedged/stale", file=sys.stderr)
         print("  python run.py health                    source health diagnostic", file=sys.stderr)
         print("  python run.py demo                      client demo (no DB writes)", file=sys.stderr)
         print("  python run.py demo --send-telegram      demo + Telegram demo alert", file=sys.stderr)
@@ -2185,6 +2186,9 @@ def main() -> None:
         print("  python run.py generate-brief --source-id <id>               generate brief for latest CHANGED run", file=sys.stderr)
         print("  python run.py generate-brief --source-id <id> --run-id <r>  generate brief for a specific run", file=sys.stderr)
         print("  python run.py rebaseline --source-id <id>                   reset ONE source's baseline (no scheduler stop, no alert)", file=sys.stderr)
+        print("  python run.py verify-trail                                  read-only: recompute snapshot hashes vs. stored evidence hashes", file=sys.stderr)
+        print("  python run.py verify-trail --source-id <id>                 verify only one source's evidence records", file=sys.stderr)
+        print("  python run.py verify-trail --json                           emit the integrity report as JSON", file=sys.stderr)
         print("  python run.py discover-source <url>                      discover candidate endpoints without saving evidence", file=sys.stderr)
         print("  python run.py discover-source <url> --json               print structured source discovery JSON", file=sys.stderr)
         print("  python run.py discover-source <url> --jurisdiction CODE  tag with jurisdiction code (e.g. AE, SG, KZ)", file=sys.stderr)
@@ -2294,6 +2298,20 @@ def main() -> None:
         from app.retention import compact_quality_drop_repeats
         qd = compact_quality_drop_repeats(days_threshold=days)
         print(f"QUALITY_DROP compaction: kept={qd['kept']} removed={qd['removed']} (threshold={days}d)")
+
+    elif cmd == "heartbeat-check":
+        # Deadman watchdog: alert the founder if the monitor heartbeat file is
+        # missing or older than 2× the watch interval. Run on a systemd timer
+        # (deploy/systemd/statuteproof-heartbeat.timer) — catches a wedged loop
+        # that Restart=on-failure cannot see. Exit 1 when stale so a monitoring
+        # wrapper can also react to the process exit code.
+        from app.ops_alert import check_heartbeat
+
+        stale = check_heartbeat()
+        if stale:
+            print("Heartbeat check: STALE/MISSING — founder alerted.", file=sys.stderr)
+            sys.exit(1)
+        print("Heartbeat check: fresh — monitor is progressing.")
 
     elif cmd == "health":
         _cmd_health()
@@ -3478,6 +3496,43 @@ def main() -> None:
             sys.exit(2)
         _cmd_rebaseline(source_id=_rb_source_id)
 
+    elif cmd == "verify-trail":
+        import importlib.util as _ilu
+        import pathlib as _pl
+        _vt_source_id: str | None = None
+        _vt_json = "--json" in args
+        _vt_extra = args[1:]
+        _vt_i = 0
+        while _vt_i < len(_vt_extra):
+            tok = _vt_extra[_vt_i]
+            if tok == "--json":
+                _vt_i += 1
+            elif tok == "--source-id":
+                if _vt_i + 1 >= len(_vt_extra):
+                    print("Error: --source-id requires a value.", file=sys.stderr)
+                    sys.exit(2)
+                _vt_source_id = _vt_extra[_vt_i + 1].strip()
+                _vt_i += 2
+            else:
+                print(
+                    f"Error: unknown argument {tok!r} for 'verify-trail'.\n"
+                    "  Usage: python run.py verify-trail [--source-id <id>] [--json]",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+        _vt_script = _pl.Path(__file__).parent / "tools" / "verify_evidence_trail.py"
+        _vt_spec = _ilu.spec_from_file_location("verify_evidence_trail", _vt_script)
+        _vt_mod = _ilu.module_from_spec(_vt_spec)  # type: ignore[arg-type]
+        # Register before exec so @dataclass can resolve cls.__module__ (Py3.14).
+        sys.modules["verify_evidence_trail"] = _vt_mod
+        _vt_spec.loader.exec_module(_vt_mod)  # type: ignore[union-attr]
+        _vt_argv: list[str] = []
+        if _vt_source_id:
+            _vt_argv += ["--source-id", _vt_source_id]
+        if _vt_json:
+            _vt_argv += ["--json"]
+        sys.exit(_vt_mod.run_cli(_vt_argv))
+
     elif cmd == "generate-secret-key":
         import secrets as _secrets
         key = _secrets.token_hex(32)
@@ -3494,7 +3549,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | generate-secret-key | validate-config",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | generate-secret-key | validate-config",
             file=sys.stderr,
         )
         sys.exit(2)

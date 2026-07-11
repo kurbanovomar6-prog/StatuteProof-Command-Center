@@ -48,14 +48,14 @@
     },
     {
       "family": "DIFC",
-      "total_enabled": 10,
+      "total_enabled": 12,
       "fresh_alert_eligible": 9,
       "evidence_library": 0,
       "candidate": 0,
       "remediation": 0,
       "status": "good",
       "gap_to_25": 16,
-      "notes": "DIFC has 9 fresh-alert sources including the official DIFC Legal Database listing. This is selected DIFC monitoring, not complete DIFC legal database coverage."
+      "notes": "DIFC has 9 fresh-alert sources including the official DIFC Legal Database listing, plus 2 DIFC Courts direction sources (practice/registrar). This is selected DIFC monitoring, not complete DIFC legal database coverage."
     },
     {
       "family": "ADGM/FSRA",

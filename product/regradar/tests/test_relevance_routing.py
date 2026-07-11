@@ -163,6 +163,151 @@ class RegulatorGateTests(unittest.TestCase):
         self.assertGreaterEqual(result["score"], 40)
 
 
+class EnabledSourceRegulatorCoverageTests(unittest.TestCase):
+    """DURABLE FIX regression: every enabled source in the real sources.json
+    must resolve to a *real* (non-OTHER) regulator code, and must carry a
+    non-blank source_id.
+
+    Why this is the load-bearing test: score_alert_for_user() applies a HARD
+    exclusion when a customer scopes to specific regulators and the alert's
+    resolved regulator is not in that scope. Any enabled source that resolves
+    to OTHER is silently undeliverable to every scoped customer (OTHER is not
+    a code a customer can subscribe to). Before this fix, ~23 of 116 enabled
+    sources (EOCN sanctions/TFS, Ministry of Economy AML, Dubai Legislation
+    Portal, MoJ, DFM, ICP, TDRA, MOCCAE, JAFZA, DMCC, ...) fell into OTHER and
+    were dropped. This test fails the moment a new enabled source lacks
+    taxonomy coverage, forcing the code/host/name rule to be added.
+    """
+
+    @staticmethod
+    def _enabled_sources():
+        from app.source_intake import load_sources_json
+
+        return [s for s in load_sources_json() if s.get("enabled")]
+
+    @staticmethod
+    def _alert_from_source(source):
+        """Shape a source row the way the routing pipeline shapes an alert.
+
+        make_source_id mirrors how alert drafts derive their source_id at
+        monitor time, so the resolver sees the same signals in production.
+        """
+        from app.source_runs import make_source_id
+
+        source_id = source.get("source_id") or make_source_id(source)
+        url = source.get("url")
+        return {
+            "source_id": source_id,
+            "source_url": url,
+            "url": url,
+            "source_name": source.get("name"),
+        }
+
+    def test_every_enabled_source_resolves_to_non_other(self):
+        enabled = self._enabled_sources()
+        self.assertGreater(len(enabled), 0, "expected enabled sources in sources.json")
+        offenders = []
+        for source in enabled:
+            code = resolve_regulator(self._alert_from_source(source))
+            if code == "OTHER":
+                offenders.append((source.get("source_id"), source.get("name"), source.get("url")))
+        self.assertEqual(
+            offenders,
+            [],
+            "enabled sources resolving to OTHER are silently undeliverable to "
+            f"scoped customers; add taxonomy coverage: {offenders}",
+        )
+
+    def test_every_enabled_source_resolved_code_is_scopable(self):
+        """A resolved code that is not in ALLOWED_REGULATOR_CODES could never
+        match a customer's normalized scope, so it would be as bad as OTHER."""
+        for source in self._enabled_sources():
+            code = resolve_regulator(self._alert_from_source(source))
+            self.assertIn(code, ALLOWED_REGULATOR_CODES, source.get("name"))
+
+    def test_every_enabled_source_has_non_blank_source_id(self):
+        blanks = [
+            s.get("name")
+            for s in self._enabled_sources()
+            if not (s.get("source_id") and str(s.get("source_id")).strip())
+        ]
+        self.assertEqual(blanks, [], f"enabled sources with blank source_id: {blanks}")
+
+
+class NonPrudentialRegulatorResolverTests(unittest.TestCase):
+    """Targeted resolution checks for the newly added non-prudential codes,
+    so the taxonomy coverage is pinned regardless of sources.json churn."""
+
+    def test_eocn_from_host(self):
+        self.assertEqual(
+            resolve_regulator(_alert("EOCN News", "https://www.eocn.gov.ae/en-us/news")),
+            "EOCN",
+        )
+
+    def test_eocn_uaeiec_mirror_shares_code(self):
+        self.assertEqual(
+            resolve_regulator(_alert("UAEIEC News", "https://www.uaeiec.gov.ae/en-us/news")),
+            "EOCN",
+        )
+
+    def test_ministry_of_economy_from_host(self):
+        self.assertEqual(
+            resolve_regulator(_alert("Ministry of Economy — AML", "https://www.moet.gov.ae/aml")),
+            "MOEC",
+        )
+
+    def test_dubai_legislation_portal_from_host(self):
+        self.assertEqual(
+            resolve_regulator(_alert("DLP", "https://dlp.dubai.gov.ae/en/Pages/LegislationSearch.aspx")),
+            "DLP",
+        )
+
+    def test_ministry_of_justice_from_host(self):
+        self.assertEqual(
+            resolve_regulator(_alert("MoJ News", "https://www.moj.gov.ae/en/media-center/news.aspx")),
+            "MOJ",
+        )
+
+    def test_dfm_from_host(self):
+        self.assertEqual(
+            resolve_regulator(_alert("DFM Circulars", "https://www.dfm.ae/the-exchange/regulation/circulars")),
+            "DFM",
+        )
+
+    def test_free_zones_and_authorities_from_host(self):
+        cases = {
+            "https://icp.gov.ae/en/media-center/": "ICP",
+            "https://tdra.gov.ae/en/media": "TDRA",
+            "https://www.moccae.gov.ae/en/media-center": "MOCCAE",
+            "https://www.jafza.ae/resource-centre/media/": "JAFZA",
+            "https://dmcc.ae/latest-news": "DMCC",
+        }
+        for url, expected in cases.items():
+            self.assertEqual(resolve_regulator(_alert("X", url)), expected, url)
+
+    def test_dfm_name_token_does_not_false_positive(self):
+        """A bare 'dfm' substring (e.g. 'ARDFM Kazakhstan') must NOT resolve to
+        DFM; only the dfm.ae host or an ae-dfm- source_id is a DFM signal."""
+        self.assertEqual(
+            resolve_regulator(
+                {"source_id": "KZ-ardfm-financial-market", "source_name": "ARDFM Kazakhstan", "url": "https://ardfm.kz/"}
+            ),
+            "OTHER",
+        )
+
+    def test_new_codes_are_scopable(self):
+        for code in ("EOCN", "MOEC", "DLP", "MOJ", "DFM", "ICP", "TDRA", "MOCCAE", "JAFZA", "DMCC"):
+            self.assertIn(code, ALLOWED_REGULATOR_CODES, code)
+
+    def test_scoped_customer_receives_eocn_and_excludes_cbuae(self):
+        """End-to-end: a sanctions-focused customer scoped to EOCN receives an
+        EOCN alert and is not spammed with an out-of-scope CBUAE alert."""
+        profile = _routing_profile(regulators=["EOCN"])
+        eocn_alert = _alert("EOCN Sanctions Update", "https://www.eocn.gov.ae/en-us/news")
+        self.assertTrue(score_alert_for_user(profile, eocn_alert)["matched"])
+        self.assertFalse(score_alert_for_user(profile, CBUAE_ALERT)["matched"])
+
+
 class ProfileRegulatorFieldTests(unittest.TestCase):
     def test_allowed_codes_cover_seven(self):
         for code in ("CBUAE", "DFSA", "FSRA", "VARA", "SCA", "FTA", "OTHER"):

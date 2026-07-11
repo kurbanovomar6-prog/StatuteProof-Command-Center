@@ -65,6 +65,38 @@ def _removed_count(records: list[dict | None], lines: list[str], keep: list[int]
     return non_blank - len(keep)
 
 
+def _emit_relinked(
+    records: list[dict | None], lines: list[str], keep: list[int]
+) -> list[str]:
+    """Produce the output JSONL lines for a compaction, re-linking the chain.
+
+    G-hashchain: dropping records breaks the surviving records' prev_record_hash
+    pointers, so the chain must be rebuilt over exactly the survivors. This
+    walks the kept indices in order, re-links the parsed survivor records via
+    ``source_runs.relink_chain`` (recomputing prev_record_hash + record_hash so
+    the chain verifies clean over the survivors), and emits each as canonical
+    JSON. Blank/malformed kept lines (parsed as None) are preserved verbatim —
+    they carry no chain and are already honoured elsewhere as always-keep.
+
+    When no survivor carries a record_hash (a legacy pre-chain trail), relink is
+    a no-op and every survivor re-serializes to its original bytes, so the
+    heartbeat/QD compaction stays byte-for-byte idempotent on legacy data.
+    """
+    kept_records = [records[idx] for idx in keep if records[idx] is not None]
+    source_runs.relink_chain(kept_records)
+
+    out: list[str] = []
+    for idx in keep:
+        rec = records[idx]
+        if rec is None:
+            # Blank/malformed line preserved verbatim (already filtered to
+            # non-empty by the caller's keep logic).
+            out.append(lines[idx])
+        else:
+            out.append(json.dumps(rec, ensure_ascii=False, sort_keys=True))
+    return out
+
+
 def _parse_ts(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -145,8 +177,8 @@ def compact_quality_drop_repeats(days_threshold: int = 30, now: datetime | None 
             if removed > 0:
                 tmp_path = run_file.with_suffix(".jsonl.qd-compact-tmp")
                 with tmp_path.open("w", encoding="utf-8") as tmp:
-                    for idx in keep:
-                        tmp.write(lines[idx] + "\n")
+                    for out_line in _emit_relinked(records, lines, keep):
+                        tmp.write(out_line + "\n")
                     tmp.flush()
                     os.fsync(tmp.fileno())
                 os.replace(tmp_path, run_file)
@@ -219,8 +251,8 @@ def compact_heartbeats(days_threshold: int = 30, now: datetime | None = None) ->
             if removed > 0:
                 tmp_path = run_file.with_suffix(".jsonl.compact-tmp")
                 with tmp_path.open("w", encoding="utf-8") as tmp:
-                    for idx in keep:
-                        tmp.write(lines[idx] + "\n")
+                    for out_line in _emit_relinked(records, lines, keep):
+                        tmp.write(out_line + "\n")
                     tmp.flush()
                     os.fsync(tmp.fileno())
                 os.replace(tmp_path, run_file)

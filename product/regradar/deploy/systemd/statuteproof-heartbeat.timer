@@ -1,0 +1,15 @@
+[Unit]
+Description=Run StatuteProof monitor heartbeat watchdog every 30 min (deadman for a wedged watch loop)
+
+[Timer]
+# Check often enough to catch a stall promptly, but the watchdog itself only
+# alerts when the heartbeat is older than 2x the watch interval, so a slow but
+# healthy cycle never pages. Runs independently of the scheduler service so it
+# still fires if the scheduler is hung.
+OnBootSec=10min
+OnUnitActiveSec=30min
+Persistent=true
+Unit=statuteproof-heartbeat.service
+
+[Install]
+WantedBy=timers.target

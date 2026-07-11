@@ -1,0 +1,22 @@
+[Unit]
+Description=StatuteProof monitor heartbeat watchdog (alerts founder if the watch loop is wedged/stale)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=regradar
+Group=regradar
+WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/regradar/.venv/bin/python run.py heartbeat-check
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar
+StandardOutput=journal
+StandardError=journal
+# Exit 1 (stale/missing heartbeat) is an expected signal, not a service fault —
+# the founder has already been alerted via Telegram inside run.py. Treat it as
+# clean so the timer keeps firing instead of the unit going into failed state.
+SuccessExitStatus=0 1

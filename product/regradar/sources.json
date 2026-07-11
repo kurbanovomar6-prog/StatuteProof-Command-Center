@@ -9963,6 +9963,7 @@
     "wait_for_selector": "main, a[href$=\".pdf\"]"
   },
   {
+    "source_id": "AE-vara-public-register-licensed-entities",
     "name": "VARA Public Register — Licensed Entities",
     "url": "https://www.vara.ae/en/licenses-and-register/public-register/",
     "jurisdiction": "AE",
@@ -9971,6 +9972,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-vara-regulatory-notices-and-enforcement-index",
     "name": "VARA Regulatory Notices and Enforcement Index",
     "url": "https://www.vara.ae/en/regulations/regulatory-notices/",
     "jurisdiction": "AE",
@@ -10027,6 +10029,7 @@
     "status": "geo_blocked"
   },
   {
+    "source_id": "AE-dfsa-public-register",
     "name": "DFSA Public Register",
     "url": "https://www.dfsa.ae/public-register/",
     "jurisdiction": "AE",
@@ -10099,6 +10102,7 @@
     "status": "geo_blocked"
   },
   {
+    "source_id": "AE-uae-ministry-of-economy-aml-cft-hub-formerly-executive-office",
     "name": "UAE Ministry of Economy — AML/CFT Hub (formerly Executive Office)",
     "url": "https://www.moet.gov.ae/en/aml",
     "jurisdiction": "AE",
@@ -10131,6 +10135,7 @@
     "status": "disabled_path_moved"
   },
   {
+    "source_id": "AE-fta-vat-public-clarifications",
     "name": "FTA VAT Public Clarifications",
     "url": "https://tax.gov.ae/en/taxes/vat/vat-public-clarifications.aspx",
     "jurisdiction": "AE",
@@ -10139,6 +10144,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-adgm-office-of-data-protection",
     "name": "ADGM Office of Data Protection",
     "url": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/",
     "jurisdiction": "AE",
@@ -10179,6 +10185,7 @@
     "status": "disabled_geo_blocked"
   },
   {
+    "source_id": "AE-dubai-legislation-portal-laws-search",
     "name": "Dubai Legislation Portal — Laws Search",
     "url": "https://dlp.dubai.gov.ae/en/Pages/LegislationSearch.aspx",
     "jurisdiction": "AE",
@@ -10187,6 +10194,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-difc-courts-practice-directions",
     "name": "DIFC Courts — Practice Directions",
     "url": "https://www.difccourts.ae/rules-decisions/practice-directions",
     "jurisdiction": "AE",
@@ -10195,6 +10203,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-difc-courts-registrar-s-directions",
     "name": "DIFC Courts — Registrar's Directions",
     "url": "https://www.difccourts.ae/rules-decisions/registrars-directions",
     "jurisdiction": "AE",
@@ -10203,6 +10212,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-difc-news-and-announcements-hub",
     "name": "DIFC — News and Announcements Hub",
     "url": "https://www.difc.com/whats-on/news",
     "jurisdiction": "AE",
@@ -10211,6 +10221,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-adgm-media-announcements-hub",
     "name": "ADGM — Media Announcements Hub",
     "url": "https://www.adgm.com/media/announcements",
     "jurisdiction": "AE",
@@ -10219,6 +10230,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-dfsa-news-hub-legislative-amendment-notices",
     "name": "DFSA — News Hub (legislative amendment notices)",
     "url": "https://www.dfsa.ae/news",
     "jurisdiction": "AE",
@@ -10227,6 +10239,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-dfsa-seo-letters",
     "name": "DFSA — SEO Letters",
     "url": "https://www.dfsa.ae/your-resources/publications-reports/seo-letters-1",
     "jurisdiction": "AE",
@@ -10235,6 +10248,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-ministry-of-justice-uae-news",
     "name": "Ministry of Justice UAE — News",
     "url": "https://www.moj.gov.ae/en/media-center/news.aspx",
     "jurisdiction": "AE",
@@ -10243,6 +10257,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-dfm-regulatory-circulars",
     "name": "DFM — Regulatory Circulars",
     "url": "https://www.dfm.ae/the-exchange/regulation/circulars",
     "jurisdiction": "AE",
@@ -10251,6 +10266,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-icp-uae-news",
     "name": "ICP UAE — News",
     "url": "https://icp.gov.ae/en/media-center/news-and-video-post/",
     "jurisdiction": "AE",
@@ -10259,6 +10275,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-ministry-of-justice-uae-media-centre",
     "name": "Ministry of Justice UAE — Media Centre",
     "url": "https://www.moj.gov.ae/en/media-center.aspx",
     "jurisdiction": "AE",
@@ -10267,6 +10284,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-tdra-uae-media-centre",
     "name": "TDRA UAE — Media Centre",
     "url": "https://tdra.gov.ae/en/media",
     "jurisdiction": "AE",
@@ -10275,6 +10293,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-moccae-media-centre",
     "name": "MOCCAE — Media Centre",
     "url": "https://www.moccae.gov.ae/en/media-center",
     "jurisdiction": "AE",
@@ -10283,6 +10302,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-jafza-media-centre",
     "name": "JAFZA — Media Centre",
     "url": "https://www.jafza.ae/resource-centre/media/",
     "jurisdiction": "AE",
@@ -10291,6 +10311,7 @@
     "status": "active"
   },
   {
+    "source_id": "AE-dmcc-latest-news-and-regulatory-updates",
     "name": "DMCC — Latest News and Regulatory Updates",
     "url": "https://dmcc.ae/latest-news",
     "jurisdiction": "AE",

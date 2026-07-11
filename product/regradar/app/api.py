@@ -155,6 +155,8 @@ _SECURITY_HEADERS: dict[str, str] = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    # JSON API returns no HTML and loads no subresources — lock everything down.
+    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
 }
 
 

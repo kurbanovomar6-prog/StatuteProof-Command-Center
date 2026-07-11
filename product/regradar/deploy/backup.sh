@@ -38,7 +38,20 @@ tar -czf "$ARCHIVE" \
 
 echo "backup written: $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
 
-# 3) Retention: keep the newest 14 backups.
+# 3) Optional off-box copy so the archive survives droplet loss. No-op unless
+# STATUTEPROOF_BACKUP_REMOTE is set. Value is an rclone remote (e.g. s3:bucket/path)
+# when rclone is installed, otherwise an scp target (e.g. user@host:/path).
+if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
+  if command -v rclone >/dev/null 2>&1; then
+    rclone copy "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"
+    echo "off-box copy (rclone): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+  else
+    scp "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"
+    echo "off-box copy (scp): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+  fi
+fi
+
+# 4) Retention: keep the newest 14 backups.
 ls -1t "$OUT_DIR"/statuteproof-backup-*.tar.gz 2>/dev/null | tail -n +15 | while read -r old; do
   rm -f "$old"
   echo "pruned old backup: $old"

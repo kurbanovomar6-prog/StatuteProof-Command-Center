@@ -29,6 +29,10 @@ statuteproof.com {
 		root * /srv/regradar/web/dist
 		try_files {path} /index.html
 		file_server
+
+		# CSP scoped to the SPA only — the /api/* backend sets its own stricter
+		# CSP (default-src 'none'), so this must not leak into that handle block.
+		header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"
 	}
 
 	header {
