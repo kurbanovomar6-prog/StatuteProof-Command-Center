@@ -15,7 +15,7 @@ const MATRIX_ROWS = [
     statusTone: 'active',
     whatWeMonitor: 'VARA licensing rules, selected official notices, rulebook PDFs, revision update history',
     limitation: null,
-    whatThisMeans: 'VARA rulebook updates and selected official source changes are tracked; regulatory notices/enforcement pages still need adapter validation.',
+    whatThisMeans: 'VARA rulebook updates and selected official source changes are tracked; regulatory notices/enforcement pages are still being validated.',
   },
   {
     category: 'DIFC / DFSA',
@@ -30,7 +30,7 @@ const MATRIX_ROWS = [
     sourceCount: '9 fresh-alert eligible',
     statusTone: 'active',
     whatWeMonitor: 'ADGM FSRA rules, guidance, waivers, supervision circulars, public consultations, Registration Authority circulars, data protection, enforcement',
-    limitation: 'FSRA rulebook on the Thomson Reuters platform has restricted external access. The dedicated regulatory-alerts page is a candidate pending selector remediation.',
+    limitation: 'FSRA rulebook on the Thomson Reuters platform has restricted external access. The dedicated regulatory-alerts page is still being validated.',
     whatThisMeans: 'ADGM regulatory scope is well covered through official ADGM pages, with gaps disclosed upfront instead of counted as active.',
   },
   {
@@ -46,23 +46,23 @@ const MATRIX_ROWS = [
     sourceCount: 'FTA strong; MoF narrow',
     statusTone: 'partial',
     whatWeMonitor: 'Ministry of Finance publications and direct FTA tax PDFs. Broader FTA listing pages remain candidate sources.',
-    limitation: 'Five FTA sub-pages failed 2026-06-18 no-save checks with nav-shell/title-only extraction. They need item-level extraction before activation.',
-    whatThisMeans: 'FTA direct PDF monitoring is strong, while MoF remains narrow and federal legislation/gazette sources remain remediation or research.',
+    limitation: 'On five FTA sub-pages we could not yet extract reliable text — only page shells or titles came through — so they are still being validated before activation.',
+    whatThisMeans: 'FTA direct PDF monitoring is strong, while MoF remains narrow and federal legislation/gazette sources are still being validated or researched.',
   },
   {
     category: 'Data protection',
     sourceCount: 'Selected-source depth',
     statusTone: 'caveat',
     whatWeMonitor: 'DIFC Commissioner of Data Protection, DIFC DP guidance and enforcement, ADGM Office of Data Protection, ADGM DP regulations and guidance index',
-    limitation: 'UAE federal PDPL (TDRA / uaedp.gov.ae) is geo-IP restricted from outside the UAE — not currently monitorable.',
-    whatThisMeans: 'DIFC and ADGM data protection are monitored through proof-backed sources. UAE federal PDPL access remains geo-restricted and is disclosed before any pilot.',
+    limitation: 'UAE federal PDPL (TDRA / uaedp.gov.ae) access is blocked from outside the UAE — not currently monitorable.',
+    whatThisMeans: 'DIFC and ADGM data protection are monitored through proof-backed sources. UAE federal PDPL access is blocked from outside the UAE and is disclosed before any pilot.',
   },
   {
     category: 'Legislation / gazettes',
     sourceCount: '0 fresh-alert eligible',
     statusTone: 'caveat',
     whatWeMonitor: 'No MoJ/UAE legislation/gazette source is fresh-alert eligible today. Related Ministry of Economy documents are separate AML/DNFBP support sources.',
-    limitation: 'Official Gazette (Al-Jaridah Al-Rasmiah) and UAE e-Laws Portal (elaws.moj.gov.ae) are geo-restricted outside the UAE.',
+    limitation: 'Official Gazette (Al-Jaridah Al-Rasmiah) and UAE e-Laws Portal (elaws.moj.gov.ae) access is blocked from outside the UAE.',
     whatThisMeans: 'Federal legislation/gazette monitoring is not sold as ready until an official accessible route passes proof and baseline gates.',
   },
 ]
@@ -76,7 +76,7 @@ const BADGE_STYLES = {
 const BADGE_LABELS = {
   active: 'Fresh-alert eligible',
   caveat: 'Active with caveats — see detail',
-  partial: 'Partially active — geo-restricted sources not available',
+  partial: 'Partially active — some sources blocked from outside the UAE',
 }
 
 function StatusBadge({ tone }) {

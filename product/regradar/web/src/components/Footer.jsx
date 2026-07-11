@@ -47,7 +47,7 @@ export default function Footer() {
       {/* Disclaimer */}
       <div className="border-t border-slate-800/60">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          <p className="text-xs text-slate-600 leading-relaxed max-w-4xl">
+          <p className="text-xs text-slate-400 leading-relaxed max-w-4xl">
             StatuteProof reports are generated from monitored official-source records and are provided
             for information and compliance review support only. StatuteProof reports do not constitute
             legal advice, regulatory advice, compliance determination, or a legal opinion. StatuteProof
@@ -65,14 +65,14 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-slate-800/40">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>&copy; {new Date().getFullYear()} StatuteProof. All rights reserved.</p>
           <div className="flex items-center gap-5">
-            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms</a>
-            <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
-            <a href="/disclaimer" className="hover:text-slate-400 transition-colors">Disclaimer</a>
+            <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+            <a href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</a>
           </div>
-          <p className="text-slate-700">Monitoring intelligence only — not legal advice and not a guarantee of compliance.</p>
+          <p className="text-slate-400">Monitoring intelligence only — not legal advice and not a guarantee of compliance.</p>
         </div>
       </div>
 

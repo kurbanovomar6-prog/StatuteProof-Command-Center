@@ -171,6 +171,43 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
   )
 }
 
+function WhatHappensNextCard() {
+  const steps = [
+    ['Source readiness review', 'The StatuteProof team reviews your selected sources — usually within about 2 business days.'],
+    ['A specialist contacts you', 'A StatuteProof specialist emails you to confirm your source pack and any limits before activation.'],
+    ['We switch on monitoring', 'Live monitoring is activated by the StatuteProof team for the approved sources. You do not have to trigger it yourself.'],
+  ]
+  return (
+    <div className="sp-panel p-5">
+      <div className="mb-3 flex items-start gap-2">
+        <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#16D9F5]" />
+        <div>
+          <h2 className="text-sm font-semibold text-white">What happens next</h2>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+            You have done your part. Live monitoring is switched on by our team — here is the rest of the path.
+          </p>
+        </div>
+      </div>
+      <ol className="space-y-3">
+        {steps.map(([title, detail], index) => (
+          <li key={title} className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-[#16D9F5]/10 text-[11px] font-bold text-[#16D9F5]">
+              {index + 1}
+            </span>
+            <div>
+              <p className="text-xs font-semibold text-slate-200">{title}</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{detail}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-4 border-t border-slate-800 pt-3 text-[11px] leading-relaxed text-slate-600">
+        No payment is taken during the founding pilot until activation is confirmed. Monitoring intelligence only. Not legal advice.
+      </p>
+    </div>
+  )
+}
+
 function SourceReadinessCard({ navigate }) {
   return (
     <div className="sp-panel p-5">
@@ -281,7 +318,7 @@ function EvidenceChainPanel() {
             This is the internal gate map. A source change becomes a customer artifact only after every required gate passes.
           </p>
         </div>
-        <StatusPill tone="slate">Delivery blocked by default</StatusPill>
+        <StatusPill tone="slate">Customer delivery stays off until you approve</StatusPill>
       </div>
 
       <div className="sp-evidence-chain">
@@ -512,7 +549,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-slate-600">
+          <p className="mt-3 text-xs text-slate-400">
             {sourcesData.disclaimer || 'Not legal advice. For monitoring information only.'}
           </p>
         </div>
@@ -533,7 +570,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
 
             <div className="rounded-lg border border-slate-800 bg-slate-950/35 px-5 py-8 text-center">
               <p className="mb-1 text-sm text-slate-300">No reviewed customer alerts are ready for this workspace yet.</p>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-400">
                 Reviewed alerts appear after evidence records pass human review and delivery routing. No sample alerts are shown in the authenticated dashboard.
               </p>
             </div>
@@ -581,6 +618,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
 
         <div className="space-y-5">
           <WorkspaceChecklist profile={profile} telegramStatus={telegramStatus} telegramLoading={telegramLoading} navigate={navigate} />
+          <WhatHappensNextCard />
           <SourceReadinessCard navigate={navigate} />
           <DeadlinesPanel />
 

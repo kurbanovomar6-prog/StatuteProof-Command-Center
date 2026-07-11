@@ -70,8 +70,8 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
             { label: 'Next step', value: 'Choose your source pack' },
           ].map(({ label, value, muted }) => (
             <div key={label}>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500 mb-0.5">{label}</p>
-              <p className={`text-xs font-medium ${muted ? 'text-slate-500' : 'text-slate-200'}`}>{value}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-0.5">{label}</p>
+              <p className={`text-xs font-medium ${muted ? 'text-slate-400' : 'text-slate-200'}`}>{value}</p>
             </div>
           ))}
         </div>
@@ -117,7 +117,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           { label: 'Evidence retention', value: retentionDays > 500 ? 'Custom' : retentionDays ? `${retentionDays} days` : '—' },
         ].map(({ label, value }) => (
           <div key={label}>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500 mb-0.5">{label}</p>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-0.5">{label}</p>
             <p className="text-xs font-medium text-slate-200">{value}</p>
           </div>
         ))}

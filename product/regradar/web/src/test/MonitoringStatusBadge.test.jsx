@@ -33,7 +33,7 @@ describe('MonitoringStatusBadge', () => {
     render(<MonitoringStatusBadge />)
     await waitFor(() =>
       expect(
-        screen.getByText(/monitoring configured — activation pending/i),
+        screen.getByText(/monitoring set up — first check runs shortly/i),
       ).toBeInTheDocument(),
     )
     expect(screen.queryByText(/monitoring active/i)).not.toBeInTheDocument()
@@ -44,7 +44,7 @@ describe('MonitoringStatusBadge', () => {
     render(<MonitoringStatusBadge />)
     await waitFor(() =>
       expect(
-        screen.getByText(/monitoring configured — activation pending/i),
+        screen.getByText(/monitoring set up — first check runs shortly/i),
       ).toBeInTheDocument(),
     )
   })
@@ -54,7 +54,7 @@ describe('MonitoringStatusBadge', () => {
     render(<MonitoringStatusBadge />)
     await waitFor(() =>
       expect(
-        screen.getByText(/monitoring configured — activation pending/i),
+        screen.getByText(/monitoring set up — first check runs shortly/i),
       ).toBeInTheDocument(),
     )
     expect(screen.queryByText(/monitoring active/i)).not.toBeInTheDocument()

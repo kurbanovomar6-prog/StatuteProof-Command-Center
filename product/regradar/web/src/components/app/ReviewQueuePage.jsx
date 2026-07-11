@@ -301,6 +301,7 @@ export default function ReviewQueuePage() {
                           <button
                             type="button"
                             title="Approve canonical evidence for draft brief inputs"
+                            aria-label="Approve canonical evidence for draft brief inputs"
                             disabled={isSaving}
                             onClick={() => submitCanonicalReview(row.record_id, 'approved')}
                             className="rounded-lg border border-emerald-400/25 bg-emerald-400/10 p-2 text-emerald-200 hover:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
@@ -310,6 +311,7 @@ export default function ReviewQueuePage() {
                           <button
                             type="button"
                             title="Reject canonical evidence"
+                            aria-label="Reject canonical evidence"
                             disabled={isSaving}
                             onClick={() => submitCanonicalReview(row.record_id, 'rejected')}
                             className="rounded-lg border border-rose-400/25 bg-rose-400/10 p-2 text-rose-200 hover:bg-rose-400/15 disabled:cursor-not-allowed disabled:opacity-50"
@@ -319,6 +321,7 @@ export default function ReviewQueuePage() {
                           <button
                             type="button"
                             title="Block canonical evidence pending remediation"
+                            aria-label="Block canonical evidence pending remediation"
                             disabled={isSaving}
                             onClick={() => submitCanonicalReview(row.record_id, 'blocked')}
                             className="rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"

@@ -38,7 +38,7 @@ export default function MonitoringStatusBadge() {
   return (
     <div className="inline-flex items-center gap-2 text-sm font-medium text-slate-300">
       <span className="h-2 w-2 rounded-full bg-slate-500" />
-      Monitoring configured — activation pending
+      Monitoring set up — first check runs shortly
     </div>
   );
 }

@@ -83,7 +83,7 @@ export default function DeadlinesPanel() {
       )}
 
       {!loading && deadlines.length === 0 && (
-        <div className="flex items-center gap-2 text-sm text-slate-600">
+        <div className="flex items-center gap-2 text-sm text-slate-400">
           <Clock className="h-4 w-4 flex-shrink-0" />
           <span>No upcoming deadlines detected in monitored alerts. Deadlines are extracted from AI analysis of regulatory changes.</span>
         </div>
@@ -106,12 +106,12 @@ export default function DeadlinesPanel() {
             </div>
           ))}
           {deadlines.length > 8 && (
-            <p className="text-[11px] text-slate-600">+{deadlines.length - 8} more in Reviewed Alerts</p>
+            <p className="text-[11px] text-slate-400">+{deadlines.length - 8} more in Reviewed Alerts</p>
           )}
         </div>
       )}
 
-      <p className="mt-3 text-[10px] text-slate-700">
+      <p className="mt-3 text-[10px] text-slate-400">
         Deadline dates are extracted by AI from regulatory text and may not be complete. Verify official source material directly.
         Monitoring intelligence only. Not legal advice.
       </p>

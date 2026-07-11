@@ -71,8 +71,11 @@ export default function IntegrationsPage() {
   const [emailReadinessLoading, setEmailReadinessLoading] = useState(true)
   const [emailConfigChecking, setEmailConfigChecking] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [nowTick, setNowTick] = useState(() => Date.now())
 
   const activeCode = status?.active_code
+  const pairExpiresAtMs = activeCode?.expires_at ? new Date(activeCode.expires_at).getTime() : null
+  const pairExpired = Boolean(activeCode && pairExpiresAtMs && nowTick > pairExpiresAtMs)
   const command = activeCode?.code ? `/start ${activeCode.code}` : ''
   const botLink = botUsername ? `https://t.me/${botUsername}` : ''
 
@@ -119,11 +122,45 @@ export default function IntegrationsPage() {
     return () => window.clearTimeout(timer)
   }, [])
 
+  // Auto-poll pairing status after a code is generated so "Connected" appears on
+  // its own — the customer never has to hunt for a Refresh button to confirm.
+  useEffect(() => {
+    if (status?.connected) return
+    if (!activeCode?.code) return
+    if (pairExpired) return
+    let active = true
+    const interval = window.setInterval(async () => {
+      if (!active) return
+      setNowTick(Date.now()) // keep the expiry countdown live
+      if (pairExpiresAtMs && Date.now() > pairExpiresAtMs) {
+        window.clearInterval(interval)
+        return
+      }
+      try {
+        const data = await telegramPair.status()
+        if (!active) return
+        if (data.bot_username) setBotUsername(data.bot_username)
+        if (data.connected) {
+          setStatus(data)
+          setSuccessMessage('Telegram connected.')
+          window.clearInterval(interval)
+        }
+      } catch {
+        // Keep polling quietly; the manual Refresh button remains available.
+      }
+    }, 4000)
+    return () => {
+      active = false
+      window.clearInterval(interval)
+    }
+  }, [activeCode?.code, pairExpiresAtMs, pairExpired, status?.connected])
+
   async function handleGenerate() {
     setGenerating(true)
     setError('')
     setSuccessMessage('')
     setCopied(false)
+    setNowTick(Date.now())
     try {
       const data = await telegramPair.generate()
       setBotUsername(data.bot_username || '')
@@ -333,6 +370,22 @@ export default function IntegrationsPage() {
                   Expires at {formatDate(activeCode.expires_at)}. Send this command to the StatuteProof Telegram bot.
                 </p>
               </div>
+
+              {/* Live pairing status — flips to Connected on its own via auto-poll. */}
+              {pairExpired ? (
+                <div className="flex items-start gap-2 rounded-lg border border-amber-400/25 bg-amber-400/10 px-3 py-2.5 text-xs text-amber-200">
+                  <XCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                  <span>This pairing code has expired. Generate a new code to try again.</span>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 rounded-lg border border-[#16D9F5]/20 bg-[#16D9F5]/5 px-3 py-2.5 text-xs text-[#16D9F5]">
+                  <Loader2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 animate-spin" />
+                  <span>
+                    Waiting for your message to @{botUsername || 'statuteproofalerts_bot'}…
+                    This confirms automatically once you send the command — no need to refresh.
+                  </span>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">

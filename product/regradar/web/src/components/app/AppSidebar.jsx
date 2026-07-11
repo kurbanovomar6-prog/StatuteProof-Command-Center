@@ -98,6 +98,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
             <button
               key={id}
               onClick={() => navigate(id)}
+              aria-current={active ? 'page' : undefined}
               title={collapsed ? label : undefined}
               className={`relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
                 active

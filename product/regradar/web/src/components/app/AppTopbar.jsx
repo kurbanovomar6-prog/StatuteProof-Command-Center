@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Menu, WifiOff } from 'lucide-react'
+import { Menu, RefreshCw, WifiOff } from 'lucide-react'
 
 function getWorkspace(currentUser) {
   try {
@@ -35,6 +35,7 @@ const PAGE_LABELS = {
 
 function useApiHealth() {
   const [status, setStatus] = useState('ok') // 'ok' | 'degraded' | 'unreachable'
+  const [checkKey, setCheckKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -46,17 +47,20 @@ function useApiHealth() {
         if (!cancelled) setStatus(healthy ? 'ok' : 'degraded')
       })
       .catch(() => {
-        if (!cancelled) setStatus('unreachable')
+        if (cancelled) return
+        setStatus('unreachable')
+        // Developer hint only — never surfaced to customers.
+        console.warn('[StatuteProof] Could not reach /api/health. If running locally, start the API with: python run.py api')
       })
     return () => { cancelled = true }
-  }, [])
+  }, [checkKey])
 
-  return status
+  return { status, recheck: () => setCheckKey(k => k + 1) }
 }
 
 export default function AppTopbar({ page, onMenuClick, navigate, currentUser }) {
   const ws = getWorkspace(currentUser)
-  const apiHealth = useApiHealth()
+  const { status: apiHealth, recheck: recheckHealth } = useApiHealth()
 
   return (
     <>
@@ -105,15 +109,25 @@ export default function AppTopbar({ page, onMenuClick, navigate, currentUser }) 
         </div>
       </header>
 
-      {/* API health warning — only shown when status is not ok */}
+      {/* Connection notice — only shown when status is not ok. Plain,
+          reassuring language for non-technical users; the developer hint
+          goes to the console, never to the customer. */}
       {apiHealth !== 'ok' && (
-        <div className="flex items-center gap-2 bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-xs text-amber-300">
+        <div className="flex flex-wrap items-center gap-2 border-b border-amber-500/20 bg-amber-500/10 px-4 py-2 text-xs text-amber-200">
           <WifiOff className="h-3.5 w-3.5 flex-shrink-0" />
           <span>
             {apiHealth === 'unreachable'
-              ? 'API server is not reachable. Some data may not load. Start with: python run.py api'
-              : 'System status: degraded. Data may be incomplete.'}
+              ? "We can't reach StatuteProof right now — your data is safe. Please retry in a moment."
+              : "Some information may be delayed while a check finishes — your data is safe. Please retry in a moment."}
           </span>
+          <button
+            type="button"
+            onClick={recheckHealth}
+            className="ml-auto inline-flex min-h-8 items-center gap-1.5 rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 font-semibold text-amber-100 transition-colors hover:bg-amber-400/20"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Retry
+          </button>
         </div>
       )}
     </>

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react'
+import { ArrowRight, ShieldCheck, AlertCircle, Lock } from 'lucide-react'
 import { profile as profileApi } from '../../api'
 
 const MARKETS = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
@@ -100,8 +100,10 @@ export default function OnboardingPage({ navigate, currentUser }) {
   const saved = loadSavedProfile()
 
   const [step, setStep]         = useState(1)
-  const [company, setCompany]   = useState(saved.company || '')
-  const [email, setEmail]       = useState(saved.email || currentUser?.email || '')
+  // Company and email come from the registration profile and are read-only here —
+  // they are edited later in Settings, not re-entered during onboarding.
+  const company = saved.company || currentUser?.company_name || ''
+  const email = currentUser?.email || saved.email || ''
   const [markets, setMarkets]   = useState(Array.isArray(saved.markets) ? saved.markets : [])
   const [industries, setIndustries] = useState(Array.isArray(saved.industries) ? saved.industries : saved.industry ? [saved.industry] : [])
   const [sourceLayers, setSourceLayers] = useState(Array.isArray(saved.topics) ? saved.topics : [])
@@ -109,18 +111,12 @@ export default function OnboardingPage({ navigate, currentUser }) {
   const [saving, setSaving]     = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const companyRef  = useRef(null)
-  const emailRef    = useRef(null)
   const marketsRef  = useRef(null)
   const sourcesRef  = useRef(null)
   const industRef   = useRef(null)
 
   function validateStep(s) {
     const errs = {}
-    if (s === 1) {
-      if (!company.trim()) errs.company = 'Company name is required.'
-      if (!email.trim())   errs.email   = 'Work email is required.'
-    }
     if (s === 2) {
       if (markets.length === 0) errs.markets = 'Select at least one UAE market or free zone.'
       if (sourceLayers.length === 0) errs.sourceLayers = 'Select at least one UAE source layer.'
@@ -133,9 +129,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
     const errs = validateStep(step)
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
-      if (errs.company) { companyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); companyRef.current?.focus() }
-      else if (errs.email) { emailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); emailRef.current?.focus() }
-      else if (errs.markets) { marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
+      if (errs.markets) { marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
       else if (errs.sourceLayers) { sourcesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
       else if (errs.industries) { industRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
       return
@@ -153,13 +147,16 @@ export default function OnboardingPage({ navigate, currentUser }) {
     setSaving(true)
     setSubmitError('')
     try {
-      const data = await profileApi.update({
-        company_name: company,
+      const payload = {
         industries,
         markets,
         topics: sourceLayers,
         onboarding_completed: true,
-      })
+      }
+      // Only send company_name when we actually have one, so the read-only
+      // prefill can never overwrite the registration company with an empty value.
+      if (company) payload.company_name = company
+      const data = await profileApi.update(payload)
       const p = data.profile
       localStorage.setItem('regradar_workspace_profile', JSON.stringify({
         company: p.company_name || '',
@@ -211,47 +208,36 @@ export default function OnboardingPage({ navigate, currentUser }) {
             />
           </div>
 
-          {/* Step 1: Profile info */}
+          {/* Step 1: Profile info (read-only — carried over from registration) */}
           {step === 1 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-white mb-6">Your workspace profile</h2>
+              <h2 className="text-xl font-bold text-white mb-2">Your workspace profile</h2>
+              <p className="text-sm text-slate-400 mb-6">
+                These come from your registration. You can change them later in Settings — no need to re-enter anything here.
+              </p>
 
-              <div ref={companyRef}>
-                <label htmlFor="onboarding-company" className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
-                  Company name *
-                </label>
-                <input
-                  id="onboarding-company"
-                  type="text"
-                  placeholder="Your company"
-                  value={company}
-                  onChange={e => { setCompany(e.target.value); setErrors(er => ({ ...er, company: '' })) }}
-                  className={`w-full bg-slate-900 border rounded-lg px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#16D9F5]/50 transition-all ${errors.company ? 'border-rose-500/60' : 'border-slate-700'}`}
-                />
-                {errors.company && (
-                  <p className="text-rose-400 text-xs mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" /> {errors.company}
-                  </p>
-                )}
+              <div>
+                <span className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
+                  Company name
+                </span>
+                <div className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-2.5">
+                  <span className="truncate text-white">{company || 'Not set'}</span>
+                  <span className="inline-flex flex-shrink-0 items-center gap-1 text-[11px] text-slate-500">
+                    <Lock className="h-3 w-3" /> Edit in Settings
+                  </span>
+                </div>
               </div>
 
-              <div ref={emailRef}>
-                <label htmlFor="onboarding-email" className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
-                  Work email *
-                </label>
-                <input
-                  id="onboarding-email"
-                  type="email"
-                  placeholder="you@company.com"
-                  value={email}
-                  onChange={e => { setEmail(e.target.value); setErrors(er => ({ ...er, email: '' })) }}
-                  className={`w-full bg-slate-900 border rounded-lg px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#16D9F5]/50 transition-all ${errors.email ? 'border-rose-500/60' : 'border-slate-700'}`}
-                />
-                {errors.email && (
-                  <p className="text-rose-400 text-xs mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" /> {errors.email}
-                  </p>
-                )}
+              <div>
+                <span className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
+                  Work email
+                </span>
+                <div className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-2.5">
+                  <span className="truncate text-white">{email || 'Not set'}</span>
+                  <span className="inline-flex flex-shrink-0 items-center gap-1 text-[11px] text-slate-500">
+                    <Lock className="h-3 w-3" /> Edit in Settings
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -267,6 +253,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                     <button
                       key={m}
                       type="button"
+                      aria-pressed={markets.includes(m)}
                       onClick={() => { toggle(markets, setMarkets, m); setErrors(er => ({ ...er, markets: '' })) }}
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         markets.includes(m)
@@ -300,6 +287,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                     <button
                       key={layer}
                       type="button"
+                      aria-pressed={sourceLayers.includes(layer)}
                       onClick={() => { toggle(sourceLayers, setSourceLayers, layer); setErrors(er => ({ ...er, sourceLayers: '' })) }}
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         sourceLayers.includes(layer)
@@ -348,6 +336,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                   <button
                     key={ind}
                     type="button"
+                    aria-pressed={industries.includes(ind)}
                     onClick={() => { toggle(industries, setIndustries, ind); setErrors(er => ({ ...er, industries: '' })) }}
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                       industries.includes(ind)

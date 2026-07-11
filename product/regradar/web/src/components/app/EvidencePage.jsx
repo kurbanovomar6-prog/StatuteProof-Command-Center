@@ -1,12 +1,26 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle, Clock, Download, FileText, Hash, History, Loader2, Shield } from 'lucide-react'
+import { Check, CheckCircle, Clock, Copy, Download, FileText, Hash, History, Loader2, Shield } from 'lucide-react'
 
-import { evidence as evidenceApi } from '../../api'
+import { apiFetch, evidence as evidenceApi } from '../../api'
 import DiffViewer from '../DiffViewer'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
 import ErrorState from './ui/ErrorState'
 import { formatGst } from '../../utils/time'
+
+// Pull the server-provided filename from Content-Disposition, or fall back.
+function filenameFromResponse(response, fallback) {
+  const disposition = response.headers?.get?.('content-disposition') || ''
+  const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition)
+  if (match && match[1]) {
+    try {
+      return decodeURIComponent(match[1])
+    } catch {
+      return match[1]
+    }
+  }
+  return fallback
+}
 
 const IMPACT_OPTIONS = [
   ['monitor', 'Monitor'],
@@ -16,6 +30,32 @@ const IMPACT_OPTIONS = [
   ['external_counsel_review', 'External counsel review'],
 ]
 
+function CopyHashButton({ value }) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      setCopied(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title="Copy full fingerprint"
+      aria-label={copied ? 'Full fingerprint copied' : 'Copy full fingerprint'}
+      className="flex-shrink-0 rounded p-1 text-slate-400 transition-colors hover:text-cyan-200"
+    >
+      {copied ? <Check className="h-3 w-3 text-emerald-300" /> : <Copy className="h-3 w-3" />}
+    </button>
+  )
+}
+
 function EvidenceCard({ record }) {
   const [impactLevel, setImpactLevel] = useState('monitor')
   const [internalNote, setInternalNote] = useState('')
@@ -23,6 +63,7 @@ function EvidenceCard({ record }) {
   const [assessment, setAssessment] = useState(record.assessment || null)
   const [assessmentMsg, setAssessmentMsg] = useState('')
   const [exportMsg, setExportMsg] = useState('')
+  const [exportError, setExportError] = useState('') // holds the format that failed, '' when none
   const [reviewHistory, setReviewHistory] = useState(null)
   const [historyLoading, setHistoryLoading] = useState(Boolean(record.evidence_record_id))
   const [historyError, setHistoryError] = useState('')
@@ -106,19 +147,33 @@ function EvidenceCard({ record }) {
     }
   }
 
-  function handleExport(format = 'pdf') {
+  async function handleExport(format = 'pdf') {
     if (!record.evidence_record_id) return
     setExportingFormat(format)
     setExportMsg('')
+    setExportError('')
     const downloadUrl = `/api/evidence/export-download?evidence_record_id=${encodeURIComponent(record.evidence_record_id)}&format=${encodeURIComponent(format)}`
-    const anchor = document.createElement('a')
-    anchor.href = downloadUrl
-    anchor.download = ''
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
-    setExportMsg('Download started. Check your downloads folder.')
-    setExportingFormat('')
+    try {
+      // Fetch the file first so we only claim a download after the bytes really arrive.
+      const response = await apiFetch(downloadUrl)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const blob = await response.blob()
+      if (!blob || blob.size === 0) throw new Error('Empty export')
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = filenameFromResponse(response, `statuteproof-audit-pack-${record.evidence_record_id}`)
+      document.body.appendChild(anchor)
+      anchor.click()
+      document.body.removeChild(anchor)
+      URL.revokeObjectURL(objectUrl)
+      setExportMsg('Download started. Check your downloads folder.')
+    } catch {
+      // Never claim a download that did not happen.
+      setExportError(format)
+    } finally {
+      setExportingFormat('')
+    }
   }
 
   return (
@@ -146,15 +201,21 @@ function EvidenceCard({ record }) {
           <StatusBadge code={record.source_health_status} />
         </div>
         <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
-          <p className="text-slate-500 mb-0.5 flex items-center gap-1">
+          <p className="text-slate-500 mb-0.5 flex items-center gap-1" title="Tamper-evident fingerprint of the captured text">
             <Hash className="w-3 h-3" /> Normalized hash
           </p>
-          <p className="text-slate-400 font-mono truncate">{record.new_hash || 'Not recorded'}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-slate-400 font-mono truncate" title={record.new_hash || 'Not recorded'}>{record.new_hash || 'Not recorded'}</p>
+            {record.new_hash && <CopyHashButton value={record.new_hash} />}
+          </div>
         </div>
         <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
-          <p className="text-slate-500 mb-0.5">Proof path</p>
-          <p className={record.proof_block_path ? 'text-cyan-300 truncate' : 'text-amber-300'}>
-            {record.proof_block_path || 'No proof artifact linked'}
+          <p className="text-slate-500 mb-0.5" title="Stored evidence file an auditor can open">Proof path</p>
+          <p
+            className={record.proof_block_path ? 'text-cyan-300 truncate' : 'text-slate-400'}
+            title={record.proof_block_path ? undefined : 'Expected while a run is still being validated.'}
+          >
+            {record.proof_block_path || 'No proof file linked yet'}
           </p>
         </div>
       </div>
@@ -307,7 +368,19 @@ function EvidenceCard({ record }) {
           {exportingFormat === 'md_html' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
           Export Markdown/HTML
         </button>
-        {exportMsg && <span className="text-xs text-slate-400">{exportMsg}</span>}
+        {exportMsg && <span className="text-xs text-emerald-300">{exportMsg}</span>}
+        {exportError && (
+          <span className="inline-flex items-center gap-2 text-xs text-rose-300">
+            Export failed — nothing was downloaded.
+            <button
+              type="button"
+              onClick={() => handleExport(exportError)}
+              className="inline-flex items-center gap-1 rounded-md border border-rose-400/40 px-2 py-1 font-semibold text-rose-200 transition-colors hover:bg-rose-400/10"
+            >
+              Retry
+            </button>
+          </span>
+        )}
       </div>
 
       <p className="text-[10px] text-slate-600 border-t border-slate-800 pt-3">
@@ -341,7 +414,7 @@ function mapEvidenceRecord(record, index) {
   }
 }
 
-export default function EvidencePage() {
+export default function EvidencePage({ navigate }) {
   const [records, setRecords] = useState([])
   const [apiChecked, setApiChecked] = useState(false)
   const [apiError, setApiError] = useState('')
@@ -379,12 +452,12 @@ export default function EvidencePage() {
         <div>
           <h1 className="mb-1 text-lg font-bold text-white">Evidence Records</h1>
           <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
-            Live monitored source runs with hashes, proof paths, source-health status, Acknowledge & Assess, and audit-pack export.
+            Every real change we capture, with a timestamp, a tamper-evident fingerprint, and a stored proof file you can export for an auditor.
           </p>
         </div>
         <span className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-300">
           <Shield className="h-3.5 w-3.5" />
-          LIVE API ONLY
+          Real monitoring runs only
         </span>
       </div>
 
@@ -401,7 +474,7 @@ export default function EvidencePage() {
             </div>
           </div>
           <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200">
-            Source evidence != delivered brief
+            Raw source records — not the reviewed briefs you send
           </span>
         </div>
 
@@ -435,10 +508,19 @@ export default function EvidencePage() {
       ) : records.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-10 text-center">
           <FileText className="mx-auto mb-3 h-5 w-5 text-slate-500" />
-          <p className="font-medium text-slate-300">No live evidence records yet</p>
-          <p className="mt-2 text-sm text-slate-500">
-            Evidence records appear after monitored sources produce saved run records with hashes and proof artifacts.
+          <p className="font-medium text-slate-300">Your first evidence record appears after your next monitoring run</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+            Nothing to do now — we capture it automatically. You do not need to trigger anything.
           </p>
+          {navigate && (
+            <button
+              type="button"
+              onClick={() => navigate('sources')}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/15"
+            >
+              View monitored sources
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">

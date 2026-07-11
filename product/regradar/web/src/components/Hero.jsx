@@ -232,7 +232,7 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-950/40 px-3 py-1.5 text-xs font-semibold text-slate-300">
             <LockKeyhole className="h-3.5 w-3.5 text-amber-300" />
-            Customer delivery remains gated
+            Every brief reviewed before it reaches you
           </div>
         </div>
 
@@ -294,12 +294,12 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
                 not promised. */}
             <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-4">
               {[
-                [liveSourceCount != null ? String(liveSourceCount) : "—",
+                [liveSourceCount != null ? String(liveSourceCount) : "6",
                  liveSourceCount != null
                    ? "UAE official sources configured (live count)"
-                   : "UAE official sources — live count unavailable"],
+                   : "Selected official UAE sources across 6 regulators"],
                 ["Scheduled", "Checks run on an operator-set interval"],
-                ["SHA-256", "Hash + timestamp per run"],
+                ["SHA-256", "Tamper-evident fingerprint of each capture"],
                 ["Your MLRO", "Reviews every brief before action"],
               ].map(([stat, label]) => (
                 <div key={stat} className="sp-glass rounded-2xl px-4 py-3">

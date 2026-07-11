@@ -10,8 +10,9 @@ const PLANS = [
     badge: 'Start here',
     highlight: false,
     desc: 'See which UAE regulatory sources are fresh-alert eligible, limited, or blocked for your compliance profile before any monitoring commitment. No live monitoring.',
-    cta: 'Request source review',
+    cta: 'Start with Source Readiness Review',
     ctaStyle: 'secondary',
+    subnote: 'Free • lowest commitment — no activation wait, no payment',
     features: [
       'Source readiness assessment',
       'Suggested UAE source pack',
@@ -34,8 +35,9 @@ const PLANS = [
     badge: null,
     highlight: false,
     desc: 'First paid plan for early users. Up to 3 official UAE sources, evidence records, basic diff view, and weekly source status summary. Manually activated after source readiness review.',
-    cta: 'Start founding pilot',
+    cta: 'Request founding-pilot activation',
     ctaStyle: 'secondary',
+    subnote: 'No payment now — we confirm your source pack first',
     features: [
       'Up to 3 official UAE sources',
       'Evidence records',
@@ -59,8 +61,9 @@ const PLANS = [
     badge: 'Recommended',
     highlight: true,
     desc: 'Selected official UAE source scope after readiness review. Manual activation keeps source limits and evidence gates visible.',
-    cta: 'Upgrade to UAE Monitor',
+    cta: 'Request UAE Monitor activation',
     ctaStyle: 'primary',
+    subnote: 'No payment now — we confirm your source pack first',
     features: [
       'Validated official UAE source profile',
       'Selected VARA / CBUAE / DFSA / ADGM / UAE FIU fresh-alert source pack',
@@ -84,6 +87,7 @@ const PLANS = [
     desc: 'Advisory firms managing multiple UAE-regulated clients. Custom source scope, extended retention, multi-workspace and white-label on the roadmap.',
     cta: 'Talk to us',
     ctaStyle: 'secondary',
+    subnote: 'No payment now — we scope your requirements with you first',
     features: [
       'Custom source scope',
       'Custom evidence retention',
@@ -143,6 +147,32 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
             Founding pilots are manually activated after source readiness review. No payment method is required now.
             Select a plan to record your intent — our team will contact you to confirm your source pack and activate your workspace.
           </p>
+        </div>
+
+        {/* What happens next — persistent, so the manual-activation flow is never a dead-end */}
+        <div className="mb-8 max-w-3xl mx-auto rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+          <h2 className="text-sm font-semibold text-white mb-1">What happens after you choose</h2>
+          <p className="text-xs text-slate-400 mb-4">
+            StatuteProof plans are activated by our team — you will not be charged today.
+          </p>
+          <ol className="grid gap-3 sm:grid-cols-2">
+            {[
+              ['1', 'You request a plan here', 'No payment is taken now. This records your intent only.'],
+              ['2', 'We review your sources', 'The StatuteProof team runs the source readiness review — usually within about 2 business days.'],
+              ['3', 'A specialist emails you', 'A StatuteProof specialist emails you to confirm your source pack and any limits.'],
+              ['4', 'We switch on monitoring', 'Live monitoring is activated by our team for the approved sources — no setup step you have to trigger.'],
+            ].map(([num, title, detail]) => (
+              <li key={num} className="flex gap-3">
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-[#16D9F5]/10 text-xs font-bold text-[#16D9F5]">
+                  {num}
+                </span>
+                <div>
+                  <p className="text-xs font-semibold text-slate-200">{title}</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
 
         {/* Confirm message */}
@@ -217,12 +247,15 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
               >
                 {selecting === p.id ? 'Saving…' : selected === p.id ? 'Selected' : p.cta}
               </button>
+              {p.subnote && (
+                <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-500">{p.subnote}</p>
+              )}
             </div>
           ))}
         </div>
 
         {/* Disclaimer */}
-        <p className="text-center text-xs text-slate-500 max-w-2xl mx-auto">
+        <p className="text-center text-xs text-slate-400 max-w-2xl mx-auto">
           Monitoring intelligence only. Not legal advice. Source readiness validation required before activation.
           No payment is processed during plan selection.
           Features marked "pilot roadmap" are not live by default. Billing is manually activated after source readiness review and founding pilot confirmation.
@@ -233,7 +266,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
           <div className="text-center mt-4">
             <button
               onClick={onContinue}
-              className="text-xs text-slate-500 hover:text-slate-300 underline"
+              className="text-xs text-slate-400 hover:text-white underline"
             >
               Skip for now — continue with Source Readiness Review
             </button>

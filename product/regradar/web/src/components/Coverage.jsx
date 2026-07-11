@@ -14,7 +14,7 @@ const ACTIVE_SOURCES = [
   { source: 'ADGM Registration Authority Circulars',  publishes: 'RA circulars on corporate, commercial and registration matters',               note: null },
   { source: 'ADGM FSRA Enforcement',                  publishes: 'FSRA enforcement actions and regulatory alerts',                               note: null },
   { source: 'ADGM Data Protection (hub + guidance)',  publishes: 'ADGM Data Protection Regulations 2021, guidance index, enforcement',          note: null },
-  { source: 'UAE FIU Publications Hub',               publishes: 'FIU publications, typology reports, knowledge centre and public notices',      note: 'FIU circulars page remains candidate/nav-shell' },
+  { source: 'UAE FIU Publications Hub',               publishes: 'FIU publications, typology reports, knowledge centre and public notices',      note: 'FIU circulars page is still being validated' },
   { source: 'UAE FIU AML/CFT Laws and Decisions',     publishes: 'AML/CFT laws and related Cabinet/Ministerial decisions',                      note: null },
   { source: 'Executive Office for AML/CFT',           publishes: 'AML/CFT laws, regulations and news from the EOCN',                           note: null },
   { source: 'DIFC Laws and Regulations',              publishes: 'DIFC legal database — laws, data protection rules',                           note: null },
@@ -25,44 +25,44 @@ const ACTIVE_SOURCES = [
   { source: 'DFSA Annual Reports',                    publishes: 'DFSA annual regulatory reports',                                              note: null },
   { source: 'DFSA Annual AML Reports',                publishes: 'DFSA annual AML and enforcement reports',                                     note: null },
   { source: 'UAE Ministry of Economy',                publishes: 'Commercial licensing and AML policy updates',                                 note: null },
-  { source: 'UAE CMA selected sources',                publishes: 'Limited UAE CMA proof-backed sources, including sandbox and selected guidance',  note: 'Broader UAE CMA regulations listing still needs adapter remediation' },
+  { source: 'UAE CMA selected sources',                publishes: 'Limited UAE CMA proof-backed sources, including sandbox and selected guidance',  note: 'Broader UAE CMA regulations listing is still being validated' },
 ]
 
 const CAVEAT_SOURCES = [
   {
     source: 'UAE FIU Homepage',
-    why: 'The FIU homepage is a navigation shell, not a document listing. FIU annual reports, press releases, typology reports, AML/CFT laws, and publications hub have fresh-alert coverage; FIU circulars remain candidate/nav-shell.',
+    why: 'The FIU homepage is a landing page with no document list, so there is nothing to alert on. FIU annual reports, press releases, typology reports, AML/CFT laws, and the publications hub have fresh-alert coverage; the FIU circulars page is still being validated because we could not yet extract reliable text from it.',
   },
   {
     source: 'FTA Main Portal and listing pages (tax.gov.ae)',
-    why: '25 direct official FTA tax PDF endpoints are fresh-alert eligible. The FTA main portal and tested listing/sub-pages are not separately counted as fresh-alert because portal/listing extraction still needs item-level proof, repeat baseline, and MONITOR_OK gates.',
+    why: '25 direct official FTA tax PDFs are fresh-alert eligible. The FTA main portal and its listing/sub-pages are not separately counted as fresh-alert because we could not yet extract reliable text for each item on those pages, so they are still being validated.',
   },
   {
     source: 'UAE Capital Market Authority (UAE CMA)',
-    why: 'UAE CMA has 6 active proof-backed fresh-alert eligible sources. UAE CMA broader coverage is actively expanding and needs adapter remediation before broader capital-markets claims.',
+    why: 'UAE CMA has 6 active proof-backed fresh-alert eligible sources. Broader UAE CMA coverage is actively expanding and is still being validated before we make broader capital-markets claims.',
   },
   {
     source: 'UAE Legislation Portal',
-    why: 'High-value federal legislation source remains in remediation due to WAF/access issues. It is not sold as monitored until an official accessible route passes proof and baseline gates.',
+    why: 'This high-value federal legislation source is still being validated because access is currently blocked. We do not sell it as monitored until there is a reliable, accessible route we have verified.',
   },
   {
     source: 'ADGM FSRA Rulebook (Thomson Reuters platform)',
-    why: 'The ADGM FSRA rulebook on Thomson Reuters platform (fsra.adgm.com) has restricted external access. FSRA regulatory content is captured through ADGM official sources such as rules and regulations, guidance notes, supervision circulars, enforcement, and consultations. The dedicated regulatory-alerts page remains a candidate pending selector remediation.',
+    why: 'The ADGM FSRA rulebook on the Thomson Reuters platform (fsra.adgm.com) has restricted external access. FSRA regulatory content is captured through ADGM official sources such as rules and regulations, guidance notes, supervision circulars, enforcement, and consultations. The dedicated regulatory-alerts page is still being validated.',
   },
 ]
 
 const NOT_AVAILABLE_SOURCES = [
   {
     source: 'UAE Official Gazette / Al-Jaridah Al-Rasmiah',
-    reason: 'Access restricted — geo-IP blocked from outside the UAE.',
+    reason: 'Access blocked from outside the UAE.',
   },
   {
     source: 'UAE e-Laws Portal (elaws.moj.gov.ae)',
-    reason: 'Access restricted — geo-IP blocked from outside the UAE.',
+    reason: 'Access blocked from outside the UAE.',
   },
   {
     source: 'UAE Data Office / TDRA (uaedp.gov.ae)',
-    reason: 'Access restricted — geo-IP blocked from outside the UAE. DIFC and ADGM data protection sources are monitored as alternatives.',
+    reason: 'Access blocked from outside the UAE. DIFC and ADGM data protection sources are monitored as alternatives.',
   },
 ]
 
@@ -134,7 +134,11 @@ export default function Coverage({ onCreateWorkspace }) {
           <p className="text-slate-400 max-w-3xl mx-auto">
             StatuteProof discloses every source status before a pilot begins. Active sources have
             passed two proof-backed baseline runs. Sources with caveats are disclosed upfront.
-            Geo-restricted and access-blocked sources are documented — not hidden.
+            Access-blocked sources are documented — not hidden.
+          </p>
+          <p className="mt-3 text-sm text-slate-400 max-w-3xl mx-auto">
+            <span className="font-semibold text-slate-200">Fresh-alert eligible</span> means a source we have
+            reliably captured at least twice and can send you change alerts from.
           </p>
         </div>
 
@@ -174,7 +178,7 @@ export default function Coverage({ onCreateWorkspace }) {
           {/* Geo-blocked sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Access restricted — geo-blocked outside UAE, not currently monitorable</h3>
+              <h3 className="font-bold text-white">Access blocked from outside the UAE — not currently monitorable</h3>
               <StatusBadge tone="blocked">Not available</StatusBadge>
             </div>
             <SourceTable
@@ -206,7 +210,7 @@ export default function Coverage({ onCreateWorkspace }) {
         <div className="bg-[#0A1628] border border-slate-800 rounded-xl p-6 mt-8 mb-6">
           <p className="text-sm text-slate-400 leading-relaxed">
             Source status reflects current technical accessibility — not regulatory significance.
-            A source listed as geo-restricted or pending does not reduce its legal importance.
+            A source listed as access-blocked or pending does not reduce its legal importance.
             It means StatuteProof cannot currently monitor it reliably, and we document that
             before you rely on it.
           </p>

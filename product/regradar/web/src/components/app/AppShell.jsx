@@ -44,7 +44,7 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
       case 'dashboard':    return <DashboardHome navigate={navigate} currentUser={currentUser} planState={planState} onChoosePlan={onChoosePlan} />
       case 'sources':      return <SourcesPage onAddCustomSource={() => navigate('source-lab')} />
       case 'source-lab':   return <SourceLabPage planState={planState} onChoosePlan={onChoosePlan} />
-      case 'evidence':     return <EvidencePage />
+      case 'evidence':     return <EvidencePage navigate={navigate} />
       case 'alerts':       return <AlertsPage />
       case 'briefs':       return <AIBriefPage />
       case 'reports':      return <ReportsPage />
