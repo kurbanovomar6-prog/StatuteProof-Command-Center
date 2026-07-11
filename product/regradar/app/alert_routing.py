@@ -8,7 +8,14 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 from app.db import _connect, ensure_auth_tables
-from app.profile import get_or_create_profile, normalize_regulators
+from app.profile import (
+    DEFAULT_URGENT_THRESHOLD,
+    DEFAULT_WEEKLY_THRESHOLD,
+    coerce_digest_cadence,
+    coerce_score_threshold,
+    get_or_create_profile,
+    normalize_regulators,
+)
 from app.regulator_map import resolve_regulator
 from app.telegram import send_telegram_message
 from app.telegram_pairing import get_telegram_link
@@ -97,6 +104,12 @@ def user_profile_to_routing_profile(user_id: int) -> dict:
     if not markets:
         markets = ["UAE"]
     alert_threshold = _normalize_risk_level(profile.get("alert_threshold"))
+    # Per-user delivery thresholds + digest cadence, promoted from what used to
+    # be hardcoded 80/50 constants. Read from the profile so every customer can
+    # tune when an alert is urgent (instant) vs bundled (digest).
+    urgent_threshold = coerce_score_threshold(profile.get("urgent_threshold"), DEFAULT_URGENT_THRESHOLD)
+    weekly_threshold = coerce_score_threshold(profile.get("weekly_threshold"), DEFAULT_WEEKLY_THRESHOLD)
+    digest_cadence = coerce_digest_cadence(profile.get("digest_cadence"))
     return {
         "client_id": f"user_{int(user_id)}",
         "user_id": int(user_id),
@@ -109,9 +122,13 @@ def user_profile_to_routing_profile(user_id: int) -> dict:
         "custom_sources": _safe_list(profile.get("custom_sources")),
         "alert_threshold": alert_threshold,
         "risk_threshold": alert_threshold,
+        "urgent_threshold": urgent_threshold,
+        "weekly_threshold": weekly_threshold,
+        "digest_cadence": digest_cadence,
         "delivery_preferences": {
-            "urgent_threshold": 80,
-            "weekly_threshold": 50,
+            "urgent_threshold": urgent_threshold,
+            "weekly_threshold": weekly_threshold,
+            "digest_cadence": digest_cadence,
         },
         "telegram_alerts_enabled": bool(profile.get("telegram_alerts_enabled")),
         "onboarding_completed": bool(profile.get("onboarding_completed")),

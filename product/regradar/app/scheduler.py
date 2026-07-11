@@ -85,6 +85,42 @@ def write_heartbeat() -> bool:
         return False
 
 
+def run_deadline_reminder_pass(base_dir: Path | None = None) -> dict:
+    """Best-effort daily deadline-reminder pass.
+
+    Delegates to ``app.deadline_radar.send_due_reminders`` (which is itself
+    idempotent per lead stage, so calling it more than once a day is safe — it
+    only sends a stage that has newly become due). Never raises; a failure here
+    must never break the watch loop.
+    """
+    try:
+        from app.deadline_radar import send_due_reminders
+
+        return send_due_reminders(base_dir=base_dir)
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("deadline reminder pass failed (non-fatal): %s", exc)
+        return {"status": "error", "error": str(exc)}
+
+
+def run_digest_dispatch_pass() -> dict:
+    """Best-effort scheduled digest + all-clear heartbeat dispatch.
+
+    Delegates to ``app.digest_cadence.run_scheduled_digests``, which is itself
+    idempotent: instant HIGH/urgent alerts are per-alert idempotent, and
+    daily/weekly bundles + quiet-window heartbeats are idempotent per period
+    (the period key, not this call frequency, enforces the cadence). Safe to run
+    every full cycle. Never raises — a failure here must never break the watch
+    loop.
+    """
+    try:
+        from app.digest_cadence import run_scheduled_digests
+
+        return run_scheduled_digests()
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("digest dispatch pass failed (non-fatal): %s", exc)
+        return {"status": "error", "error": str(exc)}
+
+
 def get_sources_by_priority(priority: str) -> list[dict]:
     """
     Return all enabled sources that have the given monitoring_priority value.
@@ -270,6 +306,9 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
     # current from the first moment the process is alive (desirable for
     # reliability, not a bug).
     last_full_run_at: float = 0.0
+    # Deadline reminders run at most once per UTC calendar day, after a full
+    # cycle. Empty string forces a pass on the first completed cycle.
+    last_deadline_pass_date: str = ""
 
     try:
         while True:
@@ -287,6 +326,35 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
                     # after a full cycle completes without an orchestrator-level
                     # exception, so a wedged/aborted cycle leaves the file stale.
                     write_heartbeat()
+
+                    # Daily deadline-reminder pass (best-effort, once per UTC
+                    # day). Fires 30/7/1-day lead reminders for monitored
+                    # effective/consultation/transition dates through the
+                    # existing customer channels; deduped per lead stage.
+                    today_utc = datetime.now(timezone.utc).date().isoformat()
+                    if today_utc != last_deadline_pass_date:
+                        last_deadline_pass_date = today_utc
+                        dl_summary = run_deadline_reminder_pass()
+                        sent = dl_summary.get("sent") or []
+                        if sent:
+                            print(
+                                f"  {_CYAN}Deadline reminders sent: "
+                                f"{len(sent)} stage(s).{_R}\n"
+                            )
+
+                    # Scheduled digest + all-clear heartbeat dispatch. Runs every
+                    # full cycle; per-period idempotency (not this frequency)
+                    # enforces each customer's daily/weekly cadence, while
+                    # instant HIGH/urgent alerts still fire immediately.
+                    digest_summary = run_digest_dispatch_pass()
+                    dg_sent = int(digest_summary.get("digests_sent") or 0)
+                    hb_sent = int(digest_summary.get("heartbeats_sent") or 0)
+                    inst_sent = int(digest_summary.get("instant_sent") or 0)
+                    if dg_sent or hb_sent or inst_sent:
+                        print(
+                            f"  {_CYAN}Customer delivery: {inst_sent} instant, "
+                            f"{dg_sent} digest(s), {hb_sent} heartbeat(s).{_R}\n"
+                        )
                 except Exception as exc:
                     # Per-source errors are handled inside monitor_all_sources.
                     # This catches unexpected failures at the orchestrator level.

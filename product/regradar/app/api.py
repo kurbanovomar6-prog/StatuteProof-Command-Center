@@ -263,6 +263,33 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_bytes(
+        self,
+        body: bytes,
+        content_type: str,
+        status: int = 200,
+        extra_headers: list[tuple[str, str]] | None = None,
+    ) -> None:
+        """Write a raw binary response (e.g. a ZIP download) exactly once.
+
+        Mirrors _send_json's one-shot guard, CORS, and security headers so a
+        binary download shares the same response discipline.
+        """
+        if getattr(self, "_response_sent", False):
+            return
+        self._response_sent = True
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        for k, v in _cors_headers(self.headers.get("Origin")).items():
+            self.send_header(k, v)
+        for k, v in _SECURITY_HEADERS.items():
+            self.send_header(k, v)
+        for k, v in extra_headers or []:
+            self.send_header(k, v)
+        self.end_headers()
+        self.wfile.write(body)
+
     _MAX_BODY_BYTES = 524_288  # 512 KB — reasonable for all API payloads
 
     def _read_json(self) -> dict:
@@ -515,6 +542,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._disabled_endpoint()
         elif path == "/api/reports/monthly-assurance":
             self._handle_monthly_assurance_report()
+        elif path == "/api/reports/coverage-certificate":
+            self._handle_coverage_certificate()
         elif path in ("/api/health", "/api/"):
             self._handle_health()
         else:
@@ -577,6 +606,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_canonical_evidence_review_action()
         elif path == "/api/audit/vault":
             self._handle_audit_vault()
+        elif path == "/api/evidence/pack":
+            self._handle_evidence_pack()
+        elif path == "/api/change-register/export":
+            self._handle_change_register_export()
         elif path == "/api/alerts/action-log":
             self._handle_alert_action_log_post()
         elif path == "/api/briefs/generate":
@@ -2688,6 +2721,72 @@ class _Handler(BaseHTTPRequestHandler):
             logger.error("monthly-assurance error: %s", type(exc).__name__)
             self._send_json({"status": "error", "message": "Internal server error."}, 500)
 
+    # ── GET /api/reports/coverage-certificate ─────────────────────────────────
+
+    def _handle_coverage_certificate(self) -> None:
+        """Return a negative-assurance coverage certificate (json/markdown/html/pdf).
+
+        Auth-scoped: an unauthenticated caller gets 401. The period is given as
+        either ?year=&month= (a calendar month) or ?period_start=&period_end=
+        (inclusive ISO dates). ?source_ids= restricts the certified sources.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        from app.coverage_certificate import (
+            build_coverage_certificate,
+            month_period,
+            render_coverage_certificate_markdown,
+            render_coverage_certificate_html,
+            generate_coverage_certificate_pdf,
+        )
+
+        parsed = urlparse(self.path)
+        qs = parse_qs(parsed.query)
+        now = datetime.now(timezone.utc)
+        period_start = (qs.get("period_start") or [""])[0].strip()
+        period_end = (qs.get("period_end") or [""])[0].strip()
+        if not (period_start and period_end):
+            try:
+                year = int((qs.get("year") or [str(now.year)])[0])
+                month = int((qs.get("month") or [str(now.month)])[0])
+                if not 1 <= month <= 12:
+                    raise ValueError("month out of range")
+                period_start, period_end = month_period(year, month)
+            except (ValueError, IndexError):
+                self._send_json({"status": "error", "message": "Invalid period."}, 400)
+                return
+
+        source_ids_raw = (qs.get("source_ids") or [""])[0]
+        source_ids = [s.strip() for s in source_ids_raw.split(",") if s.strip()] or None
+        client_name = (qs.get("client_name") or [""])[0]
+        fmt = ((qs.get("format") or ["markdown"])[0]).lower().strip()
+
+        try:
+            certificate = build_coverage_certificate(
+                period_start=period_start,
+                period_end=period_end,
+                source_ids=source_ids,
+                client_name=client_name,
+            )
+            if fmt == "json":
+                self._send_json({"status": "ok", "certificate": certificate})
+            elif fmt == "html":
+                report = render_coverage_certificate_html(certificate)
+                self._send_json({"status": "ok", "report": report, "certificate": certificate})
+            elif fmt == "pdf":
+                pdf_path = generate_coverage_certificate_pdf(certificate)
+                self._send_json({"status": "ok", "report_path": str(pdf_path), "certificate": certificate})
+            else:
+                report = render_coverage_certificate_markdown(certificate)
+                self._send_json({"status": "ok", "report": report, "certificate": certificate})
+        except ValueError as exc:
+            self._send_json({"status": "error", "message": str(exc)}, 400)
+        except Exception as exc:
+            logger.error("coverage-certificate error: %s", type(exc).__name__)
+            self._send_json({"status": "error", "message": "Internal server error."}, 500)
+
     def _handle_canonical_evidence_review_action(self) -> None:
         """Append an approval/rejection/block decision for canonical evidence."""
         user = require_auth(self)
@@ -2769,6 +2868,113 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send_json({"ok": True, **result})
         except Exception as exc:
             logger.error("audit vault error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    # ── POST /api/evidence/pack ───────────────────────────────────────────────
+
+    def _handle_evidence_pack(self) -> None:
+        """Build a self-serve, self-verifiable Evidence Pack ZIP for the client.
+
+        Auth-scoped: an unauthenticated caller gets 401 and no pack. The pack is
+        strictly restricted to the requested source_ids — evidence for any other
+        source is never included. On success the sealed ZIP (manifest.json +
+        standalone verify.py + HOW-TO-VERIFY.md + snapshots + disclaimer) is
+        returned as an application/zip download so the customer's own auditor can
+        re-hash the bytes offline and confirm they match the manifest.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        from pathlib import Path
+        from app.audit_export import validate_date_range
+        from app.evidence_pack import build_evidence_pack
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        source_ids = body.get("source_ids")
+        date_from = str(body.get("date_from") or "").strip()
+        date_to = str(body.get("date_to") or "").strip()
+        if not source_ids or not isinstance(source_ids, list):
+            self._send_json({"ok": False, "message": "source_ids must be a non-empty list."}, 400)
+            return
+        valid, err = validate_date_range(date_from, date_to)
+        if not valid:
+            self._send_json({"ok": False, "message": err}, 400)
+            return
+        try:
+            result = build_evidence_pack(source_ids, date_from, date_to)
+            status = result.get("status")
+            if status == "error":
+                self._send_json({"ok": False, "message": result.get("message", "Failed to build evidence pack.")}, 500)
+                return
+            if status == "empty":
+                self._send_json({"ok": False, **result}, 404)
+                return
+            pack_path = Path(str(result.get("pack_path") or ""))
+            if not pack_path.exists():
+                self._send_json({"ok": False, "message": "Evidence pack was not generated."}, 500)
+                return
+            filename = result.get("pack_filename") or pack_path.name
+            self._send_bytes(
+                pack_path.read_bytes(),
+                "application/zip",
+                extra_headers=[("Content-Disposition", f'attachment; filename="{filename}"')],
+            )
+        except Exception as exc:
+            logger.error("evidence pack error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    # ── POST /api/change-register/export ──────────────────────────────────────
+
+    def _handle_change_register_export(self) -> None:
+        """Export the regulatory change register (CSV + XLSX + HTML).
+
+        Auth-guarded; the act/monitor/no_action decision column is scoped to the
+        requesting client's own action log (user id). Supports an optional date
+        range and optional source_id / regulator filter. An empty range yields an
+        empty-but-valid register rather than an error.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        from app.change_register import build_change_register_export, validate_register_date_range
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        date_from = str(body.get("date_from") or "").strip()
+        date_to = str(body.get("date_to") or "").strip()
+        source_id = str(body.get("source_id") or "").strip()
+        regulator = str(body.get("regulator") or body.get("regulator_code") or "").strip()
+        export_format = str(body.get("format") or "all").strip() or "all"
+        valid, err = validate_register_date_range(date_from, date_to)
+        if not valid:
+            self._send_json({"ok": False, "message": err}, 400)
+            return
+        try:
+            result = build_change_register_export(
+                user_id=int(user["id"]),
+                date_from=date_from,
+                date_to=date_to,
+                source_id=source_id,
+                regulator=regulator,
+                export_format=export_format,
+            )
+            if result.get("status") == "error":
+                self._send_json({"ok": False, **result}, 400)
+            else:
+                self._send_json({"ok": True, **result})
+        except Exception as exc:
+            logger.error("change register export error: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
 

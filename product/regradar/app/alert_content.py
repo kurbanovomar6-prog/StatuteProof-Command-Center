@@ -22,6 +22,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
+from app.client_profiles import _norm_topic, source_metadata_for_alert
 from app.text_quality import strip_unreadable_chars, unreadable_ratio
 
 FOOTER = "Monitoring information only. Not legal advice."
@@ -141,8 +142,146 @@ def _severity_line(risk_level: str, details: dict) -> str:
     )
 
 
-def build_alert_content(payload: dict[str, Any]) -> dict[str, Any]:
-    """Build channel-independent alert content from a pipeline alert payload."""
+# ── "Does this affect me?" impact tag (LIGHT — not an RTM platform) ──────────
+# When the matched source's topics intersect the customer's profile topics we
+# add a short, monitoring-info impact tag. It is strictly additive: with no
+# profile, no topics_in_scope, no topic overlap, or no readable diff excerpt,
+# nothing is emitted and the alert body is unchanged. Topic slugs are the same
+# ones scored in app/client_profiles.py and normalized with the SAME helper, so
+# the two layers can never disagree on what a topic is.
+_TOPIC_LABELS = {
+    "aml_cft": "AML/CFT",
+    "suspicious_transactions": "suspicious transactions",
+    "crypto_vasp": "VASP / virtual assets",
+    "custody": "custody",
+    "exchange": "exchange",
+    "brokerage": "brokerage",
+    "licensing": "licensing",
+    "commercial_licensing": "commercial licensing",
+    "payments": "payments",
+    "stored_value": "stored value",
+    "reporting": "reporting",
+    "deadlines": "deadlines",
+    "banking": "banking",
+    "financial_services": "financial services",
+    "securities": "securities",
+    "funds": "funds",
+    "consultations": "consultations",
+    "enforcement": "enforcement",
+    "guidance": "guidance",
+    "data_protection": "data protection",
+    "tax": "tax",
+    "vat": "VAT",
+    "corporate_tax": "corporate tax",
+    "excise": "excise",
+    "capital_markets": "capital markets",
+    "public_companies": "public companies",
+    "legislation": "legislation",
+    "decrees": "decrees",
+    "difc_laws": "DIFC laws",
+    "legal_framework": "legal framework",
+    "company_law": "company law",
+    "beneficial_ownership": "beneficial ownership",
+    "finance": "finance",
+    "fiscal_policy": "fiscal policy",
+}
+
+# Keep the tag readable: show at most this many topic labels, then "(+N more)".
+_IMPACT_TOPIC_CAP = 4
+
+
+def _topic_label(slug: str) -> str:
+    return _TOPIC_LABELS.get(slug, slug.replace("_", " "))
+
+
+def _contains_forbidden(text: str) -> bool:
+    """Reuse the single forbidden-phrase guard (app/monthly_assurance_report).
+
+    Imported lazily so the alert path never asserts a claim we ban anywhere
+    else in customer-facing output. Applied ONLY to the impact strings (never
+    the whole message), because the mandatory footer legitimately contains the
+    words "legal advice".
+    """
+    from app.monthly_assurance_report import _FORBIDDEN_PHRASES
+
+    low = str(text or "").lower()
+    return any(phrase in low for phrase in _FORBIDDEN_PHRASES)
+
+
+def _build_impact(
+    payload: dict[str, Any],
+    client_profile: dict[str, Any] | None,
+    excerpt: str,
+) -> dict[str, Any] | None:
+    """Emit a per-customer impact tag when source topics overlap profile topics.
+
+    Returns ``None`` (no tag, unchanged alert) whenever the feature does not
+    apply: no profile, no ``topics_in_scope``, no topic overlap, or — critically
+    for evidence-grounding — no real, readable diff excerpt to point the reader
+    at. The "what changed" reference is the SAME ``excerpt`` already built from
+    the actual diff; nothing here asserts a change that the diff does not show.
+    """
+    if not client_profile:
+        return None
+    profile_topics = {
+        _norm_topic(t) for t in (client_profile.get("topics_in_scope") or []) if str(t).strip()
+    }
+    if not profile_topics:
+        return None
+
+    source_meta = source_metadata_for_alert(payload)
+    source_topics = {
+        _norm_topic(t) for t in (source_meta.get("topics") or []) if str(t).strip()
+    }
+    matched = sorted(source_topics & profile_topics)
+    if not matched:
+        return None
+
+    # Evidence-grounding gate: the impact line tells the reader to "review the
+    # excerpt", so it may only be emitted when a real, readable excerpt exists.
+    # No diff (or an unreadable one) → no impact claim.
+    if not excerpt or excerpt == _UNREADABLE_EXCERPT_NOTE:
+        return None
+
+    labels = [_topic_label(t) for t in matched]
+    shown = labels[:_IMPACT_TOPIC_CAP]
+    extra = len(labels) - len(shown)
+    topic_str = ", ".join(shown)
+    if extra:
+        topic_str += f" (+{extra} more)"
+
+    tag = f"May affect: {topic_str}"
+    line = (
+        f"This change may be relevant to your {topic_str}; "
+        "review the excerpt and source."
+    )
+
+    # Fail safe: never surface an impact tag that trips the forbidden-claims
+    # guard (the phrasing is fixed and safe, but the guard is authoritative).
+    if _contains_forbidden(tag) or _contains_forbidden(line):
+        return None
+
+    return {
+        "impact_tag": tag,
+        "impact_line": line,
+        "impact_topics": matched,
+        # The "what changed" evidence is the real diff excerpt itself — carried
+        # verbatim, never re-summarized or fabricated.
+        "impact_what_changed": excerpt,
+    }
+
+
+def build_alert_content(
+    payload: dict[str, Any],
+    client_profile: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build channel-independent alert content from a pipeline alert payload.
+
+    ``client_profile`` is optional. When supplied (a customer whose
+    ``topics_in_scope`` overlap the source's topics), a "Does this affect me?"
+    impact tag is added. Omitting it — the default — leaves the alert body
+    byte-for-byte unchanged.
+    """
     details = payload.get("risk_details") or {}
     risk_level = str(payload.get("risk_level") or "UNKNOWN").upper()
 
@@ -190,6 +329,11 @@ def build_alert_content(payload: dict[str, Any]) -> dict[str, Any]:
         summary = _clean(details.get("reason") or payload.get("risk_reason") or "")
     if summary:
         content["summary"] = summary
+
+    # Additive per-customer impact tag (no-op when it does not apply).
+    impact = _build_impact(payload, client_profile, content["excerpt"])
+    if impact:
+        content.update(impact)
     return content
 
 
@@ -206,6 +350,9 @@ def render_telegram(content: dict[str, Any]) -> str:
         lines.append(f"*Checked:* {content['checked_at']}")
     if content.get("excerpt"):
         lines.append(f"*What changed (excerpt):*\n{content['excerpt']}")
+    if content.get("impact_tag"):
+        lines.append(f"*{content['impact_tag']}*")
+        lines.append(f"_{content['impact_line']}_")
     if content.get("summary"):
         lines.append(f"*Summary:* {content['summary']}")
     if content.get("facts_lines"):
@@ -239,6 +386,10 @@ def render_markdown(content: dict[str, Any]) -> str:
         lines.append("")
         lines.append("**What changed (excerpt):**")
         lines.append(f"> {content['excerpt']}")
+    if content.get("impact_tag"):
+        lines.append("")
+        lines.append(f"**{content['impact_tag']}**")
+        lines.append(content["impact_line"])
     if content.get("summary"):
         lines.append("")
         lines.append(f"**Summary:** {content['summary']}")

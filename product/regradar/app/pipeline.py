@@ -1090,6 +1090,41 @@ def run_pipeline_for_source(source: dict) -> dict:
                 except Exception as _ad_err:
                     logger.warning("Alert draft failed (non-fatal): %s", _ad_err)
 
+                # ── Deadline radar: persist any concrete FUTURE date the change
+                # carries, keyed by the durable evidence record (run_id). Only
+                # dates extracted from the real ADDED diff excerpt are stored
+                # (evidence-grounded). Best-effort — never blocks the pipeline.
+                try:
+                    from pathlib import Path as _Path2
+                    import app.source_runs as _sr_mod2
+                    from app.deadline_radar import record_deadlines_for_change
+
+                    # Resolve the register base dir from source_runs so the
+                    # deadline register always lives alongside the trail it keys
+                    # off (and follows the same isolation in tests/deploys).
+                    persisted_deadlines = record_deadlines_for_change(
+                        evidence_record_id=final_record.get("run_id", ""),
+                        source_id=final_record.get("source_id", ""),
+                        regulator=(
+                            source.get("regulator")
+                            or source.get("family")
+                            or source.get("jurisdiction")
+                            or ""
+                        ),
+                        source_name=source.get("name", ""),
+                        official_url=source.get("url", ""),
+                        added_blocks=result.get("added", []),
+                        base_dir=_Path2(_sr_mod2._BASE_DIR),
+                    )
+                    if persisted_deadlines:
+                        logger.info(
+                            "Deadline radar: recorded %d deadline(s): source=%s run_id=%s",
+                            len(persisted_deadlines), source.get("name"),
+                            final_record.get("run_id"),
+                        )
+                except Exception as _dl_err:
+                    logger.warning("Deadline radar persist failed (non-fatal): %s", _dl_err)
+
         except Exception as _sr_err:
             logger.warning("source_runs.append_run failed (non-fatal): %s", _sr_err)
 

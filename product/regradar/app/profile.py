@@ -15,6 +15,61 @@ from app.regulator_map import REGULATOR_CODES
 # allow-list so profile validation and routing stay in lock-step.
 ALLOWED_REGULATOR_CODES: frozenset[str] = frozenset(REGULATOR_CODES)
 
+# ── Digest cadence + delivery thresholds ─────────────────────────────────────
+#
+# These promote what used to be hardcoded routing constants
+# (alert_routing.user_profile_to_routing_profile) into real per-user profile
+# fields. They are relevance-SCORE thresholds (0-100, matching
+# alert_routing.score_alert_for_user), NOT risk levels:
+#   * urgent_threshold — score at/above which a matched alert is treated as
+#     urgent and delivered instantly (in addition to any HIGH-risk alert).
+#   * weekly_threshold — score at/above which a matched alert is bundled into
+#     the periodic digest.
+# digest_cadence controls how non-urgent matched alerts are bundled:
+#   * instant — only instant HIGH-risk/urgent alerts; no periodic digest.
+#   * daily   — HIGH/urgent fire instantly; the rest bundle once per UTC day.
+#   * weekly  — HIGH/urgent fire instantly; the rest bundle once per ISO week.
+CADENCE_INSTANT = "instant"
+CADENCE_DAILY = "daily"
+CADENCE_WEEKLY = "weekly"
+
+DEFAULT_URGENT_THRESHOLD = 80
+DEFAULT_WEEKLY_THRESHOLD = 50
+DEFAULT_DIGEST_CADENCE = CADENCE_DAILY
+ALLOWED_DIGEST_CADENCES: frozenset[str] = frozenset(
+    {CADENCE_INSTANT, CADENCE_DAILY, CADENCE_WEEKLY}
+)
+
+
+def coerce_score_threshold(value, default: int) -> int:
+    """Coerce a stored/loaded threshold into an int clamped to [0, 100].
+
+    Tolerant on READ (a legacy NULL or garbage value falls back to ``default``)
+    so a missing column or bad row never crashes routing. Strict validation for
+    user-supplied WRITES lives in ``_validate_score_threshold``.
+    """
+    try:
+        return max(0, min(100, int(value)))
+    except (TypeError, ValueError):
+        return int(default)
+
+
+def coerce_digest_cadence(value) -> str:
+    """Coerce a stored/loaded cadence into an allowed value (tolerant read)."""
+    cadence = str(value or "").strip().lower()
+    return cadence if cadence in ALLOWED_DIGEST_CADENCES else DEFAULT_DIGEST_CADENCE
+
+
+def _validate_score_threshold(field: str, value) -> int:
+    """Strict validation for a user-supplied score threshold write."""
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"{field} must be an integer between 0 and 100.")
+    if parsed < 0 or parsed > 100:
+        raise ValueError(f"{field} must be between 0 and 100.")
+    return parsed
+
 
 def normalize_regulators(value) -> list[str]:
     """Coerce arbitrary input into an ordered, deduped list of valid codes.
@@ -66,6 +121,9 @@ _CREATE_PROFILE_TABLE = """
         regulators TEXT,
 
         alert_threshold TEXT NOT NULL DEFAULT 'MEDIUM',
+        urgent_threshold INTEGER NOT NULL DEFAULT 80,
+        weekly_threshold INTEGER NOT NULL DEFAULT 50,
+        digest_cadence TEXT NOT NULL DEFAULT 'daily',
         brief_language TEXT NOT NULL DEFAULT 'en',
         weekly_brief_enabled INTEGER NOT NULL DEFAULT 1,
         ai_enabled INTEGER NOT NULL DEFAULT 1,
@@ -88,6 +146,9 @@ _ALLOWED_FIELDS = {
     "custom_sources",
     "regulators",
     "alert_threshold",
+    "urgent_threshold",
+    "weekly_threshold",
+    "digest_cadence",
     "brief_language",
     "weekly_brief_enabled",
     "ai_enabled",
@@ -111,6 +172,15 @@ def ensure_profile_table() -> None:
         columns = {row["name"] for row in conn.execute("PRAGMA table_info(user_profiles)")}
         if "regulators" not in columns:
             conn.execute("ALTER TABLE user_profiles ADD COLUMN regulators TEXT")
+        # Additive digest-cadence migration for pre-existing tables. Each column
+        # carries a NOT NULL DEFAULT so existing rows backfill to the sane
+        # defaults without a data migration.
+        if "urgent_threshold" not in columns:
+            conn.execute("ALTER TABLE user_profiles ADD COLUMN urgent_threshold INTEGER NOT NULL DEFAULT 80")
+        if "weekly_threshold" not in columns:
+            conn.execute("ALTER TABLE user_profiles ADD COLUMN weekly_threshold INTEGER NOT NULL DEFAULT 50")
+        if "digest_cadence" not in columns:
+            conn.execute("ALTER TABLE user_profiles ADD COLUMN digest_cadence TEXT NOT NULL DEFAULT 'daily'")
         conn.commit()
     finally:
         conn.close()
@@ -189,6 +259,9 @@ def _profile_row_to_dict(row) -> dict:
         "custom_sources": _parse_json_list(data.get("custom_sources")),
         "regulators": normalize_regulators(_parse_json_list(data.get("regulators"))),
         "alert_threshold": data.get("alert_threshold") or "MEDIUM",
+        "urgent_threshold": coerce_score_threshold(data.get("urgent_threshold"), DEFAULT_URGENT_THRESHOLD),
+        "weekly_threshold": coerce_score_threshold(data.get("weekly_threshold"), DEFAULT_WEEKLY_THRESHOLD),
+        "digest_cadence": coerce_digest_cadence(data.get("digest_cadence")),
         "brief_language": data.get("brief_language") or "en",
         "weekly_brief_enabled": bool(data.get("weekly_brief_enabled")),
         "ai_enabled": bool(data.get("ai_enabled")),
@@ -297,6 +370,13 @@ def _sanitize_updates(updates: dict[str, Any]) -> dict[str, Any]:
             if threshold not in {"LOW", "MEDIUM", "HIGH"}:
                 raise ValueError("alert_threshold must be LOW, MEDIUM, or HIGH.")
             sanitized[key] = threshold
+        elif key in {"urgent_threshold", "weekly_threshold"}:
+            sanitized[key] = _validate_score_threshold(key, value)
+        elif key == "digest_cadence":
+            cadence = str(value or "").strip().lower()
+            if cadence not in ALLOWED_DIGEST_CADENCES:
+                raise ValueError("digest_cadence must be instant, daily, or weekly.")
+            sanitized[key] = cadence
         elif key == "brief_language":
             language = str(value or "").strip().lower()
             if language not in {"en", "ru", "both"}:

@@ -387,3 +387,31 @@ def get_all_linked_chat_ids() -> list[str]:
             seen.add(chat_id)
             chat_ids.append(chat_id)
     return chat_ids
+
+
+def get_linked_alert_user_ids() -> list[int]:
+    """Return the user_id of every user who has paired a Telegram chat AND left
+    Telegram alerts enabled.
+
+    Used by the scheduled digest dispatcher, which must resolve per-user
+    profiles (cadence + thresholds) — so it needs user_ids, not just chat_ids
+    (as ``get_all_linked_chat_ids`` returns). Ordered by user_id for a
+    deterministic dispatch order. Never raises — returns [] if the table is not
+    yet provisioned.
+    """
+    ensure_telegram_pairing_tables()
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            """
+            SELECT user_id
+            FROM user_profiles
+            WHERE telegram_chat_id IS NOT NULL
+              AND TRIM(telegram_chat_id) != ''
+              AND telegram_alerts_enabled = 1
+            ORDER BY user_id ASC
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+    return [int(row["user_id"]) for row in rows if row["user_id"] is not None]

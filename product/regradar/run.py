@@ -1209,6 +1209,49 @@ def _cmd_coverage_plan(
         print(f"  {_GREEN}HTML exported →{_R} {path}\n")
 
 
+def _cmd_coverage_certificate(
+    period_start: str,
+    period_end: str,
+    *,
+    source_ids: list[str] | None = None,
+    client_name: str = "",
+    json_export: bool = False,
+    html_export: bool = False,
+    pdf_export: bool = False,
+) -> None:
+    """Negative-assurance coverage certificate for a period (per-source continuity)."""
+    from app.coverage_certificate import (
+        build_coverage_certificate,
+        render_coverage_certificate_markdown,
+        export_coverage_certificate_json,
+        export_coverage_certificate_html,
+        generate_coverage_certificate_pdf,
+    )
+
+    try:
+        certificate = build_coverage_certificate(
+            period_start=period_start,
+            period_end=period_end,
+            source_ids=source_ids,
+            client_name=client_name,
+        )
+    except ValueError as exc:
+        print(f"\n  {_RED}✗  {exc}{_R}\n", file=sys.stderr)
+        sys.exit(1)
+
+    print(render_coverage_certificate_markdown(certificate))
+
+    if json_export:
+        path = export_coverage_certificate_json(certificate)
+        print(f"  {_GREEN}JSON exported →{_R} {path}\n")
+    if html_export:
+        path = export_coverage_certificate_html(certificate)
+        print(f"  {_GREEN}HTML exported →{_R} {path}\n")
+    if pdf_export:
+        path = generate_coverage_certificate_pdf(certificate)
+        print(f"  {_GREEN}PDF exported →{_R} {path}\n")
+
+
 def _cmd_test_mapped_deep(limit: int) -> None:
     """Deep batch discovery of mapped sources (no DB, no AI, no Telegram)."""
     from app.source_discovery import discover_source_capabilities
@@ -2103,6 +2146,72 @@ def _cmd_investigate_source(
         print(f"  Remediation: {payload.get('remediation_hint')}")
 
 
+# ── deadlines command ─────────────────────────────────────────────────────────
+
+def _cmd_deadlines(show_all: bool = False, send: bool = False) -> None:
+    """List upcoming effective-date / deadline radar entries.
+
+    Read-only by default. ``--all`` includes past dates; ``--send`` also fires
+    any due lead-time reminders through the existing channels.
+    """
+    from app.deadline_radar import upcoming_deadlines, send_due_reminders
+    from app.evidence_assessment import LEGAL_DISCLAIMER
+
+    _KIND_LABEL = {
+        "effective": "effective",
+        "consultation_close": "consultation",
+        "transition": "transition",
+        "deadline": "deadline",
+    }
+
+    rows = upcoming_deadlines(include_past=show_all)
+
+    _hr()
+    print(f"  {_BOLD}StatuteProof — Effective-date & Deadline Radar{_R}")
+    print(f"  {_DIM}Evidence-grounded monitored dates. {LEGAL_DISCLAIMER}{_R}")
+    _hr()
+
+    if not rows:
+        print(f"  {_DIM}No upcoming deadlines recorded.{_R}\n")
+    else:
+        print(
+            f"  {_BOLD}{'Date':<12}  {'In':>5}  {'Kind':<13}  "
+            f"{'Source':<28}  Evidence record{_R}"
+        )
+        _hr("·")
+        for r in rows:
+            days = r.get("days_until", 0)
+            if isinstance(days, int) and days < 0:
+                col = _DIM
+            elif isinstance(days, int) and days <= 7:
+                col = _RED
+            elif isinstance(days, int) and days <= 30:
+                col = _YELLOW
+            else:
+                col = _GREEN
+            kind = _KIND_LABEL.get(str(r.get("deadline_kind")), str(r.get("deadline_kind") or ""))
+            source = str(r.get("source_name") or r.get("source_id") or "")[:28]
+            ev_id = str(r.get("evidence_record_id") or "")
+            print(
+                f"  {r.get('deadline_date', ''):<12}  "
+                f"{col}{days:>4}d{_R}  {kind:<13}  {source:<28}  {_DIM}{ev_id}{_R}"
+            )
+        _hr("·")
+        print(f"  {len(rows)} deadline(s).\n")
+
+    if send:
+        summary = send_due_reminders()
+        sent = summary.get("sent") or []
+        print(
+            f"  {_GREEN}Reminder pass:{_R} due={summary.get('due', 0)}  "
+            f"sent-stages={len(sent)}  "
+            f"no-recipients={summary.get('skipped_no_recipients', 0)}  "
+            f"failed={summary.get('failed', 0)}\n"
+        )
+
+    sys.exit(0)
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -2120,7 +2229,11 @@ def main() -> None:
         print("  python run.py watch                     watch mode (default 60 min)", file=sys.stderr)
         print("  python run.py watch --interval <min>    watch mode (custom interval)", file=sys.stderr)
         print("  python run.py sources                   list sources", file=sys.stderr)
+        print("  python run.py deadlines                 list upcoming effective-date/deadline radar entries", file=sys.stderr)
+        print("  python run.py deadlines --all           include past dates too", file=sys.stderr)
+        print("  python run.py deadlines --send          list + fire any due lead-time reminders (30/7/1 days)", file=sys.stderr)
         print("  python run.py heartbeat-check           deadman: alert founder if monitor loop is wedged/stale", file=sys.stderr)
+        print("  python run.py digest-run                dispatch per-customer digests + all-clear heartbeats (idempotent per period)", file=sys.stderr)
         print("  python run.py health                    source health diagnostic", file=sys.stderr)
         print("  python run.py demo                      client demo (no DB writes)", file=sys.stderr)
         print("  python run.py demo --send-telegram      demo + Telegram demo alert", file=sys.stderr)
@@ -2277,11 +2390,87 @@ def main() -> None:
             category=cat_filter_p,
         )
 
+    elif cmd == "coverage-certificate":
+        extra = args[1:]
+        cc_start: str | None = None
+        cc_end: str | None = None
+        cc_month: str | None = None
+        cc_client = ""
+        cc_source_ids: list[str] | None = None
+        cc_json = "--json" in extra
+        cc_html = "--html" in extra
+        cc_pdf = "--pdf" in extra
+        _usage = (
+            "  Usage: python run.py coverage-certificate "
+            "(--month YYYY-MM | --start YYYY-MM-DD --end YYYY-MM-DD) "
+            "[--source-ids a,b,c] [--client NAME] [--json] [--html] [--pdf]"
+        )
+        i_ = 0
+        while i_ < len(extra):
+            tok = extra[i_]
+            if tok in ("--json", "--html", "--pdf"):
+                i_ += 1
+            elif tok in ("--start", "--end", "--month", "--client", "--source-ids"):
+                if i_ + 1 >= len(extra):
+                    print(f"Error: {tok} requires a value.\n{_usage}", file=sys.stderr)
+                    sys.exit(2)
+                val = extra[i_ + 1]
+                if tok == "--start":
+                    cc_start = val
+                elif tok == "--end":
+                    cc_end = val
+                elif tok == "--month":
+                    cc_month = val
+                elif tok == "--client":
+                    cc_client = val
+                else:
+                    cc_source_ids = [s.strip() for s in val.split(",") if s.strip()] or None
+                i_ += 2
+            else:
+                print(f"Error: unknown option {tok!r} for 'coverage-certificate'.\n{_usage}", file=sys.stderr)
+                sys.exit(2)
+
+        if cc_month:
+            try:
+                _y, _m = cc_month.split("-", 1)
+                from app.coverage_certificate import month_period as _month_period
+                cc_start, cc_end = _month_period(int(_y), int(_m))
+            except (ValueError, IndexError):
+                print(f"Error: --month must be YYYY-MM.\n{_usage}", file=sys.stderr)
+                sys.exit(2)
+        if not (cc_start and cc_end):
+            print(f"Error: provide --month YYYY-MM or both --start and --end.\n{_usage}", file=sys.stderr)
+            sys.exit(2)
+
+        _cmd_coverage_certificate(
+            cc_start,
+            cc_end,
+            source_ids=cc_source_ids,
+            client_name=cc_client,
+            json_export=cc_json,
+            html_export=cc_html,
+            pdf_export=cc_pdf,
+        )
+
     elif cmd == "sources":
         _cmd_sources()
 
     elif cmd == "all":
         _cmd_all()
+
+    elif cmd == "deadlines":
+        extra = args[1:]
+        show_all = "--all" in extra
+        send = "--send" in extra
+        for tok in extra:
+            if tok not in ("--all", "--send"):
+                print(
+                    f"Error: unknown option {tok!r} for 'deadlines'.\n"
+                    "  Usage: python run.py deadlines [--all] [--send]",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+        _cmd_deadlines(show_all=show_all, send=send)
 
     elif cmd == "compact-heartbeats":
         from app.retention import compact_heartbeats
@@ -2314,6 +2503,23 @@ def main() -> None:
             print("Heartbeat check: STALE/MISSING — founder alerted.", file=sys.stderr)
             sys.exit(1)
         print("Heartbeat check: fresh — monitor is progressing.")
+
+    elif cmd == "digest-run":
+        # Dispatch scheduled per-customer digests + all-clear heartbeats once.
+        # Idempotent per period (daily/weekly) and per-alert for instant sends,
+        # so re-running within a period never double-sends. Also invoked
+        # automatically each full watch cycle.
+        from app.digest_cadence import run_scheduled_digests
+
+        summary = run_scheduled_digests()
+        print(
+            "Digest dispatch: "
+            f"{summary.get('users', 0)} user(s), "
+            f"{summary.get('instant_sent', 0)} instant, "
+            f"{summary.get('digests_sent', 0)} digest(s), "
+            f"{summary.get('heartbeats_sent', 0)} heartbeat(s), "
+            f"{summary.get('errors', 0)} error(s)."
+        )
 
     elif cmd == "health":
         _cmd_health()
@@ -3564,7 +3770,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config",
+            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config",
             file=sys.stderr,
         )
         sys.exit(2)

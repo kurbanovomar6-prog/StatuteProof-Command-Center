@@ -88,6 +88,98 @@ def derive_urgency_from_text(diff_text: str) -> str:
             return urgency
     return "MONITOR"
 
+
+# ── Deadline-date capture (additive — feeds app.deadline_radar) ───────────────
+# The urgency matcher above throws away the concrete date it matched. The
+# effective-date / deadline radar needs that date. These patterns mirror the
+# urgency ladder but CAPTURE the concrete calendar-date span (named group
+# "date") and tag a deadline KIND so the radar can persist an evidence-grounded
+# deadline. `_URGENCY_PATTERNS` and `derive_urgency_from_text` above are left
+# untouched — existing callers keep their exact behaviour.
+
+_DL_MONTHS = (
+    "january|february|march|april|may|june|july|august|"
+    "september|october|november|december"
+)
+# Absolute (parseable) calendar-date forms only. "within N days" is deliberately
+# excluded here: without an anchor date it is not a concrete date the radar can
+# persist. A bare "Month YYYY" is accepted (the radar resolves it to a concrete
+# end-of-month date) so "effective from September 2026" is not silently dropped.
+_DL_DATE = (
+    r"(?P<date>"
+    r"\d{1,2}\s+(?:" + _DL_MONTHS + r")\s+\d{4}"          # 1 September 2026
+    r"|(?:end\s+of\s+)?(?:" + _DL_MONTHS + r")\s+\d{4}"    # (end of) September 2026
+    r"|\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}"                  # 01/09/2026
+    r"|\d{4}-\d{2}-\d{2}"                                  # 2026-09-01
+    r")"
+)
+
+# (pattern, urgency_hint, deadline_kind). Ordered most-specific first so a
+# consultation/transition date is not mislabelled as a bare "deadline".
+_URGENCY_DATE_PATTERNS: list[tuple["re.Pattern", str, str]] = [
+    (re.compile(r"consultation[^.\n]{0,40}?clos\w*\s+(?:on\s+)?" + _DL_DATE, re.I),
+     "WITHIN_30_DAYS", "consultation_close"),
+    (re.compile(r"(?:comments?|responses?|submissions?)[^.\n]{0,40}?"
+                r"(?:due|clos\w*)\s+(?:by\s+|on\s+)?" + _DL_DATE, re.I),
+     "WITHIN_30_DAYS", "consultation_close"),
+    (re.compile(r"transition(?:al)?\s+period[^.\n]{0,40}?"
+                r"(?:ends?|until|expir\w*)\s+(?:on\s+)?" + _DL_DATE, re.I),
+     "WITHIN_30_DAYS", "transition"),
+    (re.compile(r"(?:comes?\s+into\s+force|commenc\w*|takes?\s+effect|in\s+force)\s+"
+                r"(?:on|from|as\s+of)\s+" + _DL_DATE, re.I),
+     "IMMEDIATE", "effective"),
+    (re.compile(r"effective\s+(?:from|as\s+of|on)\s+" + _DL_DATE, re.I),
+     "IMMEDIATE", "effective"),
+    (re.compile(r"(?:no\s+later\s+than|due\s+(?:by|on)|by)\s+" + _DL_DATE, re.I),
+     "WITHIN_30_DAYS", "deadline"),
+]
+
+
+def derive_urgency_and_dates(diff_text: str) -> tuple[str, list[dict[str, str]]]:
+    """Return ``(urgency_label, captured_dates)``.
+
+    ``urgency_label`` is IDENTICAL to ``derive_urgency_from_text(diff_text)`` —
+    the existing first-match-wins ladder is preserved, so existing callers are
+    unaffected. ``captured_dates`` is the NEW additive payload: every concrete
+    calendar date the deadline patterns match, each as::
+
+        {"date_text": str, "kind": str, "urgency": str, "excerpt": str}
+
+    where ``kind`` is one of ``effective | consultation_close | transition |
+    deadline``. Results are deduplicated on ``(kind, normalized date_text)`` and
+    order-preserving. ``excerpt`` is a bounded window of the surrounding text so
+    the persisted deadline can prove where it came from. Never raises; empty or
+    dateless text yields ``(<urgency>, [])``.
+    """
+    urgency = derive_urgency_from_text(diff_text)
+    if not diff_text:
+        return urgency, []
+
+    captured: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for pattern, date_urgency, kind in _URGENCY_DATE_PATTERNS:
+        for match in pattern.finditer(diff_text):
+            date_text = " ".join((match.group("date") or "").split())
+            if not date_text:
+                continue
+            key = (kind, date_text.lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            start = max(0, match.start() - 48)
+            end = min(len(diff_text), match.end() + 48)
+            excerpt = " ".join(diff_text[start:end].split())
+            captured.append(
+                {
+                    "date_text": date_text,
+                    "kind": kind,
+                    "urgency": date_urgency,
+                    "excerpt": excerpt,
+                }
+            )
+    return urgency, captured
+
+
 # F4: matching is WORD-BOUNDED (see _match_terms) — Phase-0 replay proved
 # substring matching fired 'ban' inside 'bank' on both CBUAE recorded false
 # HIGHs (docs/signal/SIGNAL_QUALITY.md §A defect 1). Topic terms measured as
