@@ -824,18 +824,22 @@ def _truthy(value: str | None) -> bool:
 
 
 def _safe_status_row(row: dict[str, Any]) -> dict[str, Any]:
+    # CROSS-TENANT SAFETY: build_email_status_response surfaces the LAST row of a
+    # single GLOBAL delivery_status.jsonl to any authenticated caller, so this
+    # allowlist must expose ONLY channel/config health — never per-send content.
+    # ``recipient_email`` (another tenant's PII), ``subject`` (embeds a private
+    # custom source's name, e.g. "Monitoring Brief — <source_name>"),
+    # ``outbox_path`` and ``error_message`` (an SMTP bounce can echo a recipient)
+    # are deliberately excluded. A user's own send details live in the per-user
+    # scoped get_user_delivery_logs(user_id), not here.
     allowed = {
         "ok",
         "channel",
         "provider",
         "status",
-        "recipient_email",
-        "subject",
-        "outbox_path",
         "created_at",
         "external_send",
         "missing_config",
-        "error_message",
     }
     safe = {key: value for key, value in row.items() if key in allowed}
     for key in SECRET_ENV_NAMES:

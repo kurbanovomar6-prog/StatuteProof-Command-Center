@@ -85,6 +85,21 @@ def test_mixed_batch_scopes_each_entry(monkeypatch, tmp_path):
     assert by_source["official-X"] == {"chatOwner", "chatAttacker"}
 
 
+def test_blank_source_id_entry_reaches_nobody(monkeypatch, tmp_path):
+    """A due entry with no source_id is unattributable — it must never broadcast
+    its (potentially private) source_name/url/diff excerpt."""
+    blank = dict(_CUSTOM_ENTRY, source_id="")
+    monkeypatch.setattr("app.source_intake.load_sources_json", lambda: list(_SOURCES))
+    monkeypatch.setattr(deadline_radar, "due_reminders", lambda **k: [dict(blank)])
+    monkeypatch.setattr(deadline_radar, "render_reminder_message", lambda e: "unattributable reminder")
+    monkeypatch.setattr("app.telegram_pairing.get_all_linked_chat_ids", lambda: ["chatOwner", "chatAttacker"])
+    monkeypatch.setattr("app.telegram_pairing.get_alert_chat_ids_for_user", lambda uid: ["chatOwner"])
+    sent: list = []
+    result = deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=lambda c, m: sent.append(c) or True)
+    assert sent == []
+    assert result["skipped_no_recipients"] >= 1
+
+
 def test_custom_source_no_owner_reaches_nobody(monkeypatch, tmp_path):
     orphan = dict(_CUSTOM_ENTRY, source_id="custom-Z")
     monkeypatch.setattr("app.source_intake.load_sources_json", lambda: [{"source_id": "custom-Z", "custom": True}])

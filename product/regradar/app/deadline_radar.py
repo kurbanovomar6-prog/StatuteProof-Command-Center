@@ -640,12 +640,17 @@ def send_due_reminders(
         # unavailable) goes to NOBODY — never broadcast. The ``custom-`` prefix
         # is a fail-closed belt so this holds even if sources.json is unreadable.
         sid = str(entry.get("source_id") or "").strip()
-        looks_custom = sid.startswith("custom-") or (_tenancy_ok and bool(sid) and is_custom_source(sid))
-        if looks_custom:
-            owner = custom_source_owner(sid) if _tenancy_ok else None
-            entry_recipients = get_alert_chat_ids_for_user(owner) if (_tenancy_ok and owner is not None) else []
+        if not sid:
+            # Unattributable entry (no source_id): its source_name/official_url/
+            # diff excerpt cannot be confirmed shareable, so never broadcast it.
+            entry_recipients = []
         else:
-            entry_recipients = broadcast_recipients
+            looks_custom = sid.startswith("custom-") or (_tenancy_ok and is_custom_source(sid))
+            if looks_custom:
+                owner = custom_source_owner(sid) if _tenancy_ok else None
+                entry_recipients = get_alert_chat_ids_for_user(owner) if (_tenancy_ok and owner is not None) else []
+            else:
+                entry_recipients = broadcast_recipients
 
         if not entry_recipients:
             summary["skipped_no_recipients"] += 1
