@@ -347,6 +347,32 @@ def test_canonical_review_action_write_idor_blocked(monkeypatch, tmp_path):
     assert _status(h2) != 403
 
 
+def test_evidence_export_guard_covers_canonical_id_space(monkeypatch, tmp_path):
+    """Round-6 finding: the customer-delivery export branch resolves via
+    load_evidence_record (canonical record_id / path space), so the export scope
+    guard _evidence_source_out_of_scope must resolve THAT space too — else a
+    canonical record_id/path bypasses the guard while the export path resolves it
+    to a victim's custom source.
+    """
+    _seed_victim_run(tmp_path)
+    _seed_canonical_record(tmp_path)
+    monkeypatch.setattr(evidence_records, "_BASE_DIR", tmp_path)
+    monkeypatch.setattr(evidence_assessment, "_BASE_DIR", tmp_path)
+    _patch_sources(monkeypatch)
+
+    attacker = {"id": _ATTACKER_ID}
+    h = _make_handler("GET", "/api/evidence/export")
+    # run_id space (already covered), canonical record_id space, and path space
+    # are all now denied for the non-owner.
+    assert h._evidence_source_out_of_scope(attacker, "r-A") is True
+    assert h._evidence_source_out_of_scope(attacker, "rec-A") is True
+    assert h._evidence_source_out_of_scope(attacker, "evidence/custom-A/run-1/evidence-record.json") is True
+    # Owner is not denied in any id space (scoped, not a blanket block).
+    owner = {"id": _OWNER_ID}
+    assert h._evidence_source_out_of_scope(owner, "rec-A") is False
+    assert h._evidence_source_out_of_scope(owner, "r-A") is False
+
+
 def test_canonical_review_action_path_form_idor_blocked(monkeypatch, tmp_path):
     """Round-5 finding: the guard must resolve the record the SAME way the write
     does (via load_evidence_record), so addressing it by its raw

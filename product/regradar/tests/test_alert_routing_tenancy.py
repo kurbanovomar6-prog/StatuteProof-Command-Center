@@ -91,6 +91,28 @@ def test_candidate_pool_unscoped_when_no_user(monkeypatch):
     assert _ids(both) == {"custom-A", "official-X"}
 
 
+def test_pool_drops_blank_source_id_under_scoping(monkeypatch):
+    """Round-6 finding: the pool filter must fail CLOSED — a draft with a blank/
+    missing source_id (unattributable, but carrying private source_name/url/
+    summary) must be dropped under user scoping, not passed through."""
+    monkeypatch.setattr("app.source_intake.load_sources_json", lambda: list(_SOURCES))
+    blank = {"alert_id": "draft-blank", "source_id": "", "source_name": _VICTIM_NAME,
+             "source_url": _VICTIM_URL, "risk_level": "HIGH", "executive_summary": "leak",
+             "detected_at": "2026-07-01T00:00:00Z"}
+    monkeypatch.setattr("app.alert_review.list_alert_drafts", lambda *a, **k: [dict(blank)])
+    monkeypatch.setattr(
+        "app.alert_review.latest_review_for",
+        lambda alert_id, *a, **k: {"new_status": "APPROVED_FOR_URGENT", "reviewed_at_utc": "2026-07-02T00:00:00Z"},
+    )
+    monkeypatch.setattr(alert_routing, "_get_approved_statuses", lambda: {"APPROVED_FOR_URGENT", "APPROVED_FOR_WEEKLY"})
+
+    # Scoped to any user → the blank-source_id draft is dropped (fail closed).
+    assert alert_routing.load_approved_alert_candidates(days=30, user_id=_ATTACKER_ID) == []
+    assert alert_routing.load_approved_alert_candidates(days=30, user_id=_OWNER_ID) == []
+    # Unscoped (internal/backward-compat) keeps it — no behavior change there.
+    assert len(alert_routing.load_approved_alert_candidates(days=30)) == 1
+
+
 def test_preview_builder_passes_user_id_to_pool(monkeypatch):
     """Wiring guard: build_routing_preview_for_user must scope the pool to the
     target user, else preview/send/digest silently re-globalise the pool.

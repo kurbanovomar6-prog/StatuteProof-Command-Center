@@ -75,6 +75,61 @@ def denied_custom_source_ids(user_id: object) -> set[str]:
     return denied
 
 
+def is_custom_source(source_id: object) -> bool:
+    """True when ``source_id`` is a customer's PRIVATE custom source.
+
+    Custom source_ids follow the deterministic ``"custom-" + sha256(url)[:8]``
+    convention (see ``_handle_custom_sources_add``), so this holds even when
+    ``sources.json`` is unreadable — which makes the automated-delivery path
+    fail CLOSED (a ``custom-`` source is never mistaken for a shareable official
+    one just because the source list could not be read). Also True when a
+    resolvable row is explicitly flagged ``custom``.
+    """
+    sid = str(source_id or "").strip()
+    if not sid:
+        return False
+    if sid.startswith("custom-"):
+        return True
+    try:
+        from app.source_intake import load_sources_json
+
+        for s in load_sources_json():
+            if isinstance(s, dict) and str(s.get("source_id") or "").strip() == sid:
+                return s.get("custom") is True
+    except Exception:  # noqa: BLE001 — unreadable list → treat as non-custom (prefix already handled)
+        return False
+    return False
+
+
+def custom_source_owner(source_id: object) -> int | None:
+    """Return the ``owner_user_id`` of a custom source, or None.
+
+    None means the source is official/shared, unknown, or a custom source whose
+    owner cannot be resolved to an int. Callers on the delivery path must treat
+    a None owner for a ``is_custom_source`` id as "deliver to nobody" (fail
+    closed), never as "broadcast".
+    """
+    sid = str(source_id or "").strip()
+    if not sid:
+        return None
+    try:
+        from app.source_intake import load_sources_json
+
+        for s in load_sources_json():
+            if (
+                isinstance(s, dict)
+                and str(s.get("source_id") or "").strip() == sid
+                and s.get("custom") is True
+            ):
+                try:
+                    return int(s.get("owner_user_id"))
+                except (TypeError, ValueError):
+                    return None
+    except Exception:  # noqa: BLE001 — unreadable list → unattributable
+        return None
+    return None
+
+
 def source_visible_to(user_id: object, source_id: str) -> bool:
     """False only when ``source_id`` is a custom source owned by another user.
 

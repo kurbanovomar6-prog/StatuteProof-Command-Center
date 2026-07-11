@@ -27,19 +27,41 @@ from app import telegram_settings as _ts
 # Customer delivery helper
 # ---------------------------------------------------------------------------
 
-def _deliver_alert_to_subscribed_users(message: str) -> int:
+def _deliver_alert_to_subscribed_users(message: str, *, source_id: object = None) -> int:
     """
-    Send a formatted alert message to every subscribed customer via the
-    ALERTS bot (token = TELEGRAM_ALERTS_BOT_TOKEN).
+    Send a formatted alert message to subscribed customers via the ALERTS bot
+    (token = TELEGRAM_ALERTS_BOT_TOKEN).
 
-    Returns the number of users successfully reached.
-    Falls back to 0 without raising if anything goes wrong.
+    TENANCY (critical): a change on a customer's PRIVATE custom source must be
+    delivered ONLY to that source's owner — never broadcast to every paired
+    account. When ``source_id`` is a custom source, delivery is restricted to
+    the owner's alerts-enabled chat(s); a custom source with no resolvable owner
+    delivers to NOBODY (fail closed) rather than broadcasting. Official / shared
+    sources (and calls with no source_id, e.g. legacy) broadcast to all paired
+    accounts as before.
+
+    Returns the number of users successfully reached. Falls back to 0 without
+    raising if anything goes wrong.
     """
     try:
-        from app.telegram_pairing import get_all_linked_chat_ids
-        chat_ids = get_all_linked_chat_ids()
+        from app.telegram_pairing import get_alert_chat_ids_for_user, get_all_linked_chat_ids
+        from app.tenancy import custom_source_owner, is_custom_source
+
+        if source_id is not None and is_custom_source(source_id):
+            owner_id = custom_source_owner(source_id)
+            if owner_id is None:
+                # Custom source we cannot attribute → never broadcast a private
+                # source's content. Deliver to nobody.
+                logger.warning(
+                    "telegram: custom source %s has no resolvable owner — alert not broadcast",
+                    str(source_id),
+                )
+                return 0
+            chat_ids = get_alert_chat_ids_for_user(owner_id)
+        else:
+            chat_ids = get_all_linked_chat_ids()
     except Exception as exc:
-        logger.debug("_deliver_alert_to_subscribed_users: could not fetch linked chat_ids: %s", exc)
+        logger.debug("_deliver_alert_to_subscribed_users: could not resolve recipients: %s", exc)
         return 0
 
     if not chat_ids:
@@ -286,7 +308,11 @@ def send_telegram_alert(result: dict) -> bool:
     # ── Step 1: deliver to subscribed customers via ALERTS bot ──────────────
     # Falls back to founder chat during pilot phase;
     # production routes through user_delivery / _deliver_alert_to_subscribed_users.
-    users_reached = _deliver_alert_to_subscribed_users(message)
+    # Pass source_id so a PRIVATE custom source's alert is delivered only to its
+    # owner, never broadcast to every paired account (tenancy).
+    users_reached = _deliver_alert_to_subscribed_users(
+        message, source_id=result.get("source_id"),
+    )
     if users_reached > 0:
         logger.info(
             "Telegram alert sent to %d subscribed user(s) via alerts bot — risk=%s url=%s",

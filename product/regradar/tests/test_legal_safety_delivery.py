@@ -232,7 +232,7 @@ def test_clean_confident_non_high_run_still_auto_broadcasts(monkeypatch, tmp_pat
     }
     reached = []
     with patch.object(tg, "_deliver_alert_to_subscribed_users",
-                      side_effect=lambda m: reached.append(m) or 1):
+                      side_effect=lambda m, **kw: reached.append(m) or 1):
         sent = tg.send_telegram_alert(payload)
 
     assert sent is True, "a clean, confident, non-HIGH, non-review run must still deliver"

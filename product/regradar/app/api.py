@@ -181,18 +181,13 @@ def _truthy_param(value: object) -> bool:
 
 
 def _same_owner(owner_user_id: object, user_id: int) -> bool:
-    """True when a stored ``owner_user_id`` matches ``user_id``.
-
-    Tolerant of int-vs-str storage (sources.json is hand-editable), and never
-    raises: an owner value that can't be coerced to an int is treated as a
-    non-match so it is never attributed to the caller.
+    """Thin re-export of :func:`app.tenancy.same_owner` — the single ownership
+    rule. Tolerant of int-vs-str storage and never raises (unresolvable owner →
+    non-match, never attributed to the caller).
     """
-    if owner_user_id is None:
-        return False
-    try:
-        return int(owner_user_id) == int(user_id)
-    except (TypeError, ValueError):
-        return False
+    from app.tenancy import same_owner
+
+    return same_owner(owner_user_id, user_id)
 
 
 class _RateLimiter:
@@ -567,6 +562,26 @@ class _Handler(BaseHTTPRequestHandler):
                 sid = str(assessment.get("source_id") or "").strip()
                 if sid:
                     candidates.add(sid)
+            # The customer-delivery export branch (build_customer_audit_pack_export
+            # _response → build_risk_brief_inputs → load_evidence_record) resolves
+            # a DIFFERENT id-space: a canonical record_id or a raw
+            # evidence-record.json path. Resolve that space here too so the same
+            # value cannot bypass this guard while the export path resolves it to
+            # a victim's custom source (parity with _canonical_record_out_of_scope).
+            try:
+                from app.evidence_records import load_evidence_record
+
+                canonical_record, _cpath = load_evidence_record(evidence_id)
+                src = (
+                    canonical_record.get("source")
+                    if isinstance(canonical_record.get("source"), dict)
+                    else {}
+                )
+                sid = str(src.get("source_id") or "").strip()
+                if sid:
+                    candidates.add(sid)
+            except Exception:  # noqa: BLE001 — not a canonical id/path; export resolves identically
+                pass
         except Exception:  # noqa: BLE001 — let the normal handler path emit 400/404
             return False
         if not candidates:

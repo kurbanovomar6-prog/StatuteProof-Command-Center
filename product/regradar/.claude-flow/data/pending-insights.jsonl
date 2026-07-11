@@ -27,3 +27,14 @@
 {"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/alert_routing.py","success":true,"timestamp":1783782020523,"sessionId":null}
 {"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_evidence_endpoint_tenancy.py","success":true,"timestamp":1783782081723,"sessionId":null}
 {"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_alert_routing_tenancy.py","success":true,"timestamp":1783782108317,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/telegram_pairing.py","success":true,"timestamp":1783783247788,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/tenancy.py","success":true,"timestamp":1783783276496,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/telegram.py","success":true,"timestamp":1783783292080,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/telegram.py","success":true,"timestamp":1783783301125,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/api.py","success":true,"timestamp":1783783321094,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/alert_routing.py","success":true,"timestamp":1783783333935,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/app/api.py","success":true,"timestamp":1783783347053,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_telegram_delivery_tenancy.py","success":true,"timestamp":1783783434079,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_evidence_endpoint_tenancy.py","success":true,"timestamp":1783783447550,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_alert_routing_tenancy.py","success":true,"timestamp":1783783458674,"sessionId":null}
+{"type":"edit","file":"/Users/kurbnovomar/StatuteProof-Command-Center/.claude/worktrees/uplift/product/regradar/tests/test_legal_safety_delivery.py","success":true,"timestamp":1783783537161,"sessionId":null}

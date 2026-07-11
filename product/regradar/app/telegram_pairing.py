@@ -355,6 +355,45 @@ def touch_telegram_test_sent(user_id: int) -> None:
         conn.close()
 
 
+def get_alert_chat_ids_for_user(user_id: int) -> list[str]:
+    """Return the alerts-enabled Telegram chat_id(s) for ONE user.
+
+    Tenancy-scoped delivery helper: used to route a PRIVATE custom source's
+    alert only to its owner, instead of the global broadcast in
+    ``get_all_linked_chat_ids``. Applies the same paired-AND-enabled filter but
+    restricted to ``user_id``. Never raises — returns [] if the user has no
+    paired/enabled chat or the table is not yet provisioned.
+    """
+    try:
+        uid = int(user_id)
+    except (TypeError, ValueError):
+        return []
+    ensure_telegram_pairing_tables()
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            """
+            SELECT telegram_chat_id
+            FROM user_profiles
+            WHERE user_id = ?
+              AND telegram_chat_id IS NOT NULL
+              AND TRIM(telegram_chat_id) != ''
+              AND telegram_alerts_enabled = 1
+            """,
+            (uid,),
+        ).fetchall()
+    finally:
+        conn.close()
+    seen: set[str] = set()
+    chat_ids: list[str] = []
+    for row in rows:
+        chat_id = str(row["telegram_chat_id"]).strip()
+        if chat_id and chat_id not in seen:
+            seen.add(chat_id)
+            chat_ids.append(chat_id)
+    return chat_ids
+
+
 def get_all_linked_chat_ids() -> list[str]:
     """Return the Telegram chat_id of every user who has paired a chat AND
     left Telegram alerts enabled.

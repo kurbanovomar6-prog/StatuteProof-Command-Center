@@ -195,8 +195,14 @@ def load_approved_alert_candidates(days: int = 14, *, user_id: int | None = None
         alert_id = str(draft.get("alert_id") or "").strip()
         if not alert_id:
             continue
-        if denied_source_ids and str(draft.get("source_id") or "").strip() in denied_source_ids:
-            continue
+        if user_id is not None:
+            # Fail CLOSED under user scoping: drop a draft with no resolvable
+            # source_id (it cannot be attributed to a source the user may see, and
+            # its private source_name/url/summary would otherwise pass through) or
+            # one for a custom source the user does not own.
+            draft_sid = str(draft.get("source_id") or "").strip()
+            if not draft_sid or draft_sid in denied_source_ids:
+                continue
         try:
             review = latest_review_for(alert_id)
         except Exception:
