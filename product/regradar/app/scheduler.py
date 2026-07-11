@@ -253,6 +253,15 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
         )
     print(f"  Press {_BOLD}Ctrl+C{_R} to stop.\n")
 
+    # Startup heartbeat. The first full cycle sweeps every source and can take
+    # many minutes; without this the heartbeat file is missing/stale for that
+    # whole window, so a fresh deploy would trip the watchdog and false-alarm
+    # the founder before the first cycle ever completes. Writing it once here,
+    # before the first monitor_all_sources() sweep, closes that startup gap.
+    # End-of-cycle writes below keep it fresh thereafter. Best-effort like all
+    # heartbeat writes — a failure never blocks the loop.
+    write_heartbeat()
+
     cycle = 0
     # Track when we last ran the full cycle so we can decide whether to run
     # critical sources only (sub-cycle) or all sources (full cycle).

@@ -324,6 +324,53 @@ def test_full_cycle_writes_heartbeat(tmp_path, monkeypatch):
     assert hb.exists(), "heartbeat must be written after the first full cycle"
 
 
+def test_heartbeat_written_at_startup_before_first_sweep(tmp_path, monkeypatch):
+    """Deploy gotcha: the first full sweep is long, so writing the heartbeat
+    only at end-of-cycle leaves the file missing for that whole window and the
+    watchdog false-alarms the founder on a fresh deploy. run_watch_loop must
+    write the heartbeat once at startup, BEFORE the first monitor_all_sources
+    call."""
+    import app.scheduler as scheduler
+
+    hb = tmp_path / "data" / "monitor_heartbeat"
+    monkeypatch.setattr(scheduler, "_HEARTBEAT_FILE", hb)
+
+    order: list[str] = []
+
+    def _fake_monitor(**_k):
+        # By the time the first (long) sweep runs, the startup heartbeat must
+        # already be on disk.
+        assert hb.exists(), "startup heartbeat must precede the first sweep"
+        order.append("monitor")
+        return []
+
+    real_write = scheduler.write_heartbeat
+
+    def _tracked_write():
+        order.append("heartbeat")
+        return real_write()
+
+    monkeypatch.setattr(scheduler, "monitor_all_sources", _fake_monitor)
+    monkeypatch.setattr(scheduler, "write_heartbeat", _tracked_write)
+    monkeypatch.setattr(scheduler, "get_sources_by_priority", lambda _p: [])
+    monkeypatch.setattr(scheduler, "_print_cycle_summary", lambda *_a, **_k: None)
+    monkeypatch.setattr(scheduler, "_print_cycle_header", lambda *_a, **_k: None)
+    monkeypatch.setattr(scheduler, "_log_priority_summary", lambda: None)
+
+    def _stop(*_a, **_k):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(scheduler.time, "sleep", _stop)
+
+    scheduler.run_watch_loop(interval_minutes=60)
+
+    assert hb.exists()
+    # A heartbeat write happened, and the first one was before the first sweep.
+    assert order[0] == "heartbeat"
+    assert "monitor" in order
+    assert order.index("heartbeat") < order.index("monitor")
+
+
 def test_check_heartbeat_alerts_when_missing(tmp_path, monkeypatch):
     import app.ops_alert as ops_alert
 

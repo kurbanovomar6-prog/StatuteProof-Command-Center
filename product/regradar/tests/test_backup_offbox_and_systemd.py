@@ -203,6 +203,65 @@ def test_offbox_block_matches_script():
     assert _OFFBOX_BLOCK.strip() in _read(BACKUP_SH)
 
 
+# --- 2b. local-only warning when the remote is unset ------------------------
+
+# Off-box push is the encouraged default, so an unset remote must not be silent:
+# backup.sh warns loudly on stderr each run. This block is separate from the
+# push guard (above), stays non-fatal under errexit, and never emits on stdout.
+_WARN_BLOCK = """\
+if [ -z "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
+  echo "WARNING: STATUTEPROOF_BACKUP_REMOTE is unset — backups are LOCAL-ONLY on this droplet;" >&2
+  echo "WARNING: the evidence trail is NOT protected against droplet loss. Set STATUTEPROOF_BACKUP_REMOTE in .env (see DEPLOY.md § 9) to push each archive off-box." >&2
+fi
+"""
+
+# Warning block followed by a later step, to prove the warning is non-fatal and
+# the rest of the backup (retention, etc.) still runs after it.
+_WARN_THEN_NEXT = _WARN_BLOCK + 'echo next-step-ran\n'
+
+
+def _run_warn(remote: str | None, *, script: str | None = None):
+    """Run the local-only warning block under errexit; return (result)."""
+    env = {"PATH": "/usr/bin:/bin"}
+    if remote is not None:
+        env["STATUTEPROOF_BACKUP_REMOTE"] = remote
+    body = script if script is not None else _WARN_BLOCK
+    return subprocess.run(
+        [BASH, "-c", "set -euo pipefail\n" + body],
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+
+@requires_bash
+def test_local_only_warning_fires_when_remote_unset():
+    """Unset remote -> loud stderr warning, nothing on stdout, clean exit."""
+    result = _run_warn(remote=None, script=_WARN_THEN_NEXT)
+    assert result.returncode == 0, result.stderr
+    assert "WARNING" in result.stderr
+    assert "LOCAL-ONLY" in result.stderr
+    assert "droplet loss" in result.stderr
+    # The warning must not pollute stdout (that stream carries backup paths).
+    assert "WARNING" not in result.stdout
+    # Non-fatal: the following backup step still runs after the warning.
+    assert "next-step-ran" in result.stdout
+
+
+@requires_bash
+def test_local_only_warning_silent_when_remote_set():
+    """Remote set -> no local-only warning (the -z guard is false)."""
+    result = _run_warn(remote="s3:bucket/path", script=_WARN_THEN_NEXT)
+    assert result.returncode == 0, result.stderr
+    assert "LOCAL-ONLY" not in result.stderr
+    assert "next-step-ran" in result.stdout
+
+
+def test_local_only_warning_block_matches_script():
+    """The warning block is present verbatim in backup.sh (drift guard)."""
+    assert _WARN_BLOCK.strip() in _read(BACKUP_SH)
+
+
 def test_backup_sh_gates_on_remote_env_var():
     """The push is guarded by the documented env var, not hardcoded."""
     body = _read(BACKUP_SH)

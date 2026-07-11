@@ -38,10 +38,18 @@ tar -czf "$ARCHIVE" \
 
 echo "backup written: $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
 
-# 3) Optional off-box copy so the archive survives droplet loss. No-op unless
-# STATUTEPROOF_BACKUP_REMOTE is set. Value is an rclone remote (e.g. s3:bucket/path)
-# when rclone is installed, otherwise an scp target (e.g. user@host:/path).
-#
+# 3) Off-box copy so the archive survives droplet loss. STRONGLY RECOMMENDED:
+# an off-box remote is the only thing that protects the evidence trail if the
+# droplet is lost. It stays env-driven (we can't hardcode a remote), so it is a
+# no-op unless STATUTEPROOF_BACKUP_REMOTE is set — but local-only mode is never
+# silent: when the var is UNSET we warn loudly on stderr every run. The value is
+# an rclone remote (e.g. s3:bucket/path) when rclone is installed, otherwise an
+# scp target (e.g. user@host:/path). See DEPLOY.md § 9 for setup.
+if [ -z "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
+  echo "WARNING: STATUTEPROOF_BACKUP_REMOTE is unset — backups are LOCAL-ONLY on this droplet;" >&2
+  echo "WARNING: the evidence trail is NOT protected against droplet loss. Set STATUTEPROOF_BACKUP_REMOTE in .env (see DEPLOY.md § 9) to push each archive off-box." >&2
+fi
+
 # F-MEDIUM: the push is NON-FATAL. Under `set -euo pipefail` a failed rclone/scp
 # (network down, bad creds) would otherwise abort the script BEFORE step 4, so
 # retention pruning would stop running and old backups would pile up. The whole

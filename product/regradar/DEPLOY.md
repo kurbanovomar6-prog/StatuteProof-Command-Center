@@ -118,7 +118,8 @@ cp /srv/regradar/deploy/systemd/statuteproof-*.{service,timer} /etc/systemd/syst
 systemctl daemon-reload
 systemctl enable --now statuteproof-api statuteproof-scheduler \
     statuteproof-telegram-bot statuteproof-compaction.timer \
-    statuteproof-backup.timer statuteproof-heartbeat.timer
+    statuteproof-backup.timer statuteproof-heartbeat.timer \
+    statuteproof-verify.timer
 systemctl status statuteproof-api --no-pager | head -5   # expect: active (running)
 curl -s http://127.0.0.1:5001/api/health                  # expect: {"ok": true, ...}
 ```
@@ -151,10 +152,15 @@ sudo -u regradar bash /srv/regradar/deploy/backup.sh   # first backup now
 systemctl list-timers statuteproof-backup.timer --no-pager   # confirm scheduled
 ```
 
-**Off-box copies (recommended — survives droplet loss).** Backups above are
-kept only on the droplet, so a lost droplet loses the evidence trail. Set
+**Off-box copies (STRONGLY RECOMMENDED — survives droplet loss).** Backups
+above are kept only on the droplet, so a lost droplet loses the entire evidence
+trail. An off-box remote is the single most important backup setting. Set
 `STATUTEPROOF_BACKUP_REMOTE` in `/srv/regradar/.env` (mode 600) to push the
-newest archive off-box each run. The step is a no-op when the var is unset:
+newest archive off-box each run. It stays env-driven (no hardcoded remote), so
+the push is a no-op when the var is unset — but `backup.sh` then **warns loudly
+on stderr / in the journal every run** that backups are local-only and the
+evidence trail is not protected against droplet loss. Point the remote at object
+storage (S3/B2 via rclone) or a separate host (scp):
 
 ```bash
 # rclone remote (preferred; e.g. an S3/B2 bucket) — install rclone + configure it first
@@ -181,7 +187,8 @@ systemctl restart statuteproof-backup.timer   # timer re-reads EnvironmentFile o
    (NEW token only)
 7. `systemctl restart statuteproof-api` → health returns 200 within 10 s
 8. Reboot the droplet once: all three services + both timers come back
-   (`systemctl list-timers | grep statuteproof` — expect compaction + backup)
+   (`systemctl list-timers | grep statuteproof` — expect compaction + backup +
+   heartbeat + verify)
 9. Email dry-run (if a provider is configured):
    set `STATUTEPROOF_EMAIL_DRY_RUN=true`, restart api, trigger a test brief
    → `data/email_outbox/delivery_status.jsonl` gains a `dry_run` row → set
@@ -214,7 +221,15 @@ systemctl start statuteproof-api statuteproof-scheduler statuteproof-telegram-bo
 - **Evidence backups**: `statuteproof-backup.timer` runs daily (~02:30 UTC);
   keeps the newest 14 archives in `backups/`. Manual run:
   `bash deploy/backup.sh`. Set `STATUTEPROOF_BACKUP_REMOTE` in `.env` to also
-  push each archive off-box (see § 9); unset means on-box copies only.
+  push each archive off-box (see § 9, strongly recommended); unset means on-box
+  copies only and the script warns loudly on every run.
+- **Evidence integrity self-check**: `statuteproof-verify.timer` runs daily
+  (~04:20 UTC, after backup + compaction). It re-hashes every snapshot against
+  its stored evidence hash and re-verifies the tamper-evident chain
+  (read-only); on any divergence it pages the founder via the admin Telegram
+  bot (best-effort) and the oneshot exits non-zero. Manual run:
+  `run.py verify-trail-watch` (silent + exit 0 when clean). Confirm scheduled:
+  `systemctl list-timers statuteproof-verify.timer --no-pager`.
 - **Scheduler cadence**: change `--interval` in
   `statuteproof-scheduler.service`, then `systemctl daemon-reload && restart`.
 - **Never** run two schedulers against the same data dir.

@@ -2189,6 +2189,8 @@ def main() -> None:
         print("  python run.py verify-trail                                  read-only: recompute snapshot hashes vs. stored evidence hashes", file=sys.stderr)
         print("  python run.py verify-trail --source-id <id>                 verify only one source's evidence records", file=sys.stderr)
         print("  python run.py verify-trail --json                           emit the integrity report as JSON", file=sys.stderr)
+        print("  python run.py verify-trail-watch                            verify trail; alert founder (best-effort) on any divergence; exit 0 clean / 1 divergent", file=sys.stderr)
+        print("  python run.py verify-trail-watch --source-id <id>           same, scoped per-record (chain stays global)", file=sys.stderr)
         print("  python run.py discover-source <url>                      discover candidate endpoints without saving evidence", file=sys.stderr)
         print("  python run.py discover-source <url> --json               print structured source discovery JSON", file=sys.stderr)
         print("  python run.py discover-source <url> --jurisdiction CODE  tag with jurisdiction code (e.g. AE, SG, KZ)", file=sys.stderr)
@@ -3533,6 +3535,19 @@ def main() -> None:
             _vt_argv += ["--json"]
         sys.exit(_vt_mod.run_cli(_vt_argv))
 
+    elif cmd == "verify-trail-watch":
+        # Continuous self-check for the "evidence-backed" claim: run the
+        # read-only trail verifier and page the founder (best-effort) on ANY
+        # divergence — a snapshot hash mismatch OR a broken tamper-evident chain
+        # link. Exits 0 quietly on a clean trail, 1 on divergence (founder
+        # alerted). Runs on a systemd timer
+        # (deploy/systemd/statuteproof-verify.{service,timer}). Accepts the same
+        # [--source-id <id>] [--json] flags as verify-trail; run_watch()
+        # (argparse) validates them and exits 2 on a bad argument.
+        from tools import verify_trail_watch as _vtw
+
+        sys.exit(_vtw.run_watch(args[1:]))
+
     elif cmd == "generate-secret-key":
         import secrets as _secrets
         key = _secrets.token_hex(32)
@@ -3549,7 +3564,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | generate-secret-key | validate-config",
+            "Use: url | all | watch | sources | coverage | coverage-plan | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config",
             file=sys.stderr,
         )
         sys.exit(2)

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run StatuteProof evidence-trail integrity verify daily (read-only; alerts founder on any divergence)
+
+[Timer]
+OnCalendar=*-*-* 04:20:00 UTC
+Persistent=true
+RandomizedDelaySec=600
+Unit=statuteproof-verify.service
+
+[Install]
+WantedBy=timers.target
