@@ -489,6 +489,56 @@ class _Handler(BaseHTTPRequestHandler):
             entitled = entitled[:limit]
         return entitled
 
+    def _denied_custom_source_ids(self, user: dict) -> set[str]:
+        """Custom source_ids the caller does NOT own.
+
+        Used to scope *default* (unfiltered) exports that would otherwise return
+        rows for every source: any custom source not owned by the caller — and
+        legacy/unowned custom sources — is denied so another customer's private
+        source can never appear. Official (non-custom) sources are shared and are
+        never denied. Never raises: on an unreadable source list it returns an
+        empty set (matching ``_entitle_source_ids``' "no custom sources" fallback).
+        """
+        try:
+            user_id = int(user["id"])
+        except (KeyError, TypeError, ValueError):
+            # No usable user id → attribute nothing; deny every custom source.
+            user_id = -1
+        denied: set[str] = set()
+        try:
+            from app.source_intake import load_sources_json
+
+            for s in load_sources_json():
+                if not isinstance(s, dict) or s.get("custom") is not True:
+                    continue
+                sid = str(s.get("source_id") or "").strip()
+                if sid and not _same_owner(s.get("owner_user_id"), user_id):
+                    denied.add(sid)
+        except Exception:  # noqa: BLE001 — unreadable list → no per-source exclusion
+            logger.warning("change register: could not load sources.json for owner filter")
+        return denied
+
+    def _evidence_source_out_of_scope(self, user: dict, evidence_id: str) -> bool:
+        """True when an evidence record belongs to another tenant's custom source.
+
+        Cheap tenancy guard for the by-run_id evidence-export paths (IDOR
+        defense): it resolves the record's ``source_id`` and denies access only
+        when that source is a *custom* source owned by someone else. Official /
+        shared sources — and records that cannot be resolved (unknown id,
+        unreadable list) — are left to the normal handler path, so this guard
+        only ever *adds* a denial and never changes not-found/error behavior.
+        """
+        try:
+            from app.evidence_assessment import find_evidence_record
+
+            record = find_evidence_record(evidence_id)
+        except Exception:  # noqa: BLE001 — let the normal export path emit 400/404
+            return False
+        source_id = str(record.get("source_id") or "").strip()
+        if not source_id:
+            return False
+        return source_id in self._denied_custom_source_ids(user)
+
     def _base_url(self) -> str:
         host = self.headers.get("Host", "localhost:5001")
         scheme = "https" if not host.startswith("localhost") and not host.startswith("127.") else "http"
@@ -1707,6 +1757,9 @@ class _Handler(BaseHTTPRequestHandler):
         if not evidence_id:
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
             return
+        if self._evidence_source_out_of_scope(user, evidence_id):
+            self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
+            return
         export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
         customer_delivery = _truthy_param((params.get("customer_delivery") or ["false"])[0])
         self._write_evidence_export(
@@ -1729,6 +1782,9 @@ class _Handler(BaseHTTPRequestHandler):
         evidence_id = str((params.get("evidence_record_id") or params.get("run_id") or [""])[0]).strip()
         if not evidence_id:
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
+            return
+        if self._evidence_source_out_of_scope(user, evidence_id):
+            self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
         export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
         try:
@@ -1833,6 +1889,9 @@ class _Handler(BaseHTTPRequestHandler):
         evidence_id = str(body.get("evidence_record_id") or body.get("run_id") or "").strip()
         if not evidence_id:
             self._send_json({"ok": False, "message": "evidence_record_id is required."}, 400)
+            return
+        if self._evidence_source_out_of_scope(user, evidence_id):
+            self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
         export_format = str(body.get("format") or "md_html").strip() or "md_html"
         customer_delivery = _truthy_param(body.get("customer_delivery"))
@@ -2822,6 +2881,11 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if self._rate_limited(_EXPORT_LIMITER, "monthly_assurance"):
             return
+        # The monthly assurance report is a paid deliverable — gate it exactly
+        # like the sibling audit exports so a free/unactivated account cannot pull
+        # a report for arbitrary source_ids (incl. other tenants' custom sources).
+        if not self._require_capability(user, "audit_export"):
+            return
         from app.monthly_assurance_report import compute_monthly_stats, render_assurance_report_markdown, generate_monthly_report_pdf
         parsed = urlparse(self.path)
         qs = parse_qs(parsed.query)
@@ -2834,6 +2898,18 @@ class _Handler(BaseHTTPRequestHandler):
             return
         source_ids_raw = (qs.get("source_ids") or [""])[0]
         source_ids = [s.strip() for s in source_ids_raw.split(",") if s.strip()] or None
+        # Tenancy + plan-limit clipping when the caller names sources. If the
+        # caller named sources but none survive entitlement, refuse rather than
+        # silently widening the query back to every source.
+        if source_ids is not None:
+            entitled = self._entitle_source_ids(user, source_ids)
+            if not entitled:
+                self._send_json(
+                    {"status": "error", "message": "None of the requested sources are in your plan scope."},
+                    403,
+                )
+                return
+            source_ids = entitled
         client_name = (qs.get("client_name") or [""])[0]
         fmt = ((qs.get("format") or ["markdown"])[0]).lower().strip()
         try:
@@ -2899,8 +2975,13 @@ class _Handler(BaseHTTPRequestHandler):
         # set, certify the customer's monitored (enabled) sources so a fully-dark
         # configured source surfaces as NO_COVERAGE instead of vanishing. Falls
         # back to None (run-derived scope) when no enabled sources are configured.
+        # Tenancy: drop any custom source the caller does not own from that
+        # default set so another tenant's custom source can never be certified
+        # into this report (official/global sources are shared and stay).
         if source_ids is None:
-            source_ids = enabled_source_ids() or None
+            default_ids = enabled_source_ids() or []
+            denied = self._denied_custom_source_ids(user)
+            source_ids = [s for s in default_ids if s not in denied] or None
         client_name = (qs.get("client_name") or [""])[0]
         fmt = ((qs.get("format") or ["markdown"])[0]).lower().strip()
         # The PDF coverage certificate is a paid deliverable (professional /
@@ -3137,6 +3218,10 @@ class _Handler(BaseHTTPRequestHandler):
                 403,
             )
             return
+        # Default-scope tenancy guard: even with NO source_id filter, the register
+        # must never surface another customer's private custom source. Exclude any
+        # custom source the caller does not own from the row set unconditionally.
+        excluded_source_ids = self._denied_custom_source_ids(user)
         valid, err = validate_register_date_range(date_from, date_to)
         if not valid:
             self._send_json({"ok": False, "message": err}, 400)
@@ -3149,6 +3234,7 @@ class _Handler(BaseHTTPRequestHandler):
                 source_id=source_id,
                 regulator=regulator,
                 export_format=export_format,
+                excluded_source_ids=excluded_source_ids,
             )
             if result.get("status") == "error":
                 self._send_json({"ok": False, **result}, 400)

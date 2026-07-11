@@ -221,6 +221,17 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
         if "plan_intent_at" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN plan_intent_at TIMESTAMP")
             logger.info("DB: added users.plan_intent_at column")
+        # Founder-set activation columns. ``plan_name`` records what the user
+        # self-selected (intent); ``activated_plan`` records what a founder has
+        # actually switched on, and is the SOLE source of paid capabilities
+        # (see app.plan.capabilities_for / activate_plan). Nullable → an
+        # un-activated account resolves to evidence_preview capabilities.
+        if "activated_plan" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN activated_plan TEXT")
+            logger.info("DB: added users.activated_plan column")
+        if "plan_activated_at" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN plan_activated_at TIMESTAMP")
+            logger.info("DB: added users.plan_activated_at column")
         _backfill_normalized_user_emails(conn)
         conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_normalized_email_unique ON users(normalized_email)")
         conn.executescript(

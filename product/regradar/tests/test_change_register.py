@@ -308,6 +308,44 @@ def test_rows_filter_by_source_and_regulator_and_date(tmp_path):
     assert [r["record_id"] for r in by_range] == ["evr_dfsa_a"]
 
 
+def test_excluded_source_ids_drops_rows_even_without_source_filter(tmp_path):
+    """BLOCK-2: a default (no source_id) export must not surface an excluded
+    (e.g. another tenant's private custom) source. Rows for excluded source_ids
+    are dropped unconditionally, while shared/official rows survive.
+    """
+    # custom-A belongs to another tenant; official-X is shared.
+    _make_canonical_record(
+        tmp_path,
+        source_id="custom-A",
+        regulator_slug="custom",
+        regulator="CUSTOMREG",
+        source_name="User A private source",
+        run_id="run_custom_a",
+        record_id="evr_custom_a",
+        timestamp="2026-06-10T00:00:00Z",
+    )
+    _make_canonical_record(
+        tmp_path,
+        source_id="official-X",
+        regulator_slug="dfsa",
+        regulator="DFSA",
+        source_name="Shared official source",
+        run_id="run_official_x",
+        record_id="evr_official_x",
+        timestamp="2026-07-01T00:00:00Z",
+    )
+
+    # Before exclusion both rows appear.
+    all_rows = build_change_register_rows(base_dir=tmp_path)
+    assert {r["source_id"] for r in all_rows} == {"custom-A", "official-X"}
+
+    # With custom-A excluded (no source_id filter given), only official-X remains.
+    scoped = build_change_register_rows(
+        base_dir=tmp_path, excluded_source_ids={"custom-A"}
+    )
+    assert [r["source_id"] for r in scoped] == ["official-X"]
+
+
 # ── renderers ───────────────────────────────────────────────────────────────────
 
 def test_csv_render_has_headers_disclaimer_and_data(tmp_path):

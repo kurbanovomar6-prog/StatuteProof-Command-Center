@@ -126,6 +126,7 @@ def build_change_register_rows(
     base_dir: Path | None = None,
     review_file: Path | None = None,
     action_log_lookup: ActionLogLookup | None = None,
+    excluded_source_ids: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Assemble one register row per canonical evidence record.
 
@@ -139,8 +140,12 @@ def build_change_register_rows(
       act / monitor / no_action decision.
 
     ``source_id`` / ``regulator`` filter the rows; the date range filters on the
-    evidence record's run timestamp. Never raises for a single bad record — an
-    unreadable record is skipped so one corrupt file cannot break the export.
+    evidence record's run timestamp. ``excluded_source_ids`` is a tenancy guard:
+    rows whose ``source_id`` is in that set are dropped *unconditionally* — even
+    when no ``source_id`` filter is supplied — so a default (unscoped) export can
+    never surface another customer's private custom source. Never raises for a
+    single bad record — an unreadable record is skipped so one corrupt file
+    cannot break the export.
     """
     root = Path(base_dir) if base_dir is not None else _BASE_DIR
     lookup = action_log_lookup if action_log_lookup is not None else get_action_log
@@ -150,6 +155,7 @@ def build_change_register_rows(
     to_bound = _parse_optional_date(date_to)
     source_filter = str(source_id or "").strip()
     regulator_filter = str(regulator or "").strip().lower()
+    excluded = {str(s).strip() for s in (excluded_source_ids or set()) if str(s).strip()}
 
     rows: list[dict[str, Any]] = []
     for summary in list_canonical_evidence_records(base_dir=root, review_file=review_file):
@@ -166,9 +172,14 @@ def build_change_register_rows(
         record_id = str(record.get("record_id") or summary.get("record_id") or "").strip()
         run_id = str(run.get("run_id") or summary.get("run_id") or "").strip()
         timestamp = str(run.get("timestamp") or "").strip()
+        row_source_id = str(source.get("source_id") or "").strip()
 
         # Filters ---------------------------------------------------------------
-        if source_filter and str(source.get("source_id") or "").strip() != source_filter:
+        # Tenancy exclusion first: a custom source the caller does not own must
+        # never appear, regardless of the (optional) source_id / regulator filter.
+        if row_source_id and row_source_id in excluded:
+            continue
+        if source_filter and row_source_id != source_filter:
             continue
         if regulator_filter:
             reg_value = str(source.get("regulator") or "").strip().lower()
@@ -601,6 +612,7 @@ def build_change_register_export(
     output_dir: Path | None = None,
     review_file: Path | None = None,
     action_log_lookup: ActionLogLookup | None = None,
+    excluded_source_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     """Build the register and write the requested formats to disk.
 
@@ -634,6 +646,7 @@ def build_change_register_export(
             base_dir=root,
             review_file=review_file,
             action_log_lookup=action_log_lookup,
+            excluded_source_ids=excluded_source_ids,
         )
         meta = _register_meta(
             rows,

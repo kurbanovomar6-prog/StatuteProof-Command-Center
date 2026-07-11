@@ -90,15 +90,21 @@ PLAN_CAPABILITIES = {
 
 
 def capabilities_for(user_id: int) -> dict[str, Any]:
-    """Return the capability dict for the user's currently selected plan.
+    """Return the capability dict for the user's ACTIVATED plan.
 
     This is the single source of truth for authorization decisions on paid
-    export paths: a default (free ``evidence_preview``) account has every paid
-    capability set to ``False`` and ``source_limit`` 0, so it cannot pull paid
-    exports for any source. Never raises — falls back to the free-tier caps.
+    export paths. It deliberately reads ``active_capabilities`` (the capabilities
+    of the plan a founder has actually *activated*), NOT ``capabilities`` (the
+    plan the user merely self-selected). A user who POSTs ``plan_name=consultant``
+    without a founder activation therefore keeps ``evidence_preview`` (free-tier)
+    capabilities — self-selecting a paid plan grants nothing on its own.
+
+    A default (free ``evidence_preview``) account has every paid capability set
+    to ``False`` and ``source_limit`` 0, so it cannot pull paid exports for any
+    source. Never raises — falls back to the free-tier caps.
     """
     try:
-        caps = get_plan_state(int(user_id)).get("capabilities")
+        caps = get_plan_state(int(user_id)).get("active_capabilities")
     except Exception:  # noqa: BLE001 — an auth gate must never crash the request
         caps = None
     return caps if isinstance(caps, dict) else PLAN_CAPABILITIES["evidence_preview"]
@@ -141,18 +147,38 @@ def get_plan_state(user_id: int) -> dict[str, Any]:
     """Return plan state dict for the given user."""
     conn = _connect()
     try:
+        activated_plan = None
+        # ``activated_plan`` is added by a DB migration (app.db.ensure_auth_tables).
+        # Tolerate a pre-migration schema so a plan lookup never crashes an
+        # auth gate: absent column → no activation → free-tier capabilities.
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(users)")}
+        select_cols = "plan_name, trial_started_at, plan_intent_at"
+        if "activated_plan" in cols:
+            select_cols += ", activated_plan"
         row = conn.execute(
-            "SELECT plan_name, trial_started_at, plan_intent_at FROM users WHERE id = ? LIMIT 1",
+            f"SELECT {select_cols} FROM users WHERE id = ? LIMIT 1",
             (user_id,),
         ).fetchone()
         if row is None:
             return _build_state("evidence_preview", None, None)
-        return _build_state(row["plan_name"], row["trial_started_at"], row["plan_intent_at"])
+        if "activated_plan" in cols:
+            activated_plan = row["activated_plan"]
+        return _build_state(
+            row["plan_name"],
+            row["trial_started_at"],
+            row["plan_intent_at"],
+            activated_plan,
+        )
     finally:
         conn.close()
 
 
-def _build_state(plan_name: str, trial_started_at_raw, plan_intent_at_raw) -> dict[str, Any]:
+def _build_state(
+    plan_name: str,
+    trial_started_at_raw,
+    plan_intent_at_raw,
+    activated_plan_raw=None,
+) -> dict[str, Any]:
     plan = plan_name if plan_name in PLAN_NAMES else "evidence_preview"
     now = _now()
 
@@ -169,9 +195,19 @@ def _build_state(plan_name: str, trial_started_at_raw, plan_intent_at_raw) -> di
         trial_expired = remaining <= 0
 
     caps = PLAN_CAPABILITIES.get(plan, PLAN_CAPABILITIES["evidence_preview"])
-    pending_manual_activation = plan != "evidence_preview"
-    active_plan = "evidence_preview" if pending_manual_activation else plan
+
+    # The ACTIVE plan (which capabilities actually apply) is decided solely by a
+    # founder-set activation, never by the user's self-selected ``plan_name``.
+    # An un-activated account stays on ``evidence_preview`` capabilities even
+    # after POSTing a paid ``plan_name`` — this is what closes the "self-select
+    # consultant → free audit export" bypass.
+    activated_plan = str(activated_plan_raw or "").strip()
+    active_plan = activated_plan if activated_plan in PLAN_NAMES else "evidence_preview"
     active_caps = PLAN_CAPABILITIES.get(active_plan, PLAN_CAPABILITIES["evidence_preview"])
+
+    # "Pending manual activation" = the user asked for a plan that requires a
+    # founder to switch it on, and it has not yet been activated to that plan.
+    pending_manual_activation = bool(caps.get("manual_activation_required")) and active_plan != plan
 
     return {
         "plan_name": plan,
@@ -184,7 +220,9 @@ def _build_state(plan_name: str, trial_started_at_raw, plan_intent_at_raw) -> di
         "trial_expired": trial_expired,
         "days_remaining": days_remaining,
         "trial_started_at": trial_started_at_raw,
-        "status": _resolve_status(plan, trial_active, trial_expired),
+        "status": _resolve_status(
+            plan, trial_active, trial_expired, pending_manual_activation, active_plan
+        ),
         "manual_activation_required": bool(caps.get("manual_activation_required")),
         "active_capabilities": active_caps,
         "requested_capabilities": caps if pending_manual_activation else None,
@@ -192,18 +230,32 @@ def _build_state(plan_name: str, trial_started_at_raw, plan_intent_at_raw) -> di
     }
 
 
-def _resolve_status(plan: str, trial_active: bool, trial_expired: bool) -> str:
+def _resolve_status(
+    plan: str,
+    trial_active: bool,
+    trial_expired: bool,
+    pending_manual_activation: bool = False,
+    active_plan: str = "evidence_preview",
+) -> str:
     if plan == "evidence_preview":
         if trial_expired:
             return "trial_expired"
         if trial_active:
             return "trial_active"
         return "evidence_preview"
-    return "pending_manual_activation"
+    if pending_manual_activation:
+        return "pending_manual_activation"
+    # A paid plan that a founder has activated (active_plan == requested plan).
+    return "active"
 
 
 def set_plan_intent(user_id: int, plan_name: str) -> dict[str, Any]:
-    """Record the user's plan selection intent (no payment processed)."""
+    """Record the user's plan selection intent (no payment processed).
+
+    This only records what the user *wants* — it never grants capabilities.
+    Entitlements follow the ACTIVATED plan (see ``activate_plan`` /
+    ``capabilities_for``), which only a founder can set.
+    """
     if plan_name not in PLAN_NAMES:
         raise ValueError(f"Unknown plan: {plan_name}")
     now_str = _iso(_now())
@@ -213,6 +265,48 @@ def set_plan_intent(user_id: int, plan_name: str) -> dict[str, Any]:
             "UPDATE users SET plan_name = ?, plan_intent_at = ? WHERE id = ?",
             (plan_name, now_str, user_id),
         )
+        conn.commit()
+    finally:
+        conn.close()
+    return get_plan_state(user_id)
+
+
+def activate_plan(user_id: int, plan_name: str) -> dict[str, Any]:
+    """Activate ``plan_name`` for a user — the ONLY path that grants paid caps.
+
+    This is deliberately founder-only: it is invoked from the ``activate-plan``
+    CLI subcommand (which requires shell/SSH access to the production host), and
+    there is no self-service HTTP endpoint that reaches it. Setting the
+    ``activated_plan`` column is what makes ``capabilities_for`` return the paid
+    plan's capabilities; until then a user who self-selected a paid plan keeps
+    ``evidence_preview`` (free-tier) capabilities.
+
+    Passing ``evidence_preview`` (or a to-be-added future value) effectively
+    de-activates paid access. Raises ``ValueError`` on an unknown plan or a
+    non-existent user id so a founder gets a clear failure instead of a silent
+    no-op.
+    """
+    if plan_name not in PLAN_NAMES:
+        raise ValueError(f"Unknown plan: {plan_name}")
+    now_str = _iso(_now())
+    conn = _connect()
+    try:
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(users)")}
+        if "activated_plan" not in cols:
+            raise ValueError(
+                "users.activated_plan column is missing — run the DB migration "
+                "(app.db.ensure_auth_tables) before activating a plan."
+            )
+        set_activated_at = ", plan_activated_at = ?" if "plan_activated_at" in cols else ""
+        params: tuple[Any, ...] = (
+            (plan_name, now_str, user_id) if set_activated_at else (plan_name, user_id)
+        )
+        cur = conn.execute(
+            f"UPDATE users SET activated_plan = ?{set_activated_at} WHERE id = ?",
+            params,
+        )
+        if cur.rowcount == 0:
+            raise ValueError(f"No user with id {user_id}.")
         conn.commit()
     finally:
         conn.close()

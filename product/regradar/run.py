@@ -2310,6 +2310,7 @@ def main() -> None:
         print("  python run.py discover-source <url> --category NAME      tag with category (e.g. tax, aml, cyber)", file=sys.stderr)
         print("  python run.py mass-source-activate --no-save-only --limit 10  safe queue batch; no evidence save by default", file=sys.stderr)
         print("  python run.py mass-monitor --activation-ready-only --dry-run --no-alerts --limit 10  safe monitor dry-run only", file=sys.stderr)
+        print("  python run.py activate-plan --user <id> --plan <name>  founder-only: activate a paid plan for a user (grants paid export caps)", file=sys.stderr)
         sys.exit(2)
 
     cmd = args[0]
@@ -3763,6 +3764,9 @@ def main() -> None:
     elif cmd == "validate-config":
         _cmd_validate_config()
 
+    elif cmd == "activate-plan":
+        _cmd_activate_plan(args[1:])
+
     elif cmd.startswith(("http://", "https://")):
         # backward-compatible bare URL
         _run_single_url(cmd)
@@ -3770,10 +3774,79 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config",
+            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config | activate-plan",
             file=sys.stderr,
         )
         sys.exit(2)
+
+
+def _cmd_activate_plan(extra: list[str]) -> None:
+    """Founder-only: activate (or de-activate) a user's paid plan.
+
+    Usage:
+        python run.py activate-plan --user <id> --plan <plan_name>
+
+    This is intentionally a CLI-only path (no HTTP endpoint): it requires
+    shell/SSH access to the production host, so only the founder can grant paid
+    capabilities. Self-selecting a plan via POST /api/plan records intent only;
+    entitlements follow the ACTIVATED plan set here (see app.plan.activate_plan).
+
+    Passing ``--plan evidence_preview`` de-activates paid access.
+    """
+    from app.plan import PLAN_NAMES, activate_plan
+
+    user_id: int | None = None
+    plan_name: str | None = None
+    _usage = "  Usage: python run.py activate-plan --user <id> --plan <plan_name>"
+    i_ = 0
+    while i_ < len(extra):
+        tok = extra[i_]
+        if tok in ("--user", "--user-id", "--plan"):
+            if i_ + 1 >= len(extra):
+                print(f"Error: {tok} requires a value.\n{_usage}", file=sys.stderr)
+                sys.exit(2)
+            val = extra[i_ + 1]
+            if tok == "--plan":
+                plan_name = val.strip()
+            else:
+                try:
+                    user_id = int(val)
+                except ValueError:
+                    print(f"Error: --user must be an integer, got {val!r}.\n{_usage}", file=sys.stderr)
+                    sys.exit(2)
+            i_ += 2
+        else:
+            print(f"Error: unknown option {tok!r} for 'activate-plan'.\n{_usage}", file=sys.stderr)
+            sys.exit(2)
+
+    if user_id is None or not plan_name:
+        print(f"Error: both --user and --plan are required.\n{_usage}", file=sys.stderr)
+        sys.exit(2)
+    if plan_name not in PLAN_NAMES:
+        print(
+            f"Error: unknown plan {plan_name!r}. Valid plans: {', '.join(sorted(PLAN_NAMES))}.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    # Ensure the schema (incl. activated_plan column) is present before writing.
+    from app.db import ensure_auth_tables
+    ensure_auth_tables()
+
+    try:
+        state = activate_plan(user_id, plan_name)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    print(
+        f"Activated plan {plan_name!r} for user {user_id}.\n"
+        f"  active_plan_name  = {state.get('active_plan_name')}\n"
+        f"  status            = {state.get('status')}\n"
+        f"  audit_export      = {bool(state.get('active_capabilities', {}).get('audit_export'))}\n"
+        f"  source_limit      = {state.get('active_capabilities', {}).get('source_limit')}"
+    )
+    sys.exit(0)
 
 
 def _cmd_validate_config() -> None:
