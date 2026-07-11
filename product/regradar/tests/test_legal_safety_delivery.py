@@ -33,7 +33,9 @@ _CANONICAL = (
     "avoid all penalties",
     "never miss",
     "100% accurate",
-    "legal advice",
+    # "legal advice" is banned only in affirmative forms (a bare-noun ban
+    # over-held legitimate "seek legal advice" source excerpts — re-review HIGH).
+    "constitute legal advice",
 )
 
 
@@ -87,7 +89,9 @@ def test_disclaimers_never_self_trip_but_affirmative_claims_are_caught():
     assert find_forbidden_claims("We guarantee compliance, prevent fines for you.") == [
         "guarantee compliance", "prevent fines",
     ]
-    assert "legal advice" in find_forbidden_claims("Our reports constitute legal advice.")
+    assert "constitute legal advice" in find_forbidden_claims("Our reports constitute legal advice.")
+    # ...but a legitimate regulator excerpt telling readers to seek advice is NOT held.
+    assert find_forbidden_claims("Firms should seek independent legal advice.") == []
 
 
 def test_change_register_guard_shares_the_expanded_list():
@@ -350,3 +354,27 @@ def test_sample_brief_carries_sample_fake_label():
     assert "SAMPLE / FAKE" in msg
     # the invented regulator attribution must sit AFTER the top label.
     assert msg.index("SAMPLE / FAKE") < msg.index("DFSA")
+
+
+def test_bare_legal_advice_in_source_text_is_not_blocked():
+    """Regulator excerpts routinely say 'seek legal advice' — must NOT be held
+    (re-review HIGH over-block). Only AFFIRMATIVE forms are banned."""
+    from app.legal_safety import find_forbidden_claims as f
+    assert f("Firms should seek independent legal advice on these amendments.") == []
+    assert f("Entities may wish to obtain legal advice before the deadline.") == []
+    # affirmative claim that StatuteProof gives legal advice is still banned
+    assert "provides legal advice" in f("StatuteProof provides legal advice to firms.")
+    assert "constitutes legal advice" in f("This constitutes legal advice.")
+
+
+def test_homoglyph_forbidden_claim_is_caught():
+    """A Cyrillic-homoglyph forbidden claim must not smuggle past the guard."""
+    from app.legal_safety import find_forbidden_claims as f
+    hits = f("We guarantee сompliance and will prevent fines.")  # Cyrillic 'с'
+    assert "guarantee compliance" in hits and "prevent fines" in hits
+
+
+def test_product_disclaimers_never_self_trip_after_fold():
+    from app.legal_safety import find_forbidden_claims as f, LEGAL_DISCLAIMER
+    assert f(LEGAL_DISCLAIMER) == []
+    assert f("For monitoring information only. Not legal advice and not a guarantee of compliance.") == []

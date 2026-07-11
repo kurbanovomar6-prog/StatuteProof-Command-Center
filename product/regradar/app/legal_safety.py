@@ -34,8 +34,23 @@ FORBIDDEN_PHRASES: tuple[str, ...] = (
     "guaranteed compliance",
     "prevent fines",
     "replace lawyers",
+    # "legal advice" is banned ONLY in AFFIRMATIVE forms (StatuteProof claiming
+    # to give it). The bare noun is intentionally NOT listed: official regulator
+    # sources routinely say "seek independent legal advice", and holding those
+    # legitimate excerpts would degrade the core alert function. Denials ("not
+    # legal advice") are handled by _SAFE_DISCLAIMER_FRAGMENTS.
     "automatic legal advice",
-    "legal advice",
+    "automated legal advice",
+    "provides legal advice",
+    "provide legal advice",
+    "providing legal advice",
+    "gives legal advice",
+    "give legal advice",
+    "offer legal advice",
+    "offering legal advice",
+    "is legal advice",
+    "constitutes legal advice",
+    "constitute legal advice",
     "official partner",
     "certified by",
     "regulator certified",
@@ -82,9 +97,26 @@ class ForbiddenClaimError(ValueError):
     """Raised when customer-facing output contains a forbidden claim."""
 
 
+# Common Cyrillic/Greek homoglyphs of ASCII letters that appear in the ban
+# phrases. Folded to their Latin lookalike so an adversarial source cannot
+# smuggle "guarantee сompliance" (Cyrillic с) past the substring scan. AI models
+# emit ASCII, so this only matters for deliberately-crafted source content.
+_CONFUSABLE_FOLD = str.maketrans({
+    "а": "a", "с": "c", "е": "e", "о": "o", "р": "p", "х": "x", "у": "y",
+    "і": "i", "ѕ": "s", "ј": "j", "ԁ": "d", "һ": "h", "ӏ": "l", "т": "t",
+    "ν": "v", "ο": "o", "ρ": "p", "α": "a", "ϲ": "c", "е": "e",
+})
+
+
+def _fold(text: str) -> str:
+    """NFKC-normalize + fold common homoglyphs, then lowercase."""
+    import unicodedata
+    return unicodedata.normalize("NFKC", str(text or "")).translate(_CONFUSABLE_FOLD).lower()
+
+
 def _neutralize_disclaimers(text: str) -> str:
-    """Lowercase ``text`` and strip the product's fixed safe disclaimer fragments."""
-    low = str(text or "").lower()
+    """Fold ``text`` and strip the product's fixed safe disclaimer fragments."""
+    low = _fold(text)
     for fragment in _SAFE_DISCLAIMER_FRAGMENTS:
         if fragment:
             low = low.replace(fragment, " ")
@@ -103,7 +135,7 @@ def find_forbidden_claims(
     superset). By default the product's fixed disclaimers are neutralized first
     so their denials do not self-trip.
     """
-    haystack = _neutralize_disclaimers(text) if neutralize_disclaimers else str(text or "").lower()
+    haystack = _neutralize_disclaimers(text) if neutralize_disclaimers else _fold(text)
     candidates = tuple(phrases) if phrases is not None else FORBIDDEN_PHRASES
     hits = {p for p in candidates if p and p.lower() in haystack}
     return sorted(hits)
