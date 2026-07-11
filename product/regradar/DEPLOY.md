@@ -172,6 +172,34 @@ systemctl restart statuteproof-backup.timer   # timer re-reads EnvironmentFile o
 
 **Total: ≈30 min.**
 
+## 10. Plan re-activation for paying customers — REQUIRED after this deploy
+
+The paid-export entitlement gate is **fail-closed**: a user only gets paid
+capabilities (audit/PDF export, source limits) when a founder has *activated*
+their plan via the CLI. `activated_plan` is what the gate reads — the
+self-selected `plan_name` grants nothing on its own. There is **no automatic
+backfill**: any customer who was activated before this change drops to free-tier
+caps on deploy until `activate-plan` is re-run for them.
+
+You cannot infer who was previously activated, so list the current intent-vs-
+activated state and re-activate every genuinely paying customer **and the founder
+account**:
+
+```bash
+# See who self-selected a paid plan but is NOT yet activated (NEEDS ACT. = YES):
+cd /srv/regradar && sudo -u regradar python3 run.py activate-plan --list
+
+# Re-activate each real paying customer (and your own founder account).
+# The --list output prints the exact command per user needing activation, e.g.:
+sudo -u regradar python3 run.py activate-plan --user <id> --plan <plan_name>
+
+# Confirm the flip: re-run --list; NEEDS ACT. should now read "-" for those users.
+sudo -u regradar python3 run.py activate-plan --list
+```
+
+Only activate accounts you have independently confirmed are paying — a
+self-selected paid `plan_name` is an intent, not proof of payment.
+
 ## First-hour smoke-test checklist
 
 1. `https://statuteproof.com` loads; login page renders; no console errors

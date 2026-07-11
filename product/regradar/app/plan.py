@@ -311,3 +311,48 @@ def activate_plan(user_id: int, plan_name: str) -> dict[str, Any]:
     finally:
         conn.close()
     return get_plan_state(user_id)
+
+
+def list_user_plans() -> list[dict[str, Any]]:
+    """Return every user's plan intent vs. activated plan, for the operator CLI.
+
+    This exists so ``run.py activate-plan --list`` can show, after a deploy, who
+    self-selected a paid plan (``plan_name`` = intent) but is NOT yet activated
+    (``activated_plan`` unset), and therefore silently dropped to free-tier caps
+    by the activation gate. ``needs_activation`` is True when the user asked for a
+    paid plan that a founder has not yet switched on — those are the accounts the
+    operator must re-run ``activate-plan --user <id> --plan <name>`` for.
+
+    Read-only; tolerant of a pre-migration schema (absent ``activated_plan``).
+    Sorted by user id. Never raises for a missing column.
+    """
+    conn = _connect()
+    try:
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(users)")}
+        has_activated = "activated_plan" in cols
+        select_cols = "id, email, plan_name"
+        if has_activated:
+            select_cols += ", activated_plan"
+        rows = conn.execute(
+            f"SELECT {select_cols} FROM users ORDER BY id ASC"
+        ).fetchall()
+    finally:
+        conn.close()
+
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        intent = row["plan_name"] if row["plan_name"] in PLAN_NAMES else "evidence_preview"
+        activated_raw = str((row["activated_plan"] if has_activated else "") or "").strip()
+        active_plan = activated_raw if activated_raw in PLAN_NAMES else "evidence_preview"
+        intent_is_paid = bool(PLAN_CAPABILITIES.get(intent, {}).get("manual_activation_required"))
+        needs_activation = intent_is_paid and active_plan != intent
+        out.append({
+            "id": int(row["id"]),
+            "email": row["email"],
+            "plan_name": intent,
+            "plan_display": PLAN_DISPLAY.get(intent, intent),
+            "activated_plan": active_plan,
+            "active_plan_name": active_plan,
+            "needs_activation": needs_activation,
+        })
+    return out

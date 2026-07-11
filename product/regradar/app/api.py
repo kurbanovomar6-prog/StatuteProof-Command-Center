@@ -456,28 +456,15 @@ class _Handler(BaseHTTPRequestHandler):
         if not clean_ids:
             return []
 
-        # Ownership map for custom sources (official sources are absent → shared).
-        custom_owner: dict[str, object] = {}
-        try:
-            from app.source_intake import load_sources_json
-
-            for s in load_sources_json():
-                if not isinstance(s, dict) or s.get("custom") is not True:
-                    continue
-                sid = str(s.get("source_id") or "").strip()
-                if sid:
-                    custom_owner[sid] = s.get("owner_user_id")
-        except Exception:  # noqa: BLE001 — treat an unreadable list as "no custom sources"
-            logger.warning("source entitlement: could not load sources.json")
-
-        entitled: list[str] = []
-        for sid in clean_ids:
-            if sid in custom_owner:
-                # A custom source is only exportable by its owner. Legacy/unowned
-                # custom sources (owner is None) are never leaked.
-                if not _same_owner(custom_owner[sid], user_id):
-                    continue
-            entitled.append(sid)
+        # Fail-closed tenancy: drop any custom source the caller does not own.
+        # This reuses the SAME denied-set semantics as _denied_custom_source_ids
+        # (a source_id is denied if ANY row for it is owned by someone else),
+        # rather than a last-write-wins ownership map. A duplicate or
+        # attacker-injected row for the same source_id therefore cannot flip
+        # ownership to widen scope — at worst it fail-closes the id. Official /
+        # shared (non-custom) sources are never in the denied set, so they pass.
+        denied = self._denied_custom_source_ids(user)
+        entitled = [sid for sid in clean_ids if sid not in denied]
 
         try:
             from app.plan import source_limit_for
@@ -517,6 +504,49 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception:  # noqa: BLE001 — unreadable list → no per-source exclusion
             logger.warning("change register: could not load sources.json for owner filter")
         return denied
+
+    def _visible_sources_for(self, user: dict, sources: list) -> list[dict]:
+        """Filter a source-row list to what the caller may see (cross-tenant scope).
+
+        ONE shared gate for EVERY authenticated source-listing surface (status,
+        summary, timeline, readiness, coverage, evidence listing, …). Official /
+        shared (non-``custom``) sources are public and always returned; a
+        *custom* source is returned only to the user who owns it. Ownership is
+        resolved with the same fail-closed semantics as
+        ``_denied_custom_source_ids`` — any owner-mismatch row for a source_id
+        denies it — so a duplicate or attacker-injected row can neither expose
+        nor flip another tenant's private source. A future listing endpoint that
+        routes its rows through this helper inherits the scoping by default.
+
+        Never raises: rows that are not dicts are dropped; on an unreadable
+        source list the denied set is empty so only official sources survive the
+        ``custom``-flag check (custom rows without a resolvable owner are cut).
+        """
+        denied = self._denied_custom_source_ids(user)
+        visible: list[dict] = []
+        for s in sources:
+            if not isinstance(s, dict):
+                continue
+            if s.get("custom") is True:
+                sid = str(s.get("source_id") or "").strip()
+                if not sid or sid in denied:
+                    continue
+            visible.append(s)
+        return visible
+
+    def _source_visible_to(self, user: dict, source_id: str) -> bool:
+        """False only when ``source_id`` is a custom source owned by another tenant.
+
+        Per-source-id guard for lookup endpoints (e.g. the timeline handler):
+        official / shared sources — and any source_id that does not resolve to a
+        denied *custom* source — stay visible, so this only ever *adds* a denial
+        and never hides a public source. Fail-closed via
+        ``_denied_custom_source_ids`` (any owner-mismatch row denies the id).
+        """
+        sid = str(source_id or "").strip()
+        if not sid:
+            return True
+        return sid not in self._denied_custom_source_ids(user)
 
     def _evidence_source_out_of_scope(self, user: dict, evidence_id: str) -> bool:
         """True when an evidence record belongs to another tenant's custom source.
@@ -1441,6 +1471,10 @@ class _Handler(BaseHTTPRequestHandler):
 
             all_sources = load_market_sources(market)
             enabled_sources = [s for s in all_sources if s.get("enabled", False)]
+            # Cross-tenant scope: drop custom sources this user does not own so a
+            # victim's private source_id / name / URL never leaks to another
+            # authenticated account. Official / shared sources always survive.
+            enabled_sources = self._visible_sources_for(user, enabled_sources)
 
             # latest_runs returns dict keyed by source_id (or url fallback)
             run_map = latest_runs(market)
@@ -1527,7 +1561,12 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             from app.source_summary import build_sources_summary
 
-            self._send_json(build_sources_summary(market))
+            # Cross-tenant scope: exclude custom sources this user does not own so
+            # the aggregate counts never reflect another tenant's private sources.
+            self._send_json(build_sources_summary(
+                market,
+                excluded_source_ids=self._denied_custom_source_ids(user),
+            ))
         except Exception as exc:
             logger.error("sources/summary failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
@@ -1541,6 +1580,13 @@ class _Handler(BaseHTTPRequestHandler):
         source_id = str((params.get("source_id") or params.get("id") or [""])[0]).strip()
         if not source_id:
             self._send_json({"ok": False, "message": "source_id is required."}, 400)
+            return
+        # Cross-tenant scope: another tenant's private custom source must not leak
+        # its identity / URL / health via a guessed source_id. Return "not found"
+        # (do not confirm the source exists) rather than 403 so existence is not
+        # disclosed. Official / shared sources are unaffected.
+        if not self._source_visible_to(user, source_id):
+            self._send_json({"ok": False, "message": "Source not found."}, 404)
             return
         try:
             from app.source_health_timeline import build_source_timeline
@@ -1572,6 +1618,12 @@ class _Handler(BaseHTTPRequestHandler):
             except (TypeError, ValueError):
                 limit = 50
 
+            # Cross-tenant scope: evidence rows carry source_name + official_url,
+            # so a victim's private custom source must not surface here to another
+            # authenticated caller. Drop runs whose source_id is a custom source
+            # this user does not own (official sources are never denied).
+            denied_source_ids = self._denied_custom_source_ids(user)
+
             runs_path = BASE_DIR / "data" / "source_runs" / "source_runs.jsonl"
             records: list[dict] = []
             if runs_path.exists():
@@ -1583,6 +1635,8 @@ class _Handler(BaseHTTPRequestHandler):
                         try:
                             rec = json.loads(line)
                         except json.JSONDecodeError:
+                            continue
+                        if str(rec.get("source_id") or "").strip() in denied_source_ids:
                             continue
                         if str(rec.get("market") or rec.get("jurisdiction") or "").upper() == market:
                             records.append({

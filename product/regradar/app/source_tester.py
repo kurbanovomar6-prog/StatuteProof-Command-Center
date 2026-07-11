@@ -18,9 +18,11 @@ Constraints
 
 from __future__ import annotations
 
+import fcntl
 import ipaddress
 import json
 import logging
+import os
 import socket
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -462,43 +464,74 @@ def source_url_exists(url: str) -> bool:
 
 def append_source_to_json(source: dict) -> bool:
     """
-    Append `source` to sources.json atomically.
+    Append `source` to sources.json atomically and race-safely.
 
-    - Reads the current file, validates it is a JSON array.
-    - Guards against duplicate URLs (second check after source_url_exists).
-    - Writes back with indent=2 and UTF-8 encoding.
-    - Adds a trailing newline for POSIX compatibility.
+    - Holds an exclusive advisory lock (``fcntl.flock``) across the whole
+      read-modify-write, so a concurrent add cannot interleave between the
+      duplicate check and the write. This closes the read-then-write TOCTOU that
+      a bare ``read_text`` / ``write_text`` pair left open (two adds racing could
+      both pass the duplicate check and one could clobber the other's row).
+    - Rejects a duplicate by URL *or* by ``source_id`` — uniqueness is enforced
+      on both keys, not just URL, so a second row can never shadow, collide with,
+      or silently duplicate an existing source_id.
+    - Publishes the new contents via a temp file + atomic ``os.replace`` under the
+      lock, so a concurrent reader never observes a half-written file.
 
-    Returns True on success, False on any error.  Never raises.
+    Returns True on success, False on any error or duplicate.  Never raises.
     """
-    url  = source.get("url", "").rstrip("/")
+    url = source.get("url", "").rstrip("/")
+    source_id = str(source.get("source_id") or "").strip()
 
     try:
-        raw     = _SOURCES_PATH.read_text(encoding="utf-8")
-        entries = json.loads(raw)
+        _SOURCES_PATH.parent.mkdir(parents=True, exist_ok=True)
+        # ``r+`` requires the file to exist; seed an empty array if it is missing
+        # so the locked read-modify-write below has something to open.
+        if not _SOURCES_PATH.exists():
+            _SOURCES_PATH.write_text("[]\n", encoding="utf-8")
 
-        if not isinstance(entries, list):
-            logger.error(
-                "append_source_to_json: sources.json top level is not a list"
-            )
-            return False
+        with _SOURCES_PATH.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            try:
+                raw = fh.read()
+                entries = json.loads(raw) if raw.strip() else []
 
-        # Duplicate guard (TOCTOU-safe second check)
-        for e in entries:
-            if isinstance(e, dict) and e.get("url", "").rstrip("/") == url:
-                logger.warning(
-                    "append_source_to_json: duplicate URL %r — not added", url
-                )
-                return False
+                if not isinstance(entries, list):
+                    logger.error(
+                        "append_source_to_json: sources.json top level is not a list"
+                    )
+                    return False
 
-        entries.append(source)
+                # Duplicate guard on BOTH url and source_id. TOCTOU-safe: we hold
+                # the exclusive lock across this check and the write below.
+                for e in entries:
+                    if not isinstance(e, dict):
+                        continue
+                    if url and e.get("url", "").rstrip("/") == url:
+                        logger.warning(
+                            "append_source_to_json: duplicate URL %r — not added", url
+                        )
+                        return False
+                    if source_id and str(e.get("source_id") or "").strip() == source_id:
+                        logger.warning(
+                            "append_source_to_json: duplicate source_id %r — not added",
+                            source_id,
+                        )
+                        return False
 
-        _SOURCES_PATH.write_text(
-            json.dumps(entries, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
-        logger.info("append_source_to_json: added %r to sources.json", url)
-        return True
+                entries.append(source)
+
+                # Atomic publish: write a sibling temp file, fsync, then rename
+                # over the original inode while still holding the lock.
+                tmp = _SOURCES_PATH.with_name(_SOURCES_PATH.name + ".tmp")
+                with tmp.open("w", encoding="utf-8") as out:
+                    out.write(json.dumps(entries, ensure_ascii=False, indent=2) + "\n")
+                    out.flush()
+                    os.fsync(out.fileno())
+                os.replace(tmp, _SOURCES_PATH)
+                logger.info("append_source_to_json: added %r to sources.json", url)
+                return True
+            finally:
+                fcntl.flock(fh, fcntl.LOCK_UN)
 
     except Exception as exc:
         logger.error(

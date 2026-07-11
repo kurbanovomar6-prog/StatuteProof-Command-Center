@@ -10,15 +10,32 @@ from typing import Any
 _BASE_DIR = Path(__file__).parent.parent
 
 
-def build_sources_summary(market: str = "AE", *, base_dir: Path | None = None) -> dict[str, Any]:
-    """Return canonical source truth from sources.json and recorded run history."""
+def build_sources_summary(
+    market: str = "AE",
+    *,
+    base_dir: Path | None = None,
+    excluded_source_ids: set[str] | frozenset[str] | None = None,
+) -> dict[str, Any]:
+    """Return canonical source truth from sources.json and recorded run history.
+
+    ``excluded_source_ids`` is an opaque set of source_ids to drop from the count
+    (cross-tenant scoping): the caller resolves which custom sources the current
+    user may not see and passes them here so aggregate counts never reflect
+    another tenant's private sources. Official sources (which carry no source_id
+    in the registry) are never matched by this filter and always counted.
+    """
     root = base_dir or _BASE_DIR
     market_code = str(market or "AE").upper().strip() or "AE"
+    excluded = {str(s).strip() for s in (excluded_source_ids or set()) if str(s).strip()}
     sources = _load_sources(root)
     market_sources = [
         item
         for item in sources
         if str(item.get("jurisdiction") or "").upper() == market_code
+        and not (
+            str(item.get("source_id") or "").strip()
+            and str(item.get("source_id") or "").strip() in excluded
+        )
     ]
     enabled_sources = [item for item in market_sources if bool(item.get("enabled"))]
     mode_counts = {

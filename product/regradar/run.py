@@ -2311,6 +2311,7 @@ def main() -> None:
         print("  python run.py mass-source-activate --no-save-only --limit 10  safe queue batch; no evidence save by default", file=sys.stderr)
         print("  python run.py mass-monitor --activation-ready-only --dry-run --no-alerts --limit 10  safe monitor dry-run only", file=sys.stderr)
         print("  python run.py activate-plan --user <id> --plan <name>  founder-only: activate a paid plan for a user (grants paid export caps)", file=sys.stderr)
+        print("  python run.py activate-plan --list  founder-only: list every user's plan intent vs. activated plan (who needs activation after deploy)", file=sys.stderr)
         sys.exit(2)
 
     cmd = args[0]
@@ -3792,12 +3793,54 @@ def _cmd_activate_plan(extra: list[str]) -> None:
     entitlements follow the ACTIVATED plan set here (see app.plan.activate_plan).
 
     Passing ``--plan evidence_preview`` de-activates paid access.
+
+    ``--list`` prints every user's self-selected plan intent vs. their activated
+    plan so the operator can see who needs (re-)activation after a deploy. The
+    activation gate is fail-closed: a user with no ``activated_plan`` runs on
+    free-tier caps regardless of the paid ``plan_name`` they self-selected, so
+    after deploying this commit the operator must re-run ``activate-plan`` for
+    each genuinely paying customer (and the founder account) to restore access.
     """
     from app.plan import PLAN_NAMES, activate_plan
 
+    # ── --list: show intent-vs-activated for every user (no writes) ───────────
+    if extra and extra[0] in ("--list", "list"):
+        from app.db import ensure_auth_tables
+        from app.plan import list_user_plans
+
+        ensure_auth_tables()
+        users = list_user_plans()
+        if not users:
+            print("No users found.")
+            sys.exit(0)
+        needing = [u for u in users if u["needs_activation"]]
+        print(f"{'ID':>4}  {'ACTIVATED':<18} {'INTENT':<18} {'NEEDS ACT.':<10} EMAIL")
+        print("  " + "-" * 74)
+        for u in users:
+            flag = "YES" if u["needs_activation"] else "-"
+            print(
+                f"{u['id']:>4}  {u['activated_plan']:<18} {u['plan_name']:<18} "
+                f"{flag:<10} {u['email']}"
+            )
+        print("  " + "-" * 74)
+        print(
+            f"{len(users)} user(s); {len(needing)} need (re-)activation "
+            f"(self-selected a paid plan that is not yet activated)."
+        )
+        if needing:
+            print("  To activate each:")
+            for u in needing:
+                print(
+                    f"    python run.py activate-plan --user {u['id']} --plan {u['plan_name']}"
+                )
+        sys.exit(0)
+
     user_id: int | None = None
     plan_name: str | None = None
-    _usage = "  Usage: python run.py activate-plan --user <id> --plan <plan_name>"
+    _usage = (
+        "  Usage: python run.py activate-plan --user <id> --plan <plan_name>\n"
+        "         python run.py activate-plan --list"
+    )
     i_ = 0
     while i_ < len(extra):
         tok = extra[i_]
