@@ -145,6 +145,71 @@ def _safe(text: str, max_len: int) -> str:
     return cleaned
 
 
+# CLAUDE.md customer-delivery rule: "No customer delivery without human review
+# when risk >= 70 or confidence < 0.70." 70/100 maps to risk_level HIGH.
+_HUMAN_REVIEW_CONFIDENCE_FLOOR = 0.70
+
+
+def _requires_human_review(result: dict) -> str:
+    """Return a non-empty reason when an AUTOMATED customer broadcast must be
+    held for human review, or "" when it may auto-send.
+
+    Gate (any one holds): HIGH risk, an explicit review_required flag, or a
+    confidence below the floor — numeric < 0.70 or the string "low".
+    """
+    risk = str(result.get("risk_level") or "").strip().upper()
+    if risk == "HIGH":
+        return "risk_level HIGH (>= review threshold)"
+    if result.get("review_required"):
+        return "review_required flag set"
+
+    conf = result.get("confidence")
+    if isinstance(conf, bool):  # guard: bool is a subclass of int
+        conf = None
+    if isinstance(conf, (int, float)):
+        if float(conf) < _HUMAN_REVIEW_CONFIDENCE_FLOOR:
+            return f"confidence {conf} < {_HUMAN_REVIEW_CONFIDENCE_FLOOR}"
+    else:
+        conf_str = str(conf or "").strip().lower()
+        if conf_str == "low":
+            return "confidence 'low'"
+        try:
+            if conf_str and float(conf_str) < _HUMAN_REVIEW_CONFIDENCE_FLOOR:
+                return f"confidence {conf_str} < {_HUMAN_REVIEW_CONFIDENCE_FLOOR}"
+        except ValueError:
+            pass
+    return ""
+
+
+def _hold_alert_for_review(result: dict, message: str, *, reason: str, detail: str = "") -> None:
+    """Record a withheld automated alert so it is HELD (not dropped) for review.
+
+    Never raises — a recording failure must not turn a safety hold into an
+    unhandled exception on the monitoring path.
+    """
+    try:
+        from app.review_queue import record_held_alert
+
+        record_held_alert(
+            reason,
+            message=message,
+            context={
+                "source_id": result.get("source_id") or result.get("source_name") or "",
+                "source_name": result.get("source_name") or "",
+                "url": result.get("url") or "",
+                "risk_level": result.get("risk_level") or "",
+                "confidence": result.get("confidence"),
+                "review_required": bool(result.get("review_required")),
+                "normalized_hash": result.get("normalized_hash") or "",
+                "detail": detail,
+            },
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.error(
+            "Failed to record held alert (reason=%s, detail=%s): %s", reason, detail, exc
+        )
+
+
 def send_telegram_alert(result: dict) -> bool:
     """
     Send a Markdown-formatted alert for MEDIUM or HIGH risk results.
@@ -171,6 +236,27 @@ def send_telegram_alert(result: dict) -> bool:
     source_name = str(result.get("source_name") or "")
     message = render_telegram(build_alert_content(result))
 
+    # ── SF-1 legal-safety: final-bytes forbidden-claims guard (fail closed) ──
+    # The authoritative check runs on the EXACT string a customer would receive.
+    # build_alert_content already drops offending AI fields, so a hit here means
+    # a banned phrase survived elsewhere (e.g. a source-derived excerpt, SF-6).
+    # Never ship it: hold the alert for human review and report not-sent.
+    from app.legal_safety import find_forbidden_claims
+
+    _forbidden_hits = find_forbidden_claims(message)
+    if _forbidden_hits:
+        logger.error(
+            "LEGAL-SAFETY BLOCK: Telegram alert WITHHELD — forbidden claim(s) %s "
+            "in final rendered bytes for source=%s url=%s; routed to review, NOT sent",
+            _forbidden_hits, source_name or "", url,
+        )
+        _hold_alert_for_review(
+            result, message,
+            reason="forbidden_claim_in_final_bytes",
+            detail=", ".join(_forbidden_hits),
+        )
+        return False
+
     # Cycle 3: verification/e2e runs must never send real alerts. With
     # ALERT_DRY_RUN set, log the fully rendered message and report not-sent
     # so dedup state (alert_sent) is not poisoned by test traffic.
@@ -178,6 +264,24 @@ def send_telegram_alert(result: dict) -> bool:
         logger.info("ALERT_DRY_RUN — alert not sent. Rendered message:\n%s", message)
         return False
 
+    # ── SF-2 human-review gate (CLAUDE.md): no automated customer delivery ───
+    # when the run needs human review — risk >= HIGH, confidence < 0.70 / "low",
+    # or review_required. Hold for the human-approved preview path
+    # (alert_routing.send_preview_alert_to_user) instead of auto-broadcasting.
+    # Do NOT silently drop: record the hold so an operator can act on it.
+    _hold_reason = _requires_human_review(result)
+    if _hold_reason:
+        logger.warning(
+            "LEGAL-SAFETY HOLD: automated Telegram alert WITHHELD for human review "
+            "(%s) source=%s url=%s — routed to review, NOT auto-broadcast",
+            _hold_reason, source_name or "", url,
+        )
+        _hold_alert_for_review(
+            result, message,
+            reason="requires_human_review",
+            detail=_hold_reason,
+        )
+        return False
 
     # ── Step 1: deliver to subscribed customers via ALERTS bot ──────────────
     # Falls back to founder chat during pilot phase;

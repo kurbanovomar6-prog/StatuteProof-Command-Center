@@ -44,6 +44,9 @@ logger = logging.getLogger(__name__)
 
 _BASE_DIR = Path(__file__).parent.parent
 _REGISTER_TITLE = "StatuteProof Regulatory Change Register"
+# DoS width cap for a register export when both bounds are supplied. Matches the
+# audit-vault cap so the two paid exports impose the same per-request ceiling.
+MAX_REGISTER_RANGE_DAYS = 366
 _NOT_SCORED = "NOT_SCORED"
 _EMPTY_CELL = "—"
 
@@ -78,10 +81,11 @@ def validate_register_date_range(date_from: str, date_to: str) -> tuple[bool, st
     """Validate an *optional* YYYY-MM-DD range for the register.
 
     Either bound may be empty (unbounded on that side). When both are given,
-    ``date_from`` must not be after ``date_to``. This is deliberately more
-    lenient than the audit-vault validator: a change register is an
+    ``date_from`` must not be after ``date_to`` and the range must not span more
+    than ``MAX_REGISTER_RANGE_DAYS`` days (a DoS guard). This is deliberately
+    more lenient than the audit-vault validator: a change register is an
     "export everything in scope" artifact, so future/past window caps are not
-    imposed here.
+    imposed here — only the width cap when both bounds are supplied.
     """
     d_from = _parse_optional_date(date_from)
     if d_from is False:
@@ -89,8 +93,13 @@ def validate_register_date_range(date_from: str, date_to: str) -> tuple[bool, st
     d_to = _parse_optional_date(date_to)
     if d_to is False:
         return False, f"date_to '{date_to}' is not a valid YYYY-MM-DD date."
-    if isinstance(d_from, date) and isinstance(d_to, date) and d_from > d_to:
-        return False, "date_from must not be after date_to."
+    if isinstance(d_from, date) and isinstance(d_to, date):
+        if d_from > d_to:
+            return False, "date_from must not be after date_to."
+        # DoS width cap: only enforceable when BOTH bounds are given (an
+        # unbounded side stays unbounded, matching the register's lenient shape).
+        if (d_to - d_from).days > MAX_REGISTER_RANGE_DAYS:
+            return False, f"Date range must not exceed {MAX_REGISTER_RANGE_DAYS} days per request."
     return True, ""
 
 

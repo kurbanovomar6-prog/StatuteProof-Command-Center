@@ -19,6 +19,7 @@ MEDIUM_MODERATE_KEYWORD, MEDIUM_ARABIC, LOW_NO_KEYWORDS, NON_MATERIAL).
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -195,17 +196,61 @@ def _topic_label(slug: str) -> str:
 
 
 def _contains_forbidden(text: str) -> bool:
-    """Reuse the single forbidden-phrase guard (app/monthly_assurance_report).
+    """Reuse the single forbidden-phrase guard (app/legal_safety).
 
-    Imported lazily so the alert path never asserts a claim we ban anywhere
-    else in customer-facing output. Applied ONLY to the impact strings (never
-    the whole message), because the mandatory footer legitimately contains the
-    words "legal advice".
+    The shared guard neutralizes the product's fixed disclaimers before
+    scanning, so the mandatory footer ("Monitoring information only. Not legal
+    advice.") never self-trips while any AFFIRMATIVE banned claim — in an AI
+    free-text field or a source-derived excerpt — still trips it.
     """
-    from app.monthly_assurance_report import _FORBIDDEN_PHRASES
+    from app.legal_safety import contains_forbidden_claim
 
+    return contains_forbidden_claim(text)
+
+
+# SF-3 grounding: prefix for an AI obligation/deadline assertion the diff does
+# not back with a rule-detected fact. Kept short and unmistakable.
+_UNVERIFIED_LABEL = "AI-generated, unverified: "
+
+# Strong obligation / deadline language. When AI free text uses any of these AND
+# no structured fact was detected in the delta, the assertion is not grounded in
+# the evidence and must be labelled rather than presented as fact.
+_OBLIGATION_TERMS = (
+    "deadline",
+    "no later than",
+    "due by",
+    "due on",
+    "must ",
+    "shall ",
+    "required to",
+    "obligation to",
+    "effective date",
+    "comes into force",
+    "enters into force",
+    "penalty of",
+    "fine of",
+    "within 30 days",
+    "within 60 days",
+    "within 90 days",
+)
+
+# A bare four-digit year in obligation-shaped text (e.g. "by 2026") is also a
+# concrete, checkable assertion.
+_YEAR_RE = re.compile(r"\b20\d{2}\b")
+
+
+def _asserts_ungrounded_obligation(text: str) -> bool:
+    """True if free text asserts a concrete obligation/deadline (caller has
+    already established there are no detected facts to back it)."""
     low = str(text or "").lower()
-    return any(phrase in low for phrase in _FORBIDDEN_PHRASES)
+    if low.startswith(_UNVERIFIED_LABEL.lower()):
+        return False  # already labelled
+    if any(term in low for term in _OBLIGATION_TERMS):
+        return True
+    # "by <year>" / "before <year>" style deadline assertions.
+    if _YEAR_RE.search(low) and any(w in low for w in (" by ", "before ", "no later")):
+        return True
+    return False
 
 
 def _build_impact(
@@ -358,6 +403,42 @@ def build_alert_content(
         summary = _clean(details.get("reason") or payload.get("risk_reason") or "")
     if summary:
         content["summary"] = summary
+
+    # SF-1 legal-safety: the summary / action / affected fields are model- or
+    # source-controlled free text (AI executive_summary, business_action, or an
+    # echoed source string). They can carry a forbidden claim — a hallucination
+    # or a prompt-injected instruction from an adversarial source. Drop any
+    # offending field (truth over boilerplate); for the summary, fall back to
+    # the rule-based reason when that reason is itself clean and backed by a
+    # matched indicator. The final-bytes guard at each send boundary is the
+    # authoritative backstop; this keeps a single bad field from holding the
+    # whole alert while never letting the bad field ship.
+    if content.get("summary") and _contains_forbidden(content["summary"]):
+        fallback = ""
+        if details.get("matched_keywords"):
+            candidate = _clean(details.get("reason") or payload.get("risk_reason") or "")
+            if candidate and not _contains_forbidden(candidate):
+                fallback = candidate
+        if fallback:
+            content["summary"] = fallback
+        else:
+            content.pop("summary", None)
+    if content.get("action") and _contains_forbidden(content["action"]):
+        content.pop("action", None)
+    if content.get("affected") and _contains_forbidden(content["affected"]):
+        content.pop("affected", None)
+
+    # SF-3 grounding gate: an AI summary / action that asserts a concrete
+    # obligation or deadline the diff does not back (no rule-detected fact in
+    # the delta) is not verified StatuteProof content. Reuse the detected_facts
+    # grounding pattern — the alert already refuses an AI deadline with no
+    # detected span — and label the free-text field "AI-generated, unverified"
+    # so an unbacked obligation is never presented as an established fact.
+    if not facts:
+        if content.get("summary") and _asserts_ungrounded_obligation(content["summary"]):
+            content["summary"] = _UNVERIFIED_LABEL + content["summary"]
+        if content.get("action") and _asserts_ungrounded_obligation(content["action"]):
+            content["action"] = _UNVERIFIED_LABEL + content["action"]
 
     # Additive per-customer impact tag (no-op when it does not apply).
     impact = _build_impact(payload, client_profile, content["excerpt"])

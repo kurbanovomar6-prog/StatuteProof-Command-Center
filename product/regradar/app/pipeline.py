@@ -739,6 +739,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         if alert_allowed:
             alert_payload = {
                 "url":                     url,
+                "source_id":               _source_id or (source or {}).get("id") or (source or {}).get("source_id") or "",
                 "source_name":             (source or {}).get("name", ""),
                 "jurisdiction":            (source or {}).get("jurisdiction", ""),
                 "risk_level":              final_risk_level,
@@ -746,6 +747,11 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 "executive_summary":       executive_summary,
                 "business_action_required":business_action,
                 "ai_used":                 ai_used,
+                # SF-2 human-review gate inputs: send_telegram_alert holds the
+                # automated broadcast when the run needs review. These MUST ride
+                # on the payload so the gate can see them at send time.
+                "confidence":              confidence,
+                "review_required":         review_required,
                 "added_count":             len(diff_result["added"]),
                 "removed_count":           len(diff_result["removed"]),
                 "added":                   diff_result.get("added", []),

@@ -48,17 +48,18 @@ _INCLUDED_DECISIONS = {DECISION_WEEKLY, DECISION_URGENT}
 logger = logging.getLogger(__name__)
 
 # ── STEP 2: Legal language gate ───────────────────────────────────────────────
-FORBIDDEN_IN_BRIEF = [
-    "guarantee compliance",
-    "prevent fines",
-    "ensure you are compliant",
-    "you will be compliant",
-    "automatically compliant",
-    "no action needed",
-    "fully covered",
-    "certified",
-    "official partner",
-]
+# SF-5: the brief ban list is the ONE canonical product ban list
+# (app.legal_safety.FORBIDDEN_PHRASES) plus the brief-specific advisory
+# over-promises. Derived, not forked — so a phrase blocked anywhere (e.g.
+# "never miss", "100% accurate", "automated compliance decisions",
+# "we handle compliance for you", "avoid all penalties") is blocked in briefs
+# too, closing the gaps the old hardcoded list missed.
+from app.legal_safety import BRIEF_EXTRA_PHRASES as _BRIEF_EXTRA_PHRASES
+from app.legal_safety import FORBIDDEN_PHRASES as _CANONICAL_FORBIDDEN
+
+FORBIDDEN_IN_BRIEF = tuple(
+    dict.fromkeys([*_CANONICAL_FORBIDDEN, *_BRIEF_EXTRA_PHRASES])
+)
 
 
 def legal_scan_brief(brief: dict) -> list[str]:

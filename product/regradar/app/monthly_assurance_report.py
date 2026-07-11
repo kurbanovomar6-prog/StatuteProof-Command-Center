@@ -16,25 +16,16 @@ from typing import Any
 from app.config import DB_PATH
 from app.evidence_assessment import LEGAL_DISCLAIMER
 
+# Phrases that must never appear in customer-facing output. Re-exported from the
+# single source of truth (app.legal_safety) so every module that historically
+# imported ``_FORBIDDEN_PHRASES`` from here shares the ONE canonical ban list —
+# no divergent copies. See app/legal_safety.py.
+from app.legal_safety import FORBIDDEN_PHRASES as _FORBIDDEN_PHRASES
+
 logger = logging.getLogger(__name__)
 
 _BASE_DIR = Path(__file__).parent.parent
 _REPORTS_DIR = _BASE_DIR / "reports"
-
-# Phrases that must never appear in customer-facing output.
-_FORBIDDEN_PHRASES = (
-    "guarantee compliance",
-    "guaranteed compliance",
-    "prevent fines",
-    "never miss",
-    "legal advice",
-    "certified by",
-    "regulator certified",
-    "100% accurate",
-    "we handle compliance for you",
-    "automated compliance decisions",
-    "avoid all penalties",
-)
 
 _MONTH_NAMES = [
     "", "January", "February", "March", "April", "May", "June",

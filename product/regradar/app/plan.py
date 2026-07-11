@@ -89,6 +89,34 @@ PLAN_CAPABILITIES = {
 }
 
 
+def capabilities_for(user_id: int) -> dict[str, Any]:
+    """Return the capability dict for the user's currently selected plan.
+
+    This is the single source of truth for authorization decisions on paid
+    export paths: a default (free ``evidence_preview``) account has every paid
+    capability set to ``False`` and ``source_limit`` 0, so it cannot pull paid
+    exports for any source. Never raises — falls back to the free-tier caps.
+    """
+    try:
+        caps = get_plan_state(int(user_id)).get("capabilities")
+    except Exception:  # noqa: BLE001 — an auth gate must never crash the request
+        caps = None
+    return caps if isinstance(caps, dict) else PLAN_CAPABILITIES["evidence_preview"]
+
+
+def has_capability(user_id: int, capability: str) -> bool:
+    """True when the user's selected plan grants ``capability`` (truthy value)."""
+    return bool(capabilities_for(user_id).get(capability))
+
+
+def source_limit_for(user_id: int) -> int:
+    """Max number of sources the user's plan entitles per export (0 = none)."""
+    try:
+        return int(capabilities_for(user_id).get("source_limit") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 

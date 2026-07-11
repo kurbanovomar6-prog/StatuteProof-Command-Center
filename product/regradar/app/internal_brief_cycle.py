@@ -26,16 +26,20 @@ _BASE_DIR = Path(__file__).parent.parent
 _REPORT_JSON = Path("reports") / "internal_non_customer_brief_latest.json"
 _REPORT_MD = Path("reports") / "internal_non_customer_brief_latest.md"
 _HEADER = "INTERNAL SAMPLE / NOT CUSTOMER DELIVERY"
-_UNSAFE_POSITIVE_CLAIMS = (
+# SF-5: derive from the ONE canonical product ban list (app.legal_safety) plus
+# internal-brief-specific over-promises, so the canonical phrases are never
+# forked into a divergent local copy.
+from app.legal_safety import FORBIDDEN_PHRASES as _CANONICAL_FORBIDDEN
+
+_INTERNAL_EXTRA_CLAIMS = (
     "complete uae coverage",
     "complete family coverage",
-    "legal advice",
-    "guaranteed compliance",
-    "guarantee compliance",
     "regulator certification",
     "perfect parsing",
-    "never miss",
     "all-source coverage",
+)
+_UNSAFE_POSITIVE_CLAIMS = tuple(
+    dict.fromkeys([*_CANONICAL_FORBIDDEN, *_INTERNAL_EXTRA_CLAIMS])
 )
 
 

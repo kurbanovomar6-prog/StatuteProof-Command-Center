@@ -27,6 +27,70 @@ logger = logging.getLogger(__name__)
 _BASE_DIR = Path(__file__).parent.parent
 _VALID_ACTIONS = {"accepted", "not_applicable", "escalated"}
 
+# Append-only durable record of alerts a delivery path WITHHELD from automated
+# customer delivery (forbidden-claims hit or the human-review gate). "Hold, do
+# not drop": an operator reviews these before any customer send.
+_HELD_ALERTS_FILE = Path("data") / "review_holds" / "held_alerts.jsonl"
+
+
+def record_held_alert(
+    reason: str,
+    *,
+    message: str | None = None,
+    context: dict[str, Any] | None = None,
+    base_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Durably record an alert withheld from automated delivery.
+
+    Every automated customer-delivery path routes a blocked alert here instead
+    of dropping it, so the withheld alert is auditable and can be picked up for
+    human review. The stored ``message_preview`` is truncated and the record is
+    append-only. Never raises.
+    """
+    root = base_dir or _BASE_DIR
+    entry: dict[str, Any] = {
+        "held_at": now_utc(),
+        "reason": str(reason or "unspecified"),
+        "context": context or {},
+        "message_preview": str(message or "")[:600],
+        "customer_delivery_approved": False,
+    }
+    try:
+        log_path = root / _HELD_ALERTS_FILE
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        with log_path.open("a", encoding="utf-8") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            try:
+                fh.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
+            finally:
+                fcntl.flock(fh, fcntl.LOCK_UN)
+        logger.info("Alert HELD for review (reason=%s): %s", reason, (context or {}).get("source_name"))
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.error("record_held_alert could not persist hold (reason=%s): %s", reason, exc)
+    return entry
+
+
+def list_held_alerts(*, base_dir: Path | None = None, limit: int = 100) -> list[dict[str, Any]]:
+    """Return recorded held alerts, most recent first. Never raises."""
+    root = base_dir or _BASE_DIR
+    log_path = root / _HELD_ALERTS_FILE
+    if not log_path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    try:
+        for line in log_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    except OSError as exc:  # pragma: no cover - defensive
+        logger.warning("list_held_alerts read failed: %s", exc)
+        return []
+    rows.sort(key=lambda r: str(r.get("held_at") or ""), reverse=True)
+    return rows[: max(1, int(limit or 100))]
+
 
 def build_review_queue(
     *,

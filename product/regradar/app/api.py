@@ -180,6 +180,21 @@ def _truthy_param(value: object) -> bool:
     return normalized in {"1", "true", "yes", "on"}
 
 
+def _same_owner(owner_user_id: object, user_id: int) -> bool:
+    """True when a stored ``owner_user_id`` matches ``user_id``.
+
+    Tolerant of int-vs-str storage (sources.json is hand-editable), and never
+    raises: an owner value that can't be coerced to an int is treated as a
+    non-match so it is never attributed to the caller.
+    """
+    if owner_user_id is None:
+        return False
+    try:
+        return int(owner_user_id) == int(user_id)
+    except (TypeError, ValueError):
+        return False
+
+
 class _RateLimiter:
     """Small in-memory fixed-window limiter for MVP endpoint hardening."""
 
@@ -228,6 +243,12 @@ _TELEGRAM_TEST_LIMITER = _RateLimiter(5, 3600)
 _DELIVERY_TEST_BRIEF_LIMITER = _RateLimiter(5, 3600)
 _DELIVERY_SEND_PREVIEW_LIMITER = _RateLimiter(10, 3600)
 _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
+# Heavy export endpoints (audit vault, evidence pack, coverage certificate,
+# monthly assurance, change-register export, evidence export). These build ZIPs
+# and PDFs — each request is meaningful disk/CPU work on the small production
+# droplet, so one shared per-IP limiter caps how fast any client can trigger
+# them regardless of which export it is.
+_EXPORT_LIMITER = _RateLimiter(30, 3600)
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -383,6 +404,90 @@ class _Handler(BaseHTTPRequestHandler):
             429,
         )
         return True
+
+    def _require_capability(self, user: dict, capability: str) -> bool:
+        """Authorize a paid export against the user's plan capabilities.
+
+        Reads ``app.plan.has_capability`` (backed by ``get_plan_state`` /
+        ``PLAN_CAPABILITIES``). Returns ``True`` when the plan grants
+        ``capability``; otherwise emits a 403 and returns ``False`` so the
+        caller can ``return`` immediately. A default free (``evidence_preview``)
+        account has every paid capability off, so it is rejected here before any
+        export work is done. Never raises — a plan lookup failure denies access.
+        """
+        try:
+            from app.plan import has_capability
+
+            if has_capability(int(user["id"]), capability):
+                return True
+        except Exception:  # noqa: BLE001 — a broken plan lookup must fail closed
+            logger.warning("capability check failed for %s", capability)
+        self._send_json(
+            {
+                "ok": False,
+                "message": "Your plan does not include this export. Upgrade your plan to continue.",
+            },
+            403,
+        )
+        return False
+
+    def _entitle_source_ids(self, user: dict, requested: list) -> list[str]:
+        """Clip caller-supplied source_ids to what the user is entitled to.
+
+        Two independent restrictions are applied so a caller cannot widen their
+        own scope by naming arbitrary IDs:
+
+        1. Tenancy — a *custom* source may only be exported by the user who owns
+           it (``owner_user_id``). Custom sources owned by someone else, and
+           legacy custom sources with no owner recorded, are dropped. Official
+           (non-custom) sources are shared and always pass this filter.
+        2. Plan limit — the surviving list is truncated to the plan's
+           ``source_limit`` so no request pulls more sources than the plan sells.
+
+        Never raises — on any lookup failure it returns the tenancy-safe subset
+        it could compute (falling back to an empty list), never the raw input.
+        """
+        try:
+            user_id = int(user["id"])
+        except (KeyError, TypeError, ValueError):
+            return []
+
+        clean_ids = [str(s).strip() for s in (requested or []) if str(s).strip()]
+        if not clean_ids:
+            return []
+
+        # Ownership map for custom sources (official sources are absent → shared).
+        custom_owner: dict[str, object] = {}
+        try:
+            from app.source_intake import load_sources_json
+
+            for s in load_sources_json():
+                if not isinstance(s, dict) or s.get("custom") is not True:
+                    continue
+                sid = str(s.get("source_id") or "").strip()
+                if sid:
+                    custom_owner[sid] = s.get("owner_user_id")
+        except Exception:  # noqa: BLE001 — treat an unreadable list as "no custom sources"
+            logger.warning("source entitlement: could not load sources.json")
+
+        entitled: list[str] = []
+        for sid in clean_ids:
+            if sid in custom_owner:
+                # A custom source is only exportable by its owner. Legacy/unowned
+                # custom sources (owner is None) are never leaked.
+                if not _same_owner(custom_owner[sid], user_id):
+                    continue
+            entitled.append(sid)
+
+        try:
+            from app.plan import source_limit_for
+
+            limit = source_limit_for(user_id)
+        except Exception:  # noqa: BLE001 — a broken plan lookup must not widen scope
+            limit = 0
+        if limit >= 0:
+            entitled = entitled[:limit]
+        return entitled
 
     def _base_url(self) -> str:
         host = self.headers.get("Host", "localhost:5001")
@@ -1595,6 +1700,8 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        if self._rate_limited(_EXPORT_LIMITER, "evidence_export"):
+            return
         params = parse_qs(urlparse(self.path).query)
         evidence_id = str((params.get("evidence_record_id") or params.get("run_id") or [""])[0]).strip()
         if not evidence_id:
@@ -1615,6 +1722,8 @@ class _Handler(BaseHTTPRequestHandler):
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "evidence_export"):
             return
         params = parse_qs(urlparse(self.path).query)
         evidence_id = str((params.get("evidence_record_id") or params.get("run_id") or [""])[0]).strip()
@@ -1711,6 +1820,8 @@ class _Handler(BaseHTTPRequestHandler):
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "evidence_export"):
             return
         body, error = self._read_json_strict()
         if error:
@@ -2423,9 +2534,19 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
         try:
+            user_id = int(user["id"])
             from app.source_intake import load_sources_json
             sources = load_sources_json()
-            custom = [s for s in sources if s.get("custom") is True]
+            # Tenancy: only return the caller's own custom sources. A custom
+            # source with no owner recorded (legacy, pre-tenancy) is treated as
+            # unowned and is NOT leaked to an arbitrary user.
+            custom = [
+                s
+                for s in sources
+                if s.get("custom") is True
+                and s.get("owner_user_id") is not None
+                and _same_owner(s.get("owner_user_id"), user_id)
+            ]
             self._send_json({"ok": True, "sources": custom})
         except Exception as exc:
             logger.error("custom-sources list error: %s", exc)
@@ -2676,6 +2797,10 @@ class _Handler(BaseHTTPRequestHandler):
                 "status": "pending_validation",
                 "custom": True,
                 "tier": "custom",
+                # Tenancy stamp: this custom source belongs to the creating user.
+                # The list endpoint and export entitlement checks filter on it so
+                # one customer's custom sources never leak to another.
+                "owner_user_id": int(user["id"]),
             }
             append_source_to_json(new_source)
             self._send_json({
@@ -2694,6 +2819,8 @@ class _Handler(BaseHTTPRequestHandler):
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "monthly_assurance"):
             return
         from app.monthly_assurance_report import compute_monthly_stats, render_assurance_report_markdown, generate_monthly_report_pdf
         parsed = urlparse(self.path)
@@ -2734,6 +2861,8 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        if self._rate_limited(_EXPORT_LIMITER, "coverage_certificate"):
+            return
         from app.coverage_certificate import (
             build_coverage_certificate,
             enabled_source_ids,
@@ -2761,6 +2890,11 @@ class _Handler(BaseHTTPRequestHandler):
 
         source_ids_raw = (qs.get("source_ids") or [""])[0]
         source_ids = [s.strip() for s in source_ids_raw.split(",") if s.strip()] or None
+        # Tenancy: when the caller explicitly names sources, clip them to the
+        # user's entitled scope so a custom source owned by another customer can
+        # never be certified into this report.
+        if source_ids is not None:
+            source_ids = self._entitle_source_ids(user, source_ids) or None
         # Default customer scope: when the caller does not restrict the source
         # set, certify the customer's monitored (enabled) sources so a fully-dark
         # configured source surfaces as NO_COVERAGE instead of vanishing. Falls
@@ -2769,6 +2903,10 @@ class _Handler(BaseHTTPRequestHandler):
             source_ids = enabled_source_ids() or None
         client_name = (qs.get("client_name") or [""])[0]
         fmt = ((qs.get("format") or ["markdown"])[0]).lower().strip()
+        # The PDF coverage certificate is a paid deliverable (professional /
+        # consultant). Other formats stay available for in-dashboard review.
+        if fmt == "pdf" and not self._require_capability(user, "pdf_export"):
+            return
 
         try:
             certificate = build_coverage_certificate(
@@ -2847,7 +2985,9 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
-        from app.audit_export import build_period_audit_vault, validate_date_range
+        if self._rate_limited(_EXPORT_LIMITER, "audit_vault"):
+            return
+        from app.audit_export import build_period_audit_vault, validate_date_range, validate_source_ids
         body, error = self._read_json_strict()
         if error:
             self._send_json({"ok": False, "message": error}, 400)
@@ -2858,12 +2998,22 @@ class _Handler(BaseHTTPRequestHandler):
         source_ids = body.get("source_ids")
         date_from = str(body.get("date_from") or "").strip()
         date_to = str(body.get("date_to") or "").strip()
-        if not source_ids or not isinstance(source_ids, list):
-            self._send_json({"ok": False, "message": "source_ids must be a non-empty list."}, 400)
+        ids_ok, ids_err = validate_source_ids(source_ids)
+        if not ids_ok:
+            self._send_json({"ok": False, "message": ids_err}, 400)
+            return
+        if not self._require_capability(user, "audit_export"):
             return
         valid, err = validate_date_range(date_from, date_to)
         if not valid:
             self._send_json({"ok": False, "message": err}, 400)
+            return
+        source_ids = self._entitle_source_ids(user, source_ids)
+        if not source_ids:
+            self._send_json(
+                {"ok": False, "message": "None of the requested sources are in your plan scope."},
+                403,
+            )
             return
         try:
             result = build_period_audit_vault(source_ids, date_from, date_to)
@@ -2893,8 +3043,10 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        if self._rate_limited(_EXPORT_LIMITER, "evidence_pack"):
+            return
         from pathlib import Path
-        from app.audit_export import validate_date_range
+        from app.audit_export import validate_date_range, validate_source_ids
         from app.evidence_pack import build_evidence_pack
         body, error = self._read_json_strict()
         if error:
@@ -2906,12 +3058,22 @@ class _Handler(BaseHTTPRequestHandler):
         source_ids = body.get("source_ids")
         date_from = str(body.get("date_from") or "").strip()
         date_to = str(body.get("date_to") or "").strip()
-        if not source_ids or not isinstance(source_ids, list):
-            self._send_json({"ok": False, "message": "source_ids must be a non-empty list."}, 400)
+        ids_ok, ids_err = validate_source_ids(source_ids)
+        if not ids_ok:
+            self._send_json({"ok": False, "message": ids_err}, 400)
+            return
+        if not self._require_capability(user, "audit_export"):
             return
         valid, err = validate_date_range(date_from, date_to)
         if not valid:
             self._send_json({"ok": False, "message": err}, 400)
+            return
+        source_ids = self._entitle_source_ids(user, source_ids)
+        if not source_ids:
+            self._send_json(
+                {"ok": False, "message": "None of the requested sources are in your plan scope."},
+                403,
+            )
             return
         try:
             result = build_evidence_pack(source_ids, date_from, date_to)
@@ -2950,6 +3112,8 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        if self._rate_limited(_EXPORT_LIMITER, "change_register_export"):
+            return
         from app.change_register import build_change_register_export, validate_register_date_range
         body, error = self._read_json_strict()
         if error:
@@ -2958,11 +3122,21 @@ class _Handler(BaseHTTPRequestHandler):
         if body is None:
             self._send_json({"ok": False, "message": "Request body required."}, 400)
             return
+        if not self._require_capability(user, "audit_export"):
+            return
         date_from = str(body.get("date_from") or "").strip()
         date_to = str(body.get("date_to") or "").strip()
         source_id = str(body.get("source_id") or "").strip()
         regulator = str(body.get("regulator") or body.get("regulator_code") or "").strip()
         export_format = str(body.get("format") or "all").strip() or "all"
+        # Tenancy: a named custom source may only be exported by its owner. An
+        # official source (or no filter) passes through unchanged.
+        if source_id and source_id not in self._entitle_source_ids(user, [source_id]):
+            self._send_json(
+                {"ok": False, "message": "That source is not in your plan scope."},
+                403,
+            )
+            return
         valid, err = validate_register_date_range(date_from, date_to)
         if not valid:
             self._send_json({"ok": False, "message": err}, 400)

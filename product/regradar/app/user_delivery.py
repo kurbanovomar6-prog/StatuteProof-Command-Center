@@ -50,6 +50,12 @@ def build_sample_brief_message(profile: dict) -> str:
     today = _today_iso()
     return "\n".join([
         "StatuteProof - Sample Delivery Confirmation",
+        # SF-8 legal-safety: the block below attributes INVENTED regulatory
+        # content to a real regulator (DFSA). Per the CLAUDE.md SAMPLE / FAKE
+        # rule, any example output using invented regulatory content must carry
+        # this label near the top so it can never be mistaken for a real,
+        # evidence-backed monitoring brief.
+        "SAMPLE / FAKE — illustrative content only, not a real regulatory change.",
         "",
         f"Workspace: {company}",
         f"Date: {today}",
@@ -57,7 +63,7 @@ def build_sample_brief_message(profile: dict) -> str:
         "This sample brief confirms your Telegram is connected and can receive StatuteProof notifications.",
         "",
         "------------------------------",
-        "Sample: Regulatory Update",
+        "SAMPLE / FAKE: Regulatory Update (illustrative — not a monitored change)",
         "",
         "Source: DFSA - Dubai Financial Services Authority",
         "Type: Consultation paper",
@@ -70,7 +76,7 @@ def build_sample_brief_message(profile: dict) -> str:
         "https://www.dfsa.ae/consultations",
         "",
         "Limitations:",
-        "This is a delivery test with illustrative content. Real briefs include only human-reviewed changes.",
+        "This is a SAMPLE / FAKE delivery test with illustrative content. Real briefs include only human-reviewed changes.",
         "",
         "Not legal advice.",
         "Manage alerts: StatuteProof -> Integrations",

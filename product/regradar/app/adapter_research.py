@@ -12,9 +12,9 @@ import logging
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
-import requests as _req
 from bs4 import BeautifulSoup
 
+from app.adapters.base import fetch_text_bounded_status
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.extractors import extract_best_text
 from app.scraper import _fetch_via_playwright, is_low_content_html
@@ -162,32 +162,52 @@ def _categorise_links(html: str, page_url: str) -> dict:
 
 # ── Sitemap probing ───────────────────────────────────────────────────────────
 
+def _content_type_for_path(path: str) -> str:
+    """
+    Best-effort content-type for a fixed discovery path.
+
+    The SSRF-guarded transport (fetch_text_bounded_status) does not surface
+    response headers, so infer from the path's file extension. These are the
+    hard-coded _DISCOVERY_PATHS only (sitemap.xml, robots.txt, …), so the
+    extension is a reliable signal and nothing is invented.
+    """
+    lower = path.lower()
+    if lower.endswith(".xml"):
+        return "application/xml"
+    if lower.endswith(".txt"):
+        return "text/plain"
+    return ""
+
+
 def _probe_discovery_paths(base: str) -> list[dict]:
     """
-    HEAD then GET each standard discovery path.
+    GET each standard discovery path through the SSRF-guarded transport.
     Returns only paths that returned HTTP 200 and non-trivial content.
+
+    Fetches route through app.adapters.base.fetch_text_bounded_status: every
+    redirect hop is re-resolved and its IP vetted BEFORE connecting (per-hop
+    pinning, no allow_redirects), so a malicious/compromised source cannot
+    bounce this probe at an internal address (loopback / RFC1918 / link-local
+    / cloud metadata). The transport never raises — a blocked or unreachable
+    path simply yields status None and is skipped.
     """
     found = []
     for path in _DISCOVERY_PATHS:
         url = base.rstrip("/") + path
-        try:
-            resp = _req.get(
-                url,
-                headers={"User-Agent": REQUESTS_UA},
-                timeout=_PROBE_TIMEOUT_S,
-                allow_redirects=True,
-            )
-            if resp.status_code == 200 and len(resp.text) > 200:
-                ct = resp.headers.get("content-type", "").split(";")[0].strip()
-                found.append({
-                    "path":         path,
-                    "url":          url,
-                    "status":       resp.status_code,
-                    "content_type": ct,
-                    "size":         len(resp.text),
-                })
-        except Exception:
-            pass   # unreachable path — expected and fine
+        status, text = fetch_text_bounded_status(
+            url,
+            headers={"User-Agent": REQUESTS_UA},
+            timeout=_PROBE_TIMEOUT_S,
+            label="adapter-research",
+        )
+        if status == 200 and text and len(text) > 200:
+            found.append({
+                "path":         path,
+                "url":          url,
+                "status":       status,
+                "content_type": _content_type_for_path(path),
+                "size":         len(text),
+            })
     return found
 
 
@@ -359,23 +379,29 @@ def run_adapter_research(query: str) -> dict | None:
         "recommendation": None,
     }
 
-    # ── Tier 1 — requests ───────────────────────────────────────────────────
+    # ── Tier 1 — SSRF-guarded requests ──────────────────────────────────────
+    # fetch_text_bounded_status re-resolves and vets every redirect hop's IP
+    # BEFORE connecting (per-hop pinning, no allow_redirects), so a malicious
+    # or MITM'd source cannot redirect this research fetch at an internal
+    # address. It never raises: status is None when the request fails or the
+    # SSRF guard refuses a hop.
     tier1_html: str | None = None
-    try:
-        resp = _req.get(
-            url,
-            headers={"User-Agent": REQUESTS_UA, "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8"},
-            timeout=HTTP_TIMEOUT_S,
-            allow_redirects=True,
-        )
-        result["http_status"]  = resp.status_code
-        result["final_url"]    = str(resp.url)
-        result["content_type"] = resp.headers.get("content-type", "").split(";")[0].strip()
-        if resp.ok:
-            tier1_html = resp.text
-    except _req.RequestException as exc:
-        result["fetch_error"] = str(exc)
-        print(f"  Tier 1 failed: {type(exc).__name__} — trying Playwright …", flush=True)
+    status, text = fetch_text_bounded_status(
+        url,
+        headers={"User-Agent": REQUESTS_UA, "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8"},
+        timeout=HTTP_TIMEOUT_S,
+        label="adapter-research",
+    )
+    result["http_status"] = status
+    if status is None:
+        # Request failed outright or was refused by the SSRF guard. The guard
+        # logs the concrete reason (blocked IP, DNS failure, transport error);
+        # record a generic marker so the recommendation builder still reports a
+        # fetch failure and escalates to Playwright.
+        result["fetch_error"] = "fetch failed or blocked by SSRF guard"
+        print("  Tier 1 failed — trying Playwright …", flush=True)
+    elif text is not None:
+        tier1_html = text
 
     # ── Tier 2 — Playwright fallback ────────────────────────────────────────
     raw_html: str | None = None

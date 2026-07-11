@@ -511,7 +511,16 @@ def build_alert_telegram_message(user_profile: dict, alert_match: dict) -> str:
         "This alert was reviewed by a human editor and matched to your profile.",
         "Not legal advice. Manage alerts: StatuteProof -> Integrations",
     ])
-    return _truncate("\n".join(lines), 4096)
+    message = _truncate("\n".join(lines), 4096)
+
+    # ── SF-4 legal-safety: final-bytes forbidden-claims guard (fail closed) ──
+    # Even a human-approved reviewed alert must not ship a banned claim (a
+    # reviewer can miss one, or the draft's summary can echo source text). Raise
+    # so the send path holds it for review instead of delivering.
+    from app.legal_safety import assert_no_forbidden_claims
+
+    assert_no_forbidden_claims(message, label="Reviewed alert preview")
+    return message
 
 
 def _is_still_approved(alert_id: str) -> bool:
@@ -545,7 +554,40 @@ def send_preview_alert_to_user(user_id: int, alert_id: str) -> dict:
         return {"ok": False, "reason": "Telegram not connected.", "code": "not_ready"}
 
     user_profile = user_profile_to_routing_profile(int(user_id))
-    message = build_alert_telegram_message(user_profile, match)
+    # SF-4: the final-bytes forbidden-claims guard lives in
+    # build_alert_telegram_message and raises on a banned phrase. A human
+    # approved this alert, but a banned claim in the FINAL bytes must still not
+    # ship — hold it for review instead of delivering or 500-ing.
+    from app.legal_safety import ForbiddenClaimError
+
+    try:
+        message = build_alert_telegram_message(user_profile, match)
+    except ForbiddenClaimError as exc:
+        logger.error(
+            "LEGAL-SAFETY BLOCK: reviewed preview WITHHELD for user=%s alert=%s — %s",
+            user_id, safe_alert_id, exc,
+        )
+        try:
+            from app.review_queue import record_held_alert
+
+            record_held_alert(
+                "forbidden_claim_in_reviewed_preview",
+                message="",
+                context={
+                    "channel": "telegram",
+                    "user_id": int(user_id),
+                    "alert_id": safe_alert_id,
+                    "source_id": match.get("source_id"),
+                    "detail": str(exc),
+                },
+            )
+        except Exception as hold_err:  # pragma: no cover - defensive
+            logger.error("could not record held reviewed preview: %s", hold_err)
+        return {
+            "ok": False,
+            "reason": "Alert held for legal-safety review; not delivered.",
+            "code": "held_forbidden",
+        }
     idempotency_key = f"{int(user_id)}:reviewed_alert_preview:{safe_alert_id}"
     log = create_delivery_log(
         int(user_id),

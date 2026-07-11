@@ -513,6 +513,54 @@ def deliver_brief_email(
     """
     try:
         root = base_dir or _BASE_DIR
+
+        # ── SF-1 legal-safety: final-bytes forbidden-claims guard (fail closed) ──
+        # Scan the EXACT bytes a recipient would receive (subject + both bodies)
+        # before ANY provider send or outbox write. On a hit: do not send, do not
+        # queue — hold for review and log loudly. The shared guard neutralizes
+        # the mandatory disclaimer so a brief's own "Not legal advice" denial
+        # never self-trips, while any affirmative banned claim is blocked.
+        from app.legal_safety import find_forbidden_claims
+
+        _final_bytes = "\n".join(
+            str(payload.get(k) or "")
+            for k in ("subject", "body_text", "body_html")
+        )
+        _forbidden_hits = find_forbidden_claims(_final_bytes)
+        if _forbidden_hits:
+            logger.error(
+                "LEGAL-SAFETY BLOCK: brief email WITHHELD — forbidden claim(s) %s "
+                "in final bytes (to=%s, source_id=%s); held for review, NOT sent",
+                _forbidden_hits, _safe_email(payload.get("to")), source_id,
+            )
+            try:
+                from app.review_queue import record_held_alert
+
+                record_held_alert(
+                    "forbidden_claim_in_email_final_bytes",
+                    message=str(payload.get("body_text") or ""),
+                    context={
+                        "channel": "email",
+                        "to": _safe_email(payload.get("to")),
+                        "subject": str(payload.get("subject") or "")[:200],
+                        "source_id": str(source_id or ""),
+                        "detail": ", ".join(_forbidden_hits),
+                    },
+                    base_dir=root,
+                )
+            except Exception as hold_err:  # pragma: no cover - defensive
+                logger.error("could not record held email: %s", hold_err)
+            _record_delivery_attempt(
+                root, provider="unknown", status="blocked_forbidden_claim",
+                source_id=source_id, payload=payload,
+                detail=", ".join(_forbidden_hits),
+            )
+            return {
+                "status": "error",
+                "message": "Email withheld: output contains a forbidden claim. Held for review.",
+                "forbidden_claims": _forbidden_hits,
+            }
+
         config = validate_email_provider_config(env=env)
         provider = config["provider"]
         send_enabled = config.get("send_enabled", False)

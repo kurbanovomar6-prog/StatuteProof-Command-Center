@@ -25,6 +25,31 @@ logger = logging.getLogger(__name__)
 
 _BASE_DIR = Path(__file__).parent.parent
 
+# DoS caps for period-based exports on a small production droplet. A single
+# request may not span more than MAX_RANGE_DAYS calendar days, and may not name
+# more than MAX_SOURCE_IDS sources — either bound turns an unbounded export into
+# a bounded, predictable amount of disk/CPU work. Both are hard limits enforced
+# below the per-plan ``source_limit`` clip, so no plan can exceed them.
+MAX_RANGE_DAYS = 366
+MAX_SOURCE_IDS = 1000
+
+
+def validate_source_ids(source_ids: Any) -> tuple[bool, str]:
+    """Validate a source_ids list for an export request.
+
+    Rules:
+    - Must be a non-empty list.
+    - Must not name more than ``MAX_SOURCE_IDS`` sources (DoS guard).
+
+    Returns ``(True, "")`` on success, ``(False, message)`` otherwise. Never
+    raises so it is safe to call at any boundary.
+    """
+    if not source_ids or not isinstance(source_ids, list):
+        return False, "source_ids must be a non-empty list."
+    if len(source_ids) > MAX_SOURCE_IDS:
+        return False, f"source_ids must not exceed {MAX_SOURCE_IDS} entries per request."
+    return True, ""
+
 
 def render_audit_pack_markdown(
     evidence_record: dict[str, Any],
@@ -278,6 +303,7 @@ def validate_date_range(date_from: str, date_to: str) -> tuple[bool, str]:
     - date_from must not be after date_to.
     - Neither date may be in the future.
     - Neither date may be more than 2 years in the past.
+    - The range must not span more than ``MAX_RANGE_DAYS`` days (DoS guard).
 
     Returns
     -------
@@ -309,6 +335,10 @@ def validate_date_range(date_from: str, date_to: str) -> tuple[bool, str]:
         return False, "date_to must not be in the future."
     if d_from < two_years_ago:
         return False, "date_from must not be more than 2 years in the past."
+    # DoS width cap (checked last so the format/order/future/2-year messages above
+    # keep precedence): a single export may not span more than MAX_RANGE_DAYS.
+    if (d_to - d_from).days > MAX_RANGE_DAYS:
+        return False, f"Date range must not exceed {MAX_RANGE_DAYS} days per request."
 
     return True, ""
 
@@ -348,8 +378,9 @@ def build_period_audit_vault(
         root = base_dir or _BASE_DIR
 
         # Validate inputs
-        if not source_ids:
-            return {"status": "error", "message": "source_ids must be a non-empty list."}
+        ids_ok, ids_err = validate_source_ids(source_ids)
+        if not ids_ok:
+            return {"status": "error", "message": ids_err}
 
         valid, err = validate_date_range(date_from, date_to)
         if not valid:

@@ -313,6 +313,12 @@ def test_handler_streams_zip_for_authenticated_client(monkeypatch, tmp_path):
         "_read_json_strict",
         lambda: ({"source_ids": ["cbuae-test"], "date_from": "2026-03-01", "date_to": "2026-03-31"}, None),
     )
+    # GROUP B authz/limits gates are exercised by their own tests; here we isolate
+    # the streaming behavior, so let the rate-limit / capability / entitlement
+    # checks pass through unchanged.
+    monkeypatch.setattr(handler, "_rate_limited", lambda *a, **k: False)
+    monkeypatch.setattr(handler, "_require_capability", lambda *a, **k: True)
+    monkeypatch.setattr(handler, "_entitle_source_ids", lambda user, ids: ids)
     sent: dict = {}
 
     def _capture_bytes(body, content_type, status=200, extra_headers=None):

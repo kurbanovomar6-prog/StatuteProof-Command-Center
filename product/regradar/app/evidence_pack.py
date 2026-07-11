@@ -37,7 +37,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from app.audit_export import validate_date_range
+from app.audit_export import validate_date_range, validate_source_ids
 from app.evidence_assessment import LEGAL_DISCLAIMER
 from app.monthly_assurance_report import _FORBIDDEN_PHRASES
 
@@ -116,8 +116,9 @@ def build_evidence_pack(
     try:
         root = base_dir or _BASE_DIR
 
-        if not source_ids or not isinstance(source_ids, list):
-            return {"status": "error", "message": "source_ids must be a non-empty list."}
+        ids_ok, ids_err = validate_source_ids(source_ids)
+        if not ids_ok:
+            return {"status": "error", "message": ids_err}
 
         valid, err = validate_date_range(date_from, date_to)
         if not valid:
