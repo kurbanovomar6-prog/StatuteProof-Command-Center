@@ -131,28 +131,28 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
   }
 
   return (
-    <div className="min-h-dvh bg-[#07111F] px-4 py-12 text-slate-200">
+    <div className="min-h-dvh bg-[var(--bg-navy)] px-4 py-12 text-[var(--text-primary)]">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#16D9F5] uppercase tracking-widest mb-4 bg-[#16D9F5]/10 border border-[#16D9F5]/20 px-3 py-1.5 rounded-full">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--accent)] mb-4 bg-[var(--trust-badge)] border border-[var(--trust-border)] px-3 py-1.5 rounded-full">
             <Sparkles className="w-3.5 h-3.5" />
             Choose your source monitoring plan
           </div>
           <h1 className="text-3xl font-bold text-white mb-3">
             Choose the plan that matches your UAE compliance footprint
           </h1>
-          <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-sm leading-relaxed">
             Founding pilots are manually activated after source readiness review. No payment method is required now.
             Select a plan to record your intent — our team will contact you to confirm your source pack and activate your workspace.
           </p>
         </div>
 
         {/* What happens next — persistent, so the manual-activation flow is never a dead-end */}
-        <div className="mb-8 max-w-3xl mx-auto rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+        <div className="mb-8 max-w-3xl mx-auto rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
           <h2 className="text-sm font-semibold text-white mb-1">What happens after you choose</h2>
-          <p className="text-xs text-slate-400 mb-4">
+          <p className="text-xs text-[var(--text-secondary)] mb-4">
             StatuteProof plans are activated by our team — you will not be charged today.
           </p>
           <ol className="grid gap-3 sm:grid-cols-2">
@@ -163,12 +163,12 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
               ['4', 'We switch on monitoring', 'Live monitoring is activated by our team for the approved sources — no setup step you have to trigger.'],
             ].map(([num, title, detail]) => (
               <li key={num} className="flex gap-3">
-                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-[#16D9F5]/10 text-xs font-bold text-[#16D9F5]">
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--trust-badge)] text-xs font-bold text-[var(--accent)]">
                   {num}
                 </span>
                 <div>
-                  <p className="text-xs font-semibold text-slate-200">{title}</p>
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{detail}</p>
+                  <p className="text-xs font-semibold text-[var(--text-primary)]">{title}</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--text-muted)]">{detail}</p>
                 </div>
               </li>
             ))}
@@ -205,33 +205,33 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
               key={p.id}
               className={`rounded-xl border flex flex-col p-6 transition-all ${
                 p.highlight
-                  ? 'border-[#16D9F5]/40 bg-[#16D9F5]/5 shadow-[0_0_30px_rgba(22,217,245,0.08)]'
-                  : 'border-slate-800 bg-[#0D1B2E]'
+                  ? 'border-[var(--trust-border)] bg-[var(--trust-badge)] shadow-[0_0_30px_rgba(22,217,245,0.08)]'
+                  : 'border-[var(--border-muted)] bg-[var(--bg-elevated)]'
               } ${selected === p.id ? 'ring-2 ring-emerald-400/50' : ''}`}
             >
               {p.badge && (
-                <div className="text-[10px] font-bold text-[#16D9F5] uppercase tracking-widest mb-2">
+                <div className="text-[10px] font-bold text-[var(--accent)] mb-2">
                   {p.badge}
                 </div>
               )}
               <h3 className="font-bold text-lg text-white mb-1">{p.name}</h3>
               <div className="flex items-baseline gap-1 mb-3">
                 <span className="text-3xl font-bold text-white">{p.price}</span>
-                {p.period && <span className="text-xs text-slate-400">{p.period}</span>}
+                {p.period && <span className="text-xs text-[var(--text-secondary)]">{p.period}</span>}
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed mb-5">{p.desc}</p>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-5">{p.desc}</p>
 
               <ul className="space-y-2 mb-4 flex-1">
                 {p.features.map(f => (
                   <li key={f} className="flex items-start gap-2 text-xs">
-                    <CheckCircle className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${p.highlight ? 'text-[#16D9F5]' : 'text-emerald-400'}`} />
-                    <span className="text-slate-300">{f}</span>
+                    <CheckCircle className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${p.highlight ? 'text-[var(--accent)]' : 'text-emerald-400'}`} />
+                    <span className="text-[var(--text-primary)]">{f}</span>
                   </li>
                 ))}
                 {p.locked.map(f => (
                   <li key={f} className="flex items-start gap-2 text-xs opacity-50">
-                    <Lock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-slate-500" />
-                    <span className="text-slate-500">{f}</span>
+                    <Lock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-[var(--text-muted)]" />
+                    <span className="text-[var(--text-muted)]">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -241,21 +241,21 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
                 disabled={!!selecting || !!selected}
                 className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-60 ${
                   p.ctaStyle === 'primary'
-                    ? 'bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F]'
-                    : 'border border-slate-700 text-slate-300 hover:border-[#16D9F5]/40 hover:text-white'
+                    ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)]'
+                    : 'border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--trust-border)] hover:text-white'
                 }`}
               >
                 {selecting === p.id ? 'Saving…' : selected === p.id ? 'Selected' : p.cta}
               </button>
               {p.subnote && (
-                <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-500">{p.subnote}</p>
+                <p className="mt-2 text-center text-[11px] leading-relaxed text-[var(--text-muted)]">{p.subnote}</p>
               )}
             </div>
           ))}
         </div>
 
         {/* Disclaimer */}
-        <p className="text-center text-xs text-slate-400 max-w-2xl mx-auto">
+        <p className="text-center text-xs text-[var(--text-secondary)] max-w-2xl mx-auto">
           Monitoring intelligence only. Not legal advice. Source readiness validation required before activation.
           No payment is processed during plan selection.
           Features marked "pilot roadmap" are not live by default. Billing is manually activated after source readiness review and founding pilot confirmation.
@@ -266,7 +266,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
           <div className="text-center mt-4">
             <button
               onClick={onContinue}
-              className="text-xs text-slate-400 hover:text-white underline"
+              className="text-xs text-[var(--text-secondary)] hover:text-white underline"
             >
               Skip for now — continue with Source Readiness Review
             </button>

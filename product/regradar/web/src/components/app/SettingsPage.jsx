@@ -23,7 +23,7 @@ function Toggle({ checked, onChange }) {
   return (
     <button
       onClick={() => onChange(!checked)}
-      className={`relative w-9 h-5 rounded-full transition-colors ${checked ? 'bg-cyan-500' : 'bg-slate-700'}`}
+      className={`relative w-9 h-5 rounded-full transition-colors ${checked ? 'bg-[var(--accent)]' : 'bg-[var(--bg-tooltip)]'}`}
     >
       <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
     </button>
@@ -32,7 +32,7 @@ function Toggle({ checked, onChange }) {
 
 function Section({ title, children }) {
   return (
-    <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5">
+    <div className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5">
       <h2 className="text-sm font-semibold text-white mb-4">{title}</h2>
       {children}
     </div>
@@ -50,8 +50,8 @@ function ChipSelect({ options, selected, onToggle, error }) {
             onClick={() => onToggle(o)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               selected.includes(o)
-                ? 'bg-[#16D9F5]/10 border-[#16D9F5]/50 text-[#16D9F5]'
-                : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                ? 'bg-[var(--trust-badge)] border-[var(--trust-border)] text-[var(--accent)]'
+                : 'bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-white'
             }`}
           >
             {o}
@@ -189,24 +189,24 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
     <div className="p-5 space-y-4 max-w-2xl">
       <div className="mb-5">
         <h1 className="text-lg font-bold text-white mb-1">Settings</h1>
-        <p className="text-sm text-slate-400">Manage your account-owned workspace profile and notification preferences.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Manage your account-owned workspace profile and notification preferences.</p>
       </div>
 
       {/* Workspace */}
       <Section title="Workspace">
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-slate-400 mb-1.5">Workspace name</label>
+            <label className="block text-[var(--text-secondary)] mb-1.5">Workspace name</label>
             <input
               type="text"
               value={workspace}
               onChange={e => setWorkspace(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500"
+              className="w-full bg-[var(--bg-raised)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--trust-border)]"
             />
           </div>
           <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400">Plan</span>
-            <span className="text-cyan-400 font-medium">{planLabel}</span>
+            <span className="text-[var(--text-secondary)]">Plan</span>
+            <span className="text-[var(--accent)] font-medium">{planLabel}</span>
           </div>
         </div>
       </Section>
@@ -215,21 +215,21 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
       <Section title="Monitoring Profile">
         <div className="space-y-5">
           <div>
-            <p className="text-xs text-slate-400 mb-1.5">Target markets</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-1.5">Target markets</p>
             <ChipSelect options={MARKETS} selected={markets} onToggle={toggleMarket} />
             {markets.length === 0 && (
-              <p className="text-xs text-slate-600 mt-1.5">No markets selected — dashboard will show setup previews until your profile is saved.</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1.5">No markets selected — dashboard will show setup previews until your profile is saved.</p>
             )}
           </div>
           <div>
-            <p className="text-xs text-slate-400 mb-1.5">Industries</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-1.5">Industries</p>
             <ChipSelect options={INDUSTRIES} selected={industries} onToggle={toggleIndustry} />
           </div>
           <div>
-            <p className="text-xs text-slate-400 mb-1.5">UAE source layers</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-1.5">UAE source layers</p>
             <ChipSelect options={SOURCE_LAYERS} selected={topics} onToggle={toggleTopic} />
             {topics.length === 0 && (
-              <p className="text-xs text-slate-600 mt-1.5">No source layers selected — reviewed alert routing will rely on markets and industries only.</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1.5">No source layers selected — reviewed alert routing will rely on markets and industries only.</p>
             )}
           </div>
         </div>
@@ -245,8 +245,8 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
           ].map(({ label, sub, checked, set }) => (
             <div key={label} className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-200">{label}</p>
-                <p className="text-xs text-slate-500">{sub}</p>
+                <p className="text-sm text-[var(--text-primary)]">{label}</p>
+                <p className="text-xs text-[var(--text-muted)]">{sub}</p>
               </div>
               <Toggle checked={checked} onChange={set} />
             </div>
@@ -259,29 +259,29 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-200">AI briefs enabled</p>
-              <p className="text-xs text-slate-500">Prepare structured brief previews for reviewed pilot outputs</p>
+              <p className="text-sm text-[var(--text-primary)]">AI briefs enabled</p>
+              <p className="text-xs text-[var(--text-muted)]">Prepare structured brief previews for reviewed pilot outputs</p>
             </div>
             <Toggle checked={aiEnabled} onChange={setAiEnabled} />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-200">Human review flag</p>
-              <p className="text-xs text-slate-500">Flag alerts that require human legal review</p>
+              <p className="text-sm text-[var(--text-primary)]">Human review flag</p>
+              <p className="text-xs text-[var(--text-muted)]">Flag alerts that require human legal review</p>
             </div>
             <Toggle checked={reviewFlag} onChange={setReviewFlag} />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5">Brief language</label>
+            <label className="block text-xs text-[var(--text-secondary)] mb-1.5">Brief language</label>
             <select
               value={language}
               onChange={e => setLanguage(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500"
+              className="w-full bg-[var(--bg-raised)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--trust-border)]"
             >
               <option>English</option>
               <option disabled>Arabic support planned</option>
             </select>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-[var(--text-muted)] mt-1">
               English is the MVP brief language. Arabic support can be scoped during pilot setup.
             </p>
           </div>
@@ -293,15 +293,15 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-200">Telegram alerts</p>
-              <p className="text-xs text-slate-500">Telegram delivery requires connection in Integrations.</p>
+              <p className="text-sm text-[var(--text-primary)]">Telegram alerts</p>
+              <p className="text-xs text-[var(--text-muted)]">Telegram delivery requires connection in Integrations.</p>
             </div>
             <Toggle checked={tgEnabled} onChange={setTgEnabled} />
           </div>
           <div className="flex items-center justify-between opacity-40 cursor-not-allowed" title="Email digest is not yet available in this pilot">
             <div>
-              <p className="text-sm text-slate-200">Email digest</p>
-              <p className="text-xs text-slate-500">Not available in pilot — Telegram delivery is active</p>
+              <p className="text-sm text-[var(--text-primary)]">Email digest</p>
+              <p className="text-xs text-[var(--text-muted)]">Not available in pilot — Telegram delivery is active</p>
             </div>
             <Toggle checked={false} onChange={() => {}} disabled />
           </div>
@@ -309,24 +309,24 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
       </Section>
 
       {/* Legal Acknowledgement */}
-      <div className="bg-[#0D1B2E] border border-cyan-400/20 rounded-xl p-5">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--trust-border)] rounded-xl p-5">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="w-4 h-4 text-[#16D9F5] flex-shrink-0 mt-0.5" />
+          <ShieldCheck className="w-4 h-4 text-[var(--accent)] flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-xs font-semibold text-white mb-2">Legal Acknowledgement</p>
-            <p className="text-xs text-slate-400 leading-relaxed mb-3">
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
               StatuteProof provides monitoring intelligence only and does not provide legal advice.
               Reports are generated from monitored official-source records and are provided for information
               and compliance review support only. They do not constitute legal advice, regulatory advice,
               compliance determination, or a legal opinion.
             </p>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed">
               StatuteProof does not replace qualified legal counsel, compliance professionals, MLROs, or
               other professional advisers. Users should verify official source material directly and consult
               qualified professionals before making regulatory, filing, operational, or customer decisions.
             </p>
-            <div className="mt-3 pt-3 border-t border-slate-800">
-              <p className="text-[10px] text-slate-600 leading-relaxed">
+            <div className="mt-3 pt-3 border-t border-[var(--border-muted)]">
+              <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
                 Billing: manual activation terms. Advance notice will be given of any pricing changes.
                 Contact the StatuteProof team to review your subscription or access level.
               </p>
@@ -348,7 +348,7 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
           className={`text-sm font-semibold px-5 py-2 rounded-lg transition-colors ${
             saved
               ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-              : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950'
+              : 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)]'
           } disabled:opacity-60`}
         >
           {saving ? 'Saving…' : saved ? 'Saved' : 'Save settings'}
@@ -361,12 +361,12 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
       )}
 
       {/* Reset workspace */}
-      <div className="bg-[#0D1B2E] border border-rose-500/20 rounded-xl p-5 mt-4">
+      <div className="bg-[var(--bg-elevated)] border border-rose-500/20 rounded-xl p-5 mt-4">
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-xs font-semibold text-rose-400 mb-1">Reset workspace</p>
-            <p className="text-xs text-slate-500 leading-relaxed mb-3">
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-3">
               Clears all local workspace data including onboarding state. You will be signed out and returned to the landing page.
             </p>
             {showResetConfirm ? (
@@ -379,7 +379,7 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
                 </button>
                 <button
                   onClick={() => setShowResetConfirm(false)}
-                  className="text-xs font-medium px-4 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition-colors"
+                  className="text-xs font-medium px-4 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:text-white transition-colors"
                 >
                   Cancel
                 </button>

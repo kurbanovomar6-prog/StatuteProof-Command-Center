@@ -49,7 +49,7 @@ function CopyHashButton({ value }) {
       onClick={handleCopy}
       title="Copy full fingerprint"
       aria-label={copied ? 'Full fingerprint copied' : 'Copy full fingerprint'}
-      className="flex-shrink-0 rounded p-1 text-slate-400 transition-colors hover:text-cyan-200"
+      className="flex-shrink-0 rounded p-1 text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
     >
       {copied ? <Check className="h-3 w-3 text-emerald-300" /> : <Copy className="h-3 w-3" />}
     </button>
@@ -177,42 +177,42 @@ function EvidenceCard({ record }) {
   }
 
   return (
-    <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5 space-y-4">
+    <div className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="mb-1 inline-flex rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
             LIVE EVIDENCE RECORD
           </div>
           <h3 className="text-sm font-semibold text-white">{record.source}</h3>
-          <p className="text-xs text-slate-500 mt-0.5">{record.regulator} · {record.evidence_record_id}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{record.regulator} · {record.evidence_record_id}</p>
         </div>
         <StatusBadge code={record.status} />
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs">
-        <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
-          <p className="text-slate-500 mb-0.5 flex items-center gap-1">
+        <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+          <p className="text-[var(--text-muted)] mb-0.5 flex items-center gap-1">
             <Clock className="w-3 h-3" /> Checked
           </p>
-          <p className="text-slate-200 font-medium">{detectedDate}</p>
+          <p className="text-[var(--text-primary)] font-medium">{detectedDate}</p>
         </div>
-        <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
-          <p className="text-slate-500 mb-0.5">Source health</p>
+        <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+          <p className="text-[var(--text-muted)] mb-0.5">Source health</p>
           <StatusBadge code={record.source_health_status} />
         </div>
-        <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
-          <p className="text-slate-500 mb-0.5 flex items-center gap-1" title="Tamper-evident fingerprint of the captured text">
+        <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+          <p className="text-[var(--text-muted)] mb-0.5 flex items-center gap-1" title="Tamper-evident fingerprint of the captured text">
             <Hash className="w-3 h-3" /> Normalized hash
           </p>
           <div className="flex items-center gap-1.5">
-            <p className="text-slate-400 font-mono truncate" title={record.new_hash || 'Not recorded'}>{record.new_hash || 'Not recorded'}</p>
+            <p className="text-[var(--text-secondary)] font-mono truncate" title={record.new_hash || 'Not recorded'}>{record.new_hash || 'Not recorded'}</p>
             {record.new_hash && <CopyHashButton value={record.new_hash} />}
           </div>
         </div>
-        <div className="bg-slate-900/50 rounded-lg px-3 py-2.5">
-          <p className="text-slate-500 mb-0.5" title="Stored evidence file an auditor can open">Proof path</p>
+        <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+          <p className="text-[var(--text-muted)] mb-0.5" title="Stored evidence file an auditor can open">Proof path</p>
           <p
-            className={record.proof_block_path ? 'text-cyan-300 truncate' : 'text-slate-400'}
+            className={record.proof_block_path ? 'text-[var(--accent)] truncate' : 'text-[var(--text-secondary)]'}
             title={record.proof_block_path ? undefined : 'Expected while a run is still being validated.'}
           >
             {record.proof_block_path || 'No proof file linked yet'}
@@ -223,24 +223,24 @@ function EvidenceCard({ record }) {
       <div className="text-xs space-y-2">
         {record.official_url && (
           <div className="flex gap-2">
-            <span className="text-slate-500 w-20 flex-shrink-0">Source:</span>
-            <a href={record.official_url} target="_blank" rel="noopener noreferrer" className="text-[#16D9F5] hover:underline truncate">
+            <span className="text-[var(--text-muted)] w-20 flex-shrink-0">Source:</span>
+            <a href={record.official_url} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] hover:underline truncate">
               {record.official_url}
             </a>
           </div>
         )}
         <div className="flex gap-2">
-          <span className="text-slate-500 w-20 flex-shrink-0">Diff:</span>
+          <span className="text-[var(--text-muted)] w-20 flex-shrink-0">Diff:</span>
           {record.diff_available ? (
             <button
               type="button"
               onClick={handleLoadDiff}
-              className="text-cyan-400 hover:text-cyan-200 transition-colors"
+              className="text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
             >
               {diffLoading ? 'Loading…' : diffExpanded ? 'Hide diff' : 'View diff'}
             </button>
           ) : (
-            <span className="text-slate-500">Not available</span>
+            <span className="text-[var(--text-muted)]">Not available</span>
           )}
         </div>
         {diffError && (
@@ -255,11 +255,11 @@ function EvidenceCard({ record }) {
         )}
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
+      <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h4 className="text-xs font-semibold text-white">Acknowledge & Assess</h4>
-            <p className="mt-1 text-[11px] text-slate-500">Saved evidence only. This records an internal review note, not legal advice.</p>
+            <p className="mt-1 text-[11px] text-[var(--text-secondary)]">Saved evidence only. This records an internal review note, not legal advice.</p>
           </div>
           {assessment ? <span className="text-[10px] font-bold text-emerald-300">ASSESSMENT SAVED</span> : null}
         </div>
@@ -272,7 +272,7 @@ function EvidenceCard({ record }) {
             <select
               value={impactLevel}
               onChange={event => setImpactLevel(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)]"
             >
               {IMPACT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
@@ -280,45 +280,45 @@ function EvidenceCard({ record }) {
               value={internalNote}
               onChange={event => setInternalNote(event.target.value)}
               placeholder="Internal impact note"
-              className="min-h-[80px] w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-600"
+              className="min-h-[80px] w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
             />
             <input
               value={nextAction}
               onChange={event => setNextAction(event.target.value)}
               placeholder="Next action (optional)"
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-600"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
             />
             <button
               type="button"
               onClick={handleAssess}
               disabled={saving || !internalNote.trim()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/25 px-3 py-2 text-xs font-semibold text-cyan-200 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-600"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--trust-border)] px-3 py-2 text-xs font-semibold text-[var(--accent)] disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:text-[var(--text-muted)]"
             >
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
               Save assessment
             </button>
-            {assessmentMsg && <p className="text-xs text-slate-400">{assessmentMsg}</p>}
+            {assessmentMsg && <p className="text-xs text-[var(--text-secondary)]">{assessmentMsg}</p>}
           </div>
         )}
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
+      <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <h4 className="flex items-center gap-1.5 text-xs font-semibold text-white">
-              <History className="h-3.5 w-3.5 text-[#16D9F5]" />
+              <History className="h-3.5 w-3.5 text-[var(--accent)]" />
               Review History
             </h4>
-            <p className="mt-1 text-[11px] text-slate-500">Only saved evidence and recorded assessment events are shown.</p>
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">Only saved evidence and recorded assessment events are shown.</p>
           </div>
           {reviewHistory?.total_events ? (
-            <span className="rounded-full border border-slate-700 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+            <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] font-semibold text-[var(--text-primary)]">
               {reviewHistory.total_events} events
             </span>
           ) : null}
         </div>
         {historyLoading ? (
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
             Loading review history…
           </div>
@@ -327,12 +327,12 @@ function EvidenceCard({ record }) {
         ) : reviewHistory?.events?.length ? (
           <div className="space-y-2">
             {reviewHistory.events.map(event => (
-              <div key={event.event_id} className="rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2">
+              <div key={event.event_id} className="rounded-md border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-3 py-2">
                 <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold text-slate-200">{event.event_type}</span>
-                  <TimeStamp value={event.timestamp} mode="absolute" fallback="Timestamp not recorded" className="text-[10px] text-slate-500" />
+                  <span className="text-[11px] font-bold text-[var(--text-primary)]">{event.event_type}</span>
+                  <TimeStamp value={event.timestamp} mode="absolute" fallback="Timestamp not recorded" className="text-[10px] text-[var(--text-muted)]" />
                 </div>
-                <p className="text-[11px] leading-relaxed text-slate-400">{event.customer_safe_message}</p>
+                <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">{event.customer_safe_message}</p>
                 {event.assessment_impact_level && (
                   <p className="mt-1 text-[11px] text-emerald-300">
                     Impact: {event.assessment_impact_level}
@@ -343,7 +343,7 @@ function EvidenceCard({ record }) {
             ))}
           </div>
         ) : (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[var(--text-muted)]">
             No review history has been recorded yet. Use Acknowledge & Assess after confirming this saved evidence record.
           </p>
         )}
@@ -354,7 +354,7 @@ function EvidenceCard({ record }) {
           type="button"
           onClick={() => handleExport('pdf')}
           disabled={Boolean(exportingFormat) || !record.evidence_record_id}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#16D9F5] px-3 py-2 text-xs font-semibold text-[#07111F] disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-[var(--ink)] disabled:cursor-not-allowed disabled:bg-[var(--bg-tooltip)] disabled:text-[var(--text-muted)]"
         >
           {exportingFormat === 'pdf' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
           Export PDF audit pack
@@ -363,7 +363,7 @@ function EvidenceCard({ record }) {
           type="button"
           onClick={() => handleExport('md_html')}
           disabled={Boolean(exportingFormat) || !record.evidence_record_id}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-600"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] disabled:cursor-not-allowed disabled:border-[var(--border-muted)] disabled:text-[var(--text-muted)]"
         >
           {exportingFormat === 'md_html' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
           Export Markdown/HTML
@@ -383,7 +383,7 @@ function EvidenceCard({ record }) {
         )}
       </div>
 
-      <p className="text-[10px] text-slate-600 border-t border-slate-800 pt-3">
+      <p className="text-[10px] text-[var(--text-secondary)] border-t border-[var(--border-muted)] pt-3">
         Monitoring intelligence only. Not legal advice. Evidence records support compliance review and do not determine legal obligations.
       </p>
     </div>
@@ -451,7 +451,7 @@ export default function EvidencePage({ navigate }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="mb-1 text-lg font-bold text-white">Evidence Records</h1>
-          <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
+          <p className="max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
             Every real change we capture, with a timestamp, a tamper-evident fingerprint, and a stored proof file you can export for an auditor.
           </p>
         </div>
@@ -464,10 +464,10 @@ export default function EvidencePage({ navigate }) {
       <div className="sp-command-panel p-5">
         <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-3">
-            <Shield className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#16D9F5]" />
+            <Shield className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--accent)]" />
             <div>
               <h2 className="mb-1 text-sm font-semibold text-white">Evidence boundary</h2>
-              <p className="max-w-3xl text-xs leading-relaxed text-slate-400">
+              <p className="max-w-3xl text-xs leading-relaxed text-[var(--text-secondary)]">
                 These are live source-run evidence records. Customer brief eligibility requires canonical evidence,
                 review decision, alert linkage, and delivery approval. No sample hashes or fake alerts are shown here.
               </p>
@@ -485,38 +485,38 @@ export default function EvidencePage({ navigate }) {
             ['Canonical record', 'separate review gate'],
             ['Brief delivery', 'blocked until approved'],
           ].map(([title, body]) => (
-            <div key={title} className="rounded-xl border border-slate-800 bg-slate-950/45 p-3">
+            <div key={title} className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
               <p className="text-xs font-semibold text-white">{title}</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{body}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-muted)]">{body}</p>
             </div>
           ))}
         </div>
       </div>
 
       {!apiChecked ? (
-        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-10 text-center">
-          <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-[#16D9F5]" />
-          <p className="text-sm text-slate-400">Loading live evidence records…</p>
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-5 py-10 text-center">
+          <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-[var(--accent)]" />
+          <p className="text-sm text-[var(--text-secondary)]">Loading live evidence records…</p>
         </div>
       ) : apiError ? (
         <ErrorState
           title="Could not load live evidence records."
           detail={`${apiError} No sample evidence is shown in the authenticated workspace.`}
           onRetry={retryEvidence}
-          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+          className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]"
         />
       ) : records.length === 0 ? (
-        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-10 text-center">
-          <FileText className="mx-auto mb-3 h-5 w-5 text-slate-500" />
-          <p className="font-medium text-slate-300">Your first evidence record appears after your next monitoring run</p>
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-5 py-10 text-center">
+          <FileText className="mx-auto mb-3 h-5 w-5 text-[var(--text-muted)]" />
+          <p className="font-medium text-[var(--text-primary)]">Your first evidence record appears after your next monitoring run</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">
             Nothing to do now — we capture it automatically. You do not need to trigger anything.
           </p>
           {navigate && (
             <button
               type="button"
               onClick={() => navigate('sources')}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/15"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3.5 py-2 text-xs font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--trust-badge)]"
             >
               View monitored sources
             </button>
@@ -530,7 +530,7 @@ export default function EvidencePage({ navigate }) {
         </div>
       )}
 
-      <p className="text-xs text-slate-600 text-center leading-relaxed">
+      <p className="text-xs text-[var(--text-secondary)] text-center leading-relaxed">
         StatuteProof reports are for information and compliance review support only. Not legal advice.
         Users should verify official source material directly and consult qualified professionals before making regulatory decisions.
       </p>

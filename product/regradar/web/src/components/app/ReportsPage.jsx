@@ -97,7 +97,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+    <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
       <CoverageCertificatePanel />
       <RegulatorBinderExport sources={binderSources} />
       <EvidencePackExport sources={binderSources} />
@@ -105,16 +105,16 @@ export default function ReportsPage() {
 
       <div>
         <h1 className="text-lg font-bold text-white mb-1">Audit Reports</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
+        <p className="max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
           Real export-ready evidence records only. Audit packs can be exported as PDF or Markdown/HTML from saved evidence records.
         </p>
       </div>
 
-      <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
+      <div className="rounded-xl border border-[var(--trust-border)] bg-[var(--bg-elevated)] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">Evidence-backed report exports</h2>
-            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
+            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
               Reports are generated only from saved evidence records with proof/hash metadata. No fabricated report cards are shown.
             </p>
           </div>
@@ -122,18 +122,18 @@ export default function ReportsPage() {
       </div>
 
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
         <input
           type="text"
           placeholder="Search evidence records"
           value={search}
           onChange={event => setSearch(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2 pl-9 pr-3 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+          className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] py-2 pl-9 pr-3 text-xs text-white placeholder:text-[var(--text-muted)] focus:border-[var(--trust-border)] focus:outline-none"
         />
       </div>
 
       {loading && (
-        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-8 text-sm text-slate-400">
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-5 py-8 text-sm text-[var(--text-secondary)]">
           Loading report-ready evidence records...
         </div>
       )}
@@ -143,15 +143,15 @@ export default function ReportsPage() {
           title="Could not load report records."
           detail={error}
           onRetry={retryReports}
-          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+          className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]"
         />
       )}
 
       {!loading && !error && filtered.length === 0 && (
-        <div className="rounded-xl border border-slate-800 bg-slate-950/35 px-6 py-12 text-center">
-          <FileText className="mx-auto mb-3 h-8 w-8 text-slate-600" />
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-base)] px-6 py-12 text-center">
+          <FileText className="mx-auto mb-3 h-8 w-8 text-[var(--text-muted)]" />
           <p className="text-sm font-semibold text-white">No generated reports yet.</p>
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
             Audit report exports will appear after saved evidence records exist. This page does not display sample reports in authenticated workspaces.
           </p>
         </div>
@@ -169,36 +169,36 @@ export default function ReportsPage() {
                   onClick={() => setSelectedId(record.evidence_record_id)}
                   className={`w-full rounded-xl border p-3.5 text-left transition-all ${
                     selected?.evidence_record_id === record.evidence_record_id
-                      ? 'border-cyan-500/30 bg-slate-900 ring-1 ring-cyan-500/20'
-                      : 'border-slate-800 bg-slate-900 hover:border-slate-700'
+                      ? 'border-[var(--trust-border)] bg-[var(--bg-elevated)] ring-1 ring-[var(--trust-border)]'
+                      : 'border-[var(--border-muted)] bg-[var(--bg-elevated)] hover:border-[var(--border)]'
                   }`}
                 >
                   <div className="mb-2 flex items-start justify-between gap-2">
                     <StatusBadge code={status} />
-                    <TimeStamp value={record.timestamp_utc} fallback="No timestamp" className="text-[11px] text-slate-500" />
+                    <TimeStamp value={record.timestamp_utc} fallback="No timestamp" className="text-[11px] text-[var(--text-muted)]" />
                   </div>
                   <p className="text-xs font-semibold leading-snug text-white">{record.source_name || record.source_id}</p>
-                  <p className="mt-1 text-[11px] text-slate-500">Hash {shortHash(record.normalized_hash || record.content_hash)}</p>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">Hash {shortHash(record.normalized_hash || record.content_hash)}</p>
                 </button>
               )
             })}
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-[#0D1B2E]">
+          <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]">
             {!selected ? (
-              <div className="px-6 py-12 text-center text-sm text-slate-400">No evidence record selected.</div>
+              <div className="px-6 py-12 text-center text-sm text-[var(--text-secondary)]">No evidence record selected.</div>
             ) : (
               <>
-                <div className="border-b border-slate-800 px-5 py-4">
+                <div className="border-b border-[var(--border-muted)] px-5 py-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Evidence record</p>
+                      <p className="text-xs font-semibold text-[var(--text-muted)]">Evidence record</p>
                       <h2 className="mt-1 text-base font-semibold text-white">{selected.source_name || selected.source_id}</h2>
                     </div>
                     <StatusBadge code={String(selected.change_status || 'NOT_RUN').toUpperCase()} />
                   </div>
                 </div>
-                <div className="divide-y divide-slate-800 text-xs">
+                <div className="divide-y divide-[var(--border-muted)] text-xs">
                   {[
                     ['Official URL', selected.official_url || 'not recorded'],
                     ['Evidence ID', selected.evidence_record_id],
@@ -209,18 +209,18 @@ export default function ReportsPage() {
                     ['Diff path', selected.diff_json_path || selected.diff_md_path || 'not recorded'],
                   ].map(([label, value]) => (
                     <div key={label} className="grid gap-2 px-5 py-3 sm:grid-cols-[150px_1fr]">
-                      <p className="font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-                      <p className="break-all text-slate-300">{value}</p>
+                      <p className="font-semibold text-[var(--text-muted)]">{label}</p>
+                      <p className="break-all text-[var(--text-primary)]">{value}</p>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-slate-800 px-5 py-4">
+                <div className="border-t border-[var(--border-muted)] px-5 py-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       onClick={() => handleExport(selected, 'pdf')}
                       disabled={exportState[selected.evidence_record_id]?.status === 'exporting'}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3 py-2 text-xs font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--trust-badge)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Download className="h-3.5 w-3.5" />
                       {exportState[selected.evidence_record_id]?.status === 'exporting' && exportState[selected.evidence_record_id]?.format === 'pdf' ? 'Exporting PDF...' : 'Export PDF audit pack'}
@@ -229,7 +229,7 @@ export default function ReportsPage() {
                       type="button"
                       onClick={() => handleExport(selected, 'md_html')}
                       disabled={exportState[selected.evidence_record_id]?.status === 'exporting'}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--border)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <FileText className="h-3.5 w-3.5" />
                       {exportState[selected.evidence_record_id]?.status === 'exporting' && exportState[selected.evidence_record_id]?.format === 'md_html' ? 'Exporting...' : 'Export Markdown/HTML'}
@@ -239,7 +239,7 @@ export default function ReportsPage() {
                         href={selected.official_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:text-white"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                         Open source
@@ -251,9 +251,9 @@ export default function ReportsPage() {
                       {exportState[selected.evidence_record_id].message}
                     </p>
                   )}
-                  <div className="mt-4 flex items-start gap-2 rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-500" />
-                    <p className="text-xs leading-relaxed text-slate-500">
+                  <div className="mt-4 flex items-start gap-2 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-3">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text-muted)]" />
+                    <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
                       Monitoring intelligence only. Not legal advice. Audit exports preserve proof/hash context but do not determine compliance obligations.
                     </p>
                   </div>

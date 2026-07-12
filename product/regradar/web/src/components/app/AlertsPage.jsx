@@ -17,7 +17,7 @@ function AlertsEmpty() {
     <EmptyState
       icon={ShieldCheck}
       title="No reviewed alerts yet."
-      className="rounded-xl border border-slate-800 bg-slate-950/35"
+      className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-base)]"
     >
       Reviewed alerts will appear after monitored changes are detected, evidence
       is saved, and the item is approved for review. No sample alerts are shown
@@ -93,35 +93,35 @@ export default function AlertsPage() {
   }
 
   return (
-    <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+    <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
       <div>
         <h1 className="text-lg font-bold text-white mb-1">Reviewed Alerts</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
+        <p className="max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
           Real reviewed alert routing records only. Customer delivery remains manual/test-mode unless an approved delivery channel is configured.
         </p>
       </div>
 
-      <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
+      <div className="rounded-xl border border-[var(--trust-border)] bg-[var(--bg-elevated)] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">Reviewed alert routing</h2>
-            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
+            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
               Alerts shown here come from approved local alert records matched against your workspace profile. This page does not create sample alerts.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+      <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="relative w-full md:max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               placeholder="Search reviewed alerts"
               value={search}
               onChange={event => setSearch(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2 pl-9 pr-3 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] py-2 pl-9 pr-3 text-xs text-white placeholder:text-[var(--text-muted)] focus:border-[var(--trust-border)] focus:outline-none"
             />
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -132,8 +132,8 @@ export default function AlertsPage() {
                 onClick={() => setRiskFilter(risk)}
                 className={`rounded-lg border px-2.5 py-1 text-xs transition-colors ${
                   riskFilter === risk
-                    ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'
-                    : 'border-slate-700 text-slate-400 hover:text-slate-200'
+                    ? 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]'
+                    : 'border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 {risk === 'All' ? 'All risk' : risk.charAt(0) + risk.slice(1).toLowerCase() + ' risk'}
@@ -141,11 +141,11 @@ export default function AlertsPage() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">Licence type</label>
+            <label className="text-[11px] font-semibold text-[var(--text-muted)] whitespace-nowrap">Licence type</label>
             <select
               value={licenceFilter}
               onChange={e => setLicenceFilter(e.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-900 py-1.5 pl-2.5 pr-8 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+              className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] py-1.5 pl-2.5 pr-8 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none"
             >
               <option value="All">All types</option>
               <option value="VASP">VASP</option>
@@ -159,7 +159,7 @@ export default function AlertsPage() {
       </div>
 
       {loading && (
-        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-8 text-sm text-slate-400">
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-5 py-8 text-sm text-[var(--text-secondary)]">
           Loading reviewed alerts...
         </div>
       )}
@@ -169,7 +169,7 @@ export default function AlertsPage() {
           title="Could not load reviewed alerts."
           detail={error}
           onRetry={retryAlerts}
-          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+          className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]"
         />
       )}
 
@@ -187,7 +187,7 @@ export default function AlertsPage() {
               ? 'Not matched to profile'
               : item.not_ready_reasons?.[0] || 'Not ready'
             return (
-              <article key={item.alert_id} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+              <article key={item.alert_id} className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-4">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <span
                     title="Risk level assigned during human review of this alert."
@@ -200,21 +200,21 @@ export default function AlertsPage() {
                   </span>
                   <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
                     item.matched
-                      ? 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200'
-                      : 'border-slate-700 bg-slate-900 text-slate-400'
+                      ? 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]'
+                      : 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-secondary)]'
                   }`}>
                     Relevance {item.score ?? 'n/a'}
                   </span>
                 </div>
                 <h3 className="text-sm font-semibold text-white">{item.title || 'Reviewed alert'}</h3>
-                <p className="mt-1 text-xs text-slate-500">{item.market || item.jurisdiction || 'Market not specified'} · {item.source_name || 'Source not specified'}</p>
-                <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-slate-400">{item.executive_summary || 'No executive summary recorded.'}</p>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">{item.market || item.jurisdiction || 'Market not specified'} · {item.source_name || 'Source not specified'}</p>
+                <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-[var(--text-secondary)]">{item.executive_summary || 'No executive summary recorded.'}</p>
                 {item.source_url && (
                   <a
                     href={item.source_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-300 hover:text-cyan-200"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent)]"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     Official source
@@ -227,8 +227,8 @@ export default function AlertsPage() {
                     onClick={() => handleSendPreviewAlert(item.alert_id)}
                     className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
                       disabled
-                        ? 'cursor-not-allowed border-slate-700 bg-slate-800/70 text-slate-500'
-                        : 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200 hover:bg-cyan-400/15'
+                        ? 'cursor-not-allowed border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-muted)]'
+                        : 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)] hover:bg-[var(--trust-badge)]'
                     }`}
                   >
                     {item.delivery_ready ? <Send className="h-3.5 w-3.5" /> : <CheckCircle className="h-3.5 w-3.5" />}
@@ -247,7 +247,7 @@ export default function AlertsPage() {
         </div>
       )}
 
-      <p className="text-xs leading-relaxed text-slate-600">
+      <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
         Monitoring intelligence only. Not legal advice. Users should verify official source material directly and consult qualified professionals before making regulatory decisions.
       </p>
     </div>

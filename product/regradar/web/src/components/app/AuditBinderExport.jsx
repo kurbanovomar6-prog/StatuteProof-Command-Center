@@ -58,14 +58,14 @@ export default function AuditBinderExport() {
   }
 
   return (
-    <div className="sp-glass border-cyan-400/15 p-5">
+    <div className="sp-glass border-[var(--trust-border)] p-5">
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
-          <FileJson className="h-4 w-4 text-cyan-300" />
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--trust-badge)]">
+          <FileJson className="h-4 w-4 text-[var(--accent)]" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white">Monitored-alert data export (JSON)</h2>
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
             Download your monitored-alert data as a JSON file. For the board-ready PDF binder,
             use Export PDF audit pack.
           </p>
@@ -73,11 +73,11 @@ export default function AuditBinderExport() {
       </div>
 
       {/* Primary auditor-facing path: the real PDF audit pack lives per-record below. */}
-      <div className="mb-4 flex items-start gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-3 py-2.5">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-300" />
-        <p className="text-[11px] leading-relaxed text-slate-300">
+      <div className="mb-4 flex items-start gap-2 rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3 py-2.5">
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--accent)]" />
+        <p className="text-[11px] leading-relaxed text-[var(--text-primary)]">
           Need a board-ready or auditor-ready binder? Select an evidence record below and choose
-          <span className="font-semibold text-cyan-200"> Export PDF audit pack</span>. The JSON export
+          <span className="font-semibold text-[var(--accent)]"> Export PDF audit pack</span>. The JSON export
           here is raw data only — not a formatted audit binder.
         </p>
       </div>
@@ -89,8 +89,8 @@ export default function AuditBinderExport() {
           disabled={status === 'generating'}
           className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-semibold transition-colors ${
             status === 'generating'
-              ? 'cursor-wait border-slate-700 bg-slate-800/70 text-slate-500'
-              : 'border-slate-700 bg-slate-900/60 text-slate-300 hover:border-slate-500 hover:text-white'
+              ? 'cursor-wait border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-muted)]'
+              : 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:border-[var(--border)] hover:text-white'
           }`}
         >
           <FileJson className="h-3.5 w-3.5" />
@@ -108,7 +108,7 @@ export default function AuditBinderExport() {
         )}
       </div>
 
-      <p className="mt-4 text-[11px] leading-relaxed text-slate-600">
+      <p className="mt-4 text-[11px] leading-relaxed text-[var(--text-muted)]">
         This JSON file contains raw monitored-alert data from the past 60 days. It is not the
         formatted PDF audit pack. Verify hashes and official source material directly, and consider
         consulting qualified legal or compliance professionals before acting on any alert.

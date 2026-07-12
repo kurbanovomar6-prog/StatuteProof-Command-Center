@@ -28,7 +28,7 @@ const STATUS_COLOR = {
   CERTIFICATION_FAILED: 'border-rose-400/25 bg-rose-400/10 text-rose-200',
   NEEDS_HUMAN_REVIEW: 'border-amber-400/25 bg-amber-400/10 text-amber-200',
   BLOCKED: 'border-rose-400/25 bg-rose-400/10 text-rose-200',
-  UNSUPPORTED: 'border-slate-600 bg-slate-800 text-slate-300',
+  UNSUPPORTED: 'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-primary)]',
   NAV_SHELL_ONLY: 'border-rose-400/25 bg-rose-400/10 text-rose-200',
 }
 
@@ -69,16 +69,16 @@ function fieldClass(error) {
 
 function Metric({ label, value, tone = 'slate', mono = false }) {
   const tones = {
-    cyan: 'border-cyan-400/20 bg-cyan-400/10',
+    cyan: 'border-[var(--trust-border)] bg-[var(--trust-badge)]',
     emerald: 'border-emerald-400/20 bg-emerald-400/10',
     amber: 'border-amber-400/20 bg-amber-400/10',
     rose: 'border-rose-400/20 bg-rose-400/10',
-    slate: 'border-slate-800 bg-slate-950/35',
+    slate: 'border-[var(--border-muted)] bg-[var(--bg-base)]',
   }
   return (
     <div className={`rounded-lg border px-3 py-3 ${tones[tone] || tones.slate}`}>
-      <p className="mb-1 text-[11px] font-medium text-slate-500">{label}</p>
-      <p className={`truncate text-sm font-semibold text-slate-100 ${mono ? 'sp-mono' : ''}`}>{value}</p>
+      <p className="mb-1 text-[11px] font-medium text-[var(--text-muted)]">{label}</p>
+      <p className={`truncate text-sm font-semibold text-[var(--text-primary)] ${mono ? 'sp-mono' : ''}`}>{value}</p>
     </div>
   )
 }
@@ -271,7 +271,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
   }
 
   return (
-    <div className="min-h-full bg-[#07111F] p-5 pb-10">
+    <div className="min-h-full bg-[var(--bg-navy)] p-5 pb-10">
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="sp-kicker mb-3">
@@ -279,7 +279,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
             Custom source readiness
           </div>
           <h1 className="text-2xl font-semibold text-white">Source Lab</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
             Test one public official source at a time. A passing test is a readiness signal only;
             evidence records and baseline runs are required before monitoring can be approved for activation.
           </p>
@@ -295,7 +295,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
         <section className="sp-panel p-5">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-white">Source test request</h2>
-            <span className="rounded-md border border-cyan-400/25 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-semibold text-cyan-200">
+            <span className="rounded-md border border-[var(--trust-border)] bg-[var(--trust-badge)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
               No-save test
             </span>
           </div>
@@ -349,14 +349,14 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
               {touched && requiredErrors.regulator && <p className="mt-1 text-xs text-rose-300">{requiredErrors.regulator}</p>}
             </div>
 
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/35 p-3">
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
               <input
                 type="checkbox"
                 checked={form.legalConfirmed}
                 onChange={e => set('legalConfirmed', e.target.checked)}
                 className="mt-0.5 h-4 w-4 accent-[#16D9F5]"
               />
-              <span className="text-xs leading-relaxed text-slate-400">
+              <span className="text-xs leading-relaxed text-[var(--text-secondary)]">
                 I confirm this is a public official source or public material we are authorized to review.
                 Login-protected, paywalled, CAPTCHA-gated, private portal, and secret-bearing URLs are not supported.
               </span>
@@ -366,14 +366,14 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
             <button
               type="button"
               onClick={() => setAdvancedOpen(open => !open)}
-              className="flex w-full items-center justify-between rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-2 text-sm font-semibold text-slate-200"
+              className="flex w-full items-center justify-between rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-2 text-sm font-semibold text-[var(--text-primary)]"
             >
               Advanced extraction options
               <ChevronDown className={`h-4 w-4 transition-transform ${advancedOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {advancedOpen && (
-              <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-950/25 p-3">
+              <div className="space-y-3 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
                 <div>
                   <label className="sp-label">Content selector</label>
                   <input value={form.contentSelector} onChange={e => set('contentSelector', e.target.value)} placeholder="main, article, #content" className="sp-input" />
@@ -394,11 +394,11 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   />
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <label className="flex items-center gap-2 rounded-md border border-slate-800 bg-[#07111F]/70 px-3 py-2 text-xs text-slate-300">
+                  <label className="flex items-center gap-2 rounded-md border border-[var(--border-muted)] bg-[var(--bg-navy)] px-3 py-2 text-xs text-[var(--text-primary)]">
                     <input type="checkbox" checked={form.useJs} onChange={e => set('useJs', e.target.checked)} className="accent-[#16D9F5]" />
                     JS rendering
                   </label>
-                  <label className="flex items-center gap-2 rounded-md border border-slate-800 bg-[#07111F]/70 px-3 py-2 text-xs text-slate-300">
+                  <label className="flex items-center gap-2 rounded-md border border-[var(--border-muted)] bg-[var(--bg-navy)] px-3 py-2 text-xs text-[var(--text-primary)]">
                     <input type="checkbox" checked={form.pdfMode} onChange={e => set('pdfMode', e.target.checked)} className="accent-[#16D9F5]" />
                     PDF mode
                   </label>
@@ -429,9 +429,9 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
           {!result && !error && (
             <div className="sp-panel flex min-h-[360px] items-center justify-center p-8 text-center">
               <div className="max-w-md">
-                <ShieldCheck className="mx-auto mb-4 h-10 w-10 text-cyan-200" />
+                <ShieldCheck className="mx-auto mb-4 h-10 w-10 text-[var(--accent)]" />
                 <h2 className="text-lg font-semibold text-white">Ready for a no-save readiness test</h2>
-                <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
                   The result will show readiness status, quality score, extraction provider,
                   normalized length, hash preview, evidence level, activation readiness,
                   warnings, remediation hints, and normalized text preview.
@@ -457,11 +457,11 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h2 className="text-base font-semibold text-white">Discovery mode</h2>
-                  <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">
+                  <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[var(--text-secondary)]">
                     Endpoint candidates are inactive until no-save, proof, baseline, and review gates pass.
                   </p>
                 </div>
-                <span className="rounded-md border border-cyan-400/25 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-100">
+                <span className="rounded-md border border-[var(--trust-border)] bg-[var(--trust-badge)] px-2.5 py-1 text-xs font-semibold text-[var(--accent)]">
                   {(discovery.recommended_activation_paths || []).length} candidates
                 </span>
               </div>
@@ -474,13 +474,13 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
               {(discovery.recommended_activation_paths || []).length > 0 && (
                 <div className="mt-4 space-y-2">
                   {(discovery.recommended_activation_paths || []).slice(0, 6).map(item => (
-                    <div key={`${item.candidate_url}-${item.adapter_family}`} className="rounded-lg border border-slate-800 bg-slate-950/35 p-3">
+                    <div key={`${item.candidate_url}-${item.adapter_family}`} className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-slate-100">{item.title || item.candidate_url}</p>
-                          <p className="mt-1 break-all text-xs text-slate-500">{item.candidate_url}</p>
+                          <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{item.title || item.candidate_url}</p>
+                          <p className="mt-1 break-all text-xs text-[var(--text-muted)]">{item.candidate_url}</p>
                         </div>
-                        <span className="shrink-0 rounded-md border border-slate-700 px-2 py-1 text-[11px] font-semibold text-slate-300">
+                        <span className="shrink-0 rounded-md border border-[var(--border)] px-2 py-1 text-[11px] font-semibold text-[var(--text-primary)]">
                           {item.adapter_family || 'adapter'} · {item.confidence || 0}/100
                         </span>
                       </div>
@@ -504,7 +504,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                     <ResultIcon result={result} />
                     <div>
                       <h2 className="text-base font-semibold text-white">{result.status_label || result.readiness_status}</h2>
-                      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">
+                      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[var(--text-secondary)]">
                         {result.can_save_for_validation
                           ? 'Readiness threshold met. Save queues this source for evidence validation. This is not monitoring approval.'
                           : result.failure_reason || 'This source needs remediation before evidence validation.'}
@@ -537,15 +537,15 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                 </div>
 
                 {result.dom_investigation && (
-                  <div className="mt-4 rounded-lg border border-cyan-400/20 bg-cyan-400/10 p-3">
+                  <div className="mt-4 rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] p-3">
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs font-semibold text-cyan-100">DOM investigation</p>
-                        <p className="mt-1 text-xs leading-relaxed text-cyan-100/75">
+                        <p className="text-xs font-semibold text-[var(--accent)]">DOM investigation</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--accent)]">
                           {result.dom_investigation.why_selector_was_chosen || 'Selector recommendation is available for a retry test.'}
                         </p>
                       </div>
-                      <span className="rounded-md border border-cyan-400/25 px-2 py-1 text-[11px] font-semibold text-cyan-100">
+                      <span className="rounded-md border border-[var(--trust-border)] px-2 py-1 text-[11px] font-semibold text-[var(--accent)]">
                         {result.dom_investigation.detected_page_type || 'unknown'}
                       </span>
                     </div>
@@ -567,7 +567,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                         <FileText className="h-3.5 w-3.5" />
                         Try PDF listing
                       </button>
-                      <button type="button" disabled className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/55 px-3 py-2 text-xs font-semibold text-slate-500" title="Roadmap: marking remediation will write to the gated source work queue after review.">
+                      <button type="button" disabled className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-raised)] px-3 py-2 text-xs font-semibold text-[var(--text-muted)]" title="Roadmap: marking remediation will write to the gated source work queue after review.">
                         <Wrench className="h-3.5 w-3.5" />
                         Mark remediation
                       </button>
@@ -588,8 +588,8 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
 
                 {result.normalized_preview && (
                   <div className="mt-4">
-                    <h3 className="mb-2 text-xs font-semibold text-slate-400">Normalized preview</h3>
-                    <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs leading-relaxed text-slate-300">
+                    <h3 className="mb-2 text-xs font-semibold text-[var(--text-secondary)]">Normalized preview</h3>
+                    <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3 text-xs leading-relaxed text-[var(--text-primary)]">
                       {result.normalized_preview}
                     </pre>
                   </div>
@@ -600,7 +600,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <h2 className="text-sm font-semibold text-white">Activation gate</h2>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                    <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
                       A source can be saved only after a passing test. Monitoring activation requires evidence and readiness gates.
                     </p>
                   </div>
@@ -622,7 +622,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   </button>
                   <button
                     disabled
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/55 px-4 py-2 text-sm font-semibold text-slate-500"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-raised)] px-4 py-2 text-sm font-semibold text-[var(--text-muted)]"
                     title="Activation requires evidence records and monitoring readiness approval."
                   >
                     <LockKeyhole className="h-4 w-4" />
@@ -630,7 +630,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   </button>
                   <button
                     disabled
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/55 px-4 py-2 text-sm font-semibold text-slate-500"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-raised)] px-4 py-2 text-sm font-semibold text-[var(--text-muted)]"
                     title="Saved baseline requires the evidence-save workflow and repeat baseline gate."
                   >
                     <LockKeyhole className="h-4 w-4" />
@@ -638,7 +638,7 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   </button>
                   <button
                     disabled={!activateAllowed}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-4 py-2 text-sm font-semibold text-slate-500"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-4 py-2 text-sm font-semibold text-[var(--text-muted)]"
                     title="Delivery requires approved brief and integration setup."
                   >
                     Delivery requires approved brief

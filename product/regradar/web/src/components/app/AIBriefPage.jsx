@@ -8,18 +8,18 @@ import TimeStamp from './ui/TimeStamp'
 function GeneratedBriefPanel({ briefMarkdown, onDismiss }) {
   if (!briefMarkdown) return null
   return (
-    <div className="mt-3 rounded-lg border border-cyan-400/25 bg-cyan-400/5 p-3 space-y-2">
+    <div className="mt-3 rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] p-3 space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-cyan-400">Generated brief</p>
+        <p className="text-[10px] font-semibold text-[var(--accent)]">Generated brief</p>
         <button
           type="button"
           onClick={onDismiss}
-          className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors"
+          className="text-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
         >
           dismiss
         </button>
       </div>
-      <div className="rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2.5 max-h-64 overflow-y-auto">
+      <div className="rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2.5 max-h-64 overflow-y-auto">
         {briefMarkdown.split('\n').map((line, i) => {
           const isHeading = line.startsWith('#')
           const isBold = line.startsWith('**') && line.endsWith('**')
@@ -31,7 +31,7 @@ function GeneratedBriefPanel({ briefMarkdown, onDismiss }) {
                   ? 'font-semibold text-white mt-2 mb-1'
                   : isBold
                   ? 'font-semibold text-amber-200/90'
-                  : 'text-slate-300'
+                  : 'text-[var(--text-primary)]'
               } ${i > 0 && !isHeading ? 'mt-0.5' : ''}`}
             >
               {line.replace(/^#+\s*/, '').replace(/\*\*/g, '') || ' '}
@@ -39,7 +39,7 @@ function GeneratedBriefPanel({ briefMarkdown, onDismiss }) {
           )
         })}
       </div>
-      <p className="text-[10px] text-slate-500 leading-relaxed">
+      <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">
         Monitoring intelligence only. Not legal advice. Not customer delivery. Human review required before any external use.
       </p>
     </div>
@@ -71,7 +71,7 @@ function BriefContent({ brief }) {
   }
 
   return (
-    <div className="mt-3 rounded-lg border border-slate-800 bg-slate-950/40">
+    <div className="mt-3 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)]">
       <div className="flex items-center justify-between px-3 py-2.5">
         <button
           type="button"
@@ -80,15 +80,15 @@ function BriefContent({ brief }) {
         >
           <span className="text-xs font-semibold text-white">Brief content</span>
           {expanded
-            ? <ChevronUp className="h-3.5 w-3.5 text-slate-400" />
-            : <ChevronDown className="h-3.5 w-3.5 text-slate-400" />}
+            ? <ChevronUp className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+            : <ChevronDown className="h-3.5 w-3.5 text-[var(--text-secondary)]" />}
         </button>
         {!hasNotes && brief.source_id && (
           <button
             type="button"
             onClick={handleGenerate}
             disabled={generating}
-            className="flex items-center gap-1.5 rounded-md border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-semibold text-cyan-300 transition-colors hover:bg-cyan-400/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 rounded-md border border-[var(--trust-border)] bg-[var(--trust-badge)] px-2.5 py-1 text-[10px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--trust-badge)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Zap className="h-3 w-3" />
             {generating ? 'Generating…' : 'Generate Brief'}
@@ -97,14 +97,14 @@ function BriefContent({ brief }) {
       </div>
 
       {generateError && (
-        <div className="border-t border-slate-800 px-3 py-2 flex items-start gap-2">
+        <div className="border-t border-[var(--border-muted)] px-3 py-2 flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-3 w-3 flex-shrink-0 text-rose-400" />
           <p className="text-[11px] text-rose-300">{generateError}</p>
         </div>
       )}
 
       {generatedMarkdown && (
-        <div className="border-t border-slate-800 px-3 pb-3 pt-0">
+        <div className="border-t border-[var(--border-muted)] px-3 pb-3 pt-0">
           <GeneratedBriefPanel
             briefMarkdown={generatedMarkdown}
             onDismiss={() => setGeneratedMarkdown('')}
@@ -113,15 +113,15 @@ function BriefContent({ brief }) {
       )}
 
       {expanded && (
-        <div className="border-t border-slate-800 px-3 pb-3 pt-2.5 space-y-3">
+        <div className="border-t border-[var(--border-muted)] px-3 pb-3 pt-2.5 space-y-3">
           {hasNotes ? (
             <div>
-              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+              <p className="mb-1.5 text-[10px] font-semibold text-[var(--text-muted)]">
                 Reviewer notes
               </p>
-              <div className="rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2.5">
+              <div className="rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2.5">
                 {brief.notes.split('\n').map((line, i) => (
-                  <p key={i} className={`text-xs leading-relaxed text-slate-200 ${i > 0 ? 'mt-1' : ''}`}>
+                  <p key={i} className={`text-xs leading-relaxed text-[var(--text-primary)] ${i > 0 ? 'mt-1' : ''}`}>
                     {line || ' '}
                   </p>
                 ))}
@@ -139,14 +139,14 @@ function BriefContent({ brief }) {
             <div className="grid gap-2 text-xs sm:grid-cols-2">
               {brief.reviewer && (
                 <div>
-                  <p className="text-slate-500">Reviewed by</p>
-                  <p className="text-slate-300">{brief.reviewer}</p>
+                  <p className="text-[var(--text-muted)]">Reviewed by</p>
+                  <p className="text-[var(--text-primary)]">{brief.reviewer}</p>
                 </div>
               )}
               {brief.reviewed_at && (
                 <div>
-                  <p className="text-slate-500">Reviewed at</p>
-                  <p className="text-slate-300">{brief.reviewed_at}</p>
+                  <p className="text-[var(--text-muted)]">Reviewed at</p>
+                  <p className="text-[var(--text-primary)]">{brief.reviewed_at}</p>
                 </div>
               )}
             </div>
@@ -154,8 +154,8 @@ function BriefContent({ brief }) {
 
           {brief.evidence_record_id && (
             <div>
-              <p className="text-slate-500 text-xs">Evidence record ID</p>
-              <p className="sp-mono text-[11px] text-slate-400 break-all">{brief.evidence_record_id}</p>
+              <p className="text-[var(--text-muted)] text-xs">Evidence record ID</p>
+              <p className="sp-mono text-[11px] text-[var(--text-secondary)] break-all">{brief.evidence_record_id}</p>
             </div>
           )}
         </div>
@@ -167,7 +167,7 @@ function BriefContent({ brief }) {
 const STATUS_STYLE = {
   approved: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
   pending: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
-  draft: 'border-slate-600 bg-slate-800 text-slate-300',
+  draft: 'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-primary)]',
 }
 
 export default function AIBriefPage() {
@@ -205,10 +205,10 @@ export default function AIBriefPage() {
   }), [briefs, search])
 
   return (
-    <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+    <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
       <div>
         <h1 className="text-lg font-bold text-white mb-1">Monitoring Briefs</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
+        <p className="max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
           Brief records are loaded from approved local queue files. If no reviewed brief exists, this page stays empty instead of falling back to sample content.
         </p>
       </div>
@@ -217,7 +217,7 @@ export default function AIBriefPage() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">Reviewed monitoring brief queue</h2>
-            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
+            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
               Brief drafts require canonical evidence, human review, legal-language scan, and explicit delivery approval. This is not legal advice.
             </p>
           </div>
@@ -229,29 +229,29 @@ export default function AIBriefPage() {
             ['Scan', 'forbidden phrases blocked'],
             ['Delivery', 'off until approved'],
           ].map(([title, body]) => (
-            <div key={title} className="rounded-xl border border-slate-800 bg-slate-950/45 p-3">
+            <div key={title} className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
               <p className="text-xs font-semibold text-white">{title}</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{body}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-muted)]">{body}</p>
             </div>
           ))}
         </div>
       </div>
 
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
         <input
           type="text"
           placeholder="Search brief queue"
           value={search}
           onChange={event => setSearch(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2 pl-9 pr-3 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+          className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] py-2 pl-9 pr-3 text-xs text-white placeholder:text-[var(--text-muted)] focus:border-[var(--trust-border)] focus:outline-none"
         />
       </div>
 
       {loading && (
         <div className="grid gap-3 lg:grid-cols-2" aria-label="Loading monitoring briefs">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+            <div key={i} className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-4">
               <div className="sp-skeleton mb-3 h-5 w-40 rounded-full" />
               <div className="sp-skeleton mb-2 h-4 w-3/4 rounded" />
               <div className="sp-skeleton h-16 w-full rounded" />
@@ -271,10 +271,10 @@ export default function AIBriefPage() {
       )}
 
       {!loading && !error && filtered.length === 0 && (
-        <div className="rounded-xl border border-slate-800 bg-slate-950/35 px-6 py-12 text-center">
-          <FileText className="mx-auto mb-3 h-8 w-8 text-slate-600" />
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-base)] px-6 py-12 text-center">
+          <FileText className="mx-auto mb-3 h-8 w-8 text-[var(--text-muted)]" />
           <p className="text-sm font-semibold text-white">No reviewed monitoring briefs yet.</p>
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
             Monitoring briefs will appear after evidence records are queued and approved for brief delivery. No sample briefs are shown in this authenticated workspace.
           </p>
         </div>
@@ -290,7 +290,7 @@ export default function AIBriefPage() {
               : 'draft'
             const briefKey = brief.alert_id || brief.id || `${brief.source_id || 'brief'}-${brief.run_id || index}`
             return (
-              <article key={briefKey} className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+              <article key={briefKey} className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-4">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLE[status]}`}>
                     {brief.delivery_approved ? 'Delivery approved' : brief.human_reviewed ? 'Reviewed' : 'Draft queue'}
@@ -300,31 +300,31 @@ export default function AIBriefPage() {
                 <h3 className="text-sm font-semibold text-white">{brief.source_id || 'Queued source'}</h3>
                 <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
                   <div>
-                    <p className="text-slate-500">Alert ID</p>
-                    <p className="break-all text-slate-300">{brief.alert_id}</p>
+                    <p className="text-[var(--text-muted)]">Alert ID</p>
+                    <p className="break-all text-[var(--text-primary)]">{brief.alert_id}</p>
                   </div>
                   <div>
-                    <p className="text-slate-500">Run ID</p>
-                    <p className="break-all text-slate-300">{brief.run_id || 'not recorded'}</p>
+                    <p className="text-[var(--text-muted)]">Run ID</p>
+                    <p className="break-all text-[var(--text-primary)]">{brief.run_id || 'not recorded'}</p>
                   </div>
                   <div>
-                    <p className="text-slate-500">Queued</p>
-                    <TimeStamp value={brief.queued_at || brief.run_at} mode="absolute" fallback="Not recorded" className="text-slate-300" />
+                    <p className="text-[var(--text-muted)]">Queued</p>
+                    <TimeStamp value={brief.queued_at || brief.run_at} mode="absolute" fallback="Not recorded" className="text-[var(--text-primary)]" />
                   </div>
                   <div>
-                    <p className="text-slate-500">Hash</p>
-                    <p className="sp-mono text-slate-300">{brief.normalized_hash ? brief.normalized_hash.slice(0, 12) : 'not recorded'}</p>
+                    <p className="text-[var(--text-muted)]">Hash</p>
+                    <p className="sp-mono text-[var(--text-primary)]">{brief.normalized_hash ? brief.normalized_hash.slice(0, 12) : 'not recorded'}</p>
                   </div>
                 </div>
                 <BriefContent brief={brief} />
 
-                <div className="mt-3 flex items-start gap-2 rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3">
+                <div className="mt-3 flex items-start gap-2 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-3">
                   {brief.delivery_approved ? (
                     <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />
                   ) : (
-                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-500" />
+                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text-muted)]" />
                   )}
-                  <p className="text-xs leading-relaxed text-slate-500">
+                  <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
                     Delivery requires evidence, routing approval, and configured delivery channel. Monitoring intelligence only. Not legal advice.
                   </p>
                 </div>

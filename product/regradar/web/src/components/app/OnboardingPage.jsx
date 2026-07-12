@@ -79,9 +79,9 @@ const SOURCE_READINESS_PREVIEW = {
 
 const PREVIEW_TONE = {
   emerald: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-100',
-  cyan: 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100',
+  cyan: 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]',
   amber: 'border-amber-400/20 bg-amber-400/10 text-amber-100',
-  slate: 'border-slate-700 bg-slate-900/70 text-slate-200',
+  slate: 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)]',
 }
 
 function toggle(list, setList, item) {
@@ -185,7 +185,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
   const totalSteps = 4
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-[#07111F] p-6 font-sans text-slate-200 selection:bg-[#16D9F5]/30">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-[var(--bg-navy)] p-6 font-sans text-[var(--text-primary)] selection:bg-[var(--trust-badge)]">
       <div className="w-full max-w-2xl">
 
         {/* Logo */}
@@ -194,16 +194,16 @@ export default function OnboardingPage({ navigate, currentUser }) {
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-10 w-auto" />
           </div>
           <h1 className="text-3xl font-bold text-white mt-2 mb-2">Set up your monitoring profile</h1>
-          <p className="text-slate-400">Step {step} of {totalSteps}</p>
+          <p className="text-[var(--text-secondary)]">Step {step} of {totalSteps}</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#0A1628] border border-slate-800 rounded-2xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-muted)] rounded-2xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
 
           {/* Progress bar */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-slate-800">
+          <div className="absolute top-0 left-0 w-full h-1 bg-[var(--bg-raised)]">
             <div
-              className="h-full bg-[#16D9F5] transition-all duration-300"
+              className="h-full bg-[var(--accent)] transition-all duration-300"
               style={{ width: `${(step / totalSteps) * 100}%` }}
             />
           </div>
@@ -212,29 +212,29 @@ export default function OnboardingPage({ navigate, currentUser }) {
           {step === 1 && (
             <div className="space-y-4">
               <h2 className="text-xl font-bold text-white mb-2">Your workspace profile</h2>
-              <p className="text-sm text-slate-400 mb-6">
+              <p className="text-sm text-[var(--text-secondary)] mb-6">
                 These come from your registration. You can change them later in Settings — no need to re-enter anything here.
               </p>
 
               <div>
-                <span className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
+                <span className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
                   Company name
                 </span>
-                <div className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-2.5">
+                <div className="flex w-full items-center justify-between gap-3 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-4 py-2.5">
                   <span className="truncate text-white">{company || 'Not set'}</span>
-                  <span className="inline-flex flex-shrink-0 items-center gap-1 text-[11px] text-slate-500">
+                  <span className="inline-flex flex-shrink-0 items-center gap-1 text-[11px] text-[var(--text-muted)]">
                     <Lock className="h-3 w-3" /> Edit in Settings
                   </span>
                 </div>
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wide">
+                <span className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
                   Work email
                 </span>
-                <div className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-2.5">
+                <div className="flex w-full items-center justify-between gap-3 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-4 py-2.5">
                   <span className="truncate text-white">{email || 'Not set'}</span>
-                  <span className="inline-flex flex-shrink-0 items-center gap-1 text-[11px] text-slate-500">
+                  <span className="inline-flex flex-shrink-0 items-center gap-1 text-[11px] text-[var(--text-muted)]">
                     <Lock className="h-3 w-3" /> Edit in Settings
                   </span>
                 </div>
@@ -247,7 +247,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
             <div className="space-y-8">
               <div ref={marketsRef}>
                 <h2 className="text-xl font-bold text-white mb-2">Which UAE market profile applies?</h2>
-                <p className="text-sm text-slate-400 mb-6">Select all that apply — at least one required.</p>
+                <p className="text-sm text-[var(--text-secondary)] mb-6">Select all that apply — at least one required.</p>
                 <div className="flex flex-wrap gap-3">
                   {MARKETS.map(m => (
                     <button
@@ -257,10 +257,10 @@ export default function OnboardingPage({ navigate, currentUser }) {
                       onClick={() => { toggle(markets, setMarkets, m); setErrors(er => ({ ...er, markets: '' })) }}
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         markets.includes(m)
-                          ? 'bg-[#16D9F5]/10 border-[#16D9F5]/50 text-[#16D9F5]'
+                          ? 'bg-[var(--trust-badge)] border-[var(--trust-border)] text-[var(--accent)]'
                           : errors.markets
-                          ? 'bg-slate-900 border-rose-500/40 text-slate-400 hover:border-slate-600 hover:text-white'
-                          : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                          ? 'bg-[var(--bg-elevated)] border-rose-500/40 text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-white'
+                          : 'bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-white'
                       }`}
                     >
                       {m}
@@ -275,10 +275,10 @@ export default function OnboardingPage({ navigate, currentUser }) {
               </div>
 
               <div ref={sourcesRef}>
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">Source layers of interest</h3>
-                <div className="mb-4 rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
+                <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-3">Source layers of interest</h3>
+                <div className="mb-4 rounded-xl border border-[var(--trust-border)] bg-[var(--bg-elevated)] p-4">
                   <p className="text-sm font-semibold text-white">Source readiness preview</p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                  <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
                     Source coverage is validated before activation. Some source groups are under remediation.
                   </p>
                 </div>
@@ -291,10 +291,10 @@ export default function OnboardingPage({ navigate, currentUser }) {
                       onClick={() => { toggle(sourceLayers, setSourceLayers, layer); setErrors(er => ({ ...er, sourceLayers: '' })) }}
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         sourceLayers.includes(layer)
-                          ? 'bg-[#16D9F5]/10 border-[#16D9F5]/50 text-[#16D9F5]'
+                          ? 'bg-[var(--trust-badge)] border-[var(--trust-border)] text-[var(--accent)]'
                           : errors.sourceLayers
-                          ? 'bg-slate-900 border-rose-500/40 text-slate-400 hover:border-slate-600 hover:text-white'
-                          : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                          ? 'bg-[var(--bg-elevated)] border-rose-500/40 text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-white'
+                          : 'bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-white'
                       }`}
                     >
                       {layer}
@@ -308,7 +308,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
                       <div key={layer} className={`rounded-xl border p-3 ${PREVIEW_TONE[preview.tone] || PREVIEW_TONE.slate}`}>
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-semibold">{layer}</p>
-                          <span className="rounded-full border border-current/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                          <span className="rounded-full border border-current/25 px-2 py-0.5 text-[10px] font-bold">
                             {preview.status}
                           </span>
                         </div>
@@ -330,7 +330,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
           {step === 3 && (
             <div ref={industRef}>
               <h2 className="text-xl font-bold text-white mb-2">What is your industry focus?</h2>
-              <p className="text-sm text-slate-400 mb-6">Select all that apply — at least one required.</p>
+              <p className="text-sm text-[var(--text-secondary)] mb-6">Select all that apply — at least one required.</p>
               <div className="flex flex-wrap gap-3">
                 {INDUSTRIES.map(ind => (
                   <button
@@ -340,10 +340,10 @@ export default function OnboardingPage({ navigate, currentUser }) {
                     onClick={() => { toggle(industries, setIndustries, ind); setErrors(er => ({ ...er, industries: '' })) }}
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                       industries.includes(ind)
-                        ? 'bg-[#16D9F5]/10 border-[#16D9F5]/50 text-[#16D9F5]'
+                        ? 'bg-[var(--trust-badge)] border-[var(--trust-border)] text-[var(--accent)]'
                         : errors.industries
-                        ? 'bg-slate-900 border-rose-500/40 text-slate-400 hover:border-slate-600 hover:text-white'
-                        : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                        ? 'bg-[var(--bg-elevated)] border-rose-500/40 text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-white'
+                        : 'bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-white'
                     }`}
                   >
                     {ind}
@@ -363,21 +363,21 @@ export default function OnboardingPage({ navigate, currentUser }) {
             <div>
               <h2 className="text-xl font-bold text-white mb-6">Review your setup</h2>
               <div className="space-y-3">
-                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Workspace</div>
+                <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-muted)]">
+                  <div className="text-xs text-[var(--text-muted)] mb-1">Workspace</div>
                   <div className="text-white font-medium">{company || '—'}</div>
-                  <div className="text-slate-400 text-sm mt-0.5">{email}</div>
+                  <div className="text-[var(--text-secondary)] text-sm mt-0.5">{email}</div>
                 </div>
-                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Markets</div>
+                <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-muted)]">
+                  <div className="text-xs text-[var(--text-muted)] mb-1">Markets</div>
                   <div className="text-white font-medium">{markets.length ? markets.join(', ') : 'None selected'}</div>
                 </div>
-                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Source layers</div>
+                <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-muted)]">
+                  <div className="text-xs text-[var(--text-muted)] mb-1">Source layers</div>
                   <div className="text-white font-medium">{sourceLayers.length ? sourceLayers.join(', ') : 'None selected'}</div>
                 </div>
-                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Industries</div>
+                <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-muted)]">
+                  <div className="text-xs text-[var(--text-muted)] mb-1">Industries</div>
                   <div className="text-white font-medium">{industries.length ? industries.join(', ') : 'None selected'}</div>
                 </div>
               </div>
@@ -394,11 +394,11 @@ export default function OnboardingPage({ navigate, currentUser }) {
           )}
 
           {/* Footer */}
-          <div className="mt-10 flex justify-between items-center pt-6 border-t border-slate-800">
+          <div className="mt-10 flex justify-between items-center pt-6 border-t border-[var(--border-muted)]">
             {step > 1 ? (
               <button
                 onClick={() => { setErrors({}); setStep(s => s - 1) }}
-                className="text-slate-400 hover:text-white font-medium text-sm transition-colors"
+                className="text-[var(--text-secondary)] hover:text-white font-medium text-sm transition-colors"
               >
                 Back
               </button>
@@ -407,7 +407,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
             {step < totalSteps ? (
               <button
                 onClick={goNext}
-                className="bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2"
+                className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2"
               >
                 Continue <ArrowRight className="w-4 h-4" />
               </button>
@@ -415,7 +415,7 @@ export default function OnboardingPage({ navigate, currentUser }) {
               <button
                 onClick={handleComplete}
                 disabled={saving}
-                className="bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] px-6 py-2 rounded-lg font-bold transition-colors disabled:opacity-60"
+                className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] px-6 py-2 rounded-lg font-bold transition-colors disabled:opacity-60"
               >
                 {saving ? 'Saving profile…' : 'Create monitoring profile'}
               </button>

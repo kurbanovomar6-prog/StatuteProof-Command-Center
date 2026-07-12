@@ -14,7 +14,7 @@ import { hoursSince, fullStamp, timeAgo } from '../../utils/time'
 const COV_COLOR = {
   emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   amber:   'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  slate:   'text-slate-400 bg-slate-500/10 border-slate-500/20',
+  slate:   'text-[var(--text-secondary)] bg-[var(--bg-raised)] border-[var(--border)]',
 }
 
 const REMEDIATION_SOURCE_IDS = new Set([
@@ -27,9 +27,9 @@ function StatusPill({ tone = 'slate', children }) {
   const styles = {
     emerald: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
     amber: 'border-amber-400/25 bg-amber-400/10 text-amber-300',
-    cyan: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',
+    cyan: 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]',
     rose: 'border-rose-400/25 bg-rose-400/10 text-rose-300',
-    slate: 'border-slate-600 bg-slate-800/80 text-slate-300',
+    slate: 'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-primary)]',
   }
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${styles[tone] || styles.slate}`}>
@@ -48,7 +48,7 @@ function MonitoringFreshness({ lastRunAt }) {
     return (
       <span
         title="No monitoring run has been recorded yet."
-        className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 bg-slate-800/80 px-2.5 py-1 text-[11px] font-semibold text-slate-300"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-raised)] px-2.5 py-1 text-[11px] font-semibold text-[var(--text-primary)]"
       >
         <Clock className="h-3.5 w-3.5" aria-hidden="true" />
         No runs recorded
@@ -85,7 +85,7 @@ function ProfileSummaryCard({ profile, currentUser, navigate, planState }) {
   const planLabel = displayPlanName(planState)
 
   return (
-    <div className="sp-glass sp-animate-fade-up border-cyan-400/20 p-5">
+    <div className="sp-glass sp-animate-fade-up border-[var(--trust-border)] p-5">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="mb-2 flex flex-wrap gap-2">
@@ -95,34 +95,34 @@ function ProfileSummaryCard({ profile, currentUser, navigate, planState }) {
             </StatusPill>
           </div>
           <h1 className="text-xl font-bold text-white">UAE-first pilot workspace</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {company}. Source layers are shown for review and validation; activation requires proof/diff validation.
           </p>
         </div>
         <button
           onClick={() => navigate('settings')}
-          className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+          className="rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--border)] hover:text-white"
         >
           Edit profile
         </button>
       </div>
 
       <div className="grid gap-3 md:grid-cols-4">
-        <div className="rounded-lg border border-slate-800 bg-slate-950/45 px-3 py-2.5">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Company</p>
-          <p className="truncate text-sm text-slate-200">{company}</p>
+        <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-2.5">
+          <p className="mb-1 text-[11px] font-semibold text-[var(--text-muted)]">Company</p>
+          <p className="truncate text-sm text-[var(--text-primary)]">{company}</p>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-950/45 px-3 py-2.5">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Markets</p>
-          <p className="truncate text-sm text-slate-200">{profile.markets.length ? profile.markets.join(', ') : 'Select in Settings'}</p>
+        <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-2.5">
+          <p className="mb-1 text-[11px] font-semibold text-[var(--text-muted)]">Markets</p>
+          <p className="truncate text-sm text-[var(--text-primary)]">{profile.markets.length ? profile.markets.join(', ') : 'Select in Settings'}</p>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-950/45 px-3 py-2.5">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Regulatory profile</p>
-          <p className="truncate text-sm text-slate-200">{profile.industries.length ? profile.industries.join(', ') : 'Select in Settings'}</p>
+        <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-2.5">
+          <p className="mb-1 text-[11px] font-semibold text-[var(--text-muted)]">Regulatory profile</p>
+          <p className="truncate text-sm text-[var(--text-primary)]">{profile.industries.length ? profile.industries.join(', ') : 'Select in Settings'}</p>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-950/45 px-3 py-2.5">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Source layers</p>
-          <p className="truncate text-sm text-slate-200">{profile.topics.length ? profile.topics.join(', ') : 'Select in Settings'}</p>
+        <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-2.5">
+          <p className="mb-1 text-[11px] font-semibold text-[var(--text-muted)]">Source layers</p>
+          <p className="truncate text-sm text-[var(--text-primary)]">{profile.topics.length ? profile.topics.join(', ') : 'Select in Settings'}</p>
         </div>
       </div>
     </div>
@@ -152,16 +152,16 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
             key={item.label}
             type="button"
             onClick={() => item.action && navigate(item.action)}
-            className="w-full rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3 text-left transition-colors hover:border-slate-700"
+            className="w-full rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-3 text-left transition-colors hover:border-[var(--border)]"
           >
             <div className="flex items-start gap-3">
-              <CheckCircle className={`mt-0.5 h-4 w-4 flex-shrink-0 ${item.tone === 'emerald' ? 'text-emerald-300' : item.tone === 'amber' ? 'text-amber-300' : 'text-slate-500'}`} />
+              <CheckCircle className={`mt-0.5 h-4 w-4 flex-shrink-0 ${item.tone === 'emerald' ? 'text-emerald-300' : item.tone === 'amber' ? 'text-amber-300' : 'text-[var(--text-muted)]'}`} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-slate-200">{item.label}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{item.label}</p>
                   <StatusPill tone={item.tone}>{item.status}</StatusPill>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">{item.detail}</p>
+                <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">{item.detail}</p>
               </div>
             </div>
           </button>
@@ -180,10 +180,10 @@ function WhatHappensNextCard() {
   return (
     <div className="sp-panel p-5">
       <div className="mb-3 flex items-start gap-2">
-        <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#16D9F5]" />
+        <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--accent)]" />
         <div>
           <h2 className="text-sm font-semibold text-white">What happens next</h2>
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+          <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
             You have done your part. Live monitoring is switched on by our team — here is the rest of the path.
           </p>
         </div>
@@ -191,17 +191,17 @@ function WhatHappensNextCard() {
       <ol className="space-y-3">
         {steps.map(([title, detail], index) => (
           <li key={title} className="flex gap-3">
-            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-[#16D9F5]/10 text-[11px] font-bold text-[#16D9F5]">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--trust-badge)] text-[11px] font-bold text-[var(--accent)]">
               {index + 1}
             </span>
             <div>
-              <p className="text-xs font-semibold text-slate-200">{title}</p>
-              <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{detail}</p>
+              <p className="text-xs font-semibold text-[var(--text-primary)]">{title}</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--text-muted)]">{detail}</p>
             </div>
           </li>
         ))}
       </ol>
-      <p className="mt-4 border-t border-slate-800 pt-3 text-[11px] leading-relaxed text-slate-600">
+      <p className="mt-4 border-t border-[var(--border-muted)] pt-3 text-[11px] leading-relaxed text-[var(--text-secondary)]">
         No payment is taken during the founding pilot until activation is confirmed. Monitoring intelligence only. Not legal advice.
       </p>
     </div>
@@ -214,19 +214,19 @@ function SourceReadinessCard({ navigate }) {
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-white">Source readiness</h2>
-          <p className="mt-1 text-xs text-slate-500">Mapped does not mean approved for monitoring.</p>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">Mapped does not mean approved for monitoring.</p>
         </div>
         <StatusPill tone="cyan">Activation readiness in progress</StatusPill>
       </div>
 
-      <div className="space-y-2.5 text-sm text-slate-400">
+      <div className="space-y-2.5 text-sm text-[var(--text-secondary)]">
         {[
           'Monitoring activation requires evidence and baseline runs.',
           'Under-validation sources are disclosed before pilot scope.',
           'Limitations are reviewed before relying on a source map.',
         ].map(text => (
           <div key={text} className="flex gap-2">
-            <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#16D9F5]" />
+            <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--accent)]" />
             <span>{text}</span>
           </div>
         ))}
@@ -234,13 +234,13 @@ function SourceReadinessCard({ navigate }) {
 
       <button
         onClick={() => navigate('sources')}
-        className="mt-5 w-full rounded-lg bg-[#16D9F5] px-4 py-2.5 text-sm font-semibold text-[#07111F] transition-colors hover:bg-[#11c2db]"
+        className="mt-5 w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--accent-hover)]"
       >
         Review source map
       </button>
       <button
         onClick={() => navigate('source-lab')}
-        className="mt-2 w-full rounded-lg border border-cyan-400/25 px-4 py-2.5 text-sm font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50"
+        className="mt-2 w-full rounded-lg border border-[var(--trust-border)] px-4 py-2.5 text-sm font-semibold text-[var(--accent)] transition-colors hover:border-[var(--trust-border)]"
       >
         Open Source Lab
       </button>
@@ -270,7 +270,7 @@ const EXTRACTION_CLS = {
   GOOD:    'text-emerald-400',
   OK:      'text-amber-400',
   POOR:    'text-red-400',
-  UNKNOWN: 'text-slate-500',
+  UNKNOWN: 'text-[var(--text-muted)]',
 }
 
 // Map a source row to one canonical status code understood by StatusBadge.
@@ -284,15 +284,15 @@ function readinessCode(source) {
 
 function CommandMetric({ label, value, tone = 'slate', detail }) {
   const toneClass = {
-    cyan: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-100',
+    cyan: 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]',
     emerald: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100',
     amber: 'border-amber-400/25 bg-amber-400/10 text-amber-100',
-    slate: 'border-slate-700 bg-slate-950/55 text-slate-200',
-  }[tone] || 'border-slate-700 bg-slate-950/55 text-slate-200'
+    slate: 'border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)]',
+  }[tone] || 'border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)]'
 
   return (
     <div className={`rounded-2xl border p-4 ${toneClass}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">{label}</p>
+      <p className="text-[11px] font-semibold opacity-70">{label}</p>
       <p className="sp-mono mt-2 text-3xl font-bold">{value}</p>
       {detail && <p className="mt-1 text-xs leading-relaxed opacity-70">{detail}</p>}
     </div>
@@ -314,7 +314,7 @@ function EvidenceChainPanel() {
       <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 className="text-sm font-semibold text-white">Evidence-to-brief chain</h2>
-          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-500">
+          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[var(--text-muted)]">
             This is the internal gate map. A source change becomes a customer artifact only after every required gate passes.
           </p>
         </div>
@@ -326,12 +326,12 @@ function EvidenceChainPanel() {
           <div key={title} className={`sp-evidence-step ${state === 'blocked' ? 'is-blocked' : ''}`}>
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className={`h-2.5 w-2.5 rounded-full ${
-                state === 'done' ? 'bg-emerald-300' : state === 'review' ? 'bg-amber-300' : 'bg-slate-500'
+                state === 'done' ? 'bg-emerald-300' : state === 'review' ? 'bg-amber-300' : 'bg-[var(--bg-raised)]'
               }`} />
-              <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{state}</span>
+              <span className="text-[10px] font-bold text-[var(--text-muted)]">{state}</span>
             </div>
             <p className="text-xs font-semibold text-white">{title}</p>
-            <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{detail}</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-muted)]">{detail}</p>
           </div>
         ))}
       </div>
@@ -414,7 +414,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
   ]
 
   return (
-    <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+    <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
       <PlanBanner planState={planState} onChoosePlan={onChoosePlan} />
 
       <div className="sp-command-hero p-5 lg:p-6">
@@ -432,7 +432,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                 <MonitoringFreshness lastRunAt={sourceSummary?.last_run_at} />
               )}
             </div>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
               Review what changed and what needs a decision before relying on any alert,
               brief draft, or source claim. Monitoring intelligence only — not legal advice.
             </p>
@@ -443,15 +443,15 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                   key={item.label}
                   type="button"
                   onClick={() => navigate(item.action)}
-                  className="group rounded-2xl border border-slate-800 bg-slate-950/45 p-4 text-left transition hover:-translate-y-0.5 hover:border-cyan-400/35 hover:bg-slate-900/70"
+                  className="group rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-4 text-left transition hover:-translate-y-0.5 hover:border-[var(--trust-border)] hover:bg-[var(--bg-elevated)]"
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{item.label}</p>
+                    <p className="text-[11px] font-bold text-[var(--text-muted)]">{item.label}</p>
                     <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Gated'}</StatusPill>
                   </div>
                   <p className={`text-3xl font-semibold text-white ${typeof item.value === 'number' ? 'sp-mono' : ''}`}>{item.value}</p>
-                  <p className="mt-2 min-h-[2.4rem] text-xs leading-relaxed text-slate-500">{item.detail}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-cyan-200">
+                  <p className="mt-2 min-h-[2.4rem] text-xs leading-relaxed text-[var(--text-muted)]">{item.detail}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)]">
                     Open <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
                   </span>
                 </button>
@@ -459,17 +459,17 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/45 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended next step</p>
+          <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-5">
+            <p className="text-xs font-semibold text-[var(--text-muted)]">Recommended next step</p>
             <h2 className="mt-2 text-lg font-semibold text-white">Review source-health flags before brief work.</h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
+            <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
               Failed and quality-drop runs should be cleared or documented before source scope
               is presented to anyone outside the workspace.
             </p>
             <button
               type="button"
               onClick={() => navigate('sources')}
-              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#16D9F5] px-4 py-2.5 text-sm font-semibold text-[#07111F] transition hover:bg-[#11c2db]"
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--accent-hover)]"
             >
               Review source health <ArrowRight className="h-4 w-4" />
             </button>
@@ -492,7 +492,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
           title="Could not load source status."
           detail={sourcesError}
           onRetry={retrySources}
-          className="rounded-xl border border-slate-800 bg-[#0D1B2E]"
+          className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]"
         />
       )}
 
@@ -504,11 +504,11 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-white">Source status</h2>
-              <p className="mt-1 text-xs text-slate-500">Current monitoring status and extraction readiness for all active UAE sources.</p>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">Current monitoring status and extraction readiness for all active UAE sources.</p>
             </div>
-            <span title="Rows come directly from the monitoring API for this workspace — no sample data." className="rounded-md border border-slate-700 bg-slate-800/60 px-2.5 py-1 text-[10px] font-semibold text-slate-300">Live data</span>
+            <span title="Rows come directly from the monitoring API for this workspace — no sample data." className="rounded-md border border-[var(--border)] bg-[var(--bg-raised)] px-2.5 py-1 text-[10px] font-semibold text-[var(--text-primary)]">Live data</span>
           </div>
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
+          <div className="overflow-x-auto rounded-lg border border-[var(--border-muted)]">
             <table className="sp-table min-w-[860px]">
               <thead>
                 <tr>
@@ -517,12 +517,12 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-[var(--border-muted)]">
                 {sourcesData.sources.slice(0, 12).map(s => (
-                  <tr key={s.source_id} className="transition-colors hover:bg-slate-800/40">
+                  <tr key={s.source_id} className="transition-colors hover:bg-[var(--bg-raised)]">
                     <td className="font-medium text-white max-w-[260px] truncate">{s.name}</td>
-                    <td className="text-slate-400 whitespace-nowrap">{s.category?.replace(/_/g, ' ') || '—'}</td>
-                    <td className="text-slate-500 whitespace-nowrap">
+                    <td className="text-[var(--text-secondary)] whitespace-nowrap">{s.category?.replace(/_/g, ' ') || '—'}</td>
+                    <td className="text-[var(--text-muted)] whitespace-nowrap">
                       <TimeStamp value={s.last_run_at} fallback="Not run yet" />
                     </td>
                     <td className="whitespace-nowrap">
@@ -539,7 +539,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                         href={s.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#16D9F5] hover:underline text-xs font-semibold"
+                        className="text-[var(--accent)] hover:underline text-xs font-semibold"
                       >
                         View source
                       </a>
@@ -549,7 +549,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-[var(--text-secondary)]">
             {sourcesData.disclaimer || 'Not legal advice. For monitoring information only.'}
           </p>
         </div>
@@ -557,43 +557,43 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
 
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div className="space-y-5">
-          <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+          <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-white">Review queue</h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-[var(--text-muted)]">
                   Customer alerts appear only after monitored evidence is reviewed and routed.
                 </p>
               </div>
               <StatusPill tone="cyan">Live workspace</StatusPill>
             </div>
 
-            <div className="rounded-lg border border-slate-800 bg-slate-950/35 px-5 py-8 text-center">
-              <p className="mb-1 text-sm text-slate-300">No reviewed customer alerts are ready for this workspace yet.</p>
-              <p className="text-xs text-slate-400">
+            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-5 py-8 text-center">
+              <p className="mb-1 text-sm text-[var(--text-primary)]">No reviewed customer alerts are ready for this workspace yet.</p>
+              <p className="text-xs text-[var(--text-secondary)]">
                 Reviewed alerts appear after evidence records pass human review and delivery routing. No sample alerts are shown in the authenticated dashboard.
               </p>
             </div>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+            <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-sm font-semibold text-white">Brief delivery readiness</h2>
                 <StatusPill tone="cyan">Test mode</StatusPill>
               </div>
               <div className="space-y-4 text-xs">
-                <p className="leading-relaxed text-slate-300">
+                <p className="leading-relaxed text-[var(--text-primary)]">
                   Reviewed weekly briefs can be rendered into Markdown/HTML and written to local email test-mode outbox.
                   External email delivery is not enabled automatically.
                 </p>
-                <button onClick={() => navigate('integrations')} className="w-full rounded-lg border border-cyan-400/25 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50">
+                <button onClick={() => navigate('integrations')} className="w-full rounded-lg border border-[var(--trust-border)] px-3 py-2 text-xs font-semibold text-[var(--accent)] transition-colors hover:border-[var(--trust-border)]">
                   Open delivery settings
                 </button>
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+            <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
               <h2 className="mb-4 text-sm font-semibold text-white">Source pack scope</h2>
               <div className="grid grid-cols-3 gap-2">
                 <div className={`rounded-lg border p-3 text-center ${COV_COLOR.emerald}`}>
@@ -609,7 +609,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                   <span className="mt-1 block text-xs">selected sources only</span>
                 </div>
               </div>
-              <p className="mt-3 text-xs leading-relaxed text-slate-500">
+              <p className="mt-3 text-xs leading-relaxed text-[var(--text-muted)]">
                 Coverage indicators are source-readiness signals, not a statement of complete market coverage.
               </p>
             </div>
@@ -622,17 +622,17 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
           <SourceReadinessCard navigate={navigate} />
           <DeadlinesPanel />
 
-          <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-5">
+          <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
             <div className="mb-3 flex items-center gap-2">
               <Clock className="h-4 w-4 text-amber-300" />
               <h2 className="text-sm font-semibold text-white">Delivery status</h2>
             </div>
-            <p className="text-sm leading-relaxed text-slate-400">
+            <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
               Manual reviewed-alert preview delivery is available from Alerts when Telegram is connected. Automatic scheduled delivery is not enabled yet.
             </p>
             <button
               onClick={() => navigate('sources')}
-              className="mt-4 w-full rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+              className="mt-4 w-full rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--border)] hover:text-white"
             >
               Start with source readiness
             </button>

@@ -49,10 +49,10 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
   const planLabel = planDisplay(planState)
 
   return (
-    <aside className={`flex-shrink-0 flex h-dvh min-h-dvh flex-col bg-[#0A1628] border-r border-slate-800 transition-all duration-200 ${collapsed ? 'w-16' : 'w-64'}`}>
+    <aside className={`flex-shrink-0 flex h-dvh min-h-dvh flex-col bg-[var(--bg-surface)] border-r border-[var(--border-muted)] transition-all duration-200 ${collapsed ? 'w-16' : 'w-64'}`}>
 
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-slate-800 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--border-muted)] flex-shrink-0">
         {!collapsed && (
           <button
             onClick={() => navigate('dashboard')}
@@ -60,7 +60,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
           >
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-7 w-auto flex-shrink-0" />
             <span className="sp-display text-sm font-extrabold text-white tracking-tight truncate">
-              Statute<span className="text-[#16D9F5]">Proof</span>
+              Statute<span className="text-[var(--accent)]">Proof</span>
             </span>
           </button>
         )}
@@ -80,7 +80,7 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
         )}
         <button
           onClick={onToggle}
-          className="flex min-h-9 min-w-9 flex-shrink-0 items-center justify-center rounded text-slate-600 transition-colors hover:text-slate-300"
+          className="flex min-h-9 min-w-9 flex-shrink-0 items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -102,11 +102,11 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
               title={collapsed ? label : undefined}
               className={`relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
                 active
-                  ? 'bg-[#16D9F5]/10 text-[#16D9F5] border-r-2 border-[#16D9F5]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-r-2 border-transparent'
+                  ? 'bg-[var(--trust-badge)] text-[var(--accent)] border-r-2 border-[var(--accent)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-raised)] border-r-2 border-transparent'
               } ${collapsed ? 'justify-center' : ''}`}
             >
-              <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-[#16D9F5]' : ''}`} />
+              <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-[var(--accent)]' : ''}`} />
               {!collapsed && <span className="truncate">{label}</span>}
             </button>
           )
@@ -114,35 +114,35 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
       </nav>
 
       {/* Footer — user + sign out */}
-      <div className="px-3 py-4 border-t border-slate-800 flex-shrink-0">
+      <div className="px-3 py-4 border-t border-[var(--border-muted)] flex-shrink-0">
         {!collapsed ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-[#16D9F5]/20 border border-[#16D9F5]/30 flex items-center justify-center text-xs font-bold text-[#16D9F5] flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-[var(--trust-badge)] border border-[var(--trust-border)] flex items-center justify-center text-xs font-bold text-[var(--accent)] flex-shrink-0">
                 {ws.initials}
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-white truncate">{ws.displayName}</p>
-                <p className="text-xs text-slate-500 truncate">{ws.email || ws.company || planLabel}</p>
+                <p className="text-xs text-[var(--text-muted)] truncate">{ws.email || ws.company || planLabel}</p>
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-800 bg-[#07111F]/60 px-2.5 py-2 text-[11px]">
+            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-navy)] px-2.5 py-2 text-[11px]">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <span className="text-slate-500">Workspace</span>
-                <span className="max-w-[140px] truncate rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 font-semibold text-cyan-200" title={planLabel}>
+                <span className="text-[var(--text-muted)]">Workspace</span>
+                <span className="max-w-[140px] truncate rounded-full border border-[var(--trust-border)] bg-[var(--trust-badge)] px-2 py-0.5 font-semibold text-[var(--accent)]" title={planLabel}>
                   {planLabel}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-slate-500">Source map</span>
-                <span className="text-slate-400">{ws.markets.length ? 'Mapped' : 'Setup pending'}</span>
+                <span className="text-[var(--text-muted)]">Source map</span>
+                <span className="text-[var(--text-secondary)]">{ws.markets.length ? 'Mapped' : 'Setup pending'}</span>
               </div>
             </div>
 
             <button
               onClick={onSignOut}
-              className="flex min-h-10 w-full items-center gap-2 px-1 py-1 text-xs text-slate-500 transition-colors hover:text-slate-300"
+              className="flex min-h-10 w-full items-center gap-2 px-1 py-1 text-xs text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
             >
               <LogOut className="w-3.5 h-3.5" />
               Sign out
@@ -150,12 +150,12 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-7 h-7 rounded-full bg-[#16D9F5]/20 border border-[#16D9F5]/30 flex items-center justify-center text-xs font-bold text-[#16D9F5]">
+            <div className="w-7 h-7 rounded-full bg-[var(--trust-badge)] border border-[var(--trust-border)] flex items-center justify-center text-xs font-bold text-[var(--accent)]">
               {ws.initials}
             </div>
             <button
               onClick={onSignOut}
-              className="flex min-h-10 min-w-10 items-center justify-center text-slate-500 transition-colors hover:text-slate-300"
+              className="flex min-h-10 min-w-10 items-center justify-center text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
               title="Sign out"
             >
               <LogOut className="w-3.5 h-3.5" />

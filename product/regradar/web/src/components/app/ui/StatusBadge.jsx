@@ -57,8 +57,8 @@ const TONE_CLS = {
   success:  'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
   warning:  'border-amber-400/25 bg-amber-400/10 text-amber-300',
   critical: 'border-rose-400/25 bg-rose-400/10 text-rose-300',
-  accent:   'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',
-  neutral:  'border-slate-600 bg-slate-800/80 text-slate-300',
+  accent:   'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]',
+  neutral:  'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-secondary)]',
 }
 
 function statusMeta(code) {

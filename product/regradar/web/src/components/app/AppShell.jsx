@@ -18,7 +18,7 @@ const BillingPage     = lazy(() => import('./BillingPage'))
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[300px]">
-      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[#16D9F5]" />
+      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[var(--accent)]" />
     </div>
   )
 }
@@ -57,12 +57,12 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
   }
 
   return (
-    <div className="flex h-dvh min-h-dvh bg-[#07111F] overflow-hidden">
+    <div className="flex h-dvh min-h-dvh bg-[var(--bg-navy)] overflow-hidden">
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-[#07111F]/70 z-30 lg:hidden"
+          className="fixed inset-0 bg-[rgba(5,11,21,0.72)] z-30 lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}

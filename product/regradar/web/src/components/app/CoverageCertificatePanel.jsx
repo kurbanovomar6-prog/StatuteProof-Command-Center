@@ -17,11 +17,11 @@ function currentMonthStart() {
 // in emerald. These are recorded facts, never a compliance judgement.
 function StateChip({ state }) {
   const map = {
-    CHANGED: ['bg-cyan-500/12 text-cyan-200 border-cyan-400/25', 'Changed'],
+    CHANGED: ['bg-[var(--trust-badge)] text-[var(--accent)] border-[var(--trust-border)]', 'Changed'],
     UNCHANGED: ['bg-emerald-500/10 text-emerald-200 border-emerald-400/20', 'Unchanged'],
     NO_PROOF: ['bg-rose-500/12 text-rose-200 border-rose-400/25', 'No coverage'],
   }
-  const [cls, label] = map[state] || ['bg-slate-700/40 text-slate-300 border-slate-600/40', state || '—']
+  const [cls, label] = map[state] || ['bg-[var(--bg-tooltip)] text-[var(--text-primary)] border-[var(--border)]', state || '—']
   return <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${cls}`}>{label}</span>
 }
 
@@ -32,9 +32,9 @@ function Tile({ label, value, tone = 'default' }) {
       ? 'text-rose-300'
       : 'text-white'
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2.5">
+    <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-2.5">
       <p className={`font-mono text-lg font-semibold tabular-nums ${toneCls}`}>{value}</p>
-      <p className="mt-0.5 text-[11px] leading-tight text-slate-500">{label}</p>
+      <p className="mt-0.5 text-[11px] leading-tight text-[var(--text-muted)]">{label}</p>
     </div>
   )
 }
@@ -112,14 +112,14 @@ export default function CoverageCertificatePanel() {
   const busy = isLoading || !!downloading
 
   return (
-    <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-5">
+    <div className="rounded-xl border border-[var(--trust-border)] bg-[var(--bg-elevated)] p-5">
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
-          <FileCheck2 className="h-4 w-4 text-cyan-300" />
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--trust-badge)]">
+          <FileCheck2 className="h-4 w-4 text-[var(--accent)]" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white">Coverage certificate</h2>
-          <p className="mt-0.5 max-w-2xl text-xs leading-relaxed text-slate-400">
+          <p className="mt-0.5 max-w-2xl text-xs leading-relaxed text-[var(--text-secondary)]">
             Negative assurance — for the chosen period, exactly what was checked on each monitored
             source and where the recorded evidence has gaps. It makes no claim of complete coverage.
           </p>
@@ -128,25 +128,25 @@ export default function CoverageCertificatePanel() {
 
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">From</span>
+          <span className="text-[11px] font-semibold text-[var(--text-muted)]">From</span>
           <input
             type="date"
             value={periodStart}
             max={periodEnd}
             onChange={e => setPeriodStart(e.target.value)}
             disabled={busy}
-            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none disabled:opacity-60"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-white focus:border-[var(--trust-border)] focus:outline-none disabled:opacity-60"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">To</span>
+          <span className="text-[11px] font-semibold text-[var(--text-muted)]">To</span>
           <input
             type="date"
             value={periodEnd}
             min={periodStart}
             onChange={e => setPeriodEnd(e.target.value)}
             disabled={busy}
-            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none disabled:opacity-60"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-white focus:border-[var(--trust-border)] focus:outline-none disabled:opacity-60"
           />
         </label>
         <button
@@ -154,7 +154,7 @@ export default function CoverageCertificatePanel() {
           onClick={generate}
           disabled={isLoading}
           className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-            busy ? 'cursor-not-allowed bg-slate-800 text-slate-500' : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400'
+            busy ? 'cursor-not-allowed bg-[var(--bg-raised)] text-[var(--text-muted)]' : 'bg-[var(--accent)] text-[var(--ink)] hover:bg-[var(--accent-hover)]'
           }`}
         >
           <FileCheck2 className="h-3.5 w-3.5" />
@@ -168,20 +168,20 @@ export default function CoverageCertificatePanel() {
 
       {status === 'loaded' && cert && (
         <div className="mt-5 space-y-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-800 pb-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--border-muted)] pb-3">
             <div>
               <p className="text-sm font-semibold text-white">{cert.period_label || `${periodStart} — ${periodEnd}`}</p>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
                 Generated {cert.generated_at_utc || '—'} · negative assurance
               </p>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-cyan-400/25 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-200">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--trust-border)] bg-[var(--trust-badge)] px-2.5 py-1 text-[11px] font-medium text-[var(--accent)]">
               <ShieldCheck className="h-3.5 w-3.5" /> Recorded evidence only
             </span>
           </div>
 
           {cert.negative_assurance_statement && (
-            <p className="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-xs leading-relaxed text-slate-300">
+            <p className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-4 py-3 text-xs leading-relaxed text-[var(--text-primary)]">
               {cert.negative_assurance_statement}
             </p>
           )}
@@ -196,14 +196,14 @@ export default function CoverageCertificatePanel() {
           </div>
 
           {sources.length === 0 ? (
-            <p className="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-4 text-xs text-slate-400">
+            <p className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-4 py-4 text-xs text-[var(--text-secondary)]">
               No monitored sources resolved for this period. Configure and enable sources, then generate again.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-left text-[11px] uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-[var(--border-muted)] text-left text-[11px] text-[var(--text-muted)]">
                     <th scope="col" className="px-3 py-2 font-semibold">Source</th>
                     <th scope="col" className="px-3 py-2 font-semibold">State</th>
                     <th scope="col" className="px-3 py-2 text-right font-semibold">Checks</th>
@@ -219,29 +219,29 @@ export default function CoverageCertificatePanel() {
                     return (
                       <tr
                         key={s.source_id}
-                        className={`border-b border-slate-800/70 ${flagged ? 'bg-amber-500/[0.04]' : ''}`}
+                        className={`border-b border-[var(--border-muted)] ${flagged ? 'bg-amber-500/[0.04]' : ''}`}
                       >
                         <td className="px-3 py-2.5">
                           <div className="flex items-center gap-1.5">
                             {flagged && <TriangleAlert className="h-3 w-3 flex-shrink-0 text-amber-400" aria-hidden="true" />}
-                            <span className="font-medium text-slate-200">{s.source_name || s.source_id}</span>
+                            <span className="font-medium text-[var(--text-primary)]">{s.source_name || s.source_id}</span>
                           </div>
                           {s.gap_disclosure && (
                             <p className="mt-0.5 text-[11px] leading-tight text-amber-300/80">{s.gap_disclosure}</p>
                           )}
                         </td>
                         <td className="px-3 py-2.5"><StateChip state={s.change_state} /></td>
-                        <td className="px-3 py-2.5 text-right font-mono tabular-nums text-slate-300">
+                        <td className="px-3 py-2.5 text-right font-mono tabular-nums text-[var(--text-primary)]">
                           {s.successful_checks}/{s.checks_in_period}
                         </td>
-                        <td className="px-3 py-2.5 text-right font-mono tabular-nums text-slate-300">
+                        <td className="px-3 py-2.5 text-right font-mono tabular-nums text-[var(--text-primary)]">
                           {s.days_with_proof_hash}/{s.expected_days}
                         </td>
-                        <td className={`px-3 py-2.5 text-right font-mono tabular-nums ${s.gap_days > 0 ? 'text-amber-300' : 'text-slate-400'}`}>
+                        <td className={`px-3 py-2.5 text-right font-mono tabular-nums ${s.gap_days > 0 ? 'text-amber-300' : 'text-[var(--text-secondary)]'}`}>
                           {s.gap_days}
                         </td>
-                        <td className="px-3 py-2.5 text-slate-400">{s.last_check_utc || 'none recorded'}</td>
-                        <td className="px-3 py-2.5 font-mono text-[11px] text-slate-500">
+                        <td className="px-3 py-2.5 text-[var(--text-secondary)]">{s.last_check_utc || 'none recorded'}</td>
+                        <td className="px-3 py-2.5 font-mono text-[11px] text-[var(--text-muted)]">
                           {s.last_proof_hash ? String(s.last_proof_hash).slice(0, 14) : 'none'}
                         </td>
                       </tr>
@@ -252,13 +252,13 @@ export default function CoverageCertificatePanel() {
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 pt-3">
-            <span className="text-[11px] text-slate-500">Download:</span>
+          <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border-muted)] pt-3">
+            <span className="text-[11px] text-[var(--text-muted)]">Download:</span>
             <button
               type="button"
               onClick={() => download('markdown')}
               disabled={!!downloading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--border)] hover:text-white disabled:opacity-60"
             >
               <Download className="h-3.5 w-3.5" />
               {downloading === 'markdown' ? 'Preparing…' : 'Markdown'}
@@ -267,7 +267,7 @@ export default function CoverageCertificatePanel() {
               type="button"
               onClick={() => download('html')}
               disabled={!!downloading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--border)] hover:text-white disabled:opacity-60"
             >
               <Download className="h-3.5 w-3.5" />
               {downloading === 'html' ? 'Preparing…' : 'HTML (printable)'}
@@ -276,9 +276,9 @@ export default function CoverageCertificatePanel() {
         </div>
       )}
 
-      <div className="mt-4 flex items-start gap-2 rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-500" />
-        <p className="text-[11px] leading-relaxed text-slate-500">
+      <div className="mt-4 flex items-start gap-2 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-3">
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text-muted)]" />
+        <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">
           Every number is derived from real recorded source-run evidence; a source with no checks in
           the period is shown as no coverage, never hidden. For monitoring information only. Not legal
           advice and not a guarantee of compliance.

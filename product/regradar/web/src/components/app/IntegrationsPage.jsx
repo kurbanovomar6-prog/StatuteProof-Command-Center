@@ -32,7 +32,7 @@ function StatusNotice({ type, children }) {
   const classes = {
     success: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
     error: 'bg-rose-500/10 text-rose-300 border-rose-500/20',
-    info: 'bg-[#16D9F5]/10 text-[#16D9F5] border-[#16D9F5]/20',
+    info: 'bg-[var(--trust-badge)] text-[var(--accent)] border-[var(--trust-border)]',
   }
   return (
     <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2.5 border ${classes[type] || classes.info}`}>
@@ -279,27 +279,27 @@ export default function IntegrationsPage() {
     <div className="p-5 space-y-4">
       <div className="mb-5">
         <h1 className="text-lg font-bold text-white mb-1">Integrations</h1>
-        <p className="text-sm text-slate-400">Connect StatuteProof to your communication and workflow tools.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Connect StatuteProof to your communication and workflow tools.</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4">
 
         {/* Telegram */}
-        <div className="lg:col-span-2 bg-[#0D1B2E] border border-slate-800 rounded-xl p-5">
+        <div className="lg:col-span-2 bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5">
           <div className="flex items-start justify-between mb-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#16D9F5]/10 border border-[#16D9F5]/20 flex items-center justify-center flex-shrink-0">
-                <Send className="w-5 h-5 text-[#16D9F5]" />
+              <div className="w-10 h-10 rounded-xl bg-[var(--trust-badge)] border border-[var(--trust-border)] flex items-center justify-center flex-shrink-0">
+                <Send className="w-5 h-5 text-[var(--accent)]" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-white">Telegram</h3>
-                <p className="text-xs text-slate-500">Pair Telegram to this account for verified test delivery.</p>
+                <p className="text-xs text-[var(--text-muted)]">Pair Telegram to this account for verified test delivery.</p>
               </div>
             </div>
             <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
               status?.connected
                 ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
-                : 'text-slate-500 bg-slate-800 border-slate-700'
+                : 'text-[var(--text-muted)] bg-[var(--bg-raised)] border-[var(--border)]'
             }`}>
               {status?.connected ? <><CheckCircle className="w-3 h-3" /> Connected</> : 'Not connected'}
             </span>
@@ -323,25 +323,25 @@ export default function IntegrationsPage() {
 
           {!statusLoading && !status?.connected && !activeCode && (
             <div className="space-y-5">
-              <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4">
+              <div className="bg-[var(--bg-base)] border border-[var(--border-muted)] rounded-xl p-4">
                 <div className="flex items-start gap-3">
-                  <Link2 className="w-5 h-5 text-[#16D9F5] mt-0.5 flex-shrink-0" />
+                  <Link2 className="w-5 h-5 text-[var(--accent)] mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="text-sm font-semibold text-white mb-1">Connect Telegram</h4>
-                    <p className="text-sm text-slate-400 leading-relaxed">
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                       Generate a secure pairing code and send it to the StatuteProof bot. No manual Chat ID copy-paste needed.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-3 text-xs text-slate-400">
+              <div className="grid sm:grid-cols-3 gap-3 text-xs text-[var(--text-secondary)]">
                 {[
                   'The code expires after 15 minutes.',
                   'The bot links the chat to your account only.',
                   'Automatic scheduled delivery is not enabled yet.',
                 ].map(t => (
-                  <div key={t} className="bg-slate-950/40 border border-slate-800 rounded-lg px-3 py-2.5">
+                  <div key={t} className="bg-[var(--bg-base)] border border-[var(--border-muted)] rounded-lg px-3 py-2.5">
                     {t}
                   </div>
                 ))}
@@ -351,7 +351,7 @@ export default function IntegrationsPage() {
                 type="button"
                 onClick={handleGenerate}
                 disabled={generating}
-                className="inline-flex items-center gap-2 text-xs font-semibold bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] px-4 py-2.5 rounded-lg transition-colors disabled:opacity-60"
+                className="inline-flex items-center gap-2 text-xs font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] px-4 py-2.5 rounded-lg transition-colors disabled:opacity-60"
               >
                 {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
                 Generate code
@@ -361,12 +361,12 @@ export default function IntegrationsPage() {
 
           {!statusLoading && !status?.connected && activeCode && (
             <div className="space-y-5">
-              <div className="bg-slate-950/50 border border-[#16D9F5]/20 rounded-xl p-5">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Pairing code</p>
-                <div className="font-mono text-3xl font-bold tracking-widest text-white mb-3">
+              <div className="bg-[var(--bg-base)] border border-[var(--trust-border)] rounded-xl p-5">
+                <p className="text-xs font-semibold text-[var(--text-secondary)] mb-2">Pairing code</p>
+                <div className="font-mono text-3xl font-bold text-white mb-3">
                   {activeCode.code}
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Expires at {formatDate(activeCode.expires_at)}. Send this command to the StatuteProof Telegram bot.
                 </p>
               </div>
@@ -378,7 +378,7 @@ export default function IntegrationsPage() {
                   <span>This pairing code has expired. Generate a new code to try again.</span>
                 </div>
               ) : (
-                <div className="flex items-start gap-2 rounded-lg border border-[#16D9F5]/20 bg-[#16D9F5]/5 px-3 py-2.5 text-xs text-[#16D9F5]">
+                <div className="flex items-start gap-2 rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3 py-2.5 text-xs text-[var(--accent)]">
                   <Loader2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 animate-spin" />
                   <span>
                     Waiting for your message to @{botUsername || 'statuteproofalerts_bot'}…
@@ -388,17 +388,17 @@ export default function IntegrationsPage() {
               )}
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
                   Telegram command
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex-1 font-mono bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-[#16D9F5] overflow-x-auto">
+                  <div className="flex-1 font-mono bg-[var(--bg-base)] border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm text-[var(--accent)] overflow-x-auto">
                     {command}
                   </div>
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     {copied ? 'Copied' : 'Copy'}
@@ -412,7 +412,7 @@ export default function IntegrationsPage() {
                     href={botLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs font-medium text-[#16D9F5] border border-[#16D9F5]/30 hover:border-[#16D9F5]/60 px-3 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 text-xs font-medium text-[var(--accent)] border border-[var(--trust-border)] hover:border-[var(--trust-border)] px-3 py-2 rounded-lg transition-colors"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     Open @{botUsername}
@@ -422,7 +422,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={refreshStatus}
                   disabled={statusLoading}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   Refresh status
@@ -431,7 +431,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
                 >
                   {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
                   New code
@@ -447,7 +447,7 @@ export default function IntegrationsPage() {
                   <CheckCircle className="w-5 h-5 text-emerald-300 mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="text-sm font-semibold text-white mb-1">Telegram connected</h4>
-                    <p className="text-sm text-slate-400 leading-relaxed">
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                       This chat is linked to your StatuteProof account for test messages, sample brief delivery, and manual reviewed alert previews.
                       Automatic scheduled delivery is not enabled yet.
                     </p>
@@ -456,21 +456,21 @@ export default function IntegrationsPage() {
               </div>
 
               <dl className="grid sm:grid-cols-2 gap-3 text-xs">
-                <div className="bg-slate-950/40 border border-slate-800 rounded-lg px-3 py-2.5">
-                  <dt className="text-slate-500 mb-1">Telegram user</dt>
-                  <dd className="text-slate-200">{status.telegram_username ? `@${status.telegram_username}` : 'Not provided'}</dd>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-muted)] rounded-lg px-3 py-2.5">
+                  <dt className="text-[var(--text-muted)] mb-1">Telegram user</dt>
+                  <dd className="text-[var(--text-primary)]">{status.telegram_username ? `@${status.telegram_username}` : 'Not provided'}</dd>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-800 rounded-lg px-3 py-2.5">
-                  <dt className="text-slate-500 mb-1">Chat ID</dt>
-                  <dd className="font-mono text-slate-200">{status.telegram_chat_id_masked || 'Masked'}</dd>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-muted)] rounded-lg px-3 py-2.5">
+                  <dt className="text-[var(--text-muted)] mb-1">Chat ID</dt>
+                  <dd className="font-mono text-[var(--text-primary)]">{status.telegram_chat_id_masked || 'Masked'}</dd>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-800 rounded-lg px-3 py-2.5">
-                  <dt className="text-slate-500 mb-1">Paired</dt>
-                  <dd className="text-slate-200">{formatDate(status.paired_at)}</dd>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-muted)] rounded-lg px-3 py-2.5">
+                  <dt className="text-[var(--text-muted)] mb-1">Paired</dt>
+                  <dd className="text-[var(--text-primary)]">{formatDate(status.paired_at)}</dd>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-800 rounded-lg px-3 py-2.5">
-                  <dt className="text-slate-500 mb-1">Last test</dt>
-                  <dd className="text-slate-200">{formatDate(status.last_test_at)}</dd>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-muted)] rounded-lg px-3 py-2.5">
+                  <dt className="text-[var(--text-muted)] mb-1">Last test</dt>
+                  <dd className="text-[var(--text-primary)]">{formatDate(status.last_test_at)}</dd>
                 </div>
               </dl>
 
@@ -479,7 +479,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={handleTest}
                   disabled={testing}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
                 >
                   {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                   Send test message
@@ -488,7 +488,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={handleSampleBrief}
                   disabled={briefStatus === 'sending'}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
                 >
                   {briefStatus === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                   Send sample brief
@@ -497,7 +497,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={refreshStatus}
                   disabled={statusLoading}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 border border-slate-700 hover:border-slate-600 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   Refresh status
@@ -512,7 +512,7 @@ export default function IntegrationsPage() {
                   Unlink Telegram
                 </button>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--text-muted)]">
                 Send one sample reviewed brief to confirm delivery. Production routing remains manual during the founding pilot.
               </p>
               {briefStatus !== 'idle' && (
@@ -527,7 +527,7 @@ export default function IntegrationsPage() {
             </div>
           )}
 
-          <p className="mt-5 text-xs text-slate-600 bg-slate-900 rounded-lg px-3 py-2.5 leading-relaxed">
+          <p className="mt-5 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5 leading-relaxed">
             Security: the Telegram bot token stays server-side. The dashboard never accepts or stores a manual Chat ID.
           </p>
         </div>
@@ -535,22 +535,22 @@ export default function IntegrationsPage() {
         {/* Email + Webhook stubs */}
         <div className="flex flex-col gap-4">
 
-          <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5 flex flex-col">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5 flex flex-col">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-cyan-300" />
+              <div className="w-10 h-10 rounded-xl bg-[var(--trust-badge)] border border-[var(--trust-border)] flex items-center justify-center">
+                <Mail className="w-5 h-5 text-[var(--accent)]" />
               </div>
-              <span className="text-xs font-medium text-cyan-200 bg-cyan-400/10 border border-cyan-400/20 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium text-[var(--accent)] bg-[var(--trust-badge)] border border-[var(--trust-border)] px-2.5 py-1 rounded-full">
                 Test mode
               </span>
             </div>
             <h3 className="text-sm font-semibold text-white mb-1">Email Brief Delivery</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
               Render a reviewed weekly brief email payload into the local outbox. Production provider readiness is visible here, but no external email is sent unless explicitly configured and enabled server-side.
             </p>
-            <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/45 p-3">
+            <div className="mt-4 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
               {emailReadinessLoading ? (
-                <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   Loading email readiness...
                 </div>
@@ -558,29 +558,29 @@ export default function IntegrationsPage() {
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Current mode</p>
-                      <p className="mt-0.5 text-xs font-semibold text-slate-200">{emailModeLabel(emailReadiness)}</p>
+                      <p className="text-[11px] font-semibold text-[var(--text-muted)]">Current mode</p>
+                      <p className="mt-0.5 text-xs font-semibold text-[var(--text-primary)]">{emailModeLabel(emailReadiness)}</p>
                     </div>
                     <StatusBadge code={emailReadiness?.status || 'local_outbox'} />
                   </div>
                   <dl className="grid grid-cols-2 gap-2 text-[11px]">
                     <div>
-                      <dt className="text-slate-500">Provider</dt>
-                      <dd className="text-slate-300">{(emailReadiness?.provider || 'local_outbox') === 'local_outbox' ? 'Local outbox (no external provider)' : emailReadiness.provider}</dd>
+                      <dt className="text-[var(--text-muted)]">Provider</dt>
+                      <dd className="text-[var(--text-primary)]">{(emailReadiness?.provider || 'local_outbox') === 'local_outbox' ? 'Local outbox (no external provider)' : emailReadiness.provider}</dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">External send</dt>
-                      <dd className={emailReadiness?.send_enabled && emailReadiness?.provider_configured ? 'text-emerald-300' : 'text-slate-300'}>
+                      <dt className="text-[var(--text-muted)]">External send</dt>
+                      <dd className={emailReadiness?.send_enabled && emailReadiness?.provider_configured ? 'text-emerald-300' : 'text-[var(--text-primary)]'}>
                         {emailReadiness?.send_enabled && emailReadiness?.provider_configured ? 'Enabled by server config' : 'Disabled'}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">From</dt>
-                      <dd className="break-all text-slate-300">{emailReadiness?.from_email || 'Not configured'}</dd>
+                      <dt className="text-[var(--text-muted)]">From</dt>
+                      <dd className="break-all text-[var(--text-primary)]">{emailReadiness?.from_email || 'Not configured'}</dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">Last status</dt>
-                      <dd className="text-slate-300">{emailReadiness?.last_delivery_status?.status || 'No delivery status yet'}</dd>
+                      <dt className="text-[var(--text-muted)]">Last status</dt>
+                      <dd className="text-[var(--text-primary)]">{emailReadiness?.last_delivery_status?.status || 'No delivery status yet'}</dd>
                     </div>
                   </dl>
                   {emailReadiness?.missing_config?.length ? (
@@ -595,14 +595,14 @@ export default function IntegrationsPage() {
                       </div>
                     </div>
                   ) : null}
-                  <p className="text-[11px] leading-relaxed text-slate-500">
+                  <p className="text-[11px] leading-relaxed text-[var(--text-muted)]">
                     {emailReadiness?.customer_safe_status || 'Email delivery status is not available.'}
                   </p>
                   <button
                     type="button"
                     onClick={handleEmailConfigCheck}
                     disabled={emailConfigChecking}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {emailConfigChecking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                     Check provider config
@@ -610,23 +610,23 @@ export default function IntegrationsPage() {
                 </div>
               )}
             </div>
-            <label className="mt-4 block text-xs font-medium text-slate-400 mb-1.5">Test recipient</label>
+            <label className="mt-4 block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Test recipient</label>
             <input
               value={emailRecipient}
               onChange={event => setEmailRecipient(event.target.value)}
               placeholder="mlro@example.com"
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-600"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
             />
             <button
               type="button"
               onClick={handleEmailTestMode}
               disabled={emailStatus === 'sending' || !emailRecipient.trim()}
-              className="mt-3 inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-400/25 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-600"
+              className="mt-3 inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--trust-border)] px-3 py-2 text-xs font-semibold text-[var(--accent)] transition-colors hover:border-[var(--trust-border)] disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:text-[var(--text-muted)]"
             >
               {emailStatus === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
               Write email payload
             </button>
-            <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+            <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-secondary)]">
               Test-mode writes a local payload and delivery-status row. No provider secrets are shown in the dashboard. Monitoring intelligence only. Not legal advice.
             </p>
             {emailStatus !== 'idle' && (
@@ -642,17 +642,17 @@ export default function IntegrationsPage() {
             )}
           </div>
 
-          <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5 flex flex-col opacity-60">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5 flex flex-col opacity-60">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-                <Webhook className="w-5 h-5 text-slate-500" />
+              <div className="w-10 h-10 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] flex items-center justify-center">
+                <Webhook className="w-5 h-5 text-[var(--text-muted)]" />
               </div>
-              <span className="text-xs font-medium text-slate-500 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-raised)] border border-[var(--border)] px-2.5 py-1 rounded-full">
                 Planned
               </span>
             </div>
             <h3 className="text-sm font-semibold text-white mb-1">Webhook / API</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
               Push alert payloads to your own systems. REST webhook with JSON brief format.
             </p>
           </div>
@@ -660,9 +660,9 @@ export default function IntegrationsPage() {
       </div>
 
       {/* Security strip */}
-      <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl px-5 py-4">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl px-5 py-4">
         <h3 className="text-xs font-semibold text-white mb-3">Integration Security</h3>
-        <div className="grid sm:grid-cols-3 gap-3 text-xs text-slate-400">
+        <div className="grid sm:grid-cols-3 gap-3 text-xs text-[var(--text-secondary)]">
           {[
             'Bot token stored server-side only and never exposed to clients',
             'Pairing codes are one-time account links with a 15-minute expiry',

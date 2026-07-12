@@ -135,19 +135,19 @@ export default function ReviewQueuePage() {
   }), [queueData, search])
 
   return (
-    <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+    <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
       <div>
         <h1 className="text-lg font-bold text-white mb-1">Review Queue</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
+        <p className="max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
           Evidence records requiring MLRO review. Rows are built from saved source-run evidence and Acknowledge & Assess records only.
         </p>
       </div>
 
-      <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-4">
+      <div className="rounded-xl border border-[var(--trust-border)] bg-[var(--bg-elevated)] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">MLRO review</h2>
-            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-400">
+            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
               Filter by review status, source health, and change status. Rows are built only from
               saved evidence records; hash drift is a source-health signal, not a regulatory conclusion.
             </p>
@@ -155,11 +155,11 @@ export default function ReviewQueuePage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+      <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-4">
         <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">Canonical evidence review</h2>
-            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-400">
+            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[var(--text-secondary)]">
               Append-only review decisions for canonical evidence records. Approval can unlock draft-only brief inputs; customer delivery remains separately blocked.
             </p>
           </div>
@@ -168,25 +168,25 @@ export default function ReviewQueuePage() {
               <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-amber-200">Pending {canonicalData.counts.pending}</span>
               <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2 py-1 text-emerald-200">Approved {canonicalData.counts.approved}</span>
               <span className="rounded-full border border-rose-400/25 bg-rose-400/10 px-2 py-1 text-rose-200">Rejected {canonicalData.counts.rejected}</span>
-              <span className="rounded-full border border-slate-600 bg-slate-900 px-2 py-1 text-slate-300">Blocked {canonicalData.counts.blocked}</span>
+              <span className="rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] px-2 py-1 text-[var(--text-primary)]">Blocked {canonicalData.counts.blocked}</span>
             </div>
           )}
         </div>
 
-        {canonicalLoading && <p className="text-sm text-slate-400">Loading canonical evidence records...</p>}
+        {canonicalLoading && <p className="text-sm text-[var(--text-secondary)]">Loading canonical evidence records...</p>}
         {!canonicalLoading && canonicalError && (
           <ErrorState
             title="Could not load canonical evidence records."
             detail={canonicalError}
             onRetry={loadCanonicalEvidence}
-            className="rounded-lg border border-slate-800 bg-slate-950/35"
+            className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)]"
           />
         )}
         {!canonicalLoading && !canonicalError && canonicalRows.length === 0 && (
           <EmptyState
             icon={CheckCircle}
             title="No canonical evidence records yet."
-            className="rounded-lg border border-slate-800 bg-slate-950/35"
+            className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)]"
           >
             Canonical records appear after monitoring runs save evidence for
             review. Run a source check or adjust filters above.
@@ -202,24 +202,24 @@ export default function ReviewQueuePage() {
                   <article key={`${row.record_id}-${rowIndex}`} className="sp-mobile-card">
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="sp-mono truncate text-xs text-slate-300">{row.record_id}</p>
+                        <p className="sp-mono truncate text-xs text-[var(--text-primary)]">{row.record_id}</p>
                         <p className="mt-1 text-sm font-semibold text-white">{row.source_id || 'Unknown source'}</p>
-                        <p className="text-xs text-slate-500">{row.regulator || 'Unknown regulator'} · {row.run_status || 'UNKNOWN'}</p>
+                        <p className="text-xs text-[var(--text-muted)]">{row.regulator || 'Unknown regulator'} · {row.run_status || 'UNKNOWN'}</p>
                       </div>
                       <StatusBadge code={row.record_review_status || 'pending'} />
                     </div>
-                    <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Record path</p>
-                      <p className="mt-1 break-all text-xs text-slate-400">{row.record_path}</p>
+                    <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
+                      <p className="text-[11px] font-semibold text-[var(--text-muted)]">Record path</p>
+                      <p className="mt-1 break-all text-xs text-[var(--text-secondary)]">{row.record_path}</p>
                     </div>
                     <div className="mt-3">
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-400">Reviewer note</label>
+                      <label className="mb-1.5 block text-xs font-semibold text-[var(--text-secondary)]">Reviewer note</label>
                       <input
                         type="text"
                         value={reviewNotes[row.record_id] || ''}
                         onChange={event => setReviewNotes(prev => ({ ...prev, [row.record_id]: event.target.value }))}
                         placeholder="Required before decision"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-white placeholder:text-[var(--text-muted)] focus:border-[var(--trust-border)] focus:outline-none"
                       />
                       {state?.message && (
                         <p className={`mt-1 text-[11px] ${state.status === 'error' ? 'text-rose-300' : 'text-emerald-300'}`}>{state.message}</p>
@@ -246,7 +246,7 @@ export default function ReviewQueuePage() {
                         type="button"
                         disabled={isSaving}
                         onClick={() => submitCanonicalReview(row.record_id, 'blocked')}
-                        className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Block
                       </button>
@@ -256,7 +256,7 @@ export default function ReviewQueuePage() {
               })}
             </div>
 
-            <div className="hidden overflow-x-auto rounded-lg border border-slate-800 lg:block">
+            <div className="hidden overflow-x-auto rounded-lg border border-[var(--border-muted)] lg:block">
               <table className="sp-table w-full">
               <thead>
                 <tr>
@@ -265,19 +265,19 @@ export default function ReviewQueuePage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-[var(--border-muted)]">
                 {canonicalRows.map((row, rowIndex) => {
                   const state = reviewState[row.record_id]
                   const isSaving = state?.status === 'saving'
                   return (
-                    <tr key={`${row.record_id}-${rowIndex}`} className="hover:bg-slate-800/35">
+                    <tr key={`${row.record_id}-${rowIndex}`} className="hover:bg-[var(--bg-raised)]">
                       <td className="max-w-[220px]">
-                        <p className="sp-mono truncate text-xs text-slate-300" title={row.record_id}>{row.record_id}</p>
-                        <p className="mt-1 truncate text-[11px] text-slate-500" title={row.record_path}>{row.record_path}</p>
+                        <p className="sp-mono truncate text-xs text-[var(--text-primary)]" title={row.record_id}>{row.record_id}</p>
+                        <p className="mt-1 truncate text-[11px] text-[var(--text-muted)]" title={row.record_path}>{row.record_path}</p>
                       </td>
                       <td>
                         <p className="font-semibold text-white">{row.source_id || 'Unknown source'}</p>
-                        <p className="mt-1 text-[11px] text-slate-500">{row.regulator || 'Unknown regulator'}</p>
+                        <p className="mt-1 text-[11px] text-[var(--text-muted)]">{row.regulator || 'Unknown regulator'}</p>
                       </td>
                       <td>
                         <StatusBadge code={row.run_status || 'NOT_RUN'} />
@@ -290,7 +290,7 @@ export default function ReviewQueuePage() {
                           value={reviewNotes[row.record_id] || ''}
                           onChange={event => setReviewNotes(prev => ({ ...prev, [row.record_id]: event.target.value }))}
                           placeholder="Reviewer note required"
-                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+                          className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-white placeholder:text-[var(--text-muted)] focus:border-[var(--trust-border)] focus:outline-none"
                         />
                         {state?.message && (
                           <p className={`mt-1 text-[11px] ${state.status === 'error' ? 'text-rose-300' : 'text-emerald-300'}`}>{state.message}</p>
@@ -324,7 +324,7 @@ export default function ReviewQueuePage() {
                             aria-label="Block canonical evidence pending remediation"
                             disabled={isSaving}
                             onClick={() => submitCanonicalReview(row.record_id, 'blocked')}
-                            className="rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-2 text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <Ban className="h-3.5 w-3.5" />
                           </button>
@@ -340,32 +340,32 @@ export default function ReviewQueuePage() {
         )}
       </div>
 
-      <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] p-4">
+      <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-4">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto_auto]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               placeholder="Search source, hash status, reviewer"
               value={search}
               onChange={event => setSearch(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2 pl-9 pr-3 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] py-2 pl-9 pr-3 text-xs text-white placeholder:text-[var(--text-muted)] focus:border-[var(--trust-border)] focus:outline-none"
             />
           </div>
-          <select value={status} onChange={event => setStatus(event.target.value)} className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+          <select value={status} onChange={event => setStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
             {STATUS_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
-          <select value={sourceHealthStatus} onChange={event => setSourceHealthStatus(event.target.value)} className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+          <select value={sourceHealthStatus} onChange={event => setSourceHealthStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
             {HEALTH_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
-          <select value={changeStatus} onChange={event => setChangeStatus(event.target.value)} className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+          <select value={changeStatus} onChange={event => setChangeStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
             {CHANGE_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </div>
       </div>
 
       {loading && (
-        <div className="rounded-xl border border-slate-800 bg-[#0D1B2E] px-5 py-8 text-sm text-slate-400">
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-5 py-8 text-sm text-[var(--text-secondary)]">
           Loading review queue...
         </div>
       )}
@@ -381,10 +381,10 @@ export default function ReviewQueuePage() {
       )}
 
       {!loading && !error && filteredRows.length === 0 && (
-        <div className="rounded-xl border border-slate-800 bg-slate-950/35 px-6 py-12 text-center">
-          <Filter className="mx-auto mb-3 h-8 w-8 text-slate-600" />
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-base)] px-6 py-12 text-center">
+          <Filter className="mx-auto mb-3 h-8 w-8 text-[var(--text-muted)]" />
           <p className="text-sm font-semibold text-white">No pending reviews.</p>
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
             Evidence records appear here after source runs are saved. Assessed records can be viewed by switching the status filter.
           </p>
         </div>
@@ -398,32 +398,32 @@ export default function ReviewQueuePage() {
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-white">{row.source_name || row.source_id}</p>
-                    <TimeStamp value={row.timestamp_utc} mode="absolute" fallback="No timestamp" className="mt-1 block text-xs text-slate-500" />
+                    <TimeStamp value={row.timestamp_utc} mode="absolute" fallback="No timestamp" className="mt-1 block text-xs text-[var(--text-muted)]" />
                   </div>
                   <StatusBadge code={row.change_status || 'NOT_RUN'} />
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
-                    <p className="text-slate-500">Source health</p>
+                  <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-2.5">
+                    <p className="text-[var(--text-muted)]">Source health</p>
                     <div className="mt-1"><StatusBadge code={row.source_health_status || 'NOT_RUN'} /></div>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
-                    <p className="text-slate-500">Quality</p>
-                    <p className="mt-1 font-semibold text-slate-300">{row.extraction_quality ? String(row.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'}</p>
+                  <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-2.5">
+                    <p className="text-[var(--text-muted)]">Quality</p>
+                    <p className="mt-1 font-semibold text-[var(--text-primary)]">{row.extraction_quality ? String(row.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'}</p>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
-                    <p className="text-slate-500">Hash</p>
-                    <p className="sp-mono mt-1 truncate text-slate-300">{row.normalized_hash_short || 'not recorded'}</p>
+                  <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-2.5">
+                    <p className="text-[var(--text-muted)]">Hash</p>
+                    <p className="sp-mono mt-1 truncate text-[var(--text-primary)]">{row.normalized_hash_short || 'not recorded'}</p>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-2.5">
-                    <p className="text-slate-500">Assessment</p>
+                  <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-2.5">
+                    <p className="text-[var(--text-muted)]">Assessment</p>
                     <p className="mt-1 font-semibold text-amber-200">{row.pending_review ? 'Pending' : row.impact_level || row.assessment_status || 'Assessed'}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3">
-                  <a href="/app/evidence" className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">Open evidence</a>
+                  <a href="/app/evidence" className="text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent)]">Open evidence</a>
                   {row.official_url && (
-                    <a href={row.official_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-200">
+                    <a href={row.official_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                       Official source <ExternalLink className="h-3.5 w-3.5" />
                     </a>
                   )}
@@ -432,7 +432,7 @@ export default function ReviewQueuePage() {
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-xl border border-slate-800 bg-[#0D1B2E] lg:block">
+          <div className="hidden overflow-x-auto rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] lg:block">
             <table className="sp-table w-full">
             <thead>
               <tr>
@@ -441,19 +441,19 @@ export default function ReviewQueuePage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-[var(--border-muted)]">
               {filteredRows.map((row, rowIndex) => (
-                <tr key={`${row.evidence_record_id}-${rowIndex}`} className="hover:bg-slate-800/35">
+                <tr key={`${row.evidence_record_id}-${rowIndex}`} className="hover:bg-[var(--bg-raised)]">
                   <td className="max-w-[280px]">
                     <p className="truncate font-semibold text-white">{row.source_name || row.source_id}</p>
-                    <TimeStamp value={row.timestamp_utc} mode="absolute" fallback="No timestamp" className="mt-1 block text-[11px] text-slate-500" />
+                    <TimeStamp value={row.timestamp_utc} mode="absolute" fallback="No timestamp" className="mt-1 block text-[11px] text-[var(--text-muted)]" />
                   </td>
                   <td>
                     <StatusBadge code={row.change_status || 'NOT_RUN'} />
                   </td>
                   <td><StatusBadge code={row.source_health_status || 'NOT_RUN'} /></td>
-                  <td className="text-slate-300">{row.extraction_quality ? String(row.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'}</td>
-                  <td className="sp-mono text-slate-400">{row.normalized_hash_short || 'not recorded'}</td>
+                  <td className="text-[var(--text-primary)]">{row.extraction_quality ? String(row.extraction_quality).toLowerCase().replace(/^./, c => c.toUpperCase()) : 'Unknown'}</td>
+                  <td className="sp-mono text-[var(--text-secondary)]">{row.normalized_hash_short || 'not recorded'}</td>
                   <td>
                     {row.pending_review ? (
                       <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-200">Pending</span>
@@ -463,12 +463,12 @@ export default function ReviewQueuePage() {
                       </span>
                     )}
                   </td>
-                  <td className="text-slate-400">{row.reviewer || '—'}</td>
+                  <td className="text-[var(--text-secondary)]">{row.reviewer || '—'}</td>
                   <td>
                     <div className="flex items-center gap-2">
-                      <a href="/app/evidence" className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">Evidence</a>
+                      <a href="/app/evidence" className="text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent)]">Evidence</a>
                       {row.official_url && (
-                        <a href={row.official_url} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-slate-300" title="Open official source">
+                        <a href={row.official_url} target="_blank" rel="noreferrer" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]" title="Open official source">
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
                       )}
@@ -482,9 +482,9 @@ export default function ReviewQueuePage() {
         </div>
       )}
 
-      <div className="flex items-start gap-2 rounded-lg border border-slate-800 bg-slate-950/35 px-3 py-3">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-500" />
-        <p className="text-xs leading-relaxed text-slate-500">
+      <div className="flex items-start gap-2 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-3">
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text-muted)]" />
+        <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
           Monitoring intelligence only. Not legal advice. The queue helps record human review decisions; it does not determine legal obligations or compliance outcomes.
         </p>
       </div>

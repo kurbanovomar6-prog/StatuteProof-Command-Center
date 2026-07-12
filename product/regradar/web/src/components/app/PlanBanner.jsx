@@ -13,12 +13,12 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
       <div className={`rounded-xl border p-4 mb-5 ${
         urgent
           ? 'border-amber-500/40 bg-amber-500/5'
-          : 'border-[#16D9F5]/20 bg-[#16D9F5]/5'
+          : 'border-[var(--trust-border)] bg-[var(--trust-badge)]'
       }`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
-              urgent ? 'bg-amber-500/20 text-amber-400' : 'bg-[#16D9F5]/10 text-[#16D9F5]'
+              urgent ? 'bg-amber-500/20 text-amber-400' : 'bg-[var(--trust-badge)] text-[var(--accent)]'
             }`}>
               {urgent ? <AlertTriangle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
             </div>
@@ -31,13 +31,13 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
                     urgent
                       ? 'border-amber-400/30 bg-amber-400/10 text-amber-300'
-                      : 'border-[#16D9F5]/30 bg-[#16D9F5]/10 text-[#16D9F5]'
+                      : 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]'
                   }`}>
                     {days_remaining} {days_remaining === 1 ? 'day' : 'days'} remaining
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed max-w-xl">
                 {trial_expired
                   ? 'Your source readiness review access has ended. Choose a plan to start monitored sources and evidence records.'
                   : 'Explore the workspace with sample evidence and source-readiness tools. Choose a plan to unlock monitored sources, weekly briefs, and custom source activation.'}
@@ -62,7 +62,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           </div>
         </div>
 
-        <div className="mt-3 pt-3 border-t border-slate-700/50 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="mt-3 pt-3 border-t border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: 'Current plan', value: displayName || 'Source Readiness Review' },
             { label: 'Live monitoring', value: 'Not included', muted: true },
@@ -70,8 +70,8 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
             { label: 'Next step', value: 'Choose your source pack' },
           ].map(({ label, value, muted }) => (
             <div key={label}>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-0.5">{label}</p>
-              <p className={`text-xs font-medium ${muted ? 'text-slate-400' : 'text-slate-200'}`}>{value}</p>
+              <p className="text-[10px] font-medium text-[var(--text-secondary)] mb-0.5">{label}</p>
+              <p className={`text-xs font-medium ${muted ? 'text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>{value}</p>
             </div>
           ))}
         </div>
@@ -98,7 +98,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
                 {status === 'active' ? 'Plan enabled' : 'Pending activation'}
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[var(--text-secondary)]">
               Your source pack is staged for validation. Live monitoring starts after source readiness confirmation.
             </p>
             {status !== 'active' && (
@@ -109,7 +109,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           </div>
         </div>
       </div>
-      <div className="mt-3 pt-3 border-t border-slate-700/50 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="mt-3 pt-3 border-t border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Current plan', value: displayName },
           { label: 'Source limit', value: sourceLimit > 100 ? 'Custom' : String(sourceLimit || '—') },
@@ -117,8 +117,8 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           { label: 'Evidence retention', value: retentionDays > 500 ? 'Custom' : retentionDays ? `${retentionDays} days` : '—' },
         ].map(({ label, value }) => (
           <div key={label}>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 mb-0.5">{label}</p>
-            <p className="text-xs font-medium text-slate-200">{value}</p>
+            <p className="text-[10px] font-medium text-[var(--text-secondary)] mb-0.5">{label}</p>
+            <p className="text-xs font-medium text-[var(--text-primary)]">{value}</p>
           </div>
         ))}
       </div>

@@ -4,9 +4,9 @@ import { CONTACT_EMAIL } from '../../data/constants'
 
 function Row({ label, value, highlight }) {
   return (
-    <div className={`flex items-center justify-between py-2.5 border-b border-slate-800/60 last:border-0 ${highlight ? 'text-[#16D9F5]' : ''}`}>
-      <span className="text-xs text-slate-400">{label}</span>
-      <span className={`text-xs font-medium ${highlight ? 'text-[#16D9F5]' : 'text-slate-200'}`}>{value}</span>
+    <div className={`flex items-center justify-between py-2.5 border-b border-[var(--border-muted)] last:border-0 ${highlight ? 'text-[var(--accent)]' : ''}`}>
+      <span className="text-xs text-[var(--text-secondary)]">{label}</span>
+      <span className={`text-xs font-medium ${highlight ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>{value}</span>
     </div>
   )
 }
@@ -47,7 +47,7 @@ export default function BillingPage({ planState }) {
       <div>
         <div className="sp-kicker mb-3">Manual activation</div>
         <h1 className="text-2xl font-semibold text-white mb-1">Plan & Billing</h1>
-        <p className="max-w-2xl text-sm text-slate-400">
+        <p className="max-w-2xl text-sm text-[var(--text-secondary)]">
           Founding pilots are manually activated after source readiness review. No payment method is stored,
           and Stripe self-serve checkout is not enabled for the first pilot cohort.
         </p>
@@ -57,14 +57,14 @@ export default function BillingPage({ planState }) {
       <div className="sp-panel p-5">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Current Plan</p>
+            <p className="text-xs font-semibold text-[var(--text-secondary)] mb-1">Current Plan</p>
             <h2 className="text-lg font-bold text-white">{display}</h2>
           </div>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
             status === 'active'
               ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
               : status === 'trial_active'
-              ? 'border-[#16D9F5]/30 bg-[#16D9F5]/10 text-[#16D9F5]'
+              ? 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]'
               : 'border-amber-400/30 bg-amber-400/10 text-amber-300'
           }`}>
             {statusLabel}
@@ -87,12 +87,12 @@ export default function BillingPage({ planState }) {
       </div>
 
       {/* Billing note */}
-      <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+      <div className="bg-[var(--bg-raised)] border border-[var(--border)] rounded-xl p-4">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
+          <ShieldCheck className="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-slate-200 mb-1">Billing is manually activated</p>
-            <p className="text-xs text-slate-400">
+            <p className="text-sm font-medium text-[var(--text-primary)] mb-1">Billing is manually activated</p>
+            <p className="text-xs text-[var(--text-secondary)]">
               No payment method is stored. During the founding pilot, billing is activated manually after source readiness review.
               Stripe billing can be connected later. You will receive advance notice before any charges.
             </p>
@@ -102,9 +102,9 @@ export default function BillingPage({ planState }) {
 
       {/* Upgrade CTA */}
       {(selectedPlan === 'evidence_preview' || selectedPlan === 'starter_pilot') ? (
-        <div className="bg-[#16D9F5]/5 border border-[#16D9F5]/20 rounded-xl p-4">
+        <div className="bg-[var(--trust-badge)] border border-[var(--trust-border)] rounded-xl p-4">
           <p className="text-sm font-semibold text-white mb-1">Upgrade to UAE Monitor</p>
-          <p className="text-xs text-slate-400 mb-3">
+          <p className="text-xs text-[var(--text-secondary)] mb-3">
             Source scope is activated from your validated monitoring profile, not a blanket source count.
             Includes high-risk review queue, weekly MLRO brief after setup, and 180-day evidence retention.
           </p>
@@ -125,7 +125,7 @@ export default function BillingPage({ planState }) {
         </div>
       ) : null}
 
-      <p className="text-xs text-slate-600 mt-5 text-center">
+      <p className="text-xs text-[var(--text-secondary)] mt-5 text-center">
         Not legal advice. For monitoring information only. StatuteProof does not determine compliance outcomes or prevent fines.
       </p>
     </div>

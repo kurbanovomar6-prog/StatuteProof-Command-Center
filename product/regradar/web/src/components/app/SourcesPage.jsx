@@ -31,7 +31,7 @@ const INTAKE_STATUS_COLOR = {
   NAV_SHELL_ONLY:        'text-rose-400',
   QUALITY_DROP:          'text-amber-400',
   NEEDS_SELECTOR_REVIEW: 'text-amber-400',
-  UNSUPPORTED:           'text-slate-400',
+  UNSUPPORTED:           'text-[var(--text-secondary)]',
   BLOCKED:               'text-rose-400',
   PASS:                  'text-emerald-400',
   NEEDS_ADAPTER:         'text-amber-400',
@@ -45,7 +45,7 @@ const INTAKE_STATUS_BG = {
   NAV_SHELL_ONLY:        'bg-rose-500/10 border-rose-500/20',
   QUALITY_DROP:          'bg-amber-500/10 border-amber-500/20',
   NEEDS_SELECTOR_REVIEW: 'bg-amber-500/10 border-amber-500/20',
-  UNSUPPORTED:           'bg-slate-700/50 border-slate-600',
+  UNSUPPORTED:           'bg-[var(--bg-tooltip)] border-[var(--border)]',
   BLOCKED:               'bg-rose-500/10 border-rose-500/20',
   PASS:                  'bg-emerald-500/10 border-emerald-500/20',
   NEEDS_ADAPTER:         'bg-amber-500/10 border-amber-500/20',
@@ -309,8 +309,8 @@ export default function SourcesPage({ onAddCustomSource }) {
   }
 
   const inputCls = field =>
-    `w-full bg-slate-900 border rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#16D9F5]/50 transition ${
-      formErrors[field] ? 'border-rose-500/60' : 'border-slate-700'
+    `w-full bg-[var(--bg-elevated)] border rounded-lg px-3 py-2 text-sm text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--trust-border)] transition ${
+      formErrors[field] ? 'border-rose-500/60' : 'border-[var(--border)]'
     }`
 
   function sourceStatusLabel(status) {
@@ -353,7 +353,7 @@ export default function SourcesPage({ onAddCustomSource }) {
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
           <h1 className="text-lg font-bold text-white mb-1">Source Map</h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[var(--text-secondary)]">
             {profile.markets.length > 0
               ? `Based on your saved profile: ${profile.markets.join(', ')}${profile.topics.length ? ` · ${profile.topics.slice(0, 4).join(', ')}` : ''}`
               : 'Profile source map preview — select markets in Settings to filter.'}
@@ -368,7 +368,7 @@ export default function SourcesPage({ onAddCustomSource }) {
               setShowModal(true)
             }
           }}
-          className="flex items-center gap-1.5 bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add custom source
@@ -376,11 +376,11 @@ export default function SourcesPage({ onAddCustomSource }) {
       </div>
 
       {/* Info banner */}
-      <div className="bg-[#0D1B2E] border border-cyan-400/20 rounded-xl p-5 mb-4">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--trust-border)] rounded-xl p-5 mb-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white mb-1">Sources are checked before monitoring activates.</h2>
-            <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-3xl">
               StatuteProof tests public official sources for accessibility, extraction quality, and content depth.
               Sources are marked fresh-alert eligible only when meaningful regulatory text is extracted and hashed.
               Custom sources are saved for readiness review — monitoring is not activated automatically.
@@ -402,8 +402,8 @@ export default function SourcesPage({ onAddCustomSource }) {
             onClick={() => setFilter(f)}
             className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
               filter === f
-                ? 'bg-[#16D9F5]/10 text-[#16D9F5] border-[#16D9F5]/30'
-                : 'text-slate-400 border-slate-700 hover:border-slate-600 hover:text-slate-300'
+                ? 'bg-[var(--trust-badge)] text-[var(--accent)] border-[var(--trust-border)]'
+                : 'text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--border)] hover:text-[var(--text-primary)]'
             }`}
           >
             {f}
@@ -412,11 +412,11 @@ export default function SourcesPage({ onAddCustomSource }) {
       </div>
 
       {/* Table */}
-      <div className="bg-[#0D1B2E] border border-slate-800 rounded-xl overflow-hidden">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl overflow-hidden">
         {sourcesLoading ? (
           <div className="space-y-0 p-4" aria-label="Loading source status">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 border-b border-slate-800/60 py-3 last:border-b-0">
+              <div key={i} className="flex items-center gap-4 border-b border-[var(--border-muted)] py-3 last:border-b-0">
                 <div className="sp-skeleton h-4 w-1/3 rounded" />
                 <div className="sp-skeleton h-4 w-24 rounded" />
                 <div className="sp-skeleton h-5 w-32 rounded-full" />
@@ -445,39 +445,39 @@ export default function SourcesPage({ onAddCustomSource }) {
                 <tr key={`${s.id || s.url || 'source'}-${index}`} className="transition-colors">
                   <td>
                     <p className="truncate font-medium text-white" title={`${s.name} — ${s.url}`}>{s.name}</p>
-                    <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                    <p className="mt-0.5 truncate text-[11px] text-[var(--text-muted)]">
                       {s.market}
-                      {s.userSource && <span className="ml-2 rounded-full border border-[#16D9F5]/30 px-1.5 py-0.5 text-[10px] text-[#16D9F5]">User source</span>}
+                      {s.userSource && <span className="ml-2 rounded-full border border-[var(--trust-border)] px-1.5 py-0.5 text-[10px] text-[var(--accent)]">User source</span>}
                     </p>
                   </td>
-                  <td className="truncate text-slate-400" title={s.category}>{s.category}</td>
+                  <td className="truncate text-[var(--text-secondary)]" title={s.category}>{s.category}</td>
                   <td>
                     <StatusBadge
                       code={sourceStatusLabel(s.status)}
                       explainSuffix={s.remediationReason ? `Note: ${s.remediationReason}` : ''}
                     />
                   </td>
-                  <td className="text-slate-400">{String(s.extraction).toLowerCase().replace(/^./, c => c.toUpperCase())}</td>
-                  <td className="text-slate-500">
+                  <td className="text-[var(--text-secondary)]">{String(s.extraction).toLowerCase().replace(/^./, c => c.toUpperCase())}</td>
+                  <td className="text-[var(--text-muted)]">
                     {s.userSource
                       ? <span>{s.lastChecked || 'Saved for validation'}</span>
                       : <TimeStamp value={s.lastChecked} fallback="Not run yet" />}
                   </td>
-                  <td className="text-slate-500">
+                  <td className="text-[var(--text-muted)]">
                     <TimeStamp value={s.lastEvidenceAt} fallback="No evidence yet" mode="relative" />
-                    <div className="mt-1 flex items-center gap-1 truncate font-mono text-[10px] text-slate-600" title={s.normalizedHash ? `Normalized content hash: ${s.normalizedHash}` : 'No hash recorded yet'}>
+                    <div className="mt-1 flex items-center gap-1 truncate font-mono text-[10px] text-[var(--text-muted)]" title={s.normalizedHash ? `Normalized content hash: ${s.normalizedHash}` : 'No hash recorded yet'}>
                       <Hash className="h-3 w-3 flex-shrink-0" />
                       <span className="truncate">{shortHash(s.normalizedHash)}</span>
                     </div>
                   </td>
                   <td>
                     {s.userSource ? (
-                      <span className="text-[11px] text-slate-500">Validation pending</span>
+                      <span className="text-[11px] text-[var(--text-muted)]">Validation pending</span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => openTimeline(s)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--border)] hover:text-white"
                       >
                         <History className="h-3.5 w-3.5" />
                         Timeline ({s.timelineEventCount})
@@ -497,22 +497,22 @@ export default function SourcesPage({ onAddCustomSource }) {
       </div>
 
       {timelineSource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="max-h-[86vh] w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-700 bg-[#0D1B2E] shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(5,11,21,0.82)] p-4">
+          <div className="max-h-[86vh] w-full max-w-3xl overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-[var(--border-muted)] px-5 py-4">
               <div>
                 <h3 className="text-sm font-semibold text-white">Source health timeline</h3>
-                <p className="mt-1 text-xs text-slate-400">{timelineSource.name}</p>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">{timelineSource.name}</p>
               </div>
-              <button onClick={() => setTimelineSource(null)} className="text-slate-500 hover:text-white">
+              <button onClick={() => setTimelineSource(null)} className="text-[var(--text-muted)] hover:text-white">
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="max-h-[70vh] overflow-y-auto px-5 py-4">
               {timelineLoading ? (
                 <div className="py-10 text-center">
-                  <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-[#16D9F5]" />
-                  <p className="text-sm text-slate-400">Loading recorded timeline events…</p>
+                  <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-[var(--accent)]" />
+                  <p className="text-sm text-[var(--text-secondary)]">Loading recorded timeline events…</p>
                 </div>
               ) : timelineError ? (
                 <div className="rounded-lg border border-amber-400/25 bg-amber-400/5 px-4 py-3 text-xs text-amber-300">
@@ -520,17 +520,17 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
               ) : timelineData?.events?.length ? (
                 <div className="space-y-3">
-                  <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 text-xs text-cyan-100">
+                  <div className="rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3 py-2 text-xs text-[var(--accent)]">
                     {timelineData.source_health_status}: {timelineData.message}
                   </div>
                   {timelineData.events.slice().reverse().map(event => (
-                    <div key={event.event_id} className="rounded-lg border border-slate-800 bg-slate-950/35 px-4 py-3">
+                    <div key={event.event_id} className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-4 py-3">
                       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                         <span className="text-xs font-bold text-white">{String(event.event_type || '').replace(/_/g, ' ')}</span>
-                        <TimeStamp value={event.timestamp} mode="absolute" fallback="Timestamp not recorded" className="text-[11px] text-slate-500" />
+                        <TimeStamp value={event.timestamp} mode="absolute" fallback="Timestamp not recorded" className="text-[11px] text-[var(--text-muted)]" />
                       </div>
-                      <p className="text-xs leading-relaxed text-slate-300">{event.customer_safe_message}</p>
-                      <div className="mt-2 grid gap-2 text-[11px] text-slate-500 sm:grid-cols-2">
+                      <p className="text-xs leading-relaxed text-[var(--text-primary)]">{event.customer_safe_message}</p>
+                      <div className="mt-2 grid gap-2 text-[11px] text-[var(--text-muted)] sm:grid-cols-2">
                         <span>Health: {event.source_health_status || 'not recorded'}</span>
                         <span>Hash: {shortHash(event.normalized_hash)}</span>
                         <span className="truncate">Proof: {event.proof_path || 'not linked'}</span>
@@ -551,14 +551,14 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
               ) : (
                 <div className="py-10 text-center">
-                  <History className="mx-auto mb-3 h-5 w-5 text-slate-500" />
-                  <p className="font-medium text-slate-300">No timeline data yet</p>
-                  <p className="mt-2 text-sm text-slate-500">
+                  <History className="mx-auto mb-3 h-5 w-5 text-[var(--text-muted)]" />
+                  <p className="font-medium text-[var(--text-primary)]">No timeline data yet</p>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">
                     No monitoring history has been recorded yet. StatuteProof is not showing sample timeline events in this authenticated view.
                   </p>
                 </div>
               )}
-              <p className="mt-4 border-t border-slate-800 pt-3 text-[10px] text-slate-600">
+              <p className="mt-4 border-t border-[var(--border-muted)] pt-3 text-[10px] text-[var(--text-secondary)]">
                 Monitoring intelligence only. Not legal advice. Hash drift and source-health events require human review before customer conclusions.
               </p>
             </div>
@@ -568,13 +568,13 @@ export default function SourcesPage({ onAddCustomSource }) {
 
       {/* Add source modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0D1B2E] border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl">
+        <div className="fixed inset-0 bg-[rgba(5,11,21,0.82)] flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl w-full max-w-lg shadow-2xl">
 
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-muted)]">
               <h3 className="text-sm font-semibold text-white">Test Custom Source</h3>
-              <button onClick={() => { setShowModal(false); resetModal() }} className="text-slate-500 hover:text-white">
+              <button onClick={() => { setShowModal(false); resetModal() }} className="text-[var(--text-muted)] hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -586,7 +586,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                 <p className="text-sm font-semibold text-white mb-1">
                   Source saved for validation.
                 </p>
-                <p className="text-xs text-slate-400 mb-3">
+                <p className="text-xs text-[var(--text-secondary)] mb-3">
                   The source appears in your source map. Monitoring activates only after evidence validation is complete.
                 </p>
                 {saveError && (
@@ -594,13 +594,13 @@ export default function SourcesPage({ onAddCustomSource }) {
                     {saveError}
                   </p>
                 )}
-                <div className="text-xs text-slate-500 bg-slate-800/50 rounded-lg px-3 py-2 mb-4 text-left">
-                  <p className="font-medium text-slate-400 mb-1">Evidence note</p>
+                <div className="text-xs text-[var(--text-muted)] bg-[var(--bg-raised)] rounded-lg px-3 py-2 mb-4 text-left">
+                  <p className="font-medium text-[var(--text-secondary)] mb-1">Evidence note</p>
                   <p>This test met the readiness threshold without writing an evidence record. A full evidence record with hash, snapshot, and proof artifact is created during the first scheduled monitoring run.</p>
                 </div>
                 <button
                   onClick={() => { setShowModal(false); resetModal() }}
-                  className="text-xs font-medium text-[#16D9F5] border border-[#16D9F5]/30 hover:border-[#16D9F5]/60 px-4 py-2 rounded-lg transition-colors"
+                  className="text-xs font-medium text-[var(--accent)] border border-[var(--trust-border)] hover:border-[var(--trust-border)] px-4 py-2 rounded-lg transition-colors"
                 >
                   Close
                 </button>
@@ -610,8 +610,8 @@ export default function SourcesPage({ onAddCustomSource }) {
             {/* PHASE: saving */}
             {testPhase === 'saving' && (
               <div className="px-6 py-8 text-center">
-                <Loader2 className="w-10 h-10 text-[#16D9F5] animate-spin mx-auto mb-3" />
-                <p className="text-sm text-slate-300">Saving source…</p>
+                <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mx-auto mb-3" />
+                <p className="text-sm text-[var(--text-primary)]">Saving source…</p>
               </div>
             )}
 
@@ -620,56 +620,56 @@ export default function SourcesPage({ onAddCustomSource }) {
               <div className="px-6 py-5 space-y-4">
 
                 {/* Status banner */}
-                <div className={`flex items-start gap-3 p-4 rounded-xl border ${INTAKE_STATUS_BG[testResult.status] || 'bg-slate-700/50 border-slate-600'}`}>
+                <div className={`flex items-start gap-3 p-4 rounded-xl border ${INTAKE_STATUS_BG[testResult.status] || 'bg-[var(--bg-tooltip)] border-[var(--border)]'}`}>
                   {isGood    && <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />}
                   {isFailed  && <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />}
                   {needsWork && <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />}
                   <div className="min-w-0">
-                    <p className={`text-sm font-semibold mb-0.5 ${INTAKE_STATUS_COLOR[testResult.status] || 'text-slate-300'}`}>
+                    <p className={`text-sm font-semibold mb-0.5 ${INTAKE_STATUS_COLOR[testResult.status] || 'text-[var(--text-primary)]'}`}>
                       {statusLabel}
                     </p>
                     {isGood && !testResult.evidence_written && (
-                      <p className="text-xs text-slate-400 leading-relaxed">
+                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                         Threshold met — save required for evidence record.
                         Evidence hash, snapshot, and proof artifact are created during the first monitoring run.
                       </p>
                     )}
                     {(testResult.failure_reason) && (
-                      <p className="text-xs text-slate-400 leading-relaxed">{testResult.failure_reason}</p>
+                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{testResult.failure_reason}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Remediation hint (when not good) */}
                 {!isGood && testResult.remediation_hint && (
-                  <div className="flex items-start gap-2 bg-slate-800/50 rounded-lg px-3 py-2.5 text-xs text-slate-300">
-                    <Info className="w-3.5 h-3.5 text-[#16D9F5] flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2 bg-[var(--bg-raised)] rounded-lg px-3 py-2.5 text-xs text-[var(--text-primary)]">
+                    <Info className="w-3.5 h-3.5 text-[var(--accent)] flex-shrink-0 mt-0.5" />
                     <span>{testResult.remediation_hint}</span>
                   </div>
                 )}
 
                 {/* Metric grid */}
                 <div className="grid grid-cols-2 gap-2.5 text-xs">
-                  <div className="bg-slate-900 rounded-lg px-3 py-2.5">
-                    <p className="text-slate-500 mb-0.5">Normalized chars</p>
-                    <p className="text-slate-200 font-medium">{(testResult.chars || 0).toLocaleString()}</p>
+                  <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+                    <p className="text-[var(--text-muted)] mb-0.5">Normalized chars</p>
+                    <p className="text-[var(--text-primary)] font-medium">{(testResult.chars || 0).toLocaleString()}</p>
                   </div>
-                  <div className="bg-slate-900 rounded-lg px-3 py-2.5">
-                    <p className="text-slate-500 mb-0.5">Quality</p>
-                    <p className={`font-medium ${testResult.quality === 'GOOD' ? 'text-emerald-400' : testResult.quality === 'ACCEPTABLE' ? 'text-amber-400' : 'text-slate-400'}`}>
+                  <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+                    <p className="text-[var(--text-muted)] mb-0.5">Quality</p>
+                    <p className={`font-medium ${testResult.quality === 'GOOD' ? 'text-emerald-400' : testResult.quality === 'ACCEPTABLE' ? 'text-amber-400' : 'text-[var(--text-secondary)]'}`}>
                       {testResult.quality || '—'}
                     </p>
                   </div>
                   {testResult.extraction_method && (
-                    <div className="bg-slate-900 rounded-lg px-3 py-2.5">
-                      <p className="text-slate-500 mb-0.5">Extraction</p>
-                      <p className="text-slate-200 font-medium truncate">{testResult.extraction_method}</p>
+                    <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+                      <p className="text-[var(--text-muted)] mb-0.5">Extraction</p>
+                      <p className="text-[var(--text-primary)] font-medium truncate">{testResult.extraction_method}</p>
                     </div>
                   )}
                   {testResult.normalized_hash && (
-                    <div className="bg-slate-900 rounded-lg px-3 py-2.5">
-                      <p className="text-slate-500 mb-0.5">Content hash</p>
-                      <p className="text-slate-200 font-mono font-medium">{testResult.normalized_hash}…</p>
+                    <div className="bg-[var(--bg-elevated)] rounded-lg px-3 py-2.5">
+                      <p className="text-[var(--text-muted)] mb-0.5">Content hash</p>
+                      <p className="text-[var(--text-primary)] font-mono font-medium">{testResult.normalized_hash}…</p>
                     </div>
                   )}
                 </div>
@@ -687,7 +687,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                 )}
 
                 {/* Evidence note */}
-                <div className="bg-slate-800/40 rounded-lg px-3 py-2.5 text-xs text-slate-500 flex items-start gap-2">
+                <div className="bg-[var(--bg-raised)] rounded-lg px-3 py-2.5 text-xs text-[var(--text-muted)] flex items-start gap-2">
                   <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                   <span>
                     {canSaveForValidation
@@ -703,9 +703,9 @@ export default function SourcesPage({ onAddCustomSource }) {
                       type="checkbox"
                       checked={legalConfirmed}
                       onChange={e => setLegalConfirmed(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded border-slate-600 bg-slate-900 text-[#16D9F5] cursor-pointer"
+                      className="mt-0.5 w-4 h-4 rounded border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--accent)] cursor-pointer"
                     />
-                    <span className="text-xs text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">
+                    <span className="text-xs text-[var(--text-secondary)] leading-relaxed group-hover:text-[var(--text-primary)] transition-colors">
                       I confirm this is a publicly accessible official source, I am authorized to monitor it, and I understand that StatuteProof monitoring is for information only and does not constitute legal advice.
                     </span>
                   </label>
@@ -715,7 +715,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => { setTestPhase('idle'); setTestResult(null); setLegalConfirmed(false) }}
-                    className="text-xs font-medium text-slate-400 border border-slate-700 hover:border-slate-600 py-2 px-4 rounded-lg transition-colors"
+                    className="text-xs font-medium text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border)] py-2 px-4 rounded-lg transition-colors"
                   >
                     Test another
                   </button>
@@ -725,8 +725,8 @@ export default function SourcesPage({ onAddCustomSource }) {
                       disabled={!saveEnabled}
                       className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${
                         saveEnabled
-                          ? 'bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F]'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                          ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)]'
+                          : 'bg-[var(--bg-raised)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border)]'
                       }`}
                     >
                       {saveEnabled ? 'Save for validation' : 'Confirm above to save'}
@@ -734,7 +734,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                   ) : (
                     <button
                       onClick={() => { setShowModal(false); resetModal() }}
-                      className="flex-1 text-xs font-medium text-slate-400 border border-slate-700 hover:border-slate-600 py-2 px-4 rounded-lg transition-colors"
+                      className="flex-1 text-xs font-medium text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border)] py-2 px-4 rounded-lg transition-colors"
                     >
                       Close
                     </button>
@@ -747,15 +747,15 @@ export default function SourcesPage({ onAddCustomSource }) {
             {testPhase === 'testing' && (
               <div className="px-6 py-8">
                 <div className="flex items-center gap-2 mb-5">
-                  <Loader2 className="w-4 h-4 text-[#16D9F5] animate-spin flex-shrink-0" />
+                  <Loader2 className="w-4 h-4 text-[var(--accent)] animate-spin flex-shrink-0" />
                   <p className="text-sm font-medium text-white">Testing source…</p>
                 </div>
                 <div className="space-y-2">
                   {TEST_STEPS.map((step, i) => (
                     <div key={step} className={`flex items-center gap-2.5 text-xs transition-colors ${
                       i < stepIndex  ? 'text-emerald-400' :
-                      i === stepIndex ? 'text-[#16D9F5]' :
-                      'text-slate-600'
+                      i === stepIndex ? 'text-[var(--accent)]' :
+                      'text-[var(--text-muted)]'
                     }`}>
                       {i < stepIndex  && <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />}
                       {i === stepIndex && <Loader2 className="w-3.5 h-3.5 flex-shrink-0 animate-spin" />}
@@ -764,7 +764,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                     </div>
                   ))}
                 </div>
-                <p className="mt-5 text-xs text-slate-600">
+                <p className="mt-5 text-xs text-[var(--text-muted)]">
                   Only public sources are tested. Login, CAPTCHA, and private portals are not supported.
                 </p>
               </div>
@@ -773,13 +773,13 @@ export default function SourcesPage({ onAddCustomSource }) {
             {/* PHASE: idle (form) */}
             {testPhase === 'idle' && (
               <div className="px-6 py-4 space-y-3">
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-secondary)]">
                   Test whether a public regulatory source is accessible for monitoring.
                   Only public http(s) sources are supported.
                 </p>
 
                 <div>
-                  <label htmlFor="custom-source-url" className="block text-xs text-slate-400 mb-1.5">Source URL *</label>
+                  <label htmlFor="custom-source-url" className="block text-xs text-[var(--text-secondary)] mb-1.5">Source URL *</label>
                   <input
                     id="custom-source-url"
                     type="url"
@@ -792,12 +792,12 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
 
                 <div>
-                  <label htmlFor="custom-source-market" className="block text-xs text-slate-400 mb-1.5">Market *</label>
+                  <label htmlFor="custom-source-market" className="block text-xs text-[var(--text-secondary)] mb-1.5">Market *</label>
                   <select
                     id="custom-source-market"
                     value={form.market}
                     onChange={e => { setForm(f => ({ ...f, market: e.target.value })); setFormErrors(er => ({ ...er, market: '' })) }}
-                    className={`${inputCls('market')} ${!form.market ? 'text-slate-500' : ''}`}
+                    className={`${inputCls('market')} ${!form.market ? 'text-[var(--text-muted)]' : ''}`}
                   >
                     <option value="">Select market…</option>
                     {MARKETS.map(m => <option key={m} value={m}>{m}</option>)}
@@ -806,12 +806,12 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
 
                 <div>
-                  <label htmlFor="custom-source-category" className="block text-xs text-slate-400 mb-1.5">Category *</label>
+                  <label htmlFor="custom-source-category" className="block text-xs text-[var(--text-secondary)] mb-1.5">Category *</label>
                   <select
                     id="custom-source-category"
                     value={form.category}
                     onChange={e => { setForm(f => ({ ...f, category: e.target.value })); setFormErrors(er => ({ ...er, category: '' })) }}
-                    className={`${inputCls('category')} ${!form.category ? 'text-slate-500' : ''}`}
+                    className={`${inputCls('category')} ${!form.category ? 'text-[var(--text-muted)]' : ''}`}
                   >
                     <option value="">Select category…</option>
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -820,7 +820,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                 </div>
 
                 <div>
-                  <label htmlFor="custom-source-notes" className="block text-xs text-slate-400 mb-1.5">Notes (optional)</label>
+                  <label htmlFor="custom-source-notes" className="block text-xs text-[var(--text-secondary)] mb-1.5">Notes (optional)</label>
                   <textarea
                     id="custom-source-notes"
                     rows={2}
@@ -837,7 +837,7 @@ export default function SourcesPage({ onAddCustomSource }) {
                   </p>
                 )}
 
-                <div className="pt-1 bg-slate-800/30 rounded-lg px-3 py-2.5 text-xs text-slate-500">
+                <div className="pt-1 bg-[var(--bg-raised)] rounded-lg px-3 py-2.5 text-xs text-[var(--text-muted)]">
                   StatuteProof only monitors publicly accessible official sources.
                   Login-protected portals, CAPTCHA-gated sites, and private networks are not supported.
                   Testing does not write evidence records.
@@ -846,13 +846,13 @@ export default function SourcesPage({ onAddCustomSource }) {
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => { setShowModal(false); resetModal() }}
-                    className="flex-1 text-xs font-medium text-slate-400 border border-slate-700 hover:border-slate-600 py-2 rounded-lg transition-colors"
+                    className="flex-1 text-xs font-medium text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border)] py-2 rounded-lg transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleTest}
-                    className="flex-1 text-xs font-semibold bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] py-2 rounded-lg transition-colors"
+                    className="flex-1 text-xs font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] py-2 rounded-lg transition-colors"
                   >
                     Test source
                   </button>

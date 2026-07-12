@@ -6,12 +6,12 @@ export default function ErrorState({ title = 'Could not load this data.', detail
     <div className={`px-5 py-10 text-center ${className}`}>
       <AlertTriangle className="mx-auto mb-3 h-5 w-5 text-amber-400" aria-hidden="true" />
       <p className="text-sm font-medium text-amber-300">{title}</p>
-      {detail && <p className="mx-auto mt-1 max-w-md text-xs text-slate-500">{detail}</p>}
+      {detail && <p className="mx-auto mt-1 max-w-md text-xs text-[var(--text-muted)]">{detail}</p>}
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:border-[var(--trust-border)] hover:text-white"
         >
           <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />
           Retry
