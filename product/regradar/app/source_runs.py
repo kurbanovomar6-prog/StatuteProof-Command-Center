@@ -112,7 +112,11 @@ def _chain_payload(record: dict) -> str:
     any machine and across Python versions.
     """
     payload = {field: record.get(field) for field in _CHAIN_FIELDS}
-    return json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    # allow_nan=False for parity with the evidence/decision self-seal
+    # (record_hashing): NaN/Infinity serialize as non-RFC-8259 tokens no external
+    # re-hasher can reproduce, so the seal must fail loudly rather than mint an
+    # unverifiable trail hash (code review 2026-07-13).
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True, allow_nan=False)
 
 
 def compute_record_hash(record: dict, prev_record_hash: str) -> str:

@@ -273,3 +273,15 @@ def test_preview_match_carries_proof_and_fail_soft(isolated_db, monkeypatch):
     assert orphan_match["proof"] is None
     # Fail-soft: the orphan alert still scored and flowed through routing.
     assert "score" in orphan_match and "matched" in orphan_match
+
+
+def test_safe_segment_re_rejects_all_dot_segments():
+    # A crafted source_id/run_id must never be a traversal step in the evidence
+    # glob — the all-dots guard matches the sibling evidence_pack/evidence_room
+    # sites (code review 2026-07-13).
+    from app.alert_proof import _SAFE_SEGMENT_RE
+
+    for bad in (".", "..", "...", "...."):
+        assert not _SAFE_SEGMENT_RE.match(bad), bad
+    for ok in ("AE-cbuae-rulebook", "intake-20260712T090000Z", "a.b_c-1"):
+        assert _SAFE_SEGMENT_RE.match(ok), ok

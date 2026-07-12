@@ -43,7 +43,10 @@ logger = logging.getLogger(__name__)
 # Path segments interpolated into the evidence glob must be plain directory
 # names — no separators, traversal, or glob metacharacters. Matches the real
 # id charsets (source ids: "AE-adgm-fsra-rulebooks"; run ids: uuid hex[:8]).
-_SAFE_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+# Reject an all-dots segment ("." / ".." / "...") so a crafted source_id/run_id
+# can never become a traversal step in the evidence glob — matching the sibling
+# guards in evidence_pack / evidence_room (code review 2026-07-13).
+_SAFE_SEGMENT_RE = re.compile(r"^(?!\.+$)[A-Za-z0-9._-]+$")
 
 # Snapshot artifact keys whose parent directory is the run id — the layout the
 # pipeline writes: data/source_snapshots/<date>/<MARKET>/<source_id>/<run_id>/<file>
