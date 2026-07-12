@@ -29,6 +29,17 @@ Block / low-content detection heuristics:
   - HTML shorter than 1 000 chars (raw)
   - Body contains known JS-gate phrases
   - Visible extracted text shorter than MIN_EXTRACTED_TEXT_CHARS (500)
+
+SSRF guard (both tiers):
+  Tier 1 (requests) is guarded per-hop by app.adapters.base._guarded_get:
+  every redirect hop is resolved and IP-pinned before connecting, defeating
+  DNS-rebind. Tier 2 (Playwright/Chromium) cannot be IP-pinned the same way
+  from the Python side, so it is guarded instead by intercepting every
+  request the browser makes — navigation, each redirect hop, every
+  subresource, AND WebSocket connections opened by the page's own JS — via
+  context.route() / context.route_web_socket() and re-using the EXACT SAME
+  host/IP-range validation (app.adapters.base._validate_fetch_target) — see
+  SSRF_RESIDUAL_RISK below for what this does and does not close.
 """
 
 import atexit
@@ -36,11 +47,12 @@ import logging
 import re
 import sys
 import threading
+from urllib.parse import urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
 from playwright.sync_api import Browser as PWBrowser, TimeoutError as PWTimeout, sync_playwright
 
-from app.adapters.base import fetch_text_bounded
+from app.adapters.base import _validate_fetch_target, fetch_text_bounded_status
 from app.config import HTTP_TIMEOUT_S, PAGE_TIMEOUT_MS, REQUESTS_UA
 
 logger = logging.getLogger(__name__)
@@ -191,7 +203,7 @@ def is_low_content_html(html: str) -> bool:
 _MAX_RESPONSE_BYTES = 10 * 1024 * 1024  # 10 MB hard limit
 
 
-def _fetch_via_requests(url: str) -> str | None:
+def _fetch_via_requests(url: str, status_out: dict | None = None) -> str | None:
     """
     Attempt a plain HTTP GET with a bounded, streamed read.
 
@@ -203,8 +215,14 @@ def _fetch_via_requests(url: str) -> str | None:
     DECOMPRESSED size exceeds 10 MB, bounding peak memory even against
     decompression bombs (Content-Length reflects wire size, not inflated
     size, so a post-hoc check would be too late).
+
+    ``status_out``, when provided, is a caller-owned dict that receives the
+    real HTTP status code under ``"http_status"`` (None when the request
+    failed entirely, including an SSRF-guard block) — this is how callers
+    (e.g. source_intake.run_source_intake) surface the status that
+    map_source_health_status's http_status>=400 gate checks.
     """
-    body = fetch_text_bounded(
+    status, body = fetch_text_bounded_status(
         url,
         headers={
             "User-Agent":      REQUESTS_UA,
@@ -214,12 +232,212 @@ def _fetch_via_requests(url: str) -> str | None:
         max_bytes=_MAX_RESPONSE_BYTES,
         label="Tier 1 (requests)",
     )
+    if status_out is not None:
+        status_out["http_status"] = status
+
     if body is None:
         print("  Tier 1 (requests) failed — escalating to Playwright", file=sys.stderr, flush=True)
         return None
 
     logger.info("Tier 1 (requests) HTTP OK — %d chars from %s", len(body), url)
     return body
+
+
+# ── Tier 2 SSRF guard ────────────────────────────────────────────────────────
+#
+# app.adapters.base._guarded_get is the requests-tier SSRF defence: every
+# redirect hop is resolved and vetted BEFORE connecting, and the vetted IP is
+# pinned so a request cannot be re-resolved (DNS-rebound) to an internal
+# address between the check and the connect. Chromium — driven via Playwright
+# — does its own DNS resolution and follows redirects internally; there is no
+# Playwright API that lets Python force the browser's socket to dial a
+# specific, pre-vetted IP the way requests.Session + a custom HTTPAdapter can.
+# IP pinning is therefore NOT achievable for this tier.
+#
+# What IS achievable: context.route() lets us intercept EVERY request
+# Chromium is about to fire — the initial navigation, each individual
+# redirect hop (Chromium emits a fresh request event per hop), and every
+# subresource — before it connects. Each intercepted request's host is
+# vetted with the SAME validator the requests tier uses
+# (app.adapters.base._validate_fetch_target: scheme allowlist, hostname
+# resolution, and rejection of loopback/private/link-local/multicast/
+# metadata addresses), and the request is aborted if the check fails.
+#
+# SSRF_RESIDUAL_RISK documents precisely what this does not close: a fast
+# DNS-rebinding attack, where the attacker's resolver answers with a public
+# IP for our synchronous check and then rebinds the SAME hostname to a
+# private IP a few milliseconds later (before Chromium performs its own,
+# separate DNS resolution at connect time), is not fully defeated — because
+# we cannot pin the IP Chromium actually dials. A literal-IP attack (the nav
+# target or a redirect Location IS a reserved/metadata IP) and a
+# stable-DNS attack (a hostname that already resolves privately at the time
+# of the request) are both blocked, matching the finding's fallback
+# requirement.
+SSRF_RESIDUAL_RISK = (
+    "Playwright (Tier 2) SSRF guard: every navigation, redirect hop, "
+    "subresource request, and WebSocket connection is validated against the "
+    "same private/loopback/link-local/multicast/reserved/metadata blocklist "
+    "the requests tier uses (app.adapters.base._validate_fetch_target), and "
+    "the final landed URL is re-validated after navigation completes. This "
+    "blocks (a) direct navigation or redirect to a literal reserved-range/"
+    "metadata IP, (b) a hostname that currently resolves to a non-public "
+    "address for any of those request types, and (c) a page's own "
+    "JavaScript opening a raw WebSocket to an internal host (verified: "
+    "page.route() does NOT intercept WebSocket upgrades — a separate "
+    "context.route_web_socket() handler is required and is installed here). "
+    "It does NOT pin the vetted IP: Chromium performs its own DNS resolution "
+    "at connect time, milliseconds after our check runs in a separate "
+    "process, so a fast DNS-rebinding attack (public answer at check-time, "
+    "private answer at connect-time, e.g. TTL=0) is not fully defeated for "
+    "this tier — unlike Tier 1 (requests), which pins the vetted IP and is "
+    "fully rebind-proof. This is a known, intentional gap: full per-hop IP "
+    "pinning is not achievable through Playwright's public "
+    "route-interception API. Also out of scope: any Playwright-driven "
+    "fetch path outside app/scraper.py (e.g. app/source_discovery.py's "
+    "capture_playwright_network_candidates, which creates its own browser "
+    "context) does not install this guard and was not touched by this fix."
+)
+
+# Non-network / browser-internal schemes that must never be run through the
+# fetch-target validator (which only understands http/https): blocking these
+# would break normal page rendering (inline data: images, blob: object URLs,
+# about:blank, Chromium's own error/interstitial pages) without adding any
+# SSRF protection, since none of them cause an outbound connection to an
+# attacker-influenced host.
+_SSRF_SAFE_SCHEMES = frozenset({"data", "blob", "about", "chrome-error", "chrome-extension", "chrome"})
+
+
+def _ssrf_guard_route(route, request) -> None:
+    """
+    context.route() handler — validate every request Chromium is about to
+    fire (navigation, each redirect hop, every subresource) before letting it
+    proceed. Mirrors app.adapters.base._validate_fetch_target exactly (same
+    scheme allowlist, same resolve-and-vet-every-IP check) so there is a
+    single source of truth for what counts as a safe fetch target. Never
+    raises internally — any unexpected error aborts the request rather than
+    risking a silent bypass.
+    """
+    url = request.url
+    try:
+        scheme = (urlsplit(url).scheme or "").lower()
+    except Exception:
+        scheme = ""
+
+    if scheme in _SSRF_SAFE_SCHEMES:
+        try:
+            route.continue_()
+        except Exception:
+            pass
+        return
+
+    try:
+        vetted = _validate_fetch_target(url)
+    except Exception:
+        vetted = None
+
+    if vetted is None:
+        logger.warning("Playwright SSRF guard: blocked request to %s", url)
+        try:
+            route.abort()
+        except Exception:
+            pass
+        return
+
+    try:
+        route.continue_()
+    except Exception:
+        pass
+
+
+def _ssrf_guard_websocket(ws) -> None:
+    """
+    context.route_web_socket() handler — WebSocket connections opened by a
+    page's own JavaScript (``new WebSocket(...)``) are a SEPARATE
+    interception surface from context.route(): Playwright does not run HTTP
+    request routes for the WebSocket upgrade handshake at all (verified
+    empirically against a real headless Chromium — a route("**/*") handler
+    never sees the request, and the target host receives a real TCP
+    connection with a genuine WS handshake). Without this handler, a
+    malicious or compromised source's page JS could pivot to an internal
+    host over a raw WebSocket, bypassing the HTTP-only guard above entirely.
+
+    _validate_fetch_target only understands http/https, so ws/wss are
+    translated to their http/https equivalent before vetting — the
+    underlying host/IP validation is identical, only the wire protocol
+    differs. A blocked target is left UNCONNECTED (connect_to_server() is
+    simply never called) rather than actively closed: closing from inside
+    this handler was observed, empirically, to hang browser/context
+    teardown on the installed Playwright version, whereas never connecting
+    at all completes cleanly and the target server receives no TCP
+    connection at all (also verified empirically).
+    """
+    url = ws.url
+    try:
+        parsed = urlsplit(url)
+        http_scheme = {"ws": "http", "wss": "https"}.get((parsed.scheme or "").lower())
+        if http_scheme is None:
+            return  # unrecognised scheme — leave unconnected
+        translated = urlunsplit((http_scheme, parsed.netloc, parsed.path, parsed.query, parsed.fragment))
+    except Exception:
+        return  # malformed URL — leave unconnected rather than risk a bypass
+
+    try:
+        vetted = _validate_fetch_target(translated)
+    except Exception:
+        vetted = None
+
+    if vetted is None:
+        logger.warning("Playwright SSRF guard: blocked WebSocket connection to %s", url)
+        return  # never connect — see docstring for why this doesn't call close()
+
+    try:
+        ws.connect_to_server()
+    except Exception:
+        pass
+
+
+def _install_ssrf_guard(context) -> None:
+    """
+    Wire the per-request SSRF guard onto every request the context makes —
+    both HTTP(S) requests (context.route) and WebSocket connections
+    (context.route_web_socket, a separate Playwright interception surface;
+    see _ssrf_guard_websocket).
+    """
+    context.route("**/*", _ssrf_guard_route)
+    context.route_web_socket("**/*", _ssrf_guard_websocket)
+
+
+def _final_url_is_safe(page) -> bool:
+    """
+    Defense-in-depth: re-validate the FINAL landed URL's host after
+    navigation completes.
+
+    The route guard above already vets every request before it fires, so in
+    the normal case this is redundant by construction. It exists as an
+    explicit backstop per the SSRF fix requirement, and as a cheap safety net
+    against any navigation path that does not surface as a routed request.
+    It does NOT close the DNS-rebind gap described in SSRF_RESIDUAL_RISK —
+    if Chromium already connected to a rebound private IP under a
+    still-public-looking hostname, page.url reflects the hostname, not the
+    IP actually dialled, and this check cannot detect that.
+    """
+    try:
+        final_url = page.url
+    except Exception:
+        return True  # cannot determine — do not block on an internal error
+
+    if not final_url or final_url == "about:blank":
+        return True
+
+    try:
+        scheme = (urlsplit(final_url).scheme or "").lower()
+    except Exception:
+        return True
+
+    if scheme in _SSRF_SAFE_SCHEMES or scheme not in ("http", "https"):
+        return True
+
+    return _validate_fetch_target(final_url) is not None
 
 
 # ── Tier 2: Playwright ────────────────────────────────────────────────────────
@@ -248,7 +466,7 @@ def _capture_page_content(page) -> str:
         return page.content()
 
 
-def _fetch_via_playwright(url: str) -> str:
+def _fetch_via_playwright(url: str, status_out: dict | None = None) -> str:
     """
     Launch headless Chromium and return the fully rendered HTML.
 
@@ -263,10 +481,20 @@ def _fetch_via_playwright(url: str) -> str:
       4. Always apply _PW_JS_SETTLE_MS after a clean networkidle to let
          any final JS rendering complete.
 
+    SSRF guard: the context has the per-request guard installed (see
+    _install_ssrf_guard / SSRF_RESIDUAL_RISK above) before any navigation is
+    attempted, and the final landed URL is re-validated after capture.
+
+    ``status_out``, when provided, receives the navigation response's HTTP
+    status under ``"http_status"`` (left untouched when Chromium does not
+    return a Response object for the main-frame navigation, e.g. a blocked
+    or same-document navigation).
+
     Raises
     ------
     TimeoutError  — Navigation failed entirely (not just networkidle timeout).
-    ValueError    — Playwright returned empty or tiny HTML.
+    ValueError    — Playwright returned empty or tiny HTML, or the
+                     navigation resolved to a non-public address.
     """
     print(f"  Playwright fallback triggered — {url}", file=sys.stderr, flush=True)
     logger.info("Tier 2 (Playwright) starting for %s", url)
@@ -277,12 +505,14 @@ def _fetch_via_playwright(url: str) -> str:
         locale="ru-RU",
         viewport={"width": 1280, "height": 900},
     )
+    _install_ssrf_guard(context)
     page = context.new_page()
 
     try:
         networkidle_ok = False
+        response = None
         try:
-            page.goto(url, timeout=PAGE_TIMEOUT_MS, wait_until="networkidle")
+            response = page.goto(url, timeout=PAGE_TIMEOUT_MS, wait_until="networkidle")
             networkidle_ok = True
             logger.debug("Playwright: networkidle achieved for %s", url)
         except PWTimeout:
@@ -306,6 +536,27 @@ def _fetch_via_playwright(url: str) -> str:
             page.wait_for_timeout(_PW_JS_SETTLE_MS)
 
         html = _capture_page_content(page)
+
+        if not _final_url_is_safe(page):
+            logger.warning(
+                "Tier 2 (Playwright): navigation resolved to a non-public "
+                "address for %s (final URL %s) — rejecting",
+                url, getattr(page, "url", "?"),
+            )
+            raise ValueError(
+                f"Playwright navigation resolved to a non-public address for {url}"
+            )
+
+        # Only record the status once the content that produced it is the
+        # content we are actually about to return (i.e. past the safety
+        # gate above) — a status set before an early raise would misattribute
+        # a rejected navigation's status to whatever fallback content the
+        # caller ends up using instead.
+        if status_out is not None and response is not None:
+            try:
+                status_out["http_status"] = response.status
+            except Exception:
+                pass
 
     except PWTimeout as exc:
         raise TimeoutError(
@@ -336,7 +587,7 @@ def _fetch_via_playwright(url: str) -> str:
 
 # ── public API ────────────────────────────────────────────────────────────────
 
-def fetch_page(url: str) -> str:
+def fetch_page(url: str, *, status_out: dict | None = None) -> str:
     """
     Fetch `url` and return raw HTML.
 
@@ -353,13 +604,17 @@ def fetch_page(url: str) -> str:
             - If Tier 1 had any HTML   → return it (best-effort).
             - Otherwise                → raise.
 
+    ``status_out``, when provided, is a caller-owned dict that receives the
+    real HTTP status of whichever tier's content is actually returned, under
+    ``"http_status"``.
+
     Raises
     ------
     TimeoutError  — Playwright tier timed out and no Tier 1 fallback.
     ValueError    — Both tiers returned unusable content.
     """
     # ── Step 1: Tier 1 ────────────────────────────────────────────────
-    requests_html = _fetch_via_requests(url)
+    requests_html = _fetch_via_requests(url, status_out=status_out)
 
     if requests_html is not None:
         if not is_low_content_html(requests_html):
@@ -379,7 +634,7 @@ def fetch_page(url: str) -> str:
 
     # ── Step 2: Tier 2 ────────────────────────────────────────────────
     try:
-        return _fetch_via_playwright(url)
+        return _fetch_via_playwright(url, status_out=status_out)
 
     except (TimeoutError, ValueError, Exception) as exc:
         if requests_html is not None:
@@ -392,6 +647,11 @@ def fetch_page(url: str) -> str:
                 f"— using Tier 1 HTML as best-effort fallback",
                 file=sys.stderr, flush=True,
             )
+            # _fetch_via_playwright only writes status_out on a path that
+            # does not raise (see its docstring), so a failed Tier 2 attempt
+            # never overwrites it — status_out still holds Tier 1's status
+            # from the call above, which matches the Tier 1 content we are
+            # about to return here. Nothing to restore.
             return requests_html
         raise
 
@@ -403,6 +663,7 @@ def fetch_page_with_config(
     content_selector: str | None = None,
     force_playwright: bool = False,
     prefer_requests_on_low_content: bool = False,
+    status_out: dict | None = None,
 ) -> str:
     """
     Fetch `url` with optional per-source Playwright config.
@@ -414,16 +675,27 @@ def fetch_page_with_config(
       "content_selector": "main"     — extract HTML from this element only
 
     Falls back to fetch_page() when no per-source config is set.
+
+    SSRF guard: the explicit per-source Playwright run below installs the
+    same per-request guard as the generic Tier 2 path (see
+    _install_ssrf_guard / SSRF_RESIDUAL_RISK) — this is the path exercised by
+    the authenticated "test a custom source" endpoint with
+    fetch_method="playwright", so it must never navigate anywhere the
+    requests-tier guard would refuse.
+
+    ``status_out``, when provided, is a caller-owned dict that receives the
+    real HTTP status of whichever path's content is returned, under
+    ``"http_status"``.
     """
     needs_playwright = force_playwright or bool(wait_for_selector) or bool(content_selector)
 
     if not needs_playwright and prefer_requests_on_low_content:
-        requests_html = _fetch_via_requests(url)
+        requests_html = _fetch_via_requests(url, status_out=status_out)
         if requests_html:
             return requests_html
 
     if not needs_playwright:
-        return fetch_page(url)
+        return fetch_page(url, status_out=status_out)
 
     # Per-source Playwright run
     print(f"  Per-source Playwright config — {url}", file=sys.stderr, flush=True)
@@ -438,10 +710,12 @@ def fetch_page_with_config(
         locale="en-US",
         viewport={"width": 1280, "height": 900},
     )
+    _install_ssrf_guard(context)
     page = context.new_page()
 
+    response = None
     try:
-        page.goto(url, timeout=PAGE_TIMEOUT_MS, wait_until="networkidle")
+        response = page.goto(url, timeout=PAGE_TIMEOUT_MS, wait_until="networkidle")
     except Exception:
         try:
             page.wait_for_timeout(_PW_IDLE_EXTRA_MS)
@@ -472,6 +746,22 @@ def fetch_page_with_config(
                 )
         else:
             html = _capture_page_content(page)
+
+        if not _final_url_is_safe(page):
+            logger.warning(
+                "fetch_page_with_config: navigation resolved to a non-public "
+                "address for %s (final URL %s) — rejecting",
+                url, getattr(page, "url", "?"),
+            )
+            raise ValueError(
+                f"fetch_page_with_config: navigation resolved to a non-public address for {url}"
+            )
+
+        if status_out is not None and response is not None:
+            try:
+                status_out["http_status"] = response.status
+            except Exception:
+                pass
     finally:
         context.close()
 

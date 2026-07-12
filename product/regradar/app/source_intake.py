@@ -542,6 +542,15 @@ def run_source_intake(
         "quality": "POOR",
         "content_hash": "",
         "normalized_hash": "",
+        # Real HTTP status of the fetch that produced this result. Populated
+        # for both the requests and Playwright tiers (via scraper.py's
+        # status_out out-param) and for the direct-PDF path (via
+        # document_extractor.fetch_document's http_status). This is what
+        # mass_monitoring_runner.map_source_health_status's http_status>=400
+        # gate reads — before this field existed here, that gate was dead
+        # code: a rendered 4xx/5xx error page that hashed stably and cleared
+        # the length floor could be classified MONITOR_OK.
+        "http_status": None,
         "extraction_method": "",
         "provider_used": "",
         "provider_candidates": [],
@@ -618,6 +627,11 @@ def run_source_intake(
 
             fetch_result = fetch_document(url)
             result["access_status"] = "public_pdf_fetch_attempted"
+            # Surface at top level (previously only nested under
+            # pdf_extraction on the success branch) so
+            # map_source_health_status's http_status>=400 gate can see it —
+            # set on both the success and failure branches below.
+            result["http_status"] = fetch_result.get("http_status")
             if fetch_result.get("status") != "ok" or not fetch_result.get("data"):
                 result["status"] = SourceIntakeStatus.BLOCKED
                 result["failure_reason"] = f"PDF fetch failed: {fetch_result.get('error') or fetch_result.get('http_status') or 'unknown'}"
@@ -675,13 +689,24 @@ def run_source_intake(
     else:
         try:
             from app.scraper import fetch_page_with_config
+            # status_out is how fetch_page_with_config surfaces the real
+            # HTTP status of whichever tier (requests or Playwright)
+            # produced the returned HTML — see app/scraper.py. A dict
+            # passed here and then read below; existing tests that mock
+            # fetch_page_with_config with return_value=<html string> ignore
+            # this kwarg entirely (MagicMock accepts and discards it), so
+            # status_out stays empty and http_status stays None for them,
+            # exactly matching pre-fix behaviour for those fixtures.
+            status_out: dict = {}
             html = fetch_page_with_config(
                 url,
                 wait_for_selector=wait_selector,
                 content_selector=content_selector,
                 force_playwright=(fetch_method == "playwright"),
                 prefer_requests_on_low_content=str(adapter_family or adapter_name or "").lower() == "fta_tax_listing",
+                status_out=status_out,
             )
+            result["http_status"] = status_out.get("http_status")
         except Exception as exc:
             if wait_selector or content_selector or fetch_method == "playwright":
                 result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW

@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -321,3 +322,73 @@ def test_map_health_gates_http_errors_and_stub_captures():
     # Missing chars_normalized (older intake shape) never trips the gate.
     no_chars = {k: v for k, v in ok_result.items() if k != "chars_normalized"}
     assert map_source_health_status(no_chars, expected_min_length=500) == "MONITOR_OK"
+
+
+def test_batch_run_with_real_intake_gates_a_long_error_page(tmp_path):
+    """
+    Full end-to-end proof for Finding 2: run_mass_monitoring_batch with the
+    REAL app.source_intake.run_source_intake as intake_func (no injected
+    fake — this is the exact wiring run_mass_monitoring_batch uses by
+    default, see the `if intake_func is None: from app.source_intake import
+    run_source_intake` line), against a source that fetches a long,
+    cleanly-hashing page but with a 503 status. Only app.scraper's fetch
+    layer is mocked, at the same seam production code calls through.
+
+    Pre-fix, run_source_intake never set http_status at the top level, so
+    this classified via the quality/stub heuristics alone (not
+    REMEDIATION_REQUIRED for this fixture — see the honesty note on the
+    sibling test in test_source_intake.py). Post-fix, the real http_status
+    the fetch layer captured reaches the classifier and REMEDIATION_REQUIRED
+    fires, exactly as the gate's docstring claims.
+    """
+    error_page_html = (
+        "<html><body><main>"
+        + "Service temporarily unavailable. Please try again later. " * 40
+        + "</main></body></html>"
+    )
+
+    def _fake_fetch(url, *, wait_for_selector=None, content_selector=None,
+                     force_playwright=False, prefer_requests_on_low_content=False,
+                     status_out=None):
+        if status_out is not None:
+            status_out["http_status"] = 503
+        return error_page_html
+
+    # A minimal entry with no adapter configured (the standard _entry()
+    # helper above wires a "listing" adapter tuned for other tests' fixture
+    # markup, which is not the point of this test — this fixture only needs
+    # to prove the plain-HTML path threads http_status through the real
+    # batch-runner wiring end to end).
+    queue_data = {
+        "schema_version": "mass-source-activation-1.0",
+        "summary": {"sources_json_changed": False},
+        "sources": [{
+            "source_id": "AE-error-page-1",
+            "name": "AE-error-page-1",
+            "url": "https://official.example/AE-error-page-1",
+            "regulator": "SCA",
+            "source_type": "listing",
+            "official_status": "official",
+            "activation_status": "activation_ready",
+            "current_state": "activation_ready",
+            "expected_min_length": 500,
+            "baseline_runs_required": 2,
+            "can_activate": True,
+        }],
+    }
+    queue_path = tmp_path / "queue.json"
+    queue_path.write_text(json.dumps(queue_data, indent=2), encoding="utf-8")
+
+    with patch("app.scraper.fetch_page_with_config", side_effect=_fake_fetch):
+        result = run_mass_monitoring_batch(
+            queue_path=queue_path,
+            source_id="AE-error-page-1",
+            dry_run=True,
+        )
+
+    assert result["processed_count"] == 1
+    health = result["results"][0]["source_health_status"]
+    assert health == REMEDIATION_REQUIRED, (
+        f"a 503 fetch must gate to REMEDIATION_REQUIRED via the real intake "
+        f"pipeline, got {health!r}"
+    )

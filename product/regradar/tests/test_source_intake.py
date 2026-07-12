@@ -1274,3 +1274,194 @@ def test_source_lab_contract_uses_certified_evidence_after_baseline():
     assert contract["can_activate_monitoring"] is True
     assert contract["activation_readiness"] == "MONITORING_READY"
     assert contract["evidence_level"] == EvidenceLevel.CERTIFIED_EVIDENCE
+
+
+# ── Finding 2 repro: http_status must reach the top level ──────────────────────
+#
+# OPS audit 2026-07-12: a 503 "site under maintenance" page that hashed
+# stably and cleared the length floor was classified MONITOR_OK for seven
+# MOET sources and became the trusted baseline.
+# mass_monitoring_runner.map_source_health_status has an http_status>=400
+# gate specifically to catch this, but run_source_intake never populated
+# http_status at the top level of the dict it returns — the gate read a key
+# that was never set, so it was dead code on the real intake path (the
+# http_status>=400 branch was only ever reachable in the classifier's own
+# unit tests, which feed the dict by hand). These tests reproduce the gap
+# directly against run_source_intake, then chain into
+# map_source_health_status to prove the gate now actually fires end-to-end.
+
+_LONG_ERROR_PAGE_HTML = (
+    "<html><body><main>"
+    + "Service temporarily unavailable. Please try again later. " * 40
+    + "</main></body></html>"
+)
+
+
+def test_run_source_intake_surfaces_http_status_for_503_html_path():
+    """
+    REPRODUCTION (HTML/requests+Playwright tier): before the fix,
+    result.get("http_status") was always None here — fetch_page_with_config
+    returned only a bare str and nothing threaded the real status back to
+    the top-level result dict. A rendered 503 page long enough to clear the
+    length floor could sail through as CONFIRMED_ACCESSIBLE with no trace of
+    the error status anywhere but a server log.
+    """
+    def _fake_fetch(url, *, wait_for_selector=None, content_selector=None,
+                     force_playwright=False, prefer_requests_on_low_content=False,
+                     status_out=None):
+        if status_out is not None:
+            status_out["http_status"] = 503
+        return _LONG_ERROR_PAGE_HTML
+
+    source = {
+        "source_id": "AE-error-page-source",
+        "url": "https://example.gov.ae/notices",
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", side_effect=_fake_fetch):
+        result = run_source_intake(source, write_evidence=False)
+
+    # The intake layer's own content-quality checks find nothing wrong with
+    # this page (it hashes cleanly and clears every length floor) — exactly
+    # why a real http_status signal is required rather than relying on
+    # content heuristics alone.
+    assert result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE
+    assert result["http_status"] == 503, (
+        "run_source_intake must surface the real HTTP status at the top "
+        "level of the result dict, not leave it unset/None"
+    )
+
+
+def test_run_source_intake_surfaces_http_status_for_404_html_path():
+    def _fake_fetch(url, *, wait_for_selector=None, content_selector=None,
+                     force_playwright=False, prefer_requests_on_low_content=False,
+                     status_out=None):
+        if status_out is not None:
+            status_out["http_status"] = 404
+        return _LONG_ERROR_PAGE_HTML
+
+    source = {
+        "source_id": "AE-not-found-source",
+        "url": "https://example.gov.ae/moved",
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", side_effect=_fake_fetch):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["http_status"] == 404
+
+
+def test_run_source_intake_surfaces_http_status_for_pdf_path():
+    """REPRODUCTION (direct-PDF tier): fetch_document already returns
+    http_status in its result dict, but pre-fix code only copied it into the
+    nested pdf_extraction block on the success branch — never onto the
+    top-level key the health-status gate reads, and never at all on the
+    failure branch."""
+    source = {
+        "source_id": "AE-pdf-error-source",
+        "url": "https://example.gov.ae/circular.pdf",
+        "source_type": "pdf",
+        "adapter_family": "pdf_document",
+        "adapter_name": "pdf_document",
+    }
+
+    with patch("app.document_extractor.fetch_document") as fetch_document:
+        fetch_document.return_value = {
+            "status": "failed",
+            "http_status": 404,
+            "content_type": "text/html",
+            "bytes": 0,
+            "data": b"",
+            "error": "HTTP 404",
+        }
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["http_status"] == 404
+    # (Status classification for a failed direct-PDF fetch is a separate
+    # concern from this finding — chars=0 routes it to
+    # PDF_EXTRACTION_NEEDED via the is_direct_pdf branch rather than
+    # BLOCKED. What this test proves is that http_status=404 is visible at
+    # the top level either way.)
+    assert result["status"] in {
+        SourceIntakeStatus.BLOCKED,
+        SourceIntakeStatus.PDF_EXTRACTION_NEEDED,
+    }
+
+
+def test_run_source_intake_pdf_success_still_surfaces_http_status_200():
+    extracted_text = "\n".join(
+        [f"Clause {idx}: regulatory obligation text for monitoring purposes." for idx in range(1, 60)]
+    )
+    source = {
+        "source_id": "AE-pdf-ok-source",
+        "url": "https://example.gov.ae/circular.pdf",
+        "source_type": "pdf",
+        "adapter_family": "pdf_document",
+        "adapter_name": "pdf_document",
+    }
+
+    with patch("app.document_extractor.fetch_document") as fetch_document, \
+         patch("app.document_extractor.extract_pdf_text") as extract_pdf_text:
+        fetch_document.return_value = {
+            "status": "ok",
+            "http_status": 200,
+            "content_type": "application/pdf",
+            "bytes": 4096,
+            "data": b"%PDF fixture bytes",
+            "error": "",
+        }
+        extract_pdf_text.return_value = {
+            "text": extracted_text,
+            "chars": len(extracted_text),
+            "quality": "good",
+            "method": "pypdf",
+            "error": "",
+        }
+        result = run_source_intake(source, write_evidence=False)
+
+    assert result["http_status"] == 200
+
+
+def test_map_source_health_status_gate_now_fires_on_real_intake_result():
+    """
+    Integration-style proof that the gate is no longer dead code: feed a
+    REAL run_source_intake() result (not a hand-built dict, unlike
+    test_map_health_gates_http_errors_and_stub_captures in
+    test_mass_monitoring_runner.py which exercises the classifier's gate
+    logic in isolation) straight into map_source_health_status and confirm
+    it now returns REMEDIATION_REQUIRED for a long, cleanly-hashing 503
+    page — content-quality heuristics alone find nothing wrong with it
+    (run_source_intake classifies it CONFIRMED_ACCESSIBLE, see the sibling
+    test above), so only a real http_status signal catches it.
+
+    Honesty note: for this exact fixture, pre-fix the result is
+    QUALITY_DROP, not MONITOR_OK — a coincidence of this fixture's
+    quality_score, not proof the classifier is safe. Some other
+    stably-hashing 4xx/5xx page (the actual 2026-07-12 MOET incident shape)
+    clears the quality>=60 check and would have gone all the way through to
+    MONITOR_OK pre-fix. Either way, the http_status>=400 gate — which is
+    supposed to short-circuit BEFORE the quality/stub checks and is the
+    thing this finding is about — provably never fired pre-fix (http_status
+    was never set), and does now.
+    """
+    from app.mass_monitoring_runner import REMEDIATION_REQUIRED, map_source_health_status
+
+    def _fake_fetch(url, *, wait_for_selector=None, content_selector=None,
+                     force_playwright=False, prefer_requests_on_low_content=False,
+                     status_out=None):
+        if status_out is not None:
+            status_out["http_status"] = 503
+        return _LONG_ERROR_PAGE_HTML
+
+    source = {
+        "source_id": "AE-moet-style-maintenance-page",
+        "url": "https://example.gov.ae/notices",
+        "expected_min_length": 500,
+    }
+
+    with patch("app.scraper.fetch_page_with_config", side_effect=_fake_fetch):
+        result = run_source_intake(source, write_evidence=False)
+
+    assert map_source_health_status(result, expected_min_length=500) == REMEDIATION_REQUIRED
