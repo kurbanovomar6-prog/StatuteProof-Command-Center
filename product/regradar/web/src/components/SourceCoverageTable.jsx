@@ -1,3 +1,5 @@
+import { SOURCE_TRUTH } from '../data/sourceCounts.js'
+
 const SOURCES = [
   {
     source_id: 'AE-cbuae-rulebook-revision-updates',
@@ -105,12 +107,6 @@ const SOURCES = [
     caveat: 'Access blocked from outside the UAE; not fresh-alert eligible',
   },
 ]
-
-const SOURCE_TRUTH = {
-  enabled: 116,
-  readinessSupported: 83,
-  candidate: 8,
-}
 
 const LAST_CHECKED = '2026-07-12'
 

@@ -11,7 +11,7 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Virtual assets (VARA)',
-    sourceCount: '3 fresh-alert eligible of 6 enabled',
+    sourceCount: '3 fresh-alert eligible of 5 enabled',
     statusTone: 'active',
     whatWeMonitor: 'VARA rulebook revision updates, news/circulars/regulatory publications, enforcement notices',
     limitation: 'Public register and the regulatory notices index are enabled but pending validation. Static rulebook PDFs are evidence snapshots, not change-monitored.',
