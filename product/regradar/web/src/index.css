@@ -1,4 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Self-hosted fonts (Vite bundles the woff2 from node_modules) — a visitor's
+   browser contacts NO third-party font CDN. Keep in sync with
+   docs/vendor-dd/DATA-FLOW-AND-RESIDENCY.md §7. */
+@import "@fontsource/geist-sans/300.css";
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
+@import "@fontsource/geist-sans/800.css";
+@import "@fontsource/geist-sans/900.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
 @import "tailwindcss";
 
 @layer base {
@@ -12,7 +24,7 @@
   }
   body {
     margin: 0;
-    font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Geist Sans', 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     font-variant-numeric: tabular-nums;
@@ -105,8 +117,8 @@
   --shadow-paper:  0 8px 24px rgba(1, 8, 20, 0.28);
 
   /* ── Typography tokens ── */
-  --font-display:  'Geist', system-ui, sans-serif;
-  --font-body:     'Geist', 'Inter', system-ui, sans-serif;
+  --font-display:  'Geist Sans', 'Geist', system-ui, sans-serif;
+  --font-body:     'Geist Sans', 'Geist', 'Inter', system-ui, sans-serif;
   --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
 
   /* ── Spacing scale (4pt grid) ── */
