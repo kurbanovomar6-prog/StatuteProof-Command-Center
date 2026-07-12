@@ -312,6 +312,48 @@ export const reports = {
   },
 }
 
+export const evidenceRoom = {
+  // Owner-side management (authenticated). The create response contains the
+  // share token EXACTLY ONCE — the server stores only its hash and can never
+  // show the link again.
+  createShare({ sourceIds, dateFrom, dateTo, expiresDays, orgDisplayName }) {
+    return authRequest('/api/evidence-room/shares', {
+      method: 'POST',
+      body: JSON.stringify({
+        source_ids: sourceIds,
+        date_from: dateFrom,
+        date_to: dateTo,
+        expires_days: expiresDays,
+        org_display_name: orgDisplayName || '',
+      }),
+    })
+  },
+
+  listShares() {
+    return authRequest('/api/evidence-room/shares')
+  },
+
+  revokeShare(shareId) {
+    return authRequest('/api/evidence-room/shares/revoke', {
+      method: 'POST',
+      body: JSON.stringify({ share_id: shareId }),
+    })
+  },
+
+  // Public examiner view — no session required; the token IS the credential.
+  // Expired, revoked, and unknown links all return the same 404 envelope.
+  async view(token) {
+    const response = await apiFetch(`/api/room/${encodeURIComponent(token)}`)
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const err = new Error(data.message || data.error || `HTTP ${response.status}`)
+      err.status = response.status
+      throw err
+    }
+    return data
+  },
+}
+
 export const health = {
   // System health for the existing public /api/health endpoint (same one the
   // topbar polls). Best-effort: returns the parsed payload

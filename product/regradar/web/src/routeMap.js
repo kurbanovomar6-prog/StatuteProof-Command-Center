@@ -42,6 +42,11 @@ function normalizePath(pathname = '/') {
 
 export function pathToRoute(pathname = '/') {
   const path = normalizePath(pathname)
+  if (path.startsWith('/room/')) {
+    // Public Auditor Evidence Room — the token is the path segment. The page
+    // itself reads the token from location; no auth is involved.
+    return { view: 'room', appPage: 'dashboard' }
+  }
   if (path === '/app' || path === '/app/') {
     return { view: 'app', appPage: 'dashboard' }
   }

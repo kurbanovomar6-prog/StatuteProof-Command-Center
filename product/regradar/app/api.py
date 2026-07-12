@@ -253,6 +253,12 @@ _EXPORT_LIMITER = _RateLimiter(30, 3600)
 # (pure CPU, no disk, no evidence-store reads), but the endpoint is unauthenticated
 # and internet-facing on a small VPS, so cap it per client IP to bound abuse.
 _VERIFY_LIMITER = _RateLimiter(60, 3600)
+# Public, no-login Auditor Evidence Room (GET /api/room/<token>). Mirrors the
+# verifier's posture: unauthenticated and internet-facing, so per-IP capped. The
+# view is bounded by construction (metadata-only collect with a hard record cap
+# — see app.evidence_room.MAX_ROOM_RECORDS) but it does scan the evidence tree,
+# so the same 60/hour ceiling applies to bound disk work from probes.
+_ROOM_LIMITER = _RateLimiter(60, 3600)
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -442,6 +448,7 @@ class _Handler(BaseHTTPRequestHandler):
         *,
         resource_type: str = "",
         resource_id: str = "",
+        fail_closed: bool = False,
     ) -> bool:
         """RBAC Stage-2 role gate for a MUTATING action. Returns True when permitted.
 
@@ -464,11 +471,25 @@ class _Handler(BaseHTTPRequestHandler):
             # gate that fell open is never silent. STAGE-3 GATE: before any real
             # `auditor` seat is assignable to a customer, this branch MUST flip to
             # fail-CLOSED (deny) for non-owner-resolvable failures — see rbac review.
-            logger.warning("rbac evaluate failed for %s; allowing (fail-open)", action)
+            logger.warning(
+                "rbac evaluate failed for %s; %s", action,
+                "denying (fail-closed)" if fail_closed else "allowing (fail-open)",
+            )
             rbac_runtime.log_sensitive_action(
                 user, action, result=rbac_runtime.RESULT_ERROR,
                 resource_type=resource_type, resource_id=resource_id,
             )
+            # High-stakes governance actions (minting/revoking an external
+            # evidence-room credential) pass fail_closed=True: if RBAC evaluation
+            # errors we DENY, never mint a durable external credential on a plumbing
+            # failure. The default stays fail-open so an RBAC glitch can never lock
+            # an existing owner out of an ordinary mutation (no-regression).
+            if fail_closed:
+                self._send_json(
+                    {"ok": False, "message": "Authorization could not be verified. Please retry."},
+                    403,
+                )
+                return False
             return True
         rbac_runtime.log_sensitive_action(
             user,
@@ -829,6 +850,154 @@ class _Handler(BaseHTTPRequestHandler):
             return
         self._send_bytes(body, "text/markdown; charset=utf-8")
 
+    # ── Auditor Evidence Room ──────────────────────────────────────────────────
+
+    def _handle_room_view(self, token: str) -> None:
+        """GET /api/room/<token> — PUBLIC, no auth, READ-ONLY.
+
+        The external examiner's view of a share an owner created. There is no
+        session (the auditor has no account); the token IS the credential and is
+        resolved fail-closed in ``app.evidence_room.get_room_view``: only the
+        SHA-256 of the token is stored, the compare is constant-time, and the
+        response contains ONLY the scope frozen at creation. Unknown, revoked,
+        expired, and malformed tokens all produce the SAME 404 envelope — no
+        existence oracle. Rate-limited per client IP (mirrors /api/verify).
+        Every resolution is appended to the immutable access log as
+        ``room.view`` inside the module. No mutation happens on this path.
+        """
+        if self._rate_limited(_ROOM_LIMITER, "room_view"):
+            return
+        from app.evidence_room import get_room_view
+
+        view = get_room_view(token)
+        if view is None:
+            self._send_json(
+                {
+                    "ok": False,
+                    "error": "not_found",
+                    "message": (
+                        "This evidence room link is not available. "
+                        "It may have expired or been revoked."
+                    ),
+                },
+                404,
+            )
+            return
+        self._send_json({"ok": True, "room": view}, 200)
+
+    def _handle_evidence_room_share_create(self) -> None:
+        """POST /api/evidence-room/shares — create a time-boxed external share.
+
+        Mirrors the export-handler discipline: require_auth → rate limit → strict
+        body → RBAC governance gate (``evidence.share`` — owner/admin only; a
+        reviewer/approver/auditor seat is denied 403 and the decision is written
+        to the immutable access log) → plan capability (``audit_export``) →
+        module call. ``create_share`` validates, entitlement-clips (tenancy +
+        plan), bounds, and freezes the scope; the raw token in the 201 response
+        is the ONLY time it ever exists server-side outside a hash.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "evidence_room_share_create"):
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        # fail_closed: minting an external evidence-room credential is a governance
+        # action — if RBAC evaluation errors we DENY, never mint on a plumbing glitch.
+        if not self._rbac_guard(
+            user, rbac_runtime.EVIDENCE_SHARE, resource_type="evidence_share", fail_closed=True
+        ):
+            return
+        if not self._require_capability(user, "audit_export"):
+            return
+        from app.evidence_room import create_share
+
+        result = create_share(
+            user,
+            body.get("source_ids"),
+            str(body.get("date_from") or "").strip(),
+            str(body.get("date_to") or "").strip(),
+            expires_days=body.get("expires_days"),
+            org_display_name=str(body.get("org_display_name") or ""),
+        )
+        if result.get("ok"):
+            self._send_json(result, 201)
+            return
+        status = {
+            "invalid": 400,
+            "invalid_expiry": 400,
+            "forbidden_claim": 400,
+            "no_entitled_sources": 403,
+            "forbidden": 403,
+            "too_large": 413,
+        }.get(str(result.get("error")), 500)
+        # The module's failure messages are authored-safe (no internal detail),
+        # so the envelope is forwarded as-is.
+        self._send_json(result, status)
+
+    def _handle_evidence_room_shares_list(self) -> None:
+        """GET /api/evidence-room/shares — the caller's OWN shares, metadata only.
+
+        Never includes a token or token hash — a listed share cannot be turned
+        back into a usable link. Auth-scoped to the owner inside the module.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "evidence_room_shares_list"):
+            return
+        from app.evidence_room import list_shares
+
+        result = list_shares(user)
+        self._send_json(result, 200 if result.get("ok") else 500)
+
+    def _handle_evidence_room_share_revoke(self) -> None:
+        """POST /api/evidence-room/shares/revoke — kill a share immediately.
+
+        Owner-scoped inside the module: a share the caller does not own resolves
+        exactly like one that does not exist (404 — no existence oracle). Gated
+        on the same ``evidence.share`` governance action as creation, so the
+        RBAC decision lands in the immutable access log with the share id.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "evidence_room_share_revoke"):
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        share_id = body.get("share_id")
+        if not self._rbac_guard(
+            user,
+            rbac_runtime.EVIDENCE_SHARE,
+            resource_type="evidence_share",
+            resource_id=str(share_id or "")[:64],
+            fail_closed=True,
+        ):
+            return
+        from app.evidence_room import revoke_share
+
+        result = revoke_share(user, share_id)
+        if result.get("ok"):
+            self._send_json(result, 200)
+            return
+        status = 404 if result.get("error") == "not_found" else 500
+        self._send_json(result, status)
+
     def _truncate(self, value, limit: int) -> str:
         return str(value or "").strip()[:limit]
 
@@ -921,6 +1090,11 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_coverage_certificate()
         elif path == "/api/verify-spec":
             self._handle_verify_spec()
+        elif path == "/api/evidence-room/shares":
+            self._handle_evidence_room_shares_list()
+        elif path.startswith("/api/room/"):
+            # Public Auditor Evidence Room — the token is the path segment.
+            self._handle_room_view(path[len("/api/room/"):])
         elif path in ("/api/health", "/api/"):
             self._handle_health()
         else:
@@ -995,6 +1169,13 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_briefs_generate()
         elif path == "/api/verify":
             self._handle_public_verify()
+        elif path == "/api/evidence-room/shares":
+            self._handle_evidence_room_share_create()
+        elif path == "/api/evidence-room/shares/revoke":
+            self._handle_evidence_room_share_revoke()
+        # NOTE: deliberately NO route of any kind under /api/room/ here — the
+        # public room is READ-ONLY by construction; a POST to it falls through
+        # to the 404 below (asserted by tests/test_evidence_room.py).
         else:
             self._send_json({"error": "not found"}, 404)
 

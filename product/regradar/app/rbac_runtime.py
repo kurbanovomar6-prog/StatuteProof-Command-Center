@@ -58,6 +58,7 @@ from app.rbac import (
 from app.rbac import (  # noqa: F401 (re-exported for callers)
     ALERT_SEND,
     EVIDENCE_EXPORT,
+    EVIDENCE_SHARE,
     MEMBER_MANAGE,
     REVIEW_APPROVE,
     REVIEW_SUBMIT,
@@ -76,6 +77,7 @@ __all__ = [
     "RESULT_DENY",
     "ALERT_SEND",
     "EVIDENCE_EXPORT",
+    "EVIDENCE_SHARE",
     "MEMBER_MANAGE",
     "REVIEW_APPROVE",
     "REVIEW_SUBMIT",

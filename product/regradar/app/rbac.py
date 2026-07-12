@@ -67,6 +67,12 @@ ASSIGNABLE_ROLES = frozenset(
 EVIDENCE_VIEW = "evidence.view"
 EVIDENCE_EXPORT = "evidence.export"
 EVIDENCE_CAPTURE = "evidence.capture"  # machine-written evidence record
+# Create/revoke an external Auditor Evidence Room share (app/evidence_room.py) —
+# a time-boxed, read-only link that exposes sealed evidence to a NON-member
+# (an examiner/auditor with no account). Because this widens the audience
+# beyond the org, it is a GOVERNANCE action: granted to owner and admin only
+# (via ALL_ACTIONS), never to reviewer/approver/auditor/system.
+EVIDENCE_SHARE = "evidence.share"
 
 REVIEW_VIEW = "review.view"
 REVIEW_SUBMIT = "review.submit"    # annotate / submit a review for approval
@@ -90,6 +96,7 @@ ALL_ACTIONS = frozenset(
         EVIDENCE_VIEW,
         EVIDENCE_EXPORT,
         EVIDENCE_CAPTURE,
+        EVIDENCE_SHARE,
         REVIEW_VIEW,
         REVIEW_SUBMIT,
         REVIEW_APPROVE,

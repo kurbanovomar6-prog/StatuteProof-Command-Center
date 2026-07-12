@@ -5,6 +5,7 @@ import { evidence } from '../../api'
 import AuditBinderExport from './AuditBinderExport'
 import CoverageCertificatePanel from './CoverageCertificatePanel'
 import EvidencePackExport from './EvidencePackExport'
+import EvidenceRoomPanel from './EvidenceRoomPanel'
 import RegulatorBinderExport from './RegulatorBinderExport'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
@@ -101,6 +102,7 @@ export default function ReportsPage() {
       <CoverageCertificatePanel />
       <RegulatorBinderExport sources={binderSources} />
       <EvidencePackExport sources={binderSources} />
+      <EvidenceRoomPanel sources={binderSources} />
       <AuditBinderExport />
 
       <div>

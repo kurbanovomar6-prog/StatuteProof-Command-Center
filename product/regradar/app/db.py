@@ -259,6 +259,60 @@ _CREATE_RBAC_TABLES = """
 """
 
 
+# ── Auditor Evidence Room — external, time-boxed, read-only shares ───────────────
+#
+# One row per share an OWNER/ADMIN creates for an outside examiner/auditor (see
+# app/evidence_room.py). PURELY ADDITIVE: no existing table is altered.
+#
+# Security invariants baked into the schema:
+#   token_hash  — ONLY the SHA-256 hex of the URL token is stored, never the
+#                 token itself. A database read (backup leak, SQL injection
+#                 elsewhere, an operator glancing at rows) can never yield a
+#                 usable share link — exactly like a password hash.
+#   source_ids  — the scope FROZEN at creation as a JSON array. The public room
+#                 endpoint reads this column, never caller input, so the share
+#                 can never widen after the owner sealed it.
+#   expires_at  — expiry is mandatory (NOT NULL); there is no "forever" share.
+#   revoked_at  — a revoked share stays as a row (audit history) but resolves
+#                 identically to an unknown token (404, no existence oracle).
+_CREATE_EVIDENCE_SHARES_TABLE = """
+    CREATE TABLE IF NOT EXISTS evidence_shares (
+        id               INTEGER   PRIMARY KEY AUTOINCREMENT,
+        token_hash       TEXT      NOT NULL UNIQUE,
+        owner_user_id    INTEGER   NOT NULL REFERENCES users(id),
+        org_display_name TEXT      NOT NULL DEFAULT '',
+        source_ids       TEXT      NOT NULL,
+        date_from        TEXT      NOT NULL,
+        date_to          TEXT      NOT NULL,
+        created_at       TIMESTAMP NOT NULL,
+        expires_at       TIMESTAMP NOT NULL,
+        revoked_at       TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_evidence_shares_owner
+        ON evidence_shares(owner_user_id);
+"""
+
+
+def ensure_evidence_shares_table(conn: sqlite3.Connection | None = None) -> None:
+    """Provision the evidence_shares table. Cheap + idempotent + additive.
+
+    Mirrors ``ensure_rbac_tables``: constant-cost ``CREATE TABLE IF NOT EXISTS``
+    only, safe to call from every evidence-room DB operation. Deliberately NOT
+    chained into ``ensure_auth_tables`` — the table is touched only by the
+    evidence-room module, so the per-request session path stays unchanged.
+    """
+    owned_conn = conn is None
+    if conn is None:
+        conn = _connect()
+    try:
+        conn.executescript(_CREATE_EVIDENCE_SHARES_TABLE)
+        conn.commit()
+    finally:
+        if owned_conn:
+            conn.close()
+
+
 def ensure_rbac_tables(conn: sqlite3.Connection | None = None) -> None:
     """Provision the RBAC tables and seed the GLOBAL org. Cheap + idempotent.
 
