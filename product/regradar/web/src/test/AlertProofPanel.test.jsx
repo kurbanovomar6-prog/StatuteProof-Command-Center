@@ -4,7 +4,7 @@
 // sealed record is linked, the card says so honestly — no fake seal, no
 // invented linkage.
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import AlertsPage from '../components/app/AlertsPage'
 import AlertProofPanel from '../components/app/AlertProofPanel'
 
@@ -64,7 +64,15 @@ afterEach(() => {
 })
 
 describe('AlertProofPanel', () => {
-  it('reveals the seal, record id, excerpt, and both verification links', () => {
+  it('reveals the seal, record id, excerpt, and both verification links', async () => {
+    // No structured redline from the API → the panel falls back to the raw
+    // excerpt the alert already carries (rendered via AlertRedline).
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: async () => ({ ok: true, redline: { available: false, blocks: [], note: '' } }),
+      }),
+    )
     render(<AlertProofPanel item={SEALED_MATCH} />)
 
     // Collapsed by default — the seal is not on screen yet.
@@ -76,7 +84,9 @@ describe('AlertProofPanel', () => {
     expect(screen.getByText('evr_AE-cbuae-proof_run00001')).toBeInTheDocument()
     // The seal renders shortened but carries the full hash as its title.
     expect(screen.getByTitle(SEAL)).toBeInTheDocument()
-    expect(screen.getByText(SEALED_MATCH.diff_excerpt)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(SEALED_MATCH.diff_excerpt)).toBeInTheDocument()
+    })
 
     const evidenceLink = screen.getByRole('link', { name: /open evidence record/i })
     expect(evidenceLink).toHaveAttribute('href', '/app/evidence')

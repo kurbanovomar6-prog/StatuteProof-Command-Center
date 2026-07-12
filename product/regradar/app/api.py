@@ -74,7 +74,11 @@ from app.telegram_pairing import (
     unlink_telegram,
 )
 from app.user_delivery import get_user_delivery_logs, send_sample_brief_to_user
-from app.alert_routing import build_routing_preview_for_user, send_preview_alert_to_user
+from app.alert_routing import (
+    build_routing_preview_for_user,
+    find_routing_match_for_user,
+    send_preview_alert_to_user,
+)
 from app.alert_actions import save_action_log_entry, get_action_log
 from app.action_checklist import (
     FRAMING as CHECKLIST_FRAMING,
@@ -250,6 +254,10 @@ _DELIVERY_SEND_PREVIEW_LIMITER = _RateLimiter(10, 3600)
 # Per-alert review checklist is an interactive workflow surface (ticking items,
 # adding a few actions), so the budget is generous compared with delivery.
 _CHECKLIST_LIMITER = _RateLimiter(120, 3600)
+# Sealed-redline view: read-only per-alert render of the sealed diff. Bounded
+# work (capped file read + pure parse) but touches the evidence tree, so it gets
+# its own budget rather than riding an existing one.
+_REDLINE_LIMITER = _RateLimiter(120, 3600)
 _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
 # Heavy export endpoints (audit vault, evidence pack, regulator binder, coverage
 # certificate, monthly assurance, change-register export, evidence export). These
@@ -1095,6 +1103,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_alert_action_log_get()
         elif path == "/api/alerts/checklist":
             self._handle_alert_checklist_get()
+        elif path == "/api/alerts/redline":
+            self._handle_alert_redline_get()
         elif path == "/api/settings/telegram":
             self._disabled_endpoint()
         elif path == "/api/reports/monthly-assurance":
@@ -1901,6 +1911,47 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "Checklist item not found."}, 404)
             return
         self._send_json({"ok": True, "item": item})
+
+    # ── Sealed-evidence redline (read-only monitoring view) ─────────────────────
+    #
+    # Renders the added/removed text of ONE alert's SEALED diff artifact as
+    # structured redline blocks. Tenancy rides the SAME owner-scoped loader the
+    # alerts page's preview is built from: find_routing_match_for_user applies
+    # the identical deny-list + approved-review gate but normalizes ONLY the
+    # target candidate — a per-click fetch never re-scores the whole draft
+    # corpus (security review 2026-07-12). An alert outside the caller's scope
+    # simply isn't found — identical 404 for "not yours" and "gone", no oracle.
+    # The redline module itself adds no scope (see app/sealed_redline.py); it
+    # renders only what the match's proof block points to.
+
+    def _handle_alert_redline_get(self) -> None:
+        if self._rate_limited(_REDLINE_LIMITER, "alert_redline_get"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        alert_id = str((params.get("alert_id") or [""])[0]).strip()
+        if not checklist_valid_alert_id(alert_id):
+            self._send_json({"ok": False, "message": "Invalid alert_id."}, 400)
+            return
+        try:
+            days = int((params.get("days") or ["14"])[0])
+        except (TypeError, ValueError):
+            days = 14
+        try:
+            from app.sealed_redline import build_redline_for_match
+
+            match = find_routing_match_for_user(int(user["id"]), alert_id, days=days)
+            if match is None:
+                self._send_json({"ok": False, "message": "Alert not found."}, 404)
+                return
+            redline = build_redline_for_match(match)
+            self._send_json({"ok": True, "redline": redline})
+        except Exception as exc:
+            logger.error("Alert redline failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_delivery_email_test_mode(self) -> None:
         if self._rate_limited(_DELIVERY_TEST_BRIEF_LIMITER, "delivery_email_test_mode"):

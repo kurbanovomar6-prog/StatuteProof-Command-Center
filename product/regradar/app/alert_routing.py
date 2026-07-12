@@ -438,6 +438,28 @@ def get_sent_alert_ids_for_user(user_id: int) -> set[str]:
         conn.close()
 
 
+def find_routing_match_for_user(user_id: int, alert_id: str, days: int = 14) -> dict | None:
+    """Resolve ONE owner-scoped routing match by ``alert_id`` — cheaply.
+
+    Same loader and therefore the SAME tenancy filter and approved-review gate
+    as the full preview (``load_approved_alert_candidates`` applies
+    ``denied_custom_source_ids`` and the review-status gate), but only the
+    target candidate is normalized — no per-candidate scoring of the whole
+    corpus. Built for single-alert views (e.g. the sealed redline) so a
+    per-click fetch never re-scores every draft the way the preview does.
+    Returns ``None`` when the alert is outside the caller's scope or absent —
+    indistinguishable by design (no existence oracle).
+    """
+    wanted = str(alert_id or "").strip()
+    if not wanted:
+        return None
+    safe_days = max(1, min(int(days or 14), 60))
+    for candidate in load_approved_alert_candidates(safe_days, user_id=int(user_id)):
+        if str(candidate.get("alert_id") or "").strip() == wanted:
+            return normalize_alert_for_routing(candidate)
+    return None
+
+
 def build_routing_preview_for_user(
     user_id: int, days: int = 14, *, rank_by_materiality: bool = False
 ) -> dict:

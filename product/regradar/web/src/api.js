@@ -439,3 +439,12 @@ export const checklist = {
     return this.update({ item_id: itemId, delete: true })
   },
 }
+
+// Sealed-evidence redline: the added/removed text of one alert's SEALED diff
+// artifact, parsed server-side into structured blocks. Read-only; owner-scoped
+// on the server via the same routing preview the alerts page is built from.
+export const redline = {
+  get(alertId) {
+    return authRequest(`/api/alerts/redline?alert_id=${encodeURIComponent(alertId)}`)
+  },
+}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, ExternalLink, FileCheck } from 'lucide-react'
 
+import AlertRedline from './AlertRedline'
 import TimeStamp from './ui/TimeStamp'
 
 /**
@@ -86,17 +87,9 @@ export default function AlertProofPanel({ item, navigate }) {
             </div>
           </dl>
 
-          {item.diff_excerpt ? (
-            <div className="mt-3">
-              <p className="text-[11px] text-[var(--text-muted)]">What changed (excerpt)</p>
-              <p
-                className="mt-1 max-h-28 overflow-y-auto whitespace-pre-wrap rounded-md border border-[var(--border-muted)] bg-[var(--bg-elevated)] px-2.5 py-2 text-[11px] leading-relaxed text-[var(--text-secondary)]"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                {item.diff_excerpt}
-              </p>
-            </div>
-          ) : null}
+          {/* Structured sealed redline; mounts (and fetches) only while this
+              panel is open. Falls back to the raw excerpt when unavailable. */}
+          <AlertRedline alertId={item.alert_id} fallbackExcerpt={item.diff_excerpt} />
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <a
