@@ -96,7 +96,7 @@ function StatusBadge({ tone, children }) {
   const styles = {
     active:   'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
     caveat:   'border-cyan-400/20 bg-cyan-400/10 text-cyan-200',
-    blocked:  'border-slate-500/25 bg-slate-500/10 text-slate-300',
+    blocked:  'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-secondary)]',
     roadmap:  'border-amber-400/20 bg-amber-400/10 text-amber-300',
   }
   return (
@@ -108,12 +108,12 @@ function StatusBadge({ tone, children }) {
 
 function SourceTable({ columns, rows }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#0A1628]">
+    <div className="overflow-x-auto rounded-xl border border-[var(--border-muted)] bg-[var(--bg-surface)]">
       <table className="w-full text-sm">
-        <thead className="bg-slate-950/40 border-b border-slate-800">
+        <thead className="bg-[var(--bg-base)] border-b border-[var(--border-muted)]">
           <tr>
             {columns.map(column => (
-              <th key={column.key} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th key={column.key} className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
                 {column.label}
               </th>
             ))}
@@ -121,11 +121,11 @@ function SourceTable({ columns, rows }) {
         </thead>
         <tbody>
           {rows.map(row => (
-            <tr key={row.source} className="border-b border-slate-800/80 last:border-0">
+            <tr key={row.source} className="border-b border-[var(--border-subtle)] last:border-0">
               {columns.map(col => (
-                <td key={col.key} className="px-4 py-3 align-top text-slate-400">
+                <td key={col.key} className="px-4 py-3 align-top text-[var(--text-secondary)]">
                   {col.key === 'source'
-                    ? <span className="font-medium text-slate-100">{row[col.key]}</span>
+                    ? <span className="font-medium text-[var(--text-primary)]">{row[col.key]}</span>
                     : row[col.key]
                   }
                 </td>
@@ -140,7 +140,7 @@ function SourceTable({ columns, rows }) {
 
 export default function Coverage({ onCreateWorkspace }) {
   return (
-    <section className="py-20 bg-[#07111F]" id="coverage">
+    <section className="py-20 bg-[var(--bg-navy)]" id="coverage">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <div className="mb-4 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200">
@@ -149,13 +149,13 @@ export default function Coverage({ onCreateWorkspace }) {
           <h2 className="text-3xl font-bold text-white mb-4">
             What is monitored — and what is not
           </h2>
-          <p className="text-slate-400 max-w-3xl mx-auto">
+          <p className="text-[var(--text-secondary)] max-w-3xl mx-auto">
             StatuteProof discloses every source status before a pilot begins. Active sources have
             passed two proof-backed baseline runs. Sources with caveats are disclosed upfront.
             Access-blocked sources are documented — not hidden.
           </p>
-          <p className="mt-3 text-sm text-slate-400 max-w-3xl mx-auto">
-            <span className="font-semibold text-slate-200">Fresh-alert eligible</span> means a source we have
+          <p className="mt-3 text-sm text-[var(--text-secondary)] max-w-3xl mx-auto">
+            <span className="font-semibold text-[var(--text-primary)]">Fresh-alert eligible</span> means a source we have
             reliably captured at least twice and can send you change alerts from.
           </p>
         </div>
@@ -225,8 +225,8 @@ export default function Coverage({ onCreateWorkspace }) {
 
         </div>
 
-        <div className="bg-[#0A1628] border border-slate-800 rounded-xl p-6 mt-8 mb-6">
-          <p className="text-sm text-slate-400 leading-relaxed">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-muted)] rounded-xl p-6 mt-8 mb-6">
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
             Source status reflects current technical accessibility — not regulatory significance.
             A source listed as access-blocked or pending does not reduce its legal importance.
             It means StatuteProof cannot currently monitor it reliably, and we document that
@@ -234,14 +234,14 @@ export default function Coverage({ onCreateWorkspace }) {
           </p>
         </div>
 
-        <div className="bg-slate-950/50 border border-cyan-400/20 rounded-xl p-6 text-center">
+        <div className="bg-[var(--bg-navy)] border border-cyan-400/20 rounded-xl p-6 text-center">
           <h3 className="text-white text-xl font-bold mb-2">Need to check a specific regulator or source?</h3>
-          <p className="text-slate-400 text-sm mb-5">We'll review accessibility and scope before recommending a pilot configuration.</p>
+          <p className="text-[var(--text-secondary)] text-sm mb-5">We'll review accessibility and scope before recommending a pilot configuration.</p>
           <button
             onClick={onCreateWorkspace}
-            className="inline-flex items-center gap-2 bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F] font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors"
+            className="inline-flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors"
           >
-            Get a free source readiness review <ArrowRight className="w-4 h-4" />
+            Get your free source readiness review <ArrowRight className="w-4 h-4" />
           </button>
         </div>
 

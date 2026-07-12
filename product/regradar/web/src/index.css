@@ -96,7 +96,8 @@
   --hairline:      rgba(255, 255, 255, 0.045);
   --text-primary:  #E8EEF5;
   --text-secondary:#A9B6C6;
-  --text-muted:    #6E7E92;
+  --text-muted:    #8A99AD; /* was #6E7E92 (4.3:1 on --bg-elevated — failed AA at fine-print sizes);
+                               #8A99AD computes 6.2:1 on --bg-elevated, 5.2:1 on --bg-tooltip. */
   --accent:        #16D9F5; /* single accent — matches component usage; was #19D3F3 (duplicate cyan) */
   --accent-hover:  #67E8F9;
   --accent-deep:   #0891B2;

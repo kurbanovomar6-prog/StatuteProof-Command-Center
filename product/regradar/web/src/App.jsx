@@ -92,6 +92,15 @@ const initialRoute = pathToRoute(
   typeof window !== 'undefined' ? window.location.pathname : '/',
 )
 
+// Per-route document titles. Default (landing + everything unlisted) stays in
+// sync with the <title> in index.html.
+const DEFAULT_TITLE = 'StatuteProof — Official-source regulatory intelligence for UAE financial firms'
+const ROUTE_TITLES = {
+  verify: 'Verify a record — StatuteProof',
+  pricing: 'Pricing — StatuteProof',
+  'source-readiness-review': 'Source readiness review — StatuteProof',
+}
+
 const AUTH_REQUIRED_VIEWS = new Set(['app', 'choose-plan'])
 
 export default function App() {
@@ -100,6 +109,10 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [planState, setPlanState] = useState(null)
+
+  useEffect(() => {
+    document.title = ROUTE_TITLES[view] || DEFAULT_TITLE
+  }, [view])
 
   function updatePath(path, replace = false) {
     if (typeof window === 'undefined') return

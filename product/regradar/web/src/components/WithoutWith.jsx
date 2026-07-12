@@ -1,22 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, XCircle, ArrowRight } from 'lucide-react'
 
-// ─── Scroll-reveal hook ───────────────────────────────────────────────────────
-function useInView(options = {}) {
-  const ref = useRef(null)
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect() } },
-      { threshold: 0.10, ...options },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
-  return [ref, inView]
-}
+// Scroll-reveal removed deliberately: content renders instantly, matching the
+// rest of the site (the CSS fade-up utilities were neutered for the same
+// reason — no reveal gating, no reduced-motion traps).
 
 // ─── Content ──────────────────────────────────────────────────────────────────
 const BEFORE = [
@@ -58,17 +44,11 @@ const AFTER = [
 ]
 
 // ─── Column component ─────────────────────────────────────────────────────────
-function Column({ tone, items, visible, delay = 0 }) {
+function Column({ tone, items }) {
   const isBefore = tone === 'before'
 
   return (
-    <div
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity 540ms cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 540ms cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-      }}
-    >
+    <div>
       {/* Column header */}
       <div
         className={`mb-4 flex items-center gap-3 rounded-xl px-4 py-3 ${
@@ -105,11 +85,6 @@ function Column({ tone, items, visible, delay = 0 }) {
                 ? 'border-slate-800 bg-slate-950/50 hover:border-rose-400/20'
                 : 'border-slate-800/70 bg-slate-900/40 hover:border-emerald-400/25'
             }`}
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? 'translateY(0)' : 'translateY(10px)',
-              transition: `opacity 480ms ease ${delay + i * 60}ms, transform 480ms ease ${delay + i * 60}ms`,
-            }}
           >
             <div className="flex items-start gap-3">
               {isBefore ? (
@@ -139,11 +114,8 @@ function Column({ tone, items, visible, delay = 0 }) {
 
 // ─── Main section ─────────────────────────────────────────────────────────────
 export default function WithoutWith() {
-  const [sectionRef, sectionInView] = useInView()
-
   return (
     <section
-      ref={sectionRef}
       className="py-24"
       style={{ background: 'linear-gradient(180deg, #040B16 0%, #07111F 50%, #040B16 100%)' }}
       id="before-after"
@@ -151,14 +123,7 @@ export default function WithoutWith() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
 
         {/* Section header */}
-        <div
-          className="mb-12 text-center"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transform: sectionInView ? 'translateY(0)' : 'translateY(14px)',
-            transition: 'opacity 480ms cubic-bezier(0.16,1,0.3,1), transform 480ms cubic-bezier(0.16,1,0.3,1)',
-          }}
-        >
+        <div className="mb-12 text-center">
           <div className="mb-4 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200">
             What changes for your team
           </div>
@@ -173,19 +138,12 @@ export default function WithoutWith() {
 
         {/* Two-column comparison */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Column tone="before" items={BEFORE} visible={sectionInView} delay={80} />
-          <Column tone="after" items={AFTER} visible={sectionInView} delay={180} />
+          <Column tone="before" items={BEFORE} />
+          <Column tone="after" items={AFTER} />
         </div>
 
         {/* Arrow bridge on desktop */}
-        <div
-          className="relative hidden md:block"
-          aria-hidden="true"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transition: 'opacity 600ms ease 300ms',
-          }}
-        >
+        <div className="relative hidden md:block" aria-hidden="true">
           <div
             className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
             style={{ top: '-100%' }}
@@ -197,14 +155,7 @@ export default function WithoutWith() {
         </div>
 
         {/* Workflow step strip */}
-        <div
-          className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-4"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transform: sectionInView ? 'translateY(0)' : 'translateY(10px)',
-            transition: 'opacity 500ms ease 380ms, transform 500ms ease 380ms',
-          }}
-        >
+        <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-4">
           <p className="mb-3 text-center text-[10px] font-bold uppercase tracking-widest text-slate-600">
             The StatuteProof detection pipeline
           </p>
@@ -230,13 +181,7 @@ export default function WithoutWith() {
         </div>
 
         {/* Disclaimer */}
-        <p
-          className="mt-6 text-center text-[11px] leading-relaxed text-slate-600"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transition: 'opacity 500ms ease 460ms',
-          }}
-        >
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-slate-600">
           Monitoring intelligence only. Not legal advice. Not a guarantee of compliance.
           Selected-source scope — not a full regulatory universe. Consult qualified professionals
           before making regulatory or operational decisions.

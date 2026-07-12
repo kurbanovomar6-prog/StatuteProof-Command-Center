@@ -319,7 +319,7 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
                 onClick={onCreateWorkspace}
                 className="sp-btn-primary justify-center px-6"
               >
-                View source readiness <ArrowRight className="h-4 w-4" />
+                Get your free source readiness review <ArrowRight className="h-4 w-4" />
               </button>
               <button
                 type="button"

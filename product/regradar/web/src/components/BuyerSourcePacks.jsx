@@ -40,17 +40,17 @@ const LAYER_DOT = {
   active: "bg-emerald-400",
   roadmap: "bg-amber-400",
   pending: "bg-amber-400",
-  evidence_only: "bg-slate-500",
-  out_of_scope: "bg-slate-600",
+  evidence_only: "bg-[var(--text-muted)]",
+  out_of_scope: "bg-[var(--text-muted)]",
   geo_blocked: "bg-rose-400",
 };
 
 const LAYER_TEXT = {
-  active: "text-slate-300",
-  roadmap: "text-slate-400 italic",
-  pending: "text-slate-400",
-  evidence_only: "text-slate-400",
-  out_of_scope: "text-slate-500 line-through decoration-slate-700",
+  active: "text-[var(--text-secondary)]",
+  roadmap: "text-[var(--text-muted)] italic",
+  pending: "text-[var(--text-muted)]",
+  evidence_only: "text-[var(--text-muted)]",
+  out_of_scope: "text-[var(--text-muted)] line-through decoration-[var(--border)]",
   geo_blocked: "text-rose-400/80",
 };
 
@@ -64,7 +64,7 @@ const LAYER_SUFFIX = {
 
 export default function BuyerSourcePacks({ onCreateWorkspace }) {
   return (
-    <section className="bg-[#07111F] py-20" id="source-packs">
+    <section className="bg-[var(--bg-navy)] py-20" id="source-packs">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-12 max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200">
@@ -74,7 +74,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
           <h2 className="mb-4 text-3xl font-bold text-white">
             What's monitored for your regulatory profile
           </h2>
-          <p className="text-slate-400">
+          <p className="text-[var(--text-secondary)]">
             Each pack shows exactly which sources are fresh-alert eligible,
             which are pending validation, and where gaps exist — before you
             commit to a pilot.
@@ -82,7 +82,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
         </div>
 
         {/* Legend */}
-        <div className="mb-3 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+        <div className="mb-3 flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)]">
           <span className="font-semibold uppercase tracking-wide">Key:</span>
           {[
             [
@@ -90,7 +90,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
               "Fresh-alert eligible — source is proof-backed and eligible for monitoring once activated",
             ],
             ["bg-amber-400", "Pending validation / roadmap"],
-            ["bg-slate-500", "Evidence archive only"],
+            ["bg-[var(--text-muted)]", "Evidence archive only"],
             ["bg-rose-400", "Geo-restricted"],
           ].map(([dot, label]) => (
             <span key={label} className="flex items-center gap-1.5">
@@ -99,7 +99,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
             </span>
           ))}
         </div>
-        <p className="mb-4 text-xs text-slate-500 max-w-2xl">
+        <p className="mb-4 text-xs text-[var(--text-muted)] max-w-2xl">
           Fresh-alert eligible means a source has passed proof-backed baseline
           validation, produces reliable text extraction, and is configured for
           checking on an operator-set cycle once monitoring is activated (target
@@ -113,7 +113,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
             return (
               <article
                 key={pack.profile}
-                className="flex flex-col rounded-xl border border-slate-800 bg-[#0A1628] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.24)]"
+                className="flex flex-col rounded-xl border border-[var(--border-muted)] bg-[var(--bg-surface)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.24)]"
               >
                 {/* Header */}
                 <div className="mb-4">
@@ -136,12 +136,12 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
                     {[0, 1, 2, 3].map((i) => (
                       <span
                         key={i}
-                        className={`h-1 flex-1 rounded-full ${i < cfg.segments ? cfg.bar : "bg-slate-800"}`}
+                        className={`h-1 flex-1 rounded-full ${i < cfg.segments ? cfg.bar : "bg-[var(--border-muted)]"}`}
                       />
                     ))}
                   </div>
-                  <p className="text-xs leading-relaxed text-slate-500">
-                    <span className="font-semibold text-slate-400">
+                  <p className="text-xs leading-relaxed text-[var(--text-muted)]">
+                    <span className="font-semibold text-[var(--text-secondary)]">
                       Best for:
                     </span>{" "}
                     {pack.bestFor}
@@ -150,7 +150,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
 
                 {/* Source layers */}
                 <div className="mb-4 flex-1">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                     Source layers
                   </p>
                   <ul className="space-y-2">
@@ -160,16 +160,16 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
                         className="flex gap-2 text-xs leading-relaxed"
                       >
                         <span
-                          className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${LAYER_DOT[layer.status] || "bg-slate-600"}`}
+                          className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${LAYER_DOT[layer.status] || "bg-[var(--text-muted)]"}`}
                         />
                         <span
                           className={
-                            LAYER_TEXT[layer.status] || "text-slate-300"
+                            LAYER_TEXT[layer.status] || "text-[var(--text-secondary)]"
                           }
                         >
                           {layer.text}
                           {LAYER_SUFFIX[layer.status] ? (
-                            <span className="text-slate-500">
+                            <span className="text-[var(--text-muted)]">
                               {LAYER_SUFFIX[layer.status]}
                             </span>
                           ) : null}
@@ -191,7 +191,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
                   onClick={onCreateWorkspace}
                   className="inline-flex items-center justify-between gap-2 rounded-lg border border-cyan-400/25 bg-cyan-400/10 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50 hover:bg-cyan-400/15"
                 >
-                  Get source readiness report for this profile
+                  Get your free source readiness review
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </article>
@@ -199,7 +199,7 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
           })}
         </div>
 
-        <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/45 p-4 text-sm leading-relaxed text-slate-400">
+        <div className="mt-6 rounded-xl border border-[var(--border-muted)] bg-[var(--bg-navy)] p-4 text-sm leading-relaxed text-[var(--text-secondary)]">
           Source packs show the monitoring scope per licence type. Coverage
           ratings are a relative tier of how many sources are currently
           fresh-alert eligible for this profile — not regulatory significance,

@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react'
 import { LockKeyhole, Zap, ListChecks, Info } from 'lucide-react'
 
 // ─── Sample diff lines ───────────────────────────────────────────────────────
@@ -31,37 +30,14 @@ const ACTION_STEPS = [
   'File updated procedures and threshold documentation with your MLRO and preserve this evidence record',
 ]
 
-// ─── Scroll-reveal hook ───────────────────────────────────────────────────────
-function useInView(options = {}) {
-  const ref = useRef(null)
-  const [inView, setInView] = useState(false)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect() } },
-      { threshold: 0.12, ...options },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
-
-  return [ref, inView]
-}
+// Scroll-reveal removed deliberately: content renders instantly, matching the
+// rest of the site (the CSS fade-up utilities were neutered for the same
+// reason — no reveal gating, no reduced-motion traps).
 
 // ─── Diff viewer panel ────────────────────────────────────────────────────────
-function DiffPanel({ visible }) {
+function DiffPanel() {
   return (
-    <div
-      className="flex flex-col h-full"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(18px)',
-        transition: 'opacity 520ms cubic-bezier(0.16,1,0.3,1), transform 520ms cubic-bezier(0.16,1,0.3,1)',
-        transitionDelay: '80ms',
-      }}
-    >
+    <div className="flex flex-col h-full">
       {/* Panel header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/60 bg-slate-900/80 rounded-tl-xl rounded-tr-xl flex-shrink-0">
         <div className="flex items-center gap-2">
@@ -131,17 +107,9 @@ function DiffPanel({ visible }) {
 }
 
 // ─── AI Analysis panel ────────────────────────────────────────────────────────
-function AnalysisPanel({ visible }) {
+function AnalysisPanel() {
   return (
-    <div
-      className="flex flex-col gap-3 h-full overflow-y-auto"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(18px)',
-        transition: 'opacity 560ms cubic-bezier(0.16,1,0.3,1), transform 560ms cubic-bezier(0.16,1,0.3,1)',
-        transitionDelay: '200ms',
-      }}
-    >
+    <div className="flex flex-col gap-3 h-full overflow-y-auto">
       {/* Risk badge row */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
@@ -235,11 +203,8 @@ function AnalysisPanel({ visible }) {
 
 // ─── Main section ─────────────────────────────────────────────────────────────
 export default function AIInsightSection() {
-  const [sectionRef, sectionInView] = useInView()
-
   return (
     <section
-      ref={sectionRef}
       className="py-24"
       style={{ background: 'linear-gradient(180deg, #07111F 0%, #0a1628 60%, #07111F 100%)' }}
       id="ai-insight"
@@ -247,14 +212,7 @@ export default function AIInsightSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
         {/* Section header */}
-        <div
-          className="mb-12 text-center"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transform: sectionInView ? 'translateY(0)' : 'translateY(16px)',
-            transition: 'opacity 480ms cubic-bezier(0.16,1,0.3,1), transform 480ms cubic-bezier(0.16,1,0.3,1)',
-          }}
-        >
+        <div className="mb-12 text-center">
           <span className="sp-badge-trust mb-4 inline-flex">
             AI change analysis
           </span>
@@ -270,14 +228,7 @@ export default function AIInsightSection() {
         </div>
 
         {/* Split panel */}
-        <div
-          className="grid min-h-[560px] gap-4 lg:grid-cols-2"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transition: 'opacity 400ms ease',
-            transitionDelay: '60ms',
-          }}
-        >
+        <div className="grid min-h-[560px] gap-4 lg:grid-cols-2">
           {/* Left: diff viewer */}
           <div
             className="flex flex-col overflow-hidden rounded-xl border border-slate-700/50"
@@ -290,7 +241,7 @@ export default function AIInsightSection() {
               </span>
             </div>
             <div className="flex-1 min-h-0">
-              <DiffPanel visible={sectionInView} />
+              <DiffPanel />
             </div>
           </div>
 
@@ -307,20 +258,12 @@ export default function AIInsightSection() {
                 AI analysis output
               </span>
             </div>
-            <AnalysisPanel visible={sectionInView} />
+            <AnalysisPanel />
           </div>
         </div>
 
         {/* How it works strip */}
-        <div
-          className="mt-10 grid gap-3 sm:grid-cols-4"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transform: sectionInView ? 'translateY(0)' : 'translateY(12px)',
-            transition: 'opacity 520ms cubic-bezier(0.16,1,0.3,1), transform 520ms cubic-bezier(0.16,1,0.3,1)',
-            transitionDelay: '320ms',
-          }}
-        >
+        <div className="mt-10 grid gap-3 sm:grid-cols-4">
           {[
             ['01', 'Official source checked', 'Scheduled fetch from the regulator\'s own portal — no third-party feeds'],
             ['02', 'Change detected + hashed', 'Text diff computed; SHA-256 hash stored before anything else runs'],
@@ -339,14 +282,7 @@ export default function AIInsightSection() {
         </div>
 
         {/* Trust row */}
-        <div
-          className="mt-6 flex flex-wrap items-center justify-center gap-3"
-          style={{
-            opacity: sectionInView ? 1 : 0,
-            transition: 'opacity 480ms ease',
-            transitionDelay: '420ms',
-          }}
-        >
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {[
             'AI insight — not legal advice',
             'Human review required before delivery',

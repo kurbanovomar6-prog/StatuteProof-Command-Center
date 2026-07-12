@@ -41,16 +41,17 @@ const PROFILES = [
 
 export default function ConfiguredMonitoring() {
   return (
-    <section className="py-20 bg-[#07111F]" id="configured-monitoring">
+    <section className="py-20 bg-[var(--bg-navy)]" id="configured-monitoring">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <span className="inline-block text-xs font-semibold text-cyan-300 uppercase tracking-widest mb-4">
-            Alert Profiles
-          </span>
+          {/* Pill kicker (matches sibling sections) — no uppercase eyebrows per design system. */}
+          <div className="mb-4 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200">
+            Alert profiles
+          </div>
           <h2 className="text-3xl font-bold text-white mb-3">
             Your alerts are matched to your regulatory profile
           </h2>
-          <p className="text-slate-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed">
             StatuteProof does not broadcast the same alert to every client. Each pilot is configured around
             your licence type, business activity, and the specific regulators relevant to your operations.
             A change at VARA is not relevant to a payments firm with no virtual asset exposure.
@@ -61,20 +62,20 @@ export default function ConfiguredMonitoring() {
           {PROFILES.map(profile => {
             const Icon = profile.icon
             return (
-              <div key={profile.title} className="bg-[#0D1B2E] border border-slate-800 rounded-xl p-5 shadow-[0_14px_45px_rgba(0,0,0,0.22)]">
+              <div key={profile.title} className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5 shadow-[0_14px_45px_rgba(0,0,0,0.22)]">
                 <div className="w-10 h-10 rounded-lg bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center mb-4">
                   <Icon className="w-5 h-5 text-cyan-200" />
                 </div>
                 <h3 className="font-semibold text-white text-sm mb-2">{profile.title}</h3>
-                <p className="text-xs font-semibold text-slate-300 mb-2">{profile.sources}</p>
-                <p className="text-xs text-slate-500 leading-relaxed">{profile.scope}</p>
+                <p className="text-xs font-semibold text-[var(--text-secondary)] mb-2">{profile.sources}</p>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">{profile.scope}</p>
               </div>
             )
           })}
         </div>
 
-        <div className="rounded-xl border border-cyan-400/20 bg-[#0D1B2E] p-6">
-          <p className="text-sm text-slate-400 leading-relaxed max-w-4xl mx-auto text-center">
+        <div className="rounded-xl border border-cyan-400/20 bg-[var(--bg-elevated)] p-6">
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-4xl mx-auto text-center">
             Every pilot starts with a source readiness review that maps your specific regulators — and
             documents which sources are fresh-alert eligible, which have access limitations, and what your alert scope
             will be. No shared alert stream. No irrelevant sources.
