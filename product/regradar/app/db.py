@@ -27,6 +27,7 @@ import sqlite3
 from datetime import datetime, timezone
 
 from app.config import DB_PATH
+from app.rbac import GLOBAL_ORG_ID
 from app.text_normalization import stable_content_hash
 
 logger = logging.getLogger(__name__)
@@ -183,6 +184,172 @@ def ensure_delivery_log_table(conn: sqlite3.Connection | None = None) -> None:
             conn.close()
 
 
+# ── RBAC Stage-1 — INERT, ADDITIVE org/role model + immutable access log ─────────
+#
+# These tables are the dormant foundation for role-based access control. They are
+# NEW and PURELY ADDITIVE — they touch no existing table and no live endpoint
+# reads or writes them in Stage-1 (see app/rbac.py, app/access_log.py). A later
+# Stage-2 will resolve a Principal from ``org_members`` and gate requests on
+# ``app.rbac.can``, recording each decision via ``app.access_log``.
+#
+#   orgs         — one row per organisation. The GLOBAL org (id 0) is seeded for
+#                  cross-org / operator scope. Every existing user is backfilled
+#                  as the owner of their own "org-of-one" (owner_user_id = user).
+#   org_members  — (org_id, user_id, role) membership, unique per (org,user).
+#   access_log   — append-only audit of authorization decisions (no update/delete
+#                  path exists anywhere, so rows are immutable by construction).
+#
+# ``orgs.id`` is a plain INTEGER PRIMARY KEY (rowid alias) rather than
+# AUTOINCREMENT so the GLOBAL org can be seeded with the explicit id 0; personal
+# orgs then take the next rowids (1, 2, …). The partial UNIQUE index on
+# ``owner_user_id`` guarantees at most one org-of-one per user, which is what
+# makes the backfill idempotent under re-runs and races.
+_CREATE_RBAC_TABLES = """
+    CREATE TABLE IF NOT EXISTS orgs (
+        id            INTEGER PRIMARY KEY,
+        name          TEXT      NOT NULL,
+        owner_user_id INTEGER,
+        created_at    TIMESTAMP NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_orgs_owner_user_id
+        ON orgs(owner_user_id) WHERE owner_user_id IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS org_members (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        org_id     INTEGER   NOT NULL REFERENCES orgs(id),
+        user_id    INTEGER   NOT NULL REFERENCES users(id),
+        role       TEXT      NOT NULL,
+        created_at TIMESTAMP NOT NULL,
+        UNIQUE(org_id, user_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_org_members_user_id ON org_members(user_id);
+    CREATE INDEX IF NOT EXISTS idx_org_members_org_id  ON org_members(org_id);
+
+    CREATE TABLE IF NOT EXISTS access_log (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts            TIMESTAMP NOT NULL,
+        actor_user_id INTEGER,
+        org_id        INTEGER,
+        action        TEXT      NOT NULL,
+        resource_type TEXT      NOT NULL DEFAULT '',
+        resource_id   TEXT      NOT NULL DEFAULT '',
+        result        TEXT      NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_access_log_ts    ON access_log(ts);
+    CREATE INDEX IF NOT EXISTS idx_access_log_actor ON access_log(actor_user_id);
+    CREATE INDEX IF NOT EXISTS idx_access_log_org   ON access_log(org_id);
+
+    -- Append-only BY CONSTRUCTION: block every UPDATE/DELETE at the database
+    -- layer, not just by omitting helpers. A future stray writer that opens its
+    -- own connection still cannot mutate or erase an audit row.
+    CREATE TRIGGER IF NOT EXISTS trg_access_log_no_update
+    BEFORE UPDATE ON access_log
+    BEGIN
+        SELECT RAISE(ABORT, 'access_log is append-only');
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS trg_access_log_no_delete
+    BEFORE DELETE ON access_log
+    BEGIN
+        SELECT RAISE(ABORT, 'access_log is append-only');
+    END;
+"""
+
+
+def ensure_rbac_tables(conn: sqlite3.Connection | None = None) -> None:
+    """Provision the RBAC tables and seed the GLOBAL org. Cheap + idempotent.
+
+    Deliberately does ONLY constant-cost work — ``CREATE TABLE IF NOT EXISTS``
+    plus a single ``INSERT OR IGNORE`` for the GLOBAL org row — so it is safe to
+    chain into ``ensure_auth_tables`` (which runs on the per-request session path)
+    with the same cost profile as ``ensure_delivery_log_table``. The O(users)
+    backfill lives in :func:`backfill_org_memberships`, which is invoked from the
+    once-per-process migration entrypoint :func:`init_db`, NOT here — keeping the
+    request hot path free of table-wide scans.
+
+    Additive only: no existing table is altered and no existing row is touched.
+    INERT: no endpoint calls ``app.rbac.can`` or
+    ``app.access_log.append_access_log`` in Stage-1.
+    """
+    owned_conn = conn is None
+    if conn is None:
+        conn = _connect()
+    try:
+        conn.executescript(_CREATE_RBAC_TABLES)
+        now = datetime.now(timezone.utc).isoformat()
+        # Seed the GLOBAL org (cross-org / operator scope). owner_user_id NULL.
+        conn.execute(
+            "INSERT OR IGNORE INTO orgs (id, name, owner_user_id, created_at) "
+            "VALUES (?, 'GLOBAL', NULL, ?)",
+            (GLOBAL_ORG_ID, now),
+        )
+        conn.commit()
+    finally:
+        if owned_conn:
+            conn.close()
+
+
+def backfill_org_memberships(conn: sqlite3.Connection | None = None) -> None:
+    """Make every existing user the ``owner`` of their own org-of-one.
+
+    Idempotent and set-based (no Python loop): two ``NOT EXISTS``-guarded
+    statements insert only what is missing, so a re-run inserts zero rows. This
+    guarantees that when Stage-2 activates ``app.rbac.can``, a solo user resolves
+    to ``owner`` of the org that holds their resources and therefore keeps the
+    exact full access they have under today's flat owner-scope model.
+
+    Assumes the ``users`` and ``orgs`` tables already exist (they do when called
+    from :func:`ensure_rbac_tables`). Never alters an existing row.
+    """
+    owned_conn = conn is None
+    if conn is None:
+        conn = _connect()
+    try:
+        # Guard: nothing to backfill if the users table is not present yet.
+        users_exists = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+        ).fetchone() is not None
+        if not users_exists:
+            return
+        now = datetime.now(timezone.utc).isoformat()
+        # 1) Create a personal org for each user lacking one. ``OR IGNORE`` plus
+        #    the partial UNIQUE index on ``owner_user_id`` makes this safe even if
+        #    two callers race past the ``NOT EXISTS`` guard concurrently — the
+        #    loser is silently skipped rather than raising.
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO orgs (name, owner_user_id, created_at)
+            SELECT 'user:' || u.id, u.id, ?
+            FROM users u
+            WHERE NOT EXISTS (
+                SELECT 1 FROM orgs o WHERE o.owner_user_id = u.id
+            )
+            """,
+            (now,),
+        )
+        # 2) Add the owner membership for each personal org lacking one.
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO org_members (org_id, user_id, role, created_at)
+            SELECT o.id, o.owner_user_id, 'owner', ?
+            FROM orgs o
+            WHERE o.owner_user_id IS NOT NULL
+              AND NOT EXISTS (
+                  SELECT 1 FROM org_members m
+                  WHERE m.org_id = o.id AND m.user_id = o.owner_user_id
+              )
+            """,
+            (now,),
+        )
+        conn.commit()
+    finally:
+        if owned_conn:
+            conn.close()
+
+
 def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
     """Create auth tables without altering existing monitoring tables."""
     owned_conn = conn is None
@@ -272,6 +439,13 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
     from app.telegram_pairing import ensure_telegram_pairing_tables
     ensure_telegram_pairing_tables()
     ensure_delivery_log_table()
+    # RBAC Stage-1: PROVISION the INERT, additive org/role + access-log tables
+    # (cheap: CREATE IF NOT EXISTS + a one-row GLOBAL-org seed). The O(users)
+    # membership backfill is deliberately NOT here — it runs from init_db() once
+    # per process (see backfill_org_memberships) so the per-request session path
+    # stays free of table-wide scans. Additive only — no existing table is
+    # altered and no live endpoint reads these yet.
+    ensure_rbac_tables()
 
 
 def _backfill_normalized_user_emails(conn: sqlite3.Connection) -> None:
@@ -339,6 +513,7 @@ def init_db() -> None:
         if not table_exists:
             conn.executescript(_CREATE_TABLE_V3 + _CREATE_INDEXES)
             ensure_auth_tables(conn)
+            backfill_org_memberships(conn)  # RBAC Stage-1 migration (once/process)
             logger.info("DB initialised (v3 fresh schema)")
             return
 
@@ -360,6 +535,7 @@ def init_db() -> None:
                 {_CREATE_INDEXES}
             """)
             ensure_auth_tables(conn)
+            backfill_org_memberships(conn)  # RBAC Stage-1 migration (once/process)
             logger.info("Migration v1 → v3 complete")
             return
 
@@ -372,6 +548,7 @@ def init_db() -> None:
         # Always ensure indexes exist
         conn.executescript(_CREATE_INDEXES)
         ensure_auth_tables(conn)
+        backfill_org_memberships(conn)  # RBAC Stage-1 migration (once/process)
         logger.debug("DB schema is current (v3)")
 
     finally:
