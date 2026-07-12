@@ -252,6 +252,30 @@ def test_text_is_length_capped(isolated_db):
     assert len(item["text"]) == MAX_TEXT_LEN
 
 
+def test_alert_id_with_trailing_newline_is_rejected(isolated_db):
+    # \Z hardening: Python's $ also matches before a trailing newline, which
+    # would have let "…\n" through validation and stored a newline-bearing key.
+    user = _user("newline@example.com")
+    assert add_checklist_item(user["id"], ALERT + "\n", "Review the diff") is None
+    assert list_checklist_items(user["id"], ALERT + "\n") == []
+
+
+def test_aggregate_per_user_cap_enforced_across_alert_ids(isolated_db, monkeypatch):
+    # Without the aggregate cap, the per-alert cap is a false bound: alert_id is
+    # an opaque string, so fresh alert_ids would grow total rows without limit.
+    # Shrink the constant (the SQL reads the module global at call time).
+    monkeypatch.setattr(checklist, "MAX_ITEMS_PER_USER", 3)
+    user = _user("aggcap@example.com")
+    assert add_checklist_item(user["id"], "draft-agg001", "one") is not None
+    assert add_checklist_item(user["id"], "draft-agg002", "two") is not None
+    assert add_checklist_item(user["id"], "draft-agg003", "three") is not None
+    # 4th item on a FRESH alert_id still hits the per-user aggregate bound.
+    assert add_checklist_item(user["id"], "draft-agg004", "four") is None
+    # The cap is owner-scoped: another user is unaffected.
+    other = _user("aggcap-other@example.com")
+    assert add_checklist_item(other["id"], "draft-agg001", "their own") is not None
+
+
 # ── 4. legal-safety: audit log, framing guard, fail-soft ─────────────────────────
 
 def test_each_mutation_writes_access_log(isolated_db):

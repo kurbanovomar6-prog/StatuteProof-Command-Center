@@ -45,7 +45,7 @@ const MATRIX_ROWS = [
     category: 'Tax / corporate',
     sourceCount: 'MoF 7 fresh-alert; FTA candidate',
     statusTone: 'partial',
-    whatWeMonitor: 'MoF publications, financial legislation, Corporate Tax, Domestic Minimum Top-up Tax, ESR, AEOI/FATCA/CRS, UAE financial framework. Six FTA listing sources are enabled and monitored as candidates.',
+    whatWeMonitor: 'MoF publications, financial legislation, Corporate Tax, Domestic Minimum Top-up Tax, ESR, AEOI/FATCA/CRS, UAE financial framework. Six FTA listing sources are enabled and monitored ahead of the fresh-alert gate.',
     limitation: 'FTA listing sources remain candidate-stage until they pass the fresh-alert gate — no FTA source is counted as fresh-alert eligible today. Static FTA decision PDFs are evidence snapshots.',
     whatThisMeans: 'MoF tax-policy monitoring is proof-backed; FTA operational-tax alerting is disclosed as pending, not sold as ready.',
   },

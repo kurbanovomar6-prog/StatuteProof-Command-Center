@@ -38,6 +38,11 @@ logger = logging.getLogger(__name__)
 
 # ── bounds (KISS caps so the surface stays small and abuse-resistant) ────────────
 MAX_ITEMS_PER_ALERT = 25          # a checklist is a handful of actions, not a backlog
+# Aggregate per-user cap: without it the per-alert cap is a false bound — alert_id
+# is an opaque string, so distinct alert_ids (and thus total rows) would be capped
+# only by the rate limiter. 100 alerts' worth of items is far beyond real use and
+# keeps a single account's worst-case footprint at ~1.6MB in the shared DB.
+MAX_ITEMS_PER_USER = 2500         # = 100 alerts × 25 items
 MAX_TEXT_LEN = 500                # a single action item, not a document
 MAX_ASSIGNEE_LEN = 120            # a name / role / email, bounded
 MAX_DUE_DATE_LEN = 32             # an ISO date (YYYY-MM-DD) with slack
@@ -48,7 +53,9 @@ STATUS_DONE = "done"
 VALID_STATUSES = (STATUS_OPEN, STATUS_DONE)
 
 # alert_id shape mirrors the send-preview handler's validation — opaque, bounded.
-_ALERT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,%d}$" % MAX_ALERT_ID_LEN)
+# \Z (not $): in Python re, $ also matches just before a trailing newline, which
+# would let "abc\n" through and store a newline-bearing grouping key.
+_ALERT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,%d}\Z" % MAX_ALERT_ID_LEN)
 
 # access-log action vocabulary (free-text ``action`` column; namespaced).
 ACTION_CREATE = "checklist.create"
@@ -196,13 +203,15 @@ def add_checklist_item(
         ensure_checklist_table()
         conn = _connect()
         try:
-            # Cap is enforced ATOMICALLY inside the INSERT: the row is written only
-            # when the caller's own item count for this alert is still under the
-            # bound. Doing it in one statement (rather than a separate SELECT COUNT
-            # then INSERT) removes the check-then-act race — two concurrent adds
-            # can never both slip past the cap — and there is no separate count
-            # that could fail open. Owner-scoped by ``owner_user_id`` in the
-            # subquery, so the bound counts only the caller's rows.
+            # BOTH caps are enforced ATOMICALLY inside the INSERT: the row is
+            # written only when (a) the caller's item count for THIS alert is
+            # under the per-alert bound AND (b) the caller's TOTAL item count is
+            # under the per-user bound. One statement (not SELECT COUNT then
+            # INSERT) removes the check-then-act race — concurrent adds can never
+            # slip past either cap — and there is no separate count that could
+            # fail open. Owner-scoped by ``owner_user_id`` in both subqueries.
+            # The per-user bound matters because alert_id is an opaque string:
+            # without it, distinct alert_ids would make total rows unbounded.
             cur = conn.execute(
                 """
                 INSERT INTO alert_checklist_items
@@ -212,10 +221,15 @@ def add_checklist_item(
                     SELECT COUNT(*) FROM alert_checklist_items
                     WHERE owner_user_id = ? AND alert_id = ?
                 ) < ?
+                AND (
+                    SELECT COUNT(*) FROM alert_checklist_items
+                    WHERE owner_user_id = ?
+                ) < ?
                 """,
                 (
                     str(alert_id), uid, clean_text, clean_assignee, clean_due, STATUS_OPEN, now, now,
                     uid, str(alert_id), MAX_ITEMS_PER_ALERT,
+                    uid, MAX_ITEMS_PER_USER,
                 ),
             )
             conn.commit()

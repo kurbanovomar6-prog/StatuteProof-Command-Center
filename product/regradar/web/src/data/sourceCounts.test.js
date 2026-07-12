@@ -76,7 +76,17 @@ describe('per-regulator matrix counts (SourceTransparencyMatrix)', () => {
     { label: 'ADGM/FSRA: "9 fresh-alert eligible of 14 enabled"', fresh: 9, enabled: 14, prefixes: ['adgm'] },
     { label: 'UAE CMA: "6 fresh-alert eligible"', fresh: 6, prefixes: ['sca'] },
     { label: 'Tax/corporate: "MoF 7 fresh-alert"', fresh: 7, prefixes: ['mof'] },
-    { label: 'Tax/corporate: FTA candidate — "0 fresh-alert eligible"', fresh: 0, prefixes: ['fta'] },
+    // "Six FTA listing sources are enabled…" + "no FTA source is counted as
+    // fresh-alert eligible today" — guard both the 6 and the 0.
+    { label: 'Tax/corporate: "Six FTA listing sources are enabled", 0 fresh', fresh: 0, enabled: 6, prefixes: ['fta'] },
+    // "Legislation / gazettes: 0 fresh-alert eligible" — MoJ (AE-ministry-…)
+    // and the Dubai Legislation Portal (AE-dubai-…). If any of these ever
+    // passes the fresh-alert gate, the matrix row must be rewritten.
+    // minEnabled prevents a VACUOUS pass: 0===0 would also hold if the
+    // prefixes stopped matching anything (e.g. after a source_id rename).
+    { label: 'Legislation/gazettes: "0 fresh-alert eligible"', fresh: 0, minEnabled: 1, prefixes: ['ministry', 'dubai'] },
+    // "Markets / free zones / other federal: 0 fresh-alert eligible — candidates"
+    { label: 'Markets/free zones: "0 fresh-alert eligible — candidates"', fresh: 0, minEnabled: 1, prefixes: ['dfm', 'dmcc', 'jafza', 'icp', 'tdra', 'moccae'] },
   ]
 
   for (const claim of CLAIMS) {
@@ -88,6 +98,12 @@ describe('per-regulator matrix counts (SourceTransparencyMatrix)', () => {
         expect(enabledOf(claim.prefixes), `${claim.label}: enabled drift`).toBe(
           claim.enabled,
         )
+      }
+      if (typeof claim.minEnabled === 'number') {
+        expect(
+          enabledOf(claim.prefixes),
+          `${claim.label}: prefixes match no enabled source — vacuous guard`,
+        ).toBeGreaterThanOrEqual(claim.minEnabled)
       }
     })
   }
