@@ -8,6 +8,8 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 from app.db import _connect, ensure_auth_tables
+from app.legal_safety import ForbiddenClaimError
+from app.materiality import score_change
 from app.profile import (
     DEFAULT_URGENT_THRESHOLD,
     DEFAULT_WEEKLY_THRESHOLD,
@@ -426,7 +428,9 @@ def get_sent_alert_ids_for_user(user_id: int) -> set[str]:
         conn.close()
 
 
-def build_routing_preview_for_user(user_id: int, days: int = 14) -> dict:
+def build_routing_preview_for_user(
+    user_id: int, days: int = 14, *, rank_by_materiality: bool = False
+) -> dict:
     safe_days = max(1, min(int(days or 14), 60))
     user_profile = user_profile_to_routing_profile(int(user_id))
     candidates = load_approved_alert_candidates(safe_days, user_id=int(user_id))
@@ -464,6 +468,26 @@ def build_routing_preview_for_user(user_id: int, days: int = 14) -> dict:
             and bool(link.get("telegram_chat_id"))
             and not already_sent
         )
+        # ── Review-priority (materiality) heuristic — strictly ADDITIVE ──────
+        # Score the RAW candidate (it still carries the full diff chunks + change
+        # status, which the routing-normalized view drops) so the dashboard can
+        # later rank + filter by band. This is a MONITORING prioritization
+        # heuristic, not a legal determination, and it never touches the evidence
+        # record — see app/materiality.py. Kept fail-open: a scoring error must
+        # never break the preview a reviewer depends on.
+        try:
+            materiality = score_change(candidate)
+        except ForbiddenClaimError as exc:
+            # The heuristic's OWN fail-closed legal guard tripped — that means a
+            # wording-drift bug in the curated labels, StatuteProof's #1 promise.
+            # Surface it loudly (ERROR), never ship the string, and keep the
+            # preview working without a materiality block.
+            logger.error("Materiality rationale failed the legal-safety guard: %s", exc)
+            materiality = None
+        except Exception as exc:  # pragma: no cover - defensive; scorer is pure
+            logger.warning("Materiality scoring failed (non-fatal): %s: %s", type(exc).__name__, exc)
+            materiality = None
+
         matches.append({
             **normalized,
             "score": score["score"],
@@ -473,18 +497,49 @@ def build_routing_preview_for_user(user_id: int, days: int = 14) -> dict:
             "already_sent": already_sent,
             "delivery_ready": delivery_ready,
             "not_ready_reasons": item_reasons,
+            "materiality": materiality,
         })
 
-    matches.sort(key=lambda item: (item["matched"], item["score"], item.get("reviewed_at") or ""), reverse=True)
+    # Default order is UNCHANGED (matched, profile-fit score, reviewed_at) so
+    # existing consumers/tests are unaffected. When the caller opts in, rank by
+    # the review-priority heuristic first (highest-significance changes surfaced
+    # first) while still keeping matched alerts above non-matched ones.
+    if rank_by_materiality:
+        matches.sort(
+            key=lambda item: (
+                item["matched"],
+                _materiality_score(item),
+                item["score"],
+                item.get("reviewed_at") or "",
+            ),
+            reverse=True,
+        )
+    else:
+        matches.sort(key=lambda item: (item["matched"], item["score"], item.get("reviewed_at") or ""), reverse=True)
     return {
         "ok": True,
         "days": safe_days,
         "alerts_considered": len(candidates),
         "matches": matches,
+        # "review_priority", never bare "materiality": this value reaches the API
+        # payload and can be rendered by a UI — the legal-sense word must not ship
+        # (and the forbidden-claims guard does not catch it; legal review 2026-07-12).
+        "ranked_by": "review_priority" if rank_by_materiality else "profile_fit",
         "empty_state": "No approved reviewed alerts found in the selected window." if not candidates else None,
         "profile_ready": not not_ready_reasons,
         "not_ready_reasons": not_ready_reasons,
     }
+
+
+def _materiality_score(match: dict) -> int:
+    """Safely read a match's review-priority score for sorting (0 when absent)."""
+    block = match.get("materiality")
+    if isinstance(block, dict):
+        try:
+            return int(block.get("score") or 0)
+        except (TypeError, ValueError):
+            return 0
+    return 0
 
 
 def _truncate(text: str, limit: int) -> str:
