@@ -41,9 +41,9 @@ certification. Verification proves *integrity of the captured record*, nothing m
 | `record_hash` | The record's own fingerprint — `SHA-256` over its canonical JSON. Two concrete, self-checkable schemes exist. The append-only **trail record** hashes its identifying fields (`app/source_runs.py::compute_record_hash`). The canonical **`evidence-record.json`** carries a top-level `record_hash` and `record_hash_method: content-sha256-v1`, computed as `SHA-256` over the **compact** (`separators=(",", ":")`), **sorted-key**, **UTF-8** (`ensure_ascii=false`) JSON of its `content` block — the single shared function `app/record_hashing.py::canonical_record_hash`, used by both the writer and the public verifier so the two can never drift. |
 | `prev_record_hash` | The `record_hash` of the immediately preceding record in the append-only trail. This forms the chain. |
 
-The normalization function `normalize_for_change_hash` is published (see the
-`verify.py` shipped inside every Evidence Pack, and the source in
-`app/change_hash.py`). You do not need it to verify the *normalized* hash if you were
+The normalization function `normalize_for_change_hash` is published — its source
+is `app/text_normalization.py` (the exact function the writer and the public
+verifier both import, so they cannot drift). You do not need it to verify the *normalized* hash if you were
 given `normalized.txt` — just hash the bytes. You need it only if you want to
 re-derive `normalized.txt` from `raw.txt` yourself.
 
@@ -79,8 +79,14 @@ One-liner anyone can run on the bytes we give them:
 sha256sum raw.txt normalized.txt   # compare against raw_hash / current_hash in record.json
 ```
 
-Every Evidence Pack ships a standalone `verify.py` that does steps 1–4 offline with
-no network and no dependency on StatuteProof.
+Every Evidence Pack ships a standalone `verify.py` that recomputes the **raw and
+normalized** hashes (steps 1–2) offline against its `manifest.json`, with no network
+and no dependency on StatuteProof. The **Regulator Binder**'s `verify.py` goes
+further: it also re-seals every included `evidence-record.json` (step 4 — recomputes
+`record_hash` over the `content` block) and recomputes the binder-level content
+hash. To re-derive step 4 for a plain Evidence Pack, run the compact/sorted-key JSON
+`sha256` over `record.content` from the bundled `evidence-record.json` as described
+above (or paste the record into the public verifier at `/verify`).
 
 ## 4. How to verify a CHAIN (a source's timeline)
 

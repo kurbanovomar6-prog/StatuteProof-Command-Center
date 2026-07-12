@@ -680,7 +680,7 @@ def render_coverage_certificate_markdown(certificate: dict[str, Any]) -> str:
         "",
         "| Metric | Value |",
         "|--------|-------|",
-        f"| Sources certified | {summary.get('sources_total', 0)} |",
+        f"| Sources in this certificate | {summary.get('sources_total', 0)} |",
         f"| Sources with a detected change | {summary.get('sources_changed', 0)} |",
         f"| Sources checked, no detected change | {summary.get('sources_unchanged_with_proof', 0)} |",
         f"| Sources with no successful check | {summary.get('sources_no_coverage', 0)} |",
@@ -733,8 +733,8 @@ def render_coverage_certificate_markdown(certificate: dict[str, Any]) -> str:
             )
     else:
         lines.append(
-            "- No coverage gaps, failed checks, or degraded checks were recorded for the certified "
-            "sources during this period, within the limits described in the disclaimer."
+            "- No coverage gaps, failed checks, or degraded checks were recorded for the sources in this "
+            "certificate during this period, within the limits described in the disclaimer."
         )
     lines.append("")
 

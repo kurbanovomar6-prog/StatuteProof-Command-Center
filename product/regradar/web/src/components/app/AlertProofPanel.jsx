@@ -118,7 +118,8 @@ export default function AlertProofPanel({ item, navigate }) {
             </a>
           </div>
           <p className="mt-1.5 text-[10px] leading-relaxed text-[var(--text-muted)]">
-            Paste this record on the public verifier to re-check its hashes without trusting us.
+            Open the evidence record (or export its pack), then paste it into the public verifier to
+            re-check its hashes yourself — without trusting us.
           </p>
         </div>
       )}

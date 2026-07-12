@@ -14,11 +14,13 @@ function currentMonthStart() {
 
 // Change-state chip. NO_PROOF (nothing recorded in the period) is the honest
 // "not checked" signal and is shown in rose; CHANGED in cyan; UNCHANGED-with-proof
-// in emerald. These are recorded facts, never a compliance judgement.
+// in a NEUTRAL slate tone (never green — no-change is a recorded monitoring fact,
+// never a "you are safe/compliant" signal). These are recorded facts, never a
+// compliance judgement.
 function StateChip({ state }) {
   const map = {
     CHANGED: ['bg-[var(--trust-badge)] text-[var(--accent)] border-[var(--trust-border)]', 'Changed'],
-    UNCHANGED: ['bg-emerald-500/10 text-emerald-200 border-emerald-400/20', 'Unchanged'],
+    UNCHANGED: ['bg-[var(--bg-raised)] text-[var(--text-secondary)] border-[var(--border)]', 'No change (days checked)'],
     NO_PROOF: ['bg-rose-500/12 text-rose-200 border-rose-400/25', 'No coverage'],
   }
   const [cls, label] = map[state] || ['bg-[var(--bg-tooltip)] text-[var(--text-primary)] border-[var(--border)]', state || '—']

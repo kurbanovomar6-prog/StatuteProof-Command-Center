@@ -83,7 +83,7 @@ describe('AlertProofPanel', () => {
     const verifyLink = screen.getByRole('link', { name: /verify independently/i })
     expect(verifyLink).toHaveAttribute('href', '/verify')
     expect(
-      screen.getByText('Paste this record on the public verifier to re-check its hashes without trusting us.'),
+      screen.getByText(/Open the evidence record .* then paste it into the public verifier/i),
     ).toBeInTheDocument()
   })
 
