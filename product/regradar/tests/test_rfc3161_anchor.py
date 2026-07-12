@@ -619,3 +619,11 @@ def test_oversized_response_degrades_to_none(monkeypatch):
     monkeypatch.setattr(anchor._TSA_OPENER, "open", lambda *a, **k: _FakeResp())
     digest = hashlib.sha256(b"head").hexdigest()
     assert anchor.request_timestamp(digest) is None
+
+
+def test_verify_rejects_oversized_token_before_parse():
+    """A token past the size cap is refused (token_bounded) before any ASN.1 parse."""
+    huge = "A" * (anchor._MAX_TOKEN_B64_LEN + 4)
+    report = anchor.verify_timestamp_token(huge, hashlib.sha256(b"x").hexdigest())
+    assert report["verified"] is False
+    assert "token_bounded" in json.dumps(report)

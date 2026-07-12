@@ -173,6 +173,10 @@ def _imprint_bytes(digest_hex: str) -> bytes | None:
 # 14981dd, VARA mojibake incident: never read an unbounded network body).
 _MAX_TSR_BYTES = 1_048_576  # 1 MB
 
+# Max accepted base64 length of a submitted timestamp token before it is decoded +
+# ASN.1-parsed offline. A real RFC 3161 token is a few KB; 64 KB is generous.
+_MAX_TOKEN_B64_LEN = 65_536
+
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """Refuse redirects: a compromised/MITM'd TSA must not be able to pivot the
@@ -400,8 +404,16 @@ def _verify_timestamp_token_impl(token_b64: str, digest_hex: str) -> dict[str, A
         return result
     checks.append(_pass("digest_wellformed", "digest_hex is a valid SHA-256 hex digest."))
 
+    raw_b64 = str(token_b64 or "").strip()
+    # Bound the token BEFORE any ASN.1 parsing so this offline verifier is safe
+    # standalone regardless of caller (e.g. if later wired to the public, unauth
+    # /api/verify): a real RFC 3161 token is a few KB; a larger blob is hostile.
+    # Mirrors the bounded-transport discipline applied to the TSA response side.
+    if len(raw_b64) > _MAX_TOKEN_B64_LEN:
+        checks.append(_fail("token_bounded", "token_b64 exceeds the maximum accepted size."))
+        return result
     try:
-        token_der = base64.b64decode(str(token_b64 or "").strip(), validate=False)
+        token_der = base64.b64decode(raw_b64, validate=False)
     except Exception:
         checks.append(_fail("token_decodable", "token_b64 is not valid base64."))
         return result
@@ -657,9 +669,10 @@ def _verify_signature(public_key: Any, signature: bytes, message: bytes, sig_alg
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
 
+    # SHA-2 only: a weak SignerInfo/signature digest (SHA-1, SHA-224) is refused so
+    # a collision-weak hash can't be used to bind a forged token. Modern RFC 3161
+    # TSAs sign with SHA-256+; anything else is reported unverified (fail-closed).
     hash_cls = {
-        "sha1": hashes.SHA1,
-        "sha224": hashes.SHA224,
         "sha256": hashes.SHA256,
         "sha384": hashes.SHA384,
         "sha512": hashes.SHA512,
@@ -928,7 +941,9 @@ def _hash_bytes(algo: str, data: bytes) -> bytes | None:
     import hashlib
 
     name = str(algo).lower()
-    if name not in {"sha1", "sha224", "sha256", "sha384", "sha512"}:
+    # SHA-2 only (see _verify_signature): the message-digest binding must not rest
+    # on a collision-weak hash either. Weak/unknown algorithms => None => unverified.
+    if name not in {"sha256", "sha384", "sha512"}:
         return None
     try:
         return hashlib.new(name, data).digest()
