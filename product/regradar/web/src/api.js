@@ -273,6 +273,43 @@ export const reports = {
     const filename = parseFilename(response.headers.get('Content-Disposition')) || 'regulator-binder.zip'
     return { blob, filename }
   },
+
+  // Negative-assurance coverage certificate. GET with an optional period
+  // (period_start/period_end ISO dates; defaults to the current month server-side)
+  // and optional source scope. format 'json' returns the structured certificate
+  // for in-dashboard rendering; 'markdown'/'html' return a `report` string for
+  // download. Returns the parsed { status, certificate, report? } envelope.
+  coverageCertificate({ periodStart, periodEnd, sourceIds, clientName, format = 'json' } = {}) {
+    const q = new URLSearchParams()
+    if (periodStart) q.set('period_start', periodStart)
+    if (periodEnd) q.set('period_end', periodEnd)
+    if (sourceIds && sourceIds.length) q.set('source_ids', sourceIds.join(','))
+    if (clientName) q.set('client_name', clientName)
+    q.set('format', format)
+    return authRequest(`/api/reports/coverage-certificate?${q.toString()}`)
+  },
+
+  // Self-serve, self-verifiable Evidence Pack: POSTs source + period, receives a
+  // sealed application/zip (manifest + standalone verify.py + snapshots) streamed
+  // as a blob. Mirrors regulatorBinder — returns { blob, filename }; throws on
+  // error with an `empty` flag for the 404 case.
+  async evidencePack({ sourceIds, dateFrom, dateTo }) {
+    const response = await apiFetch('/api/evidence/pack', {
+      method: 'POST',
+      body: JSON.stringify({ source_ids: sourceIds, date_from: dateFrom, date_to: dateTo }),
+    })
+    const contentType = response.headers.get('Content-Type') || ''
+    if (!response.ok || !contentType.includes('application/zip')) {
+      const data = await response.json().catch(() => ({}))
+      const err = new Error(data.message || `HTTP ${response.status}`)
+      err.status = response.status
+      err.empty = response.status === 404 || data.status === 'empty'
+      throw err
+    }
+    const blob = await response.blob()
+    const filename = parseFilename(response.headers.get('Content-Disposition')) || 'evidence-pack.zip'
+    return { blob, filename }
+  },
 }
 
 export const plan = {

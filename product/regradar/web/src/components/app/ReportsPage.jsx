@@ -3,6 +3,8 @@ import { Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-re
 
 import { evidence } from '../../api'
 import AuditBinderExport from './AuditBinderExport'
+import CoverageCertificatePanel from './CoverageCertificatePanel'
+import EvidencePackExport from './EvidencePackExport'
 import RegulatorBinderExport from './RegulatorBinderExport'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
@@ -96,7 +98,9 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+      <CoverageCertificatePanel />
       <RegulatorBinderExport sources={binderSources} />
+      <EvidencePackExport sources={binderSources} />
       <AuditBinderExport />
 
       <div>
