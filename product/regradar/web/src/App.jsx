@@ -32,6 +32,7 @@ const AppShell              = lazy(() => import('./components/app/AppShell'))
 const SourceReadinessReviewPage = lazy(() => import('./components/SourceReadinessReviewPage'))
 const PricingPage           = lazy(() => import('./components/PricingPage'))
 const LegalPage             = lazy(() => import('./components/LegalPage'))
+const VerifyPage            = lazy(() => import('./components/VerifyPage'))
 
 function GlobalLoader() {
   return (
@@ -151,7 +152,7 @@ export default function App() {
         updatePath('/login', true)
         return
       }
-      if (['landing', 'login', 'register', 'pricing', 'source-readiness-review', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
+      if (['landing', 'login', 'register', 'pricing', 'source-readiness-review', 'verify', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
         setView(route.view)
         return
       }
@@ -203,7 +204,7 @@ export default function App() {
           updatePath('/app/dashboard', true)
           return
         }
-        if (['landing', 'pricing', 'source-readiness-review', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
+        if (['landing', 'pricing', 'source-readiness-review', 'verify', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
           setView(route.view)
           return
         }
@@ -352,6 +353,14 @@ export default function App() {
     return (
       <Suspense fallback={<GlobalLoader />}>
         <SourceReadinessReviewPage onBack={() => navigatePublic('landing')} />
+      </Suspense>
+    )
+  }
+
+  if (view === 'verify') {
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <VerifyPage onBack={() => navigatePublic('landing')} />
       </Suspense>
     )
   }

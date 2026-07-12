@@ -4,6 +4,7 @@ const PUBLIC_VIEW_PATHS = {
   register: '/register',
   pricing: '/pricing',
   'source-readiness-review': '/source-readiness-review',
+  verify: '/verify',
   terms: '/terms',
   privacy: '/privacy',
   disclaimer: '/disclaimer',

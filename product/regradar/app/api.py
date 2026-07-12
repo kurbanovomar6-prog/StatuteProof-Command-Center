@@ -75,6 +75,7 @@ from app.telegram_pairing import (
 from app.user_delivery import get_user_delivery_logs, send_sample_brief_to_user
 from app.alert_routing import build_routing_preview_for_user, send_preview_alert_to_user
 from app.alert_actions import save_action_log_entry, get_action_log
+from app.public_verify import verify_submission
 
 logger = logging.getLogger(__name__)
 
@@ -244,6 +245,10 @@ _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
 # droplet, so one shared per-IP limiter caps how fast any client can trigger
 # them regardless of which export it is.
 _EXPORT_LIMITER = _RateLimiter(30, 3600)
+# Public, no-login evidence verifier (POST /api/verify). Verification is cheap
+# (pure CPU, no disk, no evidence-store reads), but the endpoint is unauthenticated
+# and internet-facing on a small VPS, so cap it per client IP to bound abuse.
+_VERIFY_LIMITER = _RateLimiter(60, 3600)
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -688,6 +693,63 @@ class _Handler(BaseHTTPRequestHandler):
             }
         )
 
+    def _handle_public_verify(self) -> None:
+        """POST /api/verify — PUBLIC, no auth.
+
+        Stateless integrity check of a caller-submitted evidence record. This is
+        the no-login moat: it verifies the bytes the CALLER holds and never reads
+        the server's evidence/ tree, so it requires trusting neither a login nor
+        StatuteProof. Body: ``{"record": {...}, "raw"?: str, "normalized"?: str}``.
+        Fail-closed: malformed input returns a clear 400, never a 500 stacktrace.
+        """
+        # Cheap but unauthenticated — cap per client IP.
+        if self._rate_limited(_VERIFY_LIMITER, "public_verify"):
+            return
+
+        # _read_json_strict enforces the shared Content-Length body cap (413) and
+        # rejects non-object / invalid JSON bodies.
+        body, error = self._read_json_strict()
+        if error is not None:
+            self._send_json({"ok": False, "error": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "error": "Request body required."}, 400)
+            return
+
+        if "record" not in body or body.get("record") is None:
+            self._send_json({"ok": False, "error": "A 'record' object is required."}, 400)
+            return
+        raw = body.get("raw")
+        normalized = body.get("normalized")
+        if raw is not None and not isinstance(raw, str):
+            self._send_json({"ok": False, "error": "'raw' must be a string if provided."}, 400)
+            return
+        if normalized is not None and not isinstance(normalized, str):
+            self._send_json({"ok": False, "error": "'normalized' must be a string if provided."}, 400)
+            return
+
+        # verify_submission never raises; a malformed record surfaces as failed
+        # checks (verified: false), not a server error.
+        result = verify_submission(body.get("record"), raw=raw, normalized=normalized)
+        self._send_json(result, 200)
+
+    def _handle_verify_spec(self) -> None:
+        """GET /api/verify-spec — PUBLIC, no auth.
+
+        Serve the open verification specification (docs/EVIDENCE-VERIFICATION-SPEC.md)
+        so anyone can read the exact method the verifier implements without a login
+        or a StatuteProof code checkout. Static internal doc; no user data.
+        """
+        from pathlib import Path as _Path
+
+        spec_path = _Path(__file__).resolve().parent.parent / "docs" / "EVIDENCE-VERIFICATION-SPEC.md"
+        try:
+            body = spec_path.read_bytes()
+        except OSError:
+            self._send_json({"ok": False, "error": "Specification is not available."}, 404)
+            return
+        self._send_bytes(body, "text/markdown; charset=utf-8")
+
     def _truncate(self, value, limit: int) -> str:
         return str(value or "").strip()[:limit]
 
@@ -778,6 +840,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_monthly_assurance_report()
         elif path == "/api/reports/coverage-certificate":
             self._handle_coverage_certificate()
+        elif path == "/api/verify-spec":
+            self._handle_verify_spec()
         elif path in ("/api/health", "/api/"):
             self._handle_health()
         else:
@@ -848,6 +912,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_alert_action_log_post()
         elif path == "/api/briefs/generate":
             self._handle_briefs_generate()
+        elif path == "/api/verify":
+            self._handle_public_verify()
         else:
             self._send_json({"error": "not found"}, 404)
 

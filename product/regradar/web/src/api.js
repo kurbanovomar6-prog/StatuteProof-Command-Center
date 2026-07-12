@@ -37,6 +37,25 @@ async function authRequest(path, options = {}) {
   return data
 }
 
+// Public, no-login evidence verifier. Posts a caller-held record (+ optional
+// raw/normalized text) to /api/verify and returns the check envelope. No auth,
+// no session required — the whole point is verifying without trusting us.
+export async function verifyRecord({ record, raw, normalized }) {
+  const body = { record }
+  if (typeof raw === 'string' && raw.length) body.raw = raw
+  if (typeof normalized === 'string' && normalized.length) body.normalized = normalized
+
+  const response = await apiFetch('/api/verify', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    throw new Error(data.error || data.message || `HTTP ${response.status}`)
+  }
+  return data
+}
+
 export const auth = {
   register(body) {
     return authRequest('/api/auth/register', {

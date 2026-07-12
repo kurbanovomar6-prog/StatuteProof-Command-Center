@@ -68,6 +68,7 @@ export default function Footer() {
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>&copy; {new Date().getFullYear()} StatuteProof. All rights reserved.</p>
           <div className="flex items-center gap-5">
+            <a href="/verify" className="hover:text-white transition-colors">Verify a record</a>
             <a href="/terms" className="hover:text-white transition-colors">Terms</a>
             <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
             <a href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</a>
