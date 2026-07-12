@@ -76,6 +76,14 @@ from app.telegram_pairing import (
 from app.user_delivery import get_user_delivery_logs, send_sample_brief_to_user
 from app.alert_routing import build_routing_preview_for_user, send_preview_alert_to_user
 from app.alert_actions import save_action_log_entry, get_action_log
+from app.action_checklist import (
+    FRAMING as CHECKLIST_FRAMING,
+    add_checklist_item,
+    delete_checklist_item,
+    list_checklist_items,
+    update_checklist_item,
+    valid_alert_id as checklist_valid_alert_id,
+)
 from app.public_verify import verify_submission
 
 logger = logging.getLogger(__name__)
@@ -239,6 +247,9 @@ _PAIR_GENERATE_LIMITER = _RateLimiter(10, 3600)
 _TELEGRAM_TEST_LIMITER = _RateLimiter(5, 3600)
 _DELIVERY_TEST_BRIEF_LIMITER = _RateLimiter(5, 3600)
 _DELIVERY_SEND_PREVIEW_LIMITER = _RateLimiter(10, 3600)
+# Per-alert review checklist is an interactive workflow surface (ticking items,
+# adding a few actions), so the budget is generous compared with delivery.
+_CHECKLIST_LIMITER = _RateLimiter(120, 3600)
 _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
 # Heavy export endpoints (audit vault, evidence pack, regulator binder, coverage
 # certificate, monthly assurance, change-register export, evidence export). These
@@ -1082,6 +1093,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_plan_get()
         elif path == "/api/alerts/action-log":
             self._handle_alert_action_log_get()
+        elif path == "/api/alerts/checklist":
+            self._handle_alert_checklist_get()
         elif path == "/api/settings/telegram":
             self._disabled_endpoint()
         elif path == "/api/reports/monthly-assurance":
@@ -1169,6 +1182,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_change_register_export()
         elif path == "/api/alerts/action-log":
             self._handle_alert_action_log_post()
+        elif path == "/api/alerts/checklist":
+            self._handle_alert_checklist_add()
+        elif path == "/api/alerts/checklist/update":
+            self._handle_alert_checklist_update()
         elif path == "/api/briefs/generate":
             self._handle_briefs_generate()
         elif path == "/api/verify":
@@ -1758,6 +1775,132 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "Could not save action log entry."}, 500)
             return
         self._send_json({"ok": True, "entry": result}, 201)
+
+    # ── Per-alert review checklist (obligation-workflow v1) ─────────────────────
+    # The user's OWN review to-do list for an alert. Owner-scoped end to end:
+    # every handler passes int(user["id"]) as the owner, and the module filters
+    # every query on owner_user_id so a user can never read or mutate another
+    # user's items (a cross-user id resolves to 404, no oracle). The item text is
+    # the USER'S words — StatuteProof never authors an action here; only the
+    # returned FRAMING block is StatuteProof copy, and it is forbidden-claims
+    # guarded (see tests/test_action_checklist.py).
+
+    def _handle_alert_checklist_get(self) -> None:
+        if self._rate_limited(_CHECKLIST_LIMITER, "alert_checklist_get"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        alert_id = str((params.get("alert_id") or [""])[0]).strip()
+        if not checklist_valid_alert_id(alert_id):
+            self._send_json({"ok": False, "message": "Invalid alert_id."}, 400)
+            return
+        items = list_checklist_items(int(user["id"]), alert_id)
+        self._send_json({"ok": True, "items": items, "framing": CHECKLIST_FRAMING})
+
+    def _handle_alert_checklist_add(self) -> None:
+        if self._rate_limited(_CHECKLIST_LIMITER, "alert_checklist_add"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        # RBAC Stage-2: authoring a review action is a review write. Owner passes;
+        # a read-only auditor seat is denied 403. No-op for accounts today.
+        if not self._rbac_guard(user, rbac_runtime.REVIEW_SUBMIT, resource_type="checklist"):
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        alert_id = str(body.get("alert_id", "")).strip()
+        if not checklist_valid_alert_id(alert_id):
+            self._send_json({"ok": False, "message": "Invalid alert_id."}, 400)
+            return
+        # `or ""` (not the get() default) so an explicit JSON null coerces to ""
+        # rather than the string "None" — matching the str(x or "") guard used for
+        # every other nullable body field in this file.
+        text = str(body.get("text") or "").strip()
+        if not text:
+            self._send_json({"ok": False, "message": "A review action is required."}, 400)
+            return
+        assignee = str(body.get("assignee") or "")
+        due_date = str(body.get("due_date") or "")
+        item = add_checklist_item(int(user["id"]), alert_id, text, assignee, due_date)
+        if item is None:
+            self._send_json(
+                {
+                    "ok": False,
+                    "message": "Could not add the review action. This alert's checklist may be full.",
+                },
+                400,
+            )
+            return
+        self._send_json({"ok": True, "item": item}, 201)
+
+    def _handle_alert_checklist_update(self) -> None:
+        """Update / toggle / delete one of the caller's OWN checklist items.
+
+        A single mutating endpoint: ``delete: true`` removes the item; otherwise
+        the provided fields (``status`` to tick, ``text`` / ``assignee`` /
+        ``due_date`` to edit) are updated. Owner-scoped in the module; a
+        cross-user or absent id returns 404 with no existence oracle.
+        """
+        if self._rate_limited(_CHECKLIST_LIMITER, "alert_checklist_update"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if not self._rbac_guard(user, rbac_runtime.REVIEW_SUBMIT, resource_type="checklist"):
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        try:
+            item_id = int(body.get("item_id"))
+        except (TypeError, ValueError):
+            self._send_json({"ok": False, "message": "Invalid item_id."}, 400)
+            return
+
+        if body.get("delete") is True:
+            if delete_checklist_item(int(user["id"]), item_id):
+                self._send_json({"ok": True, "deleted": item_id})
+                return
+            self._send_json({"ok": False, "message": "Checklist item not found."}, 404)
+            return
+
+        # Only pass through fields the caller actually supplied so an update
+        # touches nothing else (immutable-by-omission).
+        kwargs: dict = {}
+        if "status" in body:
+            kwargs["status"] = body.get("status")
+        if "text" in body:
+            kwargs["text"] = body.get("text")
+        if "assignee" in body:
+            kwargs["assignee"] = body.get("assignee")
+        if "due_date" in body:
+            kwargs["due_date"] = body.get("due_date")
+        if not kwargs:
+            self._send_json({"ok": False, "message": "Nothing to update."}, 400)
+            return
+        item = update_checklist_item(int(user["id"]), item_id, **kwargs)
+        if item is None:
+            # Ambiguous between "not yours / gone" and "invalid field" by design —
+            # 404 gives no oracle for a cross-user probe. A bad status is the only
+            # value-level rejection, but conflating it here keeps the surface tight.
+            self._send_json({"ok": False, "message": "Checklist item not found."}, 404)
+            return
+        self._send_json({"ok": True, "item": item})
 
     def _handle_delivery_email_test_mode(self) -> None:
         if self._rate_limited(_DELIVERY_TEST_BRIEF_LIMITER, "delivery_email_test_mode"):

@@ -407,3 +407,35 @@ export const actionLog = {
     })
   },
 }
+
+// Per-alert review checklist (obligation-workflow v1). The user's OWN review
+// action items for an alert — list, add, tick/edit, and delete. Owner-scoped by
+// the session on the server; the item text is the user's own words. The GET
+// response carries a server-authored `framing` block (guard-clean copy).
+export const checklist = {
+  list(alertId) {
+    return authRequest(`/api/alerts/checklist?alert_id=${encodeURIComponent(alertId)}`)
+  },
+
+  add({ alertId, text, assignee = '', dueDate = '' }) {
+    return authRequest('/api/alerts/checklist', {
+      method: 'POST',
+      body: JSON.stringify({ alert_id: alertId, text, assignee, due_date: dueDate }),
+    })
+  },
+
+  update(body) {
+    return authRequest('/api/alerts/checklist/update', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+
+  toggle(itemId, status) {
+    return this.update({ item_id: itemId, status })
+  },
+
+  remove(itemId) {
+    return this.update({ item_id: itemId, delete: true })
+  },
+}

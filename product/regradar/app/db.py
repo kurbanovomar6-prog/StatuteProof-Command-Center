@@ -313,6 +313,61 @@ def ensure_evidence_shares_table(conn: sqlite3.Connection | None = None) -> None
             conn.close()
 
 
+# ── Per-alert review checklist — owner-scoped, user-authored action items ────────
+#
+# One row per action item a user adds to THEIR OWN review checklist for an alert
+# (obligation-workflow v1). PURELY ADDITIVE: no existing table is altered and the
+# monitoring pipeline never reads it.
+#
+# LEGAL FRAMING (see CLAUDE.md): the checklist is the USER'S OWN review to-do
+# list. ``text`` / ``assignee`` are the user's words — StatuteProof never
+# generates, prescribes, or suggests a compliance action here. The table is a
+# workflow aid over monitoring evidence, not compliance advice.
+#
+# Tenancy invariant baked into the schema + every query:
+#   owner_user_id  — the ONE scoping key. Every SELECT/UPDATE/DELETE filters on
+#                    ``owner_user_id = ?`` so a user can only ever see or mutate
+#                    their own items; another user's items are invisible and
+#                    unaddressable (a cross-user id resolves to zero rows, i.e. a
+#                    404 with no existence oracle). ``alert_id`` is only a
+#                    per-user grouping key, never a cross-tenant join.
+_CREATE_CHECKLIST_TABLE = """
+    CREATE TABLE IF NOT EXISTS alert_checklist_items (
+        id            INTEGER   PRIMARY KEY AUTOINCREMENT,
+        alert_id      TEXT      NOT NULL,
+        owner_user_id INTEGER   NOT NULL REFERENCES users(id),
+        text          TEXT      NOT NULL,
+        assignee      TEXT      NOT NULL DEFAULT '',
+        due_date      TEXT      NOT NULL DEFAULT '',
+        status        TEXT      NOT NULL DEFAULT 'open',
+        created_at    TIMESTAMP NOT NULL,
+        updated_at    TIMESTAMP NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_aci_owner_alert
+        ON alert_checklist_items(owner_user_id, alert_id);
+"""
+
+
+def ensure_checklist_table(conn: sqlite3.Connection | None = None) -> None:
+    """Provision the per-alert review-checklist table. Cheap + idempotent + additive.
+
+    Mirrors ``ensure_evidence_shares_table``: constant-cost ``CREATE TABLE IF NOT
+    EXISTS`` only, safe to call from every checklist DB operation. Deliberately NOT
+    chained into ``ensure_auth_tables`` — the table is touched only by the
+    checklist module, so the per-request session path stays unchanged.
+    """
+    owned_conn = conn is None
+    if conn is None:
+        conn = _connect()
+    try:
+        conn.executescript(_CREATE_CHECKLIST_TABLE)
+        conn.commit()
+    finally:
+        if owned_conn:
+            conn.close()
+
+
 def ensure_rbac_tables(conn: sqlite3.Connection | None = None) -> None:
     """Provision the RBAC tables and seed the GLOBAL org. Cheap + idempotent.
 
