@@ -15,24 +15,12 @@
     font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    background:
-      linear-gradient(180deg, rgba(9, 22, 41, 0.98) 0%, rgba(4, 11, 22, 1) 48%, rgba(6, 16, 31, 1) 100%);
-    color: #f8fafc;
+    font-variant-numeric: tabular-nums;
+    /* Flat, opaque ground. Depth comes from the surface ramp, not a tinted
+       gradient or a decorative grid (impeccable product-register). */
+    background: var(--bg-base);
+    color: var(--text-primary);
     overflow-x: hidden;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.13;
-    background-image:
-      linear-gradient(rgba(125, 211, 252, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(125, 211, 252, 0.08) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: linear-gradient(to bottom, black, transparent 72%);
   }
 
   button, a, input, select, textarea {
@@ -80,20 +68,23 @@
 
 /* ─── Design System Tokens ─── */
 :root {
-  --bg-base:       #040B16;
-  --bg-navy:       #07111F;
-  --bg-surface:    #091629;
-  --bg-elevated:   #0D1B2E;
-  --bg-raised:     #12243B;
+  /* Surface ramp — depth by lightness step + 1px hairline, not blur/gradient. */
+  --bg-base:       #050B15; /* L0 canvas   */
+  --bg-navy:       #070E1A; /* L1 chrome   */
+  --bg-surface:    #0A1522; /* L2          */
+  --bg-elevated:   #0C1826; /* L2 card     */
+  --bg-raised:     #12202F; /* L3 raised   */
+  --bg-tooltip:    #16283A; /* L4 overlay  */
   --paper:         #EAF3F3;
   --paper-strong:  #F7FBFB;
   --ink:           #07111F;
   --border:        #22314A;
   --border-subtle: #12223A;
-  --border-muted:  #17263E;
-  --text-primary:  #F8FAFC;
-  --text-secondary:#A8B6CC;
-  --text-muted:    #718099;
+  --border-muted:  #1B2A40;
+  --hairline:      rgba(255, 255, 255, 0.045);
+  --text-primary:  #E8EEF5;
+  --text-secondary:#A9B6C6;
+  --text-muted:    #6E7E92;
   --accent:        #16D9F5; /* single accent — matches component usage; was #19D3F3 (duplicate cyan) */
   --accent-hover:  #67E8F9;
   --accent-deep:   #0891B2;
@@ -107,9 +98,11 @@
   --status-unchanged:#94A3B8;
   --status-failed: #F87171;
   --status-quality-drop:#FBBF24;
-  --shadow-soft:   0 18px 54px rgba(1, 8, 20, 0.42);
-  --shadow-cyan:   0 0 0 1px rgba(25, 211, 243, 0.16), 0 20px 60px rgba(8, 145, 178, 0.13);
-  --shadow-paper:  0 26px 90px rgba(1, 8, 20, 0.46);
+  /* One restrained elevation. Real shadow (<=8px blur) only under floating overlays. */
+  --shadow-soft:   0 1px 0 var(--hairline) inset;
+  --shadow-cyan:   0 1px 0 var(--hairline) inset;
+  --shadow-overlay:0 8px 24px rgba(1, 6, 14, 0.55);
+  --shadow-paper:  0 8px 24px rgba(1, 8, 20, 0.28);
 
   /* ── Typography tokens ── */
   --font-display:  'Geist', system-ui, sans-serif;
@@ -127,52 +120,51 @@
   --space-16: 4rem;
 
   /* ── Animation tokens ── */
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1); /* no overshoot — ease-out */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
   --dur-fast:    120ms;
-  --dur-base:    200ms;
-  --dur-slow:    350ms;
+  --dur-base:    180ms;
+  --dur-slow:    240ms;
+
+  --radius-card: 0.625rem; /* 10px — one card radius everywhere */
 
   /* ── Trust & Authority color additions ── */
-  --trust-badge:    rgba(25, 211, 243, 0.08);
-  --trust-border:   rgba(25, 211, 243, 0.18);
-  --surface-glass:  rgba(9, 22, 41, 0.72);
-  --shadow-glow:    0 0 0 1px rgba(25, 211, 243, 0.12), 0 8px 32px rgba(8, 145, 178, 0.16);
+  --trust-badge:    rgba(22, 217, 245, 0.08);
+  --trust-border:   rgba(22, 217, 245, 0.20);
+  --surface-glass:  var(--bg-elevated); /* was translucent; now opaque */
+  --shadow-glow:    0 1px 0 var(--hairline) inset;
 }
 
 /* ─── Utility Classes ─── */
 .sp-card {
-  border-radius: 0.625rem;
+  border-radius: var(--radius-card);
   border: 1px solid var(--border-muted);
-  background:
-    linear-gradient(180deg, rgba(18, 36, 59, 0.72), rgba(9, 22, 41, 0.92));
+  background: var(--bg-elevated);
   padding: 1.25rem;
   box-shadow: var(--shadow-soft);
-  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
 .sp-card:hover {
-  border-color: rgba(25, 211, 243, 0.28);
-  box-shadow: var(--shadow-cyan);
+  border-color: var(--border);
 }
 
 .sp-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(103, 232, 249, 0.72);
-  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
-  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: #04111F;
-  box-shadow: 0 12px 30px rgba(25, 211, 243, 0.16);
 }
 .sp-btn-primary:hover {
-  background: linear-gradient(180deg, #A5F3FC, var(--accent-hover));
-  box-shadow: 0 16px 44px rgba(25, 211, 243, 0.24);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 .sp-btn-primary:focus-visible {
   outline: 2px solid var(--accent);
@@ -221,7 +213,6 @@
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0;
-  text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: 0.375rem;
 }
@@ -230,8 +221,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0;
-  text-transform: uppercase;
-  color: var(--accent-hover);
+  color: var(--text-secondary);
 }
 
 .sp-shell {
@@ -241,9 +231,8 @@
 
 .sp-panel {
   border: 1px solid var(--border-muted);
-  border-radius: 0.625rem;
-  background:
-    linear-gradient(180deg, rgba(13, 27, 46, 0.94), rgba(9, 22, 41, 0.94));
+  border-radius: var(--radius-card);
+  background: var(--bg-elevated);
   box-shadow: var(--shadow-soft);
 }
 
@@ -316,57 +305,35 @@
 /* ─── Visible Redesign Utilities ─── */
 .sp-page-orbit {
   position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 12% 12%, rgba(25, 211, 243, 0.14), transparent 30rem),
-    radial-gradient(circle at 86% 18%, rgba(55, 211, 153, 0.08), transparent 26rem),
-    linear-gradient(180deg, #06101d 0%, #07111f 46%, #040b16 100%);
-}
-.sp-page-orbit::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.16;
-  background-image:
-    linear-gradient(rgba(234, 243, 243, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(234, 243, 243, 0.08) 1px, transparent 1px);
-  background-size: 84px 84px;
-  mask-image: radial-gradient(circle at 50% 0%, black, transparent 66%);
+  background: var(--bg-base);
 }
 
 .sp-paper-panel {
-  border: 1px solid rgba(234, 243, 243, 0.86);
-  border-radius: 1.25rem;
-  background:
-    linear-gradient(180deg, rgba(247, 251, 251, 0.98), rgba(218, 235, 236, 0.96));
+  border: 1px solid rgba(15, 30, 45, 0.12);
+  border-radius: var(--radius-card);
+  background: var(--paper-strong);
   color: var(--ink);
   box-shadow: var(--shadow-paper);
 }
 
 .sp-command-panel {
-  border: 1px solid rgba(96, 165, 250, 0.16);
-  border-radius: 1rem;
-  background:
-    linear-gradient(135deg, rgba(13, 27, 46, 0.98), rgba(7, 17, 31, 0.94)),
-    radial-gradient(circle at 100% 0%, rgba(25, 211, 243, 0.12), transparent 30rem);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-card);
+  background: var(--bg-elevated);
   box-shadow: var(--shadow-soft);
 }
 
 .sp-command-hero {
-  border: 1px solid rgba(25, 211, 243, 0.2);
-  border-radius: 1.25rem;
-  background:
-    linear-gradient(135deg, rgba(4, 11, 22, 0.94), rgba(13, 27, 46, 0.98)),
-    radial-gradient(circle at 82% 18%, rgba(25, 211, 243, 0.15), transparent 28rem);
-  box-shadow: var(--shadow-cyan);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-card);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-soft);
 }
 
 .sp-action-lane {
-  border: 1px solid rgba(244, 184, 74, 0.28);
-  border-radius: 1rem;
-  background:
-    linear-gradient(135deg, rgba(244, 184, 74, 0.14), rgba(13, 27, 46, 0.86));
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-card);
+  background: var(--bg-raised);
 }
 
 .sp-evidence-chain {
@@ -394,12 +361,11 @@
   bottom: -1px;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(25, 211, 243, 0.9), rgba(55, 211, 153, 0.55));
-  transform-origin: left;
-  animation: sp-flow-line 4.8s ease-in-out infinite;
+  background: var(--accent);
+  opacity: 0.5;
 }
 .sp-evidence-step.is-blocked::after {
-  background: linear-gradient(90deg, rgba(244, 184, 74, 0.95), rgba(248, 113, 113, 0.7));
+  background: var(--warning);
 }
 
 .sp-mobile-card {
@@ -410,7 +376,9 @@
 }
 
 .sp-reveal {
-  animation: sp-reveal-up 440ms ease both;
+  /* Page-load reveal removed (product loads into the task; avoids the
+     transition-pauses-on-hidden-tab "ships blank" trap). Content is instant. */
+  animation: none;
 }
 
 @keyframes sp-reveal-up {
@@ -489,7 +457,7 @@
   0%, 100% { transform: scaleX(0); opacity: 0; }
   50% { transform: scaleX(1); opacity: 1; }
 }
-.animate-rr-pulse-x { animation: rr-pulse-x 3s ease-in-out infinite; }
+.animate-rr-pulse-x { animation: none; }
 
 /* ── Display typography ── */
 .sp-display {
@@ -506,19 +474,17 @@
   line-height: 1.15;
 }
 
-/* ── Liquid glass card ── */
+/* ── Surface card (was glassmorphism — now opaque, product-register) ── */
 .sp-glass {
-  background: var(--surface-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--shadow-soft);
-  border-radius: 0.75rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
+  box-shadow: var(--shadow-soft);
+  border-radius: var(--radius-card);
+  transition: border-color 150ms ease;
 }
 
 .sp-glass:hover {
-  border-color: var(--trust-border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--shadow-glow);
+  border-color: var(--border);
 }
 
 /* ── Trust badge ── */
@@ -532,8 +498,7 @@
   padding: 0.25rem 0.75rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   color: var(--accent);
 }
 
@@ -555,16 +520,14 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.sp-animate-pulse-metric { animation: metric-pulse 2.4s ease-in-out infinite; }
-.sp-animate-stat { animation: stat-reveal 0.4s var(--ease-out) forwards; }
-.sp-animate-fade-up { animation: fade-up 0.5s var(--ease-out) both; }
+/* Product loads into a task, not a choreographed reveal. Content is visible
+   immediately; only skeleton->content is animated (see .sp-skeleton). */
+.sp-animate-pulse-metric { animation: none; }
+.sp-animate-stat { animation: none; }
+.sp-animate-fade-up { animation: none; }
 
-/* stagger delays */
-.sp-delay-1 { animation-delay: 80ms; }
-.sp-delay-2 { animation-delay: 160ms; }
-.sp-delay-3 { animation-delay: 240ms; }
-.sp-delay-4 { animation-delay: 320ms; }
-.sp-delay-5 { animation-delay: 400ms; }
+/* stagger delays — no-ops, kept so existing className usage stays valid */
+.sp-delay-1, .sp-delay-2, .sp-delay-3, .sp-delay-4, .sp-delay-5 { animation-delay: 0ms; }
 
 /* ── Status dot (live indicator) ── */
 .sp-live-dot {
@@ -578,10 +541,10 @@
 .sp-live-dot::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -3px;
   border-radius: 50%;
-  background: var(--success);
-  animation: dot-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  border: 1px solid var(--success);
+  opacity: 0.4;
 }
 
 /* ── Button tactile feedback ── */
