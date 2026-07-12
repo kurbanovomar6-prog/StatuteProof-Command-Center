@@ -63,6 +63,19 @@ FULL_LEGAL_DISCLAIMER = (
     "filing, operational, or customer decisions based on a report."
 )
 
+# Hard cap on the number of evidence records a single pack may materialize. The
+# pack loads every included record's raw + normalized + record bytes into memory
+# before writing the ZIP, so an unbounded selection ("export a year across every
+# source") could exhaust memory on the single-process server and take the
+# platform down for all tenants. A self-serve evidence pack is a focused artifact
+# (a source or a few sources over a period), so this ceiling is well above any
+# legitimate use; an oversized selection is rejected with guidance to narrow it
+# rather than silently truncated (a truncated pack would be misleading evidence
+# shipped under a clean manifest). Enforced via the collector's ``limit`` so
+# over-cap requests never load more than ``MAX_EVIDENCE_PACK_RECORDS + 1``
+# records' bytes. Mirrors ``regulator_binder.MAX_BINDER_RECORDS``.
+MAX_EVIDENCE_PACK_RECORDS = 2000
+
 
 class EvidencePackError(ValueError):
     """Raised when authored pack prose would contain a forbidden claim."""
@@ -98,6 +111,7 @@ def build_evidence_pack(
     *,
     base_dir: Path | None = None,
     output_dir: Path | None = None,
+    max_records: int = MAX_EVIDENCE_PACK_RECORDS,
 ) -> dict[str, Any]:
     """Bundle canonical evidence for ``source_ids`` in a date range into a ZIP.
 
@@ -110,8 +124,11 @@ def build_evidence_pack(
     -------
     dict
         ``{"status": "ok", "pack_path": str, "record_count": int, ...}`` on
-        success, ``{"status": "empty", ...}`` when no records match, and
-        ``{"status": "error", "message": str}`` on failure. Never raises.
+        success, ``{"status": "empty", ...}`` when no records match,
+        ``{"status": "too_large", "max_records": int, ...}`` when the selection
+        exceeds ``max_records`` (availability guard — see
+        ``MAX_EVIDENCE_PACK_RECORDS``), and ``{"status": "error", "message":
+        str}`` on failure. Never raises.
     """
     try:
         root = base_dir or _BASE_DIR
@@ -129,12 +146,26 @@ def build_evidence_pack(
             return {"status": "error", "message": "source_ids must be a non-empty list."}
 
         date_to_end = f"{date_to}T23:59:59"
-        entries = _collect_pack_entries(root, wanted, date_from, date_to_end)
+        # Bounded collect: the collector stops after max_records + 1 entries, so an
+        # oversized selection never materializes an unbounded number of records'
+        # bytes in memory (the availability guard — see MAX_EVIDENCE_PACK_RECORDS).
+        entries = _collect_pack_entries(root, wanted, date_from, date_to_end, limit=max_records)
         if not entries:
             return {
                 "status": "empty",
                 "record_count": 0,
                 "message": "No complete evidence records found for the specified period and sources.",
+            }
+        if len(entries) > max_records:
+            return {
+                "status": "too_large",
+                "max_records": max_records,
+                "message": (
+                    f"This selection spans more than {max_records} captured records. "
+                    "Narrow the period or the number of sources and export again — a "
+                    "self-serve evidence pack is a focused artifact for a source or a "
+                    "few sources over a defined period."
+                ),
             }
 
         manifest = _build_manifest(entries, wanted, date_from, date_to)

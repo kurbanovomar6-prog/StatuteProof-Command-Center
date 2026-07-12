@@ -33,6 +33,20 @@ _BASE_DIR = Path(__file__).parent.parent
 MAX_RANGE_DAYS = 366
 MAX_SOURCE_IDS = 1000
 
+# Hard cap on the number of run records a single audit vault may materialize.
+# Neither the day-width nor the source-count cap bounds the number of RECORDS a
+# selection resolves to: one source over a year can have thousands of runs, and
+# the vault generates a per-record audit pack (Markdown/HTML/metadata files) for
+# every matching run before zipping. An unbounded selection ("export a year
+# across every source") could exhaust memory/disk/CPU on the single-process
+# server and take the platform down for all tenants. This ceiling is well above
+# any legitimate audit-vault use; an oversized selection is rejected with
+# guidance to narrow it rather than silently truncated. Enforced via the
+# collector's ``limit`` so over-cap requests never materialize more than
+# ``MAX_AUDIT_VAULT_RECORDS + 1`` run records. Mirrors
+# ``regulator_binder.MAX_BINDER_RECORDS`` / ``evidence_pack.MAX_EVIDENCE_PACK_RECORDS``.
+MAX_AUDIT_VAULT_RECORDS = 2000
+
 
 def validate_source_ids(source_ids: Any) -> tuple[bool, str]:
     """Validate a source_ids list for an export request.
@@ -349,6 +363,7 @@ def build_period_audit_vault(
     date_to: str,
     output_dir: Path | None = None,
     base_dir: Path | None = None,
+    max_records: int = MAX_AUDIT_VAULT_RECORDS,
 ) -> dict[str, Any]:
     """Bundle all audit packs for source_ids within a date range into a ZIP archive.
 
@@ -365,12 +380,18 @@ def build_period_audit_vault(
         Directory for the ZIP archive. Defaults to product/regradar/data/audit_vaults/.
     base_dir:
         Override for the product root (used in tests).
+    max_records:
+        Availability guard: reject (never truncate) a selection that resolves to
+        more than this many run records. See ``MAX_AUDIT_VAULT_RECORDS``. Exposed
+        as a kwarg for testability, mirroring the sibling exports.
 
     Returns
     -------
     dict
         {"status": "ok", "vault_path": str, "record_count": int, ...} on success.
         {"status": "empty", ...} when no records match.
+        {"status": "too_large", "max_records": int, ...} when the selection
+        exceeds ``max_records`` (availability guard).
         {"status": "error", "message": str} on failure.
         Never raises.
     """
@@ -389,14 +410,29 @@ def build_period_audit_vault(
         vault_dir = output_dir or (root / "data" / "audit_vaults")
         vault_dir.mkdir(parents=True, exist_ok=True)
 
-        # Collect run records from source_runs.jsonl for the given sources + date range
-        records = _fetch_runs_for_vault(root, source_ids, date_from, date_to)
+        # Collect run records from source_runs.jsonl for the given sources + date range.
+        # Bounded collect: the fetcher stops after max_records + 1 records, so an
+        # oversized selection never materializes an unbounded number of run records
+        # (and never triggers unbounded per-record pack generation below) — the
+        # availability guard, see MAX_AUDIT_VAULT_RECORDS.
+        records = _fetch_runs_for_vault(root, source_ids, date_from, date_to, limit=max_records)
 
         if not records:
             return {
                 "status": "empty",
                 "record_count": 0,
                 "message": "No records found for the specified period and sources.",
+            }
+        if len(records) > max_records:
+            return {
+                "status": "too_large",
+                "max_records": max_records,
+                "message": (
+                    f"This selection spans more than {max_records} captured records. "
+                    "Narrow the period or the number of sources and export again — an "
+                    "audit vault is a focused artifact for a source or a few sources "
+                    "over a defined period."
+                ),
             }
 
         # Generate individual audit packs
@@ -499,10 +535,18 @@ def _fetch_runs_for_vault(
     source_ids: list[str],
     date_from: str,
     date_to: str,
+    limit: int | None = None,
 ) -> list[dict[str, Any]]:
     """Return run records matching source_ids and date range.
 
     First tries source_runs.jsonl; falls back to documents DB if no JSONL exists.
+
+    ``limit`` bounds how many records are materialized: once ``limit + 1`` records
+    have been collected the scan stops early, so a caller can detect an oversized
+    selection (``len(result) > limit``) and reject it WITHOUT materializing an
+    unbounded number of run records (and without triggering unbounded per-record
+    audit-pack generation downstream). ``None`` (the default) preserves the
+    original collect-everything behavior.
     """
     wanted_ids = set(str(s).strip() for s in source_ids if s)
     date_to_end = f"{date_to}T23:59:59"
@@ -512,6 +556,8 @@ def _fetch_runs_for_vault(
     if runs_path.exists():
         matching: list[dict[str, Any]] = []
         for line in runs_path.read_text(encoding="utf-8").splitlines():
+            if limit is not None and len(matching) > limit:
+                break  # one past the cap is enough for the caller to detect overflow
             if not line.strip():
                 continue
             try:
@@ -550,6 +596,8 @@ def _fetch_runs_for_vault(
 
         result: list[dict[str, Any]] = []
         for row in rows:
+            if limit is not None and len(result) > limit:
+                break  # one past the cap is enough for the caller to detect overflow
             url = str(row["url"] or "")
             # Include if url contains any of the wanted source_ids
             if any(sid in url for sid in wanted_ids):

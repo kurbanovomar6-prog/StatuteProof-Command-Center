@@ -3321,9 +3321,25 @@ class _Handler(BaseHTTPRequestHandler):
             return
         try:
             result = build_period_audit_vault(source_ids, date_from, date_to)
-            if result.get("status") == "error":
-                self._send_json({"ok": False, **result}, 500)
-            elif result.get("status") == "empty":
+            status = result.get("status")
+            if status == "error":
+                # Never forward the builder's internal exception text to the client:
+                # it can carry absolute server paths or other internal detail. Log it
+                # server-side, return a generic 500.
+                logger.error("audit vault build failed: %s", result.get("message"))
+                self._send_json({"ok": False, "message": "Failed to build the audit vault."}, 500)
+            elif status == "too_large":
+                # Availability guard tripped: the selection exceeds MAX_AUDIT_VAULT_RECORDS.
+                # 413 with a safe, actionable message (narrow the selection).
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": result.get("message", "Selection too large; narrow the period or sources."),
+                        "max_records": result.get("max_records"),
+                    },
+                    413,
+                )
+            elif status == "empty":
                 self._send_json({"ok": False, **result}, 404)
             else:
                 self._send_json({"ok": True, **result})
@@ -3383,7 +3399,23 @@ class _Handler(BaseHTTPRequestHandler):
             result = build_evidence_pack(source_ids, date_from, date_to)
             status = result.get("status")
             if status == "error":
-                self._send_json({"ok": False, "message": result.get("message", "Failed to build evidence pack.")}, 500)
+                # Never forward the builder's internal exception text to the client:
+                # it can carry absolute server paths or other internal detail. Log it
+                # server-side, return a generic 500.
+                logger.error("evidence pack build failed: %s", result.get("message"))
+                self._send_json({"ok": False, "message": "Failed to build the evidence pack."}, 500)
+                return
+            if status == "too_large":
+                # Availability guard tripped: the selection exceeds MAX_EVIDENCE_PACK_RECORDS.
+                # 413 with a safe, actionable message (narrow the selection).
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": result.get("message", "Selection too large; narrow the period or sources."),
+                        "max_records": result.get("max_records"),
+                    },
+                    413,
+                )
                 return
             if status == "empty":
                 self._send_json({"ok": False, **result}, 404)
@@ -3393,8 +3425,13 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "message": "Evidence pack was not generated."}, 500)
                 return
             filename = result.get("pack_filename") or pack_path.name
+            try:
+                payload = pack_path.read_bytes()
+            finally:
+                # One-shot download: don't accumulate generated ZIPs on the server's disk.
+                pack_path.unlink(missing_ok=True)
             self._send_bytes(
-                pack_path.read_bytes(),
+                payload,
                 "application/zip",
                 extra_headers=[("Content-Disposition", f'attachment; filename="{filename}"')],
             )

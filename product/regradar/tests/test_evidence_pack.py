@@ -135,6 +135,41 @@ def test_out_of_range_record_is_excluded(tmp_path):
     assert result["status"] == "empty"
 
 
+# ── availability guard: bounded record materialization ──────────────────────────
+
+def test_pack_rejects_oversized_selection(tmp_path):
+    """More records than the cap → reject the whole selection, never truncate.
+
+    The collector stops one past the cap, so an over-cap request never loads an
+    unbounded number of records' bytes into memory (the OOM guard). Rejecting (vs
+    silently truncating) keeps the pack honest — a partial pack shipped under a
+    clean manifest would be misleading evidence.
+    """
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-a", timestamp="2026-03-10T10:00:00Z")
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-b", timestamp="2026-03-12T10:00:00Z")
+
+    result = build_evidence_pack(
+        ["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path, max_records=1
+    )
+
+    assert result["status"] == "too_large", result
+    assert result["max_records"] == 1
+    assert "pack_path" not in result
+    assert "narrow" in result["message"].lower()
+
+
+def test_pack_exactly_at_cap_still_builds(tmp_path):
+    """Boundary: a selection with exactly max_records records builds normally."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-a", timestamp="2026-03-10T10:00:00Z")
+
+    result = build_evidence_pack(
+        ["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path, max_records=1
+    )
+
+    assert result["status"] == "ok", result
+    assert result["record_count"] == 1
+
+
 # ── manifest ↔ snapshot integrity ───────────────────────────────────────────────
 
 def test_manifest_matches_included_snapshots(tmp_path):
@@ -327,8 +362,65 @@ def test_handler_streams_zip_for_authenticated_client(monkeypatch, tmp_path):
     handler._send_bytes = _capture_bytes  # type: ignore[method-assign]
     handler._send_json = lambda data, status=200, **kw: sent.update(json=data, status=status)  # type: ignore[method-assign]
 
+    expected_bytes = fake_zip.read_bytes()  # capture before the handler unlinks it
     handler._handle_evidence_pack()
 
     assert sent.get("content_type") == "application/zip"
-    assert sent.get("body") == fake_zip.read_bytes()
+    assert sent.get("body") == expected_bytes
     assert any("Content-Disposition" == k for k, _ in (sent.get("extra_headers") or []))
+    # One-shot download: the generated ZIP is removed from disk after streaming.
+    assert not fake_zip.exists()
+
+
+def test_handler_413_when_selection_too_large(monkeypatch):
+    """The handler maps the builder's too_large status to HTTP 413."""
+    monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
+    handler = _bare_handler()
+    monkeypatch.setattr(
+        handler, "_read_json_strict",
+        lambda: ({"source_ids": ["mine"], "date_from": "2026-03-01", "date_to": "2026-03-31"}, None),
+    )
+    monkeypatch.setattr(handler, "_rate_limited", lambda *a, **k: False)
+    monkeypatch.setattr(handler, "_require_capability", lambda *a, **k: True)
+    monkeypatch.setattr(handler, "_entitle_source_ids", lambda user, ids: ids)
+    import app.evidence_pack as ep
+    monkeypatch.setattr(
+        ep, "build_evidence_pack",
+        lambda *a, **k: {"status": "too_large", "max_records": 2000, "message": "narrow the selection"},
+    )
+    captured: dict = {}
+    handler._send_json = lambda data, status=200, **kw: captured.update(data=data, status=status)  # type: ignore[method-assign]
+
+    handler._handle_evidence_pack()
+
+    assert captured["status"] == 413
+    assert captured["data"]["ok"] is False
+    assert captured["data"]["max_records"] == 2000
+
+
+def test_handler_error_does_not_leak_internal_message(monkeypatch):
+    """A builder error must return a generic 500 — never forward internal detail
+    (e.g. an absolute server path in an OSError) to the client."""
+    monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
+    handler = _bare_handler()
+    monkeypatch.setattr(
+        handler, "_read_json_strict",
+        lambda: ({"source_ids": ["mine"], "date_from": "2026-03-01", "date_to": "2026-03-31"}, None),
+    )
+    monkeypatch.setattr(handler, "_rate_limited", lambda *a, **k: False)
+    monkeypatch.setattr(handler, "_require_capability", lambda *a, **k: True)
+    monkeypatch.setattr(handler, "_entitle_source_ids", lambda user, ids: ids)
+    secret_path = "/srv/statuteproof/data/evidence_packs"
+    import app.evidence_pack as ep
+    monkeypatch.setattr(
+        ep, "build_evidence_pack",
+        lambda *a, **k: {"status": "error", "message": f"[Errno 13] Permission denied: '{secret_path}'"},
+    )
+    captured: dict = {}
+    handler._send_json = lambda data, status=200, **kw: captured.update(data=data, status=status)  # type: ignore[method-assign]
+
+    handler._handle_evidence_pack()
+
+    assert captured["status"] == 500
+    assert secret_path not in json.dumps(captured["data"])
+    assert captured["data"]["message"] == "Failed to build the evidence pack."
