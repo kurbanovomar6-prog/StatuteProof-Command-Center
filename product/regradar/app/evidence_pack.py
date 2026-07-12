@@ -231,8 +231,24 @@ def _collect_pack_entries(
     if not evidence_root.exists():
         return []
 
+    # Scope the filesystem walk to the wanted source_ids ONLY. The on-disk layout
+    # is evidence/<regulator>/<source_id>/<run_id>/evidence-record.json, so one
+    # glob per wanted source enumerates just that source's own records — never the
+    # entire cross-tenant evidence store on every export request. Bounds cost to
+    # O(records in the requested scope), not O(total product evidence)
+    # (verification-swarm 2026-07-12; matches evidence_room._collect_room_records).
+    # A source_id that isn't a safe single path segment could never have matched a
+    # real record dir anyway, so it is skipped.
+    import re as _re
+
+    _safe_segment = _re.compile(r"^[A-Za-z0-9._-]+$")
+    record_paths: list[Path] = []
+    for source_id in sorted(wanted):
+        if _safe_segment.match(str(source_id)):
+            record_paths.extend(evidence_root.glob(f"*/{source_id}/**/evidence-record.json"))
+
     entries: list[dict[str, Any]] = []
-    for record_path in sorted(evidence_root.glob("**/evidence-record.json")):
+    for record_path in sorted(record_paths):
         if limit is not None and len(entries) > limit:
             break  # one past the cap is enough for the caller to detect overflow
         try:

@@ -555,21 +555,24 @@ def _fetch_runs_for_vault(
     runs_path = root / "data" / "source_runs" / "source_runs.jsonl"
     if runs_path.exists():
         matching: list[dict[str, Any]] = []
-        for line in runs_path.read_text(encoding="utf-8").splitlines():
-            if limit is not None and len(matching) > limit:
-                break  # one past the cap is enough for the caller to detect overflow
-            if not line.strip():
-                continue
-            try:
-                row = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            sid = str(row.get("source_id") or "").strip()
-            if sid not in wanted_ids:
-                continue
-            ts = _naive_ts(str(row.get("timestamp_utc") or row.get("run_at") or ""))
-            if ts and ts >= date_from and ts <= date_to_end:
-                matching.append(row)
+        # Stream line-by-line (never read the whole growing run log into memory at
+        # once) and stop one past the cap (verification-swarm 2026-07-12).
+        with runs_path.open(encoding="utf-8") as _fh:
+            for line in _fh:
+                if limit is not None and len(matching) > limit:
+                    break  # one past the cap is enough for the caller to detect overflow
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                sid = str(row.get("source_id") or "").strip()
+                if sid not in wanted_ids:
+                    continue
+                ts = _naive_ts(str(row.get("timestamp_utc") or row.get("run_at") or ""))
+                if ts and ts >= date_from and ts <= date_to_end:
+                    matching.append(row)
         if matching:
             return matching
 
