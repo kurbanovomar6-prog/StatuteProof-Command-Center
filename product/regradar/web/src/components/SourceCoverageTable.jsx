@@ -148,7 +148,13 @@ export default function SourceCoverageTable() {
         <div className="text-right text-xs">
           <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} enabled UAE source records</p>
           <p className="text-emerald-200">{SOURCE_TRUTH.readinessSupported} fresh-alert eligible</p>
-          <p className="text-amber-200">{SOURCE_TRUTH.candidate} candidates pending validation</p>
+          {/* The remainder (enabled − fresh) so the three lines reconcile to
+              `enabled` and this never undercounts the pending set the
+              transparency matrix discloses; {SOURCE_TRUTH.candidate} of these are
+              in formal candidate monitoring mode. */}
+          <p className="text-amber-200">
+            {SOURCE_TRUTH.enabled - SOURCE_TRUTH.readinessSupported} enabled, pending fresh-alert validation
+          </p>
         </div>
       </div>
 
