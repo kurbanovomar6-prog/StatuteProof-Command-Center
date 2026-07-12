@@ -35,10 +35,10 @@ certification. Verification proves *integrity of the captured record*, nothing m
 
 | Field | Definition |
 |---|---|
-| `raw_hash` | `SHA-256( bytes of raw.txt )` — the exact source bytes as captured. |
-| `current_hash` (normalized) | `SHA-256( bytes of normalized.txt )`, where `normalized.txt = normalize_for_change_hash(raw)` — the content-stable form used for change detection (strips volatile markup/whitespace so a cosmetic republish is not a false change). |
-| `previous_hash` | The `current_hash` of the immediately preceding captured state of the same source (empty for the first-ever capture, `FIRST_SEEN`). |
-| `record_hash` | `SHA-256` over the record's canonical, sorted-key JSON of its content block (the fields above + `timestamp` + identifiers). This is the record's own fingerprint. |
+| `raw_hash` | `SHA-256( bytes of raw.txt )` — the exact source bytes as captured. In the canonical `evidence-record.json` this is stored as `content.raw_hash`. |
+| `current_hash` (normalized) | `SHA-256( bytes of normalized.txt )`, where `normalized.txt = normalize_for_change_hash(raw)` — the content-stable form used for change detection (strips volatile markup/whitespace so a cosmetic republish is not a false change). Stored as `content.current_hash`. |
+| `previous_hash` | The `current_hash` of the immediately preceding captured state of the same source (empty for the first-ever capture, `FIRST_SEEN`). Stored as `content.previous_hash`. |
+| `record_hash` | The record's own fingerprint — `SHA-256` over its canonical JSON. Two concrete, self-checkable schemes exist. The append-only **trail record** hashes its identifying fields (`app/source_runs.py::compute_record_hash`). The canonical **`evidence-record.json`** carries a top-level `record_hash` and `record_hash_method: content-sha256-v1`, computed as `SHA-256` over the **compact** (`separators=(",", ":")`), **sorted-key**, **UTF-8** (`ensure_ascii=false`) JSON of its `content` block — the single shared function `app/record_hashing.py::canonical_record_hash`, used by both the writer and the public verifier so the two can never drift. |
 | `prev_record_hash` | The `record_hash` of the immediately preceding record in the append-only trail. This forms the chain. |
 
 The normalization function `normalize_for_change_hash` is published (see the
@@ -57,11 +57,21 @@ Given a record bundle (`raw.txt`, `normalized.txt`, `record.json`):
 3. *(optional, stronger)* **Re-derive normalization:** run the published
    `normalize_for_change_hash` on `raw.txt`; the output must be byte-identical to
    `normalized.txt` (so the "normalized" form was not quietly swapped).
-4. **Recompute the record hash:** canonicalize `record.content` (JSON, sorted keys,
-   UTF-8) and `sha256` it → must equal `record.record_hash`.
+4. **Recompute the record hash:** for a canonical `evidence-record.json`
+   (`record_hash_method == "content-sha256-v1"`), serialize `record.content` as
+   compact (`separators=(",", ":")`), sorted-key, UTF-8 (`ensure_ascii=false`) JSON
+   and `sha256` it → must equal the bare digest in `record.record_hash` (drop the
+   `sha256:` prefix). Because `content` includes `current_hash`, `raw_hash`, and the
+   previous-side fields, this one fingerprint covers every hash the record asserts:
+   altering any field inside `content` makes `record_hash` diverge. (For a source-run
+   trail record, the record hash is instead computed over its identifying fields; see
+   §4.)
 
 If all match, the record's bytes are exactly what was sealed. Any mismatch =
 `divergent` (corrupted or altered) — that is the signal, and it never auto-heals.
+This remains tamper-**evident**, not tamper-**proof** (see §1): a `record_hash` that
+recomputes proves the content block was not edited *in place*, not that no actor with
+full write access re-sealed the whole record.
 
 One-liner anyone can run on the bytes we give them:
 

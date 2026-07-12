@@ -15,25 +15,29 @@ Design constraints (deliberate, non-negotiable):
 * **Fail-closed.** Malformed input yields a ``fail`` / ``skipped`` check, never
   an exception to the caller. :func:`verify_submission` never raises.
 * **Real code paths, not reinvented math.** ``record_hash`` self-consistency
-  reuses the product's genuine chain-hash function
-  ``app.source_runs.compute_record_hash`` (the same function
-  ``tools/verify_evidence_trail.py`` uses). Normalization reproducibility reuses
+  reuses the product's genuine hashing functions — never a hand-rolled digest.
+  The trail record uses ``app.source_runs.compute_record_hash`` (the same function
+  ``tools/verify_evidence_trail.py`` uses); the canonical evidence record uses the
+  shared ``app.record_hashing.canonical_record_hash`` (the SAME function its writer
+  seals with). Normalization reproducibility reuses
   ``app.text_normalization.normalize_for_change_hash``.
 
-Record-shape note (see the module-level report accompanying this change): two
-genuine record shapes exist in the product and both are accepted here.
+Record-shape note: two genuine record shapes exist in the product and both are
+fully self-checkable here.
 
 * The **source-run trail record** (``data/source_runs/source_runs.jsonl`` — the
   shape the open spec §2 describes) carries bare-hex ``raw_hash`` /
   ``normalized_hash`` / ``content_hash`` / ``record_hash`` / ``prev_record_hash``
-  and is fully self-checkable, including ``record_hash`` via
-  ``compute_record_hash``.
+  and is self-checkable, including ``record_hash`` via ``compute_record_hash``.
 * The **canonical ``evidence-record.json``** (``evidence/.../evidence-record.json``
   — the object shipped inside every Evidence Pack) carries ``sha256:``-prefixed
-  ``content.current_hash`` / ``content.previous_hash`` and NO in-record
-  ``record_hash`` / ``raw_hash``; for it, ``record_hash_self_consistent`` and
-  ``raw_bytes_match`` report ``skipped`` (there is no field to check), while the
-  normalized-bytes and format checks are genuine.
+  ``content.current_hash`` / ``content.previous_hash`` / ``content.raw_hash`` plus a
+  top-level ``record_hash`` and ``record_hash_method: content-sha256-v1``. For it,
+  ``record_hash_self_consistent`` recomputes ``canonical_record_hash(content)`` and
+  ``raw_bytes_match`` matches a submitted ``raw.txt`` against ``content.raw_hash``;
+  all checks are genuine. A legacy canonical record predating this seal (no
+  ``record_hash``) still verifies its normalized bytes and simply reports
+  ``skipped`` for the self-seal — never ``fail``.
 
 Hashes are accepted both bare and ``sha256:``-prefixed, and are always compared
 as the bare 64-char lowercase digest (the spec mandates lowercase hex).
@@ -45,6 +49,7 @@ import hashlib
 import re
 from typing import Any
 
+from app.record_hashing import RECORD_HASH_METHOD, canonical_record_hash
 from app.source_runs import compute_record_hash
 from app.text_normalization import normalize_for_change_hash
 
@@ -182,16 +187,43 @@ def _check_record_hash_self_consistent(
     if not stored:
         return _skip(
             name,
-            "The record carries no record_hash (e.g. a canonical "
-            "evidence-record.json); nothing to self-check.",
+            "The record carries no record_hash (e.g. a legacy record predating "
+            "the content-sha256-v1 seal); nothing to self-check.",
         )
     stored_bare = _bare_digest(stored)
     if stored_bare is None:
         return _fail(name, "record_hash is not a valid sha256 digest.")
-    # Recompute over the record's OWN prev_record_hash string exactly as the
-    # write side did (source_runs._apply_chain_fields) and as the real trail
-    # verifier does (tools/verify_evidence_trail.verify_chain). Reuse the product
-    # function — never reinvent the canonicalization.
+
+    # Branch on the sealed scheme so writer and verifier can never drift.
+    #
+    # Canonical evidence-record.json seals its OWN content block under the
+    # published content-sha256-v1 scheme. Recompute through the SAME shared
+    # function the writer used (app.record_hashing.canonical_record_hash) — never
+    # reinvent the canonicalization.
+    if record.get("record_hash_method") == RECORD_HASH_METHOD:
+        content = record.get("content")
+        if not isinstance(content, dict):
+            return _fail(
+                name,
+                "record_hash_method is content-sha256-v1 but the record has no "
+                "content block to recompute.",
+            )
+        if canonical_record_hash(content) == stored_bare:
+            return _pass(
+                name,
+                "record_hash recomputes from the record's content block "
+                "(content-sha256-v1).",
+            )
+        return _fail(
+            name,
+            "record_hash does not recompute from the record's content block — "
+            "the record was altered.",
+        )
+
+    # Otherwise this is a source-run trail record: recompute over the record's OWN
+    # prev_record_hash string exactly as the write side did
+    # (source_runs._apply_chain_fields) and as the real trail verifier does
+    # (tools/verify_evidence_trail.verify_chain). Reuse the product function.
     prev = record.get("prev_record_hash")
     prev = prev if isinstance(prev, str) else ""
     recomputed = compute_record_hash(record, prev)

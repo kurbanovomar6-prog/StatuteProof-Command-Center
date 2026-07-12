@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from app.record_hashing import RECORD_HASH_METHOD, canonical_record_hash
 from app.text_quality import is_mostly_unreadable
 
 
@@ -183,6 +184,10 @@ def create_canonical_evidence_record(
             },
             "content": {
                 "current_hash": f"sha256:{_sha256_path(current_path)}",
+                # Additive self-seal input: the raw source bytes' own hash lives
+                # INSIDE content so it is covered by record_hash below, and so the
+                # public verifier can match a submitted raw.txt against the record.
+                "raw_hash": f"sha256:{_sha256_path(raw_input)}",
                 "raw_content_path": _relative_or_absolute(raw_path, root),
                 "normalized_current_path": _relative_or_absolute(current_path, root),
             },
@@ -216,6 +221,14 @@ def create_canonical_evidence_record(
             rel_diff = _relative_or_absolute(diff_path, root)
             record["change"]["diff_path"] = rel_diff
             record["files"]["diff_path"] = rel_diff
+
+        # Seal the record with its own fingerprint LAST, once the content block is
+        # fully built (current_hash + raw_hash + paths, and the previous-side
+        # fields when present). record_hash covers the whole content block, so any
+        # later in-place edit to content makes the recomputed hash diverge. This is
+        # additive: legacy records predate these two fields and stay valid.
+        record["record_hash"] = f"sha256:{canonical_record_hash(record['content'])}"
+        record["record_hash_method"] = RECORD_HASH_METHOD
 
         validation = validate_evidence_record(record, base_dir=root)
         if not validation["valid"]:
@@ -353,6 +366,19 @@ def validate_evidence_record(record: dict[str, Any], base_dir: Path | None = Non
         errors.append("review.human_review_required is required.")
     _require_text(review, "review_status", errors, "review.review_status")
     _require_text(review, "review_reason", errors, "review.review_reason")
+
+    # Additive self-seal check (content-sha256-v1). Records written after this
+    # change carry a top-level record_hash over their content block; recompute it
+    # through the SAME shared function the writer used and flag any mismatch.
+    # Legacy records predate BOTH fields and must stay valid, so this is a strict
+    # no-op unless the method marker AND the record_hash are both present.
+    if record.get("record_hash_method") == RECORD_HASH_METHOD and record.get("record_hash"):
+        content_block = record.get("content")
+        if isinstance(content_block, dict):
+            expected = canonical_record_hash(content_block)
+            stored = str(record.get("record_hash") or "").strip().lower().removeprefix("sha256:")
+            if stored != expected:
+                errors.append("record_hash does not match content")
 
     return {"valid": not errors, "errors": errors}
 

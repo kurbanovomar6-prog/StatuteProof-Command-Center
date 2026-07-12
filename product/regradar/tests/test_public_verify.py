@@ -212,8 +212,10 @@ def test_real_canonical_evidence_record_verifies(tmp_path):
 
     assert result["verified"] is True
     assert _status_of(result, "normalized_bytes_match") == STATUS_PASS
-    # A canonical record carries no in-record record_hash / raw_hash — honest skip.
-    assert _status_of(result, "record_hash_self_consistent") == STATUS_SKIPPED
+    # A canonical record now seals its own content block (content-sha256-v1), so
+    # record_hash_self_consistent is a genuine PASS. raw_bytes_match stays skipped
+    # here only because this caller submitted normalized bytes but no raw.txt.
+    assert _status_of(result, "record_hash_self_consistent") == STATUS_PASS
     assert _status_of(result, "raw_bytes_match") == STATUS_SKIPPED
 
 
