@@ -6,6 +6,7 @@ import AppTopbar from './AppTopbar'
 const DashboardHome   = lazy(() => import('./DashboardHome'))
 const SourcesPage     = lazy(() => import('./SourcesPage'))
 const SourceLabPage   = lazy(() => import('./SourceLabPage'))
+const MonitoringHealthPage = lazy(() => import('./MonitoringHealthPage'))
 const AlertsPage      = lazy(() => import('./AlertsPage'))
 const AIBriefPage     = lazy(() => import('./AIBriefPage'))
 const ReportsPage     = lazy(() => import('./ReportsPage'))
@@ -44,6 +45,7 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
       case 'dashboard':    return <DashboardHome navigate={navigate} currentUser={currentUser} planState={planState} onChoosePlan={onChoosePlan} />
       case 'sources':      return <SourcesPage onAddCustomSource={() => navigate('source-lab')} />
       case 'source-lab':   return <SourceLabPage planState={planState} onChoosePlan={onChoosePlan} />
+      case 'monitoring-health': return <MonitoringHealthPage />
       case 'evidence':     return <EvidencePage navigate={navigate} />
       case 'alerts':       return <AlertsPage />
       case 'briefs':       return <AIBriefPage />

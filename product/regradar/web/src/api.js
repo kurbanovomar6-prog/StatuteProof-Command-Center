@@ -312,6 +312,19 @@ export const reports = {
   },
 }
 
+export const health = {
+  // System health for the existing public /api/health endpoint (same one the
+  // topbar polls). Best-effort: returns the parsed payload
+  // ({ ok, db, sources_active, last_run_at, ... }) and never throws for a
+  // non-2xx response — a "degraded" health signal is itself meaningful. A
+  // genuine network failure rejects, so callers can distinguish unreachable.
+  async get() {
+    const response = await apiFetch('/api/health')
+    const data = await response.json().catch(() => ({}))
+    return { ...data, http_ok: response.ok }
+  },
+}
+
 export const plan = {
   get() {
     return authRequest('/api/plan')

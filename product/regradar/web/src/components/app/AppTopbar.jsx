@@ -23,6 +23,7 @@ const PAGE_LABELS = {
   dashboard:    'Dashboard',
   sources:      'Source Map',
   'source-lab': 'Source Lab',
+  'monitoring-health': 'Monitoring Health',
   evidence:     'Evidence Records',
   'review-queue': 'Review Queue',
   alerts:       'Reviewed Alerts',

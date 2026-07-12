@@ -1,9 +1,10 @@
-import { LayoutDashboard, Globe, Bell, FileText, BarChart3, Plug, Settings, ChevronLeft, ChevronRight, LogOut, ShieldCheck, CreditCard, FlaskConical, ClipboardCheck } from 'lucide-react'
+import { LayoutDashboard, Globe, Bell, FileText, BarChart3, Plug, Settings, ChevronLeft, ChevronRight, LogOut, ShieldCheck, CreditCard, FlaskConical, ClipboardCheck, Activity } from 'lucide-react'
 
 const NAV = [
   { id: 'dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
   { id: 'sources',      label: 'Sources',         icon: Globe },
   { id: 'source-lab',   label: 'Source Lab',      icon: FlaskConical },
+  { id: 'monitoring-health', label: 'Monitoring health', icon: Activity },
   { id: 'evidence',     label: 'Evidence',        icon: ShieldCheck },
   { id: 'review-queue', label: 'Review Queue',    icon: ClipboardCheck },
   { id: 'alerts',       label: 'Reviewed Alerts', icon: Bell },

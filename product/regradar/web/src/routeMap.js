@@ -15,6 +15,7 @@ const APP_PAGE_PATHS = {
   dashboard: '/app/dashboard',
   sources: '/app/sources',
   'source-lab': '/app/source-lab',
+  'monitoring-health': '/app/monitoring-health',
   evidence: '/app/evidence',
   'review-queue': '/app/review-queue',
   alerts: '/app/alerts',
