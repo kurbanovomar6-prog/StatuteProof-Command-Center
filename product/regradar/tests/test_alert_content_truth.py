@@ -190,6 +190,95 @@ def test_excerpt_capped_at_400_even_for_huge_diffs():
     assert len(c["excerpt"]) <= 400
 
 
+# ── headline shape: front-loaded, factual, bounded, guarded (info-presentation) ──
+
+def test_headline_is_front_loaded_factual_and_dated():
+    from app.alert_content import build_alert_content
+
+    c = build_alert_content(_payload())
+    title = c["title"]
+    # Front-loaded on the source/regulator, NOT the brand or a severity label.
+    assert title.startswith("DFSA Financial Crime Prevention Notices")
+    assert not title.startswith("StatuteProof alert")
+    # A severity/priority word is never the headline — the band carries that.
+    assert "HIGH" not in title
+    # States the FACT and carries the recorded date.
+    assert "monitored change detected" in title
+    assert "2026-07-05" in title
+
+
+def test_headline_prefixes_regulator_when_source_name_lacks_it():
+    from app.alert_content import build_alert_content
+
+    c = build_alert_content(_payload(source_name="Virtual Assets Rulebook", url="https://www.vara.ae/"))
+    assert c["title"].startswith("VARA — Virtual Assets Rulebook")
+
+
+def test_headline_is_length_bounded():
+    from app.alert_content import build_alert_content
+
+    huge = _payload(source_name="Extremely Long Official Regulatory Source Name " * 6)
+    c = build_alert_content(huge)
+    assert len(c["title"]) <= 120
+
+
+def test_headline_falls_back_when_no_source_name():
+    from app.alert_content import build_alert_content
+
+    c = build_alert_content(_payload(source_name=""))
+    assert c["title"] == "StatuteProof alert — monitored change detected"
+
+
+def test_headline_guards_forbidden_claim_in_source_name():
+    # The source name is source-controlled free text. A headline that would embed
+    # a forbidden claim must never ship; it falls back to the fixed safe title.
+    from app.alert_content import build_alert_content
+
+    c = build_alert_content(_payload(source_name="We guarantee compliance Ltd"))
+    assert c["title"] == "StatuteProof alert — monitored change detected"
+
+
+def test_headline_strips_markdown_metachars_from_source_name():
+    # Telegram renders the title inside *...*; page-derived metachars must not
+    # break formatting or inject markup.
+    from app.alert_content import build_alert_content
+
+    c = build_alert_content(_payload(source_name="DFSA *Notice* [inject]"))
+    for ch in "*_`[]":
+        assert ch not in c["title"]
+
+
+# ── fact / assessment split: facts flat, "why it may matter" calibrated ──────
+
+def test_what_changed_block_carries_flat_diff_facts_not_hedged():
+    from app.alert_content import build_alert_content, render_markdown
+
+    md = render_markdown(build_alert_content(_payload()))
+    # The "what changed" block is the real diff — flat declarative facts
+    # (amounts/dates), carried verbatim, with no StatuteProof hedging wrapper.
+    assert "**What changed (excerpt):**" in md
+    assert "AED 50,000" in md
+
+
+def test_why_it_may_matter_uses_calibrated_verb_never_imperative():
+    from app.alert_content import build_alert_content
+
+    # Exact SOURCE_METADATA name (DFSA) + a profile that overlaps its topics
+    # reliably triggers the "why it may matter" assessment line — the same setup
+    # test_alert_impact_tag.py proves resolves. The fact block stays flat; the
+    # assessment must use a calibrated verb and never an obligation imperative.
+    profile = {"topics_in_scope": ["financial_services", "aml_cft", "securities"]}
+    payload = _payload(source_name="Dubai Financial Services Authority (DFSA)")
+    content = build_alert_content(payload, client_profile=profile)
+    line = content["impact_line"].lower()
+    assert "may be relevant" in line, "assessment must use a calibrated verb"
+    for imperative in ("you must", "required action", "ensure compliance", "you are required"):
+        assert imperative not in line
+    # The assessment's "what changed" evidence is the flat diff excerpt verbatim —
+    # facts are never re-summarised or hedged into the assessment.
+    assert content["impact_what_changed"] == content["excerpt"]
+
+
 def test_alert_draft_markdown_embeds_shared_content_block():
     """The draft/email channel renders the SAME content layer (A2 shared-layer
     requirement): when the pipeline attaches alert_content_markdown, the

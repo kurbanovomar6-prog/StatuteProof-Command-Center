@@ -194,6 +194,47 @@ class AssuranceDigestTest(unittest.TestCase):
         self.assertNotIn("no changes occurred", statement)
         self.assertNotIn("you are compliant", statement)
 
+    # ── bounded audit-register negative-assurance form ───────────────────────
+
+    def test_statement_uses_bounded_audit_register_form(self):
+        # The coverage sentence must be the bounded auditor's negative-assurance
+        # register form: period + N sources + regulators, then the DETECTION-
+        # bounded "no change ... other than the items listed below" clause.
+        self._standard()
+        d = self._digest()
+        statement = d["assurance_statement"]
+        # Period is bounded explicitly with both dates.
+        self.assertIn("Between 2026-06-01 and 2026-06-07", statement)
+        # Count of monitored sources is named.
+        self.assertIn("monitored 3 source(s)", statement)
+        # Regulators the sources fall under are named ("across ...").
+        self.assertIn("across ", statement)
+        # The negative-assurance clause is bounded to detection and to the items
+        # listed below — never "nothing changed" / "you are compliant".
+        self.assertIn(
+            "no change was detected in the monitored sources other than the items listed below",
+            statement,
+        )
+
+    def test_statement_names_resolved_regulators_not_raw_other(self):
+        self._standard()
+        d = self._digest()
+        phrase = d["coverage_scope_regulators"]
+        # Real regulator codes are named; the unclassifiable "Gappy Source" is
+        # summarised, never shown as the literal resolver bucket "OTHER".
+        self.assertIn("CBUAE", phrase)
+        self.assertIn("VARA", phrase)
+        self.assertNotIn("OTHER", phrase)
+        self.assertIn("other monitored official sources", phrase)
+        self.assertIn(phrase, d["assurance_statement"])
+
+    def test_statement_single_day_period_uses_on_date(self):
+        self._standard()
+        d = self._digest(period_start="2026-06-03", period_end="2026-06-03")
+        statement = d["assurance_statement"]
+        self.assertIn("On 2026-06-03", statement)
+        self.assertNotIn("Between", statement)
+
     # ── failed check disclosed as a GAP, never "all clear" ───────────────────
 
     def test_failed_source_is_gap_never_folded_into_no_change(self):

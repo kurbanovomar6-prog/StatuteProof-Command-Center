@@ -125,6 +125,53 @@ def _build_excerpt(added: list | None, removed: list | None, cap: int = _EXCERPT
     return excerpt
 
 
+# ── Headline (front-loaded, factual, bounded) ────────────────────────────────
+# The alert title StatuteProof generates. Shape: "[Regulator] [source]: what
+# changed — [date]". It states a FACT (a monitored change was detected on a
+# recorded check) and is deliberately NOT a severity/priority or legal-conclusion
+# label — the review-priority band carries urgency framing. Built only from
+# grounded fields (source name, the deterministic regulator code, the recorded
+# timestamp); nothing is fabricated.
+_HEADLINE_MAX = 120
+_HEADLINE_TAIL = ": monitored change detected"
+# Safe fixed title used when no source name is available, or when the assembled
+# headline (which embeds source-controlled text) trips the forbidden-claims
+# guard. Carries no legal-severity label.
+_FALLBACK_TITLE = "StatuteProof alert — monitored change detected"
+
+
+def _headline(payload: dict[str, Any], checked_at: str) -> str:
+    """Front-loaded, factual alert headline; guarded, bounded, never fabricated."""
+    source_name = _clean(payload.get("source_name") or "").translate(_MARKDOWN_METACHARS).strip()
+    if not source_name:
+        return _FALLBACK_TITLE
+    from app.regulator_map import resolve_regulator
+
+    regulator = resolve_regulator(
+        {
+            "source_id": payload.get("source_id"),
+            "source_name": source_name,
+            "url": payload.get("url"),
+        }
+    )
+    # Prefix the regulator code only when the source name does not already carry
+    # it, so a "VARA Rulebook" source is not rendered "VARA — VARA Rulebook".
+    prefix = ""
+    if regulator and regulator != "OTHER" and regulator.lower() not in source_name.lower():
+        prefix = f"{regulator} — "
+    date_suffix = f" — {checked_at}" if checked_at else ""
+    subject = f"{prefix}{source_name}"
+    room = _HEADLINE_MAX - len(_HEADLINE_TAIL) - len(date_suffix)
+    if len(subject) > room:
+        subject = subject[: max(0, room - 1)].rstrip() + "…"
+    headline = f"{subject}{_HEADLINE_TAIL}{date_suffix}"
+    # Source name is source-controlled free text; never let a headline that trips
+    # the forbidden-claims guard ship (the final-bytes guard is the backstop).
+    if _contains_forbidden(headline):
+        return _FALLBACK_TITLE
+    return headline
+
+
 def _severity_line(risk_level: str, details: dict) -> str:
     """A4: severity must state its indicator or admit it has none recorded."""
     rule = str(details.get("rule") or "")
@@ -358,9 +405,10 @@ def build_alert_content(
     """
     details = payload.get("risk_details") or {}
     risk_level = str(payload.get("risk_level") or "UNKNOWN").upper()
+    checked_at = _format_ts(payload.get("checked_at_utc") or payload.get("created_at") or "")
 
     content: dict[str, Any] = {
-        "title": f"StatuteProof alert — {risk_level}",
+        "title": _headline(payload, checked_at),
         "risk_level": risk_level,
         "severity_line": _severity_line(risk_level, details),
         "rule": details.get("rule") or "",
@@ -369,7 +417,7 @@ def build_alert_content(
         "source_name": _clean(payload.get("source_name") or ""),
         "url": str(payload.get("url") or ""),
         "market": _clean(payload.get("jurisdiction") or ""),
-        "checked_at": _format_ts(payload.get("checked_at_utc") or payload.get("created_at") or ""),
+        "checked_at": checked_at,
         "excerpt": _build_excerpt(payload.get("added"), payload.get("removed")),
         "footer": FOOTER,
     }

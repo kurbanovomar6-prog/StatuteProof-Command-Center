@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { delivery } from '../../api'
+import { RISK_BANDS, RISK_BAND_LEGEND } from './riskBands'
 
 function countByRisk(alerts) {
   let high = 0; let medium = 0; let low = 0
@@ -12,14 +13,14 @@ function countByRisk(alerts) {
   return { total: alerts.length, high, medium, low }
 }
 
-// Small severity dot. Rose is allowed as a category dot/chip (never as a hero
-// ring); amber for medium, emerald for low.
-function RiskRow({ color, label, value }) {
+// A band row: colour dot (design token) + text label + count. The review-priority
+// definition rides on the row title so the colour is never the only signal.
+function RiskRow({ band, value }) {
   return (
-    <div className="flex items-center justify-between py-1.5">
+    <div className="flex items-center justify-between py-1.5" title={band.priority}>
       <span className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-        <span className="h-2 w-2 rounded-full" style={{ background: color }} aria-hidden="true" />
-        {label}
+        <span className="h-2 w-2 rounded-full" style={{ background: band.color }} aria-hidden="true" />
+        {band.label}
       </span>
       <span className="font-mono text-sm tabular-nums text-[var(--text-primary)]">{value}</span>
     </div>
@@ -68,13 +69,14 @@ export default function PressureScore() {
         </div>
       ) : (
         <div className="mt-3 divide-y divide-[var(--border-subtle)]">
-          <RiskRow color="#FB7185" label="High" value={high} />
-          <RiskRow color="#F4B84A" label="Medium" value={medium} />
-          <RiskRow color="#37D399" label="Low" value={low} />
+          <RiskRow band={RISK_BANDS.HIGH} value={high} />
+          <RiskRow band={RISK_BANDS.MEDIUM} value={medium} />
+          <RiskRow band={RISK_BANDS.LOW} value={low} />
         </div>
       )}
 
-      <p className="mt-4 text-xs leading-relaxed text-[var(--text-secondary)]">
+      <p className="mt-4 text-[11px] leading-relaxed text-[var(--text-muted)]">{RISK_BAND_LEGEND}</p>
+      <p className="mt-2 text-xs leading-relaxed text-[var(--text-secondary)]">
         Reviewed alerts matched to this workspace. Monitoring information only. Not legal advice.
       </p>
     </div>

@@ -6,13 +6,35 @@ import ActionLogPanel from './ActionLogPanel'
 import AlertChecklistPanel from './AlertChecklistPanel'
 import AlertDecisionPanel from './AlertDecisionPanel'
 import AlertProofPanel from './AlertProofPanel'
+import { RISK_BAND_LEGEND, riskBand } from './riskBands'
 import EmptyState from './ui/EmptyState'
 import ErrorState from './ui/ErrorState'
 
-const RISK_DARK = {
-  HIGH: 'text-red-400 bg-red-500/15 border border-red-500/30',
-  MEDIUM: 'text-amber-400 bg-amber-500/15 border border-amber-500/30',
-  LOW: 'text-emerald-400 bg-emerald-500/15 border border-emerald-500/30',
+// A band is colour + text label + a review-priority definition (never colour
+// alone). The colour comes from a design token; the label and the "Priority: …"
+// line make it legible to colour-blind and screen-reader users.
+function RiskBand({ level }) {
+  const band = riskBand(level)
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span
+        title={band.priority}
+        aria-label={`${band.label} risk. ${band.priority}`}
+        className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold"
+        style={{
+          color: band.color,
+          borderColor: band.color,
+          backgroundColor: `color-mix(in srgb, ${band.color} 14%, transparent)`,
+        }}
+      >
+        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: band.color }} aria-hidden="true" />
+        {band.label} risk
+      </span>
+      {/* Visible for sighted users; the badge aria-label already carries it, so
+          it is hidden from the a11y tree to avoid a duplicate announcement. */}
+      <span aria-hidden="true" className="text-[10px] font-medium text-[var(--text-muted)]">{band.priority}</span>
+    </span>
+  )
 }
 
 function AlertsEmpty() {
@@ -159,6 +181,7 @@ export default function AlertsPage({ navigate }) {
             </select>
           </div>
         </div>
+        <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-muted)]">{RISK_BAND_LEGEND}</p>
       </div>
 
       {loading && (
@@ -192,12 +215,7 @@ export default function AlertsPage({ navigate }) {
             return (
               <article key={item.alert_id} className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-4">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <span
-                    title="Risk level assigned during human review of this alert."
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${RISK_DARK[risk] || RISK_DARK.MEDIUM}`}
-                  >
-                    {risk.charAt(0) + risk.slice(1).toLowerCase()} risk
-                  </span>
+                  <RiskBand level={risk} />
                   <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                     {item.review_status || 'Approved'}
                   </span>

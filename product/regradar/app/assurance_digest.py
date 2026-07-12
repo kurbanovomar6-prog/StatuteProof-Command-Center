@@ -60,6 +60,7 @@ from app.legal_safety import (
     find_forbidden_claims,
 )
 from app.regulator_binder import SHORT_MONITORING_DISCLAIMER
+from app.regulator_map import resolve_regulator
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +204,74 @@ def _period_label(start: date, end: date) -> str:
     if start == end:
         return start.isoformat()
     return f"{start.isoformat()} to {end.isoformat()}"
+
+
+def _between_phrase(start: date, end: date) -> str:
+    """Sentence-initial bounded-period phrase for the audit-register statement.
+
+    A negative-assurance claim must be explicitly bounded to the period it
+    covers, so the coverage sentence opens with the exact dates rather than a
+    vague "recently". Single-day periods read "On <date>"; ranges read
+    "Between <start> and <end>".
+    """
+    if start == end:
+        return f"On {start.isoformat()}"
+    return f"Between {start.isoformat()} and {end.isoformat()}"
+
+
+def _join_names(names: list[str]) -> str:
+    """Human list join: [], [a], [a, b], [a, b, c] -> '', 'a', 'a and b', 'a, b, and c'."""
+    items = [n for n in names if n]
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return ", ".join(items[:-1]) + f", and {items[-1]}"
+
+
+# Cap the named-regulator list so the audit-register sentence stays bounded even
+# for a large configured source set; the exact per-source detail is always in the
+# sections below.
+_MAX_NAMED_REGULATORS = 8
+
+
+def _regulators_phrase(cert_rows: list[dict[str, Any]]) -> str:
+    """Distinct regulator codes for the reported sources, as a display phrase.
+
+    Uses the deterministic, side-effect-free source→regulator resolver so the
+    same source set always yields the same phrase. A source the resolver cannot
+    classify (code ``OTHER``) is summarised as "other monitored official
+    sources" rather than shown as the literal ``OTHER`` token — never silently
+    dropped, so the scope is not overstated. Returns a neutral fallback when
+    there are no rows.
+    """
+    codes: set[str] = set()
+    has_other = False
+    for row in cert_rows:
+        code = resolve_regulator(
+            {
+                "source_id": row.get("source_id"),
+                "source_name": row.get("source_name"),
+                "url": row.get("official_url"),
+            }
+        )
+        if code and code != "OTHER":
+            codes.add(code)
+        else:
+            has_other = True
+
+    named = sorted(codes)
+    if len(named) > _MAX_NAMED_REGULATORS:
+        extra = len(named) - _MAX_NAMED_REGULATORS
+        named = named[:_MAX_NAMED_REGULATORS] + [f"{extra} more"]
+    parts = list(named)
+    if has_other:
+        parts.append("other monitored official sources")
+    if not parts:
+        return "the monitored official sources"
+    return _join_names(parts)
 
 
 def _utc_now(now: datetime) -> str:
@@ -429,9 +498,12 @@ def build_assurance_digest(
         "total_days_with_proof_hash": int(cert_summary.get("total_days_with_proof_hash") or 0),
     }
 
+    regulators_phrase = _regulators_phrase(cert_rows)
     statement = _assurance_statement(
         client_name=client_name,
         period_label=_period_label(start_date, end_date),
+        between_phrase=_between_phrase(start_date, end_date),
+        regulators_phrase=regulators_phrase,
         summary=summary,
     )
     verification = _verification_pointer(len(sealed_changes))
@@ -446,6 +518,7 @@ def build_assurance_digest(
         "period_label": _period_label(start_date, end_date),
         "period_start": start_date.isoformat(),
         "period_end": end_date.isoformat(),
+        "coverage_scope_regulators": regulators_phrase,
         "summary": summary,
         "changes_captured_and_sealed": sealed_changes,
         "sources_no_change_detected": no_change_sources,
@@ -517,12 +590,27 @@ def _detected_change_row(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _assurance_statement(
-    *, client_name: str, period_label: str, summary: dict[str, Any]
+    *,
+    client_name: str,
+    period_label: str,
+    between_phrase: str,
+    regulators_phrase: str,
+    summary: dict[str, Any],
 ) -> str:
-    """The digest's headline paragraph — detection-bounded, gap-disclosing, safe."""
+    """The digest's headline paragraph — detection-bounded, gap-disclosing, safe.
+
+    The non-empty lead opens with the bounded audit-register negative-assurance
+    form: it names the period, the number of monitored sources and the
+    regulators they fall under, then states that — based on that monitoring — no
+    change was DETECTED other than the items listed below. It is deliberately
+    NOT "nothing changed" and NOT "you are compliant": the claim is bounded to
+    detection, every non-clean source is disclosed below (the immediately
+    following gap sentence surfaces any source that could not be checked), and
+    the boundary paragraph and disclaimer keep the scope explicit.
+    """
     who = f" for {client_name}" if client_name else ""
     checks = summary["total_checks"]
-    sources_checked = summary["sources_checked"]
+    sources_monitored = summary["sources_monitored"]
     sealed = summary["changes_captured_and_sealed"]
     no_change = summary["sources_no_change_detected"]
 
@@ -536,12 +624,13 @@ def _assurance_statement(
     else:
         lead = (
             f"This digest records the official-source monitoring activity StatuteProof performed"
-            f"{who} during {period_label}. Across {sources_checked} monitored source(s), "
-            f"StatuteProof completed {checks} recorded check(s) in this period. "
-            f"{sealed} change(s) were captured and sealed as cryptographic evidence records, "
-            f"each listed below with its sealed record hash so it can be verified independently. "
-            f"For {no_change} monitored source(s), no change was detected in the recorded content "
-            f"on the days checked in this period."
+            f"{who} during {period_label}. {between_phrase}, StatuteProof monitored "
+            f"{sources_monitored} source(s) across {regulators_phrase} and completed {checks} "
+            f"recorded check(s). Based on this monitoring, no change was detected in the monitored "
+            f"sources other than the items listed below. {sealed} change(s) were captured and "
+            f"sealed as cryptographic evidence records, each listed below with its sealed record "
+            f"hash so it can be verified independently. For {no_change} monitored source(s), no "
+            f"change was detected in the recorded content on the days checked in this period."
         )
 
     gaps = summary["sources_with_gaps"]
