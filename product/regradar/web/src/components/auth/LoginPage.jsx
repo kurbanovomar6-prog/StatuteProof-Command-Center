@@ -10,40 +10,40 @@ function AuthLayout({ children }) {
   ]
 
   return (
-    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-10 text-slate-200 selection:bg-[#16D9F5]/30">
+    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-10 text-[var(--text-primary)] selection:bg-[var(--trust-badge)]">
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.92fr_0.78fr]">
         <aside className="hidden lg:block">
           <a href="/" className="mb-10 flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-10 w-auto" />
-            <span className="text-2xl font-extrabold tracking-tight text-white">
-              Statute<span className="text-[#16D9F5]">Proof</span>
+            <span className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
+              Statute<span className="text-[var(--accent)]">Proof</span>
             </span>
           </a>
 
           <div className="max-w-xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-hover)]">
               <LockKeyhole className="h-3.5 w-3.5" />
               Evidence workspace access
             </div>
-            <h2 className="text-4xl font-semibold leading-tight text-white">
+            <h2 className="text-4xl font-semibold leading-tight text-[var(--text-primary)]">
               Sign in to review source evidence before it becomes a brief.
             </h2>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-400">
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-[var(--text-secondary)]">
               The account area separates source monitoring, canonical evidence review, draft brief
               preparation, and delivery approval.
             </p>
           </div>
 
-          <div className="mt-8 max-w-lg rounded-3xl border border-slate-800 bg-slate-950/42 p-5">
-            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-              <RadioTower className="h-4 w-4 text-cyan-300" />
+          <div className="mt-8 max-w-lg rounded-3xl border border-[var(--border-muted)] bg-[var(--bg-surface)] p-5">
+            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+              <RadioTower className="h-4 w-4 text-[var(--accent)]" />
               Workspace boundary
             </div>
             <div className="grid gap-3">
               {trustRows.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between rounded-2xl border border-slate-800 bg-[#07111F]/72 px-4 py-3 text-sm">
-                  <span className="text-slate-500">{label}</span>
-                  <span className="font-semibold text-slate-100">{value}</span>
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-navy)] px-4 py-3 text-sm">
+                  <span className="text-[var(--text-secondary)]">{label}</span>
+                  <span className="font-semibold text-[var(--text-primary)]">{value}</span>
                 </div>
               ))}
             </div>
@@ -143,7 +143,7 @@ export default function LoginPage({ onLogin, onRegister }) {
   }
 
   const inputCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
-  const labelCls = 'block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1.5'
+  const labelCls = 'block text-xs font-semibold text-slate-600 mb-1.5'
 
   return (
     <AuthLayout>

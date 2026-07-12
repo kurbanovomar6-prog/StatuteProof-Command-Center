@@ -32,42 +32,42 @@ const JURISDICTIONS = [
 
 function AuthLayout({ children }) {
   return (
-    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-10 text-slate-200 selection:bg-[#16D9F5]/30">
+    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-10 text-[var(--text-primary)] selection:bg-[var(--trust-badge)]">
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.78fr_0.92fr]">
         <aside className="hidden lg:block">
           <a href="/" className="mb-10 flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-10 w-auto" />
-            <span className="text-2xl font-extrabold tracking-tight text-white">
-              Statute<span className="text-[#16D9F5]">Proof</span>
+            <span className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
+              Statute<span className="text-[var(--accent)]">Proof</span>
             </span>
           </a>
           <div className="max-w-md">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-hover)]">
               <ShieldCheck className="h-3.5 w-3.5" />
               Pilot workspace setup
             </div>
-            <h2 className="text-4xl font-semibold leading-tight text-white">
+            <h2 className="text-4xl font-semibold leading-tight text-[var(--text-primary)]">
               Create one accountable workspace per verified email.
             </h2>
-            <p className="mt-5 text-base leading-relaxed text-slate-400">
+            <p className="mt-5 text-base leading-relaxed text-[var(--text-secondary)]">
               Registration captures the compliance profile needed to scope selected-source monitoring
               without implying complete regulatory coverage.
             </p>
           </div>
 
-          <div className="mt-8 max-w-md rounded-3xl border border-slate-800 bg-slate-950/42 p-5">
+          <div className="mt-8 max-w-md rounded-3xl border border-[var(--border-muted)] bg-[var(--bg-surface)] p-5">
             {[
               ['1', 'Account', 'case-insensitive unique work email'],
               ['2', 'Profile', 'licence type and primary jurisdiction'],
               ['3', 'Scope', 'source readiness before activation'],
             ].map(([num, title, detail]) => (
-              <div key={title} className="flex gap-3 border-b border-slate-800 py-3 last:border-b-0">
-                <span className="sp-mono flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-300/10 text-sm font-bold text-cyan-200">
+              <div key={title} className="flex gap-3 border-b border-[var(--border-muted)] py-3 last:border-b-0">
+                <span className="sp-mono flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--trust-badge)] text-sm font-bold text-[var(--accent-hover)]">
                   {num}
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-white">{title}</p>
-                  <p className="text-xs leading-relaxed text-slate-500">{detail}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{title}</p>
+                  <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{detail}</p>
                 </div>
               </div>
             ))}
@@ -242,7 +242,7 @@ export default function RegisterPage({ onRegister, onLogin }) {
 
   const inputCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
   const selectCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
-  const labelCls = 'block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1.5'
+  const labelCls = 'block text-xs font-semibold text-slate-600 mb-1.5'
 
   return (
     <AuthLayout>
