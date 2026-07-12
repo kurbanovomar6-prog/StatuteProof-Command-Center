@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { ShieldCheck, AlertTriangle } from 'lucide-react'
-import { profile as profileApi } from '../../api'
+import { ShieldCheck, AlertTriangle, Download, Loader2 } from 'lucide-react'
+import { account as accountApi, profile as profileApi } from '../../api'
 
 const MARKETS    = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const INDUSTRIES = ['Fintech', 'Payments', 'Crypto / VASP', 'Banking', 'Legal & Compliance', 'Tax / Reporting', 'Consulting', 'Other']
@@ -123,6 +123,9 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
   const [saving,        setSaving]        = useState(false)
   const [saveError,     setSaveError]     = useState('')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [exporting,     setExporting]     = useState(false)
+  const [exportError,   setExportError]   = useState('')
+  const [exportMessage, setExportMessage] = useState('')
 
   function toggleMarket(m) {
     setMarkets(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])
@@ -183,6 +186,29 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
     localStorage.removeItem('regradar_onboarding_complete')
     localStorage.removeItem('regradar_workspace_profile')
     if (onResetWorkspace) onResetWorkspace()
+  }
+
+  async function handleExportData() {
+    setExporting(true)
+    setExportError('')
+    setExportMessage('')
+    try {
+      const { blob, filename } = await accountApi.exportData()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      const kb = (blob.size / 1024).toFixed(1)
+      setExportMessage(`Export downloaded — ${filename} (${kb} KB)`)
+    } catch (err) {
+      setExportError(err.message || 'Could not export your account data.')
+    } finally {
+      setExporting(false)
+    }
   }
 
   return (
@@ -359,6 +385,43 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
           {saveError}
         </div>
       )}
+
+      {/* Export my data — self-service exit portability */}
+      <div className="sp-card mt-4">
+        <div className="flex items-start gap-3">
+          <Download className="w-4 h-4 text-[var(--accent)] flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-white mb-1">Export my data</p>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-2">
+              Download everything your account owns as one JSON file: account profile,
+              workspace monitoring profile, notification preferences, your review
+              checklist items, your organisation&rsquo;s sealed decision records, and
+              your Telegram link.
+            </p>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-3">
+              Sealed decision records remain independently verifiable without
+              StatuteProof — each carries its own SHA-256 record hash and can be
+              checked with the public verifier or standard tools. For monitoring
+              information only. Not legal advice and not a guarantee of compliance.
+            </p>
+            <button
+              type="button"
+              onClick={handleExportData}
+              disabled={exporting}
+              className="inline-flex items-center gap-2 text-xs font-medium text-[var(--accent)] border border-[var(--trust-border)] hover:border-[var(--trust-border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+            >
+              {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+              {exporting ? 'Preparing export…' : 'Download my data (JSON)'}
+            </button>
+            {exportMessage && (
+              <p className="mt-2 text-xs text-emerald-300">{exportMessage}</p>
+            )}
+            {exportError && (
+              <p className="mt-2 text-xs text-rose-300">{exportError}</p>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Reset workspace */}
       <div className="bg-[var(--bg-elevated)] border border-rose-500/20 rounded-xl p-5 mt-4">

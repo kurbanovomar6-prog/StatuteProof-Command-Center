@@ -80,6 +80,7 @@ from app.alert_routing import (
     send_preview_alert_to_user,
 )
 from app.alert_actions import save_action_log_entry, get_action_log
+from app.account_export import build_account_export
 from app.action_checklist import (
     FRAMING as CHECKLIST_FRAMING,
     add_checklist_item,
@@ -284,6 +285,11 @@ _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
 # regulator binder caps record count via MAX_BINDER_RECORDS); if a single shared
 # export budget per IP is wanted later, key this without the per-endpoint label.
 _EXPORT_LIMITER = _RateLimiter(30, 3600)
+# Self-service account data export (GET /api/account/export): a heavy-ish
+# owner-scoped read — profile + every checklist item + the org's full sealed
+# decision chain assembled into one JSON body. 10/hour is generous for a real
+# "take my data out" need while bounding repeated full-chain reads per IP.
+_ACCOUNT_EXPORT_LIMITER = _RateLimiter(10, 3600)
 # Public, no-login evidence verifier (POST /api/verify). Verification is cheap
 # (pure CPU, no disk, no evidence-store reads), but the endpoint is unauthenticated
 # and internet-facing on a small VPS, so cap it per client IP to bound abuse.
@@ -1079,6 +1085,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_auth_google_callback()
         elif path == "/api/profile":
             self._handle_profile_get()
+        elif path == "/api/account/export":
+            self._handle_account_export()
         elif path == "/api/telegram/pair/status":
             self._handle_telegram_pair_status()
         elif path == "/api/delivery/logs":
@@ -1519,6 +1527,59 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": str(exc)}, 400)
         except Exception as exc:
             logger.error("Profile update failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    # ── Self-service account data export (exit portability, vendor-DD Q25) ───────
+
+    def _handle_account_export(self) -> None:
+        """Everything the CALLER owns, in one JSON attachment download.
+
+        Order: auth → rate limit → gather → attachment. Owner/org scoping on
+        EVERY read: account / profile / checklist / telegram rows are keyed by
+        the session user id; sealed decision records come from the caller's
+        RESOLVED org principal — never from request input (see
+        app.account_export). RBAC: deliberately NO role gate — this is a read
+        of the caller's own data, so a read-only auditor seat may export its
+        own org view; the authorized export is still recorded in the immutable
+        access log. The export NEVER contains the password hash, session ids,
+        pairing codes, or verification tokens: every section is an explicit
+        field list (asserted by tests/test_account_export.py).
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_ACCOUNT_EXPORT_LIMITER, "account_export"):
+            return
+        try:
+            try:
+                principal = rbac_runtime.resolve_principal(user)
+                org_id = principal.org_id
+            except Exception:  # noqa: BLE001 — no resolvable org is an empty decisions section, not a failure
+                org_id = None
+            export = build_account_export(user, org_id)
+            body = json.dumps(export, ensure_ascii=False, indent=2).encode("utf-8")
+            stamp = datetime.now(timezone.utc).strftime("%Y%m%d")
+            filename = f"statuteproof-account-export-{stamp}.json"
+            # Immutable audit row with the TRUTHFUL action name (not the
+            # evidence.export label _rbac_log_export would write). Additive
+            # observation only — log_sensitive_action swallows its own errors.
+            rbac_runtime.log_sensitive_action(
+                user,
+                "account.export",
+                result=rbac_runtime.RESULT_ALLOW,
+                resource_type="account",
+                resource_id="",
+            )
+            self._send_bytes(
+                body,
+                "application/json; charset=utf-8",
+                extra_headers=[
+                    ("Content-Disposition", f'attachment; filename="{filename}"'),
+                ],
+            )
+        except Exception as exc:
+            logger.error("Account export failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _telegram_instructions(self, code: str) -> str:

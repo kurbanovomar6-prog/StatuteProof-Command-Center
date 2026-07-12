@@ -215,9 +215,15 @@ archives and Regulator Binders — sealed ZIPs containing the captured bytes,
 hash manifests and a standalone offline verifier (`app/evidence_pack.py`,
 `app/audit_export.py`). Because verification needs only SHA-256 and the
 published open spec, exported evidence remains independently verifiable
-forever, without StatuteProof. Account records (profile, checklists) have no
-dedicated export endpoint yet; on request the operator provides them:
-[CONFIRM WITH OPERATOR] for format and turnaround.
+forever, without StatuteProof. Account records are also self-service: the
+dashboard's Settings page ("Export my data") calls `GET /api/account/export`
+and downloads one JSON file containing the account profile, workspace
+monitoring profile, notification preferences, the user's review checklist
+items, the organisation's sealed decision records (verbatim envelopes plus
+the chain head), and the Telegram delivery link (`app/account_export.py`).
+Sealed decision records in that file are self-contained SHA-256 envelopes, so
+they verify offline forever — with the public verifier or standard tools —
+without a StatuteProof account.
 
 ---
 

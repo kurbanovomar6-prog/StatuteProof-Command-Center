@@ -171,6 +171,40 @@ def list_checklist_items(user_id: int, alert_id: str) -> list[dict[str, Any]]:
         return []
 
 
+def list_all_checklist_items(user_id: int) -> list[dict[str, Any]]:
+    """Return ALL of the caller's OWN checklist items across every alert.
+
+    Additive read for the self-service account data export (exit portability):
+    the SAME ``owner_user_id = ?`` scoping as :func:`list_checklist_items`, just
+    without the per-alert filter. Bounded by construction — a user can never
+    hold more than ``MAX_ITEMS_PER_USER`` rows (enforced atomically at insert).
+    Fail-soft: any error yields an empty list, never a raise.
+    """
+    try:
+        uid = int(user_id)
+    except (TypeError, ValueError):
+        return []
+    try:
+        ensure_checklist_table()
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                """
+                SELECT id, alert_id, text, assignee, due_date, status, created_at, updated_at
+                FROM alert_checklist_items
+                WHERE owner_user_id = ?
+                ORDER BY alert_id ASC, created_at ASC, id ASC
+                """,
+                (uid,),
+            ).fetchall()
+            return [_row_to_item(r) for r in rows]
+        finally:
+            conn.close()
+    except Exception as exc:  # noqa: BLE001 — read must never raise across the boundary
+        logger.warning("list_all_checklist_items failed: %s", type(exc).__name__)
+        return []
+
+
 def add_checklist_item(
     user_id: int,
     alert_id: str,

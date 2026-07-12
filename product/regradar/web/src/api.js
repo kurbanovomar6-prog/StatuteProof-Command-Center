@@ -108,6 +108,28 @@ export const profile = {
   },
 }
 
+// Self-service account data export (exit portability). GET streams everything
+// the signed-in user owns — account profile, workspace profile, notification
+// preferences, checklist items, the org's sealed decision records + chain head,
+// and the Telegram link — as one application/json attachment. Mirrors
+// reports.regulatorBinder's blob shape: returns { blob, filename } so the
+// caller triggers the browser download; throws with `status` on error.
+export const account = {
+  async exportData() {
+    const response = await apiFetch('/api/account/export')
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      const err = new Error(data.message || `HTTP ${response.status}`)
+      err.status = response.status
+      throw err
+    }
+    const blob = await response.blob()
+    const filename = parseFilename(response.headers.get('Content-Disposition'))
+      || 'statuteproof-account-export.json'
+    return { blob, filename }
+  },
+}
+
 export const telegramPair = {
   generate() {
     return authRequest('/api/telegram/pair/generate', { method: 'POST' })
