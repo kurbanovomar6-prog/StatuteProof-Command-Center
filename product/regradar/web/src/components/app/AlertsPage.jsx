@@ -3,6 +3,7 @@ import { CheckCircle, ExternalLink, Search, Send, ShieldCheck } from 'lucide-rea
 
 import { delivery } from '../../api'
 import ActionLogPanel from './ActionLogPanel'
+import AlertProofPanel from './AlertProofPanel'
 import EmptyState from './ui/EmptyState'
 import ErrorState from './ui/ErrorState'
 
@@ -25,7 +26,7 @@ function AlertsEmpty() {
     </EmptyState>
   )
 }
-export default function AlertsPage() {
+export default function AlertsPage({ navigate }) {
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -220,6 +221,7 @@ export default function AlertsPage() {
                     Official source
                   </a>
                 )}
+                <AlertProofPanel item={item} navigate={navigate} />
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <button
                     type="button"

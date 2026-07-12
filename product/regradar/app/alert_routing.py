@@ -277,6 +277,15 @@ def normalize_alert_for_routing(alert: dict) -> dict:
     from app.alert_content import _build_excerpt
 
     diff_excerpt = _build_excerpt(alert.get("added_chunks"), alert.get("removed_chunks"))
+    # ── Sealed-evidence linkage (strictly ADDITIVE) ───────────────────────────
+    # Bind this alert to its canonical evidence record so every preview/routing
+    # match carries a verifiable "proof" block (record id + self-seal record_hash
+    # + run id). Hash integrity of the captured bytes only — never legal proof.
+    # Fail-soft by contract: no resolvable sealed record → proof stays None and
+    # the alert flows exactly as before (see app/alert_proof.py).
+    from app.alert_proof import build_proof_for_candidate
+
+    proof_link = build_proof_for_candidate(alert)
     if not source_url:
         limitations.append("Source URL unavailable in alert draft.")
     if not market:
@@ -298,6 +307,7 @@ def normalize_alert_for_routing(alert: dict) -> dict:
         "executive_summary": str(summary),
         "business_action": str(business_action),
         "diff_excerpt": diff_excerpt,
+        "proof": proof_link,
         "affected_entities": [str(item) for item in affected if str(item).strip()],
         "detected_at": alert.get("detected_at") or alert.get("checked_at_utc") or alert.get("created_at"),
         "review_status": alert.get("review_status"),
