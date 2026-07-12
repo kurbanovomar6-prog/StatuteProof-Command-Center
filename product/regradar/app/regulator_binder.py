@@ -164,7 +164,14 @@ def build_regulator_binder(
         entries.sort(key=lambda e: (_naive_ts(e["timestamp"]), e["record_id"]))
 
         binder_content_hash = _binder_content_hash([e["record_hash"] for e in entries])
-        manifest = _build_manifest(entries, wanted, date_from, date_to, binder_content_hash)
+        # Optional, additive: include the trail-level external RFC 3161 timestamp
+        # when the operator enabled anchoring and a head-anchor sidecar exists.
+        # Absence is silent (None => no manifest key, no embedded token).
+        external_ts = _external_timestamp_section(root)
+        manifest = _build_manifest(
+            entries, wanted, date_from, date_to, binder_content_hash,
+            external_ts[0] if external_ts else None,
+        )
         cover = _render_cover(entries, wanted, date_from, date_to, binder_content_hash)
         how_to = _render_how_to_verify(manifest)
         verify_script = _VERIFY_SCRIPT
@@ -196,6 +203,8 @@ def build_regulator_binder(
                 zf.writestr(entry["record_arcname"], entry["record_bytes"])
                 if entry.get("diff_arcname") and entry.get("diff_bytes") is not None:
                     zf.writestr(entry["diff_arcname"], entry["diff_bytes"])
+            if external_ts is not None:
+                zf.writestr(external_ts[0]["token_file"], external_ts[1])
 
         return {
             "status": "ok",
@@ -204,6 +213,7 @@ def build_regulator_binder(
             "record_count": len(entries),
             "source_count": len({e["source_id"] for e in entries}),
             "diff_count": sum(1 for e in entries if e.get("diff_arcname")),
+            "has_external_timestamp": external_ts is not None,
             "date_from": date_from,
             "date_to": date_to,
             "binder_content_hash": binder_content_hash,
@@ -294,12 +304,57 @@ def _binder_content_hash(record_hashes: list[str]) -> str:
     return hashlib.sha256("\n".join(bare).encode("utf-8")).hexdigest()
 
 
+def _external_timestamp_section(root: Path) -> tuple[dict[str, Any], bytes] | None:
+    """Return (manifest section, raw token bytes) for the trail head anchor, or None.
+
+    Reads the ADDITIVE head-anchor sidecar (``data/evidence_chain_head.tsr.json``)
+    written by :mod:`app.rfc3161_anchor` when the operator enabled anchoring. When no
+    sidecar / token exists (the default), returns ``None`` and the binder simply omits
+    the section — absence is silent. Never raises.
+
+    Scope honesty: this timestamp anchors the monitored TRAIL's head ``record_hash``
+    as a whole at the asserted time. It is a supplementary integrity signal; it does
+    not individually attest any single record included in this binder.
+    """
+    try:
+        from app.rfc3161_anchor import SIDECAR_TSR_NAME, read_head_anchor_sidecar
+
+        head_file = root / "data" / "evidence_chain_head.json"
+        sidecar = read_head_anchor_sidecar(head_file)
+        if not sidecar:
+            return None
+        token_b64 = str(sidecar.get("token_b64") or "").strip()
+        if not token_b64:
+            return None
+        import base64
+
+        token_bytes = base64.b64decode(token_b64)
+        section = {
+            "token_file": f"external_timestamp/{SIDECAR_TSR_NAME}",
+            "token_format": sidecar.get("token_format"),
+            "tsa_url": sidecar.get("tsa_url"),
+            "digest_algorithm": sidecar.get("digest_algorithm"),
+            "anchored_head_record_hash": sidecar.get("anchored_head_record_hash"),
+            "asserted_time_utc": sidecar.get("asserted_time_utc"),
+            "requested_at": sidecar.get("requested_at"),
+            "scope_note": (
+                "Third-party RFC 3161 timestamp over the monitored trail's head "
+                "record_hash. It anchors the trail as a whole at the asserted time; "
+                "it does not individually attest any single record in this binder."
+            ),
+        }
+        return section, token_bytes
+    except Exception:
+        return None
+
+
 def _build_manifest(
     entries: list[dict[str, Any]],
     wanted: set[str],
     date_from: str,
     date_to: str,
     binder_content_hash: str,
+    external_timestamp: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     records = []
     for e in entries:
@@ -323,7 +378,7 @@ def _build_manifest(
         if e.get("diff_arcname"):
             row["diff_file"] = e["diff_arcname"]
         records.append(row)
-    return {
+    manifest: dict[str, Any] = {
         "pack_type": "statuteproof_regulator_binder",
         "schema_version": "1.0",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -351,6 +406,12 @@ def _build_manifest(
         "legal_notice": FULL_LEGAL_DISCLAIMER,
         "records": records,
     }
+    # Additive, optional: a trail-level external RFC 3161 timestamp, included only
+    # when the operator has enabled anchoring and a head-anchor sidecar exists.
+    # Absence is silent (no key). It never affects the binder's verify result.
+    if external_timestamp:
+        manifest["external_timestamp"] = external_timestamp
+    return manifest
 
 
 def _render_cover(
@@ -621,6 +682,23 @@ def main():
     else:
         print("FAIL  binder_content_hash expected=%s actual=%s" % (expected_binder, actual_binder))
         failures += 1
+
+    # (4) OPTIONAL: report an external RFC 3161 timestamp anchor when present.
+    # Additive and advisory — it does NOT affect the pass/fail result above. This
+    # standalone script stays stdlib-only, so it reports the token and shows how to
+    # verify it independently rather than embedding an ASN.1 verifier.
+    ext = manifest.get("external_timestamp")
+    if ext:
+        print()
+        print("External RFC 3161 timestamp anchor present (trail-level, supplementary):")
+        print("  TSA URL:                   %s" % ext.get("tsa_url"))
+        print("  Asserted time (UTC):       %s" % ext.get("asserted_time_utc"))
+        print("  Anchored head record_hash: %s" % ext.get("anchored_head_record_hash"))
+        print("  Token file:                %s" % ext.get("token_file"))
+        print("  Note: %s" % ext.get("scope_note"))
+        print("  Verify independently against your own trusted TSA root(s), e.g.:")
+        print("    openssl ts -verify -in %s -digest %s -CAfile <your-tsa-ca.pem>" % (
+            ext.get("token_file"), ext.get("anchored_head_record_hash")))
 
     print()
     if failures:

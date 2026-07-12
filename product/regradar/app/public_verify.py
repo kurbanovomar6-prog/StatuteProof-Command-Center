@@ -89,12 +89,22 @@ def verify_submission(
     *,
     raw: str | None = None,
     normalized: str | None = None,
+    timestamp_token: str | None = None,
+    timestamp_digest: str | None = None,
 ) -> dict[str, Any]:
     """Verify a caller-submitted evidence record against the open spec.
 
     Returns the public response envelope; never raises. ``verified`` is true when
     no check failed and at least one check passed (an all-skipped result — e.g. a
     blob with no hashes — is never reported as verified).
+
+    ``timestamp_token`` (optional) lets a caller ALSO submit an external RFC 3161
+    timestamp token. When present, the response gains an additive ``external_timestamp``
+    block reporting the token's own offline verification (see
+    :mod:`app.rfc3161_anchor`) against the digest it should attest — the explicit
+    ``timestamp_digest`` if given, else the record's ``record_hash``. This is purely
+    additive: it NEVER changes the record-integrity ``verified`` gate, and its
+    absence is silent (no block, no failure).
     """
     try:
         is_obj = isinstance(record, dict)
@@ -113,13 +123,18 @@ def verify_submission(
         passed = any(c["status"] == STATUS_PASS for c in checks)
         verified = (not failed) and passed
 
-        return {
+        response = {
             "ok": True,
             "verified": verified,
             "checks": checks,
             "spec_url": SPEC_URL,
             "disclaimer": DISCLAIMER,
         }
+        if timestamp_token:
+            response["external_timestamp"] = _external_timestamp_report(
+                timestamp_token, timestamp_digest, hashes
+            )
+        return response
     except Exception:  # absolute fail-closed backstop — never leak a stacktrace
         return {
             "ok": True,
@@ -298,6 +313,42 @@ def _check_normalization_reproducible(
         name,
         "normalize_for_change_hash(raw.txt) does not reproduce the submitted normalized.txt.",
     )
+
+
+# ── optional external RFC 3161 timestamp reporting (additive) ────────────────────
+
+def _external_timestamp_report(
+    timestamp_token: str,
+    timestamp_digest: str | None,
+    hashes: dict[str, str | None],
+) -> dict[str, Any]:
+    """Report an external RFC 3161 timestamp token offline, best-effort.
+
+    Additive only — the caller never folds this into the record-integrity
+    ``verified`` gate. Verifies the token against the digest it should attest: the
+    explicit ``timestamp_digest`` when given, else the record's own ``record_hash``.
+    Never raises. When the optional anchor dependency is unavailable, the token's
+    own report degrades to ``skipped`` checks rather than a hard failure.
+    """
+    digest = _bare_digest(timestamp_digest) if timestamp_digest else _bare_digest(hashes.get("record_hash"))
+    if not digest:
+        return {
+            "present": True,
+            "verified": False,
+            "detail": (
+                "No record_hash (or explicit timestamp_digest) available to match the "
+                "timestamp token against."
+            ),
+        }
+    try:
+        from app.rfc3161_anchor import verify_timestamp_token
+
+        report = verify_timestamp_token(str(timestamp_token), digest)
+    except Exception:
+        return {"present": True, "verified": False, "detail": "Timestamp token could not be evaluated."}
+    report["present"] = True
+    report["checked_digest"] = digest
+    return report
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────────

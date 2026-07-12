@@ -28,6 +28,14 @@ readability-lxml==0.8.4.1
 # -- optional: AI analysis -----------------------------------------------------
 anthropic==0.103.1
 
+# -- optional: external RFC 3161 timestamp anchor -----------------------------
+# asn1crypto: pure-Python ASN.1 with a purpose-built asn1crypto.tsp module used to
+# build the TimeStampReq and parse/verify the timestamp token OFFLINE. Only needed
+# when RFC3161_TSA_URL is configured (the anchor is DORMANT by default and imports
+# this lazily; unset => never imported). `cryptography` (used to verify the TSA
+# signature) is already present transitively via pdfminer.six below.
+asn1crypto==1.5.1
+
 # -- optional: document sources (PDF, Excel) ----------------------------------
 pypdf==6.13.3
 python-docx==1.2.0

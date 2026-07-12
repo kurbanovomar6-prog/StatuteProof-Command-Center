@@ -190,7 +190,31 @@ def _write_chain_head(head_record_hash: str, *, compaction: bool = False) -> Non
         tmp = path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
         tmp.replace(path)
+        # G-anchor-external (DORMANT by default): optionally submit this head to a
+        # third-party RFC 3161 Time-Stamping Authority so the head cannot be
+        # backdated by anyone with local write access (see docs
+        # EVIDENCE-VERIFICATION-SPEC.md §5). This is the SINGLE chokepoint for every
+        # head update (append + compaction), so wiring it here covers them all.
+        _maybe_external_anchor(head_record_hash, path)
     except OSError:
+        pass
+
+
+def _maybe_external_anchor(head_record_hash: str, head_anchor_path: Path) -> None:
+    """Best-effort, DORMANT-by-default external timestamp anchor of the chain head.
+
+    Complete no-op unless the operator has set ``RFC3161_TSA_URL`` — no network, no
+    thread, no files, capture byte-for-byte unchanged. When enabled, the anchor
+    runs on a daemon thread so source capture never blocks on the TSA. Never raises
+    into the append path (the tamper-evident chain is never at risk from this).
+    """
+    try:
+        from app.rfc3161_anchor import anchor_enabled, spawn_head_anchor
+
+        if not anchor_enabled():
+            return
+        spawn_head_anchor(head_record_hash, head_anchor_path)
+    except Exception:
         pass
 
 

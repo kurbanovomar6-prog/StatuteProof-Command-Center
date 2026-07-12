@@ -139,6 +139,31 @@ ENABLE_CRAWL4AI_EXTRACTOR: bool = (
     os.getenv("ENABLE_CRAWL4AI_EXTRACTOR", "false").lower() == "true"
 )
 
+# ── external RFC 3161 timestamp anchor (DORMANT by default) ───────────────────
+#
+# Optional third-party trusted-timestamp anchor for the evidence chain head. When
+# RFC3161_TSA_URL is UNSET (the default), the anchor is a complete no-op: no
+# network, no threads, no files, and the capture pipeline is byte-for-byte
+# unchanged. There is NO default TSA — nothing calls out unless an operator
+# explicitly configures one. See app/rfc3161_anchor.py and
+# docs/EVIDENCE-VERIFICATION-SPEC.md §5.
+#
+# To enable, point at a public RFC 3161 TSA (e.g. https://freetsa.org/tsr) and,
+# for signed offline verification, keep RFC3161_TSA_CERT_REQ=true so the token
+# embeds the TSA certificate. Enabling also requires the optional `asn1crypto`
+# dependency (see requirements.txt); `cryptography` is already present in prod.
+RFC3161_TSA_URL: str = os.getenv("RFC3161_TSA_URL", "").strip()
+try:
+    RFC3161_TSA_TIMEOUT_S: float = float(os.getenv("RFC3161_TSA_TIMEOUT_S", "10"))
+except ValueError:
+    # Never crash the process at import on a malformed timeout. The anchor module's
+    # own _timeout_s() reads + clamps this at call time; these constants document the
+    # env contract (rfc3161_anchor.py reads os.environ directly, not these).
+    RFC3161_TSA_TIMEOUT_S = 10.0
+RFC3161_TSA_CERT_REQ: bool = os.getenv("RFC3161_TSA_CERT_REQ", "true").lower() != "false"
+RFC3161_TSA_POLICY_OID: str = os.getenv("RFC3161_TSA_POLICY_OID", "").strip()
+ENABLE_RFC3161_ANCHOR: bool = bool(RFC3161_TSA_URL)
+
 # ── web server ────────────────────────────────────────────────────────────────
 
 SECRET_KEY: str = os.getenv("SECRET_KEY", "change-me-to-a-random-64-char-string")
