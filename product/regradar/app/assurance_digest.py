@@ -65,6 +65,9 @@ logger = logging.getLogger(__name__)
 
 _BASE_DIR = Path(__file__).parent.parent
 _EVIDENCE_REL = Path("evidence")
+# Bound the sealed-change payload — the digest is a periodic summary, not a bulk
+# export (the Evidence Pack / Binder exist for full handover).
+_MAX_DIGEST_CHANGES = 1000
 
 # The published, no-login verification method a recipient can use to confirm any
 # sealed record independently (docs/EVIDENCE-VERIFICATION-SPEC.md, served at
@@ -241,8 +244,24 @@ def _load_sealed_change_records(
     if not evidence_root.exists():
         return []
 
+    # Scope the walk to the allowed sources ONLY (layout
+    # evidence/<regulator>/<source_id>/<run>/evidence-record.json) so the digest
+    # never enumerates the whole cross-tenant evidence store — cost O(reported
+    # scope), not O(total product evidence). Matches evidence_pack/evidence_room
+    # (verify-swarm 2026-07-12). A source_id that isn't a safe path segment could
+    # never have matched a real record dir, so it is skipped.
+    import re as _re
+
+    _safe_segment = _re.compile(r"^[A-Za-z0-9._-]+$")
+    record_paths: list[Path] = []
+    for sid in sorted(allowed_source_ids):
+        if _safe_segment.match(str(sid)):
+            record_paths.extend(evidence_root.glob(f"*/{sid}/**/evidence-record.json"))
+
     out: list[dict[str, Any]] = []
-    for path in sorted(evidence_root.glob("**/evidence-record.json")):
+    for path in sorted(record_paths):
+        if len(out) >= _MAX_DIGEST_CHANGES:
+            break  # bound the payload; the digest is a summary, not a bulk export
         try:
             record = json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):

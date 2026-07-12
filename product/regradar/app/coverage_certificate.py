@@ -163,18 +163,26 @@ def _load_runs_by_source(root: Path) -> dict[str, list[dict[str, Any]]]:
     if not path.exists():
         return {}
     out: dict[str, list[dict[str, Any]]] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        try:
-            parsed = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if not isinstance(parsed, dict):
-            continue
-        source_id = str(parsed.get("source_id") or "").strip()
-        if source_id:
-            out.setdefault(source_id, []).append(parsed)
+    # Stream line-by-line — never materialize the whole (unbounded, ever-growing)
+    # run log into memory at once. This reader is exercised on every coverage
+    # certificate AND every assurance-digest preview (verify-swarm 2026-07-12;
+    # matches the audit_export._fetch_runs_for_vault streaming fix).
+    try:
+        with path.open(encoding="utf-8") as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                try:
+                    parsed = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(parsed, dict):
+                    continue
+                source_id = str(parsed.get("source_id") or "").strip()
+                if source_id:
+                    out.setdefault(source_id, []).append(parsed)
+    except OSError:
+        return out
     return out
 
 

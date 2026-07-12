@@ -374,40 +374,59 @@ def upcoming_key_dates(
     allow = {str(s).strip() for s in source_ids} if source_ids is not None else None
     excluded = {str(s).strip() for s in (excluded_source_ids or set()) if str(s).strip()}
 
-    try:
-        from app.evidence_records import list_canonical_evidence_records
-
-        summaries = list_canonical_evidence_records(base_dir=root)
-    except Exception:  # noqa: BLE001 — an unreadable evidence tree yields no dates
-        logger.warning("effective-dates: could not list evidence records")
-        summaries = []
+    # Discover source directories cheaply (evidence/<regulator>/<source_id> — a
+    # directory enumeration, NOT a file read), skip the deny-list, honor the
+    # allow-list, then read records ONLY for the in-scope sources. This bounds the
+    # (expensive) record reads to the caller's own scope and avoids both the
+    # whole-tree walk and list_canonical_evidence_records' per-record review-log
+    # re-read — an O(N×M) cost this view never needs (verify-swarm 2026-07-12).
+    evidence_root = root / "evidence"
+    record_paths: list[Path] = []
+    if evidence_root.exists():
+        for source_dir in evidence_root.glob("*/*"):
+            if not source_dir.is_dir():
+                continue
+            sid = source_dir.name
+            if not sid or sid in excluded:
+                continue  # deny-list: another tenant's source is never even read
+            if allow is not None and sid not in allow:
+                continue  # allow-list restricts to named sources
+            record_paths.extend(source_dir.glob("**/evidence-record.json"))
+    record_paths.sort()
 
     # key -> chosen item (earliest capture wins).
     chosen: dict[tuple[str, str, str], dict[str, Any]] = {}
     truncated = False
     scanned = 0
 
-    for examined, summary in enumerate(summaries):
-        # Bound on records EXAMINED, not just processed, so an evidence tree of
-        # mostly-UNCHANGED/excluded records can't make this loop O(whole tree)
-        # (code review 2026-07-12).
+    for examined, record_path in enumerate(record_paths):
         if examined >= _MAX_RECORDS_SCANNED:
             truncated = True
             break
-        if str(summary.get("run_status") or "").strip().upper() != "CHANGED":
+        try:
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
             continue
-        source_id = str(summary.get("source_id") or "").strip()
-        if source_id and source_id in excluded:
+        if not isinstance(record, dict):
+            continue
+
+        run = record.get("run")
+        if not isinstance(run, dict):
+            run = {}
+        if str(run.get("status") or "").strip().upper() != "CHANGED":
+            continue
+        source = record.get("source")
+        if not isinstance(source, dict):
+            source = {}
+        source_id = str(source.get("source_id") or "").strip()
+        # Belt-and-suspenders: the dir glob already applied the deny-/allow-list at
+        # the directory level; re-check the record's own source_id so it can never
+        # resolve outside the caller's scope.
+        if not source_id or source_id in excluded:
             continue
         if allow is not None and source_id not in allow:
             continue
-
-        record = _load_record(root, summary.get("record_path"))
-        if record is None:
-            continue
-        # Evidence-First: only surface dates from a COMPLETE, integrity-VERIFIED
-        # record — never from a quarantined/unverified one (enforce the invariant
-        # directly, not by accident of a missing snapshot path; code review).
+        # Evidence-First: only COMPLETE, integrity-VERIFIED records.
         if record.get("record_status") != "complete":
             continue
         integrity = record.get("integrity")
@@ -415,15 +434,9 @@ def upcoming_key_dates(
             continue
         scanned += 1
 
-        source = record.get("source")
-        if not isinstance(source, dict):
-            source = {}
-        run = record.get("run")
-        if not isinstance(run, dict):
-            run = {}
         captured_at = str(run.get("timestamp") or "").strip()
         record_hash = str(record.get("record_hash") or "").strip()
-        evidence_record_id = str(record.get("record_id") or summary.get("record_id") or "").strip()
+        evidence_record_id = str(record.get("record_id") or "").strip()
 
         changed_text = _changed_text_for_record(record, root)
         if not changed_text:
