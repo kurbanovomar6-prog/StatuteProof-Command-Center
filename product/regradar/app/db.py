@@ -368,6 +368,84 @@ def ensure_checklist_table(conn: sqlite3.Connection | None = None) -> None:
             conn.close()
 
 
+# ── Sealed decision log — per-org, append-only, chained (Stage 1: INERT) ────────
+#
+# One row per SEALED review decision a user records against monitored evidence
+# (see app/decision_records.py). PURELY ADDITIVE: no existing table is altered,
+# the capture chain (data/source_runs/source_runs.jsonl) is untouched, and no
+# live endpoint reads or writes this table in Stage 1.
+#
+# Invariants baked into the schema:
+#   org_id + UNIQUE(org_id, chain_seq) — ONE hash chain per org (never global:
+#       a shared head would leak activity across tenants; never per-user: the
+#       org is the accountability boundary). The writer computes chain_seq as
+#       MAX+1 inside BEGIN IMMEDIATE; the UNIQUE constraint turns a lost race
+#       into an IntegrityError that the writer retries, so two concurrent seals
+#       can never fork a chain.
+#   record_json — the full sealed record: {content, record_hash,
+#       record_hash_method: "content-sha256-v1"}. The seal is
+#       app.record_hashing.canonical_record_hash over the content block — the
+#       SAME primitive canonical evidence records use, so app.public_verify
+#       verifies a decision record today with ZERO changes.
+#   append-only triggers — every UPDATE/DELETE is blocked at the database layer
+#       (same pattern as access_log): a stray writer on its own connection still
+#       cannot mutate or erase a sealed decision. Corrections are NEW rows that
+#       reference the original via supersedes_id; the original stays.
+_CREATE_DECISION_TABLE = """
+    CREATE TABLE IF NOT EXISTS decision_records (
+        id                 INTEGER   PRIMARY KEY AUTOINCREMENT,
+        decision_id        TEXT      NOT NULL UNIQUE,
+        org_id             INTEGER   NOT NULL,
+        chain_seq          INTEGER   NOT NULL,
+        decided_by_user_id INTEGER   NOT NULL REFERENCES users(id),
+        alert_id           TEXT      NOT NULL DEFAULT '',
+        evidence_record_id TEXT      NOT NULL DEFAULT '',
+        prev_decision_hash TEXT      NOT NULL DEFAULT '',
+        decision_hash      TEXT      NOT NULL,
+        record_json        TEXT      NOT NULL,
+        sealed_at          TIMESTAMP NOT NULL,
+        supersedes_id      TEXT      NOT NULL DEFAULT '',
+        UNIQUE(org_id, chain_seq)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_decision_org   ON decision_records(org_id, id);
+    CREATE INDEX IF NOT EXISTS idx_decision_alert ON decision_records(org_id, alert_id);
+
+    -- Append-only BY CONSTRUCTION (access_log pattern): block every UPDATE and
+    -- DELETE at the database layer, not just by omitting helpers.
+    CREATE TRIGGER IF NOT EXISTS trg_decision_records_no_update
+    BEFORE UPDATE ON decision_records
+    BEGIN
+        SELECT RAISE(ABORT, 'decision_records is append-only');
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS trg_decision_records_no_delete
+    BEFORE DELETE ON decision_records
+    BEGIN
+        SELECT RAISE(ABORT, 'decision_records is append-only');
+    END;
+"""
+
+
+def ensure_decision_table(conn: sqlite3.Connection | None = None) -> None:
+    """Provision the sealed decision-log table. Cheap + idempotent + additive.
+
+    Mirrors ``ensure_checklist_table``: constant-cost ``CREATE ... IF NOT
+    EXISTS`` only, safe to call from every decision DB operation. Deliberately
+    NOT chained into ``ensure_auth_tables`` — the table is touched only by
+    ``app.decision_records``, so the per-request session path stays unchanged.
+    """
+    owned_conn = conn is None
+    if conn is None:
+        conn = _connect()
+    try:
+        conn.executescript(_CREATE_DECISION_TABLE)
+        conn.commit()
+    finally:
+        if owned_conn:
+            conn.close()
+
+
 def ensure_rbac_tables(conn: sqlite3.Connection | None = None) -> None:
     """Provision the RBAC tables and seed the GLOBAL org. Cheap + idempotent.
 
