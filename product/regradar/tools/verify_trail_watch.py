@@ -12,8 +12,16 @@ Runs unattended on a systemd timer
 (``deploy/systemd/statuteproof-verify.{service,timer}``), so two properties are
 non-negotiable:
 
-  * READ-ONLY. It only calls ``verify_evidence_trail.verify_trail`` (read-only)
-    and posts a Telegram message. It never mutates the trail.
+  * READ-ONLY over the evidence trail. It only calls
+    ``verify_evidence_trail.verify_trail`` (read-only) and posts a Telegram
+    message. It never mutates the trail, a record, or a head file. One
+    ADDITIVE exception rides on this timer: the dormant-by-default RFC 3161
+    decision-head anchor sweep (``app.decision_anchor``). With
+    ``RFC3161_TSA_URL`` unset (the default) it is a complete no-op; when an
+    operator opts in, it writes ONLY additive timestamp sidecars next to each
+    org's decision-chain head file — the same cadence role the capture trail's
+    ``rfc3161_anchor.anchor_head_now`` is documented for, reusing this existing
+    daily timer instead of inventing a new one.
   * The founder alert is strictly BEST-EFFORT. ``notify_founder`` already never
     raises; this wrapper additionally guards the call so a Telegram/network
     failure can never turn a watchdog run into a crash.
@@ -85,6 +93,28 @@ def build_divergence_summary(report: "vt.TrailReport") -> str:
     return "\n".join(lines)
 
 
+def _anchor_decision_heads_best_effort() -> dict | None:
+    """Run the dormant-by-default decision-head anchor sweep. NEVER raises.
+
+    ``app.decision_anchor.anchor_decision_heads_now`` is itself fail-soft and
+    dormant unless ``RFC3161_TSA_URL`` is set; the guard here is
+    defence-in-depth so even an import failure can never crash the watchdog or
+    change its exit code. Returns the sweep summary, or ``None`` on failure.
+    """
+    try:
+        from app import decision_anchor
+
+        summary = decision_anchor.anchor_decision_heads_now()
+        if not summary.get("skipped_dormant"):
+            logger.info("decision-head anchor sweep: %s", summary)
+        return summary
+    except Exception:  # noqa: BLE001 — an add-on pass must never break the watchdog
+        logger.warning(
+            "verify-trail-watch: decision-head anchor sweep failed — swallowed"
+        )
+        return None
+
+
 def _alert_best_effort(summary: str) -> bool:
     """Page the founder without ever letting a failure propagate.
 
@@ -135,13 +165,22 @@ def run_watch(argv: list[str] | None = None) -> int:
     if report.ok:
         if not args.json:
             print("verify-trail-watch: evidence trail intact — no divergence.")
-        return 0
+        exit_code = 0
+    else:
+        summary = build_divergence_summary(report)
+        if not args.json:
+            print(summary, file=sys.stderr)
+        _alert_best_effort(summary)
+        exit_code = 1
 
-    summary = build_divergence_summary(report)
-    if not args.json:
-        print(summary, file=sys.stderr)
-    _alert_best_effort(summary)
-    return 1
+    # Dormant-by-default RFC 3161 decision-head anchor sweep (additive sidecars
+    # only; complete no-op unless RFC3161_TSA_URL is set). Runs on BOTH the
+    # clean and the divergent path, deliberately AFTER the verdict and the
+    # founder alert so a slow TSA can never delay an integrity page, and it
+    # never affects the verdict or exit code.
+    _anchor_decision_heads_best_effort()
+
+    return exit_code
 
 
 if __name__ == "__main__":
