@@ -1,223 +1,38 @@
 import { ArrowRight, Layers3 } from "lucide-react";
+import { SOURCE_PACKS as PACKS } from "../data/sourcePacks";
 
 // coverage: 'strong' | 'good' | 'partial' | 'limited'
-const PACKS = [
-  {
-    profile: "VASP / Crypto",
-    bestFor:
-      "Exchanges, brokers, custodians, token projects and VASP compliance teams",
-    coverage: "strong",
-    layers: [
-      {
-        text: "VARA rulebook revision updates, regulatory notices and enforcement index",
-        status: "active",
-      },
-      {
-        text: "VARA Virtual Asset regulations and compliance rulebook PDFs",
-        status: "active",
-      },
-      { text: "VARA public register of licensed entities", status: "active" },
-      {
-        text: "UAE FIU public sources, AML/CFT laws and typology reports",
-        status: "active",
-      },
-      { text: "CBUAE Payment Token Services Regulation", status: "active" },
-      {
-        text: "UAE CMA (formerly SCA) — capital market rules covering virtual assets",
-        status: "active",
-      },
-    ],
-    caveat: null,
-  },
-  {
-    profile: "Payments & Fintech",
-    bestFor:
-      "Payment firms, stored value providers, fintech operators and compliance advisers",
-    coverage: "strong",
-    layers: [
-      {
-        text: "CBUAE regulations, notices and supervisory materials",
-        status: "active",
-      },
-      {
-        text: "UAE FIU AML/CFT publications and laws; circulars remain candidate",
-        status: "active",
-      },
-      { text: "UAE Ministry of Finance policy updates", status: "active" },
-      {
-        text: "UAE Legislation Portal — federal law texts and gazette updates",
-        status: "geo_blocked",
-      },
-    ],
-    caveat:
-      "UAE Legislation Portal is not fresh-alert eligible — currently in remediation and geo-restricted from outside the UAE. Direct FTA tax PDFs are active in the tax pack.",
-  },
-  {
-    profile: "DIFC / DFSA",
-    bestFor:
-      "DIFC regulated firms, funds, advisers, law firms and compliance consultants",
-    coverage: "strong",
-    layers: [
-      {
-        text: "DFSA legislative amendment notices, consultation papers and enforcement",
-        status: "active",
-      },
-      { text: "DFSA Rulebook modules and SEO letters", status: "active" },
-      {
-        text: "DIFC Courts — practice directions and registrar directions",
-        status: "active",
-      },
-      {
-        text: "DIFC Laws and Regulations — legal database and news hub",
-        status: "active",
-      },
-      {
-        text: "DIFC Data Protection — Commissioner, guidance and enforcement",
-        status: "active",
-      },
-    ],
-    caveat: null,
-  },
-  {
-    profile: "ADGM / FSRA",
-    bestFor:
-      "ADGM regulated firms, funds, securities teams and regulatory advisers",
-    coverage: "strong",
-    layers: [
-      {
-        text: "ADGM FSRA rules, regulations, guidance and policy statements",
-        status: "active",
-      },
-      {
-        text: "ADGM FSRA supervision circulars and regulatory alerts",
-        status: "active",
-      },
-      {
-        text: "ADGM FSRA enforcement decisions and public consultations",
-        status: "active",
-      },
-      {
-        text: "ADGM media announcements hub — rule finalisations and regulatory updates",
-        status: "active",
-      },
-      { text: "ADGM Registration Authority circulars", status: "active" },
-      {
-        text: "ADGM Office of Data Protection — regulations, guidance and enforcement",
-        status: "active",
-      },
-    ],
-    caveat: null,
-  },
-  {
-    profile: "AML / FIU",
-    bestFor:
-      "MLROs, AML consultants, onboarding teams and regulated financial firms",
-    coverage: "strong",
-    layers: [
-      {
-        text: "UAE FIU publications hub, typology reports and knowledge centre",
-        status: "active",
-      },
-      { text: "UAE FIU AML/CFT laws and related decisions", status: "active" },
-      {
-        text: "Ministry of Economy — AML/CFT circulars for DNFBPs",
-        status: "active",
-      },
-      {
-        text: "MOHRE ministerial resolutions and labour compliance circulars",
-        status: "active",
-      },
-      {
-        text: "UAE Cabinet decisions — upstream legislative signals",
-        status: "active",
-      },
-      { text: "UAE CMA, CBUAE and DFSA AML/CFT guidance", status: "active" },
-    ],
-    caveat:
-      "MOHRE and UAE Cabinet sources are candidate-status pending baseline runs. CBUAE sub-pages are accessible via the rulebook subdomain (rulebook.centralbank.ae); the main centralbank.ae domain is geo-IP filtered from outside the UAE.",
-  },
-  {
-    profile: "Tax / Corporate",
-    bestFor:
-      "Finance teams, tax advisers, corporate service providers and legal teams",
-    coverage: "good",
-    layers: [
-      {
-        text: "UAE Ministry of Finance policy updates and financial legislation",
-        status: "active",
-      },
-      {
-        text: "Direct official FTA PDF decisions, VAT and Corporate Tax guides",
-        status: "active",
-      },
-      {
-        text: "UAE Legislation Portal — federal law texts and official gazette",
-        status: "geo_blocked",
-      },
-      {
-        text: "Dubai Legislation Portal — Dubai local laws and executive decisions",
-        status: "out_of_scope",
-      },
-      {
-        text: "FTA — VAT clarifications and Corporate Tax listing pages",
-        status: "pending",
-      },
-    ],
-    caveat:
-      "FTA monitoring covers 6 selected fresh-alert eligible sources. UAE Legislation Portal and Dubai Legislation Portal are not fresh-alert eligible — the UAE Legislation Portal is currently in remediation and geo-restricted from outside the UAE, and the Dubai Legislation Portal is evidence-library only.",
-  },
-  {
-    profile: "Data Protection",
-    bestFor:
-      "Privacy teams, DIFC/ADGM firms, legal teams and data protection leads",
-    coverage: "good",
-    layers: [
-      {
-        text: "DIFC Commissioner of Data Protection — guidance and enforcement",
-        status: "active",
-      },
-      {
-        text: "ADGM Office of Data Protection — regulations, guidance and enforcement index",
-        status: "active",
-      },
-      {
-        text: "ADGM Data Protection Regulations 2021 (updated PDF)",
-        status: "active",
-      },
-      {
-        text: "UAE federal PDPL (TDRA / UAE Data Office)",
-        status: "geo_blocked",
-      },
-    ],
-    caveat:
-      "DIFC and ADGM data protection sources are fresh-alert eligible where proof-backed. UAE federal PDPL site (TDRA) is geo-IP restricted from outside the UAE — documented, not hidden.",
-  },
-];
+// Pack contents live in src/data/sourcePacks.js — a single structured source
+// keyed off the real source_ids in product/regradar/sources.json, guarded by
+// src/data/sourcePacks.test.js so a layer can never silently over-claim.
 
+// A DISCRETE tier (segments filled of 4), never a percentage fill — the coverage
+// rating is a relative tier, not a "% of sources you need" ratio (which the product
+// does not measure). See the footer note.
 const COVERAGE_CONFIG = {
   strong: {
     label: "Strong selected-source",
     badge: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
     bar: "bg-emerald-400",
-    width: "w-[92%]",
+    segments: 4,
   },
   good: {
     label: "Good selected-source",
     badge: "border-cyan-400/25 bg-cyan-400/10 text-cyan-200",
     bar: "bg-cyan-400",
-    width: "w-[72%]",
+    segments: 3,
   },
   partial: {
     label: "Partial selected-source",
     badge: "border-amber-400/25 bg-amber-400/10 text-amber-300",
     bar: "bg-amber-400",
-    width: "w-[50%]",
+    segments: 2,
   },
   limited: {
     label: "Limited selected-source",
     badge: "border-rose-400/25 bg-rose-400/10 text-rose-300",
     bar: "bg-rose-400",
-    width: "w-[25%]",
+    segments: 1,
   },
 };
 
@@ -225,6 +40,7 @@ const LAYER_DOT = {
   active: "bg-emerald-400",
   roadmap: "bg-amber-400",
   pending: "bg-amber-400",
+  evidence_only: "bg-slate-500",
   out_of_scope: "bg-slate-600",
   geo_blocked: "bg-rose-400",
 };
@@ -233,13 +49,15 @@ const LAYER_TEXT = {
   active: "text-slate-300",
   roadmap: "text-slate-400 italic",
   pending: "text-slate-400",
+  evidence_only: "text-slate-400",
   out_of_scope: "text-slate-500 line-through decoration-slate-700",
   geo_blocked: "text-rose-400/80",
 };
 
 const LAYER_SUFFIX = {
   roadmap: " — roadmap",
-  pending: " — pending item review",
+  pending: " — pending validation, not alert-eligible yet",
+  evidence_only: " — evidence archive, not change-monitored",
   out_of_scope: " — outside current scope",
   geo_blocked: " — geo-restricted",
 };
@@ -258,8 +76,8 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
           </h2>
           <p className="text-slate-400">
             Each pack shows exactly which sources are fresh-alert eligible,
-            which are on the roadmap, and where gaps exist — before you commit
-            to a pilot.
+            which are pending validation, and where gaps exist — before you
+            commit to a pilot.
           </p>
         </div>
 
@@ -271,8 +89,8 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
               "bg-emerald-400",
               "Fresh-alert eligible — source is proof-backed and eligible for monitoring once activated",
             ],
-            ["bg-amber-400", "Roadmap / pending"],
-            ["bg-slate-600", "Outside current scope"],
+            ["bg-amber-400", "Pending validation / roadmap"],
+            ["bg-slate-500", "Evidence archive only"],
             ["bg-rose-400", "Geo-restricted"],
           ].map(([dot, label]) => (
             <span key={label} className="flex items-center gap-1.5">
@@ -309,11 +127,18 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
                       {cfg.label}
                     </span>
                   </div>
-                  {/* Coverage bar */}
-                  <div className="mb-2 h-1 w-full rounded-full bg-slate-800">
-                    <div
-                      className={`h-1 rounded-full ${cfg.bar} ${cfg.width} transition-all`}
-                    />
+                  {/* Coverage tier — DISCRETE segments (a relative tier, not a
+                      coverage percentage). */}
+                  <div
+                    className="mb-2 flex gap-1"
+                    aria-label={`Coverage tier ${cfg.segments} of 4`}
+                  >
+                    {[0, 1, 2, 3].map((i) => (
+                      <span
+                        key={i}
+                        className={`h-1 flex-1 rounded-full ${i < cfg.segments ? cfg.bar : "bg-slate-800"}`}
+                      />
+                    ))}
                   </div>
                   <p className="text-xs leading-relaxed text-slate-500">
                     <span className="font-semibold text-slate-400">
@@ -376,8 +201,10 @@ export default function BuyerSourcePacks({ onCreateWorkspace }) {
 
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/45 p-4 text-sm leading-relaxed text-slate-400">
           Source packs show the monitoring scope per licence type. Coverage
-          ratings reflect the current number of active sources — not regulatory
-          significance. Roadmap and pending sources are not delivered to clients
+          ratings are a relative tier of how many sources are currently
+          fresh-alert eligible for this profile — not regulatory significance,
+          not a completeness percentage, and not a ratio of all the sources your
+          firm may need. Roadmap and pending sources are not delivered to clients
           until they pass proof-backed baseline checks. Geo-restricted sources
           are documented, not hidden. Once monitoring is activated, active
           sources are checked on an operator-set cycle (target up to every 24h).

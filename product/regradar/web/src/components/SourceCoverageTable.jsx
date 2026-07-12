@@ -1,29 +1,29 @@
 const SOURCES = [
   {
-    source_id: 'AE-central-bank-of-the-uae',
-    regulator: 'CBUAE Main',
-    coverageArea: 'Financial regulation & monetary policy',
+    source_id: 'AE-cbuae-rulebook-revision-updates',
+    regulator: 'CBUAE Rulebook Revision Updates',
+    coverageArea: 'Rulebook-wide revision history',
     status: 'ACTIVE',
     caveat: null,
   },
   {
-    source_id: 'AE-cbuae-regulations',
-    regulator: 'CBUAE Regulations',
-    coverageArea: 'CBUAE rules & standards',
+    source_id: 'AE-cbuae-payment-token-services-rulebook',
+    regulator: 'CBUAE Payment Token Services Regulation',
+    coverageArea: 'Payment token / stablecoin rules',
     status: 'ACTIVE',
     caveat: null,
   },
   {
-    source_id: 'AE-uae-ministry-of-finance',
-    regulator: 'UAE Ministry of Finance',
-    coverageArea: 'Federal tax & budget policy',
+    source_id: 'AE-mof-publications-and-releases',
+    regulator: 'MoF Publications and Releases',
+    coverageArea: 'Federal finance & tax policy',
     status: 'ACTIVE',
     caveat: null,
   },
   {
-    source_id: 'AE-dubai-virtual-assets-regulatory-authority-vara',
-    regulator: 'VARA Main',
-    coverageArea: 'Virtual assets regulation',
+    source_id: 'AE-vara-rulebook-updates',
+    regulator: 'VARA Rulebook Revision Updates',
+    coverageArea: 'Virtual assets rulebook changes',
     status: 'ACTIVE',
     caveat: null,
   },
@@ -35,18 +35,25 @@ const SOURCES = [
     caveat: null,
   },
   {
-    source_id: 'AE-abu-dhabi-global-market-adgm',
-    regulator: 'ADGM FSRA Main',
+    source_id: 'AE-adgm-fsra-rulebooks',
+    regulator: 'ADGM FSRA Rules and Regulations',
     coverageArea: 'ADGM financial regulation',
-    status: 'CAVEAT',
-    caveat: 'Character count is low on some pages; disclosed before pilot activation',
+    status: 'ACTIVE',
+    caveat: null,
   },
   {
-    source_id: 'AE-uaefiu-circulars',
-    regulator: 'UAE FIU Circulars',
-    coverageArea: 'AML/CFT circulars & notices',
-    status: 'PENDING',
-    caveat: 'Circulars page remains candidate/nav-shell; FIU publications hub is separate',
+    source_id: 'AE-adgm-fsra-regulatory-alerts',
+    regulator: 'ADGM FSRA Regulatory Alerts',
+    coverageArea: 'FSRA regulatory alerts listing',
+    status: 'CAVEAT',
+    caveat: 'Enabled as candidate — listing extraction still being validated before alert eligibility',
+  },
+  {
+    source_id: 'AE-dfsa-aml-rulebook-module',
+    regulator: 'DFSA AML Rulebook Module',
+    coverageArea: 'DFSA AML/CTF & sanctions module',
+    status: 'ACTIVE',
+    caveat: 'Repointed from a frozen-version URL to the canonical current-version page (July 2026)',
   },
   {
     source_id: 'AE-difc-laws-and-regulations',
@@ -56,49 +63,56 @@ const SOURCES = [
     caveat: null,
   },
   {
+    source_id: 'AE-sca-circulars-rules-procedures',
+    regulator: 'UAE CMA Circulars, Rules and Procedures',
+    coverageArea: 'Capital markets circulars',
+    status: 'ACTIVE',
+    caveat: 'Repointed to the CMA’s new canonical page during the SCA→CMA site transition (July 2026)',
+  },
+  {
+    source_id: 'AE-moet-aml-170b7988',
+    regulator: 'Ministry of Economy — AML',
+    coverageArea: 'DNFBP AML obligations',
+    status: 'ACTIVE',
+    caveat: null,
+  },
+  {
+    source_id: 'AE-eocn-news-en',
+    regulator: 'EOCN News and Sanctions Updates',
+    coverageArea: 'UN sanctions / TFS updates',
+    status: 'ACTIVE',
+    caveat: null,
+  },
+  {
+    source_id: 'AE-fta-tax-legislation-listing',
+    regulator: 'FTA — All Tax Legislation',
+    coverageArea: 'Federal tax legislation listing',
+    status: 'CAVEAT',
+    caveat: 'Enabled as candidate after a June 2026 extraction fix — not alert-eligible until it passes the fresh-alert gate',
+  },
+  {
+    source_id: 'AE-uae-financial-intelligence-unit-uaefiu',
+    regulator: 'UAE FIU (uaefiu.gov.ae)',
+    coverageArea: 'AML/CFT publications & typologies',
+    status: 'PENDING',
+    caveat: 'Geo-IP restricted from outside the UAE — disclosed, covered via EOCN/CBUAE/MoE alternatives',
+  },
+  {
     source_id: 'AE-uae-legislation-portal',
     regulator: 'UAE Legislation Portal',
     coverageArea: 'UAE federal legislation',
     status: 'PENDING',
-    caveat: 'WAF/access constraints; not fresh-alert eligible',
-  },
-  {
-    source_id: 'AE-uae-ministry-of-economy',
-    regulator: 'UAE Ministry of Economy',
-    coverageArea: 'Corporate & commercial regulation',
-    status: 'ACTIVE',
-    caveat: null,
-  },
-  {
-    source_id: 'AE-dfsa-annual-reports',
-    regulator: 'DFSA Annual Reports',
-    coverageArea: 'DFSA annual reports',
-    status: 'ACTIVE',
-    caveat: null,
-  },
-  {
-    source_id: 'AE-dfsa-annual-aml-reports',
-    regulator: 'DFSA Annual AML Reports',
-    coverageArea: 'DFSA AML annual reports',
-    status: 'ACTIVE',
-    caveat: null,
-  },
-  {
-    source_id: 'AE-uae-financial-intelligence-unit-uaefiu',
-    regulator: 'UAE FIU Homepage',
-    coverageArea: 'FIU homepage (covered via 4 sub-sources)',
-    status: 'PENDING',
-    caveat: null,
+    caveat: 'Access blocked from outside the UAE; not fresh-alert eligible',
   },
 ]
 
 const SOURCE_TRUTH = {
-  enabled: 246,
-  readinessSupported: 180,
-  remediation: 2,
+  enabled: 116,
+  readinessSupported: 83,
+  candidate: 8,
 }
 
-const LAST_CHECKED = '2026-06-21'
+const LAST_CHECKED = '2026-07-12'
 
 function StatusBadge({ status }) {
   if (status === 'ACTIVE') {
@@ -136,9 +150,9 @@ export default function SourceCoverageTable() {
           </p>
         </div>
         <div className="text-right text-xs">
-          <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} UAE source records tracked</p>
+          <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} enabled UAE source records</p>
           <p className="text-emerald-200">{SOURCE_TRUTH.readinessSupported} fresh-alert eligible</p>
-          <p className="text-amber-200">{SOURCE_TRUTH.remediation} under technical review</p>
+          <p className="text-amber-200">{SOURCE_TRUTH.candidate} candidates pending validation</p>
         </div>
       </div>
 
@@ -149,7 +163,7 @@ export default function SourceCoverageTable() {
               <th className="px-4 py-2 text-left font-medium">Regulatory source</th>
               <th className="px-4 py-2 text-left font-medium">Coverage area</th>
               <th className="px-4 py-2 text-left font-medium">Status</th>
-              <th className="px-4 py-2 text-left font-medium">Last checked</th>
+              <th className="px-4 py-2 text-left font-medium">Status as of</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
@@ -177,7 +191,7 @@ export default function SourceCoverageTable() {
       </div>
 
       <div className="border-t border-slate-800 px-4 py-2.5 text-xs text-slate-500">
-        Fresh-alert eligible means we have at least two confirmed baseline evidence runs with stable content hashes. Sources under technical review are not delivered to clients.
+        Fresh-alert eligible means we have at least two confirmed baseline evidence runs with stable content hashes. Candidate and geo-restricted sources are not delivered to clients. Statuses reflect the source-register review of {LAST_CHECKED}.
       </div>
     </div>
   )

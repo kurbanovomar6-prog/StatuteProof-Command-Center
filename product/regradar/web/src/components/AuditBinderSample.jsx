@@ -29,8 +29,8 @@ const RUN_LOG = [
   },
   {
     date: '2026-01-14',
-    source: 'UAE FIU Typology Reports',
-    regulator: 'UAE FIU',
+    source: 'EOCN News and Sanctions Updates',
+    regulator: 'EOCN',
     status: 'FIRST_SEEN',
     hash: 'b2d6e3f7…',
     quality: 'GOOD',

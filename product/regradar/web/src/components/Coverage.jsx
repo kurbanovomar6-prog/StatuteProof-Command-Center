@@ -1,57 +1,72 @@
 import { ArrowRight } from 'lucide-react'
 
 const ACTIVE_SOURCES = [
-  { source: 'CBUAE Main',                             publishes: 'Central bank notices, licensing and supervisory updates',                     note: null },
-  { source: 'CBUAE Regulations',                      publishes: 'CBUAE regulations and standards listing',                                     note: 'Noise filter applied before alert delivery' },
-  { source: 'CBUAE Rulebook — multiple modules',      publishes: 'AML/CFT, Consumer Protection, Open Finance, Payment Token, Risk Management',  note: null },
-  { source: 'MoF + FTA direct tax PDFs',               publishes: 'MoF financial publications plus direct FTA tax PDF decisions, guides and clarifications', note: 'Broader FTA portal/listing extraction remains roadmap' },
-  { source: 'VARA Main + Rulebook revision updates',  publishes: 'VASP licensing, rulebook updates, guidance notes, revision history',          note: null },
-  { source: 'VARA Enforcement Notices',               publishes: 'VASP enforcement actions and regulatory decisions',                            note: null },
-  { source: 'VARA Rulebook PDFs (6 modules)',         publishes: 'Compliance, Technology, VA Issuance, Broker-Dealer, Lending, Regulations',    note: null },
-  { source: 'ADGM FSRA — Rules, Guidance, Waivers',  publishes: 'ADGM regulations, FSRA guidance notes, waivers and modifications register',   note: null },
-  { source: 'ADGM FSRA Supervision Circulars',        publishes: 'FSRA supervision circulars to regulated entities',                            note: null },
-  { source: 'ADGM Public Consultations',              publishes: 'FSRA consultation papers and policy proposals',                               note: null },
-  { source: 'ADGM Registration Authority Circulars',  publishes: 'RA circulars on corporate, commercial and registration matters',               note: null },
-  { source: 'ADGM FSRA Enforcement',                  publishes: 'FSRA enforcement actions and regulatory alerts',                               note: null },
-  { source: 'ADGM Data Protection (hub + guidance)',  publishes: 'ADGM Data Protection Regulations 2021, guidance index, enforcement',          note: null },
-  { source: 'UAE FIU Publications Hub',               publishes: 'FIU publications, typology reports, knowledge centre and public notices',      note: 'FIU circulars page is still being validated' },
-  { source: 'UAE FIU AML/CFT Laws and Decisions',     publishes: 'AML/CFT laws and related Cabinet/Ministerial decisions',                      note: null },
-  { source: 'Executive Office for AML/CFT',           publishes: 'AML/CFT laws, regulations and news from the EOCN',                           note: null },
-  { source: 'DIFC Laws and Regulations',              publishes: 'DIFC legal database — laws, data protection rules',                           note: null },
-  { source: 'DIFC Data Protection (Commissioner)',    publishes: 'DIFC DP Commissioner materials, supervision, guidance and enforcement',       note: null },
-  { source: 'DFSA Rulebook Modules',                  publishes: 'DFSA rulebook modules via Thomson Reuters platform',                          note: null },
-  { source: 'DFSA Consultation Papers',               publishes: 'DFSA consultation papers — current and closed',                              note: null },
-  { source: 'DFSA Enforcement Decisions + Actions',   publishes: 'Published enforcement decisions and ongoing regulatory actions',               note: null },
-  { source: 'DFSA Annual Reports',                    publishes: 'DFSA annual regulatory reports',                                              note: null },
-  { source: 'DFSA Annual AML Reports',                publishes: 'DFSA annual AML and enforcement reports',                                     note: null },
-  { source: 'UAE Ministry of Economy',                publishes: 'Commercial licensing and AML policy updates',                                 note: null },
-  { source: 'UAE CMA selected sources',                publishes: 'Limited UAE CMA proof-backed sources, including sandbox and selected guidance',  note: 'Broader UAE CMA regulations listing is still being validated' },
+  { source: 'CBUAE Rulebook — revision updates',       publishes: 'Rulebook-wide revision history across CBUAE modules',                          note: 'Monitored on rulebook.centralbank.ae; the main centralbank.ae domain is geo-IP filtered from outside the UAE' },
+  { source: 'CBUAE Rulebook — AML/CFT',                publishes: 'AML/CFT rulebook sections, document links, proliferation finance and TBML guidance', note: null },
+  { source: 'CBUAE Rulebook — payments',               publishes: 'Payment Token Services, Retail Payment Services and Card Schemes, Stored Value Facilities, payment systems regulations', note: null },
+  { source: 'CBUAE Rulebook — open finance + conduct', publishes: 'Open Finance Regulation, consumer protection, market conduct, SME customer protection', note: null },
+  { source: 'CBUAE Rulebook — prudential risk',        publishes: 'Capital adequacy, market/operational/interest-rate risk, large exposures, model management, Islamic banks risk', note: null },
+  { source: 'MoF publications + financial legislation', publishes: 'MoF publications and releases, financial legislation, UAE financial framework', note: null },
+  { source: 'MoF tax policy pages',                     publishes: 'Corporate Tax, Domestic Minimum Top-up Tax, Economic Substance, AEOI/FATCA/CRS', note: 'FTA listing sources are enabled but remain candidate — see below' },
+  { source: 'VARA Rulebook revision updates',          publishes: 'VARA rulebook module changes and revision history',                            note: null },
+  { source: 'VARA News, Circulars and Publications',   publishes: 'VASP licensing news, circulars and regulatory publications',                   note: null },
+  { source: 'VARA Enforcement Notices',                publishes: 'VASP enforcement actions and regulatory decisions',                            note: null },
+  { source: 'ADGM FSRA Rules and Regulations',         publishes: 'FSRA rules, regulations, guidance and policy statements',                      note: null },
+  { source: 'ADGM FSRA Supervision Circulars',         publishes: 'FSRA supervision circulars to regulated entities',                             note: null },
+  { source: 'ADGM FSRA Financial + Cyber Crime',       publishes: 'FSRA financial and cyber crime prevention materials',                          note: null },
+  { source: 'ADGM FSRA Listing Authority',             publishes: 'Listing Authority rules and guidance',                                         note: null },
+  { source: 'ADGM Public Consultations',               publishes: 'FSRA consultation papers and policy proposals',                                note: null },
+  { source: 'ADGM Courts',                             publishes: 'Courts legislation, procedures, forms, fees and guides',                       note: null },
+  { source: 'ADGM Data Protection Guidance',           publishes: 'ADGM data protection guidance index',                                          note: 'Office of Data Protection hub is enabled, pending validation' },
+  { source: 'EOCN / UAEIEC',                           publishes: 'AML/CFT laws and regulations, news, UN sanctions and TFS updates',             note: null },
+  { source: 'DIFC Laws and Regulations',               publishes: 'DIFC legal database, laws and regulations, legal notices',                     note: null },
+  { source: 'DIFC Data Protection',                    publishes: 'Commissioner materials, Regulation 10, guidance, supervision and enforcement', note: null },
+  { source: 'DIFC Business — AML/CFT + ESR',           publishes: 'DIFC AML/CFT and economic substance pages',                                    note: null },
+  { source: 'DFSA Rulebook',                           publishes: 'Official rulebook plus Thomson Reuters modules, including the AML module',     note: null },
+  { source: 'DFSA Consultation Papers',                publishes: 'DFSA consultation papers — current',                                           note: null },
+  { source: 'DFSA Enforcement',                        publishes: 'Published enforcement decisions and ongoing regulatory actions',               note: null },
+  { source: 'DFSA Financial Crime + MLRO Letters',     publishes: 'Financial crime prevention notices, MLRO letters, innovation and testing licence updates', note: null },
+  { source: 'DFSA Annual + AML Reports',               publishes: 'DFSA annual regulatory reports and annual AML reports',                        note: null },
+  { source: 'Ministry of Economy — DNFBP AML',         publishes: 'AML, goAML registration, targeted financial sanctions, economic substance, auditing, business and competition regulation', note: null },
+  { source: 'UAE CMA (formerly SCA)',                  publishes: 'Circulars/rules/procedures, regulations listing, AML/CFT, corporate governance, FATCA/CRS, fintech sandbox', note: 'Circulars page repointed to the CMA’s new canonical URL during the SCA→CMA site transition (July 2026)' },
 ]
 
 const CAVEAT_SOURCES = [
   {
-    source: 'UAE FIU Homepage',
-    why: 'The FIU homepage is a landing page with no document list, so there is nothing to alert on. FIU annual reports, press releases, typology reports, AML/CFT laws, and the publications hub have fresh-alert coverage; the FIU circulars page is still being validated because we could not yet extract reliable text from it.',
+    source: 'UAE FIU (uaefiu.gov.ae)',
+    why: 'The UAE FIU website is geo-IP restricted from outside the UAE and no FIU source is fresh-alert eligible today. Previously validated FIU pages are excluded from coverage claims until an accessible official route is re-verified. AML coverage continues through EOCN, CBUAE AML/CFT rulebook sections, Ministry of Economy DNFBP sources and DFSA/CMA AML sources.',
   },
   {
-    source: 'FTA Main Portal and listing pages (tax.gov.ae)',
-    why: '25 direct official FTA tax PDFs are fresh-alert eligible. The FTA main portal and its listing/sub-pages are not separately counted as fresh-alert because we could not yet extract reliable text for each item on those pages, so they are still being validated.',
+    source: 'FTA listing sources (tax.gov.ae)',
+    why: 'Six FTA listing sources — all-tax legislation, Corporate Tax legislation, Corporate Tax and VAT guides, VAT public clarifications and the media centre — are enabled and monitored after a June 2026 extraction fix. They remain candidate-stage until they pass the same fresh-alert gate as other sources, so no FTA source is counted as fresh-alert eligible today. Static FTA decision PDFs are archived as evidence snapshots, not monitored for change.',
   },
   {
     source: 'UAE Capital Market Authority (UAE CMA)',
-    why: 'UAE CMA has 6 active proof-backed fresh-alert eligible sources. Broader UAE CMA coverage is actively expanding and is still being validated before we make broader capital-markets claims.',
+    why: 'UAE CMA has 6 proof-backed fresh-alert eligible sources, including the regulations listing and the circulars/rules/procedures page, which was repointed to the CMA’s new canonical URL during the SCA→CMA site transition in July 2026. The root portal and board-decisions listing are still being validated before we make broader capital-markets claims.',
   },
   {
     source: 'UAE Legislation Portal',
-    why: 'This high-value federal legislation source is still being validated because access is currently blocked. We do not sell it as monitored until there is a reliable, accessible route we have verified.',
+    why: 'This high-value federal legislation source is still being validated because access is currently blocked from outside the UAE. We do not sell it as monitored until there is a reliable, accessible route we have verified.',
   },
   {
     source: 'ADGM FSRA Rulebook (Thomson Reuters platform)',
-    why: 'The ADGM FSRA rulebook on the Thomson Reuters platform (fsra.adgm.com) has restricted external access. FSRA regulatory content is captured through ADGM official sources such as rules and regulations, guidance notes, supervision circulars, enforcement, and consultations. The dedicated regulatory-alerts page is still being validated.',
+    why: 'The ADGM FSRA rulebook on the Thomson Reuters platform (fsra.adgm.com) has restricted external access. FSRA regulatory content is captured through ADGM official sources such as rules and regulations, guidance notes, supervision circulars, and consultations. The dedicated regulatory-alerts page, the waivers register and Registration Authority circulars are enabled as disclosed candidates, pending validation.',
   },
 ]
 
 const NOT_AVAILABLE_SOURCES = [
+  {
+    source: 'UAE FIU (uaefiu.gov.ae)',
+    reason: 'Geo-IP restricted from outside the UAE. EOCN, CBUAE, Ministry of Economy and DFSA/CMA AML sources are monitored as alternatives.',
+  },
+  {
+    source: 'CBUAE main domain (centralbank.ae)',
+    reason: 'Geo-IP filtered from outside the UAE. The CBUAE rulebook subdomain (rulebook.centralbank.ae) is monitored instead — 25 fresh-alert eligible sources.',
+  },
+  {
+    source: 'UAE Cabinet — news and decisions (uaecabinet.ae)',
+    reason: 'Access blocked from outside the UAE.',
+  },
   {
     source: 'UAE Official Gazette / Al-Jaridah Al-Rasmiah',
     reason: 'Access blocked from outside the UAE.',
@@ -61,17 +76,20 @@ const NOT_AVAILABLE_SOURCES = [
     reason: 'Access blocked from outside the UAE.',
   },
   {
-    source: 'UAE Data Office / TDRA (uaedp.gov.ae)',
-    reason: 'Access blocked from outside the UAE. DIFC and ADGM data protection sources are monitored as alternatives.',
+    source: 'UAE Data Office / TDRA (federal PDPL)',
+    reason: 'Not currently in monitored scope — no accessible fresh-alert route has been validated. DIFC and ADGM data protection sources are monitored as alternatives.',
   },
 ]
 
 const ROADMAP_SOURCES = [
-  { source: 'FTA item-level portal/listing extraction beyond direct PDFs', profile: 'Tax advisers, corporate finance and legal teams' },
-  { source: 'ADGM FSRA dedicated regulatory-alerts listing', profile: 'ADGM regulated firms and securities teams' },
-  { source: 'DMCC regulatory notices',            profile: 'DMCC member firms and commodity traders' },
-  { source: 'Insurance Authority supervision',    profile: 'Insurance, insurtech, law firms' },
-  { source: 'UAE sanctions / AML screening list', profile: 'AML teams, VASPs, banks, payments firms' },
+  { source: 'FTA listing sources — fresh-alert promotion after candidate gate', profile: 'Tax advisers, corporate finance and legal teams' },
+  { source: 'ADGM FSRA regulatory alerts, waivers register, RA circulars — enabled candidates', profile: 'ADGM regulated firms and securities teams' },
+  { source: 'DFSA news hub, SEO letters, public register — enabled, pending validation', profile: 'DIFC regulated firms and advisers' },
+  { source: 'VARA public register + regulatory notices index — enabled, pending validation', profile: 'VASPs and crypto compliance teams' },
+  { source: 'DIFC news hub; DIFC Courts practice + registrar directions — enabled, pending validation', profile: 'DIFC firms, funds and law firms' },
+  { source: 'MoJ media centre + news; Dubai Legislation Portal laws search — enabled, pending validation', profile: 'Legal and governance teams' },
+  { source: 'DFM, DMCC, JAFZA, ICP, TDRA, MOCCAE — enabled, pending validation', profile: 'Listed companies, free-zone firms and sector teams' },
+  { source: 'Insurance supervision; item-level sanctions screening list extraction', profile: 'Insurance, AML teams, VASPs, banks, payments firms' },
 ]
 
 function StatusBadge({ tone, children }) {
@@ -147,7 +165,7 @@ export default function Coverage({ onCreateWorkspace }) {
           {/* Active sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">Source monitoring examples — {ACTIVE_SOURCES.length} sources</h3>
+              <h3 className="font-bold text-white">Fresh-alert eligible coverage — {ACTIVE_SOURCES.length} grouped source layers</h3>
               <StatusBadge tone="active">Fresh-alert eligible</StatusBadge>
             </div>
             <SourceTable
@@ -193,8 +211,8 @@ export default function Coverage({ onCreateWorkspace }) {
           {/* Roadmap sources */}
           <div>
             <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-white">On the monitoring roadmap — not yet active</h3>
-              <StatusBadge tone="roadmap">Roadmap</StatusBadge>
+              <h3 className="font-bold text-white">On the validation track — enabled or planned, not yet alert-eligible</h3>
+              <StatusBadge tone="roadmap">Pending / roadmap</StatusBadge>
             </div>
             <SourceTable
               columns={[

@@ -68,7 +68,7 @@ const REGULATOR_STRIP = [
   "ADGM / FSRA",
   "VARA",
   "UAE CMA",
-  "UAE FIU",
+  "DIFC",
 ];
 
 function EvidenceDossier() {
