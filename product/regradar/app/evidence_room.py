@@ -110,7 +110,9 @@ _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{20,200}$")
 # A source_id is a single path segment interpolated into the evidence glob. It
 # must be a plain directory name — no separators, traversal, or glob metachars —
 # so a frozen scope id can never broaden the walk beyond its own source subtree.
-_SAFE_SOURCE_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+# The negative lookahead rejects all-dot segments (".."/".") so a traversal id
+# can't collapse the per-source glob back to a whole-tree walk (verify-swarm).
+_SAFE_SOURCE_SEGMENT_RE = re.compile(r"^(?!\.+$)[A-Za-z0-9._-]+$")
 
 # Authored, examiner-facing prose. Negative-assurance tone only: what was
 # captured, how to check it — never certification, guarantees, or advice.

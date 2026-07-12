@@ -252,7 +252,9 @@ def _load_sealed_change_records(
     # never have matched a real record dir, so it is skipped.
     import re as _re
 
-    _safe_segment = _re.compile(r"^[A-Za-z0-9._-]+$")
+    # Reject all-dot segments (".."/".") so a traversal id can't collapse the
+    # per-source glob back to a whole-tree walk (verify-swarm 2026-07-12).
+    _safe_segment = _re.compile(r"^(?!\.+$)[A-Za-z0-9._-]+$")
     record_paths: list[Path] = []
     for sid in sorted(allowed_source_ids):
         if _safe_segment.match(str(sid)):

@@ -673,3 +673,13 @@ def test_share_revoke_endpoint_owner_flow(isolated_db, entitled, monkeypatch, tm
     handler = _make_handler(body={"share_id": 424242})
     handler._handle_evidence_room_share_revoke()
     assert handler._sent[-1][1] == 404
+
+
+def test_safe_source_segment_re_rejects_traversal():
+    """A source_id segment interpolated into the per-source glob must reject all-dot
+    traversal ids ('..'/'.') so it can never re-collapse to a whole-tree walk
+    (verify-swarm 2026-07-12)."""
+    from app.evidence_room import _SAFE_SOURCE_SEGMENT_RE as R
+    assert R.match("AE-vara-rulebook") and R.match("custom-1a2b3c4d")
+    for bad in ("..", ".", "...", "....", "./.."):
+        assert not R.match(bad), bad
