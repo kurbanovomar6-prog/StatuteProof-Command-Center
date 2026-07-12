@@ -239,11 +239,14 @@ _TELEGRAM_TEST_LIMITER = _RateLimiter(5, 3600)
 _DELIVERY_TEST_BRIEF_LIMITER = _RateLimiter(5, 3600)
 _DELIVERY_SEND_PREVIEW_LIMITER = _RateLimiter(10, 3600)
 _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
-# Heavy export endpoints (audit vault, evidence pack, coverage certificate,
-# monthly assurance, change-register export, evidence export). These build ZIPs
-# and PDFs — each request is meaningful disk/CPU work on the small production
-# droplet, so one shared per-IP limiter caps how fast any client can trigger
-# them regardless of which export it is.
+# Heavy export endpoints (audit vault, evidence pack, regulator binder, coverage
+# certificate, monthly assurance, change-register export, evidence export). These
+# build ZIPs and PDFs — meaningful disk/CPU work on the small production droplet.
+# NOTE: _rate_limited keys each hit as "<ip>:<label>", so every export label gets
+# its OWN independent 30/hour bucket per IP (not one shared cross-export budget).
+# Per-request blast radius is bounded separately at the builder layer (e.g. the
+# regulator binder caps record count via MAX_BINDER_RECORDS); if a single shared
+# export budget per IP is wanted later, key this without the per-endpoint label.
 _EXPORT_LIMITER = _RateLimiter(30, 3600)
 # Public, no-login evidence verifier (POST /api/verify). Verification is cheap
 # (pure CPU, no disk, no evidence-store reads), but the endpoint is unauthenticated
@@ -906,6 +909,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_audit_vault()
         elif path == "/api/evidence/pack":
             self._handle_evidence_pack()
+        elif path == "/api/reports/regulator-binder":
+            self._handle_regulator_binder()
         elif path == "/api/change-register/export":
             self._handle_change_register_export()
         elif path == "/api/alerts/action-log":
@@ -3395,6 +3400,107 @@ class _Handler(BaseHTTPRequestHandler):
             )
         except Exception as exc:
             logger.error("evidence pack error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    # ── POST /api/reports/regulator-binder ────────────────────────────────────
+
+    def _handle_regulator_binder(self) -> None:
+        """Build the Regulator-ready Evidence Binder ZIP for the client.
+
+        A period+source-scoped, multi-record extension of the Evidence Pack: for
+        the chosen source(s) over the chosen period it bundles every captured
+        change (sealed evidence records + raw/normalized snapshots + diffs), a
+        machine manifest with a tamper-evident binder content hash, an honest
+        COVER.md timeline, and a standalone offline verify.py — so an examiner can
+        re-hash everything without trusting StatuteProof.
+
+        Mirrors ``_handle_audit_vault`` / ``_handle_evidence_pack`` exactly:
+        require_auth → rate limit → validate_source_ids + validate_date_range →
+        require_capability("audit_export") → owner-scope source_ids via
+        ``_entitle_source_ids`` (403 if none in scope) → build → stream the ZIP.
+        Fails closed; never 500s to the client with an internal detail.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "regulator_binder"):
+            return
+        from pathlib import Path
+        from app.audit_export import validate_date_range, validate_source_ids
+        from app.regulator_binder import build_regulator_binder
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+        source_ids = body.get("source_ids")
+        date_from = str(body.get("date_from") or "").strip()
+        date_to = str(body.get("date_to") or "").strip()
+        ids_ok, ids_err = validate_source_ids(source_ids)
+        if not ids_ok:
+            self._send_json({"ok": False, "message": ids_err}, 400)
+            return
+        if not self._require_capability(user, "audit_export"):
+            return
+        valid, err = validate_date_range(date_from, date_to)
+        if not valid:
+            self._send_json({"ok": False, "message": err}, 400)
+            return
+        # Owner-scope tenancy: clip to the sources the caller is entitled to. A
+        # custom source owned by another tenant is dropped here and never reaches
+        # the builder; if nothing survives, 403 (never build another tenant's pack).
+        source_ids = self._entitle_source_ids(user, source_ids)
+        if not source_ids:
+            self._send_json(
+                {"ok": False, "message": "None of the requested sources are in your plan scope."},
+                403,
+            )
+            return
+        try:
+            result = build_regulator_binder(source_ids, date_from, date_to)
+            status = result.get("status")
+            if status == "error":
+                # Never forward the builder's internal exception text to the client:
+                # it can carry absolute server paths or other internal detail. Log it
+                # server-side, return a generic 500.
+                logger.error("regulator binder build failed: %s", result.get("message"))
+                self._send_json({"ok": False, "message": "Failed to build regulator binder."}, 500)
+                return
+            if status == "too_large":
+                # Availability guard tripped: the selection exceeds MAX_BINDER_RECORDS.
+                # 413 with a safe, actionable message (narrow the selection).
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": result.get("message", "Selection too large; narrow the period or sources."),
+                        "max_records": result.get("max_records"),
+                    },
+                    413,
+                )
+                return
+            if status == "empty":
+                self._send_json({"ok": False, **result}, 404)
+                return
+            binder_path = Path(str(result.get("binder_path") or ""))
+            if not binder_path.exists():
+                self._send_json({"ok": False, "message": "Regulator binder was not generated."}, 500)
+                return
+            filename = result.get("binder_filename") or binder_path.name
+            try:
+                payload = binder_path.read_bytes()
+            finally:
+                # One-shot download: don't accumulate generated ZIPs on the server's disk.
+                binder_path.unlink(missing_ok=True)
+            self._send_bytes(
+                payload,
+                "application/zip",
+                extra_headers=[("Content-Disposition", f'attachment; filename="{filename}"')],
+            )
+        except Exception as exc:
+            logger.error("regulator binder error: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     # ── POST /api/change-register/export ──────────────────────────────────────

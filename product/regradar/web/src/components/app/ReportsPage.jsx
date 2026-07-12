@@ -3,6 +3,7 @@ import { Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-re
 
 import { evidence } from '../../api'
 import AuditBinderExport from './AuditBinderExport'
+import RegulatorBinderExport from './RegulatorBinderExport'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
 import { formatGst } from '../../utils/time'
@@ -59,6 +60,18 @@ export default function ReportsPage() {
 
   const selected = records.find(record => record.evidence_record_id === selectedId) || filtered[0]
 
+  // Unique sources the caller has evidence for — feeds the binder source picker.
+  const binderSources = useMemo(() => {
+    const seen = new Map()
+    records.forEach(record => {
+      const id = record.source_id
+      if (id && !seen.has(id)) {
+        seen.set(id, { id, name: record.source_name || id })
+      }
+    })
+    return Array.from(seen.values())
+  }, [records])
+
   async function handleExport(record, format = 'pdf') {
     if (!record?.evidence_record_id) return
     setExportState(prev => ({ ...prev, [record.evidence_record_id]: { status: 'exporting', format, message: '' } }))
@@ -83,6 +96,7 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-full space-y-5 bg-[#07111F] p-5 pb-10">
+      <RegulatorBinderExport sources={binderSources} />
       <AuditBinderExport />
 
       <div>

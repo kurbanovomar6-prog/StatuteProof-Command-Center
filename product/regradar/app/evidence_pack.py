@@ -186,14 +186,24 @@ def _collect_pack_entries(
     wanted: set[str],
     date_from: str,
     date_to_end: str,
+    limit: int | None = None,
 ) -> list[dict[str, Any]]:
-    """Return verified, in-range, source-scoped evidence entries for the pack."""
+    """Return verified, in-range, source-scoped evidence entries for the pack.
+
+    ``limit`` bounds how many entries are materialized: once ``limit + 1`` entries
+    have been collected the scan stops early, so a caller can detect an oversized
+    selection (``len(result) > limit``) and reject it WITHOUT ever loading the
+    snapshot bytes of an unbounded number of records into memory. ``None`` (the
+    default) preserves the original collect-everything behavior.
+    """
     evidence_root = root / "evidence"
     if not evidence_root.exists():
         return []
 
     entries: list[dict[str, Any]] = []
     for record_path in sorted(evidence_root.glob("**/evidence-record.json")):
+        if limit is not None and len(entries) > limit:
+            break  # one past the cap is enough for the caller to detect overflow
         try:
             record = json.loads(record_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -202,16 +212,22 @@ def _collect_pack_entries(
             continue
         if record.get("record_status") != "complete":
             continue
-        integrity = record.get("integrity") if isinstance(record.get("integrity"), dict) else {}
+        integrity = record.get("integrity")
+        if not isinstance(integrity, dict):
+            integrity = {}
         if integrity.get("integrity_status") != "VERIFIED" or integrity.get("hash_verified") is not True:
             continue
 
-        source = record.get("source") if isinstance(record.get("source"), dict) else {}
+        source = record.get("source")
+        if not isinstance(source, dict):
+            source = {}
         source_id = str(source.get("source_id") or "").strip()
         if source_id not in wanted:  # source-scoping: never leak another source
             continue
 
-        run = record.get("run") if isinstance(record.get("run"), dict) else {}
+        run = record.get("run")
+        if not isinstance(run, dict):
+            run = {}
         naive = _naive_ts(str(run.get("timestamp") or ""))
         if not (naive and date_from <= naive <= date_to_end):
             continue
@@ -231,8 +247,12 @@ def _entry_from_record(
     run: dict[str, Any],
 ) -> dict[str, Any] | None:
     """Read + hash the snapshots for one record; None if inconsistent/unreadable."""
-    content = record.get("content") if isinstance(record.get("content"), dict) else {}
-    files = record.get("files") if isinstance(record.get("files"), dict) else {}
+    content = record.get("content")
+    if not isinstance(content, dict):
+        content = {}
+    files = record.get("files")
+    if not isinstance(files, dict):
+        files = {}
     record_id = str(record.get("record_id") or "").strip()
     if not record_id:
         return None

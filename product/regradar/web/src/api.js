@@ -245,6 +245,36 @@ export const delivery = {
   },
 }
 
+function parseFilename(disposition) {
+  if (!disposition) return ''
+  const match = /filename="?([^"]+)"?/.exec(disposition)
+  return match ? match[1] : ''
+}
+
+export const reports = {
+  // Regulator-ready evidence binder: POSTs the source + period, receives a sealed
+  // application/zip on success (streamed as a blob for download) or a JSON error
+  // envelope otherwise. Returns { blob, filename } so the caller can trigger the
+  // browser download; throws on error with an `empty` flag for the 404 case.
+  async regulatorBinder({ sourceIds, dateFrom, dateTo }) {
+    const response = await apiFetch('/api/reports/regulator-binder', {
+      method: 'POST',
+      body: JSON.stringify({ source_ids: sourceIds, date_from: dateFrom, date_to: dateTo }),
+    })
+    const contentType = response.headers.get('Content-Type') || ''
+    if (!response.ok || !contentType.includes('application/zip')) {
+      const data = await response.json().catch(() => ({}))
+      const err = new Error(data.message || `HTTP ${response.status}`)
+      err.status = response.status
+      err.empty = response.status === 404 || data.status === 'empty'
+      throw err
+    }
+    const blob = await response.blob()
+    const filename = parseFilename(response.headers.get('Content-Disposition')) || 'regulator-binder.zip'
+    return { blob, filename }
+  },
+}
+
 export const plan = {
   get() {
     return authRequest('/api/plan')
