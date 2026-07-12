@@ -150,12 +150,16 @@ export const SOURCE_PACKS = [
     coverage: "strong",
     layers: [
       {
-        text: "DFSA Rulebook modules, including the AML/CTF & Sanctions module",
+        text: "DFSA Rulebook (Thomson Reuters modules)",
         status: "active",
         sourceIds: [
           "AE-dfsa-rulebook-thomsonreuters",
-          "AE-dfsa-aml-rulebook-module",
         ],
+      },
+      {
+        text: "DFSA AML/CTF & Sanctions rulebook module — under adapter remediation (re-baseline pending)",
+        status: "pending",
+        sourceIds: ["AE-dfsa-aml-rulebook-module"],
       },
       {
         text: "DFSA laws, rules and legal resources",
@@ -310,8 +314,8 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "Ministry of Economy DNFBP AML, targeted financial sanctions and goAML registration",
-        status: "active",
+        text: "Ministry of Economy DNFBP AML, TFS and goAML registration — under source remediation (earlier captures were a maintenance page; re-baseline pending)",
+        status: "pending",
         sourceIds: [
           "AE-moet-aml-170b7988",
           "AE-moet-targeted-financial-sanctions-586d6f96",
@@ -319,13 +323,17 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "DFSA and ADGM financial-crime / MLRO and AML rulebook sources",
+        text: "DFSA MLRO letters and ADGM financial-crime prevention sources",
         status: "active",
         sourceIds: [
-          "AE-dfsa-aml-rulebook-module",
           "AE-dfsa-financial-crime-mlro-letters",
           "AE-adgm-fsra-financial-crime-prevention",
         ],
+      },
+      {
+        text: "DFSA AML rulebook module — under adapter remediation (re-baseline pending)",
+        status: "pending",
+        sourceIds: ["AE-dfsa-aml-rulebook-module"],
       },
       {
         text: "UAE CMA and DIFC AML/CFT obligation pages",
@@ -371,17 +379,21 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "UAE CMA FATCA/CRS guidance and DIFC / MoE Economic Substance pages",
+        text: "UAE CMA FATCA/CRS guidance and DIFC Economic Substance pages",
         status: "active",
         sourceIds: [
           "AE-sca-fatca-crs",
           "AE-difc-business-economic-substance-regulations-05c9f19b",
-          "AE-moet-economic-substance-regulations-a5b9825b",
         ],
       },
       {
-        text: "Ministry of Economy — business regulation, competition and auditing legislation",
-        status: "active",
+        text: "MoE Economic Substance page — under source remediation (re-baseline pending)",
+        status: "pending",
+        sourceIds: ["AE-moet-economic-substance-regulations-a5b9825b"],
+      },
+      {
+        text: "Ministry of Economy business regulation, competition and auditing legislation — under source remediation (re-baseline pending)",
+        status: "pending",
         sourceIds: [
           "AE-moet-regulation-of-business-fd17959e",
           "AE-moet-regulation-of-competition-ba53cc4c",

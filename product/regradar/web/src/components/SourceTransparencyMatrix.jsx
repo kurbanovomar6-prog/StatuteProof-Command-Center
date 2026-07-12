@@ -19,10 +19,10 @@ const MATRIX_ROWS = [
   },
   {
     category: 'DIFC / DFSA',
-    sourceCount: '21 fresh-alert eligible across DIFC/DFSA',
+    sourceCount: '20 fresh-alert eligible across DIFC/DFSA',
     statusTone: 'active',
-    whatWeMonitor: 'DIFC laws, legal database, legal notices, data protection, AML/CFT and ESR pages; DFSA rulebook (official + Thomson Reuters modules incl. AML), consultations, enforcement, MLRO letters, annual reports',
-    limitation: 'DFSA news hub, SEO letters and public register, plus the DIFC news hub and DIFC Courts directions, are enabled but pending validation.',
+    whatWeMonitor: 'DIFC laws, legal database, legal notices, data protection, AML/CFT and ESR pages; DFSA rulebook (official + Thomson Reuters modules), consultations, enforcement, MLRO letters, annual reports',
+    limitation: 'DFSA news hub, SEO letters and public register, plus the DIFC news hub and DIFC Courts directions, are enabled but pending validation. The DFSA AML rulebook module is under adapter remediation (its earlier captures did not meet the content-quality floor) and is not counted until re-baselined.',
     whatThisMeans: 'Selected DIFC/DFSA source monitoring covers laws, rulebook, data protection and enforcement; pending sources are disclosed, not counted.',
   },
   {
@@ -37,9 +37,9 @@ const MATRIX_ROWS = [
     category: 'AML / sanctions / FIU',
     sourceCount: 'Selected-source AML depth',
     statusTone: 'caveat',
-    whatWeMonitor: 'EOCN / UAEIEC AML/CFT laws, news and UN sanctions/TFS updates; Ministry of Economy DNFBP AML suite (goAML, TFS, beneficial ownership); CBUAE AML/CFT rulebook; DFSA AML module and MLRO letters; UAE CMA AML/CFT page',
-    limitation: 'The UAE FIU website (uaefiu.gov.ae) is geo-IP restricted from outside the UAE — no FIU source is fresh-alert eligible today.',
-    whatThisMeans: 'AML monitoring runs through EOCN, CBUAE, MoE, DFSA and CMA official sources; the FIU access limitation is disclosed before any pilot.',
+    whatWeMonitor: 'EOCN / UAEIEC AML/CFT laws, news and UN sanctions/TFS updates; CBUAE AML/CFT rulebook; DFSA MLRO letters; UAE CMA AML/CFT page',
+    limitation: 'The UAE FIU website (uaefiu.gov.ae) is geo-IP restricted from outside the UAE — no FIU source is fresh-alert eligible today. The Ministry of Economy DNFBP AML suite (goAML, TFS, beneficial ownership, business regulation) is under source remediation — its earlier captures were a site-maintenance page, which our quality gate now rejects — and is not counted until re-baselined on real content.',
+    whatThisMeans: 'AML monitoring runs through EOCN, CBUAE, DFSA and CMA official sources; the FIU access limitation and the MoE remediation are disclosed before any pilot, not discovered after it.',
   },
   {
     category: 'Tax / corporate',

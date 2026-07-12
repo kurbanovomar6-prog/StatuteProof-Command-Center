@@ -12,6 +12,9 @@
 //   candidate          = enabled AND monitoring_mode === 'candidate'
 export const SOURCE_TRUTH = {
   enabled: 116,
-  readinessSupported: 83,
+  // 2026-07-12 OPS audit: 8 sources (7 MOET on a maintenance-stub baseline +
+  // the DFSA AML rulebook module on a JS-shell baseline) moved to remediation
+  // until re-baselined on real content — honest count drops 83 → 75.
+  readinessSupported: 75,
   candidate: 8,
 }

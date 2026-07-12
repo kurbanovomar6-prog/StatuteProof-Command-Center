@@ -289,3 +289,35 @@ def test_mass_monitor_dry_run_does_not_mutate_queue(tmp_path):
     )
 
     assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_map_health_gates_http_errors_and_stub_captures():
+    """OPS audit 2026-07-12: a 503 maintenance page classified MONITOR_OK and
+    became the trusted baseline for 7 MOET sources. The classifier must gate
+    (a) http_status >= 400 and (b) captures below expected_min_length."""
+    from app.mass_monitoring_runner import map_source_health_status
+
+    ok_result = {
+        "status": "CONFIRMED_ACCESSIBLE",
+        "normalized_hash": "sha256:aa",
+        "quality_score": 65,
+        "chars_normalized": 20_000,
+    }
+    # Healthy result stays OK (with and without the min-length kwarg).
+    assert map_source_health_status(dict(ok_result)) == "MONITOR_OK"
+    assert map_source_health_status(dict(ok_result), expected_min_length=500) == "MONITOR_OK"
+
+    # (a) An HTTP error body can NEVER be OK, however clean it hashed.
+    for code in (403, 429, 500, 503):
+        got = map_source_health_status({**ok_result, "http_status": code})
+        assert got == "REMEDIATION_REQUIRED", f"http {code} classified {got}"
+
+    # (b) A capture below the declared floor is a stub, never OK — the exact
+    # MOET shape: 146-char maintenance page, quality >= 60, hash present.
+    stub = {**ok_result, "chars_normalized": 146}
+    assert map_source_health_status(stub, expected_min_length=500) == "QUALITY_DROP"
+    # Without a declared floor the gate stays out of the way (no false drop).
+    assert map_source_health_status(stub) == "MONITOR_OK"
+    # Missing chars_normalized (older intake shape) never trips the gate.
+    no_chars = {k: v for k, v in ok_result.items() if k != "chars_normalized"}
+    assert map_source_health_status(no_chars, expected_min_length=500) == "MONITOR_OK"

@@ -143,8 +143,21 @@ def _enabled_sources_as_entries(path: Path) -> list[dict[str, Any]]:
     return entries
 
 
-def map_source_health_status(result: dict[str, Any]) -> str:
-    """Map a Source Lab/intake result to a monitoring health status."""
+def map_source_health_status(
+    result: dict[str, Any], *, expected_min_length: int | None = None
+) -> str:
+    """Map a Source Lab/intake result to a monitoring health status.
+
+    Two gates guard the MONITOR_OK path (OPS audit 2026-07-12 — seven MOET
+    sources sat on a 146-byte "site under maintenance" page classified
+    MONITOR_OK, so the maintenance stub became the trusted baseline):
+
+    * ``http_status`` >= 400 can NEVER classify as OK — an error body that
+      hashed cleanly is still an error body.
+    * a capture shorter than the source's declared ``expected_min_length`` is
+      a shell/maintenance stub, not monitorable content — QUALITY_DROP, so it
+      neither becomes a baseline nor masks an outage as "no change".
+    """
     failure_code = str(result.get("failure_code") or "").upper()
     status = str(result.get("status") or result.get("readiness_status") or "").upper()
     quality = int(result.get("quality_score") or 0)
@@ -161,6 +174,21 @@ def map_source_health_status(result: dict[str, Any]) -> str:
         return SOURCE_STRUCTURE_CHANGED
     if failure_code in {"ACCESS_BLOCKED", "LIKELY_WAF_403"} or status in {"BLOCKED", "UNSUPPORTED"}:
         return REMEDIATION_REQUIRED
+    # HTTP-error gate: 4xx/5xx bodies must never reach an OK classification.
+    try:
+        http_status = int(result.get("http_status") or 0)
+    except (TypeError, ValueError):
+        http_status = 0
+    if http_status >= 400:
+        return REMEDIATION_REQUIRED
+    # Min-length gate: below the source's declared floor = stub, never OK.
+    chars_raw = result.get("chars_normalized")
+    try:
+        chars = int(chars_raw) if chars_raw is not None else None
+    except (TypeError, ValueError):
+        chars = None
+    if expected_min_length and chars is not None and chars < int(expected_min_length):
+        return QUALITY_DROP
     if quality and quality < 60:
         return QUALITY_DROP
     if status == "CONFIRMED_ACCESSIBLE" and result.get("normalized_hash"):
@@ -276,7 +304,10 @@ def run_mass_monitoring_batch(
 
         source = _source_config(entry)
         result = intake_func(source, write_evidence=write_evidence)
-        health = map_source_health_status(result or {})
+        health = map_source_health_status(
+            result or {},
+            expected_min_length=int(entry.get("expected_min_length") or 500),
+        )
         normalized_hash = (result or {}).get("normalized_hash") or ""
         previous_hash = entry.get("last_monitor_hash") or entry.get("normalized_hash") or ""
         change_detected = bool(previous_hash and normalized_hash and previous_hash != normalized_hash)
