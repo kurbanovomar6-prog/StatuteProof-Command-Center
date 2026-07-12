@@ -205,7 +205,7 @@ function ChainStrip() {
   );
 }
 
-export default function Hero({ onCreateWorkspace, onViewSample }) {
+export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
   // Live source count — landing must never hardcode coverage numbers.
   const [liveSourceCount, setLiveSourceCount] = useState(null);
   useEffect(() => {
@@ -328,6 +328,24 @@ export default function Hero({ onCreateWorkspace, onViewSample }) {
               >
                 View sample evidence record
               </button>
+            </div>
+
+            {/* Public verifier CTA — the record it loads is real (public
+                regulator content); verification confirms record integrity
+                only, never compliance. */}
+            <div className="sp-animate-fade-up sp-delay-3 mt-4">
+              <a
+                href="/verify#sample"
+                onClick={(event) => {
+                  if (!onVerify) return
+                  event.preventDefault()
+                  onVerify()
+                }}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-300 transition-colors hover:text-white"
+              >
+                Verify a record in 60 seconds — no account
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
 
             {/* Live indicator + disclaimer */}

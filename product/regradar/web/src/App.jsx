@@ -396,6 +396,7 @@ export default function App() {
         <Hero
           onCreateWorkspace={() => navigatePublic('source-readiness-review')}
           onViewSample={handleViewSampleEvidence}
+          onVerify={() => navigatePublic('verify', { query: '#sample' })}
         />
         <Suspense fallback={<div className="py-20" />}>
           <Problem />

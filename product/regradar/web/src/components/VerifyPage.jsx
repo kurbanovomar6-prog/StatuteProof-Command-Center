@@ -6,13 +6,36 @@
  * server never reads its own evidence store — that is the whole point: you do not
  * have to trust StatuteProof, you check the math yourself.
  *
+ * "Load a real record" fills the form with a REAL evidence record of public
+ * regulator content (a captured change on the DFSA Rules and Standards page),
+ * shipped as static assets under /sample-record/, so a first-time visitor can
+ * run the check without holding a record. Deep link: /verify#sample auto-loads
+ * that built-in record ONLY — the page never accepts records or URLs from
+ * location params (no reflected-content vector).
+ *
  * Disclaimer: verification confirms record integrity only. Not legal advice.
  */
-import { useState } from 'react'
-import { ArrowLeft, ShieldCheck, ShieldAlert, Check, X, Minus, FileUp } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, ShieldCheck, ShieldAlert, Check, X, Minus, FileUp, FileSearch } from 'lucide-react'
 import { verifyRecord } from '../api'
 
 const SPEC_HREF = '/api/verify-spec'
+
+// Static, repo-pinned assets: a real evidence record captured by the monitor
+// from the official DFSA "Rules and Standards" page, plus the exact raw and
+// normalized text its hashes cover. Copied byte-for-byte from the evidence
+// store; nothing in it is invented.
+const SAMPLE_ASSETS = {
+  record: '/sample-record/record.json',
+  raw: '/sample-record/raw.txt',
+  normalized: '/sample-record/normalized.txt',
+}
+
+async function fetchSampleAsset(path) {
+  const response = await fetch(path)
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  return response.text()
+}
 
 const STATUS_META = {
   pass: {
@@ -89,8 +112,11 @@ export default function VerifyPage({ onBack }) {
   const [normalizedText, setNormalizedText] = useState(null)
   const [normalizedName, setNormalizedName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [sampleLoading, setSampleLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  // Guards the #sample deep-link against React StrictMode's double effect run.
+  const autoLoadedRef = useRef(false)
 
   async function handleFile(event, setText, setName) {
     setError('')
@@ -108,6 +134,26 @@ export default function VerifyPage({ onBack }) {
       setError('Could not read that file. Please choose a plain text file.')
       setText(null)
       setName('')
+    }
+  }
+
+  // Shared verify runner: takes explicit values so the sample loader can run
+  // the check immediately after loading, without racing setState.
+  async function runVerify(record, raw, normalized) {
+    setError('')
+    setResult(null)
+    setLoading(true)
+    try {
+      const data = await verifyRecord({
+        record,
+        raw: raw ?? undefined,
+        normalized: normalized ?? undefined,
+      })
+      setResult(data)
+    } catch (err) {
+      setError(err.message || 'Verification could not be completed. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -129,20 +175,49 @@ export default function VerifyPage({ onBack }) {
       return
     }
 
-    setLoading(true)
+    await runVerify(record, rawText, normalizedText)
+  }
+
+  async function handleLoadSample() {
+    setError('')
+    setResult(null)
+    setSampleLoading(true)
     try {
-      const data = await verifyRecord({
-        record,
-        raw: rawText ?? undefined,
-        normalized: normalizedText ?? undefined,
-      })
-      setResult(data)
-    } catch (err) {
-      setError(err.message || 'Verification could not be completed. Please try again.')
+      const [recordStr, raw, normalized] = await Promise.all([
+        fetchSampleAsset(SAMPLE_ASSETS.record),
+        fetchSampleAsset(SAMPLE_ASSETS.raw),
+        fetchSampleAsset(SAMPLE_ASSETS.normalized),
+      ])
+      const record = JSON.parse(recordStr)
+      setRecordText(recordStr.trim())
+      setRawText(raw)
+      setRawName('raw.txt')
+      setNormalizedText(normalized)
+      setNormalizedName('normalized.txt')
+      await runVerify(record, raw, normalized)
+    } catch {
+      setError(
+        'The real record could not be loaded right now. Please try again, or paste a record.json you hold.',
+      )
     } finally {
-      setLoading(false)
+      setSampleLoading(false)
     }
   }
+
+  useEffect(() => {
+    // Deep link: /verify#sample auto-loads the built-in real record ONLY.
+    // Nothing else is ever read from the location — no arbitrary URLs, no
+    // pasted records via params.
+    if (autoLoadedRef.current) return
+    if (typeof window !== 'undefined' && window.location.hash === '#sample') {
+      autoLoadedRef.current = true
+      // Defer past the effect body: the effect only reads the external URL and
+      // schedules the load; all state updates happen in the microtask.
+      queueMicrotask(handleLoadSample)
+    }
+    // Mount-only by design; handleLoadSample is stable in behaviour.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const verified = result?.verified === true
   const hasResult = result != null
@@ -180,7 +255,40 @@ export default function VerifyPage({ onBack }) {
           </p>
         </header>
 
-        <section className="sp-card mt-8">
+        <section className="sp-card mt-8" aria-labelledby="sample-loader-heading">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0 flex-1" style={{ minWidth: '16rem' }}>
+              <p id="sample-loader-heading" className="text-sm font-semibold text-[var(--text-primary)]">
+                No record on hand? Load a real one.
+              </p>
+              <p className="mt-1 text-[0.8rem] leading-relaxed text-[var(--text-secondary)]">
+                This is a real evidence record of public regulator content — a change our monitor
+                captured on the official{' '}
+                <a
+                  href="https://www.dfsa.ae/rules-and-standards"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+                >
+                  DFSA Rules and Standards
+                </a>{' '}
+                page — together with the exact raw and normalized text its hashes cover. Nothing in
+                it is invented. Check the math yourself.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleLoadSample}
+              disabled={sampleLoading || loading}
+              className="sp-btn-secondary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FileSearch className="h-4 w-4 text-[var(--accent)]" />
+              {sampleLoading ? 'Loading record…' : 'Load a real record'}
+            </button>
+          </div>
+        </section>
+
+        <section className="sp-card mt-4">
           <label htmlFor="record-json" className="sp-label">
             record.json
           </label>
@@ -216,7 +324,7 @@ export default function VerifyPage({ onBack }) {
             <button
               type="button"
               onClick={handleVerify}
-              disabled={loading}
+              disabled={loading || sampleLoading}
               className="sp-btn-primary disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Verifying…' : 'Verify'}

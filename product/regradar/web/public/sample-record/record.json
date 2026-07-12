@@ -1,0 +1,47 @@
+{
+  "change": {
+    "diff_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/diff.txt",
+    "lines_added": 0,
+    "lines_removed": 5,
+    "summary": "Extracted 4,701 chars — sufficient for reliable generic monitoring."
+  },
+  "content": {
+    "current_hash": "sha256:2cedc486a126302a5318a749f49e0c817eb113515aa7ddc99ac70ae1223082eb",
+    "normalized_current_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/current.normalized.txt",
+    "normalized_previous_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/previous.normalized.txt",
+    "previous_hash": "sha256:8aa2f16a5562617ba7b02d250d468fbb07e956d4874bc0874b79a22acbb2b992",
+    "raw_content_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/raw.txt"
+  },
+  "files": {
+    "diff_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/diff.txt",
+    "metadata_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/metadata.json",
+    "normalized_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/current.normalized.txt",
+    "previous_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/previous.normalized.txt",
+    "raw_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/raw.txt",
+    "snapshot_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/snapshot.txt"
+  },
+  "integrity": {
+    "hash_verified": true,
+    "integrity_status": "VERIFIED",
+    "verified_at": "2026-06-23T15:29:42Z"
+  },
+  "record_id": "evr_AE-dubai-financial-services-authority-dfsa_AE-20260611T222827Z-db5a1dea",
+  "record_status": "complete",
+  "review": {
+    "human_review_required": true,
+    "review_reason": "Customer-facing brief requires human review.",
+    "review_status": "pending"
+  },
+  "run": {
+    "run_id": "AE-20260611T222827Z-db5a1dea",
+    "status": "CHANGED",
+    "timestamp": "2026-06-11T22:29:38+00:00"
+  },
+  "schema_version": "2.0",
+  "source": {
+    "official_url": "https://www.dfsa.ae/rules-and-standards",
+    "regulator": "DFSA",
+    "source_id": "AE-dubai-financial-services-authority-dfsa",
+    "source_name": "Dubai Financial Services Authority (DFSA)"
+  }
+}
