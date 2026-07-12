@@ -218,46 +218,56 @@ def _resolve(root: Path, rel_or_abs: Any) -> Path | None:
 
 
 def _read_snapshot(root: Path, rel_or_abs: Any) -> str:
+    """Read a normalized snapshot, capped at ``_MAX_SNAPSHOT_BYTES + 1`` chars so
+    the caller can DETECT truncation (a full read is ``<= _MAX_SNAPSHOT_BYTES``)."""
     path = _resolve(root, rel_or_abs)
     if path is None or not path.exists():
         return ""
     try:
         with path.open("r", encoding="utf-8", errors="replace") as fh:
-            return fh.read(_MAX_SNAPSHOT_BYTES)
+            return fh.read(_MAX_SNAPSHOT_BYTES + 1)
     except OSError:
         return ""
 
 
-def _load_diff_artifact(root: Path, rel_or_abs: Any) -> dict[str, Any] | None:
-    """Load a persisted diff artifact (the ``added_chunks``/``changed_chunks`` shape
-    ``build_chunk_diff`` produces), or ``None`` if absent/unreadable/wrong-shape.
+def _read_sealed_diff_text(root: Path, rel_or_abs: Any) -> str | None:
+    """Return the added/changed text of the SEALED diff artifact, or ``None`` if
+    absent/unreadable.
 
-    This is the diff the canonical writer computed over the FULL, untruncated
-    snapshots at ingest — the exact edit a reviewer sees — so reading it avoids the
-    truncation-misalignment a re-diff of independently byte-capped snapshots can
-    introduce. A non-JSON (e.g. markdown) diff file simply fails the shape check and
-    falls back to the snapshot re-diff.
+    ``diff_path`` is the diff the canonical writer persisted over the FULL,
+    untruncated snapshots at ingest (:func:`app.evidence_records._canonical_diff_artifact`),
+    so reading it avoids the truncation-misalignment a re-diff of independently
+    byte-capped snapshots can introduce. Handles both shapes the pipeline can write:
+    a difflib unified diff (extract the added ``+`` lines) and a copied markdown
+    diff report (use the report text — date extraction reads dates from the changed
+    content regardless of format; diff punctuation never manufactures a date).
     """
     path = _resolve(root, rel_or_abs)
-    if path is None or not path.exists():
+    if path is None or not path.is_file():
         return None
     try:
         with path.open("r", encoding="utf-8", errors="replace") as fh:
-            data = json.loads(fh.read(_MAX_DIFF_BYTES))
-    except (OSError, ValueError):
+            raw = fh.read(_MAX_DIFF_BYTES)
+    except OSError:
         return None
-    if isinstance(data, dict) and ("added_chunks" in data or "changed_chunks" in data):
-        return data
-    return None
+    added = [
+        line[1:] for line in raw.splitlines()
+        if line.startswith("+") and not line.startswith("+++")
+    ]
+    if added:
+        return "\n".join(a for a in added if a.strip())
+    # Not a unified diff (e.g. the copied markdown report) — use the report text.
+    return raw
 
 
 def _changed_text_for_record(record: dict[str, Any], root: Path) -> str:
     """Reconstruct the CHANGED/added text for a canonical evidence record.
 
-    Prefers the SEALED diff artifact (``change.diff_path``) — the diff the canonical
-    writer computed over the full snapshots at ingest — so a date is only surfaced
-    from text the reviewed/sealed diff actually classified as changed. Falls back to
-    re-diffing the (byte-capped) normalized snapshots only when no artifact exists.
+    Prefers the SEALED diff at ``change.diff_path`` (computed over the FULL snapshots
+    at ingest) so a date is only surfaced from text the sealed diff shows as changed.
+    Falls back to a bounded re-diff of the normalized snapshots ONLY when no diff
+    artifact exists — and skips that record if either snapshot was truncated on read
+    (independent truncation could misalign the re-diff and surface a spurious date).
     Returns "" when there is no changed side (e.g. FIRST_SEEN records).
     """
     content = record.get("content")
@@ -270,37 +280,32 @@ def _changed_text_for_record(record: dict[str, Any], root: Path) -> str:
     if not isinstance(change, dict):
         change = {}
 
-    # 1. Prefer the sealed diff artifact (no truncation-misalignment risk).
-    artifact = _load_diff_artifact(root, change.get("diff_path") or files.get("diff_path"))
-    if artifact is None:
-        # 2. Fall back to a bounded re-diff of the normalized snapshots.
-        current = _read_snapshot(root, content.get("normalized_current_path") or files.get("normalized_path"))
-        previous = _read_snapshot(root, content.get("normalized_previous_path") or files.get("previous_path"))
-        if not current or not previous:
-            return ""
-        try:
-            from app.chunk_diff import build_chunk_diff
+    # 1. Prefer the sealed diff artifact (computed over the full snapshots).
+    sealed = _read_sealed_diff_text(root, change.get("diff_path") or files.get("diff_path"))
+    if sealed is not None:
+        return sealed
 
-            artifact = build_chunk_diff(previous, current)
-        except Exception:  # noqa: BLE001 — a bad diff must not break the calendar
-            return ""
+    # 2. Fall back to a bounded re-diff of the normalized snapshots.
+    current = _read_snapshot(root, content.get("normalized_current_path") or files.get("normalized_path"))
+    previous = _read_snapshot(root, content.get("normalized_previous_path") or files.get("previous_path"))
+    if not current or not previous:
+        return ""
+    # If either side exceeded the read bound it was truncated at an independent
+    # point — a re-diff could misalign, so skip rather than surface a date the
+    # sealed diff might not classify as changed (verify-swarm 2026-07-12).
+    if len(current) > _MAX_SNAPSHOT_BYTES or len(previous) > _MAX_SNAPSHOT_BYTES:
+        return ""
+    try:
+        from app.chunk_diff import build_chunk_diff
+
+        artifact = build_chunk_diff(previous, current)
+    except Exception:  # noqa: BLE001 — a bad diff must not break the calendar
+        return ""
     parts: list[str] = list(artifact.get("added_chunks") or [])
     for changed in artifact.get("changed_chunks") or []:
         if isinstance(changed, dict):
             parts.extend(str(a) for a in (changed.get("after") or []))
     return "\n".join(p for p in parts if str(p).strip())
-
-
-def _load_record(root: Path, record_path: Any) -> dict[str, Any] | None:
-    path = _resolve(root, record_path)
-    if path is None or not path.exists():
-        return None
-    try:
-        with path.open("r", encoding="utf-8") as fh:
-            record = json.load(fh)
-        return record if isinstance(record, dict) else None
-    except (OSError, json.JSONDecodeError):
-        return None
 
 
 # ── Forward-looking calendar (tenancy-enforced, bounded, fail-soft) ───────────
