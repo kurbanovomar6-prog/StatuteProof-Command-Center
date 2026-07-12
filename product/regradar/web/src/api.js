@@ -448,3 +448,28 @@ export const redline = {
     return authRequest(`/api/alerts/redline?alert_id=${encodeURIComponent(alertId)}`)
   },
 }
+
+// Sealed decision log: the reviewer's OWN sign-off for one alert, sealed in
+// their own words into the org's append-only hash chain. GET is readable by
+// every org role (incl. auditor); POST requires review.submit — the panel
+// needs the HTTP status to tell a role denial (403 → read-only) from a
+// validation error, so seal() attaches it to the thrown error.
+export const decisions = {
+  list(alertId) {
+    return authRequest(`/api/alerts/decisions?alert_id=${encodeURIComponent(alertId)}`)
+  },
+
+  async seal(body) {
+    const response = await apiFetch('/api/alerts/decisions', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const err = new Error(data.message || data.error || `HTTP ${response.status}`)
+      err.status = response.status
+      throw err
+    }
+    return data
+  },
+}

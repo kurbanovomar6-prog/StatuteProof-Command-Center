@@ -24,6 +24,7 @@ Migration path:
 import hashlib
 import logging
 import sqlite3
+import time
 from datetime import datetime, timezone
 
 from app.config import DB_PATH
@@ -38,8 +39,24 @@ logger = logging.getLogger(__name__)
 def _connect() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
+    # busy_timeout first so every later statement (including the WAL switch)
+    # runs with a real wait instead of the default fast-fail (0 ms).
     conn.execute("PRAGMA busy_timeout=5000")
+    # Switching a non-WAL database to WAL needs exclusive access, and SQLite
+    # can return SQLITE_BUSY here WITHOUT consulting the busy handler when
+    # concurrent connections race on the switch (observed on a fresh DB under
+    # threaded writers — the decision-chain concurrency test). journal_mode is
+    # a persistent property of the database file, so the FIRST connection to
+    # succeed covers every later one; retry briefly, then proceed without the
+    # switch for THIS connection rather than failing the caller.
+    for _attempt in range(5):
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+            break
+        except sqlite3.OperationalError:
+            time.sleep(0.01)
+    else:
+        logger.warning("journal_mode=WAL switch busy; continuing with current mode")
     return conn
 
 

@@ -4,6 +4,7 @@ import { CheckCircle, ExternalLink, Search, Send, ShieldCheck } from 'lucide-rea
 import { delivery } from '../../api'
 import ActionLogPanel from './ActionLogPanel'
 import AlertChecklistPanel from './AlertChecklistPanel'
+import AlertDecisionPanel from './AlertDecisionPanel'
 import AlertProofPanel from './AlertProofPanel'
 import EmptyState from './ui/EmptyState'
 import ErrorState from './ui/ErrorState'
@@ -244,6 +245,7 @@ export default function AlertsPage({ navigate }) {
                   )}
                 </div>
                 <AlertChecklistPanel alertId={item.alert_id} />
+                <AlertDecisionPanel alertId={item.alert_id} />
                 <ActionLogPanel alertId={item.alert_id} />
               </article>
             )

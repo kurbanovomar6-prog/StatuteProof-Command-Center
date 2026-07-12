@@ -88,6 +88,16 @@ from app.action_checklist import (
     update_checklist_item,
     valid_alert_id as checklist_valid_alert_id,
 )
+from app.decision_records import (
+    FRAMING as DECISION_FRAMING,
+    KINDS as DECISION_KINDS,
+    MAX_AMENDMENT_REASON_LEN as DECISION_MAX_REASON_LEN,
+    MAX_DISPLAY_NAME_LEN as DECISION_MAX_NAME_LEN,
+    MAX_STATEMENT_LEN as DECISION_MAX_STATEMENT_LEN,
+    list_decisions,
+    read_decision_head,
+    seal_decision,
+)
 from app.public_verify import verify_submission
 
 logger = logging.getLogger(__name__)
@@ -258,6 +268,12 @@ _CHECKLIST_LIMITER = _RateLimiter(120, 3600)
 # work (capped file read + pure parse) but touches the evidence tree, so it gets
 # its own budget rather than riding an existing one.
 _REDLINE_LIMITER = _RateLimiter(120, 3600)
+# Sealed decision log: sealing is a deliberate, occasional act (each seal writes
+# an append-only chained record), so the budget is deliberately tighter than the
+# interactive checklist. NOTE: _rate_limited keys hits as "<ip>:<label>", so the
+# GET (list) and POST (seal) labels each get their OWN independent 60/hour
+# bucket per IP — a read burst can never starve a legitimate seal.
+_DECISION_LIMITER = _RateLimiter(60, 3600)
 _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
 # Heavy export endpoints (audit vault, evidence pack, regulator binder, coverage
 # certificate, monthly assurance, change-register export, evidence export). These
@@ -1105,6 +1121,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_alert_checklist_get()
         elif path == "/api/alerts/redline":
             self._handle_alert_redline_get()
+        elif path == "/api/alerts/decisions":
+            self._handle_alert_decisions_get()
         elif path == "/api/settings/telegram":
             self._disabled_endpoint()
         elif path == "/api/reports/monthly-assurance":
@@ -1196,6 +1214,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_alert_checklist_add()
         elif path == "/api/alerts/checklist/update":
             self._handle_alert_checklist_update()
+        elif path == "/api/alerts/decisions":
+            self._handle_alert_decisions_post()
         elif path == "/api/briefs/generate":
             self._handle_briefs_generate()
         elif path == "/api/verify":
@@ -1951,6 +1971,212 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": True, "redline": redline})
         except Exception as exc:
             logger.error("Alert redline failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    # ── Sealed decision log (individual-accountability sign-off, Stage 2) ────────
+    #
+    # A reviewer's OWN decision for one alert, sealed IN THEIR OWN WORDS into the
+    # org's append-only hash chain (app/decision_records.py). StatuteProof never
+    # prescribes, suggests, scores, or assesses the decision — the only app-
+    # authored copy is DECISION_FRAMING, forbidden-claims guarded at import.
+    # Tenancy: the org comes from the caller's resolved principal (never the
+    # request body); the alert binding rides the SAME owner-scoped loader as the
+    # redline (find_routing_match_for_user), so an alert outside the caller's
+    # scope is an identical 404 for "not yours" and "gone" — no oracle.
+    # RBAC: sealing (POST) requires review.submit; listing (GET) deliberately
+    # does NOT — an auditor seat is read-only but MUST be able to read the log.
+
+    def _handle_alert_decisions_get(self) -> None:
+        if self._rate_limited(_DECISION_LIMITER, "alert_decisions_get"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        params = parse_qs(urlparse(self.path).query)
+        alert_id = str((params.get("alert_id") or [""])[0]).strip()
+        if not checklist_valid_alert_id(alert_id):
+            self._send_json({"ok": False, "message": "Invalid alert_id."}, 400)
+            return
+        try:
+            principal = rbac_runtime.resolve_principal(user)
+            if principal.org_id is None:
+                # A user with no resolvable org has no decision chain yet — an
+                # honest empty list, not an error (read path stays fail-soft).
+                self._send_json({
+                    "ok": True,
+                    "decisions": [],
+                    "framing": DECISION_FRAMING,
+                    "kinds": list(DECISION_KINDS),
+                    "chain": None,
+                })
+                return
+            org_id = int(principal.org_id)
+            self._send_json({
+                "ok": True,
+                "decisions": list_decisions(org_id, alert_id),
+                "framing": DECISION_FRAMING,
+                "kinds": list(DECISION_KINDS),
+                "chain": read_decision_head(org_id),
+            })
+        except Exception as exc:
+            logger.error("Alert decisions list failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_alert_decisions_post(self) -> None:
+        """Seal ONE user-authored decision for an alert into the org chain.
+
+        Order matters: auth → rate limit → RBAC (review.submit) → validate →
+        owner-scoped alert resolution (404, no oracle) → evidence binding
+        (409 when the alert carries no sealed proof block) → seal. The user's
+        ``statement`` / ``amendment_reason`` are passed through VERBATIM — never
+        guarded, rewritten, or truncated; oversize input is rejected with an
+        honest message so nothing the user did not write is ever sealed.
+        """
+        if self._rate_limited(_DECISION_LIMITER, "alert_decisions_seal"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        # RBAC Stage-2: sealing a decision is a review write. Owner passes; a
+        # read-only auditor seat is denied 403 (it may still GET the list).
+        if not self._rbac_guard(user, rbac_runtime.REVIEW_SUBMIT, resource_type="decision"):
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+
+        alert_id = str(body.get("alert_id", "")).strip()
+        if not checklist_valid_alert_id(alert_id):
+            self._send_json({"ok": False, "message": "Invalid alert_id."}, 400)
+            return
+        kind = str(body.get("kind") or "").strip()
+        if kind not in DECISION_KINDS:
+            self._send_json({"ok": False, "message": "Invalid decision kind."}, 400)
+            return
+        statement = body.get("statement")
+        if not isinstance(statement, str) or not statement.strip():
+            self._send_json({"ok": False, "message": "A decision statement is required."}, 400)
+            return
+        if len(statement) > DECISION_MAX_STATEMENT_LEN:
+            # REJECT, never truncate — these are the user's sealed words.
+            self._send_json(
+                {
+                    "ok": False,
+                    "message": (
+                        f"The statement is longer than the {DECISION_MAX_STATEMENT_LEN}-character "
+                        "limit. It is sealed exactly as written, so nothing was recorded — "
+                        "please shorten it and try again."
+                    ),
+                },
+                400,
+            )
+            return
+        supersedes = str(body.get("supersedes_decision_id") or "").strip()
+        amendment_reason = body.get("amendment_reason")
+        amendment = "" if amendment_reason is None else amendment_reason
+        if not isinstance(amendment, str):
+            self._send_json({"ok": False, "message": "The correction reason must be text."}, 400)
+            return
+        if len(amendment) > DECISION_MAX_REASON_LEN:
+            self._send_json(
+                {
+                    "ok": False,
+                    "message": (
+                        f"The correction reason is longer than the {DECISION_MAX_REASON_LEN}-character "
+                        "limit. It is sealed exactly as written, so nothing was recorded — "
+                        "please shorten it and try again."
+                    ),
+                },
+                400,
+            )
+            return
+        if bool(supersedes) != bool(amendment.strip()):
+            self._send_json(
+                {
+                    "ok": False,
+                    "message": (
+                        "A correction needs both the earlier decision and your reason "
+                        "for correcting it."
+                    ),
+                },
+                400,
+            )
+            return
+        try:
+            days = int(body.get("days") or 14)
+        except (TypeError, ValueError):
+            days = 14
+
+        try:
+            principal = rbac_runtime.resolve_principal(user)
+            if principal.org_id is None:
+                self._send_json(
+                    {"ok": False, "message": "Your workspace could not be resolved. Please retry."},
+                    400,
+                )
+                return
+            match = find_routing_match_for_user(int(user["id"]), alert_id, days=days)
+            if match is None:
+                self._send_json({"ok": False, "message": "Alert not found."}, 404)
+                return
+            proof = match.get("proof")
+            if not isinstance(proof, dict) or not proof:
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": "This alert has no sealed evidence record to bind a decision to.",
+                    },
+                    409,
+                )
+                return
+            # "What they saw": the alert's proof block verbatim, plus the alert /
+            # source identity fields the design binds into content.reviewed.
+            reviewed = dict(proof)
+            reviewed["alert_id"] = alert_id
+            reviewed["source_id"] = str(match.get("source_id") or "")
+            reviewed["source_name"] = str(match.get("source_name") or "")
+            reviewed["official_url"] = str(match.get("source_url") or "")
+
+            # Account metadata (not the user's sealed words) — bounded here so an
+            # over-long profile name can never block a legitimate seal.
+            display_name = (
+                str(user.get("full_name") or "").strip()
+                or str(user.get("email") or "").strip()
+            )[:DECISION_MAX_NAME_LEN]
+
+            record = seal_decision(
+                int(user["id"]),
+                int(principal.org_id),
+                display_name=display_name,
+                reviewed=reviewed,
+                kind=kind,
+                statement=statement,
+                checklist_ref=body.get("checklist_ref"),
+                supersedes_decision_id=supersedes,
+                amendment_reason=amendment,
+            )
+            if record is None:
+                # Fail-soft: covers a malformed checklist_ref, an unknown or
+                # foreign supersedes id (same message — no cross-org oracle), or
+                # a storage failure. Nothing was sealed.
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": "The decision could not be sealed. Nothing was recorded — "
+                        "check the entry and try again.",
+                    },
+                    400,
+                )
+                return
+            self._send_json({"ok": True, "decision": record}, 201)
+        except Exception as exc:
+            logger.error("Alert decision seal failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_delivery_email_test_mode(self) -> None:
