@@ -34,6 +34,9 @@ logger = logging.getLogger(__name__)
 # outcomes without a migration, but these two cover the allow/deny decision.
 RESULT_ALLOW = "allow"
 RESULT_DENY = "deny"
+# RBAC evaluation itself failed and the gate fell open; recorded so the anomaly is
+# never silent in the audit trail (see app/api.py::_rbac_guard fail-open branch).
+RESULT_ERROR = "error"
 
 
 def _now_iso() -> str:

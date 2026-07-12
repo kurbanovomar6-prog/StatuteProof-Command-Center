@@ -480,17 +480,35 @@ def test_no_update_or_delete_path_in_rbac_layer():
     # (b) No UPDATE/DELETE statement targets access_log in the writer modules.
     #     (db.py legitimately references it in the *protective* triggers, so it is
     #     intentionally out of scope here.)
-    for module_path in ("app/access_log.py", "app/rbac.py"):
+    for module_path in ("app/access_log.py", "app/rbac.py", "app/rbac_runtime.py", "app/api.py"):
         raw = (Path(__file__).resolve().parent.parent / module_path).read_text().lower()
         source = " ".join(raw.split())
         assert "update access_log" not in source
         assert "delete from access_log" not in source
 
 
-def test_access_log_table_has_no_writes_from_api_paths():
-    """Guardrail: Stage-1 keeps the access log out of every live request path."""
+def test_api_routes_rbac_only_through_the_runtime_bridge():
+    """Architectural guardrail — UPDATED for Stage-2 (was Stage-1 inertness check).
+
+    Stage-1 asserted RBAC was wired into NO live request path. Stage-2 makes RBAC
+    LIVE, so that premise no longer holds. The invariant that remains — and that
+    this test now enforces — is that ``app/api.py`` reaches RBAC ONLY through the
+    single ``app.rbac_runtime`` bridge, never into ``app.rbac`` or
+    ``app.access_log`` directly. That keeps one testable choke point for principal
+    resolution, the role gate, and audit logging.
+
+    (See ``tests/test_rbac_stage2.py`` for the behavioural Stage-2 coverage:
+    access-log writes on sensitive actions, owner no-regression, and auditor
+    denial.)
+    """
     api_source = (Path(__file__).resolve().parent.parent / "app/api.py").read_text()
+    # api.py must NOT touch the RBAC internals directly — everything goes through
+    # the rbac_runtime bridge.
     assert "append_access_log" not in api_source
     assert "app.access_log" not in api_source
     assert "from app.rbac import" not in api_source
     assert "rbac.can(" not in api_source
+    # …and it MUST use the bridge (proof Stage-2 is actually wired in).
+    assert "import rbac_runtime" in api_source
+    assert "rbac_runtime.EVIDENCE_EXPORT" in api_source
+    assert "_rbac_guard" in api_source

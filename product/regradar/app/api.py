@@ -55,6 +55,7 @@ from app.auth import (
     verify_password,
 )
 from app import telegram_settings as _ts
+from app import rbac_runtime
 from app.config import (
     BASE_DIR,
     CONTACT_DELIVERY_DISABLED,
@@ -433,6 +434,81 @@ class _Handler(BaseHTTPRequestHandler):
             403,
         )
         return False
+
+    def _rbac_guard(
+        self,
+        user: dict,
+        action: str,
+        *,
+        resource_type: str = "",
+        resource_id: str = "",
+    ) -> bool:
+        """RBAC Stage-2 role gate for a MUTATING action. Returns True when permitted.
+
+        Resolves the caller's Principal from org membership and evaluates the
+        default-deny role matrix (``app.rbac.can`` via ``app.rbac_runtime``). EVERY
+        existing account is backfilled as ``owner`` (full access), so this returns
+        ``True`` and changes NOTHING for them — the only role in live data today is
+        ``owner``. Only a non-owner role that lacks ``action`` (e.g. an ``auditor``
+        seat attempting a mutation) is denied with 403.
+
+        The allow/deny decision is written to the immutable access log (best-effort
+        — logging never affects the outcome). Fails OPEN on any internal RBAC error
+        so authorization plumbing can never break an already-authenticated request.
+        """
+        try:
+            allowed, principal = rbac_runtime.evaluate(user, action)
+        except Exception:  # noqa: BLE001 — RBAC must never break a live request
+            # Fail OPEN (an existing owner must never be locked out by RBAC
+            # plumbing) but record the anomaly in the immutable audit trail so a
+            # gate that fell open is never silent. STAGE-3 GATE: before any real
+            # `auditor` seat is assignable to a customer, this branch MUST flip to
+            # fail-CLOSED (deny) for non-owner-resolvable failures — see rbac review.
+            logger.warning("rbac evaluate failed for %s; allowing (fail-open)", action)
+            rbac_runtime.log_sensitive_action(
+                user, action, result=rbac_runtime.RESULT_ERROR,
+                resource_type=resource_type, resource_id=resource_id,
+            )
+            return True
+        rbac_runtime.log_sensitive_action(
+            user,
+            action,
+            result=rbac_runtime.RESULT_ALLOW if allowed else rbac_runtime.RESULT_DENY,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            principal=principal,
+        )
+        if allowed:
+            return True
+        self._send_json(
+            {"ok": False, "message": "Your role does not permit this action."},
+            403,
+        )
+        return False
+
+    def _rbac_log_export(
+        self,
+        user: dict,
+        *,
+        resource_type: str = "evidence",
+        resource_id: str = "",
+    ) -> None:
+        """Record an AUTHORIZED export to the immutable access log (Part A audit).
+
+        Purely additive: exports are allowed for read-capable roles (incl. the
+        read+export ``auditor``), so this only OBSERVES — it never denies. Wrapped
+        end-to-end in ``rbac_runtime.log_sensitive_action`` so a logging failure is
+        swallowed and the export proceeds exactly as before. Call it only after the
+        export has passed its auth / capability / tenancy checks so the trail
+        records genuine exports, not rejected attempts.
+        """
+        rbac_runtime.log_sensitive_action(
+            user,
+            rbac_runtime.EVIDENCE_EXPORT,
+            result=rbac_runtime.RESULT_ALLOW,
+            resource_type=resource_type,
+            resource_id=resource_id,
+        )
 
     def _entitle_source_ids(self, user: dict, requested: list) -> list[str]:
         """Clip caller-supplied source_ids to what the user is entitled to.
@@ -1191,6 +1267,10 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        # RBAC Stage-2: a settings mutation. Owner (every existing user) passes;
+        # a read-only auditor seat is denied 403. No-op for accounts today.
+        if not self._rbac_guard(user, rbac_runtime.SETTINGS_EDIT, resource_type="settings"):
+            return
 
         body, error = self._read_json_strict()
         if error:
@@ -1399,6 +1479,10 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        # RBAC Stage-2: dispatching an alert is a privileged action. Owner passes;
+        # a read-only auditor seat is denied 403. No-op for accounts today.
+        if not self._rbac_guard(user, rbac_runtime.ALERT_SEND, resource_type="alert"):
+            return
 
         body, error = self._read_json_strict()
         if error:
@@ -1462,6 +1546,10 @@ class _Handler(BaseHTTPRequestHandler):
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        # RBAC Stage-2: recording an act/monitor/no_action review decision is a
+        # review write. Owner passes; a read-only auditor seat is denied 403.
+        if not self._rbac_guard(user, rbac_runtime.REVIEW_SUBMIT, resource_type="review"):
             return
         body, error = self._read_json_strict()
         if error:
@@ -1908,6 +1996,10 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        # RBAC Stage-2: writing an evidence assessment is a review write. Owner
+        # passes; a read-only auditor seat is denied 403. No-op for accounts today.
+        if not self._rbac_guard(user, rbac_runtime.REVIEW_SUBMIT, resource_type="review"):
+            return
         body, error = self._read_json_strict()
         if error:
             self._send_json({"ok": False, "message": error}, 400)
@@ -1954,6 +2046,9 @@ class _Handler(BaseHTTPRequestHandler):
         if self._evidence_source_out_of_scope(user, evidence_id):
             self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
+        # RBAC Stage-2 (Part A): record the authorized evidence export. Additive
+        # audit only — never blocks or alters the export.
+        self._rbac_log_export(user, resource_id=evidence_id)
         export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
         customer_delivery = _truthy_param((params.get("customer_delivery") or ["false"])[0])
         self._write_evidence_export(
@@ -1980,6 +2075,8 @@ class _Handler(BaseHTTPRequestHandler):
         if self._evidence_source_out_of_scope(user, evidence_id):
             self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
+        # RBAC Stage-2 (Part A): record the authorized evidence export/download.
+        self._rbac_log_export(user, resource_id=evidence_id)
         export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
         try:
             from app.audit_export import write_audit_pack, write_audit_pack_pdf
@@ -2090,6 +2187,8 @@ class _Handler(BaseHTTPRequestHandler):
         if self._evidence_source_out_of_scope(user, evidence_id):
             self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
+        # RBAC Stage-2 (Part A): record the authorized evidence export.
+        self._rbac_log_export(user, resource_id=evidence_id)
         export_format = str(body.get("format") or "md_html").strip() or "md_html"
         customer_delivery = _truthy_param(body.get("customer_delivery"))
         self._write_evidence_export(
@@ -2500,6 +2599,10 @@ class _Handler(BaseHTTPRequestHandler):
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        # RBAC Stage-2: changing plan intent is a settings mutation. Owner passes;
+        # a read-only auditor seat is denied 403. No-op for accounts today.
+        if not self._rbac_guard(user, rbac_runtime.SETTINGS_EDIT, resource_type="settings"):
             return
         body, error = self._read_json_strict()
         if error:
@@ -3010,6 +3113,10 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        # RBAC Stage-2: adding a monitored source mutates configuration. Owner
+        # passes; a read-only auditor seat is denied 403. No-op for accounts today.
+        if not self._rbac_guard(user, rbac_runtime.SOURCE_EDIT, resource_type="source"):
+            return
 
         body = self._read_json()
         url = str(body.get("url", "")).strip()
@@ -3104,6 +3211,8 @@ class _Handler(BaseHTTPRequestHandler):
         # a report for arbitrary source_ids (incl. other tenants' custom sources).
         if not self._require_capability(user, "audit_export"):
             return
+        # RBAC Stage-2 (Part A): record the authorized monthly-assurance export.
+        self._rbac_log_export(user, resource_type="monthly_assurance")
         from app.monthly_assurance_report import compute_monthly_stats, render_assurance_report_markdown, generate_monthly_report_pdf
         parsed = urlparse(self.path)
         qs = parse_qs(parsed.query)
@@ -3207,6 +3316,8 @@ class _Handler(BaseHTTPRequestHandler):
         if fmt == "pdf" and not self._require_capability(user, "pdf_export"):
             return
 
+        # RBAC Stage-2 (Part A): record the authorized coverage-certificate export.
+        self._rbac_log_export(user, resource_type="coverage_certificate")
         try:
             certificate = build_coverage_certificate(
                 period_start=period_start,
@@ -3236,6 +3347,10 @@ class _Handler(BaseHTTPRequestHandler):
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        # RBAC Stage-2: the canonical human review gate (approve/reject/block).
+        # Owner passes; a read-only auditor seat is denied 403. No-op today.
+        if not self._rbac_guard(user, rbac_runtime.REVIEW_APPROVE, resource_type="review"):
             return
         body, error = self._read_json_strict()
         if error:
@@ -3319,6 +3434,8 @@ class _Handler(BaseHTTPRequestHandler):
                 403,
             )
             return
+        # RBAC Stage-2 (Part A): record the authorized audit-vault export.
+        self._rbac_log_export(user, resource_type="audit_vault", resource_id=",".join(source_ids)[:200])
         try:
             result = build_period_audit_vault(source_ids, date_from, date_to)
             status = result.get("status")
@@ -3395,6 +3512,8 @@ class _Handler(BaseHTTPRequestHandler):
                 403,
             )
             return
+        # RBAC Stage-2 (Part A): record the authorized evidence-pack export.
+        self._rbac_log_export(user, resource_type="evidence_pack", resource_id=",".join(source_ids)[:200])
         try:
             result = build_evidence_pack(source_ids, date_from, date_to)
             status = result.get("status")
@@ -3496,6 +3615,8 @@ class _Handler(BaseHTTPRequestHandler):
                 403,
             )
             return
+        # RBAC Stage-2 (Part A): record the authorized regulator-binder export.
+        self._rbac_log_export(user, resource_type="regulator_binder", resource_id=",".join(source_ids)[:200])
         try:
             result = build_regulator_binder(source_ids, date_from, date_to)
             status = result.get("status")
@@ -3587,6 +3708,8 @@ class _Handler(BaseHTTPRequestHandler):
         if not valid:
             self._send_json({"ok": False, "message": err}, 400)
             return
+        # RBAC Stage-2 (Part A): record the authorized change-register export.
+        self._rbac_log_export(user, resource_type="change_register", resource_id=source_id)
         try:
             result = build_change_register_export(
                 user_id=int(user["id"]),
