@@ -467,11 +467,15 @@ def test_invalid_inputs_fail_soft(isolated_env):
     assert _seal(reviewed={}) is None
     assert _seal(reviewed={"alert_id": {"nested": True}}) is None
     assert _seal(reviewed={"": "empty key"}) is None
-    # A non-finite float would seal internally but be unverifiable by an external
-    # jq/Go re-hasher (NaN/Infinity are not valid JSON) — reject it. (A finite
-    # float is accepted — covered by the happy-path seal tests that seed a user.)
+    # EVERY float is rejected in sealed content — not just non-finite ones. NaN /
+    # Infinity are not valid JSON; a FINITE float would seal internally but its
+    # Python repr is not guaranteed byte-identical to a jq/Go/JS re-hasher, so an
+    # external re-hash could mismatch. content-sha256-v1 defines no float rule, so
+    # a proof block (identifiers/hashes/strings/ints) must carry no floats.
     assert _seal(reviewed={"alert_id": "a", "score": float("nan")}) is None
     assert _seal(reviewed={"alert_id": "a", "limit": float("inf")}) is None
+    assert _seal(reviewed={"alert_id": "a", "score": 0.5}) is None
+    assert _seal(reviewed={"alert_id": "a", "ratio": 1.0}) is None
     # checklist_ref shape is validated.
     assert _seal(checklist_ref={"unexpected": 1}) is None
     assert _seal(checklist_ref={"item_ids": ["twelve"]}) is None
@@ -481,6 +485,46 @@ def test_invalid_inputs_fail_soft(isolated_env):
     assert get_decision("nope", "dec_1_1_x") is None
     assert read_decision_head("nope") is None
     assert list_decisions(ORG_A) == []  # none of the above wrote anything
+
+
+def test_validated_reviewed_copy_rejects_floats_keeps_bool_int_str_none():
+    """The proof-block validator rejects ALL floats but keeps str/int/bool/None.
+
+    Regression for the evidence-integrity finding: a FINITE float verifies GREEN
+    inside StatuteProof but its json repr is not guaranteed byte-portable to an
+    external re-hasher, so it must be rejected at seal time (not just NaN/Inf).
+    """
+    reject = decision_records._validated_reviewed_copy
+
+    # Every float shape rejects the whole block (returns None — never rewrites).
+    assert reject({"alert_id": "a", "score": 0.5}) is None
+    assert reject({"alert_id": "a", "score": 0.0}) is None
+    assert reject({"alert_id": "a", "score": -12.75}) is None
+    assert reject({"alert_id": "a", "score": 1e10}) is None
+    assert reject({"alert_id": "a", "score": float("nan")}) is None
+    assert reject({"alert_id": "a", "score": float("inf")}) is None
+
+    # str / int / bool / None are byte-portable and kept verbatim.
+    kept = reject(
+        {
+            "alert_id": "draft-x",
+            "count": 7,          # int stays
+            "flagged": True,     # bool stays (and is a subclass of int)
+            "cleared": False,
+            "note": None,        # None stays
+            "hash": "sha256:" + "c" * 64,
+        }
+    )
+    assert kept == {
+        "alert_id": "draft-x",
+        "count": 7,
+        "flagged": True,
+        "cleared": False,
+        "note": None,
+        "hash": "sha256:" + "c" * 64,
+    }
+    # bool must not be silently coerced to int; identity of True/False preserved.
+    assert kept["flagged"] is True and kept["cleared"] is False
 
 
 def test_valid_checklist_ref_is_sealed_normalized(isolated_env):

@@ -41,6 +41,23 @@ certification. Verification proves *integrity of the captured record*, nothing m
 | `record_hash` | The record's own fingerprint — `SHA-256` over its canonical JSON. Two concrete, self-checkable schemes exist. The append-only **trail record** hashes its identifying fields (`app/source_runs.py::compute_record_hash`). The canonical **`evidence-record.json`** carries a top-level `record_hash` and `record_hash_method: content-sha256-v1`, computed as `SHA-256` over the **compact** (`separators=(",", ":")`), **sorted-key**, **UTF-8** (`ensure_ascii=false`) JSON of its `content` block — the single shared function `app/record_hashing.py::canonical_record_hash`, used by both the writer and the public verifier so the two can never drift. |
 | `prev_record_hash` | The `record_hash` of the immediately preceding record in the append-only trail. This forms the chain. |
 
+**Canonical JSON value types (portability scope, stated plainly).** The
+`content-sha256-v1` canonicalization — compact `separators=(",", ":")`,
+`sort_keys=True`, `ensure_ascii=false` — is defined over JSON **strings,
+integers, booleans, and `null` only**. For those types the byte output is
+identical across machines, languages, and JSON tools (jq, Go, JS), so the digest
+is reproducible with standard tooling. It deliberately defines **no
+float-canonicalization rule**: floating-point `repr` is not guaranteed
+byte-identical across languages (Python's `json` output can differ from jq/JS/Go
+for the same value), so a float — even a finite one — could verify inside
+StatuteProof yet fail an independent re-hash. Sealed `content` therefore **must
+not contain floats**; the writers that build sealed content reject float values
+(e.g. `app/decision_records.py::_validated_reviewed_copy`), and the seal itself
+also refuses non-finite floats (`allow_nan=False` in
+`app/record_hashing.py::canonical_record_hash`). `ensure_ascii=false` preserves
+UTF-8 verbatim, so non-ASCII text is hashed as its raw UTF-8 bytes with no escape
+ambiguity.
+
 The normalization function `normalize_for_change_hash` is published — its source
 is `app/text_normalization.py` (the exact function the writer and the public
 verifier both import, so they cannot drift). You do not need it to verify the *normalized* hash if you were

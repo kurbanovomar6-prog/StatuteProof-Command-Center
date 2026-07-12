@@ -241,12 +241,22 @@ def main() -> int:
         _check(stale not in serialized, failures, f"stale fragment in json: {stale}")
         _check(stale not in frontend_text, failures, f"stale fragment in frontend audit: {stale}")
 
+    # Derive the expected auditDate from the audit JSON itself so the frontend
+    # drift-guard checks frontend↔JSON consistency without pinning a literal date
+    # that goes stale on every legitimate re-audit.
+    audit_date = str(audit.get("audit_date") or "").strip()
+    _check(bool(audit_date), failures, "audit JSON missing audit_date")
+
     _check(frontend_text, failures, f"missing frontend audit export: {FRONTEND_AUDIT}")
     if frontend_text:
         _check(
-            "auditDate: '2026-06-21'" in frontend_text or 'auditDate: "2026-06-21"' in frontend_text,
+            bool(audit_date)
+            and (
+                f"auditDate: '{audit_date}'" in frontend_text
+                or f'auditDate: "{audit_date}"' in frontend_text
+            ),
             failures,
-            "frontend audit must expose auditDate 2026-06-21",
+            f"frontend audit auditDate must match audit JSON audit_date ({audit_date!r})",
         )
         _check(
             "StatuteProof Source Quality Auditor v2" in frontend_text,

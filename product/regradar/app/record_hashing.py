@@ -31,9 +31,17 @@ def canonical_record_hash(content: dict[str, Any]) -> str:
     """Return the bare lowercase-hex SHA-256 of a record's ``content`` block.
 
     The block is serialized as compact (``separators=(",", ":")``), sorted-key,
-    non-ASCII-preserving (``ensure_ascii=False``) UTF-8 JSON. That serialization is
-    byte-stable across machines and Python versions, so any auditor who holds the
-    record's ``content`` block can reproduce the digest with standard tools.
+    non-ASCII-preserving (``ensure_ascii=False``) UTF-8 JSON. For the JSON value
+    types sealed content is restricted to — strings, integers, booleans, and
+    null — that serialization is byte-stable across machines, languages, and
+    Python versions, so any auditor who holds the record's ``content`` block can
+    reproduce the digest with standard tools (jq, Go, JS). It defines NO
+    float-canonicalization rule: floating-point ``repr`` is not guaranteed
+    byte-identical across languages, so sealed content must not contain floats —
+    the writers that build sealed content (e.g.
+    ``app.decision_records._validated_reviewed_copy``) reject float values rather
+    than seal a record an independent re-hash might not reproduce. See
+    ``docs/EVIDENCE-VERIFICATION-SPEC.md``.
 
     Parameters
     ----------
@@ -50,6 +58,10 @@ def canonical_record_hash(content: dict[str, Any]) -> str:
     # standard JSON parser (jq, Go, JS) accepts, so an auditor could not reproduce
     # the digest — silently breaking the "reproducible with standard tools" promise
     # above. Fail loudly at seal time instead of sealing an unverifiable record.
+    # NOTE: allow_nan=False only rejects NON-finite floats. A FINITE float would
+    # serialize fine here but its ``repr`` is not guaranteed byte-identical to
+    # jq/JS/Go, so sealed content must contain no floats at all — enforced by the
+    # writers upstream (see the docstring and app.decision_records), not here.
     payload = json.dumps(
         content, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
     ).encode("utf-8")

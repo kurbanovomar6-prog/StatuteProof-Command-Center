@@ -90,6 +90,46 @@ def test_unified_diff_still_extracts_added_only(tmp_path):
     assert "30 June 2028" in text
 
 
+def test_oversize_sealed_diff_is_skipped_not_silently_truncated(tmp_path):
+    """A sealed diff larger than the read cap returns None (no partial diff).
+
+    Regression: the previous read used ``fh.read(_MAX_DIFF_BYTES)``, which
+    silently returned the truncated prefix — surfacing dates only from the head
+    of the diff and MISSING every date in the dropped tail. It must instead skip
+    the artifact so the record is dropped rather than surfaced from a partial diff.
+    """
+    from app.effective_dates import _MAX_DIFF_BYTES
+
+    # A date near the very END of an over-cap unified diff — inside the tail that
+    # a truncating read would drop.
+    filler = "\n".join(f"+filler line {i}" for i in range(_MAX_DIFF_BYTES // 10))
+    oversize = (
+        "--- prev\n+++ curr\n@@ -1 +1 @@\n"
+        + filler
+        + "\n+The effective date is 30 June 2028.\n"
+    )
+    assert len(oversize) > _MAX_DIFF_BYTES  # genuinely over the cap
+    diff_path = tmp_path / "huge.txt"
+    diff_path.write_text(oversize, encoding="utf-8")
+
+    assert _read_sealed_diff_text(tmp_path, "huge.txt") is None
+
+
+def test_diff_exactly_at_cap_is_read_not_skipped(tmp_path):
+    """A diff at/under the cap is read normally (off-by-one boundary)."""
+    from app.effective_dates import _MAX_DIFF_BYTES
+
+    body = "--- prev\n+++ curr\n@@ -1 +1 @@\n+The effective date is 30 June 2028.\n"
+    body += "+" + "x" * (_MAX_DIFF_BYTES - len(body) - 2) + "\n"
+    assert len(body) <= _MAX_DIFF_BYTES
+    diff_path = tmp_path / "atcap.txt"
+    diff_path.write_text(body, encoding="utf-8")
+
+    text = _read_sealed_diff_text(tmp_path, "atcap.txt")
+    assert text is not None
+    assert "30 June 2028" in text
+
+
 # ── fixtures ───────────────────────────────────────────────────────────────────
 
 def _make_record(

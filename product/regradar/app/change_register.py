@@ -47,6 +47,17 @@ _REGISTER_TITLE = "StatuteProof Regulatory Change Register"
 # DoS width cap for a register export when both bounds are supplied. Matches the
 # audit-vault cap so the two paid exports impose the same per-request ceiling.
 MAX_REGISTER_RANGE_DAYS = 366
+# DoS record cap (mirrors app.evidence_pack.MAX_EVIDENCE_PACK_RECORDS): the
+# register join is O(N×M) — it loads every canonical evidence-record.json and,
+# per record, re-reads the whole run-log risk index plus assessment/action-log
+# joins. The date-range width cap above does not bound record COUNT (a dense
+# tree can hold thousands of records inside a single day), so cap the number of
+# canonical records a single export will walk. Over-cap requests are REJECTED
+# with a clear message (narrow the filters), never silently truncated — a
+# partial register that looks complete is a worse failure than a refused one.
+# Kept in step with app.effective_dates._MAX_RECORDS_SCANNED, which bounds the
+# same evidence tree for the sibling key-dates view.
+MAX_REGISTER_RECORDS = 5000
 _NOT_SCORED = "NOT_SCORED"
 _EMPTY_CELL = "—"
 
@@ -73,6 +84,16 @@ ActionLogLookup = Callable[[int, str], list[dict[str, Any]]]
 
 class ChangeRegisterError(ValueError):
     """Raised when a rendered change register would contain a forbidden claim."""
+
+
+class ChangeRegisterTooLargeError(ValueError):
+    """Raised when a register export would exceed ``MAX_REGISTER_RECORDS`` records.
+
+    Distinct from :class:`ChangeRegisterError` (a legal-safety guard) so the
+    export layer can return a clear "narrow your filters" message instead of a
+    generic failure — and so a caller can tell a size rejection apart from a
+    forbidden-claim rejection. Never results in a partial/truncated register.
+    """
 
 
 # ── date-range validation (register-specific: lenient, optional bounds) ────────
@@ -149,6 +170,21 @@ def build_change_register_rows(
     """
     root = Path(base_dir) if base_dir is not None else _BASE_DIR
     lookup = action_log_lookup if action_log_lookup is not None else get_action_log
+
+    # Record-count cap FIRST (before the per-record joins and even the run-log
+    # risk-index read): materialize the lightweight summary list and refuse an
+    # oversize export outright rather than doing — or worse, silently truncating
+    # — an unbounded O(N×M) walk. Never truncates: a partial register that looks
+    # complete would be a legal-safety hazard in an evidence product.
+    summaries = list_canonical_evidence_records(base_dir=root, review_file=review_file)
+    if len(summaries) > MAX_REGISTER_RECORDS:
+        raise ChangeRegisterTooLargeError(
+            f"This change register would span {len(summaries)} evidence records, "
+            f"over the {MAX_REGISTER_RECORDS}-record per-export cap. Narrow the "
+            f"date range, source, or regulator filter and export again. No partial "
+            f"register was produced."
+        )
+
     run_risk_index = _build_run_risk_index(root)
 
     from_bound = _parse_optional_date(date_from)
@@ -158,7 +194,7 @@ def build_change_register_rows(
     excluded = {str(s).strip() for s in (excluded_source_ids or set()) if str(s).strip()}
 
     rows: list[dict[str, Any]] = []
-    for summary in list_canonical_evidence_records(base_dir=root, review_file=review_file):
+    for summary in summaries:
         record = _load_full_record(summary, root)
         if record is None:
             continue
@@ -687,6 +723,9 @@ def build_change_register_export(
                 else "No detected changes matched; an empty but valid register was exported."
             ),
         }
+    except ChangeRegisterTooLargeError as exc:
+        logger.warning("change register rejected (over record cap): %s", exc)
+        return {"status": "error", "message": str(exc)}
     except ChangeRegisterError as exc:
         logger.error("change register blocked by forbidden-claims guard: %s", exc)
         return {"status": "error", "message": str(exc)}

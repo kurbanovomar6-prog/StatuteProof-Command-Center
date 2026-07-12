@@ -8,11 +8,12 @@ import { sourceHealthRows } from '../data/mockData'
 import { Badge } from './ui/Badge'
 import { ShieldCheck, Clock, FileSearch, Activity, Link2, Gauge } from 'lucide-react'
 
-const qualityLabel   = { readiness_supported: 'Fresh-alert eligible', underReview: 'Under review' }
-const qualityVariant = { readiness_supported: 'green',                remediation: 'yellow' }
-const statusLabel    = { readiness_supported: 'Fresh-alert eligible', underReview: 'Under review' }
-const statusVariant  = { readiness_supported: 'green',                remediation: 'yellow' }
-const verdictLabel   = { READINESS: 'Readiness', REVIEW: 'Review' }
+const qualityLabel   = { readiness_supported: 'Fresh-alert eligible', underReview: 'Under review', geo_blocked: 'Geo-restricted — not monitored' }
+const qualityVariant = { readiness_supported: 'green',                remediation: 'yellow',        geo_blocked: 'red' }
+const statusLabel    = { readiness_supported: 'Fresh-alert eligible', underReview: 'Under review', geo_blocked: 'Geo-restricted — not monitored' }
+const statusVariant  = { readiness_supported: 'green',                remediation: 'yellow',        geo_blocked: 'red' }
+const verdictLabel   = { READINESS: 'Readiness', REVIEW: 'Review', BLOCKED: 'Blocked' }
+const verdictVariant = { READINESS: 'green', BLOCKED: 'red' }
 const accessVariant  = { Accessible: 'green', Limited: 'yellow' }
 
 const col = createColumnHelper()
@@ -53,7 +54,7 @@ const columns = [
   col.accessor('verdict', {
     header: 'Result',
     cell: i => (
-      <Badge variant={i.getValue() === 'READINESS' ? 'green' : 'yellow'}>
+      <Badge variant={verdictVariant[i.getValue()] || 'yellow'}>
         {verdictLabel[i.getValue()] || i.getValue()}
       </Badge>
     ),

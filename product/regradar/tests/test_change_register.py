@@ -557,3 +557,45 @@ def test_no_records_at_all_is_empty_but_valid(tmp_path):
     assert result["status"] == "ok"
     assert result["row_count"] == 0
     assert (tmp_path / result["exports"]["xlsx_path"]).exists()
+
+
+# ── record-count cap (DoS bound; reject, never truncate) ───────────────────────
+
+def test_register_rejects_over_record_cap(tmp_path, monkeypatch):
+    """Over the record cap → REJECT with a clear message, and write no file."""
+    from app import change_register as cr
+
+    over = [
+        {"record_id": f"r{i}", "record_path": ""}
+        for i in range(cr.MAX_REGISTER_RECORDS + 1)
+    ]
+    monkeypatch.setattr(cr, "list_canonical_evidence_records", lambda **kw: over)
+
+    # The row builder raises the dedicated too-large error (not the forbidden
+    # claims error, and not a silent truncation).
+    with pytest.raises(cr.ChangeRegisterTooLargeError):
+        cr.build_change_register_rows(base_dir=tmp_path)
+
+    out_dir = tmp_path / "out"
+    result = cr.build_change_register_export(base_dir=tmp_path, output_dir=out_dir)
+    assert result["status"] == "error"
+    assert str(cr.MAX_REGISTER_RECORDS) in result["message"]
+    assert "narrow" in result["message"].lower()
+    # No partial/truncated register was written to disk.
+    assert not out_dir.exists() or not any(out_dir.iterdir())
+
+
+def test_register_at_record_cap_is_not_rejected(tmp_path, monkeypatch):
+    """Exactly at the cap must NOT trip the guard (off-by-one boundary)."""
+    from app import change_register as cr
+
+    at_cap = [
+        {"record_id": f"r{i}", "record_path": ""}
+        for i in range(cr.MAX_REGISTER_RECORDS)
+    ]
+    monkeypatch.setattr(cr, "list_canonical_evidence_records", lambda **kw: at_cap)
+
+    # Must not raise; the fake summaries load nothing, so rows come back empty —
+    # the point is that the cap check itself allowed the export to proceed.
+    rows = cr.build_change_register_rows(base_dir=tmp_path)
+    assert rows == []

@@ -445,10 +445,16 @@ def test_source_url(
 
 def source_url_exists(url: str) -> bool:
     """
-    Return True when `url` already exists in sources.json.
+    Return True when `url` already exists in sources.json (GLOBAL, unscoped).
 
     URL comparison is normalised (trailing slash stripped on both sides).
     Returns False on any read/parse error — never raises.
+
+    NOTE: this GLOBAL check leaks cross-tenant existence — it returns True for a
+    private custom source another user added, so a "URL already in the list"
+    response would reveal that user B monitors URL X. For the add-source
+    duplicate check use :func:`source_url_exists_for_user`, which is scoped to
+    the caller and never reveals another tenant's custom source.
     """
     norm = url.rstrip("/")
     try:
@@ -460,6 +466,58 @@ def source_url_exists(url: str) -> bool:
         )
     except Exception:
         return False
+
+
+def _is_official_source(entry: dict) -> bool:
+    """True for a built-in / official source (not a user-owned custom source).
+
+    A custom source is stamped ``custom: True`` and/or carries an
+    ``owner_user_id`` (see the add-source handler). Anything without those
+    markers is an official/built-in source that every tenant legitimately sees.
+    """
+    if entry.get("custom") is True:
+        return False
+    if entry.get("owner_user_id") is not None:
+        return False
+    return True
+
+
+def source_url_exists_for_user(url: str, user_id: int | None) -> bool:
+    """Return True only when `url` already exists **within the caller's scope**.
+
+    "In scope" means the URL matches either an OFFICIAL/built-in source (which
+    every tenant may see) or a CUSTOM source owned by ``user_id``. A custom
+    source owned by a DIFFERENT user is treated as absent (returns ``False``), so
+    the add-source flow can reject a genuine self-duplicate or an official-source
+    clash without ever revealing that another tenant monitors this URL — closing
+    the cross-tenant URL-existence oracle the GLOBAL :func:`source_url_exists`
+    would open. Returns ``False`` on any read/parse error — never raises.
+    """
+    norm = url.rstrip("/")
+    try:
+        uid = int(user_id) if user_id is not None else None
+    except (TypeError, ValueError):
+        uid = None
+    try:
+        entries = json.loads(_SOURCES_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("url", "").rstrip("/") != norm:
+            continue
+        if _is_official_source(entry):
+            return True  # official/built-in source — visible to every tenant
+        try:
+            owner = int(entry.get("owner_user_id"))
+        except (TypeError, ValueError):
+            owner = None
+        if uid is not None and owner == uid:
+            return True  # the caller's OWN custom source
+        # else: another tenant's custom source — do NOT reveal it; keep scanning
+        # in case an official entry (or the caller's own) also matches this URL.
+    return False
 
 
 def append_source_to_json(source: dict) -> bool:

@@ -247,8 +247,23 @@ def _read_sealed_diff_text(root: Path, rel_or_abs: Any) -> str | None:
         return None
     try:
         with path.open("r", encoding="utf-8", errors="replace") as fh:
-            raw = fh.read(_MAX_DIFF_BYTES)
+            # Read ONE char past the cap so truncation is DETECTABLE (a full,
+            # untruncated diff is <= _MAX_DIFF_BYTES). Mirrors the +1 pattern in
+            # _read_snapshot / the re-diff fallback in _changed_text_for_record.
+            raw = fh.read(_MAX_DIFF_BYTES + 1)
     except OSError:
+        return None
+    if len(raw) > _MAX_DIFF_BYTES:
+        # The sealed diff exceeded the read cap. Silently using the truncated
+        # prefix would surface dates only from the head of the diff and MISS
+        # every date in the dropped tail — a partial view that looks complete.
+        # Skip this artifact instead; the caller falls back to a bounded re-diff
+        # (which itself skips over-cap snapshots), so the record is dropped
+        # rather than surfaced from an incomplete diff (code review 2026-07-13).
+        logger.warning(
+            "effective-dates: sealed diff exceeds %d chars — skipping (no partial diff)",
+            _MAX_DIFF_BYTES,
+        )
         return None
     added = [
         line[1:] for line in raw.splitlines()

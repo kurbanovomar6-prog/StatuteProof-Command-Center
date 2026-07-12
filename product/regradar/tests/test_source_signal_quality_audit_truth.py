@@ -3,6 +3,7 @@ import importlib.util
 import subprocess
 import sys
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -20,6 +21,16 @@ _family_spec = importlib.util.spec_from_file_location(
 _family_validator = importlib.util.module_from_spec(_family_spec)
 assert _family_spec and _family_spec.loader
 _family_spec.loader.exec_module(_family_validator)
+
+
+# Import the audit validator as a module so a stale-audit rejection can be
+# exercised by monkeypatching its AUDIT_JSON path — no subprocess, no mutation
+# of the real report file. (Importing does NOT run main(): the module guards it
+# behind ``if __name__ == "__main__"``.)
+_validator_spec = importlib.util.spec_from_file_location("validate_audit", VALIDATOR_PATH)
+_audit_validator = importlib.util.module_from_spec(_validator_spec)
+assert _validator_spec and _validator_spec.loader
+_validator_spec.loader.exec_module(_audit_validator)
 
 
 def _enabled_uae_sources() -> list[dict]:
@@ -112,7 +123,8 @@ def test_source_signal_quality_family_readiness_matches_registry_truth():
         ), family["family"]
 
 
-def test_source_signal_quality_audit_validator_rejects_stale_counts():
+def test_source_signal_quality_audit_validator_accepts_current_truth():
+    """Happy path: the validator PASSES (exit 0) against the shipped, in-sync audit."""
     result = subprocess.run(
         [sys.executable, str(VALIDATOR_PATH)],
         cwd=ROOT,
@@ -124,11 +136,45 @@ def test_source_signal_quality_audit_validator_rejects_stale_counts():
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+def test_source_signal_quality_audit_validator_rejects_stale_counts(tmp_path):
+    """Feed a DELIBERATELY-stale audit and assert the validator REJECTS it.
+
+    The previous version of this test only re-ran the validator against the good,
+    shipped audit and asserted exit 0 — it proved acceptance, never rejection,
+    despite its name. Here we corrupt the enabled-source count so it no longer
+    matches ``sources.json`` truth and assert a non-zero exit, so the guard
+    actually proves the validator catches drift.
+    """
+    stale_audit = json.loads(AUDIT_PATH.read_text(encoding="utf-8"))
+    # Corrupt a checked count so it diverges from the sources.json-derived truth.
+    stale_audit["current_source_truth"]["total_enabled"] += 4242
+    stale_path = tmp_path / "stale_source_signal_quality_audit.json"
+    stale_path.write_text(json.dumps(stale_audit), encoding="utf-8")
+
+    # Point the validator at the stale file (real sources.json / frontend paths
+    # stay in place, so the ONLY discrepancy is the injected stale count).
+    with mock.patch.object(_audit_validator, "AUDIT_JSON", stale_path):
+        return_code = _audit_validator.main()
+
+    assert return_code == 1, (
+        "validator must REJECT (non-zero exit) an audit whose counts drift from "
+        "sources.json truth"
+    )
+
+
 def test_frontend_source_quality_export_matches_safe_audit_claims():
     audit = json.loads(AUDIT_PATH.read_text(encoding="utf-8"))
     frontend = FRONTEND_AUDIT_PATH.read_text(encoding="utf-8")
 
-    assert "auditDate: '2026-06-21'" in frontend or 'auditDate: "2026-06-21"' in frontend
+    # Drift-guard WITHOUT a stale literal: the frontend auditDate must equal the
+    # audit JSON's own audit_date — whatever it is — so this guards frontend↔JSON
+    # drift but never goes stale when the audit is legitimately re-dated.
+    audit_date = str(audit["audit_date"]).strip()
+    assert audit_date, "audit JSON must declare a non-empty audit_date"
+    assert (
+        f"auditDate: '{audit_date}'" in frontend
+        or f'auditDate: "{audit_date}"' in frontend
+    ), f"frontend auditDate must match audit JSON audit_date ({audit_date!r})"
     assert "StatuteProof Source Quality Auditor v2" in frontend
     assert "2026-06-19" not in frontend
     assert "confirmed-live" not in frontend

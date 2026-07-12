@@ -76,14 +76,21 @@ function EvidenceDossier() {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
+    let fadeTimer;
     const id = setInterval(() => {
       setFading(true);
-      setTimeout(() => {
+      fadeTimer = setTimeout(() => {
         setIdx((i) => (i + 1) % SIGNALS.length);
         setFading(false);
       }, 300);
     }, 5000);
-    return () => clearInterval(id);
+    // Clear BOTH timers on unmount: the interval and the in-flight nested fade
+    // timeout. Without the clearTimeout, unmounting during the 300ms fade window
+    // leaves the timeout to fire setState on an unmounted component.
+    return () => {
+      clearInterval(id);
+      clearTimeout(fadeTimer);
+    };
   }, []);
 
   const sig = SIGNALS[idx];

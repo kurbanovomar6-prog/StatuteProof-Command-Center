@@ -281,6 +281,15 @@ _DECISION_LIMITER = _RateLimiter(60, 3600)
 # client could loop it to pin CPU/disk. Throttled like an export.
 _CANONICAL_EVIDENCE_LIMITER = _RateLimiter(60, 3600)
 _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
+# GET /api/evidence (full source_runs.jsonl read per request) and GET /api/briefs
+# (whole alert_queue/*.json glob + parse per request) are heavy authenticated
+# reads that were unthrottled (code review 2026-07-13) — a single logged-in
+# client could loop either to pin disk/CPU. Same posture as the canonical review
+# queue above: 60/hour, and (because _rate_limited keys hits as "<ip>:<label>")
+# each gets its OWN independent per-IP bucket, so an evidence-list burst can never
+# starve the briefs list or vice-versa.
+_EVIDENCE_LIST_LIMITER = _RateLimiter(60, 3600)
+_BRIEFS_LIST_LIMITER = _RateLimiter(60, 3600)
 # Heavy export endpoints (audit vault, evidence pack, regulator binder, coverage
 # certificate, monthly assurance, change-register export, evidence export). These
 # build ZIPs and PDFs — meaningful disk/CPU work on the small production droplet.
@@ -2488,6 +2497,8 @@ class _Handler(BaseHTTPRequestHandler):
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
             return
+        if self._rate_limited(_EVIDENCE_LIST_LIMITER, "evidence_list"):
+            return
         try:
             params = parse_qs(urlparse(self.path).query)
             market = str((params.get("market") or ["AE"])[0]).upper().strip() or "AE"
@@ -2912,6 +2923,8 @@ class _Handler(BaseHTTPRequestHandler):
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_BRIEFS_LIST_LIMITER, "briefs_list"):
             return
         try:
             params = parse_qs(urlparse(self.path).query)
@@ -3809,7 +3822,11 @@ class _Handler(BaseHTTPRequestHandler):
             return
 
         try:
-            from app.source_tester import validate_public_url, source_url_exists, append_source_to_json
+            from app.source_tester import (
+                validate_public_url,
+                source_url_exists_for_user,
+                append_source_to_json,
+            )
             from app.source_intake import run_source_intake, load_sources_json
             import hashlib
 
@@ -3818,8 +3835,13 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "message": f"URL blocked: {reason}"}, 400)
                 return
 
-            if source_url_exists(url):
-                self._send_json({"ok": False, "message": "This URL is already in the source list."}, 409)
+            # SCOPED duplicate check (not the GLOBAL source_url_exists): only an
+            # official source or THIS user's own custom source counts as a
+            # visible duplicate. A URL another tenant added as a private custom
+            # source is treated as absent here, so this 409 can never become a
+            # cross-tenant "user B monitors URL X" oracle.
+            if source_url_exists_for_user(url, user.get("id")):
+                self._send_json({"ok": False, "message": "This URL is already in your source list."}, 409)
                 return
 
             intake_result = run_source_intake(
@@ -3859,7 +3881,18 @@ class _Handler(BaseHTTPRequestHandler):
                 # one customer's custom sources never leak to another.
                 "owner_user_id": int(user["id"]),
             }
-            append_source_to_json(new_source)
+            # append_source_to_json enforces GLOBAL url/source_id uniqueness. The
+            # scoped check above already passed, so a False here means the URL is
+            # held by ANOTHER tenant's custom source (identical deterministic
+            # source_id). Report a NON-oracle failure — deliberately not "already
+            # in the list" — so we neither falsely claim success nor reveal that
+            # another tenant monitors this URL.
+            if not append_source_to_json(new_source):
+                self._send_json({
+                    "ok": False,
+                    "message": "This source could not be saved. Please re-run the readiness test and try again.",
+                }, 409)
+                return
             self._send_json({
                 "ok": True,
                 "source_id": source_id,

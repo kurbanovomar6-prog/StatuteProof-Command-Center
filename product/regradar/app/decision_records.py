@@ -51,7 +51,6 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import math
 import os
 import sqlite3
 from datetime import datetime, timezone
@@ -211,9 +210,10 @@ def _validated_reviewed_copy(reviewed: Any) -> dict[str, Any] | None:
     """Return a verbatim copy of the caller-supplied proof block, or ``None``.
 
     Shape-validates WITHOUT altering values: a non-empty flat dict with string
-    keys and scalar values (str/int/float/bool/None), all bounded. Validation
-    only REJECTS — it never rewrites — because ``reviewed`` is the record of
-    what the reviewer actually saw (the alert's proof block, copied verbatim).
+    keys and scalar values (str/int/bool/None — **floats are rejected**, see
+    below), all bounded. Validation only REJECTS — it never rewrites — because
+    ``reviewed`` is the record of what the reviewer actually saw (the alert's
+    proof block, copied verbatim).
     """
     if not isinstance(reviewed, dict) or not reviewed:
         return None
@@ -226,13 +226,19 @@ def _validated_reviewed_copy(reviewed: Any) -> dict[str, Any] | None:
         if isinstance(value, str):
             if len(value) > _MAX_REVIEWED_STR_LEN:
                 return None
-        elif isinstance(value, float) and not math.isfinite(value):
-            # NaN / Infinity serialize as non-RFC-8259 tokens that a customer's
-            # external verifier (jq, a Go/JS re-hasher) cannot reproduce — the
-            # seal would pass inside StatuteProof but fail independent
-            # verification, silently defeating the moat. Reject, per REJECT-doctrine.
+        elif isinstance(value, float):
+            # REJECT every float, finite or not. A NON-finite float (NaN /
+            # Infinity) serializes as a non-RFC-8259 token no standard JSON
+            # parser accepts. A FINITE float verifies GREEN inside StatuteProof,
+            # but Python's ``json`` float repr is not guaranteed byte-identical
+            # to jq / JS / Go, so an INDEPENDENT re-hash of the sealed content
+            # could mismatch — the seal would pass here yet fail external
+            # verification, silently defeating the moat. The ``content-sha256-v1``
+            # canonicalization defines no float rule (docs/EVIDENCE-VERIFICATION-
+            # SPEC.md); a proof block is identifiers/hashes/strings/ints, where a
+            # float has no legitimate place. Reject, per REJECT-doctrine.
             return None
-        elif not (value is None or isinstance(value, (bool, int, float))):
+        elif not (value is None or isinstance(value, (bool, int))):
             return None
         copy[key] = value
     return copy
