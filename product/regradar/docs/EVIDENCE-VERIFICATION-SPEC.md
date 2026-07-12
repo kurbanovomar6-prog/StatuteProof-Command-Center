@@ -25,7 +25,7 @@ It does **not** claim to be tamper-**proof**. Honest scope (also stated in the
 verifier tool): a clean chain proves there was no *in-place, un-relinked* tampering
 since the last known head. An actor who can also *relink* the whole trail could
 produce a trail that re-verifies clean. Two things raise that bar and are addressed
-in §5: a separately-persisted **head anchor**, and (roadmap) an **external
+in §5–§6: a separately-persisted **head anchor**, and an operator-enabled **external
 timestamp anchor** (RFC 3161) that a third party — not StatuteProof — signs.
 
 StatuteProof is not legal advice, not a guarantee of compliance, and not a
@@ -102,15 +102,136 @@ not reordered since it was written.
   anchor; a mismatch **reports** a likely delete-then-relink (`anchor_status:
   divergent`). It is advisory (does not fail the run) because legitimate new captures
   advance the head.
-- **External timestamp anchor (roadmap, §Public Verifier):** periodically submit the
-  head `record_hash` to an **RFC 3161 Time-Stamping Authority** (and/or a public
-  transparency log). The TSA — a third party, not StatuteProof — returns a signed
-  token binding that hash to a time. A relinked trail cannot reproduce a TSA token
-  that predates the relink. This is what upgrades the guarantee from *tamper-evident*
-  to *externally-anchored tamper-evident*, and it is verifiable by anyone who trusts
-  the TSA, not StatuteProof.
+- **External timestamp anchor (implemented; optional, dormant by default — see §6):**
+  periodically submit the head `record_hash` to an **RFC 3161 Time-Stamping
+  Authority**. The TSA — a third party, not StatuteProof — returns a signed token
+  binding that hash to a time StatuteProof cannot backdate. A relinked trail cannot
+  reproduce a TSA token that predates the relink. This upgrades the guarantee from
+  *tamper-evident* to *externally-anchored tamper-evident*, and it is verifiable by
+  anyone who trusts the TSA, not StatuteProof. §6 documents exactly how it is stored
+  and independently checked.
 
-## 6. The Public Verifier (what we expose)
+## 6. External RFC 3161 timestamp anchor (optional)
+
+> **Status: implemented, and *dormant by default*.** This is an operator-enabled
+> add-on, not part of the base guarantee. With no configuration it is a complete
+> no-op — zero network calls, zero threads, zero files, and the capture pipeline is
+> byte-for-byte unchanged; records produced without it stay 100% valid. It is enabled
+> only when an operator sets the `RFC3161_TSA_URL` environment variable to a non-empty
+> value (`app/rfc3161_anchor.py::anchor_enabled`). There is intentionally no default
+> TSA.
+
+### 6.1 What it adds
+
+The internal chain (§4) is tamper-**evident**: it catches in-place, un-relinked edits.
+Its honest limit (§1) is that an actor with full write access who *relinks* the whole
+trail can still produce a chain that re-verifies clean. An external anchor closes that
+gap with something StatuteProof cannot forge: a third-party **RFC 3161 Time-Stamping
+Authority (TSA)** signs a token binding the current chain-**head** `record_hash` to a
+time StatuteProof cannot backdate. A relinked trail cannot reproduce a TSA token that
+predates the relink. This upgrades the guarantee from *tamper-evident* to
+*externally-anchored tamper-evident* — checkable by anyone who trusts the TSA, **not**
+StatuteProof.
+
+Only the chain **head** is anchored. `app/source_runs.py::_write_chain_head` is the
+single chokepoint for every head update — a normal append *and* a retention relink —
+and it calls `_maybe_external_anchor` → `rfc3161_anchor.spawn_head_anchor` on a
+background daemon thread with a single-in-flight guard, so a source capture never
+blocks on the TSA and the TSA is never hammered per-append.
+
+### 6.2 What gets written (the additive sidecar)
+
+The token is persisted as an **additive sidecar** next to `evidence_chain_head.json`;
+no existing evidence record, trail line, or head file is ever mutated:
+
+| File | Contents |
+|---|---|
+| `evidence_chain_head.tsr.json` | JSON sidecar (metadata + base64 token) |
+| `evidence_chain_head.tsr` | the raw DER timestamp token, so standard `openssl ts` tooling can read it directly |
+
+The JSON sidecar (`app/rfc3161_anchor.py::request_timestamp` + `maybe_anchor_head`)
+carries:
+
+| Field | Meaning |
+|---|---|
+| `schema_version` | sidecar schema version (`"1.0"`) |
+| `token_format` | `"rfc3161-timestamp-token-der-base64"` |
+| `token_b64` | the RFC 3161 timestamp token, DER, base64 |
+| `tsa_url` | the operator-configured TSA that issued it |
+| `digest_hex` | the anchored digest — the head `record_hash`, lowercase hex |
+| `digest_algorithm` | always `sha256` |
+| `anchored_head_record_hash` | the head `record_hash` this token anchors (equals `digest_hex`) |
+| `requested_at` | when StatuteProof requested the token (UTC; advisory) |
+| `asserted_time_utc` | the TSA's asserted time, lifted from the token (advisory until verified) |
+| `nonce` | random nonce sent in the request, to detect a replayed/substituted response |
+
+The message imprint inside the token is the **raw bytes of the head `record_hash`**
+(itself a SHA-256 digest), carried with `hashAlgorithm = sha256` — built exactly the
+way `openssl ts -query -digest <hex> -sha256` builds it. Only a genuine 64-char
+lowercase SHA-256 head hash is ever submitted; anything else is refused with no request
+sent.
+
+### 6.3 How a recipient verifies the token OFFLINE (no trust in StatuteProof)
+
+`app/rfc3161_anchor.py::verify_timestamp_token(token_b64, digest_hex)` runs the
+following checks with **no network access**, and returns a fail-closed envelope where
+`verified` is `true` only when the imprint **and** the signature pass:
+
+1. **`digest_wellformed`** — `digest_hex` is a 64-char lowercase SHA-256 hex string.
+2. **`token_parsed`** — the blob parses as a CMS `SignedData` RFC 3161 timestamp token
+   carrying a `TSTInfo`.
+3. **`imprint_matches_digest`** — the token's message imprint equals the SHA-256 digest
+   you hold (i.e. the head `record_hash`). This is what ties the token to *your* head.
+4. **`message_digest_attr_matches_content`** — the signed `message-digest` attribute
+   equals the digest of the token's `TSTInfo` eContent, binding the signature to *this*
+   TSTInfo.
+5. **`signature_valid`** — the TSA's signature over the signed attributes verifies
+   against the certificate **embedded in the token** (SHA-2 signature hashes only;
+   SHA-1/SHA-224 are refused).
+
+If the signature cannot be checked (no embedded certificate, or the `cryptography`
+package is unavailable), the token is reported **unverified** with an explanatory
+`skipped` check — never a false pass.
+
+**Standard-tooling equivalent (openssl).** Because the imprint is the raw digest with
+`sha256`, the persisted `.tsr` token is verifiable with plain `openssl ts` — nothing
+StatuteProof-specific is required:
+
+```bash
+# Rebuild the query from the head hash you are checking, then verify the token
+# against the TSA roots YOU trust:
+openssl ts -query -digest <head_record_hash> -sha256 -out head.tsq
+openssl ts -verify -in evidence_chain_head.tsr -queryfile head.tsq \
+    -CAfile your-trusted-tsa-roots.pem
+
+# Equivalent, using the digest directly (no query file):
+openssl ts -verify -in evidence_chain_head.tsr -digest <head_record_hash> \
+    -CAfile your-trusted-tsa-roots.pem
+```
+
+`<head_record_hash>` is the bare 64-char hex `record_hash` of the chain head (drop any
+`sha256:` prefix); it must equal `anchored_head_record_hash` in the sidecar. The
+`-CAfile` you pass is **your own** trusted TSA root set — see §6.4.
+
+### 6.4 Honest scope limit (stated plainly)
+
+`verify_timestamp_token` proves two things and **only** two: that the token was *signed
+by the holder of the certificate embedded in it*, and that the imprint it signed
+*equals the head `record_hash` you hold*. It does **not** validate the TSA certificate
+chain to a trusted root — the module ships **no trust store** — so on its own it does
+not establish "signed by a TSA you have independently decided to trust". That final
+check is reported as a `skipped` / `not_checked` outcome, never a pass.
+
+The final trust decision belongs to the **recipient**: chain the embedded TSA
+certificate to your own trusted TSA roots (the `-CAfile` above). This is deliberate —
+whose roots to trust is the verifier's call, not StatuteProof's. We do not overclaim
+what the module checks.
+
+This is monitoring evidence, not legal proof. An external anchor strengthens the
+integrity signal; it is not a certification, a legal opinion, or a guarantee of
+compliance, and it does not change what a record attests in §1.
+
+## 7. The Public Verifier (what we expose)
 
 A public, no-login endpoint and page: paste a `record.json` (or upload a bundle /
 Evidence Pack), and the verifier runs §3–§4 **client-observable** and returns
@@ -121,5 +242,6 @@ servers: the math is standard and the bytes are in your hand.
 
 ---
 *This spec is versioned. v1 covers raw+normalized+record hashing, the append-only
-chain, and the head anchor. External RFC 3161 anchoring and signed exports are
-tracked additions that only strengthen — never weaken — the above.*
+chain, and the head anchor. §6 documents the optional external RFC 3161 timestamp
+anchor (implemented, dormant by default); signed exports remain a tracked addition.
+These strengthen — never weaken — the above.*
