@@ -148,27 +148,30 @@ def test_caddyfile_overwrites_x_real_ip():
     assert "header_up X-Real-IP {remote_host}" in caddyfile
 
 
-def test_caddyfile_spa_csp_allows_google_fonts():
-    """The SPA CSS (web/src/index.css) @imports fonts.googleapis.com and pulls
-    font files from fonts.gstatic.com. The SPA CSP must permit both, or the
-    stylesheet is blocked and text falls back to the system font. The API-side
+def test_caddyfile_spa_csp_has_no_external_font_hosts():
+    """Fonts are SELF-HOSTED (bundled woff2 via @fontsource, 2026-07-12) so a
+    visitor's browser must contact NO third-party font CDN. Guard BOTH sides of
+    that privacy posture: the CSS must not import Google Fonts, and the SPA CSP
+    must not re-open the hosts (a stray allowance would silently re-enable the
+    leak the vendor-DD data-flow doc says cannot happen). The API-side
     default-src 'none' CSP is intentionally NOT relaxed.
     """
     root = Path(__file__).resolve().parents[1]
     caddyfile = (root / "deploy" / "Caddyfile").read_text(encoding="utf-8")
 
-    # The SPA CSS still imports Google Fonts — if this ever stops being true the
-    # CSP allowances below can be dropped.
+    # The SPA CSS is self-hosted — no external font stylesheet import.
     index_css = (root / "web" / "src" / "index.css").read_text(encoding="utf-8")
-    assert "fonts.googleapis.com" in index_css
+    assert "fonts.googleapis.com" not in index_css
+    assert "@fontsource/" in index_css  # the self-hosted replacement is present
 
-    # style-src must allow the stylesheet host; font-src must allow the font host.
+    # The SPA CSP must not allow the external font hosts either.
     csp_line = next(
         line for line in caddyfile.splitlines()
         if "Content-Security-Policy" in line and "style-src" in line
     )
-    assert "style-src" in csp_line and "https://fonts.googleapis.com" in csp_line
-    assert "font-src" in csp_line and "https://fonts.gstatic.com" in csp_line
+    assert "fonts.googleapis.com" not in csp_line
+    assert "fonts.gstatic.com" not in csp_line
+    assert "font-src 'self'" in csp_line
     # The API CSP (default-src 'none') must remain strict — no font hosts leaked.
     assert "default-src 'none'" not in csp_line
 
