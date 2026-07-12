@@ -354,6 +354,21 @@ export const evidenceRoom = {
   },
 }
 
+export const calendar = {
+  // Forward-looking view of key dates StatuteProof DETECTED in the changed text
+  // of monitored sources (effective dates / deadlines / consultation closes),
+  // each linked to its sealed evidence record. Read-only, own-scope. Returns the
+  // { ok, dates, horizon, framing, disclaimer } envelope. `days` defaults to 90.
+  effectiveDates({ days = 90, from, to, sourceIds } = {}) {
+    const q = new URLSearchParams()
+    if (days) q.set('days', String(days))
+    if (from) q.set('from', from)
+    if (to) q.set('to', to)
+    if (sourceIds && sourceIds.length) q.set('source_ids', sourceIds.join(','))
+    return authRequest(`/api/calendar/effective-dates?${q.toString()}`)
+  },
+}
+
 export const health = {
   // System health for the existing public /api/health endpoint (same one the
   // topbar polls). Best-effort: returns the parsed payload

@@ -4,6 +4,7 @@ import { Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-re
 import { evidence } from '../../api'
 import AuditBinderExport from './AuditBinderExport'
 import CoverageCertificatePanel from './CoverageCertificatePanel'
+import EffectiveDatesCalendar from './EffectiveDatesCalendar'
 import EvidencePackExport from './EvidencePackExport'
 import EvidenceRoomPanel from './EvidenceRoomPanel'
 import RegulatorBinderExport from './RegulatorBinderExport'
@@ -99,6 +100,7 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
+      <EffectiveDatesCalendar />
       <CoverageCertificatePanel />
       <RegulatorBinderExport sources={binderSources} />
       <EvidencePackExport sources={binderSources} />

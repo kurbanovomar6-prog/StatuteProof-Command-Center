@@ -1088,6 +1088,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_monthly_assurance_report()
         elif path == "/api/reports/coverage-certificate":
             self._handle_coverage_certificate()
+        elif path == "/api/calendar/effective-dates":
+            self._handle_effective_dates_calendar()
         elif path == "/api/digest/assurance-preview":
             self._handle_assurance_digest_preview()
         elif path == "/api/verify-spec":
@@ -3524,6 +3526,85 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             logger.error("coverage-certificate error: %s", type(exc).__name__)
             self._send_json({"status": "error", "message": "Internal server error."}, 500)
+
+    def _handle_effective_dates_calendar(self) -> None:
+        """GET /api/calendar/effective-dates — forward-looking detected key dates.
+
+        A read-only, own-scope view of dates StatuteProof DETECTED in the changed
+        text of monitored sources (effective dates / deadlines / consultation
+        closes) and sealed into evidence records. Each item carries its
+        verification pointer — the sealed record_hash + evidence_record_id — plus
+        the honest "detected in the changed text, verify against source" framing
+        and the short disclaimer. It never asserts the reader's obligations and
+        makes no completeness claim.
+
+        Window: ?days=N (default 90, clamped 1..365) forward from today, OR an
+        explicit ?from=&to= (inclusive ISO dates). ?source_ids= restricts the
+        reported sources; the caller's entitled scope is always enforced.
+
+        Mirrors the coverage-certificate handler discipline: auth -> rate limit ->
+        entitled scope -> RBAC export log -> build -> render.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "effective_dates_calendar"):
+            return
+        from datetime import date
+
+        from app.effective_dates import upcoming_key_dates
+
+        qs = parse_qs(urlparse(self.path).query)
+
+        def _iso(name: str):
+            raw = (qs.get(name) or [""])[0].strip()
+            if not raw:
+                return None
+            try:
+                return date.fromisoformat(raw[:10])
+            except ValueError:
+                return "invalid"
+
+        date_from = _iso("from")
+        date_to = _iso("to")
+        if date_from == "invalid" or date_to == "invalid":
+            self._send_json({"ok": False, "message": "Invalid from/to date (use YYYY-MM-DD)."}, 400)
+            return
+        try:
+            horizon_days = int((qs.get("days") or ["90"])[0])
+        except (ValueError, IndexError):
+            self._send_json({"ok": False, "message": "Invalid days."}, 400)
+            return
+
+        # Tenancy — identical semantics to the coverage certificate. Named sources
+        # are clipped to the caller's entitled scope; the default (unnamed) view
+        # still excludes any custom source the caller does not own so another
+        # tenant's private source can never surface.
+        source_ids_raw = (qs.get("source_ids") or [""])[0]
+        named = [s.strip() for s in source_ids_raw.split(",") if s.strip()]
+        allow_source_ids = None
+        if named:
+            allow_source_ids = self._entitle_source_ids(user, named)
+            if not allow_source_ids:
+                self._send_json({"ok": False, "message": "Those sources are not in your plan scope."}, 403)
+                return
+        excluded_source_ids = self._denied_custom_source_ids(user)
+
+        # RBAC Stage-2 (Part A): record the authorized calendar read.
+        self._rbac_log_export(user, resource_type="effective_dates_calendar")
+        try:
+            result = upcoming_key_dates(
+                source_ids=allow_source_ids,
+                excluded_source_ids=excluded_source_ids,
+                horizon_days=horizon_days,
+                date_from=date_from,
+                date_to=date_to,
+            )
+            self._send_json({"ok": True, **result})
+        except Exception as exc:
+            logger.error("effective-dates calendar error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_assurance_digest_preview(self) -> None:
         """GET /api/digest/assurance-preview — preview the negative-assurance digest.
