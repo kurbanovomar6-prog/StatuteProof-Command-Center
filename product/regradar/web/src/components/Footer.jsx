@@ -23,7 +23,7 @@ export default function Footer() {
                 Statute<span className="text-[#16D9F5]">Proof</span>
               </span>
             </div>
-            <p className="text-sm text-slate-500 leading-relaxed">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
               Official-source regulatory monitoring with hash-verified evidence records and human-review
               workflows for UAE financial firms. Source limitations disclosed. Not legal advice.
             </p>

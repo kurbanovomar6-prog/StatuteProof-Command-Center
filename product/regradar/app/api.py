@@ -275,6 +275,11 @@ _REDLINE_LIMITER = _RateLimiter(120, 3600)
 # GET (list) and POST (seal) labels each get their OWN independent 60/hour
 # bucket per IP — a read burst can never starve a legitimate seal.
 _DECISION_LIMITER = _RateLimiter(60, 3600)
+# Canonical-evidence review queue: a heavy READ (whole-tree scan + per-record
+# review-log read). Every other heavy read/export endpoint is throttled; this one
+# was the lone unthrottled outlier (code review 2026-07-13), so a single logged-in
+# client could loop it to pin CPU/disk. Throttled like an export.
+_CANONICAL_EVIDENCE_LIMITER = _RateLimiter(60, 3600)
 _BRIEFS_GENERATE_LIMITER = _RateLimiter(20, 3600)
 # Heavy export endpoints (audit vault, evidence pack, regulator binder, coverage
 # certificate, monthly assurance, change-register export, evidence export). These
@@ -2818,6 +2823,8 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _handle_canonical_evidence_get(self) -> None:
         """GET /api/canonical-evidence — append-only canonical evidence review state."""
+        if self._rate_limited(_CANONICAL_EVIDENCE_LIMITER, "canonical_evidence_get"):
+            return
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)

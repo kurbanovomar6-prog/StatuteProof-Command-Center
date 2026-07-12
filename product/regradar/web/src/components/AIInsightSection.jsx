@@ -192,8 +192,9 @@ function AnalysisPanel() {
         </div>
       </div>
 
-      {/* Disclaimer */}
-      <p className="text-[10px] leading-relaxed text-slate-600 text-center">
+      {/* Disclaimer — must be legible: token instead of slate-600 (~2.5:1) and
+          11px min, so the legal notice actually reads (code review 2026-07-13). */}
+      <p className="text-[11px] leading-relaxed text-[var(--text-secondary)] text-center">
         Monitoring intelligence only. Not legal advice. Not a guarantee of compliance.
         Consult qualified professionals before making regulatory or operational decisions.
       </p>
