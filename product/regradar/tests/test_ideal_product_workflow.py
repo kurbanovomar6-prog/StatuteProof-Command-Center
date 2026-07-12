@@ -90,14 +90,34 @@ class IdealProductWorkflowTests(unittest.TestCase):
     def test_source_summary_reads_current_registry_truth(self):
         summary = build_sources_summary("AE")
 
+        # Recompute the truth from sources.json (drift-proof — the summary must
+        # track the registry, not a number pinned on the day the test was written).
+        registry = json.loads(
+            (Path(__file__).resolve().parents[1] / "sources.json").read_text(encoding="utf-8")
+        )
+        enabled = [s for s in registry if s.get("jurisdiction") == "AE" and s.get("enabled") is True]
+        fresh = sum(
+            1 for s in enabled
+            if s.get("monitoring_mode") == "fresh_alert" and s.get("alert_eligible") is True
+        )
+
         self.assertTrue(summary["ok"])
-        self.assertEqual(summary["enabled_count"], 116)
-        self.assertEqual(summary["readiness_supported_count"], 83)
-        self.assertEqual(summary["fresh_alert_count"], 83)
-        self.assertEqual(summary["evidence_library_count"], 4)
-        self.assertEqual(summary["candidate_count"], 8)
-        self.assertEqual(summary["remediation_count"], 0)
-        self.assertIn("83 fresh-alert eligible", summary["source_truth"])
+        self.assertEqual(summary["enabled_count"], len(enabled))
+        self.assertEqual(summary["readiness_supported_count"], fresh)
+        self.assertEqual(summary["fresh_alert_count"], fresh)
+        self.assertEqual(
+            summary["evidence_library_count"],
+            sum(1 for s in enabled if s.get("monitoring_mode") == "evidence_library"),
+        )
+        self.assertEqual(
+            summary["candidate_count"],
+            sum(1 for s in enabled if s.get("monitoring_mode") == "candidate"),
+        )
+        self.assertEqual(
+            summary["remediation_count"],
+            sum(1 for s in enabled if s.get("monitoring_mode") == "remediation"),
+        )
+        self.assertIn(f"{fresh} fresh-alert eligible", summary["source_truth"])
         self.assertIn("Not legal advice", summary["disclaimer"])
 
     def test_source_summary_uses_registry_and_run_history(self):

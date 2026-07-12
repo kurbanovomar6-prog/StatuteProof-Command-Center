@@ -5,11 +5,11 @@
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
     "total_enabled": 116,
-    "fresh_alert_eligible": 83,
+    "fresh_alert_eligible": 75,
     "evidence_library": 4,
     "candidate": 8,
-    "remediation": 0,
-    "source_level_monitor_ok": 83,
+    "remediation": 8,
+    "source_level_monitor_ok": 75,
     "with_proof_path": 86
   },
   "family_readiness": [
@@ -38,10 +38,10 @@
     {
       "family": "DFSA",
       "total_enabled": 16,
-      "fresh_alert_eligible": 12,
+      "fresh_alert_eligible": 11,
       "evidence_library": 1,
       "candidate": 0,
-      "remediation": 0,
+      "remediation": 1,
       "status": "good",
       "gap_to_25": 13,
       "notes": "DFSA has 12 fresh-alert sources. Static individual news/notice pages stay evidence-library and must not inflate fresh monitoring claims."
@@ -71,10 +71,10 @@
     {
       "family": "Ministry of Economy / DNFBP AML",
       "total_enabled": 9,
-      "fresh_alert_eligible": 7,
+      "fresh_alert_eligible": 0,
       "evidence_library": 1,
       "candidate": 0,
-      "remediation": 0,
+      "remediation": 7,
       "status": "good",
       "gap_to_25": 18,
       "notes": "7 MoE/DNFBP AML sources are fresh-alert eligible, plus one evidence-library homepage."
@@ -93,10 +93,10 @@
     {
       "family": "EOCN / sanctions / TFS",
       "total_enabled": 6,
-      "fresh_alert_eligible": 6,
+      "fresh_alert_eligible": 5,
       "evidence_library": 0,
       "candidate": 0,
-      "remediation": 0,
+      "remediation": 1,
       "status": "selected_source_pilot_ready",
       "gap_to_25": 19,
       "notes": "6 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN/UAEIEC and MoE-owned TFS support. This is not complete sanctions coverage."

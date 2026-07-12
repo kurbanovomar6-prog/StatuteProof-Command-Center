@@ -5,11 +5,11 @@
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: "2026-06-21",
   totalEnabled: 116,
-  freshAlertEligible: 83,
+  freshAlertEligible: 75,
   evidenceLibraryOnly: 4,
   candidate: 8,
-  remediation: 0,
-  sourceLevelMonitorOk: 83,
+  remediation: 8,
+  sourceLevelMonitorOk: 75,
   withProofPath: 86,
 } as const
 
@@ -39,13 +39,13 @@ export const FAMILY_QUALITY = [
   {
     family: "DFSA",
     totalEnabled: 16,
-    freshAlertEligible: 12,
+    freshAlertEligible: 11,
     evidenceLibrary: 1,
     candidate: 0,
-    remediation: 0,
+    remediation: 1,
     status: "good",
     gapTo25: 13,
-    notes: "DFSA has 12 fresh-alert sources. Static individual news/notice pages stay evidence-library and must not inflate fresh monitoring claims.",
+    notes: "11 DFSA sources fresh-alert eligible; the AML rulebook module is under adapter remediation (earlier captures were a navigation shell) and is not counted until re-baselined.",
   },
   {
     family: "DIFC",
@@ -72,13 +72,13 @@ export const FAMILY_QUALITY = [
   {
     family: "Ministry of Economy / DNFBP AML",
     totalEnabled: 9,
-    freshAlertEligible: 7,
+    freshAlertEligible: 0,
     evidenceLibrary: 1,
     candidate: 0,
-    remediation: 0,
+    remediation: 7,
     status: "good",
     gapTo25: 18,
-    notes: "7 MoE/DNFBP AML sources are fresh-alert eligible, plus one evidence-library homepage.",
+    notes: "All 7 MoE DNFBP sources are under source remediation — earlier captures were a site-maintenance page, which the quality gate now rejects; none is counted until re-baselined on real content.",
   },
   {
     family: "FTA",
@@ -94,13 +94,13 @@ export const FAMILY_QUALITY = [
   {
     family: "EOCN / sanctions / TFS",
     totalEnabled: 6,
-    freshAlertEligible: 6,
+    freshAlertEligible: 5,
     evidenceLibrary: 0,
     candidate: 0,
-    remediation: 0,
+    remediation: 1,
     status: "selected_source_pilot_ready",
     gapTo25: 19,
-    notes: "6 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN/UAEIEC and MoE-owned TFS support. This is not complete sanctions coverage.",
+    notes: "5 EOCN/TFS sources fresh-alert eligible; the MoE targeted-financial-sanctions page in this bucket is under source remediation pending re-baseline.",
   },
   {
     family: "UAE CMA",
