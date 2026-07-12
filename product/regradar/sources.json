@@ -860,7 +860,7 @@
   {
     "source_id": "AE-sca-circulars-rules-procedures",
     "name": "UAE CMA Circulars, Rules and Procedures",
-    "url": "https://www.uaecma.gov.ae/en/regulations/circulars-and-procedures.aspx",
+    "url": "https://www.uaecma.gov.ae/en/regulations/circulars-rules-and-procedures",
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
@@ -876,7 +876,7 @@
     "baseline_runs_required": 2,
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-sca-circulars-rules-procedures/intake-20260619T150551Z/proof.json",
     "normalized_hash": "7fb7a5a87d0e11980bc196a590d3d51b45b0a138cf4c38f2789c82f73568ab2c",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 TOMBSTONE WATCH (SCA→CMA transition, watch through 2027-01-01): verified from dev machine that this URL now returns 302 → /404.aspx?aspxerrorpath=… and lands on /en/home, so the pipeline is hashing the homepage/nav shell — UNCHANGED from this source is NOT evidence the circulars listing is unchanged. No replacement path discoverable without a browser (uaecma.gov.ae is a JS SPA). Kept enabled per transition-watch policy; do not delete. Follow-up (M): discover the new circulars path via Playwright, repoint, then rebaseline.",
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 REPOINTED (resolves the same-day TOMBSTONE WATCH): the old .aspx path 302s to /404.aspx and the pipeline was hashing the homepage nav shell. New canonical CMA circulars page discovered via browser and verified on the app's own fetch path (python-requests, 200, no redirect, circular titles present in raw server-rendered HTML — no JS needed). Old: /en/regulations/circulars-and-procedures.aspx  New: /en/regulations/circulars-rules-and-procedures. REBASELINE REQUIRED after deploy: python run.py rebaseline --source-id AE-sca-circulars-rules-procedures (first sweep otherwise fires one spurious CHANGED vs the stale homepage-shell baseline). SCA->CMA transition still worth watching through 2027-01-01 for further path moves.",
     "monitoring_mode": "fresh_alert",
     "alert_eligible": true,
     "fresh_signal_class": "HIGH_SIGNAL",

@@ -79,3 +79,23 @@ URLs, and production run logs (`data/source_runs/source_runs.jsonl`, through 202
 show zero 403s for any DFSA source — all runs `accessible`/successful extraction.
 **No browser adapter is needed for DFSA.** If a future dependency swaps the HTTP client
 (e.g. to a curl-based transport), DFSA sources will start failing — keep this in mind.
+
+## 2026-07-12 RESOLUTION — CMA circulars repointed (same day)
+
+The tombstone watch above is resolved. The correct canonical page was discovered
+via a real browser session on uaecma.gov.ae (Regulations → "Circulars, Rules and
+procedures of the CMA") and verified on the app's own fetch path:
+
+- New URL: `https://www.uaecma.gov.ae/en/regulations/circulars-rules-and-procedures`
+- python-requests with the app UA: HTTP 200, no redirect, 105 KB
+- The circulars content is SERVER-RENDERED (all circular titles present in raw
+  HTML — Passporting Rules, FinTech regulatory framework, unlicensed-entities
+  circular, VA guidelines) — no browser adapter needed for this source.
+
+`AE-sca-circulars-rules-procedures` is repointed in sources.json. REBASELINE
+REQUIRED after deploy (second entry, alongside the DFSA AML module):
+
+    python run.py rebaseline --source-id AE-sca-circulars-rules-procedures
+
+The SCA→CMA transition remains worth watching through 2027-01-01 for further
+path moves.
