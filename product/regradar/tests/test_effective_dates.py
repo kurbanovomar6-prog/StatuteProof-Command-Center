@@ -381,3 +381,18 @@ def test_horizon_days_are_clamped(tmp_path):
     assert over["horizon"]["days"] == 365
     under = upcoming_key_dates(as_of=date(2026, 7, 1), base_dir=tmp_path, horizon_days=0)
     assert under["horizon"]["days"] == 1
+
+
+def test_truncated_snapshots_are_skipped_not_misaligned(tmp_path, monkeypatch):
+    # Security rationale (effective_dates.py): if either normalized snapshot
+    # exceeded the read bound it was truncated at an independent point, so a
+    # re-diff could misalign and surface a date the sealed diff would not classify
+    # as changed. The record must be SKIPPED, not have a spurious date surfaced.
+    # (test-coverage audit 2026-07-13 — the comment had no backing test.)
+    import app.effective_dates as ed
+
+    monkeypatch.setattr(ed, "_MAX_SNAPSHOT_BYTES", 100)
+    oversize = "x" * 150 + " The revised rules are effective from 1 September 2026."
+    _cbuae(tmp_path, current_text=oversize, previous_text="y" * 150)
+    result = upcoming_key_dates(as_of=date(2026, 7, 1), base_dir=tmp_path)
+    assert result["count"] == 0

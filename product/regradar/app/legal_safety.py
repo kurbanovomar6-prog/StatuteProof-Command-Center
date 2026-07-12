@@ -109,17 +109,33 @@ _CONFUSABLE_FOLD = str.maketrans({
 
 
 def _fold(text: str) -> str:
-    """NFKC-normalize + fold common homoglyphs, then lowercase."""
+    """NFKC-normalize + fold homoglyphs + lowercase + collapse whitespace runs.
+
+    Whitespace collapse matters: rendered output (markdown→plaintext email,
+    PDF text extraction, line-wrapped Telegram) reflows text across newlines,
+    tabs and double spaces, so a banned two-word phrase like "guarantee
+    compliance" routinely appears as "guarantee\ncompliance". Collapsing every
+    whitespace run to a single space before the substring scan closes that
+    bypass (found by the test-coverage audit 2026-07-13). Punctuation is left
+    intact, so it never merges two words that were separated by a full stop.
+    """
     import unicodedata
-    return unicodedata.normalize("NFKC", str(text or "")).translate(_CONFUSABLE_FOLD).lower()
+    folded = unicodedata.normalize("NFKC", str(text or "")).translate(_CONFUSABLE_FOLD).lower()
+    return " ".join(folded.split())
 
 
 def _neutralize_disclaimers(text: str) -> str:
-    """Fold ``text`` and strip the product's fixed safe disclaimer fragments."""
+    """Fold ``text`` and strip the product's fixed safe disclaimer fragments.
+
+    Fragments are folded the SAME way (incl. whitespace collapse) so a
+    line-wrapped disclaimer in the rendered output is still recognised and
+    neutralised — otherwise a wrapped disclaimer's own denial could be missed.
+    """
     low = _fold(text)
     for fragment in _SAFE_DISCLAIMER_FRAGMENTS:
-        if fragment:
-            low = low.replace(fragment, " ")
+        folded_fragment = _fold(fragment)
+        if folded_fragment:
+            low = low.replace(folded_fragment, " ")
     return low
 
 

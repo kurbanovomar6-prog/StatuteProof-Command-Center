@@ -378,3 +378,39 @@ def test_product_disclaimers_never_self_trip_after_fold():
     from app.legal_safety import find_forbidden_claims as f, LEGAL_DISCLAIMER
     assert f(LEGAL_DISCLAIMER) == []
     assert f("For monitoring information only. Not legal advice and not a guarantee of compliance.") == []
+
+
+# ── whitespace-split bypass (test-coverage audit 2026-07-13) ──────────────────
+
+@pytest.mark.parametrize("wrapped", [
+    "We guarantee\ncompliance for every customer.",   # newline wrap
+    "We guarantee  compliance for every customer.",    # double space
+    "We guarantee\tcompliance for every customer.",    # tab
+    "Our platform will guarantee\n\ncompliance for you.",  # paragraph wrap
+])
+def test_forbidden_phrase_caught_across_whitespace_variants(wrapped):
+    # Rendered output (markdown->email, PDF extraction, wrapped Telegram) reflows
+    # text across newlines/tabs/double-spaces; the guard must still catch a banned
+    # two-word claim split by any whitespace run.
+    from app.legal_safety import find_forbidden_claims
+
+    assert "guarantee compliance" in find_forbidden_claims(wrapped), wrapped
+
+
+def test_whitespace_collapse_does_not_merge_across_punctuation():
+    # A full stop between the words is NOT a bypass fix false-positive: this is a
+    # genuine denial, not the banned adjacency.
+    from app.legal_safety import find_forbidden_claims
+
+    benign = "We do not guarantee. Compliance remains your responsibility."
+    assert find_forbidden_claims(benign) == []
+
+
+def test_line_wrapped_disclaimer_still_neutralized():
+    # A disclaimer that got line-wrapped in the rendered output must still be
+    # recognised and neutralised (its own denial must not self-trip the guard).
+    from app.evidence_assessment import LEGAL_DISCLAIMER
+    from app.legal_safety import contains_forbidden_claim
+
+    wrapped = LEGAL_DISCLAIMER.replace(" ", "\n", 3)
+    assert contains_forbidden_claim(wrapped) is False
