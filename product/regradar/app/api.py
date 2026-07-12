@@ -1088,6 +1088,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_monthly_assurance_report()
         elif path == "/api/reports/coverage-certificate":
             self._handle_coverage_certificate()
+        elif path == "/api/digest/assurance-preview":
+            self._handle_assurance_digest_preview()
         elif path == "/api/verify-spec":
             self._handle_verify_spec()
         elif path == "/api/evidence-room/shares":
@@ -3522,6 +3524,102 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             logger.error("coverage-certificate error: %s", type(exc).__name__)
             self._send_json({"status": "error", "message": "Internal server error."}, 500)
+
+    def _handle_assurance_digest_preview(self) -> None:
+        """GET /api/digest/assurance-preview — preview the negative-assurance digest.
+
+        A read-only, own-scope PREVIEW of the periodic monitoring-activity digest:
+        what was checked, which changes were captured and sealed (each linked to
+        its sealed record hash), which sources showed no change DETECTED, and where
+        coverage has gaps. It NEVER sends anything and does NOT touch the existing
+        alert delivery path — scheduling/sending is a later step.
+
+        Period: ?period_start=&period_end= (inclusive ISO dates) or ?days=N
+        (default 7 = weekly, clamped 1..90) ending today. ?source_ids= restricts
+        the reported sources; the caller's entitled scope is always enforced.
+        Mirrors the coverage-certificate handler discipline: auth -> rate limit ->
+        entitled scope -> build -> render.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if self._rate_limited(_EXPORT_LIMITER, "assurance_digest_preview"):
+            return
+        from app.assurance_digest import (
+            build_assurance_digest,
+            render_assurance_digest_email_text,
+            render_assurance_digest_markdown,
+        )
+        from datetime import timedelta
+
+        from app.coverage_certificate import enabled_source_ids
+
+        parsed = urlparse(self.path)
+        qs = parse_qs(parsed.query)
+        now = datetime.now(timezone.utc)
+        period_start = (qs.get("period_start") or [""])[0].strip()
+        period_end = (qs.get("period_end") or [""])[0].strip()
+        if not (period_start and period_end):
+            try:
+                days = int((qs.get("days") or ["7"])[0])
+            except (TypeError, ValueError):
+                days = 7
+            days = max(1, min(days, 90))
+            end_date = now.date()
+            period_end = end_date.isoformat()
+            period_start = (end_date - timedelta(days=days - 1)).isoformat()
+
+        source_ids_raw = (qs.get("source_ids") or [""])[0]
+        requested_ids = [s.strip() for s in source_ids_raw.split(",") if s.strip()] or None
+        # Resolve to an EXPLICIT scope list (never None). This is tenancy-critical:
+        # collapsing an empty entitled scope to None would let build_* re-open the
+        # global, cross-tenant default scope. An empty list here means "nothing in
+        # scope" and yields an honest empty digest instead.
+        if requested_ids is not None:
+            # Caller named sources: report only the subset they are entitled to.
+            scope_ids = self._entitle_source_ids(user, requested_ids)
+        else:
+            # Default own scope: the customer's monitored (enabled) sources, minus
+            # any custom source they do not own — so a fully-dark configured source
+            # still surfaces as a gap, and no other tenant's custom source leaks in.
+            default_ids = enabled_source_ids() or []
+            denied = self._denied_custom_source_ids(user)
+            scope_ids = [s for s in default_ids if s not in denied]
+
+        client_name = (qs.get("client_name") or [""])[0].strip()[:200]
+        fmt = ((qs.get("format") or ["all"])[0]).lower().strip()
+        if fmt not in ("all", "markdown", "email", "text", "json"):
+            fmt = "all"
+
+        # RBAC Stage-2 (Part A): record the authorized preview of sealed evidence
+        # content, mirroring the coverage-certificate export audit trail.
+        self._rbac_log_export(user, resource_type="assurance_digest")
+        try:
+            digest = build_assurance_digest(
+                period_start=period_start,
+                period_end=period_end,
+                source_ids=scope_ids,
+                client_name=client_name,
+                now=now,
+            )
+            payload: dict = {"ok": True, "digest": digest}
+            # Always run at least one full-body render so the render-time guard
+            # sweeps the assembled document even when only JSON is requested.
+            markdown = render_assurance_digest_markdown(digest)
+            if fmt in ("all", "markdown"):
+                payload["markdown"] = markdown
+            if fmt in ("all", "email", "text"):
+                payload["email_text"] = render_assurance_digest_email_text(digest)
+        except ValueError as exc:
+            # Includes ForbiddenClaimError (a ValueError) from the legal-safety guard.
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+            return
+        except Exception as exc:
+            logger.error("assurance-digest preview error: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+            return
+        self._send_json(payload)
 
     def _handle_canonical_evidence_review_action(self) -> None:
         """Append an approval/rejection/block decision for canonical evidence."""
