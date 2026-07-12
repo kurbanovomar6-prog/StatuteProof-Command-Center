@@ -179,3 +179,14 @@ def test_legacy_record_without_seal_validates_and_verifier_skips(tmp_path):
     assert result["verified"] is True
     assert _status_of(result, "record_hash_self_consistent") == STATUS_SKIPPED
     assert _status_of(result, "normalized_bytes_match") == STATUS_PASS
+
+
+def test_canonical_hash_rejects_non_finite_floats():
+    # NaN/Infinity serialize as non-RFC-8259 tokens no standard JSON tool accepts,
+    # so an externally-held record could not be re-hashed by an auditor. The seal
+    # must fail loudly at compute time, not emit an unverifiable digest.
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        with pytest.raises(ValueError):
+            canonical_record_hash({"score": bad})
+    # A finite float still hashes fine.
+    assert re.fullmatch(r"[0-9a-f]{64}", canonical_record_hash({"score": 0.5}))

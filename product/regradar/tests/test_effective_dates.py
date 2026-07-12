@@ -24,10 +24,70 @@ import pytest
 
 from app.effective_dates import (
     VIEW_FRAMING,
+    _read_sealed_diff_text,
     extract_key_dates_from_change,
     upcoming_key_dates,
 )
 from app.legal_safety import assert_no_forbidden_claims
+
+
+_CHUNK_REPORT_WITH_REPEAL = """# Source Diff
+
+## Removed Chunks
+
+```text
+The compliance filing deadline of 1 September 2026 is hereby repealed.
+```
+
+## Changed Chunks
+
+### Change 1
+
+Before:
+```text
+Firms must comply by 15 March 2027.
+```
+
+After:
+```text
+Firms must comply by 30 June 2028.
+```
+
+## Added Chunks
+
+```text
+A new obligation takes effect on 1 January 2029.
+```
+"""
+
+
+def test_sealed_markdown_report_excludes_removed_and_before_dates(tmp_path):
+    # A date that a change REMOVED (## Removed Chunks) or REPLACED (the "Before:"
+    # side) must never reach the date extractor — otherwise a repealed deadline
+    # would surface on the calendar as an upcoming obligation. Only the added /
+    # After side is returned. (verify-swarm 2026-07-12)
+    diff_path = tmp_path / "diff.md"
+    diff_path.write_text(_CHUNK_REPORT_WITH_REPEAL, encoding="utf-8")
+    text = _read_sealed_diff_text(tmp_path, "diff.md")
+    assert text is not None
+    assert "1 September 2026" not in text   # repealed (Removed Chunks)
+    assert "15 March 2027" not in text      # superseded (Before:)
+    assert "30 June 2028" in text           # new obligation (After:)
+    assert "1 January 2029" in text         # new obligation (Added Chunks)
+
+
+def test_unified_diff_still_extracts_added_only(tmp_path):
+    diff_path = tmp_path / "diff.txt"
+    diff_path.write_text(
+        "--- prev\n+++ curr\n@@ -1 +1 @@\n"
+        "-The old deadline was 15 March 2027.\n"
+        "+The new deadline is 30 June 2028.\n",
+        encoding="utf-8",
+    )
+    text = _read_sealed_diff_text(tmp_path, "diff.txt")
+    assert text is not None
+    assert "15 March 2027" not in text
+    assert "30 June 2028" in text
 
 
 # ── fixtures ───────────────────────────────────────────────────────────────────

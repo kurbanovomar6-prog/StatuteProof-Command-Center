@@ -461,6 +461,11 @@ def test_invalid_inputs_fail_soft(isolated_env):
     assert _seal(reviewed={}) is None
     assert _seal(reviewed={"alert_id": {"nested": True}}) is None
     assert _seal(reviewed={"": "empty key"}) is None
+    # A non-finite float would seal internally but be unverifiable by an external
+    # jq/Go re-hasher (NaN/Infinity are not valid JSON) — reject it. (A finite
+    # float is accepted — covered by the happy-path seal tests that seed a user.)
+    assert _seal(reviewed={"alert_id": "a", "score": float("nan")}) is None
+    assert _seal(reviewed={"alert_id": "a", "limit": float("inf")}) is None
     # checklist_ref shape is validated.
     assert _seal(checklist_ref={"unexpected": 1}) is None
     assert _seal(checklist_ref={"item_ids": ["twelve"]}) is None

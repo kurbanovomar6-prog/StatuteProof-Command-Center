@@ -256,8 +256,67 @@ def _read_sealed_diff_text(root: Path, rel_or_abs: Any) -> str | None:
     ]
     if added:
         return "\n".join(a for a in added if a.strip())
-    # Not a unified diff (e.g. the copied markdown report) — use the report text.
+    # Markdown chunk report (the production format): return ONLY the added/After
+    # side. Returning the whole report would feed REMOVED text (## Removed Chunks
+    # and the "Before:" side of ## Changed Chunks) to the date extractor, so a
+    # date that a change REPEALED — e.g. "the 1 September 2026 deadline is
+    # removed" — would surface on the calendar as an UPCOMING obligation. We only
+    # ever surface a date from text the change ADDED (verify-swarm 2026-07-12).
+    if _looks_like_chunk_report(raw):
+        return _added_text_from_chunk_report(raw)
     return raw
+
+
+def _looks_like_chunk_report(text: str) -> bool:
+    return "## Added Chunks" in text or "## Changed Chunks" in text or "## Removed Chunks" in text
+
+
+def _added_text_from_chunk_report(text: str) -> str:
+    """Extract ONLY the added/After fenced text from a render_diff_markdown report.
+
+    State machine over the report: fenced blocks under ``## Added Chunks`` and the
+    ``After:`` fence of each ``## Changed Chunks`` -> ``### Change N`` are kept;
+    ``## Removed Chunks`` and every ``Before:`` fence are skipped. Anything outside
+    a fence (headers, summary, limitations) is ignored. Mirrors the proven
+    add/remove partition in ``app.sealed_redline._parse_chunk_report`` without
+    taking a dependency on it.
+    """
+    section: str | None = None       # "added" | "removed" | "changed" | None
+    pending_op: str | None = None     # within "changed": Before->removed, After->added
+    in_fence = False
+    keep_fence = False
+    kept: list[str] = []
+    for raw_line in text.splitlines():
+        if raw_line.lstrip().startswith("```"):
+            if in_fence:
+                in_fence = False
+            else:
+                in_fence = True
+                if section == "added":
+                    keep_fence = True
+                elif section == "changed":
+                    keep_fence = pending_op == "added"
+                else:
+                    keep_fence = False
+            continue
+        if in_fence:
+            if keep_fence and raw_line.strip():
+                kept.append(raw_line)
+            continue
+        stripped = raw_line.strip()
+        if stripped == "## Added Chunks":
+            section, pending_op = "added", None
+        elif stripped == "## Removed Chunks":
+            section, pending_op = "removed", None
+        elif stripped == "## Changed Chunks":
+            section, pending_op = "changed", None
+        elif stripped.startswith("## "):
+            section, pending_op = None, None
+        elif section == "changed" and stripped == "Before:":
+            pending_op = "removed"
+        elif section == "changed" and stripped == "After:":
+            pending_op = "added"
+    return "\n".join(kept)
 
 
 def _changed_text_for_record(record: dict[str, Any], root: Path) -> str:

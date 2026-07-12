@@ -51,6 +51,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import math
 import os
 import sqlite3
 from datetime import datetime, timezone
@@ -216,6 +217,12 @@ def _validated_reviewed_copy(reviewed: Any) -> dict[str, Any] | None:
         if isinstance(value, str):
             if len(value) > _MAX_REVIEWED_STR_LEN:
                 return None
+        elif isinstance(value, float) and not math.isfinite(value):
+            # NaN / Infinity serialize as non-RFC-8259 tokens that a customer's
+            # external verifier (jq, a Go/JS re-hasher) cannot reproduce — the
+            # seal would pass inside StatuteProof but fail independent
+            # verification, silently defeating the moat. Reject, per REJECT-doctrine.
+            return None
         elif not (value is None or isinstance(value, (bool, int, float))):
             return None
         copy[key] = value

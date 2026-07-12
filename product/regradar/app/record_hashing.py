@@ -46,7 +46,11 @@ def canonical_record_hash(content: dict[str, Any]) -> str:
     str
         The 64-character lowercase hex SHA-256 digest (no ``sha256:`` prefix).
     """
+    # allow_nan=False: NaN/Infinity would serialize as non-RFC-8259 tokens that no
+    # standard JSON parser (jq, Go, JS) accepts, so an auditor could not reproduce
+    # the digest — silently breaking the "reproducible with standard tools" promise
+    # above. Fail loudly at seal time instead of sealing an unverifiable record.
     payload = json.dumps(
-        content, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        content, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
     ).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
