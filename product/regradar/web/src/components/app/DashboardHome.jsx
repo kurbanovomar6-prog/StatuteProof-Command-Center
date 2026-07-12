@@ -5,6 +5,7 @@ import { telegramPair, sources as sourcesApi } from '../../api'
 import PlanBanner from './PlanBanner'
 import { getWorkspaceProfile, profileLabel } from '../../data/workspaceProfile'
 import DeadlinesPanel from './DeadlinesPanel'
+import FirstRunBackfillPanel from './FirstRunBackfillPanel'
 import PressureScore from './PressureScore'
 import StatusBadge from './ui/StatusBadge'
 import TimeStamp from './ui/TimeStamp'
@@ -575,6 +576,10 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               </p>
             </div>
           </div>
+
+          {/* First-run backfill: shows the latest already-sealed changes only
+              while the alerts preview is empty; renders nothing otherwise. */}
+          <FirstRunBackfillPanel />
 
           <div className="grid gap-5 lg:grid-cols-2">
             <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
