@@ -300,7 +300,10 @@ export const SOURCE_PACKS = [
           "AE-eocn-news-en",
           "AE-uaeiec-en-us-laws-regulations-listing-00a71863",
           "AE-eocn-tfs",
-          "AE-uaeiec-news-listing-next",
+          // 2026-07-13: AE-uaeiec-news-listing-next removed — confirmed
+          // byte-identical duplicate of AE-eocn-news-en (same page on the
+          // legacy uaeiec.gov.ae domain); demoted to dedupe candidate in
+          // sources.json. Coverage of the page continues via AE-eocn-news-en.
         ],
       },
       {

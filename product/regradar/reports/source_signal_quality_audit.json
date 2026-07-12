@@ -5,9 +5,9 @@
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
     "total_enabled": 116,
-    "fresh_alert_eligible": 75,
+    "fresh_alert_eligible": 74,
     "evidence_library": 4,
-    "candidate": 8,
+    "candidate": 9,
     "remediation": 8,
     "source_level_monitor_ok": 75,
     "with_proof_path": 86
@@ -93,13 +93,13 @@
     {
       "family": "EOCN / sanctions / TFS",
       "total_enabled": 6,
-      "fresh_alert_eligible": 5,
+      "fresh_alert_eligible": 4,
       "evidence_library": 0,
-      "candidate": 0,
+      "candidate": 1,
       "remediation": 1,
       "status": "selected_source_pilot_ready",
       "gap_to_25": 19,
-      "notes": "6 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN/UAEIEC and MoE-owned TFS support. This is not complete sanctions coverage."
+      "notes": "4 selected EOCN/TFS-related sources are fresh-alert eligible across direct EOCN and MoE-owned TFS support. The duplicate UAEIEC news listing (same page as the EOCN news listing on a second domain) is held as a dedupe candidate, and one MoE TFS page remains in remediation. This is not complete sanctions coverage."
     },
     {
       "family": "SCA",

@@ -15,6 +15,9 @@ export const SOURCE_TRUTH = {
   // 2026-07-12 OPS audit: 8 sources (7 MOET on a maintenance-stub baseline +
   // the DFSA AML rulebook module on a JS-shell baseline) moved to remediation
   // until re-baselined on real content — honest count drops 83 → 75.
-  readinessSupported: 75,
-  candidate: 8,
+  // 2026-07-13 OPS source-rot audit (MEDIUM findings): the UAEIEC news listing
+  // was confirmed byte-identical to the EOCN news listing (same page, second
+  // domain) and demoted to a dedupe candidate — 75 → 74, candidate 8 → 9.
+  readinessSupported: 74,
+  candidate: 9,
 }

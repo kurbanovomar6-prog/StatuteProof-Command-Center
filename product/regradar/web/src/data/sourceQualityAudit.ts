@@ -5,9 +5,9 @@
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: "2026-06-21",
   totalEnabled: 116,
-  freshAlertEligible: 75,
+  freshAlertEligible: 74,
   evidenceLibraryOnly: 4,
-  candidate: 8,
+  candidate: 9,
   remediation: 8,
   sourceLevelMonitorOk: 75,
   withProofPath: 86,
@@ -94,13 +94,13 @@ export const FAMILY_QUALITY = [
   {
     family: "EOCN / sanctions / TFS",
     totalEnabled: 6,
-    freshAlertEligible: 5,
+    freshAlertEligible: 4,
     evidenceLibrary: 0,
-    candidate: 0,
+    candidate: 1,
     remediation: 1,
     status: "selected_source_pilot_ready",
     gapTo25: 19,
-    notes: "5 EOCN/TFS sources fresh-alert eligible; the MoE targeted-financial-sanctions page in this bucket is under source remediation pending re-baseline.",
+    notes: "4 EOCN/TFS sources fresh-alert eligible; the duplicate UAEIEC news listing is held as a dedupe candidate (same page as the EOCN news listing on a second domain), and the MoE targeted-financial-sanctions page is under source remediation pending re-baseline.",
   },
   {
     family: "UAE CMA",

@@ -1956,7 +1956,7 @@
     "last_checked_at": "2026-06-19T15:06:49Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: 1,024-byte normalized run captures verified as genuine page size, not a truncation cap (live visible text ~1,923B; the 63.6KB HTML is mostly anti-bot JS; raw.txt is a non-round 1,184B and text ends at natural footer strings). expected_min_length 1000 leaves only ~24B headroom over current captures — watch for length-gate flapping. Duplicate AE-uaeiec-news-listing-next demoted to candidate (same page on a second domain); this source is the canonical EOCN news monitor."
   },
   {
     "name": "UAE CMA Regulations Listing",
@@ -2905,7 +2905,7 @@
     "source_id": "AE-cbuae-risk-management-rulebook",
     "adapter_family": "cbuae_document_listing",
     "adapter_name": "cbuae_document_listing",
-    "expected_min_length": 500,
+    "expected_min_length": 1300,
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-risk-management-rulebook/intake-20260619T145716Z/proof.json",
     "normalized_hash": "09d5657181d9230dccd08ab00dd7385d4dce6ae82ea573b7705f3b73cf5c9346",
     "adapter_config": {
@@ -2930,7 +2930,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: live check confirmed this page is a genuine server-rendered thin doclist index, not a JS shell (plain fetch returns 128,148B HTML; <main> holds 45 rulebook/PDF links; visible text 1,421B matches the stored 1,431B capture; no JS-app markers). No playwright needed. expected_min_length raised 500 -> 1300 (just under the live doclist size) so a collapse to nav-stub chrome fails the length gate instead of passing. The other 19 plain-fetch CBUAE rulebook sources are intentionally unchanged."
   },
   {
     "name": "Stored Value Facilities",
@@ -3776,7 +3776,7 @@
     "baseline_runs_required": 2,
     "proof_path": "data/source_snapshots/2026-06-21/AE/AE-difc-legal-database/intake-20260621T214518Z/proof.json",
     "normalized_hash": "c86855bcc6a246e4977e24fadd5506c4477ba270a16ed2f65825b863646d05d2",
-    "notes": "Selected official DIFC legal database listing source. Activated only after proof-backed repeat baseline and mass-monitor MONITOR_OK. Not complete DIFC legal database coverage.",
+    "notes": "Selected official DIFC legal database listing source. Activated only after proof-backed repeat baseline and mass-monitor MONITOR_OK. Not complete DIFC legal database coverage. 2026-07-13 OPS source-rot audit: fetch_method set to playwright — wait_for_selector was configured but fetch_method was null, so the browser wait never applied (dead config). Live checks earlier today hit intermittent HTTP 429; recommended_check_frequency stays daily (already the least aggressive cadence in use). Re-baseline required (fetch adapter changed).",
     "monitoring_mode": "fresh_alert",
     "alert_eligible": true,
     "fresh_signal_class": "FRESH_ALERT",
@@ -3796,7 +3796,8 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "1",
-    "wait_for_selector": "main, a[href$=\".pdf\"]"
+    "wait_for_selector": "main, a[href$=\".pdf\"]",
+    "fetch_method": "playwright"
   },
   {
     "name": "DIFC Commissioner of Data Protection",
@@ -9436,13 +9437,13 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "1",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
-    "fresh_signal_class": "HIGH_SIGNAL",
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: demoted fresh_alert -> candidate as a duplicate of AE-eocn-news-en. Live check: uaeiec.gov.ae/en-us/news serves the byte-identical EOCN news page (63,638B vs 63,633B; only per-request anti-bot/CSRF tokens and the domain inside a ReadSpeaker URL differ; same title, same #NewsContainer). Canonical monitoring stays on AE-eocn-news-en (eocn.gov.ae). The 1,024-byte captures are NOT a truncation cap: live visible text is ~1.9KB, raw.txt is a non-round 1,184B, and normalized text ends at natural footer strings. Record retained for evidence continuity; do not delete.",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "fresh_signal_class": "PENDING_VALIDATION",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "EOCN/UAEIEC official news listing; checked daily for sanctions, TFS, strategic goods, AML/CFT, and control-list update announcements.",
-    "fresh_signal_notes": "Fresh-alert eligible: official/public, daily-checkable, proof-backed, baseline-complete, MONITOR_OK, and not a static detail page. Monitoring intelligence only. Not legal advice.",
+    "fresh_signal_notes": "Candidate/pending validation: duplicate of AE-eocn-news-en; not counted as customer fresh-alert monitoring.",
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "sanctions_tfs_news_updates",
     "expected_update_pattern": "EOCN/UAEIEC official news listing; checked daily for sanctions, TFS, strategic goods, AML/CFT, and control-list update announcements.",
@@ -9688,7 +9689,7 @@
   },
   {
     "name": "UAE Ministry of Finance Economic Substance Regulations",
-    "url": "https://mof.gov.ae/en/public-finance/international-relations/economic-substance-regulations/",
+    "url": "https://mof.gov.ae/en/public-finance/international-relations/economic-substance-regulations-esr/",
     "jurisdiction": "AE",
     "category": "regulatory",
     "enabled": true,
@@ -9717,7 +9718,7 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "2",
-    "notes": "Activated after strong no-save pass, two proof-backed baseline runs, stable normalized hash, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice.",
+    "notes": "Activated after strong no-save pass, two proof-backed baseline runs, stable normalized hash, mass-monitor dry-run MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: URL repointed to canonical /economic-substance-regulations-esr/ — old URL 301-redirects there (X-Redirect-By: MOF Legacy Redirects), and the prior baseline captured ~4.9KB of nav chrome vs a 353,604B live page. Live check confirmed exactly one id=\"main-content\" element and 14 PDF links on the canonical page, so the existing #main-content content_selector stays. Re-baseline required before the next monitored run (URL changed).",
     "adapter_config": {
       "container_selector": "#main-content",
       "content_selector": "#main-content",
