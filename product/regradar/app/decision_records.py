@@ -73,6 +73,15 @@ MAX_AMENDMENT_REASON_LEN = 2000   # the user's correction reason, their words
 MAX_DISPLAY_NAME_LEN = 120        # a person's name, bounded
 MAX_LIST_LIMIT = 200              # list_decisions page bound
 MAX_ID_LEN = 200                  # decision_id / alert_id / evidence_record_id
+MAX_CHAIN_EXPORT = 5000           # read_org_decision_chain export ceiling (binder use)
+
+# ── verify_decision_head status vocabulary (mirrors the trail head anchor) ────────
+HEAD_MATCH = "match"              # computed head == persisted head file
+HEAD_DIVERGED = "diverged"        # heads disagree — investigate a rewritten head
+HEAD_NO_ANCHOR = "no_anchor"      # rows exist but no head file to compare (advisory)
+HEAD_EMPTY = "empty"             # no rows and no head file — nothing to compare
+HEAD_INVALID_ORG = "invalid_org_id"
+HEAD_STORAGE_ERROR = "storage_error"
 
 # ``reviewed`` is a verbatim copy of the alert's proof block ("what they saw").
 # Stage 1 takes it as a caller-supplied dict; these bounds validate the SHAPE
@@ -262,6 +271,28 @@ def _parse_envelope(record_json: Any) -> dict[str, Any] | None:
     except (TypeError, ValueError):
         return None
     return parsed if isinstance(parsed, dict) else None
+
+
+def _sealed_alert_id(envelope: dict[str, Any]) -> str:
+    """Return ``content.reviewed.alert_id`` from a parsed envelope, or ``""``.
+
+    The SEALED source of truth for which alert a decision belongs to. The
+    ``alert_id`` COLUMN is only an un-sealed lookup convenience — an attacker with
+    DB write could rewrite that column to hide a sealed decision from its own
+    alert view, or to inject it into a foreign alert's view, WITHOUT breaking the
+    self-seal (the column is not covered by ``canonical_record_hash``). So every
+    alert-scoped read derives the alert_id from HERE (inside ``content``, which
+    IS sealed) instead of the column. A malformed/absent block yields ``""`` —
+    attributed to no alert, never silently mis-attributed.
+    """
+    content = envelope.get("content")
+    if not isinstance(content, dict):
+        return ""
+    reviewed = content.get("reviewed")
+    if not isinstance(reviewed, dict):
+        return ""
+    value = reviewed.get("alert_id")
+    return value if isinstance(value, str) else ""
 
 
 def _record_access_log(user_id: int, decision_id: str, result: str = "allow") -> None:
@@ -595,29 +626,83 @@ def list_decisions(
         conn = _connect()
         try:
             if alert_id is not None:
-                rows = conn.execute(
+                # SECURITY: match on the SEALED ``content.reviewed.alert_id``, never
+                # the indexed ``alert_id`` COLUMN. A column-only edit (attacker with
+                # DB write) must not be able to hide a sealed decision from its own
+                # alert view — ``WHERE alert_id = ?`` cannot find a row whose column
+                # was rewritten away from the target — nor inject one into a foreign
+                # alert's view. So we scan the org's chain and filter on the sealed
+                # value. Streaming the cursor (never fetchall) keeps memory O(1) and
+                # we stop after ``capped`` matches; a full-chain scan mirrors
+                # ``verify_decision_chain`` and is bounded by the org's decision count.
+                cursor = conn.execute(
                     "SELECT record_json FROM decision_records"
-                    " WHERE org_id = ? AND alert_id = ?"
-                    " ORDER BY chain_seq ASC LIMIT ?",
-                    (oid, alert_id, capped),
-                ).fetchall()
-            else:
-                rows = conn.execute(
-                    "SELECT record_json FROM decision_records"
-                    " WHERE org_id = ?"
-                    " ORDER BY chain_seq ASC LIMIT ?",
-                    (oid, capped),
-                ).fetchall()
+                    " WHERE org_id = ? ORDER BY chain_seq ASC",
+                    (oid,),
+                )
+                matched: list[dict[str, Any]] = []
+                for row in cursor:
+                    parsed = _parse_envelope(row["record_json"])
+                    if parsed is None or _sealed_alert_id(parsed) != alert_id:
+                        continue
+                    matched.append(parsed)
+                    if len(matched) >= capped:
+                        break
+                return matched
+            cursor = conn.execute(
+                "SELECT record_json FROM decision_records"
+                " WHERE org_id = ? ORDER BY chain_seq ASC LIMIT ?",
+                (oid, capped),
+            )
+            records: list[dict[str, Any]] = []
+            for row in cursor:
+                parsed = _parse_envelope(row["record_json"])
+                if parsed is not None:
+                    records.append(parsed)
+            return records
         finally:
             conn.close()
-        records = []
-        for row in rows:
-            parsed = _parse_envelope(row["record_json"])
-            if parsed is not None:
-                records.append(parsed)
-        return records
     except Exception as exc:  # noqa: BLE001 — read must never raise across the boundary
         logger.warning("list_decisions failed: %s", type(exc).__name__)
+        return []
+
+
+def read_org_decision_chain(org_id: int, limit: int = MAX_CHAIN_EXPORT) -> list[dict[str, Any]]:
+    """Return the org's FULL sealed decision chain in ``chain_seq`` order (bounded).
+
+    Like :func:`list_decisions` but with an export-oriented ceiling
+    (``MAX_CHAIN_EXPORT`` vs the tenant list's ``MAX_LIST_LIMIT``) and no alert
+    filter — used by the regulator binder to embed a contiguous, independently
+    verifiable chain segment. Each element is the full sealed envelope. Fail-soft:
+    bad input or any error yields ``[]``.
+    """
+    try:
+        oid = int(org_id)
+    except (TypeError, ValueError):
+        return []
+    try:
+        capped = max(1, min(int(limit), MAX_CHAIN_EXPORT))
+    except (TypeError, ValueError):
+        capped = MAX_CHAIN_EXPORT
+    try:
+        ensure_decision_table()
+        conn = _connect()
+        try:
+            cursor = conn.execute(
+                "SELECT record_json FROM decision_records"
+                " WHERE org_id = ? ORDER BY chain_seq ASC LIMIT ?",
+                (oid, capped),
+            )
+            records: list[dict[str, Any]] = []
+            for row in cursor:
+                parsed = _parse_envelope(row["record_json"])
+                if parsed is not None:
+                    records.append(parsed)
+            return records
+        finally:
+            conn.close()
+    except Exception as exc:  # noqa: BLE001 — read must never raise across the boundary
+        logger.warning("read_org_decision_chain failed: %s", type(exc).__name__)
         return []
 
 
@@ -746,3 +831,107 @@ def _check_sealed_row(
     if content.get("prev_decision_hash") != prev_hash:
         return "prev_link_mismatch", ""
     return None, stored
+
+
+# ── head divergence (in-table chain vs the separately-persisted head file) ───────
+
+def verify_decision_head(org_id: int) -> dict[str, Any]:
+    """Compare the org's COMPUTED chain head to its persisted head file.
+
+    :func:`verify_decision_chain` recomputes every seal and the prev linkage, but
+    it reads ONLY the ``decision_records`` table — so an attacker with DB write
+    who drops the append-only triggers, deletes rows, and re-seals+relinks the
+    survivors produces a chain that STILL verifies clean (the in-table chain
+    cannot witness its own history being rewritten). This check raises the bar one
+    notch, exactly as ``tools/verify_evidence_trail._annotate_head_anchor`` does
+    for the capture trail: it compares the live head — the MAX ``chain_seq`` row's
+    ``decision_hash`` — against the separately-persisted
+    ``decision_chain_head.json`` (:func:`read_decision_head`) and REPORTS any
+    divergence.
+
+    Returns ``{"status": ..., "computed_head": str | None, "anchored_head":
+    str | None, "reason": str | None}`` where ``status`` is one of:
+
+    * ``match``      — the computed head equals the persisted head file.
+    * ``diverged``   — they disagree (or the file names a head with no rows) —
+      investigate a possible re-seal/relink with a rewritten head.
+    * ``no_anchor``  — rows exist but no head file is present to compare (advisory).
+    * ``empty``      — no rows and no head file — nothing to compare.
+    * ``invalid_org_id`` / ``storage_error`` — bad input / read failure.
+
+    ADVISORY, like the trail anchor, and it NEVER mutates or repairs anything.
+    Unlike the capture trail there is no legitimate head rewrite for an append-only
+    decision chain (no compaction/relink is ever performed by the app), so a
+    ``diverged`` here always warrants investigation. Fail-soft: never raises.
+    """
+    result: dict[str, Any] = {
+        "status": HEAD_NO_ANCHOR,
+        "computed_head": None,
+        "anchored_head": None,
+        "reason": None,
+    }
+    try:
+        oid = int(org_id)
+    except (TypeError, ValueError):
+        result["status"] = HEAD_INVALID_ORG
+        result["reason"] = "invalid_org_id"
+        return result
+
+    computed_head: str | None = None
+    try:
+        ensure_decision_table()
+        conn = _connect()
+        try:
+            row = conn.execute(
+                "SELECT decision_hash FROM decision_records"
+                " WHERE org_id = ? ORDER BY chain_seq DESC LIMIT 1",
+                (oid,),
+            ).fetchone()
+        finally:
+            conn.close()
+        if row is not None:
+            computed_head = str(row["decision_hash"])
+    except Exception as exc:  # noqa: BLE001 — diagnostic, never raises
+        logger.warning("verify_decision_head failed: %s", type(exc).__name__)
+        result["status"] = HEAD_STORAGE_ERROR
+        result["reason"] = "storage_error"
+        return result
+
+    anchor = read_decision_head(oid)
+    anchored_head = (
+        str(anchor.get("head_decision_hash") or "") if isinstance(anchor, dict) else None
+    )
+    result["computed_head"] = computed_head
+    result["anchored_head"] = anchored_head
+
+    if anchor is None:
+        if computed_head is None:
+            result["status"] = HEAD_EMPTY
+            result["reason"] = "no sealed decisions and no head file — nothing to compare"
+        else:
+            result["status"] = HEAD_NO_ANCHOR
+            result["reason"] = (
+                "no head file present to compare against the computed chain head"
+            )
+        return result
+
+    if computed_head is None:
+        # The head file names a head, but no rows exist for the org — the strongest
+        # divergence signal (records look deleted).
+        result["status"] = HEAD_DIVERGED
+        result["reason"] = (
+            "the head file references a chain head but no sealed decisions exist "
+            "for this org — investigate a possible deletion"
+        )
+        return result
+
+    if anchored_head == computed_head:
+        result["status"] = HEAD_MATCH
+        return result
+
+    result["status"] = HEAD_DIVERGED
+    result["reason"] = (
+        "the computed chain head does not match the persisted head file — "
+        "investigate a possible re-seal/relink with a rewritten head"
+    )
+    return result

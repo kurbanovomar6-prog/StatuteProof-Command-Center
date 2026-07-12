@@ -44,6 +44,10 @@ from app.access_log import read_access_log
 from app.auth import create_user
 from app.decision_records import (
     FRAMING,
+    HEAD_DIVERGED,
+    HEAD_EMPTY,
+    HEAD_MATCH,
+    HEAD_NO_ANCHOR,
     KINDS,
     MAX_AMENDMENT_REASON_LEN,
     MAX_DISPLAY_NAME_LEN,
@@ -51,8 +55,10 @@ from app.decision_records import (
     get_decision,
     list_decisions,
     read_decision_head,
+    read_org_decision_chain,
     seal_decision,
     verify_decision_chain,
+    verify_decision_head,
 )
 from app.legal_safety import assert_no_forbidden_claims
 from app.materiality import SHORT_DISCLAIMER
@@ -530,3 +536,120 @@ def test_head_write_failure_never_blocks_the_seal(isolated_env, monkeypatch):
     sealed = _seal()
     assert sealed is not None
     assert get_decision(ORG_A, sealed["decision_id"]) is not None
+
+
+# ── 11. Stage-3 A.1: head-file divergence (in-table chain vs persisted head) ─────
+
+def test_verify_decision_head_matches_after_seals(isolated_env):
+    _seal(statement="First review decision.")
+    second = _seal(statement="Second review decision.")
+
+    report = verify_decision_head(ORG_A)
+    assert report["status"] == HEAD_MATCH
+    assert report["computed_head"] == second["record_hash"]
+    assert report["anchored_head"] == second["record_hash"]
+
+
+def test_verify_decision_head_detects_rewritten_head(isolated_env):
+    """A full re-seal+relink with a rewritten head file must be REPORTED.
+
+    verify_decision_chain alone cannot see this (a relinked in-table chain still
+    recomputes). Comparing the computed head against the separately-persisted head
+    file surfaces the divergence — the Stage-3 hardening for the MED finding.
+    """
+    _seal(statement="First review decision.")
+    _seal(statement="Second review decision.")
+    assert verify_decision_head(ORG_A)["status"] == HEAD_MATCH
+
+    # Rewrite the persisted head file to a head the table no longer contains.
+    head_path = isolated_env / "data" / "decision_chain" / str(ORG_A) / "decision_chain_head.json"
+    payload = json.loads(head_path.read_text(encoding="utf-8"))
+    payload["head_decision_hash"] = "sha256:" + "e" * 64
+    head_path.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+
+    report = verify_decision_head(ORG_A)
+    assert report["status"] == HEAD_DIVERGED
+    assert report["anchored_head"] == "sha256:" + "e" * 64
+    assert report["computed_head"] is not None
+    assert report["anchored_head"] != report["computed_head"]
+    assert "rewritten head" in report["reason"]
+
+
+def test_verify_decision_head_no_anchor_and_empty(isolated_env, monkeypatch):
+    # Empty org: no rows, no head file → nothing to compare.
+    assert verify_decision_head(ORG_A)["status"] == HEAD_EMPTY
+
+    # Rows exist but the head file never landed (best-effort write suppressed) →
+    # advisory no_anchor, never a false divergence.
+    monkeypatch.setattr(decision_records, "_write_decision_head", lambda *a, **k: None)
+    sealed = _seal()
+    assert sealed is not None
+    report = verify_decision_head(ORG_A)
+    assert report["status"] == HEAD_NO_ANCHOR
+    assert report["computed_head"] == sealed["record_hash"]
+    assert report["anchored_head"] is None
+
+
+def test_verify_decision_head_reports_deleted_rows(isolated_env):
+    """Head file names a head but the table is empty → strongest divergence."""
+    _seal(statement="First review decision.")
+    conn = _raw_conn()
+    try:
+        conn.execute("DROP TRIGGER trg_decision_records_no_delete")
+        conn.execute("DELETE FROM decision_records WHERE org_id = 1")
+        conn.commit()
+    finally:
+        conn.close()
+    report = verify_decision_head(ORG_A)
+    assert report["status"] == HEAD_DIVERGED
+    assert report["computed_head"] is None
+    assert report["anchored_head"] is not None
+    assert "deletion" in report["reason"]
+
+
+def test_verify_decision_head_fail_soft_on_bad_org(isolated_env):
+    assert verify_decision_head("nope")["status"] == "invalid_org_id"
+
+
+# ── 12. Stage-3 A.2: alert filter derives from SEALED content, not the column ─────
+
+def test_list_by_alert_uses_sealed_content_not_column(isolated_env):
+    """A column-only edit cannot hide a sealed decision from its own alert view."""
+    sealed = _seal()  # sealed reviewed.alert_id == "draft-cbuae001"
+    true_alert = sealed["content"]["reviewed"]["alert_id"]
+    assert list_decisions(ORG_A, alert_id=true_alert) != []
+
+    # Attacker with full DB access rewrites ONLY the un-sealed alert_id COLUMN.
+    conn = _raw_conn()
+    try:
+        conn.execute("DROP TRIGGER trg_decision_records_no_update")
+        conn.execute(
+            "UPDATE decision_records SET alert_id = ? WHERE org_id = 1",
+            ("forged-hidden-alert",),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    # The decision STILL appears under its true (sealed) alert_id …
+    still_visible = list_decisions(ORG_A, alert_id=true_alert)
+    assert [r["decision_id"] for r in still_visible] == [sealed["decision_id"]]
+    # … and the forged column value can NOT inject it into another alert's view.
+    assert list_decisions(ORG_A, alert_id="forged-hidden-alert") == []
+    # The self-seal is intact — only the un-sealed column was touched.
+    assert verify_decision_chain(ORG_A)["ok"] is True
+
+
+def test_read_org_decision_chain_returns_full_chain_in_order(isolated_env):
+    first = _seal(statement="First.")
+    second = _seal(statement="Second.")
+    third = _seal(statement="Third.")
+    chain = read_org_decision_chain(ORG_A)
+    assert [r["decision_id"] for r in chain] == [
+        first["decision_id"], second["decision_id"], third["decision_id"]
+    ]
+    # Org-scoped like every other read.
+    _seal(org=ORG_B, user=USER_B, statement="Org B note.")
+    assert len(read_org_decision_chain(ORG_A)) == 3
+    assert len(read_org_decision_chain(ORG_B)) == 1
+    assert read_org_decision_chain("nope") == []

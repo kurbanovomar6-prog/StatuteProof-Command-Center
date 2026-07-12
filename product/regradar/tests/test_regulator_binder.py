@@ -315,6 +315,140 @@ def test_cover_md_has_verbatim_disclaimer_and_clears_guard(tmp_path):
     assert_no_forbidden_claims(contents["verify.py"].decode("utf-8"), label="verify")
 
 
+# ── Stage-3: sealed reviewer-decision chain segment (additive, org-scoped) ───────
+
+def _seal_decision(tmp_path, monkeypatch, *, org_id, decided_at, kind="reviewed",
+                   statement="Reviewed the change against our licence scope.",
+                   source_id="cbuae-test", alert_id="alert-1"):
+    """Seal one decision into an isolated decision DB pointed at ``tmp_path``."""
+    import app.db as app_db
+    import app.decision_records as dr
+
+    monkeypatch.setattr(app_db, "DB_PATH", str(tmp_path / "decisions.db"))
+    monkeypatch.setattr(dr, "_BASE_DIR", tmp_path)
+    monkeypatch.setattr(dr, "_decided_at_utc", lambda: decided_at)
+    reviewed = {
+        "evidence_record_id": "rec_cbuae_1",
+        "record_hash": "sha256:" + "a" * 64,
+        "source_id": source_id,
+        "source_name": "CBUAE Test Source",
+        "official_url": "https://example.gov/cbuae-test",
+        "alert_id": alert_id,
+    }
+    return dr.seal_decision(101, org_id, display_name="A. Rahman", reviewed=reviewed,
+                            kind=kind, statement=statement)
+
+
+def test_binder_omits_decisions_without_org_id(tmp_path):
+    """No org_id → no decision section (dormant/additive, no regression)."""
+    _make_first_seen(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_regulator_binder(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    assert result["status"] == "ok"
+    assert result["decision_count"] == 0
+    manifest = json.loads(_read_zip(result["binder_path"])["manifest.json"])
+    assert "decisions" not in manifest
+    assert not any(n.startswith("decisions/") for n in _read_zip(result["binder_path"]))
+
+
+def test_binder_embeds_and_verifies_decision_chain(tmp_path, monkeypatch):
+    _make_first_seen(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    assert _seal_decision(tmp_path, monkeypatch, org_id=42, decided_at="2026-03-20T09:00:00.000000Z")
+    assert _seal_decision(tmp_path, monkeypatch, org_id=42, decided_at="2026-03-21T09:00:00.000000Z",
+                          kind="acknowledged", statement="Acknowledged; forwarded to MLRO.")
+
+    result = build_regulator_binder(["cbuae-test"], "2026-03-01", "2026-03-31",
+                                    base_dir=tmp_path, org_id=42)
+    assert result["status"] == "ok", result
+    assert result["decision_count"] == 2
+
+    contents = _read_zip(result["binder_path"])
+    manifest = json.loads(contents["manifest.json"])
+    assert "decisions" in manifest
+    drecords = manifest["decisions"]["records"]
+    assert len(drecords) == 2
+    assert manifest["decisions"]["segment_anchor_prev_hash"] == ""  # genesis
+    for row in drecords:
+        assert row["decision_file"] in contents
+
+    # The embedded verify.py verifies the decision chain (seal + prev linkage).
+    extracted = _extract(result["binder_path"], tmp_path / "clean")
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "RESULT: PASS" in proc.stdout
+    assert "[decision seal]" in proc.stdout
+    assert "[decision link]" in proc.stdout
+    assert "decision_chain_hash=" in proc.stdout
+    assert "FAIL" not in proc.stdout
+
+
+def test_binder_decision_chain_hash_is_reproducible(tmp_path, monkeypatch):
+    _make_first_seen(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    _seal_decision(tmp_path, monkeypatch, org_id=42, decided_at="2026-03-20T09:00:00.000000Z")
+    _seal_decision(tmp_path, monkeypatch, org_id=42, decided_at="2026-03-21T09:00:00.000000Z")
+
+    result = build_regulator_binder(["cbuae-test"], "2026-03-01", "2026-03-31",
+                                    base_dir=tmp_path, org_id=42)
+    manifest = json.loads(_read_zip(result["binder_path"])["manifest.json"])
+    decisions = manifest["decisions"]
+    seals = [r["record_hash"] for r in decisions["records"]]
+    bare = sorted(h.replace("sha256:", "") for h in seals)
+    manual = hashlib.sha256("\n".join(bare).encode("utf-8")).hexdigest()
+    assert manual == decisions["decision_chain_hash"]
+
+
+def test_binder_verify_py_fails_on_tampered_decision(tmp_path, monkeypatch):
+    _make_first_seen(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    _seal_decision(tmp_path, monkeypatch, org_id=42, decided_at="2026-03-20T09:00:00.000000Z")
+
+    result = build_regulator_binder(["cbuae-test"], "2026-03-01", "2026-03-31",
+                                    base_dir=tmp_path, org_id=42)
+    assert result["status"] == "ok"
+    extracted = _extract(result["binder_path"], tmp_path / "tampered")
+
+    dfile = next(extracted.glob("decisions/*/decision-record.json"))
+    sealed = json.loads(dfile.read_text(encoding="utf-8"))
+    sealed["content"]["decision"]["statement"] = "TAMPERED statement not sealed by the reviewer."
+    dfile.write_text(json.dumps(sealed, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[decision seal]" in proc.stdout
+
+
+def test_binder_decision_out_of_period_excluded(tmp_path, monkeypatch):
+    _make_first_seen(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    # Decision dated OUTSIDE the binder period → no decision section.
+    _seal_decision(tmp_path, monkeypatch, org_id=42, decided_at="2026-08-01T09:00:00.000000Z")
+
+    result = build_regulator_binder(["cbuae-test"], "2026-03-01", "2026-03-31",
+                                    base_dir=tmp_path, org_id=42)
+    assert result["status"] == "ok"
+    assert result["decision_count"] == 0
+    manifest = json.loads(_read_zip(result["binder_path"])["manifest.json"])
+    assert "decisions" not in manifest
+
+
+def test_binder_decision_cover_clears_guard_and_omits_user_statement(tmp_path, monkeypatch):
+    _make_first_seen(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    secret_words = "Reviewer verbatim words that must not appear in the guarded cover."
+    _seal_decision(tmp_path, monkeypatch, org_id=42, decided_at="2026-03-20T09:00:00.000000Z",
+                   statement=secret_words)
+
+    result = build_regulator_binder(["cbuae-test"], "2026-03-01", "2026-03-31",
+                                    base_dir=tmp_path, org_id=42)
+    contents = _read_zip(result["binder_path"])
+    cover = contents["COVER.md"].decode("utf-8")
+
+    assert "detected → reviewed → decided" in cover
+    # The reviewer's verbatim statement is NEVER placed into the guarded COVER.md …
+    assert secret_words not in cover
+    # … but it IS sealed, verbatim, inside its own (unguarded) decision-record.json.
+    dfile = next(n for n in contents if n.startswith("decisions/") and n.endswith(".json"))
+    assert secret_words in contents[dfile].decode("utf-8")
+    assert_no_forbidden_claims(cover, label="cover-with-decisions")
+
+
 def test_manifest_points_at_the_verification_spec(tmp_path):
     _make_first_seen(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
     result = build_regulator_binder(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)

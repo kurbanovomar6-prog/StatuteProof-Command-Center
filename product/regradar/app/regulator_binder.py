@@ -86,6 +86,12 @@ _SUMMARY_MAX_CHARS = 220
 # load more than ``MAX_BINDER_RECORDS + 1`` records' bytes.
 MAX_BINDER_RECORDS = 2000
 
+# Hard cap on sealed decision records embedded in one binder's decision-chain
+# segment. Like ``MAX_BINDER_RECORDS`` this bounds in-memory materialization; an
+# over-cap segment is not embedded (the section is omitted with an honest note)
+# rather than silently truncated — a truncated chain segment would be misleading.
+MAX_BINDER_DECISIONS = 2000
+
 
 def build_regulator_binder(
     source_ids: list[str],
@@ -95,6 +101,7 @@ def build_regulator_binder(
     base_dir: Path | None = None,
     output_dir: Path | None = None,
     max_records: int = MAX_BINDER_RECORDS,
+    org_id: int | None = None,
 ) -> dict[str, Any]:
     """Bundle a period+source-scoped, hash-verified evidence binder into a ZIP.
 
@@ -109,6 +116,15 @@ def build_regulator_binder(
     Source-scoping is data-level: a record for any source not named in
     ``source_ids`` is never included. Tenancy (owner scope) is enforced one layer
     up by the API handler via ``_entitle_source_ids`` before this is called.
+
+    ``org_id`` (optional, additive): when supplied, the binder ALSO embeds the
+    org's sealed reviewer-decision chain segment covering the period (see
+    :func:`_decision_section`) plus an offline chain verifier. A decision chain is
+    a per-org construct, so ``org_id`` is never inferred — passing it is the ONLY
+    way decisions are included, which structurally prevents any cross-tenant leak.
+    When omitted (the default, and the current API call shape), no decision
+    section is produced and the evidence binder is byte-for-byte as before. The
+    caller MUST pass the AUTHENTICATED user's own org_id.
 
     Returns
     -------
@@ -168,11 +184,22 @@ def build_regulator_binder(
         # when the operator enabled anchoring and a head-anchor sidecar exists.
         # Absence is silent (None => no manifest key, no embedded token).
         external_ts = _external_timestamp_section(root)
+        # Optional, additive: the org's sealed reviewer-decision chain segment for
+        # the period. Only built when the caller passes ``org_id`` (a per-org
+        # construct — never inferred, so it can never leak across tenants). Absence
+        # is silent: no ``decisions`` manifest key, no decision files, no cover
+        # section. It never affects the binder's evidence verify result.
+        decision_section = _decision_section(org_id, wanted, date_from, date_to)
         manifest = _build_manifest(
             entries, wanted, date_from, date_to, binder_content_hash,
             external_ts[0] if external_ts else None,
         )
-        cover = _render_cover(entries, wanted, date_from, date_to, binder_content_hash)
+        if decision_section is not None:
+            manifest["decisions"] = decision_section["manifest"]
+        cover = _render_cover(
+            entries, wanted, date_from, date_to, binder_content_hash,
+            decision_cover_lines=(decision_section["cover_lines"] if decision_section else None),
+        )
         how_to = _render_how_to_verify(manifest)
         verify_script = _VERIFY_SCRIPT
 
@@ -205,6 +232,9 @@ def build_regulator_binder(
                     zf.writestr(entry["diff_arcname"], entry["diff_bytes"])
             if external_ts is not None:
                 zf.writestr(external_ts[0]["token_file"], external_ts[1])
+            if decision_section is not None:
+                for arcname, body in decision_section["files"]:
+                    zf.writestr(arcname, body)
 
         return {
             "status": "ok",
@@ -213,6 +243,9 @@ def build_regulator_binder(
             "record_count": len(entries),
             "source_count": len({e["source_id"] for e in entries}),
             "diff_count": sum(1 for e in entries if e.get("diff_arcname")),
+            "decision_count": (
+                len(decision_section["files"]) if decision_section else 0
+            ),
             "has_external_timestamp": external_ts is not None,
             "date_from": date_from,
             "date_to": date_to,
@@ -302,6 +335,233 @@ def _binder_content_hash(record_hashes: list[str]) -> str:
         h.strip().lower().removeprefix("sha256:") for h in record_hashes if str(h or "").strip()
     )
     return hashlib.sha256("\n".join(bare).encode("utf-8")).hexdigest()
+
+
+def _decision_seq(env: dict[str, Any]) -> int:
+    """Sealed ``content.chain_seq`` for a decision envelope, or ``-1`` if absent."""
+    content = env.get("content") if isinstance(env, dict) else None
+    if not isinstance(content, dict):
+        return -1
+    try:
+        return int(content.get("chain_seq"))
+    except (TypeError, ValueError):
+        return -1
+
+
+def _decision_naive_ts(env: dict[str, Any]) -> str:
+    """Sealed ``content.decided_at_utc`` as a naive-comparable string, or ``""``."""
+    content = env.get("content") if isinstance(env, dict) else None
+    if not isinstance(content, dict):
+        return ""
+    return _naive_ts(str(content.get("decided_at_utc") or ""))
+
+
+def _decision_section(
+    org_id: int | None, wanted: set[str], date_from: str, date_to: str
+) -> dict[str, Any] | None:
+    """Build the org's sealed decision-chain segment covering the period.
+
+    Returns ``{"manifest": {...}, "files": [(arcname, bytes), ...],
+    "cover_lines": [...]}`` or ``None`` when there is nothing to embed (no
+    ``org_id``, no decisions, none in period, or an error). Purely additive and
+    never raises: any failure omits the section rather than failing the binder.
+
+    A per-org decision chain is not source-partitioned, so the embedded segment is
+    the CONTIGUOUS ``chain_seq`` range covering the period (period-scoped). Because
+    ``chain_seq`` is dense, this range is gap-free, which lets the offline verifier
+    assert ``prev_decision_hash == the previous embedded record's seal`` for every
+    record after the first. The first record links (``prev_decision_hash``) to the
+    decision immediately before the period, recorded as ``segment_anchor_prev_hash``
+    (it lives in the org's full decision log, outside this binder).
+    """
+    if org_id is None:
+        return None
+    try:
+        oid = int(org_id)
+    except (TypeError, ValueError):
+        return None
+    try:
+        from app import decision_records
+    except Exception:  # pragma: no cover — import guard, never fails the binder
+        return None
+    try:
+        chain = decision_records.read_org_decision_chain(oid)
+    except Exception:  # noqa: BLE001 — a read failure omits the section, never raises
+        return None
+    if not chain:
+        return None
+
+    naive_from = _naive_ts(f"{date_from}T00:00:00")
+    naive_to = _naive_ts(f"{date_to}T23:59:59")
+    in_period_seqs = [
+        _decision_seq(e)
+        for e in chain
+        if naive_from <= _decision_naive_ts(e) <= naive_to and _decision_seq(e) >= 0
+    ]
+    if not in_period_seqs:
+        return None
+    min_seq, max_seq = min(in_period_seqs), max(in_period_seqs)
+    segment = sorted(
+        (e for e in chain if min_seq <= _decision_seq(e) <= max_seq),
+        key=_decision_seq,
+    )
+    if not segment:
+        return None
+    if len(segment) > MAX_BINDER_DECISIONS:
+        note = (
+            f"The sealed decision chain for this period spans more than "
+            f"{MAX_BINDER_DECISIONS} records and was not embedded in this binder. "
+            f"Export a narrower period to include the sealed decision records."
+        )
+        return {
+            "manifest": {
+                "status": "omitted_too_large",
+                "reason": note,
+                "segment_size": len(segment),
+                "max_decisions": MAX_BINDER_DECISIONS,
+            },
+            "files": [],
+            "cover_lines": ["", "## Reviewer decisions", "", note],
+        }
+
+    files: list[tuple[str, bytes]] = []
+    records: list[dict[str, Any]] = []
+    seen_arcnames: set[str] = set()
+    for env in segment:
+        entry = _build_decision_entry(env, wanted, naive_from, naive_to)
+        if entry is None:
+            continue
+        arcname, body, row = entry
+        # Defensive: decision_id is UNIQUE and its charset is arcname-safe, so a
+        # collision is not reachable today — but never double-write a decision file
+        # (that would silently overwrite one reviewer's sealed record with another).
+        if arcname in seen_arcnames:
+            logger.warning("regulator_binder: duplicate decision arcname %s; skipping", arcname)
+            continue
+        seen_arcnames.add(arcname)
+        files.append((arcname, body))
+        records.append(row)
+    if not records:
+        return None
+
+    decision_chain_hash = _binder_content_hash([r["record_hash"] for r in records])
+    first, last = records[0], records[-1]
+    manifest_section = {
+        "chain": "org_decision_chain_segment",
+        "schema_version": "1.0",
+        "record_hash_method": RECORD_HASH_METHOD,
+        "date_from": date_from,
+        "date_to": date_to,
+        "count": len(records),
+        "segment_first_chain_seq": first["chain_seq"],
+        "segment_last_chain_seq": last["chain_seq"],
+        # The prev hash of the first embedded record — links this segment to the
+        # decision immediately before the period (in the org's full log). "" means
+        # the segment begins at the chain genesis.
+        "segment_anchor_prev_hash": first["prev_decision_hash"],
+        "segment_head_hash": last["record_hash"],
+        "decision_chain_hash": decision_chain_hash,
+        "decision_chain_hash_method": _BINDER_HASH_METHOD,
+        "decision_chain_hash_input": (
+            "sha256 of the decision record_hash values below, normalized to bare "
+            "lowercase hex, sorted ascending and joined with a single newline (\\n)."
+        ),
+        "scope_note": (
+            "The org's own append-only, per-org decision chain: reviewer sign-off "
+            "records sealed with the same content-sha256-v1 primitive as the "
+            "evidence records. The segment embedded here is the contiguous "
+            "chain_seq range covering the reporting period; its first record links "
+            "(prev_decision_hash) to the decision immediately before the period, "
+            "which lives in the org's full decision log. StatuteProof does not "
+            "author, suggest, or assess any decision; each statement is the "
+            "reviewer's own words, sealed unchanged, in its decision-record.json."
+        ),
+        "records": records,
+    }
+    return {
+        "manifest": manifest_section,
+        "files": files,
+        "cover_lines": _decision_cover_lines(records),
+    }
+
+
+def _build_decision_entry(
+    env: dict[str, Any], wanted: set[str], naive_from: str, naive_to: str
+) -> tuple[str, bytes, dict[str, Any]] | None:
+    """Build ``(arcname, file_bytes, manifest_row)`` for one sealed decision, or None.
+
+    The file bytes are the FULL sealed envelope verbatim (the offline verifier
+    re-serializes ``content`` compactly to recompute the seal, so indentation here
+    is cosmetic). The manifest row carries only metadata + the seal; the reviewer's
+    verbatim ``statement`` lives solely in the embedded file, never re-authored.
+    """
+    content = env.get("content") if isinstance(env.get("content"), dict) else {}
+    reviewed = content.get("reviewed") if isinstance(content.get("reviewed"), dict) else {}
+    decided_by = content.get("decided_by") if isinstance(content.get("decided_by"), dict) else {}
+    decision = content.get("decision") if isinstance(content.get("decision"), dict) else {}
+    decision_id = str(env.get("decision_id") or content.get("decision_id") or "")
+    record_hash = str(env.get("record_hash") or "")
+    if not decision_id or not record_hash:
+        return None
+    try:
+        body = json.dumps(env, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
+    except (TypeError, ValueError):
+        return None
+    arcname = f"decisions/{_safe_arc(decision_id)}/decision-record.json"
+    source_id = str(reviewed.get("source_id") or "")
+    row = {
+        "decision_id": decision_id,
+        "chain_seq": _decision_seq(env),
+        "decided_at_utc": str(content.get("decided_at_utc") or ""),
+        "decided_by": {
+            "user_id": decided_by.get("user_id"),
+            "display_name": str(decided_by.get("display_name") or ""),
+        },
+        "kind": str(decision.get("kind") or ""),
+        "record_hash": record_hash,
+        "record_hash_method": str(env.get("record_hash_method") or RECORD_HASH_METHOD),
+        "prev_decision_hash": str(content.get("prev_decision_hash") or ""),
+        "supersedes_decision_id": content.get("supersedes_decision_id"),
+        "reviewed_source_id": source_id,
+        "reviewed_source_name": str(reviewed.get("source_name") or ""),
+        "reviewed_alert_id": str(reviewed.get("alert_id") or ""),
+        "reviewed_evidence_record_id": str(reviewed.get("evidence_record_id") or ""),
+        "decision_file": arcname,
+        "in_period": naive_from <= _decision_naive_ts(env) <= naive_to,
+        "in_scope_source": source_id in wanted,
+    }
+    return arcname, body, row
+
+
+def _decision_cover_lines(records: list[dict[str, Any]]) -> list[str]:
+    """A neutral 'detected → reviewed → decided' note for COVER.md.
+
+    COVER.md is run through the shared forbidden-claims guard, and the reviewer's
+    own ``statement`` / ``display_name`` are NEVER passed through any guard (their
+    words, verbatim). So this timeline uses ONLY provably-safe, system-generated
+    tokens — the sealed timestamp, the neutral kind label, the decision_id, and
+    the seal hash — and points at each decision-record.json for the verbatim text.
+    """
+    lines = [
+        "",
+        "## Reviewer decisions (detected → reviewed → decided)",
+        "",
+        "Each entry is a decision a reviewer in your organisation sealed into the "
+        "record for a monitored change. StatuteProof records the reviewer's own "
+        "words unchanged and does not author, suggest, or assess any decision. The "
+        "full sealed wording of each decision is in its `decision-record.json`; the "
+        "line here shows only when it was sealed, the neutral log type, and its "
+        "seal. Run `verify.py` to recompute each decision's seal and confirm each "
+        "links to the one before it.",
+        "",
+    ]
+    for r in records:
+        short = str(r.get("record_hash") or "").replace("sha256:", "")[:12]
+        lines.append(
+            f"- {r['decided_at_utc']} — log type `{r['kind']}` "
+            f"(record `{r['decision_id']}`, seal `{short}…`)"
+        )
+    return lines
 
 
 def _external_timestamp_section(root: Path) -> tuple[dict[str, Any], bytes] | None:
@@ -420,6 +680,7 @@ def _render_cover(
     date_from: str,
     date_to: str,
     binder_content_hash: str,
+    decision_cover_lines: list[str] | None = None,
 ) -> str:
     """Plain, honest "what changed and when" timeline. No invented content."""
     source_names = sorted({e["source_name"] for e in entries}) or sorted(wanted)
@@ -450,6 +711,8 @@ def _render_cover(
             f"- {e['timestamp']} — {e['source_name']} — {summary} "
             f"(record `{e['record_id']}`, seal `{short_hash}…`)"
         )
+    if decision_cover_lines:
+        lines.extend(decision_cover_lines)
     lines.extend([
         "",
         "## How to verify this binder yourself",
@@ -616,6 +879,87 @@ def bare(value):
     return str(value or "").strip().lower().replace("sha256:", "")
 
 
+def verify_decisions(manifest):
+    """Verify the embedded sealed reviewer-decision chain segment (offline).
+
+    Returns the number of failures. A no-op returning 0 when the binder carries no
+    decisions. For each decision it (a) re-seals decision-record.json by recomputing
+    record_hash over its content block and (b) asserts prev_decision_hash equals the
+    previous embedded record's seal (the first links to the recorded anchor).
+    """
+    decisions = manifest.get("decisions")
+    if not isinstance(decisions, dict) or not decisions.get("records"):
+        return 0
+    drecords = decisions.get("records", [])
+    print()
+    print("Verifying %d sealed reviewer decision(s) in this binder\\n" % len(drecords))
+    failures = 0
+    dhashes = []
+    prev_seal = None  # bare record_hash of the previously listed decision
+    anchor = bare(decisions.get("segment_anchor_prev_hash"))
+
+    for d in drecords:
+        did = d.get("decision_id", "<unknown>")
+        drel = d.get("decision_file")
+        dpath = HERE / drel if drel else None
+        manifest_seal = bare(d.get("record_hash"))
+        this_seal = manifest_seal
+        if not drel or dpath is None or not dpath.exists():
+            print("FAIL  %s [decision] file missing: %s" % (did, drel))
+            failures += 1
+            prev_seal = this_seal
+            continue
+        try:
+            denv = json.loads(dpath.read_text(encoding="utf-8"))
+            dcontent = denv.get("content")
+            dmethod = str(denv.get("record_hash_method") or "").strip()
+            dstored = bare(denv.get("record_hash"))
+            if dmethod != "content-sha256-v1" or not isinstance(dcontent, dict):
+                print("FAIL  %s [decision] unexpected record_hash_method: %s" % (did, dmethod))
+                failures += 1
+                prev_seal = manifest_seal
+                continue
+            dactual = canonical_record_hash(dcontent)
+            if dactual == dstored and dactual == manifest_seal:
+                print("PASS  %s [decision seal] record_hash=%s" % (did, dactual))
+            else:
+                print("FAIL  %s [decision seal] manifest=%s stored=%s recomputed=%s" % (
+                    did, manifest_seal, dstored, dactual))
+                failures += 1
+            this_seal = dstored or manifest_seal
+            dhashes.append(this_seal)
+
+            prev_hash = bare(dcontent.get("prev_decision_hash"))
+            expected_prev = anchor if prev_seal is None else prev_seal
+            if prev_hash == expected_prev:
+                if prev_seal is None and not prev_hash:
+                    print("      %s [decision link] chain genesis (no prior decision)" % did)
+                elif prev_seal is None:
+                    print("      %s [decision link] anchors to prior decision %s... "
+                          "(in the org's full log, outside this binder)" % (did, prev_hash[:12]))
+                else:
+                    print("PASS  %s [decision link] prev_decision_hash -> %s..." % (did, prev_hash[:12]))
+            else:
+                print("FAIL  %s [decision link] prev_decision_hash=%s expected=%s" % (
+                    did, prev_hash, expected_prev))
+                failures += 1
+        except (ValueError, OSError) as exc:
+            print("FAIL  %s [decision] could not read/parse: %s" % (did, exc))
+            failures += 1
+        prev_seal = this_seal
+
+    # decision-chain content hash over the sorted decision seals
+    expected_dchain = bare(decisions.get("decision_chain_hash"))
+    if expected_dchain:
+        actual_dchain = hashlib.sha256("\\n".join(sorted(dhashes)).encode("utf-8")).hexdigest()
+        if actual_dchain == expected_dchain:
+            print("PASS  decision_chain_hash=%s" % actual_dchain)
+        else:
+            print("FAIL  decision_chain_hash expected=%s actual=%s" % (expected_dchain, actual_dchain))
+            failures += 1
+    return failures
+
+
 def main():
     manifest = json.loads((HERE / "manifest.json").read_text(encoding="utf-8"))
     records = manifest.get("records", [])
@@ -683,7 +1027,16 @@ def main():
         print("FAIL  binder_content_hash expected=%s actual=%s" % (expected_binder, actual_binder))
         failures += 1
 
-    # (4) OPTIONAL: report an external RFC 3161 timestamp anchor when present.
+    # (4) OPTIONAL: the org's sealed reviewer-decision chain segment. Present only
+    # when this binder was built with decisions. Each decision re-seals with the
+    # SAME content-sha256-v1 primitive as the evidence records, and each links to
+    # the previous decision via prev_decision_hash. The embedded segment is a
+    # contiguous chain_seq range, so every record after the first must link to the
+    # one before it; the first links to a decision before the period (recorded as
+    # segment_anchor_prev_hash, in the org's full log). All checked offline here.
+    failures += verify_decisions(manifest)
+
+    # (5) OPTIONAL: report an external RFC 3161 timestamp anchor when present.
     # Additive and advisory — it does NOT affect the pass/fail result above. This
     # standalone script stays stdlib-only, so it reports the token and shows how to
     # verify it independently rather than embedding an ASN.1 verifier.

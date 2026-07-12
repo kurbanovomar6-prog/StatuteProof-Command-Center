@@ -237,6 +237,120 @@ This is monitoring evidence, not legal proof. An external anchor strengthens the
 integrity signal; it is not a certification, a legal opinion, or a guarantee of
 compliance, and it does not change what a record attests in §1.
 
+## 6A. Sealed decision records (reviewer accountability)
+
+Alongside the captured-source evidence trail, StatuteProof can seal a **reviewer's
+own decision** about a monitored change into a tamper-evident record. This is a
+separate, **per-org**, append-only, hash-chained log (`decision_records`) — it is
+NOT the capture chain and does not touch it. Its whole point is individual
+accountability: a named reviewer records, **in their own words**, what they
+reviewed and what they decided, and StatuteProof seals that statement *unchanged*.
+StatuteProof never authors, suggests, scores, or assesses the decision.
+
+### 6A.1 Canonical shape
+
+A sealed decision record is the **same `{content, record_hash, record_hash_method}`
+envelope** as an evidence record, so it verifies with the same method (§3, step 4)
+and through the same public verifier (§7) with **zero** special handling:
+
+```json
+{
+  "schema_version": "1.0",
+  "decision_id": "dec_<org>_<seq>_<20-hex>",
+  "record_hash": "sha256:<64 hex over canonical content>",
+  "record_hash_method": "content-sha256-v1",
+  "content": {
+    "decision_id": "…same…",
+    "org_id": 42,
+    "chain_seq": 7,
+    "prev_decision_hash": "sha256:… (or \"\" for the chain genesis)",
+    "decided_by": {"user_id": 108, "display_name": "A. Rahman"},
+    "decided_at_utc": "2026-07-12T09:30:00.000000Z",
+    "reviewed": { … verbatim copy of the alert's proof block: evidence_record_id,
+                  record_hash, run_id, normalized_hash, source_id, source_name,
+                  official_url, alert_id … },
+    "decision": {"kind": "reviewed", "statement": "<the reviewer's own words>",
+                 "checklist_ref": … | null},
+    "supersedes_decision_id": null,
+    "amendment_reason": null
+  }
+}
+```
+
+Everything load-bearing lives **inside `content`** — including `prev_decision_hash`
+and the authoritative `decided_at_utc` — so the single `record_hash` fingerprint
+covers all of it. `kind` is one of five neutral, user-selected log labels
+(`reviewed` / `acknowledged` / `escalated` / `no_change_needed` /
+`action_recorded`); it is never a StatuteProof assessment. Corrections are **new,
+linked** records (`supersedes_decision_id` + `amendment_reason`) — the original is
+never edited or deleted (database `BEFORE UPDATE`/`BEFORE DELETE` triggers enforce
+append-only at the storage layer).
+
+### 6A.2 The seal (identical to evidence records)
+
+`record_hash` is `SHA-256` over the **compact** (`separators=(",", ":")`),
+**sorted-key**, **UTF-8** (`ensure_ascii=false`) JSON of the `content` block — the
+single shared `app/record_hashing.py::canonical_record_hash`, prefixed `sha256:`.
+Recompute it with standard tools over the `content` block you hold; any edit to any
+field inside `content` (including the reviewer's `statement`) makes it diverge.
+
+### 6A.3 What a SINGLE decision record proves — and what it does NOT
+
+Verifying one decision record (§3, step 4) proves exactly one thing: **the `content`
+block was not edited in place** — the reviewer's sealed words, the time, and the
+`reviewed` proof block are intact relative to the seal.
+
+> **Scope limit — read this before trusting a green single-record verify.** A
+> self-consistent decision record proves *only its own integrity*. It does **not**
+> prove chain membership or authenticity: because a record seals its own `content`,
+> **anyone can fabricate a brand-new, internally-consistent decision record** (pick
+> any `content`, compute its `record_hash`) and it will verify `true` in isolation.
+> A green single-record verify therefore means "these bytes are self-consistent",
+> **never** "this decision is a genuine, in-order entry in org X's accountability
+> chain". That stronger claim requires verifying the **chain**, not one record.
+
+### 6A.4 Verifying the decision CHAIN (membership + order)
+
+Chain authenticity is established exactly like the evidence trail (§4), over the
+per-org sequence:
+
+1. Verify each record individually (§6A.2).
+2. Walk the records in `chain_seq` order; for each record after the first, confirm
+   `content.prev_decision_hash == the previous record's record_hash` (the first
+   record's `prev_decision_hash` is `""` at the chain genesis, or the seal of the
+   decision immediately before an exported segment — see below).
+3. The **first** broken link is the actionable failure; everything after it is
+   untrusted.
+
+Because `prev_decision_hash` is *inside* `content`, editing it breaks the record's
+own seal (step 1); the walk (step 2) additionally catches insertion, deletion, and
+reordering. `app/decision_records.py::verify_decision_chain` performs exactly this
+recompute-and-walk over an org's chain.
+
+**Head divergence (raising "evident" toward "proof").** Like the evidence trail
+(§5), the live decision-chain head (`decision_hash` of the MAX-`chain_seq` row) is
+also written to a separately-persisted `decision_chain_head.json`.
+`app/decision_records.py::verify_decision_head` compares the two and **reports**
+divergence (`status: diverged`) — the advisory signal for a full re-seal+relink
+with a rewritten head, which the in-table walk alone cannot see. It is advisory and
+never mutates anything; a decision chain has no legitimate head rewrite (pure
+append), so a divergence always warrants investigation.
+
+### 6A.5 In the Regulator Binder
+
+When a binder is built for an org, it embeds the **contiguous `chain_seq` segment**
+of that org's decision chain covering the reporting period, under
+`decisions/<decision_id>/decision-record.json`, with a `decisions` sub-manifest
+(each record's seal, `prev_decision_hash`, `chain_seq`, and a
+`decision_chain_hash` over the sorted decision seals). The first embedded record's
+`prev_decision_hash` links to the decision immediately *before* the period
+(recorded as `segment_anchor_prev_hash`), which lives in the org's full log outside
+the binder. The bundled offline `verify.py` recomputes every decision seal
+(§6A.2) **and** asserts each record links to the previous embedded record — so an
+examiner confirms both integrity **and** in-segment order with no network and no
+StatuteProof code. This is what turns a single-record self-seal (§6A.3) into a
+chain-verifiable artifact.
+
 ## 7. The Public Verifier (what we expose)
 
 A public, no-login endpoint and page: paste a `record.json` (or upload a bundle /
@@ -249,5 +363,7 @@ servers: the math is standard and the bytes are in your hand.
 ---
 *This spec is versioned. v1 covers raw+normalized+record hashing, the append-only
 chain, and the head anchor. §6 documents the optional external RFC 3161 timestamp
-anchor (implemented, dormant by default); signed exports remain a tracked addition.
-These strengthen — never weaken — the above.*
+anchor (implemented, dormant by default); §6A documents sealed reviewer-decision
+records (same content-sha256-v1 seal, a separate per-org chain, with the explicit
+scope limit that a single-record verify does NOT prove chain membership). Signed
+exports remain a tracked addition. These strengthen — never weaken — the above.*
