@@ -10,6 +10,7 @@ No network calls. File operations use tmp_path.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -242,3 +243,32 @@ def test_get_enabled_sources_returns_empty_list_when_none_enabled(tmp_path):
     src_file.write_text(json.dumps(entries), encoding="utf-8")
     result = get_enabled_sources(src_file)
     assert result == []
+
+
+# ── real config — URL stability guard ────────────────────────────────────────
+#
+# A frozen-version URL (e.g. Thomson Reuters "…-module-aml-ver3004-26" or VARA
+# "…_VER20250519.pdf") keeps serving the OLD text after the next amendment, so
+# an enabled source pinned to one silently stops seeing real changes — the one
+# failure mode this product cannot allow. Disabled evidence-library entries may
+# keep version-pinned URLs deliberately; only ENABLED sources are guarded.
+# Added 2026-07-12 after AE-dfsa-aml-rulebook-module was found pinned to
+# …-aml-ver3004-26 and repointed to the canonical current-version module URL.
+
+_REAL_SOURCES_JSON = Path(__file__).resolve().parent.parent / "sources.json"
+
+_FROZEN_VERSION_URL = re.compile(r"[-_/]ver\d", re.IGNORECASE)
+
+
+def test_no_enabled_source_url_is_pinned_to_a_frozen_version():
+    sources = json.loads(_REAL_SOURCES_JSON.read_text(encoding="utf-8"))
+    pinned = [
+        (source.get("source_id") or source.get("name"), source.get("url"))
+        for source in sources
+        if source.get("enabled") is True
+        and _FROZEN_VERSION_URL.search(source.get("url", ""))
+    ]
+    assert pinned == [], (
+        "Enabled sources must monitor stable index/current-version URLs, "
+        f"not frozen version paths (goes silently stale on next amendment): {pinned}"
+    )
