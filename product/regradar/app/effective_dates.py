@@ -468,7 +468,15 @@ def upcoming_key_dates(
                 continue
             key = (item.get("source_id", ""), item["date"], item.get("detected_type", ""))
             existing = chosen.get(key)
-            if existing is None or item.get("captured_at", "") < existing.get("captured_at", ""):
+            # Earliest capture wins; break same-timestamp ties on the sealed
+            # record_hash so the chosen record is fully determined by its content,
+            # never by filesystem/glob iteration order (defence-in-depth on top of
+            # the record_paths.sort() above).
+            order = (item.get("captured_at", ""), item.get("record_hash", ""))
+            if existing is None or order < (
+                existing.get("captured_at", ""),
+                existing.get("record_hash", ""),
+            ):
                 enriched = {**item, "days_until": (parsed - (as_of or _utc_today())).days}
                 chosen[key] = enriched
 
