@@ -148,6 +148,7 @@ def build_change_register_rows(
     review_file: Path | None = None,
     action_log_lookup: ActionLogLookup | None = None,
     excluded_source_ids: set[str] | None = None,
+    org_id: Any = None,
 ) -> list[dict[str, Any]]:
     """Assemble one register row per canonical evidence record.
 
@@ -226,10 +227,11 @@ def build_change_register_rows(
 
         # Human assessment join (assessments are keyed by run_id; fall back to
         # record_id in case a reviewer assessed by the canonical id) -----------
+        _akw = {} if org_id is None else {"org_id": org_id}
         assessment = (
-            latest_assessment_for(run_id, base_dir=root) if run_id else None
+            latest_assessment_for(run_id, base_dir=root, **_akw) if run_id else None
         ) or (
-            latest_assessment_for(record_id, base_dir=root) if record_id else None
+            latest_assessment_for(record_id, base_dir=root, **_akw) if record_id else None
         ) or {}
 
         # Action-log decision join (scoped to the requesting client) -----------
@@ -513,7 +515,7 @@ def render_change_register_csv(rows: list[dict[str, Any]], meta: dict[str, str])
     writer = csv.writer(buf)
     writer.writerow([header for _, header in _COLUMNS])
     for row in rows:
-        writer.writerow([_cell(row, key) for key, _ in _COLUMNS])
+        writer.writerow([_csv_safe(_cell(row, key)) for key, _ in _COLUMNS])
     text = buf.getvalue()
     assert_no_forbidden_claims(text)
     return text
@@ -549,7 +551,11 @@ def render_change_register_xlsx(rows: list[dict[str, Any]], meta: dict[str, str]
         cell.font = Font(bold=True)
 
     for row in rows:
-        values = [_cell(row, key) for key, _ in _COLUMNS]
+        # openpyxl writes a string beginning with '=' (or +, -, @) as a live
+        # FORMULA, so the same formula-injection guard the CSV renderer uses must
+        # be applied here too — human-authored cells (reviewer notes, next action)
+        # reach this export.
+        values = [_csv_safe(_cell(row, key)) for key, _ in _COLUMNS]
         worksheet.append(values)
         guard_parts.extend(values)
 
@@ -634,6 +640,20 @@ def _cell(row: dict[str, Any], key: str) -> str:
     return str(value)
 
 
+# CSV formula-injection triggers: a cell that begins with any of these is treated
+# as a formula by Excel/Sheets/LibreOffice. Human-authored fields (reviewer notes,
+# next actions) reach this export, so they must be neutralized.
+_CSV_FORMULA_TRIGGERS = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _csv_safe(value: str) -> str:
+    """Neutralize CSV formula injection by prefixing a formula-trigger cell with a
+    single quote, so a spreadsheet renders it as text rather than executing it."""
+    if value and value[0] in _CSV_FORMULA_TRIGGERS:
+        return "'" + value
+    return value
+
+
 # ── top-level export (writes CSV + XLSX + HTML) ────────────────────────────────
 
 def build_change_register_export(
@@ -649,6 +669,7 @@ def build_change_register_export(
     review_file: Path | None = None,
     action_log_lookup: ActionLogLookup | None = None,
     excluded_source_ids: set[str] | None = None,
+    org_id: Any = None,
 ) -> dict[str, Any]:
     """Build the register and write the requested formats to disk.
 
@@ -683,6 +704,7 @@ def build_change_register_export(
             review_file=review_file,
             action_log_lookup=action_log_lookup,
             excluded_source_ids=excluded_source_ids,
+            org_id=org_id,
         )
         meta = _register_meta(
             rows,

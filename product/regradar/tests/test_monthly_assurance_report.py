@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.evidence_assessment import LEGAL_DISCLAIMER
+from app import monthly_assurance_report as mar
 from app.monthly_assurance_report import (
     _zero_stats,
     compute_monthly_stats,
@@ -134,3 +135,71 @@ def test_render_omits_estimate_warning_when_not_estimate():
     report = render_assurance_report_markdown(stats)
     assert "may be partial" not in report
     assert "fewer than 20 runs" not in report
+
+
+# ── Test 9: review status never fabricates a "0 pending" claim ───────────────
+
+def test_zero_stats_review_count_is_unknown_not_zero():
+    """A period with no measured backlog must not assert 0 pending review."""
+    stats = _zero_stats(2026, 6, is_estimate=True)
+    assert stats["unreviewed_count"] is None
+
+
+def test_render_unknown_review_count_points_to_queue_not_zero():
+    stats = _sample_stats(unreviewed_count=None)
+    report = render_assurance_report_markdown(stats)
+    assert "0 change(s) pending human review" not in report
+    assert "review queue" in report.lower()
+
+
+def test_render_known_review_count_is_shown():
+    stats = _sample_stats(unreviewed_count=3)
+    report = render_assurance_report_markdown(stats)
+    assert "3 change(s) pending human review" in report
+
+
+# ── Test 10: source scoping resolves slugs to URLs (not slug==url) ───────────
+
+def test_source_scoping_resolves_slug_to_url(monkeypatch):
+    """compute_monthly_stats must translate source-id slugs to their configured
+    URLs before filtering the documents table, which keys on url."""
+    captured = {}
+
+    class _FakeCursor:
+        def fetchall(self):
+            return []
+
+    class _FakeConn:
+        row_factory = None
+
+        def execute(self, sql, params):
+            captured["sql"] = sql
+            captured["params"] = list(params)
+            return _FakeCursor()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(mar, "_urls_for_source_ids", lambda ids: ["https://reg.example/aml"])
+    monkeypatch.setattr(mar.Path, "exists", lambda self: True)
+    monkeypatch.setattr(mar.sqlite3, "connect", lambda *a, **k: _FakeConn())
+
+    compute_monthly_stats(["AE-some-slug"], 2026, 6)
+    # The resolved URL — not the slug — must be in the query params.
+    assert "https://reg.example/aml" in captured["params"]
+    assert "AE-some-slug" not in captured["params"]
+
+
+def test_source_scoping_unresolvable_returns_zero_not_full_table(monkeypatch):
+    """If named sources resolve to no known URL, return zero stats — never widen
+    back to the whole (cross-tenant) documents table."""
+    monkeypatch.setattr(mar, "_urls_for_source_ids", lambda ids: [])
+    monkeypatch.setattr(mar.Path, "exists", lambda self: True)
+
+    def _boom(*a, **k):
+        raise AssertionError("DB must not be queried when scope resolves to nothing")
+
+    monkeypatch.setattr(mar.sqlite3, "connect", _boom)
+    stats = compute_monthly_stats(["AE-unknown"], 2026, 6)
+    assert stats["total_runs"] == 0
+    assert stats["is_estimate"] is True

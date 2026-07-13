@@ -717,6 +717,7 @@ def test_evidence_export_refuses_other_tenants_custom_source(monkeypatch):
 
 def test_evidence_export_allows_official_source(monkeypatch):
     _auth(monkeypatch, user_id=2)
+    _patch_plan(monkeypatch, "professional")  # a plan that includes audit_export
     monkeypatch.setattr(
         "app.evidence_assessment.find_evidence_record",
         lambda evidence_id: {"run_id": evidence_id, "source_id": "official-X"},
@@ -732,6 +733,80 @@ def test_evidence_export_allows_official_source(monkeypatch):
         lambda evidence_id, **k: called.update(evidence_id=evidence_id),
     )
     handler._handle_evidence_export_get()
-    # Official (shared) source is not tenancy-denied; export proceeds.
+    # Official (shared) source is not tenancy-denied; export proceeds under a paid plan.
     assert called.get("evidence_id") == "run_official_1"
     assert 403 not in _statuses(handler)
+
+
+# ── 8b. per-record audit-pack export is paywalled like every bulk export ──────
+
+def test_per_record_export_get_blocks_free_account(monkeypatch):
+    """A free evidence_preview account cannot pull the per-record audit pack.
+
+    Regression for the paywall-bypass finding: _handle_evidence_export_get ran
+    auth -> rate limit -> tenancy but never checked plan capability, so the
+    flagship paid deliverable was free. The tenancy guard must never even be
+    reached to grant the export for a plan that lacks audit_export.
+    """
+    _auth(monkeypatch, user_id=2)
+    _patch_plan(monkeypatch, "evidence_preview")
+    handler = _make_handler("GET", "/api/evidence/export?run_id=run_official_1")
+    monkeypatch.setattr(
+        handler, "_write_evidence_export",
+        lambda *a, **k: pytest.fail("free account reached the export writer"),
+    )
+    handler._handle_evidence_export_get()
+    assert 403 in _statuses(handler)
+
+
+def test_per_record_export_download_blocks_free_account(monkeypatch):
+    _auth(monkeypatch, user_id=2)
+    _patch_plan(monkeypatch, "evidence_preview")
+    handler = _make_handler(
+        "GET", "/api/evidence/export-download?run_id=run_official_1&format=pdf"
+    )
+    handler._handle_evidence_export_download()
+    assert 403 in _statuses(handler)
+
+
+def test_per_record_export_pdf_requires_pdf_capability(monkeypatch):
+    """A plan with audit_export but not pdf_export is refused a PDF pack."""
+    _auth(monkeypatch, user_id=2)
+    caps = dict(PLAN_CAPABILITIES["professional"])
+    caps["pdf_export"] = False
+    state = {
+        "active_plan_name": "professional",
+        "active_capabilities": caps,
+        "requested_capabilities": None,
+        "capabilities": caps,
+    }
+    monkeypatch.setattr(plan, "get_plan_state", lambda uid: state)
+    handler = _make_handler(
+        "GET", "/api/evidence/export?run_id=run_official_1&format=pdf"
+    )
+    monkeypatch.setattr(
+        handler, "_write_evidence_export",
+        lambda *a, **k: pytest.fail("pdf export reached the writer without pdf_export"),
+    )
+    handler._handle_evidence_export_get()
+    assert 403 in _statuses(handler)
+
+
+def test_per_record_export_pdf_gate_is_case_insensitive(monkeypatch):
+    """format=PDF (uppercase) must still hit the pdf_export gate — format is
+    lowercased before the capability check so case can't bypass the paywall."""
+    _auth(monkeypatch, user_id=2)
+    caps = dict(PLAN_CAPABILITIES["professional"])
+    caps["pdf_export"] = False
+    state = {
+        "active_plan_name": "professional", "active_capabilities": caps,
+        "requested_capabilities": None, "capabilities": caps,
+    }
+    monkeypatch.setattr(plan, "get_plan_state", lambda uid: state)
+    handler = _make_handler("GET", "/api/evidence/export?run_id=run_official_1&format=PDF")
+    monkeypatch.setattr(
+        handler, "_write_evidence_export",
+        lambda *a, **k: pytest.fail("uppercase PDF bypassed the pdf_export gate"),
+    )
+    handler._handle_evidence_export_get()
+    assert 403 in _statuses(handler)

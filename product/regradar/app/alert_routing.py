@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timedelta, timezone
+from typing import Any
 from urllib.parse import urlparse
 
 from app.db import _connect, ensure_auth_tables
@@ -31,6 +32,18 @@ from app.user_delivery import (
 logger = logging.getLogger(__name__)
 
 _UAE_MARKETS = {"UAE", "AE", "DIFC", "ADGM", "DUBAI", "FEDERAL", "MAINLAND"}
+
+
+def _action_orientation_label(change_type: Any) -> dict[str, str]:
+    """Action-orientation triage {code,label} for a change type (workflow prompt,
+    never a legal obligation). Falls back to Informative on any error."""
+    try:
+        from app.alert_drafts import action_orientation
+
+        o = action_orientation(str(change_type or ""))
+        return {"code": o["code"], "label": o["label"]}
+    except Exception:  # noqa: BLE001 — presentation only; never break routing
+        return {"code": "informative", "label": "Informational"}
 
 
 def _now_utc() -> datetime:
@@ -301,6 +314,9 @@ def normalize_alert_for_routing(alert: dict) -> dict:
         "title": str(title),
         "risk_level": _normalize_risk_level(alert.get("risk_level")),
         "change_type": str(alert.get("change_type") or "REGULATORY_UPDATE"),
+        # Action-orientation triage label (Actionable/Indicative/Informative) for
+        # the dashboard — a review-workflow prompt, never a legal obligation.
+        "action_orientation": _action_orientation_label(alert.get("change_type")),
         "market": str(market).strip() if market else None,
         "jurisdiction": str(alert.get("jurisdiction") or market).strip() if (alert.get("jurisdiction") or market) else None,
         "topics": [str(item) for item in topics if str(item).strip()],

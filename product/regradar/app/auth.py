@@ -391,6 +391,93 @@ def mark_email_verified(user_id: int) -> None:
         conn.close()
 
 
+_PASSWORD_RESET_TOKEN_HOURS = 2
+
+
+def generate_password_reset_token(email: str) -> tuple[str, int] | None:
+    """Issue a single-use, 2-hour password-reset token for the account with this
+    email. Returns (token, user_id), or None when no such account exists — the
+    caller MUST return the same generic response either way (no user enumeration).
+    Only password (email) accounts are eligible; OAuth-only accounts return None.
+    """
+    ensure_auth_tables()
+    normalized = normalize_email(email)
+    if not normalized:
+        return None
+    conn = _connect()
+    try:
+        row = conn.execute(
+            "SELECT id, password_hash FROM users WHERE normalized_email = ?",
+            (normalized,),
+        ).fetchone()
+        if row is None or not row["password_hash"]:
+            return None
+        user_id = int(row["id"])
+        token = secrets.token_urlsafe(32)
+        now = _now()
+        conn.execute(
+            """
+            INSERT INTO password_reset_tokens (token, user_id, created_at, expires_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (token, user_id, _iso(now), _iso(now + timedelta(hours=_PASSWORD_RESET_TOKEN_HOURS))),
+        )
+        conn.commit()
+        return token, user_id
+    finally:
+        conn.close()
+
+
+def consume_password_reset_token(token: str) -> int | None:
+    """Validate a reset token (unexpired, unused); mark it used; return user_id."""
+    ensure_auth_tables()
+    clean = str(token or "").strip()
+    if not clean:
+        return None
+    conn = _connect()
+    try:
+        row = conn.execute(
+            "SELECT user_id, expires_at, used_at FROM password_reset_tokens WHERE token = ?",
+            (clean,),
+        ).fetchone()
+        if row is None or row["used_at"] is not None:
+            return None
+        expires_at = datetime.fromisoformat(row["expires_at"]).replace(tzinfo=timezone.utc)
+        if _now() > expires_at:
+            return None
+        conn.execute(
+            "UPDATE password_reset_tokens SET used_at = ? WHERE token = ?",
+            (_iso(_now()), clean),
+        )
+        conn.commit()
+        return int(row["user_id"])
+    finally:
+        conn.close()
+
+
+def set_user_password(user_id: int, new_password: str) -> None:
+    """Set a new password for the user and INVALIDATE all their sessions and any
+    outstanding reset tokens — a password change must log every device out."""
+    ensure_auth_tables()
+    password_hash = hash_password(new_password)
+    now = _iso(_now())
+    conn = _connect()
+    try:
+        conn.execute(
+            "UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?",
+            (password_hash, now, int(user_id)),
+        )
+        # Kill all existing sessions (log out everywhere) and burn other reset tokens.
+        conn.execute("DELETE FROM sessions WHERE user_id = ?", (int(user_id),))
+        conn.execute(
+            "UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL",
+            (now, int(user_id)),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def google_oauth_config() -> dict[str, str]:
     return {
         "client_id": os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip(),

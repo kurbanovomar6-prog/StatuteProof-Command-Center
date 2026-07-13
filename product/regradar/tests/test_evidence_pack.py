@@ -199,6 +199,30 @@ def test_manifest_matches_included_snapshots(tmp_path):
     assert entry["normalized_hash"] == recorded
 
 
+def test_pack_excludes_record_with_tampered_raw_snapshot(tmp_path):
+    """A post-capture edit to raw.txt must NOT ship as a clean pack.
+
+    Regression: the pack recomputed raw_hash from disk and never compared it to
+    the capture-time content.raw_hash, so a raw tamper printed PASS. The record
+    is now excluded when raw bytes diverge from the sealed raw_hash — mirroring
+    the normalized-side protection.
+    """
+    record = _make_record(
+        tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z"
+    )
+    # The pack reads the canonical evidence-tree copy, not the source snapshot.
+    raw_rel = record["files"]["raw_path"]
+    raw_path = tmp_path / raw_rel
+    assert raw_path.exists()
+    raw_path.write_text("<main>FABRICATED regulatory text</main>", encoding="utf-8")
+
+    result = build_evidence_pack(
+        ["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path
+    )
+    assert result["status"] == "empty"
+    assert result["record_count"] == 0
+
+
 # ── source-scoping (data-level auth boundary) ────────────────────────────────────
 
 def test_pack_never_includes_a_non_requested_source(tmp_path):

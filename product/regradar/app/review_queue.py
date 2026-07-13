@@ -101,16 +101,17 @@ def build_review_queue(
     change_status: str | None = None,
     source_id: str | None = None,
     excluded_source_ids: set[str] | None = None,
+    org_id: Any = None,
     limit: int = 50,
     base_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Return review queue rows from recorded evidence and Acknowledge & Assess records.
 
-    ``excluded_source_ids`` fail-closes cross-tenant leakage: any run whose
-    ``source_id`` is in the set is dropped before it can reach the caller. The
-    HTTP layer passes the caller's denied custom-source set here so another
-    tenant's private custom source never appears in the review queue. Official /
-    shared sources are never in that set and stay visible to everyone.
+    ``excluded_source_ids`` fail-closes cross-tenant leakage of custom SOURCES.
+    ``org_id`` scopes the private ASSESSMENT NOTES: when given, only the caller's
+    own org's Acknowledge & Assess notes are attached, so a shared official
+    record shows THIS customer's review state, never another tenant's internal
+    note/impact/next_action. The HTTP layer passes the caller's resolved org_id.
     """
     root = base_dir or _BASE_DIR
     market_code = str(market or "AE").upper().strip() or "AE"
@@ -118,7 +119,7 @@ def build_review_queue(
     if requested_status not in {"pending", "assessed", "all"}:
         requested_status = "pending"
 
-    latest_assessments = _latest_assessments_by_evidence(root)
+    latest_assessments = _latest_assessments_by_evidence(root, org_id=org_id)
     rows: list[dict[str, Any]] = []
     for run in _read_runs(root, market_code):
         evidence_id = str(run.get("run_id") or "").strip()
@@ -280,9 +281,12 @@ def _queue_row(
     }
 
 
-def _latest_assessments_by_evidence(root: Path) -> dict[str, dict[str, Any]]:
+def _latest_assessments_by_evidence(root: Path, org_id: Any = None) -> dict[str, dict[str, Any]]:
+    """Latest assessment per evidence record, SCOPED to ``org_id`` when given so
+    the queue never shows another tenant's private review notes."""
     latest: dict[str, dict[str, Any]] = {}
-    for row in load_assessments(base_dir=root):
+    kw = {} if org_id is None else {"org_id": org_id}
+    for row in load_assessments(base_dir=root, **kw):
         evidence_id = str(row.get("evidence_record_id") or "")
         if evidence_id:
             latest[evidence_id] = row

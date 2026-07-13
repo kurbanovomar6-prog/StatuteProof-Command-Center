@@ -329,6 +329,17 @@ def _entry_from_record(
         logger.warning("build_evidence_pack: skipping %s (normalized bytes != recorded hash)", record_id)
         return None
 
+    # Same protection for the RAW capture. The manifest and HOW-TO-VERIFY tell the
+    # auditor these are the hashes recorded at capture time, so a post-capture
+    # edit to raw.txt must never ship as PASS. Compare disk bytes to the sealed
+    # content.raw_hash and skip on mismatch; use the recorded value in the manifest.
+    recorded_raw = str(content.get("raw_hash") or "").strip().lower().removeprefix("sha256:")
+    if recorded_raw and recorded_raw != raw_hash:
+        logger.warning("build_evidence_pack: skipping %s (raw bytes != recorded raw_hash)", record_id)
+        return None
+    if recorded_raw:
+        raw_hash = recorded_raw
+
     safe_id = _safe_arc(record_id)
     return {
         "record_id": record_id,

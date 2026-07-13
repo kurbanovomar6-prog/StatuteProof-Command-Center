@@ -599,3 +599,82 @@ def test_register_at_record_cap_is_not_rejected(tmp_path, monkeypatch):
     # the point is that the cap check itself allowed the export to proceed.
     rows = cr.build_change_register_rows(base_dir=tmp_path)
     assert rows == []
+
+
+# ── CSV formula-injection neutralization ──────────────────────────────────────
+
+def test_csv_neutralizes_formula_injection_in_authored_fields():
+    """Human-authored cells that begin with a formula trigger (= + - @) must be
+    prefixed with a single quote so a spreadsheet renders them as text."""
+    rows = [{
+        "date": "2026-07-13",
+        "source_name": "DFSA",
+        "regulator_code": "DFSA",
+        "change_summary": "=HYPERLINK(\"http://evil\",\"click\")",
+        "normalized_hash": "sha256:abc",
+        "risk_level": "MEDIUM",
+        "reviewer": "@attacker",
+        "impact_action": "+1+1",
+        "next_action": "-2+3",
+        "status": "reviewed",
+        "proof_reference": "run-1",
+    }]
+    meta = {
+        "generated_at_utc": "2026-07-13T00:00:00Z", "row_count": "1",
+        "date_from": "(unbounded)", "date_to": "(unbounded)",
+        "source_id": "(all)", "regulator": "(all)",
+    }
+    csv_text = render_change_register_csv(rows, meta)
+    # Each dangerous cell is quoted; the raw formula never starts a field.
+    assert "'=HYPERLINK" in csv_text
+    assert "'@attacker" in csv_text
+    assert "'+1+1" in csv_text
+    assert "'-2+3" in csv_text
+    # A leading '=' must never begin a CSV field (which is what Excel executes).
+    for line in csv_text.splitlines():
+        for field in line.split(","):
+            assert not field.lstrip('"').startswith("="), field
+
+
+def test_xlsx_neutralizes_formula_injection():
+    """openpyxl treats a string starting with '=' as a live formula, so the XLSX
+    renderer must apply the same guard as CSV."""
+    from openpyxl import load_workbook
+
+    rows = [{
+        "date": "2026-07-13", "source_name": "DFSA", "regulator_code": "DFSA",
+        "change_summary": "=1+1", "normalized_hash": "sha256:abc",
+        "risk_level": "LOW", "reviewer": "@x", "impact_action": "monitor",
+        "next_action": "-2+3", "status": "reviewed", "proof_reference": "run-1",
+    }]
+    meta = {
+        "generated_at_utc": "2026-07-13T00:00:00Z", "row_count": "1",
+        "date_from": "(unbounded)", "date_to": "(unbounded)",
+        "source_id": "(all)", "regulator": "(all)",
+    }
+    data = render_change_register_xlsx(rows, meta)
+    wb = load_workbook(io.BytesIO(data))
+    ws = wb.active
+    formula_cells = [
+        c.value for r in ws.iter_rows() for c in r
+        if isinstance(c.value, str) and c.value[:1] in ("=", "+", "-", "@")
+    ]
+    # No cell begins with a raw formula trigger — each dangerous cell was quoted.
+    assert formula_cells == [], formula_cells
+
+
+def test_csv_leaves_safe_cells_unchanged():
+    rows = [{
+        "date": "2026-07-13", "source_name": "DFSA", "regulator_code": "DFSA",
+        "change_summary": "Section 7 amended", "normalized_hash": "sha256:abc",
+        "risk_level": "LOW", "reviewer": "Alice", "impact_action": "monitor",
+        "next_action": "none", "status": "reviewed", "proof_reference": "run-1",
+    }]
+    meta = {
+        "generated_at_utc": "2026-07-13T00:00:00Z", "row_count": "1",
+        "date_from": "(unbounded)", "date_to": "(unbounded)",
+        "source_id": "(all)", "regulator": "(all)",
+    }
+    csv_text = render_change_register_csv(rows, meta)
+    assert "Section 7 amended" in csv_text
+    assert "'Section" not in csv_text

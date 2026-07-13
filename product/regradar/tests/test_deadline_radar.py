@@ -301,6 +301,7 @@ def test_reminder_fires_once_per_lead_stage(tmp_path):
             base_dir=tmp_path,
             send_fn=fake_send,
             recipients=["123"],
+            require_review_approval=False,  # timing/dedup test — review gate covered separately
         )
 
     # too far out -> no reminder
@@ -330,6 +331,7 @@ def test_reminder_discovered_late_only_fires_applicable_stage(tmp_path):
             base_dir=tmp_path,
             send_fn=lambda c, t: True,
             recipients=["1"],
+            require_review_approval=False,
         )
 
     # discovered 3 days out: fire the 7-day stage (most urgent applicable),
@@ -348,6 +350,7 @@ def test_reminder_never_fires_for_past_deadline(tmp_path):
         base_dir=tmp_path,
         send_fn=lambda c, t: True,
         recipients=["1"],
+        require_review_approval=False,
     )
     assert summary["due"] == 0
     assert summary["sent"] == []
@@ -359,6 +362,7 @@ def test_reminder_not_logged_when_no_recipient_delivers(tmp_path):
     s1 = dr.send_due_reminders(
         as_of=DEADLINE - timedelta(days=7), base_dir=tmp_path,
         send_fn=lambda c, t: True, recipients=[],
+        require_review_approval=False,
     )
     assert s1["sent"] == [] and s1["skipped_no_recipients"] == 1
     assert dr._load_jsonl(dr.deadline_reminders_path(tmp_path)) == []
@@ -367,6 +371,7 @@ def test_reminder_not_logged_when_no_recipient_delivers(tmp_path):
     s2 = dr.send_due_reminders(
         as_of=DEADLINE - timedelta(days=7), base_dir=tmp_path,
         send_fn=lambda c, t: False, recipients=["1"],
+        require_review_approval=False,
     )
     assert s2["sent"] == [] and s2["failed"] == 1
     assert dr._load_jsonl(dr.deadline_reminders_path(tmp_path)) == []
@@ -375,8 +380,60 @@ def test_reminder_not_logged_when_no_recipient_delivers(tmp_path):
     s3 = dr.send_due_reminders(
         as_of=DEADLINE - timedelta(days=7), base_dir=tmp_path,
         send_fn=lambda c, t: True, recipients=["1"],
+        require_review_approval=False,
     )
     assert [x["lead_stage"] for x in s3["sent"]] == [7]
+
+
+# ── human-review gate: unreviewed deadlines are not broadcast ─────────────────
+
+def test_reminder_held_until_parent_record_approved(tmp_path, monkeypatch):
+    """A deadline whose parent evidence record is not human-approved must be
+    held (never broadcast rule-extracted dates + diff excerpts unreviewed)."""
+    _seed_one(tmp_path, ev_id="run_gate")
+    sent: list[str] = []
+
+    # Not yet reviewed -> held.
+    monkeypatch.setattr(
+        "app.evidence_records.latest_canonical_evidence_review",
+        lambda ev, **k: None,
+    )
+    s = dr.send_due_reminders(
+        as_of=DEADLINE - timedelta(days=7), base_dir=tmp_path,
+        send_fn=lambda c, t: sent.append(t) or True, recipients=["1"],
+    )
+    assert s["sent"] == []
+    assert s["skipped_unreviewed"] == 1
+    assert sent == []
+    assert dr._load_jsonl(dr.deadline_reminders_path(tmp_path)) == []
+
+    # Parent record approved -> the same reminder now fires.
+    monkeypatch.setattr(
+        "app.evidence_records.latest_canonical_evidence_review",
+        lambda ev, **k: {"decision": "approved"},
+    )
+    s2 = dr.send_due_reminders(
+        as_of=DEADLINE - timedelta(days=7), base_dir=tmp_path,
+        send_fn=lambda c, t: sent.append(t) or True, recipients=["1"],
+    )
+    assert [x["lead_stage"] for x in s2["sent"]] == [7]
+    assert len(sent) == 1
+
+
+def test_reminder_not_sent_when_parent_rejected(tmp_path, monkeypatch):
+    _seed_one(tmp_path, ev_id="run_rej")
+    monkeypatch.setattr(
+        "app.evidence_records.latest_canonical_evidence_review",
+        lambda ev, **k: {"decision": "rejected"},
+    )
+    sent: list[str] = []
+    s = dr.send_due_reminders(
+        as_of=DEADLINE - timedelta(days=7), base_dir=tmp_path,
+        send_fn=lambda c, t: sent.append(t) or True, recipients=["1"],
+    )
+    assert s["sent"] == []
+    assert s["skipped_unreviewed"] == 1
+    assert sent == []
 
 
 # ── legal safety: disclaimer + forbidden-claims guard ─────────────────────────

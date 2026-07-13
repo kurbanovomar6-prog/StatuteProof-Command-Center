@@ -70,7 +70,9 @@ def _deliver_alert_to_subscribed_users(message: str, *, source_id: object = None
     sent = 0
     for chat_id in chat_ids:
         try:
-            if send_telegram_message(str(chat_id), message):
+            # Render Markdown so customers see formatted alerts (bold severity,
+            # etc.) — the same formatting the founder-fallback path already uses.
+            if send_telegram_message(str(chat_id), message, parse_mode="Markdown"):
                 sent += 1
         except Exception as exc:
             logger.warning("_deliver_alert_to_subscribed_users: failed for chat_id=%s: %s", chat_id, exc)
@@ -112,38 +114,54 @@ _MATERIALITY_LABEL = {
 }
 
 
-def send_telegram_message(chat_id: str, text: str) -> bool:
-    """Send a plain account-scoped Telegram message to the provided chat_id."""
+def send_telegram_message(chat_id: str, text: str, parse_mode: str | None = None) -> bool:
+    """Send an account-scoped Telegram message to the provided chat_id.
+
+    ``parse_mode`` (e.g. "Markdown") is applied when set so customers see the
+    same formatted alert the founder-fallback path already renders — without it,
+    the ``*bold*`` / ``_italic_`` markers show up as literal characters. If
+    Telegram rejects the formatted message (HTTP 400 "can't parse entities"), the
+    message is retried once as plain text so a formatting quirk never drops a
+    customer alert (the auto path does not rebuild a lost alert).
+    """
     token = _ts.get_token()
     if not token or not str(chat_id).strip():
         logger.warning("Telegram message skipped — bot token or target chat_id missing")
         return False
-    try:
-        resp = requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={
-                "chat_id": str(chat_id).strip(),
-                "text": str(text),
-                "disable_web_page_preview": True,
-            },
-            timeout=_TELEGRAM_TIMEOUT_S,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        if data.get("ok"):
-            logger.info("Account Telegram test message sent")
-            return True
-        logger.warning("Telegram message API error: %s", data.get("description"))
-        return False
-    except requests.Timeout:
-        logger.warning("Telegram message timed out after %ds", _TELEGRAM_TIMEOUT_S)
-        return False
-    except requests.HTTPError as exc:
-        logger.warning("Telegram message HTTP error: %s", exc)
-        return False
-    except Exception as exc:
-        logger.warning("Telegram message failed (%s: %s)", type(exc).__name__, exc)
-        return False
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    base_payload = {
+        "chat_id": str(chat_id).strip(),
+        "text": str(text),
+        "disable_web_page_preview": True,
+    }
+    # First attempt uses parse_mode (if any); on a markdown parse error fall back
+    # to a plain-text attempt so the customer still receives the alert.
+    modes = [parse_mode, None] if parse_mode else [None]
+    last_desc: str | None = None
+    for attempt, mode in enumerate(modes):
+        payload = dict(base_payload)
+        if mode:
+            payload["parse_mode"] = mode
+        try:
+            resp = requests.post(url, json=payload, timeout=_TELEGRAM_TIMEOUT_S)
+            data = resp.json() if resp.content else {}
+            if resp.status_code == 200 and data.get("ok"):
+                return True
+            last_desc = data.get("description") if isinstance(data, dict) else None
+            if mode and resp.status_code == 400 and attempt + 1 < len(modes):
+                logger.warning(
+                    "Telegram %s parse failed (%s) — retrying as plain text", mode, last_desc
+                )
+                continue
+            logger.warning("Telegram message API error: %s", last_desc)
+            return False
+        except requests.Timeout:
+            logger.warning("Telegram message timed out after %ds", _TELEGRAM_TIMEOUT_S)
+            return False
+        except Exception as exc:
+            logger.warning("Telegram message failed (%s: %s)", type(exc).__name__, exc)
+            return False
+    return False
 
 
 def _safe(text: str, max_len: int) -> str:

@@ -34,7 +34,12 @@ _MONTH_NAMES = [
 
 
 def _zero_stats(year: int, month: int, *, is_estimate: bool = True) -> dict[str, Any]:
-    """Return a zero-counts stats dict for the given period."""
+    """Return a zero-counts stats dict for the given period.
+
+    ``unreviewed_count`` is None (unknown), never 0 — asserting "0 pending review"
+    when the review backlog was not actually measured is a false negative-assurance
+    statement to the compliance officer the report is written for.
+    """
     return {
         "period_label": f"{_MONTH_NAMES[month]} {year}",
         "year": year,
@@ -47,12 +52,51 @@ def _zero_stats(year: int, month: int, *, is_estimate: bool = True) -> dict[str,
         "medium_risk_count": 0,
         "low_risk_count": 0,
         "non_material_count": 0,
-        "unreviewed_count": 0,
+        "unreviewed_count": None,
         "sources_with_errors": 0,
         "uptime_pct": None,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "is_estimate": is_estimate,
     }
+
+
+def _urls_for_source_ids(source_ids: list[str]) -> list[str]:
+    """Resolve opaque source_ids (``make_source_id`` slugs) to their configured
+    URLs.
+
+    The ``documents`` table stores ``url``, not ``source_id`` — filtering the
+    caller-supplied slugs directly against ``url`` never matched, so every
+    source-scoped report silently returned zero stats. This maps each requested
+    id to its source URL(s) so the query can filter correctly. Unknown ids
+    contribute nothing (they simply do not appear in the resolved URL set).
+    """
+    wanted = {str(s).strip() for s in (source_ids or []) if str(s).strip()}
+    if not wanted:
+        return []
+    try:
+        from app.source_intake import load_sources_json
+        from app.source_runs import make_source_id
+    except Exception:  # noqa: BLE001 — resolution failure must not widen the query
+        return []
+    urls: list[str] = []
+    for src in load_sources_json():
+        try:
+            sid = make_source_id(src)
+        except Exception:  # noqa: BLE001
+            continue
+        if sid in wanted:
+            url = str(src.get("url") or "").strip()
+            if url and url not in urls:
+                urls.append(url)
+    return urls
+
+
+# NOTE: a per-customer, per-period, per-source pending-review count is not
+# computable from build_review_queue (which is global, all-time, and counts runs
+# rather than material changes). Reporting that global number in a per-customer,
+# source-scoped assurance report would be BOTH cross-tenant-leaky AND overstated,
+# so the report deliberately reports "unknown" (None) and points the reader to
+# the live workspace review queue instead of fabricating a figure.
 
 
 def compute_monthly_stats(
@@ -89,13 +133,19 @@ def compute_monthly_stats(
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         try:
-            # Build optional source filter
+            # Build optional source filter. source_ids are opaque slugs; the
+            # documents table keys on url, so resolve slugs -> urls first. If
+            # named sources resolve to no known url, return an honest zero-stat
+            # scope rather than silently widening back to every source.
             source_filter = ""
             params_base: list[Any] = [period_start, period_end]
             if source_ids:
-                placeholders = ",".join("?" * len(source_ids))
+                urls = _urls_for_source_ids(source_ids)
+                if not urls:
+                    return _zero_stats(year, month, is_estimate=True)
+                placeholders = ",".join("?" * len(urls))
                 source_filter = f" AND url IN ({placeholders})"
-                params_base.extend(source_ids)
+                params_base.extend(urls)
 
             rows = conn.execute(
                 f"""
@@ -172,7 +222,9 @@ def compute_monthly_stats(
             "medium_risk_count": medium_risk_count,
             "low_risk_count": low_risk_count,
             "non_material_count": non_material_count,
-            "unreviewed_count": 0,  # placeholder — review queue is filesystem-backed
+            # Unknown (not a fabricated or cross-tenant number) — see the note on
+            # _zero_stats and the removed _pending_review_count above.
+            "unreviewed_count": None,
             "sources_with_errors": len(sources_with_errors),
             "uptime_pct": uptime_pct,
             "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -255,12 +307,21 @@ def render_assurance_report_markdown(
         "",
     ]
 
-    # Review Status
-    unreviewed = stats.get("unreviewed_count", 0)
+    # Review Status — never assert a count that was not measured.
+    unreviewed = stats.get("unreviewed_count")
+    if isinstance(unreviewed, int):
+        review_line = (
+            f"{unreviewed} change(s) pending human review as of report generation."
+        )
+    else:
+        review_line = (
+            "Pending human-review items are tracked in your workspace review queue. "
+            "See the dashboard review queue for the current count."
+        )
     lines += [
         "## Review Status",
         "",
-        f"{unreviewed} change(s) pending human review.",
+        review_line,
         "",
     ]
 

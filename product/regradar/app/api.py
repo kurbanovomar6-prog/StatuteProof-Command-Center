@@ -41,6 +41,9 @@ from app.auth import (
     exchange_google_oauth_code,
     generate_verification_token,
     consume_verification_token,
+    generate_password_reset_token,
+    consume_password_reset_token,
+    set_user_password,
     mark_email_verified,
     get_user_by_email,
     google_oauth_authorization_url,
@@ -64,6 +67,7 @@ from app.config import (
     TELEGRAM_CHAT_ID,
 )
 from app.email_delivery import send_verification_email as _send_verification_email
+from app.email_delivery import send_password_reset_email as _send_password_reset_email
 from app.profile import get_or_create_profile, update_profile
 from app.telegram import send_telegram_message
 from app.telegram_pairing import (
@@ -496,6 +500,17 @@ class _Handler(BaseHTTPRequestHandler):
         )
         return False
 
+    def _caller_org_id(self, user: dict):
+        """Resolve the caller's tenant (org) id for scoping PRIVATE per-tenant
+        data — Acknowledge & Assess notes and review state. Returns the org id or
+        None. Never raises; on failure returns None, and the assessment layer
+        treats None as the empty legacy bucket, so a resolution failure ISOLATES
+        (shows nothing) rather than leaking another tenant's notes."""
+        try:
+            return rbac_runtime.resolve_principal(user).org_id
+        except Exception:  # noqa: BLE001 — unknown tenant must isolate, not leak
+            return None
+
     def _rbac_guard(
         self,
         user: dict,
@@ -787,14 +802,23 @@ class _Handler(BaseHTTPRequestHandler):
         self._send_json({"ok": False, "message": "This endpoint is not available."}, 403)
 
     def _handle_health(self) -> None:
-        """Return a rich health payload for uptime monitors and ops dashboards."""
+        """Return a health payload for uptime monitors and ops dashboards.
+
+        ``ok`` reflects real health: it is False (and the response is HTTP 503)
+        when the database is unreachable OR the last monitoring run is stale
+        beyond 2x the watch interval. Uptime monitors that key on HTTP status
+        therefore see failure; the dashboard (which reads ``ok`` from the JSON
+        body regardless of status) shows "degraded". Only the tail of the trail
+        is read so an unauthenticated probe cannot force an unbounded file scan.
+        """
         import json as _json_mod
         from datetime import datetime, timezone
-        from pathlib import Path as _Path
 
+        from app.config import BASE_DIR as _BASE_DIR, WATCH_INTERVAL_MINUTES as _WATCH_MIN
         from app.sources import get_enabled_sources
 
-        now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        now = datetime.now(timezone.utc)
+        now_iso = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         # Count active (enabled) sources — fast; reads sources.json once.
         try:
@@ -802,16 +826,23 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception:
             active_count = -1
 
-        # Scan source_runs.jsonl for last run timestamp and CHANGED count.
-        # Only reads the file once; stops if we've found what we need.
+        # Read only the tail of source_runs.jsonl for the last run timestamp and a
+        # recent CHANGED count. Appends are chronological, so the newest timestamp
+        # is in the tail. Uses BASE_DIR so a STATUTEPROOF_BASE_DIR override reads
+        # the same tree the rest of the app writes.
         last_run_at: str = ""
-        changed_count = 0
-        runs_file = _Path(__file__).resolve().parent.parent / "data" / "source_runs" / "source_runs.jsonl"
+        recent_changed_count = 0
+        runs_file = _BASE_DIR / "data" / "source_runs" / "source_runs.jsonl"
+        _TAIL_BYTES = 262_144
         try:
             if runs_file.exists():
-                with runs_file.open(encoding="utf-8") as fh:
-                    for line in fh:
-                        line = line.strip()
+                size = runs_file.stat().st_size
+                with runs_file.open("rb") as fh:
+                    if size > _TAIL_BYTES:
+                        fh.seek(size - _TAIL_BYTES)
+                        fh.readline()  # discard the partial first line after the seek
+                    for raw in fh:
+                        line = raw.decode("utf-8", "replace").strip()
                         if not line:
                             continue
                         try:
@@ -822,7 +853,7 @@ class _Handler(BaseHTTPRequestHandler):
                         if ts > last_run_at:
                             last_run_at = ts
                         if rec.get("change_status") == "CHANGED":
-                            changed_count += 1
+                            recent_changed_count += 1
         except Exception:
             pass
 
@@ -836,16 +867,33 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception:
             db_status = "unavailable"
 
+        # Staleness: a recorded last run older than 2x the watch interval means the
+        # monitor has stopped producing runs. No run yet (fresh deploy) is not
+        # treated as stale — absence of data is not a failure signal here.
+        stale = False
+        if last_run_at:
+            try:
+                parsed = datetime.fromisoformat(last_run_at.replace("Z", "+00:00"))
+                if parsed.tzinfo is None:
+                    parsed = parsed.replace(tzinfo=timezone.utc)
+                age_min = (now - parsed).total_seconds() / 60.0
+                stale = age_min > (2 * max(1, int(_WATCH_MIN)))
+            except (ValueError, TypeError):
+                stale = False
+
+        ok = db_status == "connected" and not stale
         self._send_json(
             {
-                "ok": True,
+                "ok": ok,
                 "version": "1.0",
                 "db": db_status,
+                "stale": stale,
                 "sources_active": active_count,
                 "last_run_at": last_run_at or None,
-                "changed_count": changed_count,
+                "changed_count": recent_changed_count,
                 "timestamp_utc": now_iso,
-            }
+            },
+            200 if ok else 503,
         )
 
     def _handle_public_verify(self) -> None:
@@ -1133,6 +1181,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_reviews_queue_get()
         elif path == "/api/canonical-evidence":
             self._handle_canonical_evidence_get()
+        elif path == "/api/audit-log":
+            self._handle_audit_log_get()
         elif path == "/api/briefs":
             self._handle_briefs_list()
         elif path == "/api/plan":
@@ -1186,6 +1236,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_auth_logout()
         elif path == "/api/auth/resend-verification":
             self._handle_auth_resend_verification()
+        elif path == "/api/auth/forgot-password":
+            self._handle_auth_forgot_password()
+        elif path == "/api/auth/reset-password":
+            self._handle_auth_reset_password()
         elif path == "/api/plan":
             self._handle_plan_set()
         elif path == "/api/telegram/pair/generate":
@@ -1425,6 +1479,69 @@ class _Handler(BaseHTTPRequestHandler):
             daemon=True,
         ).start()
         self._send_json({"ok": True, "message": "Verification email sent. Check your inbox."}, 200)
+
+    def _handle_auth_forgot_password(self) -> None:
+        """POST /api/auth/forgot-password {email} — always returns a generic
+        success (no user enumeration). If the account exists, emails a 2-hour
+        single-use reset link."""
+        if self._rate_limited(_REGISTER_LIMITER, "auth_forgot"):
+            return
+        body, error = self._read_json_strict()
+        if error or body is None:
+            self._send_json({"ok": False, "message": "Request body with email required."}, 400)
+            return
+        email = normalize_email(body.get("email", ""))
+        generic = {"ok": True, "message": "If that email is registered, a password reset link has been sent."}
+        if not validate_email(email):
+            # Same generic response — never reveal validity/existence.
+            self._send_json(generic, 200)
+            return
+        try:
+            issued = generate_password_reset_token(email)
+        except Exception as exc:
+            logger.error("forgot-password token issue failed: %s", type(exc).__name__)
+            self._send_json(generic, 200)
+            return
+        if issued:
+            token, _uid = issued
+            reset_url = f"{self._base_url()}/reset-password?token={token}"
+            import threading as _threading
+            _threading.Thread(
+                target=_send_password_reset_email,
+                args=(email, reset_url),
+                daemon=True,
+            ).start()
+        self._send_json(generic, 200)
+
+    def _handle_auth_reset_password(self) -> None:
+        """POST /api/auth/reset-password {token, password} — consume the reset
+        token, set the new password, and log the user out everywhere."""
+        if self._rate_limited(_REGISTER_LIMITER, "auth_reset"):
+            return
+        body, error = self._read_json_strict()
+        if error or body is None:
+            self._send_json({"ok": False, "message": "Request body with token and password required."}, 400)
+            return
+        token = str(body.get("token") or "").strip()
+        new_password = str(body.get("password") or "")
+        if not token:
+            self._send_json({"ok": False, "message": "Reset token is required."}, 400)
+            return
+        ok, msg = validate_password(new_password)
+        if not ok:
+            self._send_json({"ok": False, "message": msg}, 400)
+            return
+        try:
+            user_id = consume_password_reset_token(token)
+            if user_id is None:
+                self._send_json({"ok": False, "message": "This reset link is invalid or has expired."}, 400)
+                return
+            set_user_password(user_id, new_password)
+        except Exception as exc:
+            logger.error("reset-password failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+            return
+        self._send_json({"ok": True, "message": "Your password has been reset. Please sign in with your new password."}, 200)
 
     def _handle_auth_me(self) -> None:
         user = require_auth(self)
@@ -2398,7 +2515,9 @@ class _Handler(BaseHTTPRequestHandler):
                     last_evidence_at = None
 
                 try:
-                    timeline_event_count = int(build_source_timeline(source_id, limit=200).get("total_events") or 0)
+                    timeline_event_count = int(build_source_timeline(
+                        source_id, org_id=self._caller_org_id(user), limit=200
+                    ).get("total_events") or 0)
                 except Exception:
                     timeline_event_count = 0
 
@@ -2483,7 +2602,9 @@ class _Handler(BaseHTTPRequestHandler):
                 limit = int((params.get("limit") or ["100"])[0])
             except (TypeError, ValueError):
                 limit = 100
-            timeline = build_source_timeline(source_id, limit=max(1, min(limit, 200)))
+            timeline = build_source_timeline(
+                source_id, org_id=self._caller_org_id(user), limit=max(1, min(limit, 200))
+            )
             self._send_json(timeline)
         except ValueError as exc:
             self._send_json({"ok": False, "message": str(exc)}, 400)
@@ -2638,7 +2759,8 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             from app.evidence_assessment import latest_assessment_for
 
-            assessment = latest_assessment_for(evidence_id)
+            # Scope to the caller's org — assessment notes are private per-tenant.
+            assessment = latest_assessment_for(evidence_id, org_id=self._caller_org_id(user))
             self._send_json({
                 "ok": True,
                 "evidence_record_id": evidence_id,
@@ -2665,7 +2787,7 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             from app.source_health_timeline import build_evidence_review_history
 
-            history = build_evidence_review_history(evidence_id)
+            history = build_evidence_review_history(evidence_id, org_id=self._caller_org_id(user))
             self._send_json(history)
         except ValueError as exc:
             self._send_json({"ok": False, "message": str(exc)}, 400)
@@ -2705,6 +2827,7 @@ class _Handler(BaseHTTPRequestHandler):
                 next_action=str(body.get("next_action") or "").strip(),
                 reviewer_user_id=int(user["id"]),
                 reviewer_name=str(user.get("full_name") or user.get("email") or "Reviewer"),
+                org_id=self._caller_org_id(user),
             )
             self._send_json({"ok": True, "assessment": assessment}, 201)
         except ValueError as exc:
@@ -2728,15 +2851,24 @@ class _Handler(BaseHTTPRequestHandler):
         if self._evidence_source_out_of_scope(user, evidence_id):
             self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
+        export_format = (str((params.get("format") or ["md_html"])[0]).strip().lower() or "md_html")
+        # Paywall: the per-record audit pack is a paid deliverable and is gated
+        # exactly like every bulk export (audit vault, evidence pack, monthly
+        # assurance). A free evidence_preview account has audit_export/pdf_export
+        # off and is rejected here before any export work happens.
+        if not self._require_capability(user, "audit_export"):
+            return
+        if export_format in {"pdf", "application/pdf"} and not self._require_capability(user, "pdf_export"):
+            return
         # RBAC Stage-2 (Part A): record the authorized evidence export. Additive
         # audit only — never blocks or alters the export.
         self._rbac_log_export(user, resource_id=evidence_id)
-        export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
         customer_delivery = _truthy_param((params.get("customer_delivery") or ["false"])[0])
         self._write_evidence_export(
             evidence_id,
             export_format=export_format,
             customer_delivery=customer_delivery,
+            org_id=self._caller_org_id(user),
         )
 
     def _handle_evidence_export_download(self) -> None:
@@ -2757,15 +2889,20 @@ class _Handler(BaseHTTPRequestHandler):
         if self._evidence_source_out_of_scope(user, evidence_id):
             self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
+        export_format = (str((params.get("format") or ["md_html"])[0]).strip().lower() or "md_html")
+        # Paywall: same paid-export gate as the bulk endpoints (see _handle_evidence_export_get).
+        if not self._require_capability(user, "audit_export"):
+            return
+        if export_format in {"pdf", "application/pdf"} and not self._require_capability(user, "pdf_export"):
+            return
         # RBAC Stage-2 (Part A): record the authorized evidence export/download.
         self._rbac_log_export(user, resource_id=evidence_id)
-        export_format = str((params.get("format") or ["md_html"])[0]).strip() or "md_html"
         try:
             from app.audit_export import write_audit_pack, write_audit_pack_pdf
             from app.evidence_assessment import find_evidence_record, latest_assessment_for
 
             record = find_evidence_record(evidence_id)
-            assessment = latest_assessment_for(evidence_id)
+            assessment = latest_assessment_for(evidence_id, org_id=self._caller_org_id(user))
 
             want_pdf = export_format in {"pdf", "application/pdf"}
             if want_pdf:
@@ -2825,6 +2962,7 @@ class _Handler(BaseHTTPRequestHandler):
                 change_status=str((params.get("change_status") or [""])[0]).strip() or None,
                 source_id=str((params.get("source_id") or [""])[0]).strip() or None,
                 excluded_source_ids=self._denied_custom_source_ids(user),
+                org_id=self._caller_org_id(user),
                 limit=limit,
             )
             self._send_json(queue)
@@ -2850,6 +2988,55 @@ class _Handler(BaseHTTPRequestHandler):
             logger.error("canonical evidence list failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
+    def _handle_audit_log_get(self) -> None:
+        """GET /api/audit-log — owner-scoped, read-only view of the append-only
+        access log.
+
+        The access log records who did what, when, allowed or denied. Until now it
+        had no reader, so the record that justifies its append-only triggers could
+        not be shown to a customer, an auditor, or the founder without raw SQLite.
+        This returns ONLY the caller's org rows (never another tenant's) and is
+        gated to the workspace owner.
+        """
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        try:
+            principal = rbac_runtime.resolve_principal(user)
+            if principal.role != rbac_runtime.ROLE_OWNER:
+                self._send_json(
+                    {"ok": False, "message": "Only the workspace owner can view the audit log."},
+                    403,
+                )
+                return
+            # FAIL CLOSED on an unresolved org. resolve_principal fail-safes to
+            # Principal(org_id=None, role=owner) on a missing membership or a DB
+            # error; passing org_id=None to read_access_log would return EVERY
+            # tenant's rows (cross-tenant disclosure). Never scope-less read here.
+            if principal.org_id is None:
+                self._send_json(
+                    {"ok": False, "message": "Your workspace could not be resolved. Try again later."},
+                    403,
+                )
+                return
+            params = parse_qs(urlparse(self.path).query)
+            try:
+                limit = int((params.get("limit") or ["100"])[0])
+            except (TypeError, ValueError):
+                limit = 100
+            rows = rbac_runtime.read_access_log(limit=limit, org_id=principal.org_id)
+            self._send_json({
+                "ok": True,
+                "org_id": principal.org_id,
+                "entries": rows,
+                "count": len(rows),
+                "disclaimer": "Read-only access log. Append-only; entries cannot be edited or deleted.",
+            })
+        except Exception as exc:
+            logger.error("audit-log read failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
     def _handle_evidence_export_post(self) -> None:
         user = require_auth(self)
         if not user:
@@ -2871,14 +3058,20 @@ class _Handler(BaseHTTPRequestHandler):
         if self._evidence_source_out_of_scope(user, evidence_id):
             self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
             return
+        export_format = (str(body.get("format") or "md_html").strip().lower() or "md_html")
+        # Paywall: same paid-export gate as the bulk endpoints (see _handle_evidence_export_get).
+        if not self._require_capability(user, "audit_export"):
+            return
+        if export_format in {"pdf", "application/pdf"} and not self._require_capability(user, "pdf_export"):
+            return
         # RBAC Stage-2 (Part A): record the authorized evidence export.
         self._rbac_log_export(user, resource_id=evidence_id)
-        export_format = str(body.get("format") or "md_html").strip() or "md_html"
         customer_delivery = _truthy_param(body.get("customer_delivery"))
         self._write_evidence_export(
             evidence_id,
             export_format=export_format,
             customer_delivery=customer_delivery,
+            org_id=self._caller_org_id(user),
         )
 
     def _write_evidence_export(
@@ -2887,6 +3080,7 @@ class _Handler(BaseHTTPRequestHandler):
         *,
         export_format: str = "md_html",
         customer_delivery: bool = False,
+        org_id=None,
     ) -> None:
         try:
             from app.audit_export import build_audit_pack_export_response, build_customer_audit_pack_export_response
@@ -2901,7 +3095,8 @@ class _Handler(BaseHTTPRequestHandler):
                 return
 
             record = find_evidence_record(evidence_id)
-            assessment = latest_assessment_for(evidence_id)
+            # Attach only the caller's own org's assessment to their audit pack.
+            assessment = latest_assessment_for(evidence_id, org_id=org_id)
             response = build_audit_pack_export_response(
                 record,
                 assessment=assessment,
@@ -4600,6 +4795,7 @@ class _Handler(BaseHTTPRequestHandler):
                 regulator=regulator,
                 export_format=export_format,
                 excluded_source_ids=excluded_source_ids,
+                org_id=self._caller_org_id(user),
             )
             if result.get("status") == "error":
                 self._send_json({"ok": False, **result}, 400)

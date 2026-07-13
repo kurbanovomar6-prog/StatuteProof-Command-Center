@@ -1,0 +1,33 @@
+# Test + coverage configuration for the StatuteProof product (regradar).
+# Coverage is measured and RATCHETED in CI: the fail_under floor sits just below
+# the current measured line coverage so a regression fails the build, and the
+# floor is raised as coverage climbs toward the 80% target.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "unit: fast, isolated unit tests",
+    "integration: tests that exercise multiple modules or the HTTP handler",
+]
+
+[tool.coverage.run]
+source = ["app"]
+branch = false
+omit = [
+    "app/__pycache__/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+# Current measured line coverage is ~68% (23,492 statements). This floor is a
+# non-regression ratchet — raise it (never lower it) as coverage improves toward
+# the 80% project target.
+fail_under = 66
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

@@ -145,6 +145,16 @@ _CREATE_EMAIL_VERIFICATION_TOKENS_TABLE = """
     );
     CREATE INDEX IF NOT EXISTS idx_evtokens_user_id ON email_verification_tokens(user_id);
     CREATE INDEX IF NOT EXISTS idx_evtokens_expires ON email_verification_tokens(expires_at);
+
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        token TEXT PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        created_at TIMESTAMP NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        used_at TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_prtokens_user_id ON password_reset_tokens(user_id);
+    CREATE INDEX IF NOT EXISTS idx_prtokens_expires ON password_reset_tokens(expires_at);
 """
 
 _CREATE_ACTION_LOG_TABLE = """

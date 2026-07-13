@@ -771,6 +771,17 @@ def _canonical_record_id(source_id: str, run_id: str) -> str:
     return f"evr_{seed}"
 
 
+def canonical_record_id(source_id: str, run_id: str) -> str:
+    """Public: the canonical evidence ``record_id`` for a (source_id, run_id).
+
+    Canonical evidence records and their human reviews key on this derived id
+    (``evr_<source>_<run>``), NOT on the raw ``run_id``. Callers that hold only a
+    run_id (e.g. the deadline radar, whose entries store the run_id) must resolve
+    through here before looking up a review, or the lookup will never match.
+    """
+    return _canonical_record_id(source_id, run_id)
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 

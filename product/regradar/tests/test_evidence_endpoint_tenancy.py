@@ -30,12 +30,24 @@ PRODUCT_DIR = str(Path(__file__).resolve().parents[1])
 if PRODUCT_DIR not in sys.path:
     sys.path.insert(0, PRODUCT_DIR)
 
+import pytest
+
 import app.api as api
 import app.evidence_assessment as evidence_assessment
 import app.source_health_timeline as source_health_timeline
 import app.review_queue as review_queue
 import app.evidence_records as evidence_records
 from app.api import _Handler
+
+
+@pytest.fixture(autouse=True)
+def _deterministic_org(monkeypatch):
+    """In these tenancy tests the caller's org == their user id, so the owner
+    resolves to the org that owns the seeded assessment and note-org-scoping is
+    deterministic (independent of any backfill state in the shared DB)."""
+    monkeypatch.setattr(
+        api._Handler, "_caller_org_id", lambda self, user: str(user.get("id"))
+    )
 
 _VICTIM_NAME = "ACME Internal Compliance Feed"
 _VICTIM_URL = "https://acme-private.example/regulatory-inbox"
@@ -122,6 +134,9 @@ def _seed_victim_assessment(tmp_path: Path) -> None:
             "source_id": "custom-A", "source_name": _VICTIM_NAME,
             "official_url": _VICTIM_URL, "impact_level": "escalate",
             "internal_note": _VICTIM_NOTE, "reviewer_name": "victim-owner",
+            # The assessment belongs to the owner's tenant (org). Note reads are
+            # org-scoped, so this must carry the owner's org id.
+            "org_id": str(_OWNER_ID),
         }) + "\n",
         encoding="utf-8",
     )

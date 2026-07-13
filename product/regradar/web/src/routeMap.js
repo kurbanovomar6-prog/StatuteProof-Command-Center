@@ -2,6 +2,8 @@ const PUBLIC_VIEW_PATHS = {
   landing: '/',
   login: '/login',
   register: '/register',
+  'forgot-password': '/forgot-password',
+  'reset-password': '/reset-password',
   pricing: '/pricing',
   'source-readiness-review': '/source-readiness-review',
   verify: '/verify',

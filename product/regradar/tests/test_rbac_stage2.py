@@ -190,8 +190,9 @@ def test_evidence_export_writes_access_log(isolated_db, monkeypatch):
     user = _new_owner("exporter@example.com")
     _auth_as(monkeypatch, {"id": user["id"], "email": user["email"]})
     handler = _make_handler("GET", "/api/evidence/export?run_id=run_official_1")
-    # Bypass tenancy (not under test) and the actual export writer.
+    # Bypass tenancy and the plan paywall (neither under test) and the writer.
     monkeypatch.setattr(handler, "_evidence_source_out_of_scope", lambda u, e: False)
+    monkeypatch.setattr(handler, "_require_capability", lambda u, cap: True)
     called: dict = {}
     monkeypatch.setattr(handler, "_write_evidence_export", lambda evidence_id, **k: called.update(evidence_id=evidence_id))
 
@@ -373,6 +374,7 @@ def test_auditor_allowed_through_export_handler(org_with_auditor, monkeypatch):
     _auth_as(monkeypatch, {"id": auditor["id"], "email": auditor["email"]})
     handler = _make_handler("GET", "/api/evidence/export?run_id=run_official_9")
     monkeypatch.setattr(handler, "_evidence_source_out_of_scope", lambda u, e: False)
+    monkeypatch.setattr(handler, "_require_capability", lambda u, cap: True)  # paywall not under test
     called: dict = {}
     monkeypatch.setattr(handler, "_write_evidence_export", lambda evidence_id, **k: called.update(evidence_id=evidence_id))
     handler._handle_evidence_export_get()

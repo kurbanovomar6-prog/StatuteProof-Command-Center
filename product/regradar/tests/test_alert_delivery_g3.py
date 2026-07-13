@@ -73,7 +73,7 @@ def test_deliver_alert_reaches_subscribed_users(isolated_db, monkeypatch):
 
     sent_to: list[str] = []
 
-    def _fake_send(chat_id: str, text: str) -> bool:
+    def _fake_send(chat_id: str, text: str, parse_mode: str | None = None) -> bool:
         sent_to.append(str(chat_id))
         return True
 

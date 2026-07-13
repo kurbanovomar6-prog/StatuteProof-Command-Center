@@ -22,6 +22,7 @@ from app.legal_safety import assert_no_forbidden_claims, contains_forbidden_clai
 from app.materiality import (
     BAND_HIGH,
     BAND_LOW,
+    BAND_UNKNOWN,
     BAND_MEDIUM,
     BAND_NOISE,
     SHORT_DISCLAIMER,
@@ -197,15 +198,43 @@ def test_big_substantive_diff_is_high():
     assert result["score"] >= 65
 
 
-def test_medium_band_for_single_moderate_signal():
-    # A modest, real content change with one moderate signal lands in low/medium,
-    # never high and never noise.
+def test_modest_change_lands_in_a_sane_band_not_high_or_noise():
+    # A modest, real content change with no strong regulatory keyword must not be
+    # ranked high or noise; with no keyword basis it is honestly 'unknown' (not a
+    # fabricated 'low' — see the unknown-band tests below).
     result = score_change(_added(
         "The authority published an updated guidance note describing the revised "
         "administrative process for members over the coming period of operations."
     ))
-    assert result["band"] in {BAND_LOW, BAND_MEDIUM}
+    assert result["band"] in {BAND_LOW, BAND_MEDIUM, BAND_UNKNOWN}
     assert result["band"] not in {BAND_HIGH, BAND_NOISE}
+
+
+# ── UNKNOWN band: an unscored change is NOT presented as assessed-low ──────────
+
+def test_change_with_no_keyword_basis_is_unknown_not_low():
+    # A real content change the heuristic cannot rank by content (no regulatory
+    # keyword) must be 'unknown', never a fabricated 'low' (silent over-assurance).
+    result = score_change(_added(
+        "The cafeteria menu and staff parking arrangements were updated this quarter "
+        "with several new options across the building over the coming weeks."
+    ))
+    assert result["band"] == BAND_UNKNOWN
+    # The rationale must NOT positively claim a low ranking, and must tell the
+    # reader it could not be ranked by content.
+    assert "ranked low review-priority" not in result["rationale"].lower()
+    assert "unknown" in result["rationale"].lower()
+
+
+def test_change_with_a_regulatory_keyword_is_ranked_not_unknown():
+    # When there IS a regulatory-content signal, the change is assessed (low/med/
+    # high), never 'unknown'.
+    result = score_change(_added(
+        "Firms must submit a suspicious activity report to the regulator and pay a "
+        "penalty for non-compliance under the amended rulebook provisions."
+    ))
+    assert result["band"] in {BAND_LOW, BAND_MEDIUM, BAND_HIGH}
+    assert result["band"] != BAND_UNKNOWN
 
 
 # ── Determinism ────────────────────────────────────────────────────────────────

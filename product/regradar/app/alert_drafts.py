@@ -58,6 +58,50 @@ def _is_legislation_aggregate_change(source_run: dict[str, Any], diff_artifact: 
     )
 
 
+# Action-orientation triage (VIXIO buyer's-guide / FINRA-notice model). This
+# describes the READER'S REVIEW WORKFLOW — never a legal obligation — so it stays
+# on the monitoring side of the legal-advice line: "review recommended" is a
+# workflow prompt; "you must comply" would be advice and is never emitted.
+_ACTIONABLE_TYPES = {
+    "DEADLINE_OR_REPORTING", "ENFORCEMENT", "AML_CFT", "TAX",
+    "LICENSING", "RULEBOOK_UPDATE", "DATA_PROTECTION",
+}
+_INDICATIVE_TYPES = {"CONSULTATION"}
+
+
+def action_orientation(change_type: str) -> dict[str, str]:
+    """Return a legal-safe action-orientation label for a change type.
+
+    ``Actionable`` — the change type often warrants a direct review response;
+    ``Indicative`` — a proposal/consultation to monitor, not yet in force;
+    ``Informative`` — context / general update, no specific review action.
+    A heuristic from the change type only; it prompts the reviewer's workflow and
+    is explicitly NOT a determination that the change applies to the reader.
+    """
+    ct = str(change_type or "").upper()
+    if ct in _ACTIONABLE_TYPES:
+        return {
+            "code": "actionable",
+            "label": "Review recommended",
+            "description": (
+                "This change type often warrants a direct review response. "
+                "Review recommended — a workflow prompt only, not a legal or "
+                "applicability determination."
+            ),
+        }
+    if ct in _INDICATIVE_TYPES:
+        return {
+            "code": "indicative",
+            "label": "Monitor",
+            "description": "A proposal or consultation to monitor; it is not yet in force.",
+        }
+    return {
+        "code": "informative",
+        "label": "Informational",
+        "description": "Context or a general update; no specific review action is indicated by the change type.",
+    }
+
+
 def classify_change_type(source_run: dict[str, Any], diff_artifact: dict[str, Any]) -> str:
     if _is_legislation_aggregate_change(source_run, diff_artifact):
         return "UNKNOWN"

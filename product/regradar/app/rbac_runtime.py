@@ -41,7 +41,13 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
-from app.access_log import RESULT_ALLOW, RESULT_DENY, RESULT_ERROR, append_access_log
+from app.access_log import (  # noqa: F401 (read_access_log re-exported for callers)
+    RESULT_ALLOW,
+    RESULT_DENY,
+    RESULT_ERROR,
+    append_access_log,
+    read_access_log,
+)
 from app.db import _connect, ensure_rbac_tables
 from app.rbac import (
     ASSIGNABLE_ROLES,
@@ -72,6 +78,8 @@ __all__ = [
     "is_permitted",
     "log_sensitive_action",
     "assign_org_role",
+    "read_access_log",
+    "ROLE_OWNER",
     # re-exports
     "RESULT_ALLOW",
     "RESULT_DENY",

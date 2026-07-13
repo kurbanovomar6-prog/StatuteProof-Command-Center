@@ -109,7 +109,6 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
   const [industries, setIndustries] = useState(Array.isArray(profile.industries) ? profile.industries : [])
   const [topics,     setTopics]     = useState(Array.isArray(profile.topics)     ? profile.topics     : [])
 
-  const [highAlerts,    setHighAlerts]    = useState(thresholds.high)
   const [mediumAlerts,  setMediumAlerts]  = useState(thresholds.medium)
   const [lowAlerts,     setLowAlerts]     = useState(thresholds.low)
   const [tgEnabled,     setTgEnabled]     = useState(Boolean(profile.telegramAlertsEnabled))
@@ -117,7 +116,6 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
   // this value yet (tracked in DEFECT_LOG D3 note).
   const [emailEnabled]  = useState(Boolean(profile.emailAlertsEnabled))
   const [aiEnabled,     setAiEnabled]     = useState(profile.aiEnabled !== false)
-  const [reviewFlag,    setReviewFlag]    = useState(true)
   const [language,      setLanguage]      = useState(languageLabel(profile.briefLanguage))
   const [saved,         setSaved]         = useState(false)
   const [saving,        setSaving]        = useState(false)
@@ -264,8 +262,19 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
       {/* Alert thresholds */}
       <Section title="Alert Thresholds">
         <div className="space-y-3">
+          {/* HIGH-risk changes always alert — this floor is not user-configurable
+              (mandatory review posture), so it is shown as a fixed fact, not a
+              non-functional toggle. */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[var(--text-primary)]">HIGH risk alerts</p>
+              <p className="text-xs text-[var(--text-muted)]">Immediate review required</p>
+            </div>
+            <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+              Always on
+            </span>
+          </div>
           {[
-            { label: 'HIGH risk alerts',   sub: 'Immediate review required', checked: highAlerts,   set: setHighAlerts },
             { label: 'MEDIUM risk alerts', sub: 'Review within 3 days',      checked: mediumAlerts, set: setMediumAlerts },
             { label: 'LOW risk alerts',    sub: 'Monitor only',              checked: lowAlerts,    set: setLowAlerts },
           ].map(({ label, sub, checked, set }) => (
@@ -292,10 +301,12 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--text-primary)]">Human review flag</p>
-              <p className="text-xs text-[var(--text-muted)]">Flag alerts that require human legal review</p>
+              <p className="text-sm text-[var(--text-primary)]">Human review of high-risk changes</p>
+              <p className="text-xs text-[var(--text-muted)]">High-risk / low-confidence changes are held for human review before delivery — this is mandatory and cannot be disabled.</p>
             </div>
-            <Toggle checked={reviewFlag} onChange={setReviewFlag} />
+            <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+              Always on
+            </span>
           </div>
           <div>
             <label className="block text-xs text-[var(--text-secondary)] mb-1.5">Brief language</label>

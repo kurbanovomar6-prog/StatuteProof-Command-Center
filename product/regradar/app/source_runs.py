@@ -647,14 +647,26 @@ def mark_alert_sent(source_id: str, run_id: str, *, alert_sent: bool = True) -> 
     with _RUN_FILE.open("r+", encoding="utf-8") as fh:
         fcntl.flock(fh, fcntl.LOCK_EX)
         try:
-            rows: list[dict] = []
+            out_lines: list[str] = []
             updated = False
+            preserved_corrupt = 0
             for line in fh.read().splitlines():
                 if not line.strip():
                     continue
                 try:
                     rec = json.loads(line)
                 except json.JSONDecodeError:
+                    # Preserve unparseable lines VERBATIM — this rewrite must never
+                    # silently drop a line it did not intend to remove. The
+                    # evidence trail is the product's legal asset; a crash-truncated
+                    # line is copied through (and logged), not erased on the next
+                    # confirmed alert send. Mirrors retention.py's compaction rule.
+                    import logging as _logging
+                    _logging.getLogger(__name__).warning(
+                        "mark_alert_sent: preserving unparseable trail line verbatim (not dropping)"
+                    )
+                    out_lines.append(line)
+                    preserved_corrupt += 1
                     continue
                 if (
                     str(rec.get("source_id") or "") == str(source_id)
@@ -663,13 +675,12 @@ def mark_alert_sent(source_id: str, run_id: str, *, alert_sent: bool = True) -> 
                     if bool(rec.get("alert_sent")) != bool(alert_sent):
                         rec["alert_sent"] = bool(alert_sent)
                         updated = True
-                rows.append(rec)
+                out_lines.append(json.dumps(rec, ensure_ascii=False, sort_keys=True))
             if not updated:
                 return False
             tmp = _RUN_FILE.with_suffix(".jsonl.mark.tmp")
             with tmp.open("w", encoding="utf-8") as out:
-                for row in rows:
-                    out.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+                out.write("\n".join(out_lines) + "\n")
                 out.flush()
                 os.fsync(out.fileno())
             tmp.replace(_RUN_FILE)

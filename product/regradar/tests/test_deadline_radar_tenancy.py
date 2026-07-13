@@ -62,7 +62,7 @@ def _wire(monkeypatch, entries):
 
 def test_custom_source_reminder_only_to_owner(monkeypatch, tmp_path):
     sent, send = _wire(monkeypatch, [_CUSTOM_ENTRY])
-    deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=send)
+    deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=send, require_review_approval=False)
     recipients = {c for c, _ in sent}
     assert recipients == {"chatOwner"}  # attacker never receives the private reminder
     assert all("custom-A" in m for _, m in sent)
@@ -70,13 +70,13 @@ def test_custom_source_reminder_only_to_owner(monkeypatch, tmp_path):
 
 def test_official_source_reminder_broadcasts(monkeypatch, tmp_path):
     sent, send = _wire(monkeypatch, [_OFFICIAL_ENTRY])
-    deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=send)
+    deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=send, require_review_approval=False)
     assert {c for c, _ in sent} == {"chatOwner", "chatAttacker"}
 
 
 def test_mixed_batch_scopes_each_entry(monkeypatch, tmp_path):
     sent, send = _wire(monkeypatch, [_CUSTOM_ENTRY, _OFFICIAL_ENTRY])
-    deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=send)
+    deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=send, require_review_approval=False)
     by_source = {}
     for chat, msg in sent:
         src = "custom-A" if "custom-A" in msg else "official-X"
@@ -95,7 +95,11 @@ def test_blank_source_id_entry_reaches_nobody(monkeypatch, tmp_path):
     monkeypatch.setattr("app.telegram_pairing.get_all_linked_chat_ids", lambda: ["chatOwner", "chatAttacker"])
     monkeypatch.setattr("app.telegram_pairing.get_alert_chat_ids_for_user", lambda uid: ["chatOwner"])
     sent: list = []
-    result = deadline_radar.send_due_reminders(base_dir=tmp_path, send_fn=lambda c, m: sent.append(c) or True)
+    result = deadline_radar.send_due_reminders(
+        base_dir=tmp_path,
+        send_fn=lambda c, m: sent.append(c) or True,
+        require_review_approval=False,
+    )
     assert sent == []
     assert result["skipped_no_recipients"] >= 1
 
@@ -109,7 +113,9 @@ def test_custom_source_no_owner_reaches_nobody(monkeypatch, tmp_path):
     monkeypatch.setattr("app.telegram_pairing.get_alert_chat_ids_for_user", lambda uid: [])
     sent: list = []
     result = deadline_radar.send_due_reminders(
-        base_dir=tmp_path, send_fn=lambda c, m: sent.append(c) or True
+        base_dir=tmp_path,
+        send_fn=lambda c, m: sent.append(c) or True,
+        require_review_approval=False,
     )
     assert sent == []
     assert result["skipped_no_recipients"] >= 1

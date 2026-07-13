@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Download, ExternalLink, FileText, Search, ShieldCheck } from 'lucide-react'
 
-import { evidence } from '../../api'
+import { apiFetch, evidence } from '../../api'
 import AuditBinderExport from './AuditBinderExport'
 import CoverageCertificatePanel from './CoverageCertificatePanel'
 import EffectiveDatesCalendar from './EffectiveDatesCalendar'
@@ -15,6 +15,19 @@ import ErrorState from './ui/ErrorState'
 
 function shortHash(value) {
   return value ? String(value).slice(0, 12) : 'not recorded'
+}
+
+function filenameFromResponse(response, fallback) {
+  const disposition = response.headers?.get?.('content-disposition') || ''
+  const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition)
+  if (match && match[1]) {
+    try {
+      return decodeURIComponent(match[1])
+    } catch {
+      return match[1]
+    }
+  }
+  return fallback
 }
 
 export default function ReportsPage() {
@@ -79,16 +92,31 @@ export default function ReportsPage() {
   async function handleExport(record, format = 'pdf') {
     if (!record?.evidence_record_id) return
     setExportState(prev => ({ ...prev, [record.evidence_record_id]: { status: 'exporting', format, message: '' } }))
+    // Stream the audit pack to the browser as a real download. We fetch the
+    // bytes first and only claim success once they arrive, so we never render a
+    // server file path (which the customer cannot open) or say "exported" when
+    // nothing downloaded — mirrors EvidencePage's export flow.
+    const downloadUrl = `/api/evidence/export-download?evidence_record_id=${encodeURIComponent(record.evidence_record_id)}&format=${encodeURIComponent(format)}`
     try {
-      const data = await evidence.exportAuditPack(record.evidence_record_id, format)
-      const paths = data.export || {}
-      const artifactPath = data.format === 'pdf'
-        ? paths.pdf_path || data.pdf_path || 'PDF path unavailable'
-        : paths.md_path || paths.html_path || 'Markdown/HTML path unavailable'
-      const message = `${data.message || 'Audit pack exported.'} ${artifactPath}`
+      const response = await apiFetch(downloadUrl)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const blob = await response.blob()
+      if (!blob || blob.size === 0) throw new Error('Empty export')
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = filenameFromResponse(response, `statuteproof-audit-pack-${record.evidence_record_id}`)
+      document.body.appendChild(anchor)
+      anchor.click()
+      document.body.removeChild(anchor)
+      URL.revokeObjectURL(objectUrl)
       setExportState(prev => ({
         ...prev,
-        [record.evidence_record_id]: { status: 'ok', format: data.format, message, export: data.export },
+        [record.evidence_record_id]: {
+          status: 'ok',
+          format,
+          message: 'Download started. Check your downloads folder.',
+        },
       }))
     } catch (err) {
       setExportState(prev => ({

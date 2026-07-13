@@ -226,6 +226,20 @@ export default function AlertsPage({ navigate }) {
                   }`}>
                     Relevance {item.score ?? 'n/a'}
                   </span>
+                  {item.action_orientation?.label && (
+                    <span
+                      title="A review-workflow prompt, not a legal obligation."
+                      className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                        item.action_orientation.code === 'actionable'
+                          ? 'border-amber-400/30 bg-amber-400/10 text-amber-300'
+                          : item.action_orientation.code === 'indicative'
+                          ? 'border-sky-400/30 bg-sky-400/10 text-sky-300'
+                          : 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      {item.action_orientation.label}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-sm font-semibold text-white">{item.title || 'Reviewed alert'}</h3>
                 <p className="mt-1 text-xs text-[var(--text-muted)]">{item.market || item.jurisdiction || 'Market not specified'} · {item.source_name || 'Source not specified'}</p>

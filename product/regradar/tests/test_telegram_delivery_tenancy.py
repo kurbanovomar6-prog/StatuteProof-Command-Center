@@ -34,7 +34,7 @@ _SOURCES = [
 def _wire(monkeypatch, sources=_SOURCES):
     sent: list[str] = []
     monkeypatch.setattr("app.source_intake.load_sources_json", lambda: list(sources))
-    monkeypatch.setattr(telegram, "send_telegram_message", lambda chat, msg: sent.append(str(chat)) or True)
+    monkeypatch.setattr(telegram, "send_telegram_message", lambda chat, msg, **kw: sent.append(str(chat)) or True)
     monkeypatch.setattr("app.telegram_pairing.get_all_linked_chat_ids", lambda: ["chatOwner", "chatAttacker"])
     monkeypatch.setattr(
         "app.telegram_pairing.get_alert_chat_ids_for_user",
@@ -80,7 +80,7 @@ def test_custom_prefix_fails_closed_when_source_list_unreadable(monkeypatch):
         raise RuntimeError("unreadable sources.json")
 
     monkeypatch.setattr("app.source_intake.load_sources_json", _boom)
-    monkeypatch.setattr(telegram, "send_telegram_message", lambda chat, msg: sent.append(str(chat)) or True)
+    monkeypatch.setattr(telegram, "send_telegram_message", lambda chat, msg, **kw: sent.append(str(chat)) or True)
     monkeypatch.setattr("app.telegram_pairing.get_all_linked_chat_ids", lambda: ["chatOwner", "chatAttacker"])
     monkeypatch.setattr("app.telegram_pairing.get_alert_chat_ids_for_user", lambda uid: [])
     n = telegram._deliver_alert_to_subscribed_users("private diff", source_id="custom-deadbeef")

@@ -69,6 +69,11 @@ BAND_HIGH = "high"
 BAND_MEDIUM = "medium"
 BAND_LOW = "low"
 BAND_NOISE = "noise"
+# FCA-style "unknown": a real change the heuristic has NO regulatory-content
+# basis to rank. It must NOT be presented as an assessed "low" (that would be
+# silent over-assurance — "they said low, so we skipped it"); it means "review
+# this yourself, we couldn't prioritise it by content".
+BAND_UNKNOWN = "unknown"
 
 _BAND_HIGH_MIN = 65
 _BAND_MEDIUM_MIN = 38
@@ -392,18 +397,21 @@ def _noise_reason(
     return None
 
 
-def _band_for_score(score: int) -> str:
-    """Map a NON-noise score to a band. The floor is ``low`` by design.
+def _band_for_score(score: int, has_keyword_basis: bool = True) -> str:
+    """Map a NON-noise score to a band.
 
-    ``noise`` is NOT reachable from here — it is reserved for the explicit
-    noise-detection path (whitespace / boilerplate / below-tiny-magnitude), so a
-    small-but-genuine content change is honestly labelled ``low``, never ``noise``.
+    Below the medium threshold we distinguish two honestly-different states:
+    - ``low``: we matched some regulatory wording, just weakly (an assessed-low);
+    - ``unknown``: NO regulatory-content signal was matched, so the heuristic has
+      no basis to rank this change — presenting it as "low" would be silent
+      over-assurance (FCA "unknown (U)" model). ``noise`` is reserved for the
+      explicit noise-detection path (whitespace/boilerplate/below-tiny-magnitude).
     """
     if score >= _BAND_HIGH_MIN:
         return BAND_HIGH
     if score >= _BAND_MEDIUM_MIN:
         return BAND_MEDIUM
-    return BAND_LOW
+    return BAND_LOW if has_keyword_basis else BAND_UNKNOWN
 
 
 def _join_clause(items: list[str]) -> str:
@@ -456,6 +464,14 @@ def _build_rationale(band: str, signals: list[dict], noise_reason: str | None) -
             "evidence record and is not discarded — only its review order is "
             f"affected. {HEURISTIC_FRAMING} {SHORT_DISCLAIMER}"
         )
+    elif band == BAND_UNKNOWN:
+        # Honest non-assessment: NEVER imply we ranked this low. FCA "unknown".
+        rationale = (
+            "Review-priority is unknown: the heuristic found no regulatory-content "
+            "signal to prioritise this change, so it is NOT ranked low — it simply "
+            "could not be ranked by content and should be reviewed directly. "
+            f"{HEURISTIC_FRAMING} {SHORT_DISCLAIMER}"
+        )
     else:
         rationale = (
             f"Ranked {band} review-priority because {_reasons_phrase(signals)}. "
@@ -482,7 +498,7 @@ def score_change(change: dict) -> dict:
     Returns
     -------
     dict
-        ``{"score": int 0..100, "band": "high"|"medium"|"low"|"noise",
+        ``{"score": int 0..100, "band": "high"|"medium"|"low"|"unknown"|"noise",
         "signals": [{"name", "detail", "weight"}], "rationale": str,
         "label": str, "framing": str, "disclaimer": str, "heuristic_only": True}``
 
@@ -530,7 +546,7 @@ def score_change(change: dict) -> dict:
         signals.append(tier_signal)
 
     score = min(sum(int(sig["weight"]) for sig in signals), 100)
-    band = _band_for_score(score)
+    band = _band_for_score(score, has_keyword_basis=bool(keyword_signals))
     return _result(band, score, signals, None)
 
 

@@ -111,7 +111,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
         </div>
 
         <p className="text-center text-xs text-slate-500 mt-6 max-w-3xl mx-auto leading-relaxed">
-          Monitoring scope is limited to selected official UAE regulatory sources across VARA, CBUAE, DFSA, ADGM/FSRA, UAE FIU, DIFC and related public authorities.
+          Monitoring scope is limited to selected official UAE regulatory sources across VARA, CBUAE, DFSA, ADGM/FSRA, DIFC and related public authorities.
           Features marked for activation or roadmap are not live by default. Source access, extraction quality, and any limitations are disclosed before pilot begins.
         </p>
 

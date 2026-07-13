@@ -25,7 +25,7 @@ export const riskTrendData = [
 ]
 
 export const features = [
-  { icon: 'Search',        title: 'Official-source monitoring',      desc: 'Your selected UAE regulatory sources are configured to be checked on a defined schedule once monitoring is activated — CBUAE, VARA, DFSA, ADGM/FSRA, UAE FIU, and more. When something changes on an official portal, the change is captured from the source, not from a peer.' },
+  { icon: 'Search',        title: 'Official-source monitoring',      desc: 'Your selected UAE regulatory sources are configured to be checked on a defined schedule once monitoring is activated — CBUAE, VARA, DFSA, ADGM/FSRA, and more. When something changes on an official portal, the change is captured from the source, not from a peer.' },
   { icon: 'FileText',      title: 'Source-backed compliance briefs', desc: 'Detected changes can produce a structured brief for human review: what changed, which official source published it, and what your team may need to review. No raw text dumps.' },
   { icon: 'Globe',         title: 'Documented extraction methods',    desc: 'You see exactly how each source is monitored — HTML, PDF, or page snapshot — and any known limitations are disclosed upfront. If a source has restricted access, that is documented before your pilot begins.' },
   { icon: 'MessageSquare', title: 'Profile-scoped alert delivery',    desc: 'Alerts are filtered to the regulators and business activities relevant to your licence type. A VARA update does not reach a payments firm with no virtual asset exposure.' },
@@ -101,7 +101,7 @@ export const pricingPlans = [
     badge: 'Recommended',
     ctaType: 'plan',
     routePlan: 'professional',
-    desc: 'Selected official UAE regulatory source pack across VARA, CBUAE, DFSA, ADGM, FIU, DIFC and related public authorities. Built for an MLRO who needs evidence that regulatory changes were tracked.',
+    desc: 'Selected official UAE regulatory source pack across VARA, CBUAE, DFSA, ADGM, DIFC and related public authorities. Built for an MLRO who needs evidence that regulatory changes were tracked.',
     features: [
       'Validated official-source profile after readiness review',
       'Priority review queue for high-risk changes',

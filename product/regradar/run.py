@@ -2312,6 +2312,8 @@ def main() -> None:
         print("  python run.py mass-monitor --activation-ready-only --dry-run --no-alerts --limit 10  safe monitor dry-run only", file=sys.stderr)
         print("  python run.py activate-plan --user <id> --plan <name>  founder-only: activate a paid plan for a user (grants paid export caps)", file=sys.stderr)
         print("  python run.py activate-plan --list  founder-only: list every user's plan intent vs. activated plan (who needs activation after deploy)", file=sys.stderr)
+        print("  python run.py assign-role --owner <id> --user <id> --role <role>  founder-only: seat a teammate/auditor in an owner's workspace", file=sys.stderr)
+        print("  python run.py assign-role --list  founder-only: list org memberships (who is in which workspace, with what role)", file=sys.stderr)
         sys.exit(2)
 
     cmd = args[0]
@@ -3767,6 +3769,8 @@ def main() -> None:
 
     elif cmd == "activate-plan":
         _cmd_activate_plan(args[1:])
+    elif cmd == "assign-role":
+        _cmd_assign_role(args[1:])
 
     elif cmd.startswith(("http://", "https://")):
         # backward-compatible bare URL
@@ -3775,7 +3779,7 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config | activate-plan",
+            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config | activate-plan | assign-role",
             file=sys.stderr,
         )
         sys.exit(2)
@@ -3888,6 +3892,129 @@ def _cmd_activate_plan(extra: list[str]) -> None:
         f"  status            = {state.get('status')}\n"
         f"  audit_export      = {bool(state.get('active_capabilities', {}).get('audit_export'))}\n"
         f"  source_limit      = {state.get('active_capabilities', {}).get('source_limit')}"
+    )
+    sys.exit(0)
+
+
+def _cmd_assign_role(extra: list[str]) -> None:
+    """Founder-only: seat a teammate/auditor in an owner's workspace (org).
+
+    Usage:
+        python run.py assign-role --owner <owner_id> --user <target_id> --role <role>
+        python run.py assign-role --list
+
+    RBAC Stage-2 ships org/role machinery and a default-deny matrix, but there is
+    no HTTP invite flow yet — this CLI is the founder-only door to add a member
+    without hand-editing SQLite. The acting principal is the OWNER of the target
+    workspace (resolved from org membership); ``assign_org_role`` is owner-gated
+    and org-scoped, so this can only seat a member inside that owner's own org.
+
+    Roles: owner, admin, reviewer, approver, auditor.
+    """
+    from app.db import ensure_auth_tables
+    from app.rbac import ASSIGNABLE_ROLES, ROLE_OWNER
+    from app.rbac_runtime import assign_org_role, resolve_principal
+
+    ensure_auth_tables()
+
+    _usage = (
+        "  Usage: python run.py assign-role --owner <owner_id> --user <target_id> --role <role>\n"
+        "         python run.py assign-role --list\n"
+        f"  Roles: {', '.join(sorted(ASSIGNABLE_ROLES))}"
+    )
+
+    # ── --list: show every org membership (no writes) ─────────────────────────
+    if extra and extra[0] in ("--list", "list"):
+        from app.db import _connect
+        from app.rbac_runtime import ensure_rbac_tables
+
+        conn = _connect()
+        try:
+            ensure_rbac_tables(conn)
+            rows = conn.execute(
+                """
+                SELECT m.org_id AS org_id, m.user_id AS user_id, m.role AS role,
+                       o.owner_user_id AS owner_id, u.email AS email
+                FROM org_members m
+                JOIN orgs o ON o.id = m.org_id
+                LEFT JOIN users u ON u.id = m.user_id
+                ORDER BY m.org_id ASC, m.role ASC, m.user_id ASC
+                """
+            ).fetchall()
+        finally:
+            conn.close()
+        if not rows:
+            print("No org memberships found.")
+            sys.exit(0)
+        print(f"{'ORG':>4}  {'USER':>6}  {'ROLE':<10} {'OWNER?':<7} EMAIL")
+        print("  " + "-" * 60)
+        for r in rows:
+            is_owner = "owner" if r["owner_id"] == r["user_id"] else "-"
+            print(
+                f"{r['org_id']:>4}  {r['user_id']:>6}  {str(r['role']):<10} "
+                f"{is_owner:<7} {r['email'] or '(unknown)'}"
+            )
+        sys.exit(0)
+
+    owner_id: int | None = None
+    target_id: int | None = None
+    role: str | None = None
+    i_ = 0
+    while i_ < len(extra):
+        tok = extra[i_]
+        if tok in ("--owner", "--user", "--role"):
+            if i_ + 1 >= len(extra):
+                print(f"Error: {tok} requires a value.\n{_usage}", file=sys.stderr)
+                sys.exit(2)
+            val = extra[i_ + 1]
+            if tok == "--role":
+                role = val.strip()
+            else:
+                try:
+                    parsed = int(val)
+                except ValueError:
+                    print(f"Error: {tok} must be an integer, got {val!r}.\n{_usage}", file=sys.stderr)
+                    sys.exit(2)
+                if tok == "--owner":
+                    owner_id = parsed
+                else:
+                    target_id = parsed
+            i_ += 2
+        else:
+            print(f"Error: unknown option {tok!r} for 'assign-role'.\n{_usage}", file=sys.stderr)
+            sys.exit(2)
+
+    if owner_id is None or target_id is None or not role:
+        print(f"Error: --owner, --user and --role are all required.\n{_usage}", file=sys.stderr)
+        sys.exit(2)
+    if role not in ASSIGNABLE_ROLES:
+        print(f"Error: unknown role {role!r}.\n{_usage}", file=sys.stderr)
+        sys.exit(2)
+
+    # Resolve the owner's workspace (org) and confirm they actually own it.
+    principal = resolve_principal({"id": owner_id})
+    if principal.org_id is None:
+        print(
+            f"Error: could not resolve a workspace (org) for owner user {owner_id}. "
+            "Ensure that user exists and owns a workspace.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    if principal.role != ROLE_OWNER:
+        print(
+            f"Error: user {owner_id} is not the owner of their workspace "
+            f"(resolved role: {principal.role}). Only an owner can seat members.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    result = assign_org_role({"id": owner_id}, target_id, principal.org_id, role)
+    if not result.get("ok"):
+        print(f"Error: could not assign role ({result.get('error')}).", file=sys.stderr)
+        sys.exit(1)
+    print(
+        f"Assigned role {role!r} to user {target_id} in workspace (org) {principal.org_id} "
+        f"owned by user {owner_id}."
     )
     sys.exit(0)
 

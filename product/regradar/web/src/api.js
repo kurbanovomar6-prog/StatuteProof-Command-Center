@@ -93,6 +93,20 @@ export const auth = {
       body: JSON.stringify({ email }),
     })
   },
+
+  forgotPassword(email) {
+    return authRequest('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    })
+  },
+
+  resetPassword(token, password) {
+    return authRequest('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    })
+  },
 }
 
 export const profile = {

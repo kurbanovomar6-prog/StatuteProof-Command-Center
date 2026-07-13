@@ -7,6 +7,17 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { CONTACT_EMAIL } from "../data/constants";
+import { PLAN_CAPABILITIES } from "../data/planCapabilities";
+
+// Evidence-retention copy is DERIVED from the single source of truth
+// (planCapabilities.js retentionDays) so the pricing page can never drift from
+// what the product actually enforces or from the privacy policy. See
+// pricingRetention.test.jsx for the drift guard.
+function retentionLabel(days) {
+  if (!days || days <= 0) return "Sample only";
+  if (days >= 900) return "Custom (extended) — export on demand";
+  return `${days} days`;
+}
 
 // Honest feature status labels shown in the table
 // ✓ = available  ✗ = not included  text = qualified/roadmap
@@ -36,7 +47,10 @@ const PLANS_DATA = [
       { label: "MLRO response log", value: false },
       { label: "Audit binder export", value: false },
       { label: "Users", value: "1" },
-      { label: "Evidence retention", value: "Sample only" },
+      {
+        label: "Evidence retention",
+        value: retentionLabel(PLAN_CAPABILITIES.evidence_preview.retentionDays),
+      },
       { label: "Multiple workspaces", value: false },
     ],
   },
@@ -70,7 +84,10 @@ const PLANS_DATA = [
       { label: "MLRO response log", value: false },
       { label: "Audit binder export", value: false },
       { label: "Users", value: "1" },
-      { label: "Evidence retention", value: "90 days" },
+      {
+        label: "Evidence retention",
+        value: retentionLabel(PLAN_CAPABILITIES.starter_pilot.retentionDays),
+      },
       { label: "Multiple workspaces", value: false },
     ],
   },
@@ -96,7 +113,7 @@ const PLANS_DATA = [
           "Target once activated: up to every 24h per source (priority target 12h); actual cadence is operator-set and confirmed at pilot onboarding",
       },
       { label: "Source readiness review", value: true },
-      { label: "Evidence records + full diff view", value: true },
+      { label: "Evidence records + full diff view", key: "Diff view", value: true },
       { label: "Custom sources", value: "Up to 2 — requires activation" },
       { label: "Weekly MLRO brief", value: "Email + Telegram" },
       { label: "High-risk review queue", value: true },
@@ -110,7 +127,10 @@ const PLANS_DATA = [
         value: "PDF audit pack included for saved evidence records",
       },
       { label: "Users", value: "2" },
-      { label: "Evidence retention", value: "12 months" },
+      {
+        label: "Evidence retention",
+        value: retentionLabel(PLAN_CAPABILITIES.professional.retentionDays),
+      },
       { label: "Multiple workspaces", value: false },
     ],
   },
@@ -133,7 +153,7 @@ const PLANS_DATA = [
           "Target once activated: up to every 24h per source (priority target 12h); actual cadence is operator-set and confirmed at pilot onboarding",
       },
       { label: "Source readiness review", value: true },
-      { label: "Evidence records + full diff view", value: true },
+      { label: "Evidence records + full diff view", key: "Diff view", value: true },
       { label: "Custom sources", value: "Custom — pilot roadmap" },
       { label: "Weekly MLRO brief", value: "Email + Telegram + API (roadmap)" },
       { label: "High-risk review queue", value: "Pilot roadmap" },
@@ -144,7 +164,10 @@ const PLANS_DATA = [
       },
       { label: "White-label reports", value: "Pilot roadmap" },
       { label: "Users", value: "Custom" },
-      { label: "Evidence retention", value: "24 months + export-on-demand" },
+      {
+        label: "Evidence retention",
+        value: retentionLabel(PLAN_CAPABILITIES.consultant.retentionDays),
+      },
       { label: "Multiple workspaces", value: "Pilot roadmap" },
     ],
   },
@@ -364,6 +387,7 @@ export default function PricingPage({
                           val={
                             p.features.find(
                               (f) =>
+                                f.key === row.key ||
                                 f.label === row.label ||
                                 f.label.startsWith(row.label),
                             )?.value ?? false

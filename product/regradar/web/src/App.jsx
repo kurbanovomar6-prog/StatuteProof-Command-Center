@@ -26,6 +26,8 @@ const VendorTrustSection    = lazy(() => import('./components/VendorTrustSection
 const ConsultationTracker   = lazy(() => import('./components/ConsultationTracker'))
 const LoginPage             = lazy(() => import('./components/auth/LoginPage'))
 const RegisterPage          = lazy(() => import('./components/auth/RegisterPage'))
+const ForgotPasswordPage    = lazy(() => import('./components/auth/ForgotPasswordPage'))
+const ResetPasswordPage     = lazy(() => import('./components/auth/ResetPasswordPage'))
 const OnboardingPage        = lazy(() => import('./components/app/OnboardingPage'))
 const ChoosePlanPage        = lazy(() => import('./components/app/ChoosePlanPage'))
 const AppShell              = lazy(() => import('./components/app/AppShell'))
@@ -296,7 +298,24 @@ export default function App() {
         <LoginPage
           onLogin={handleAuthenticated}
           onRegister={() => navigateRegister()}
+          onForgotPassword={() => navigatePublic('forgot-password')}
         />
+      </Suspense>
+    )
+  }
+
+  if (view === 'forgot-password') {
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <ForgotPasswordPage onBack={() => navigatePublic('login')} />
+      </Suspense>
+    )
+  }
+
+  if (view === 'reset-password') {
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <ResetPasswordPage onDone={() => navigatePublic('login')} />
       </Suspense>
     )
   }

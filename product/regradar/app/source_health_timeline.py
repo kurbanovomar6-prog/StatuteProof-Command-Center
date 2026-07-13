@@ -70,17 +70,22 @@ def source_health_customer_message(status: str) -> str:
 def build_source_timeline(
     source_id: str,
     *,
+    org_id: Any = None,
     base_dir: Path | None = None,
     limit: int = 100,
 ) -> dict[str, Any]:
-    """Build a per-source timeline from registry, source runs, and assessments."""
+    """Build a per-source timeline from registry, source runs, and assessments.
+
+    ``org_id`` scopes the private assessment events to the caller's tenant.
+    """
     sid = str(source_id or "").strip()
     if not sid:
         raise ValueError("source_id is required")
     root = base_dir or _BASE_DIR
     source = _find_source(sid, root)
     runs = [row for row in _read_runs(root) if row.get("source_id") == sid]
-    assessments = [row for row in load_assessments(base_dir=root) if row.get("source_id") == sid]
+    _akw = {} if org_id is None else {"org_id": org_id}
+    assessments = [row for row in load_assessments(base_dir=root, **_akw) if row.get("source_id") == sid]
 
     events: list[dict[str, Any]] = []
     if source and str(source.get("status") or "").lower() == "remediation":
@@ -253,9 +258,15 @@ def build_operator_source_health_report(
 def build_evidence_review_history(
     evidence_record_id: str,
     *,
+    org_id: Any = None,
     base_dir: Path | None = None,
 ) -> dict[str, Any]:
-    """Build a review-history event list for a saved evidence/source run."""
+    """Build a review-history event list for a saved evidence/source run.
+
+    ``org_id`` scopes the private assessment events to the caller's tenant so the
+    history never surfaces another customer's internal review notes on a shared
+    official record.
+    """
     evidence_id = str(evidence_record_id or "").strip()
     if not evidence_id:
         raise ValueError("evidence_record_id is required")
@@ -264,7 +275,11 @@ def build_evidence_review_history(
     if run is None:
         raise ValueError(f"Saved evidence record not found: {evidence_id}")
 
-    assessments = [row for row in load_assessments(base_dir=root) if row.get("evidence_record_id") == evidence_id]
+    _assess_kw = {} if org_id is None else {"org_id": org_id}
+    assessments = [
+        row for row in load_assessments(base_dir=root, **_assess_kw)
+        if row.get("evidence_record_id") == evidence_id
+    ]
     events: list[dict[str, Any]] = []
     events.append(_evidence_created_event(run))
     if run.get("change_status") == "CHANGED":
@@ -285,7 +300,7 @@ def build_evidence_review_history(
         "message": "Review history is built only from saved evidence and assessment records.",
         "events": events,
         "total_events": len(events),
-        "latest_assessment": latest_assessment_for(evidence_id, base_dir=root),
+        "latest_assessment": latest_assessment_for(evidence_id, base_dir=root, **_assess_kw),
         "disclaimer": LEGAL_DISCLAIMER,
     }
 

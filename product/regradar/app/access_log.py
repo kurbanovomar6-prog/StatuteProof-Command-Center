@@ -90,29 +90,38 @@ def append_access_log(
         conn.close()
 
 
-def read_access_log(limit: int = 100) -> list[dict[str, Any]]:
+def read_access_log(limit: int = 100, *, org_id: int | None = None) -> list[dict[str, Any]]:
     """Return the most recent access-log rows, newest first (read-only).
 
-    A convenience reader for tests and future audit views. It performs no writes
-    and there is intentionally no update/delete counterpart, preserving the
-    append-only guarantee.
+    A convenience reader for tests and audit views. It performs no writes and
+    there is intentionally no update/delete counterpart, preserving the
+    append-only guarantee. When ``org_id`` is given, only that org's rows are
+    returned so an owner-facing audit view can never disclose another tenant's
+    actions.
     """
     ensure_rbac_tables()
     try:
         capped = max(1, min(int(limit), 10_000))
     except (TypeError, ValueError):
         capped = 100
+    where = ""
+    params: list[Any] = []
+    if org_id is not None:
+        where = "WHERE org_id = ?"
+        params.append(int(org_id))
+    params.append(capped)
     conn = _connect()
     try:
         rows = conn.execute(
-            """
+            f"""
             SELECT id, ts, actor_user_id, org_id, action,
                    resource_type, resource_id, result
             FROM access_log
+            {where}
             ORDER BY id DESC
             LIMIT ?
             """,
-            (capped,),
+            tuple(params),
         ).fetchall()
         return [dict(row) for row in rows]
     finally:

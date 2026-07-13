@@ -19,8 +19,31 @@ from typing import Any
 from app.config import DB_PATH
 from app.evidence_assessment import LEGAL_DISCLAIMER
 from app.evidence_records import build_risk_brief_inputs
+from app.legal_safety import assert_no_forbidden_claims, find_forbidden_claims
 
 logger = logging.getLogger(__name__)
+
+# Reviewer-authored free-text fields shown in the audit pack. A forbidden phrase
+# typed by a reviewer (e.g. "guarantees compliance") must never ship in a
+# customer-facing export, so these are scrubbed before rendering.
+_SCRUBBED_FIELD_NOTICE = "[withheld: text did not pass the forbidden-claims check]"
+
+
+def _scrub_assessment_claims(assessment: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of ``assessment`` with reviewer free-text fields cleared
+    when they contain a forbidden claim.
+
+    Covers EVERY reviewer-authored free-text field the pack renders — including
+    ``reviewer_name`` — because the fail-closed final scan runs over the whole
+    rendered pack, so an unscrubbed forbidden phrase in ANY of them would raise
+    and produce no pack at all.
+    """
+    out = dict(assessment)
+    for field in ("internal_note", "next_action", "reviewer_name"):
+        value = str(out.get(field) or "").strip()
+        if value and find_forbidden_claims(value):
+            out[field] = _SCRUBBED_FIELD_NOTICE
+    return out
 
 
 _BASE_DIR = Path(__file__).parent.parent
@@ -76,6 +99,8 @@ def render_audit_pack_markdown(
     timestamp = evidence_record.get("timestamp_utc") or evidence_record.get("run_at") or "not recorded"
     normalized_hash = evidence_record.get("normalized_hash") or evidence_record.get("content_hash") or "not recorded"
     proof_path = evidence_record.get("proof_block_path") or "not recorded"
+    if assessment:
+        assessment = _scrub_assessment_claims(assessment)
     source_health = (
         (assessment or {}).get("source_health_status")
         or _source_health_status(evidence_record)
@@ -124,7 +149,12 @@ def render_audit_pack_markdown(
         "This export supports internal compliance review. It does not determine legal obligations, certify compliance, or replace qualified legal/compliance advice.",
         "",
     ])
-    return "\n".join(lines)
+    markdown = "\n".join(lines)
+    # Fail-closed final-bytes guard: reviewer free text is scrubbed above, but scan
+    # the fully rendered pack anyway and refuse to emit one that still contains a
+    # forbidden claim (disclaimer denials are neutralized so they never self-trip).
+    assert_no_forbidden_claims(markdown, label="Audit pack")
+    return markdown
 
 
 def render_audit_pack_html(markdown: str) -> str:

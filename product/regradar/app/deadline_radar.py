@@ -575,6 +575,43 @@ def build_reminder_email(entry: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def _reminder_review_approved(entry: dict[str, Any], base_dir: Path | None) -> bool:
+    """True iff the deadline's parent evidence record has a human review decision
+    of ``approved``.
+
+    Deadlines are rule-extracted and persisted with ``human_review_required=True``;
+    a reminder embeds the source name, the official URL and a verbatim diff
+    excerpt, so it must never be broadcast to customers until a human has approved
+    the underlying evidence record. Unknown/absent review state fails closed
+    (no send).
+    """
+    ev_id = str(entry.get("evidence_record_id") or "").strip()
+    if not ev_id:
+        return False
+    source_id = str(entry.get("source_id") or "").strip()
+    try:
+        from app.evidence_records import (
+            canonical_record_id,
+            latest_canonical_evidence_review,
+        )
+
+        # A deadline entry stores the RUN_ID as evidence_record_id, but canonical
+        # reviews key on the derived canonical record_id (evr_<source>_<run>). Look
+        # up by the canonical id; fall back to the raw id for any legacy entry that
+        # already stored a canonical id.
+        candidates: list[str] = []
+        if source_id:
+            candidates.append(canonical_record_id(source_id, ev_id))
+        candidates.append(ev_id)
+        for record_id in candidates:
+            review = latest_canonical_evidence_review(record_id, base_dir=base_dir)
+            if review and str(review.get("decision") or "").strip().lower() == "approved":
+                return True
+        return False
+    except Exception:  # noqa: BLE001 — unknown review state must fail closed
+        return False
+
+
 def send_due_reminders(
     *,
     as_of: date | None = None,
@@ -583,6 +620,7 @@ def send_due_reminders(
     send_fn: Callable[[str, str], bool] | None = None,
     recipients: list[str] | None = None,
     now_fn: Callable[[], str] | None = None,
+    require_review_approval: bool = True,
 ) -> dict[str, Any]:
     """Fire due lead-time reminders through the Telegram channel; dedupe by stage.
 
@@ -591,13 +629,30 @@ def send_due_reminders(
     alert-durability rule (never mark a reminder "sent" that was not delivered),
     so a transient outage or a not-yet-linked customer base retries next pass.
 
+    HUMAN-REVIEW GATE: reminders carry rule-extracted dates and verbatim diff
+    excerpts to customers, so by default a reminder is only broadcast once the
+    parent evidence record has been human-approved (``require_review_approval``).
+    Deadlines whose parent record is not yet approved are held and counted under
+    ``skipped_unreviewed`` — they retry on a later pass once approved. Set the
+    flag False only where the review gate is not the concern under test.
+
     ``send_fn`` and ``recipients`` are injectable for tests; in production they
     default to ``app.telegram.send_telegram_message`` and the subscribed
     customers (``app.telegram_pairing.get_all_linked_chat_ids``) — the same
     channel customer alerts use.
     """
     due = due_reminders(as_of=as_of, lead_stages=lead_stages, base_dir=base_dir)
-    summary: dict[str, Any] = {"due": len(due), "sent": [], "skipped_no_recipients": 0, "failed": 0}
+    summary: dict[str, Any] = {
+        "due": len(due),
+        "sent": [],
+        "skipped_no_recipients": 0,
+        "skipped_unreviewed": 0,
+        "failed": 0,
+    }
+    if require_review_approval:
+        approved = [e for e in due if _reminder_review_approved(e, base_dir)]
+        summary["skipped_unreviewed"] = len(due) - len(approved)
+        due = approved
     if not due:
         return summary
 

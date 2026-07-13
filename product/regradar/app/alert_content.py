@@ -30,6 +30,34 @@ FOOTER = "Monitoring information only. Not legal advice."
 
 _EXCERPT_CAP = 400
 
+# Telegram rejects messages longer than 4096 characters with HTTP 400. The auto
+# alert path builds alerts only when content changed, so a rejected send is
+# never retried and the alert is permanently lost. Cap the rendered message and
+# ALWAYS preserve the trailing proof URL + disclaimer footer (the disclaimer may
+# never be truncated off a customer-facing message).
+_TELEGRAM_LIMIT = 4096
+_TRUNCATION_NOTE = (
+    "\n…\n[Message truncated. Open the source link and evidence record for the "
+    "full change.]"
+)
+
+
+def _utf16_len(text: str) -> int:
+    """Length in UTF-16 code units — the unit Telegram uses for its 4096 limit
+    (an emoji is 1 Python code point but 2 UTF-16 units)."""
+    return len(text.encode("utf-16-le")) // 2
+
+
+def _utf16_truncate(text: str, limit: int) -> str:
+    """Truncate ``text`` so its UTF-16 length is <= ``limit``, never splitting a
+    surrogate pair (an emoji is kept whole or dropped whole)."""
+    if _utf16_len(text) <= limit:
+        return text
+    out = text[:limit]
+    while out and _utf16_len(out) > limit:
+        out = out[:-1]
+    return out
+
 _RULE_LABEL = {
     "HIGH_MULTIPLE_STRONG": "multiple strong indicators",
     "HIGH_STRONG_PLUS_CONTEXT": "strong indicator with context term",
@@ -422,6 +450,16 @@ def build_alert_content(
         "footer": FOOTER,
     }
 
+    # Action-orientation triage (VIXIO/FINRA model) — answers the reviewer's first
+    # question ("do I need to act?") as a WORKFLOW prompt, never a legal
+    # obligation. Only added when the change type is known.
+    change_type = str(payload.get("change_type") or "").strip()
+    if change_type:
+        from app.alert_drafts import action_orientation
+        _orient = action_orientation(change_type)
+        content["action_orientation"] = _orient["label"]
+        content["action_orientation_note"] = _orient["description"]
+
     # Optional facts — included ONLY when actually detected (A3/F2).
     # F2: detected_facts are rule-extracted from the ADDED delta with matched
     # spans. A deadline line renders ONLY from a real detection — an
@@ -495,44 +533,86 @@ def build_alert_content(
     return content
 
 
+def _md(value: Any) -> str:
+    """Strip Telegram Markdown metacharacters (``*_`[]``) from a DYNAMIC value.
+
+    The customer alert is sent with parse_mode='Markdown', so the STATIC labels
+    (``*Severity:*`` etc.) render as formatting — but any AI- or source-derived
+    field interpolated between them must be metachar-stripped, or an adversarial
+    ``[text](url)`` in a summary/action becomes a LIVE clickable link injected
+    into the customer alert (and stray ``*``/``_`` corrupt the formatting)."""
+    return str(value or "").translate(_MARKDOWN_METACHARS)
+
+
 def render_telegram(content: dict[str, Any]) -> str:
-    """Telegram Markdown rendering. Only present fields are rendered."""
-    lines = [f"🚨 *{content['title']}*", ""]
-    lines.append(f"*Severity:* {content['severity_line']}")
+    """Telegram Markdown rendering. Only present fields are rendered.
+
+    Dynamic content is metachar-stripped (see _md) because it is delivered with
+    parse_mode='Markdown'; only the fixed structural labels carry markup.
+    """
+    lines = [f"🚨 *{_md(content['title'])}*", ""]
+    lines.append(f"*Severity:* {_md(content['severity_line'])}")
+    if content.get("action_orientation"):
+        lines.append(f"*Action orientation:* {_md(content['action_orientation'])}")
+        if content.get("action_orientation_note"):
+            lines.append(f"_{_md(content['action_orientation_note'])}_")
     if content.get("source_name"):
-        source = content["source_name"]
+        source = _md(content["source_name"])
         if content.get("market"):
-            source += f" ({content['market']})"
+            source += f" ({_md(content['market'])})"
         lines.append(f"*Source:* {source}")
     if content.get("checked_at"):
-        lines.append(f"*Checked:* {content['checked_at']}")
+        lines.append(f"*Checked:* {_md(content['checked_at'])}")
     if content.get("excerpt"):
-        lines.append(f"*What changed (excerpt):*\n{content['excerpt']}")
+        lines.append(f"*What changed (excerpt):*\n{_md(content['excerpt'])}")
     if content.get("impact_tag"):
-        lines.append(f"*{content['impact_tag']}*")
-        lines.append(f"_{content['impact_line']}_")
+        lines.append(f"*{_md(content['impact_tag'])}*")
+        lines.append(f"_{_md(content['impact_line'])}_")
     if content.get("summary"):
-        lines.append(f"*Summary:* {content['summary']}")
+        lines.append(f"*Summary:* {_md(content['summary'])}")
     if content.get("facts_lines"):
         lines.append("*Detected in this change:*")
-        lines.extend(f"• {fl}" for fl in content["facts_lines"])
+        lines.extend(f"• {_md(fl)}" for fl in content["facts_lines"])
     if content.get("deadline"):
-        lines.append(f"*Deadline stated in source:* {content['deadline']}")
+        lines.append(f"*Deadline stated in source:* {_md(content['deadline'])}")
     if content.get("urgency"):
-        lines.append(f"*Urgency:* {content['urgency']}")
+        lines.append(f"*Urgency:* {_md(content['urgency'])}")
     if content.get("affected"):
-        lines.append(f"*Affected:* {content['affected']}")
+        lines.append(f"*Affected:* {_md(content['affected'])}")
     if content.get("action"):
-        lines.append(f"*Action:* {content['action']}")
-    lines.append(f"\n🔗 {content['url']}")
-    lines.append(f"_{content['footer']}_")
-    return "\n".join(lines)
+        lines.append(f"*Action:* {_md(content['action'])}")
+    body = "\n".join(lines)
+    # The proof URL + disclaimer footer are reserved and normally never truncated.
+    # The URL is left RAW (not metachar-stripped) because legitimate URLs commonly
+    # contain '_' and stripping would corrupt the proof link; a URL that trips
+    # Markdown parsing is handled by send_telegram_message's plain-text fallback.
+    tail = f"\n\n🔗 {content['url']}\n_{content['footer']}_"
+    message = body + tail
+    # Telegram enforces its 4096 limit in UTF-16 code units, not Python code
+    # points — an emoji is 1 code point but 2 UTF-16 units. Measure the way
+    # Telegram does so an emoji-heavy message can't slip over and 400.
+    if _utf16_len(message) <= _TELEGRAM_LIMIT:
+        return message
+    reserve = _utf16_len(tail) + _utf16_len(_TRUNCATION_NOTE)
+    keep = max(0, _TELEGRAM_LIMIT - reserve)
+    result = _utf16_truncate(body, keep).rstrip() + _TRUNCATION_NOTE + tail
+    # Hard backstop: even a pathologically long proof URL (so the reserved tail
+    # alone exceeds the limit) must never produce an over-limit message — Telegram
+    # would 400 it and the auto path would lose the alert entirely. Delivering a
+    # clamped message beats losing it.
+    if _utf16_len(result) > _TELEGRAM_LIMIT:
+        return _utf16_truncate(result, _TELEGRAM_LIMIT)
+    return result
 
 
 def render_markdown(content: dict[str, Any]) -> str:
     """Markdown rendering shared by the alert draft file and alert emails."""
     lines = [f"## {content['title']}", ""]
     lines.append(f"**Severity:** {content['severity_line']}")
+    if content.get("action_orientation"):
+        lines.append(f"**Action orientation:** {content['action_orientation']}")
+        if content.get("action_orientation_note"):
+            lines.append(f"_{content['action_orientation_note']}_")
     if content.get("source_name"):
         source = content["source_name"]
         if content.get("market"):

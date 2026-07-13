@@ -92,22 +92,52 @@ class TestFounderNotifyOnRegistration:
         assert captured["company"] == _REGISTER_BODY["company_name"]
 
     def test_notification_failure_does_not_break_registration(self):
-        """Notify helper raising inside its thread must not affect the 201."""
+        """Notify helper raising inside its daemon thread must not affect the 201.
+
+        The notify runs in a fire-and-forget daemon thread. We capture that
+        thread's exception via ``threading.excepthook`` so it (a) is asserted to
+        have actually fired and (b) does not leak into interpreter teardown as a
+        stray ``PytestUnhandledThreadExceptionWarning`` mis-attributed to a later
+        test. In production ``_notify_founder_registration`` swallows its own
+        errors (see ``test_helper_swallows_request_errors``); this test patches
+        the whole helper to force the raise and prove the 201 is unaffected.
+        """
         handler = _make_handler(_REGISTER_BODY)
+
+        raised = threading.Event()
+        captured_exc: list[BaseException] = []
 
         def _boom(*a, **kw):
             raise RuntimeError("telegram down")
 
-        with patch.object(api_module, "create_user") as mock_create, \
-             patch.object(api_module, "generate_verification_token", return_value="tok"), \
-             patch.object(api_module, "_send_verification_email"), \
-             patch.object(api_module, "_notify_founder_registration", side_effect=_boom), \
-             patch.object(handler, "_rate_limited", return_value=False, create=True):
-            mock_create.return_value = {"id": 8, "email": _REGISTER_BODY["email"]}
-            handler._handle_auth_register()
+        original_hook = threading.excepthook
 
-        payload, status = handler._sent[-1]
-        assert status == 201 and payload.get("ok") is True
+        def _capture_hook(args):
+            exc = args.exc_value
+            if isinstance(exc, RuntimeError) and str(exc) == "telegram down":
+                captured_exc.append(exc)
+                raised.set()
+            else:  # pragma: no cover - unexpected thread errors still surface
+                original_hook(args)
+
+        threading.excepthook = _capture_hook
+        try:
+            with patch.object(api_module, "create_user") as mock_create, \
+                 patch.object(api_module, "generate_verification_token", return_value="tok"), \
+                 patch.object(api_module, "_send_verification_email"), \
+                 patch.object(api_module, "_notify_founder_registration", side_effect=_boom), \
+                 patch.object(handler, "_rate_limited", return_value=False, create=True):
+                mock_create.return_value = {"id": 8, "email": _REGISTER_BODY["email"]}
+                handler._handle_auth_register()
+
+            payload, status = handler._sent[-1]
+            assert status == 201 and payload.get("ok") is True
+            # The daemon notify thread must have run and raised — captured here,
+            # not leaked to teardown.
+            assert raised.wait(timeout=3.0), "notify thread did not run"
+            assert captured_exc and isinstance(captured_exc[0], RuntimeError)
+        finally:
+            threading.excepthook = original_hook
 
     def test_helper_swallows_request_errors(self):
         """Direct call: requests.post raising must not propagate."""

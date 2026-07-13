@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, CheckCircle, Clock } from 'lucide-react'
 
-import { telegramPair, sources as sourcesApi } from '../../api'
+import { telegramPair, sources as sourcesApi, delivery } from '../../api'
 import PlanBanner from './PlanBanner'
 import { getWorkspaceProfile, profileLabel } from '../../data/workspaceProfile'
 import DeadlinesPanel from './DeadlinesPanel'
@@ -340,6 +340,73 @@ function EvidenceChainPanel() {
   )
 }
 
+// Review-queue summary on the dashboard. Fetches the same delivery preview that
+// PressureScore uses and reflects the REAL reviewed-alert count — it must never
+// assert "nothing is ready" when alerts exist (that is an active
+// "nothing needs attention" misstatement on the primary screen). Falls back to
+// the honest empty state only when the preview genuinely has zero matches.
+function ReviewQueueSummary({ navigate }) {
+  const [count, setCount] = useState(null)   // null = loading, number = matches
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    delivery.preview(14)
+      .then(res => { if (active) setCount((res.preview?.matches || []).length) })
+      .catch(() => { if (active) { setFailed(true); setCount(0) } })
+    return () => { active = false }
+  }, [])
+
+  const hasAlerts = typeof count === 'number' && count > 0
+
+  return (
+    <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-white">Review queue</h2>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Customer alerts appear only after monitored evidence is reviewed and routed.
+          </p>
+        </div>
+        <StatusPill tone="cyan">Live workspace</StatusPill>
+      </div>
+
+      {hasAlerts ? (
+        <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-5 py-6">
+          <p className="mb-1 text-sm text-[var(--text-primary)]">
+            <span className="font-mono tabular-nums text-base font-semibold">{count}</span>{' '}
+            reviewed customer alert{count === 1 ? '' : 's'} matched to this workspace in the last 14 days.
+          </p>
+          <p className="mb-4 text-xs text-[var(--text-secondary)]">
+            Open Reviewed Alerts to triage, seal decisions, and preview delivery. Monitoring information only. Not legal advice.
+          </p>
+          <button
+            onClick={() => navigate('alerts')}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--trust-border)] px-3 py-2 text-xs font-semibold text-[var(--accent)] transition-colors hover:border-[var(--accent)]"
+          >
+            View reviewed alerts <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-5 py-8 text-center">
+          <p className="mb-1 text-sm text-[var(--text-primary)]">
+            {failed
+              ? 'Reviewed alerts could not be loaded right now.'
+              : count === null
+                ? 'Checking for reviewed customer alerts…'
+                : 'No reviewed customer alerts are ready for this workspace yet.'}
+          </p>
+          <p className="text-xs text-[var(--text-secondary)]">
+            {failed
+              ? 'The reviewed-alerts preview could not be loaded — this is not a confirmation that none exist. Open Reviewed Alerts to retry.'
+              : 'Reviewed alerts appear after evidence records pass human review and delivery routing. No sample alerts are shown in the authenticated dashboard.'}
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function DashboardHome({ navigate, currentUser, planState, onChoosePlan }) {
   const profile = getWorkspaceProfile()
 
@@ -558,24 +625,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
 
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div className="space-y-5">
-          <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-semibold text-white">Review queue</h2>
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
-                  Customer alerts appear only after monitored evidence is reviewed and routed.
-                </p>
-              </div>
-              <StatusPill tone="cyan">Live workspace</StatusPill>
-            </div>
-
-            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-5 py-8 text-center">
-              <p className="mb-1 text-sm text-[var(--text-primary)]">No reviewed customer alerts are ready for this workspace yet.</p>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Reviewed alerts appear after evidence records pass human review and delivery routing. No sample alerts are shown in the authenticated dashboard.
-              </p>
-            </div>
-          </div>
+          <ReviewQueueSummary navigate={navigate} />
 
           {/* First-run backfill: shows the latest already-sealed changes only
               while the alerts preview is empty; renders nothing otherwise. */}

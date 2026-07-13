@@ -38,26 +38,52 @@ def assessment_store_path(base_dir: Path | None = None) -> Path:
     return root / "data" / "evidence_assessments" / "assessments.jsonl"
 
 
-def load_assessments(base_dir: Path | None = None) -> list[dict[str, Any]]:
+# Sentinel distinguishing "caller did not scope by org" (legacy/operator-wide
+# reads) from "scope to this org, including the unowned/legacy bucket None".
+_NO_ORG_FILTER = object()
+
+
+def _org_key(value: Any) -> str:
+    """Normalize an org id to a stable string key ('' for None/unset)."""
+    return "" if value is None else str(value)
+
+
+def load_assessments(
+    base_dir: Path | None = None,
+    org_id: Any = _NO_ORG_FILTER,
+) -> list[dict[str, Any]]:
+    """Load assessment rows. When ``org_id`` is supplied, return ONLY that org's
+    rows — Acknowledge & Assess notes (internal_note/impact/next_action) are
+    private to the org that authored them, even though the underlying official
+    evidence record is shared across customers. Callers on any customer-facing
+    read path MUST pass the caller's resolved org_id or they leak cross-tenant."""
     path = assessment_store_path(base_dir)
     if not path.exists():
         return []
+    want = _NO_ORG_FILTER if org_id is _NO_ORG_FILTER else _org_key(org_id)
     rows: list[dict[str, Any]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
         try:
-            rows.append(json.loads(line))
+            row = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if want is not _NO_ORG_FILTER and _org_key(row.get("org_id")) != want:
+            continue
+        rows.append(row)
     return rows
 
 
-def latest_assessment_for(evidence_record_id: str, base_dir: Path | None = None) -> dict[str, Any] | None:
+def latest_assessment_for(
+    evidence_record_id: str,
+    base_dir: Path | None = None,
+    org_id: Any = _NO_ORG_FILTER,
+) -> dict[str, Any] | None:
     wanted = str(evidence_record_id or "").strip()
     if not wanted:
         return None
-    for row in reversed(load_assessments(base_dir=base_dir)):
+    for row in reversed(load_assessments(base_dir=base_dir, org_id=org_id)):
         if row.get("evidence_record_id") == wanted:
             return row
     return None
@@ -112,6 +138,7 @@ def create_assessment(
     reviewer_name: str | None = None,
     next_action: str | None = None,
     assessment_status: str = "acknowledged",
+    org_id: Any = None,
     base_dir: Path | None = None,
 ) -> dict[str, Any]:
     impact = str(impact_level or "").strip()
@@ -139,6 +166,9 @@ def create_assessment(
         "source_health_status": _source_health_status(record),
         "change_status": record.get("change_status"),
         "reviewer_user_id": str(reviewer_user_id or ""),
+        # Owning tenant. Private assessment notes are scoped to this org on every
+        # read; '' (None) is the legacy/operator bucket, never a customer's.
+        "org_id": _org_key(org_id),
         "reviewer_name": str(reviewer_name or "").strip() or "Reviewer",
         "reviewed_at": reviewed_at,
         "impact_level": impact,

@@ -62,7 +62,7 @@ function AuthLayout({ children }) {
   )
 }
 
-export default function LoginPage({ onLogin, onRegister }) {
+export default function LoginPage({ onLogin, onRegister, onForgotPassword }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
@@ -173,8 +173,17 @@ export default function LoginPage({ onLogin, onRegister }) {
         </div>
 
         <div>
-          <div className="flex justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
             <label className={labelCls}>Password</label>
+            {onForgotPassword && (
+              <button
+                type="button"
+                onClick={onForgotPassword}
+                className="text-xs font-medium text-slate-500 hover:text-slate-900"
+              >
+                Forgot password?
+              </button>
+            )}
           </div>
           <div className="relative">
             <input
