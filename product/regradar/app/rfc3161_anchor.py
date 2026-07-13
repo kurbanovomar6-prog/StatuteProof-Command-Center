@@ -729,6 +729,13 @@ def read_head_anchor_sidecar(head_anchor_path: Path) -> dict[str, Any] | None:
 def write_head_anchor_sidecar(head_anchor_path: Path, anchor: dict[str, Any]) -> None:
     """Persist the anchor sidecar atomically (JSON) plus the raw ``.tsr`` DER token.
 
+    PRESERVES PRIOR TOKENS: a re-anchor (new chain head) must never destroy an
+    earlier RFC 3161 timestamp proof. The existing sidecar's current anchor and
+    its own accumulated ``history`` are carried forward into a ``history`` list on
+    the new sidecar, so every token this chain head was ever stamped with survives
+    (each history entry keeps its ``token_b64``, independently re-verifiable). The
+    latest token also stays as the raw ``.tsr`` for standard tooling.
+
     Best-effort: a write failure is logged and swallowed (the sidecar is an
     ADDITIVE signal, never a gate on evidence durability). Never mutates the
     head-anchor file or any evidence record.
@@ -738,6 +745,26 @@ def write_head_anchor_sidecar(head_anchor_path: Path, anchor: dict[str, Any]) ->
     json_path = sidecar_path_for(head_anchor_path)
     try:
         json_path.parent.mkdir(parents=True, exist_ok=True)
+        anchor = dict(anchor)
+        prior = read_head_anchor_sidecar(head_anchor_path)
+        history: list[dict[str, Any]] = []
+        if isinstance(prior, dict):
+            history = [h for h in (prior.get("history") or []) if isinstance(h, dict)]
+            prior_current = {k: v for k, v in prior.items() if k != "history"}
+            # Fold a real prior anchor (has a token or an anchored head) forward,
+            # unless it is the very same anchor (defensive — the caller already
+            # skips idempotent re-anchors of an unchanged head).
+            if prior_current.get("token_b64") or prior_current.get("anchored_head_record_hash"):
+                same = prior_current.get("anchored_head_record_hash") == anchor.get(
+                    "anchored_head_record_hash"
+                )
+                if not same:
+                    history.append(prior_current)
+        # Only add the key when there is real history, so a first-ever anchor's
+        # sidecar stays byte-identical to the pre-history format (and existing
+        # idempotent-read equality holds).
+        if history:
+            anchor["history"] = history
         _atomic_replace(
             json_path,
             json.dumps(anchor, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8"),

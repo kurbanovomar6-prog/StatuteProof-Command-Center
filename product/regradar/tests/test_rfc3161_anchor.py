@@ -627,3 +627,49 @@ def test_verify_rejects_oversized_token_before_parse():
     report = anchor.verify_timestamp_token(huge, hashlib.sha256(b"x").hexdigest())
     assert report["verified"] is False
     assert "token_bounded" in json.dumps(report)
+
+
+def _anchor_dict(n: int) -> dict:
+    digest = _digest(f"head-{n}".encode())
+    return {
+        "token_b64": base64.b64encode(_make_token(digest)).decode(),
+        "token_format": anchor.TOKEN_FORMAT,
+        "tsa_url": "https://tsa.test.invalid/tsr",
+        "digest_algorithm": "sha256",
+        "anchored_head_record_hash": digest,
+        "asserted_time_utc": f"2026-07-12T10:0{n}:00Z",
+    }
+
+
+def test_reanchor_preserves_prior_tokens_in_history(tmp_path):
+    """A new anchor must NEVER destroy an earlier RFC 3161 token — prior anchors
+    accumulate in ``history`` with their token_b64 intact."""
+    head_file = tmp_path / "data" / "evidence_chain_head.json"
+    head_file.parent.mkdir(parents=True, exist_ok=True)
+
+    a1, a2, a3 = _anchor_dict(1), _anchor_dict(2), _anchor_dict(3)
+    anchor.write_head_anchor_sidecar(head_file, a1)
+    anchor.write_head_anchor_sidecar(head_file, a2)
+    anchor.write_head_anchor_sidecar(head_file, a3)
+
+    side = anchor.read_head_anchor_sidecar(head_file)
+    # Current anchor is the latest.
+    assert side["anchored_head_record_hash"] == a3["anchored_head_record_hash"]
+    # History preserves BOTH prior anchors, oldest first, tokens intact.
+    hist_heads = [h["anchored_head_record_hash"] for h in side["history"]]
+    assert hist_heads == [a1["anchored_head_record_hash"], a2["anchored_head_record_hash"]]
+    assert side["history"][0]["token_b64"] == a1["token_b64"]  # prior token NOT destroyed
+    assert side["history"][1]["token_b64"] == a2["token_b64"]
+    # History entries never nest their own history.
+    assert all("history" not in h for h in side["history"])
+
+
+def test_idempotent_reanchor_same_head_does_not_duplicate(tmp_path):
+    head_file = tmp_path / "data" / "evidence_chain_head.json"
+    head_file.parent.mkdir(parents=True, exist_ok=True)
+    a = _anchor_dict(1)
+    anchor.write_head_anchor_sidecar(head_file, a)
+    anchor.write_head_anchor_sidecar(head_file, a)  # same head written again
+    side = anchor.read_head_anchor_sidecar(head_file)
+    # The identical anchor is not folded in twice — no history key is written.
+    assert side.get("history", []) == []
