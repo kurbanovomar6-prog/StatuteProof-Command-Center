@@ -121,6 +121,7 @@ def verify_submission(
             _guard(_check_raw_bytes, hashes, raw),
             _guard(_check_normalized_bytes, hashes, normalized),
             _guard(_check_diff_bytes, hashes, diff),
+            _guard(_check_capture_metadata_consistent, record, is_obj),
             _guard(_check_normalization_reproducible, raw, normalized),
         ]
 
@@ -296,6 +297,35 @@ def _check_diff_bytes(hashes: dict[str, str | None], diff: str | None) -> dict[s
     if _sha256_text(diff) == stored_bare:
         return _pass(name, "sha256(diff.txt) matches the record's diff_hash.")
     return _fail(name, "sha256(diff.txt) does not match the record's diff_hash.")
+
+
+def _check_capture_metadata_consistent(record: Any, is_obj: bool) -> dict[str, str]:
+    """Cross-check the DISPLAY capture metadata (run.timestamp, source.official_url)
+    against the SEALED copies (content.captured_at, content.source_url). The sealed
+    copies are covered by record_hash, so this catches an edit to a display field
+    that left the sealed value untouched. Additive: skips for records that predate
+    the sealed fields."""
+    name = "capture_metadata_consistent"
+    if not is_obj:
+        return _skip(name, "No record object to check.")
+    content = record.get("content")
+    content = content if isinstance(content, dict) else {}
+    sealed_ts = content.get("captured_at")
+    sealed_url = content.get("source_url")
+    if sealed_ts is None and sealed_url is None:
+        return _skip(name, "The record carries no sealed captured_at/source_url (legacy record).")
+    run = record.get("run")
+    run = run if isinstance(run, dict) else {}
+    source = record.get("source")
+    source = source if isinstance(source, dict) else {}
+    mismatches: list[str] = []
+    if sealed_ts is not None and "timestamp" in run and run.get("timestamp") != sealed_ts:
+        mismatches.append("run.timestamp does not match the sealed content.captured_at")
+    if sealed_url is not None and "official_url" in source and source.get("official_url") != sealed_url:
+        mismatches.append("source.official_url does not match the sealed content.source_url")
+    if mismatches:
+        return _fail(name, "; ".join(mismatches))
+    return _pass(name, "Displayed capture time and source URL match the sealed content values.")
 
 
 def _check_normalized_bytes(

@@ -134,3 +134,52 @@ def test_no_diff_submitted_skips(tmp_path):
     res = verify_submission(record)  # no diff submitted
     diff_check = next(c for c in res["checks"] if c["name"] == "diff_bytes_match")
     assert diff_check["status"] == "skipped"
+
+
+# ── sealed capture metadata (WHEN / WHERE) ────────────────────────────────────
+
+def test_capture_time_and_source_url_are_sealed_into_content(tmp_path):
+    run, previous_run = _changed_run_with_previous(tmp_path)
+    record = create_canonical_evidence_record(run, previous_run, base_dir=tmp_path)
+    # The capture time and source URL now live INSIDE content and match the display.
+    assert record["content"]["captured_at"] == record["run"]["timestamp"]
+    assert record["content"]["source_url"] == record["source"]["official_url"]
+    # ...and record_hash covers them (recomputing the seal reproduces record_hash).
+    assert record["record_hash"] == f"sha256:{canonical_record_hash(record['content'])}"
+
+
+def test_verify_capture_metadata_consistent_passes_for_untampered(tmp_path):
+    run, previous_run = _changed_run_with_previous(tmp_path)
+    record = create_canonical_evidence_record(run, previous_run, base_dir=tmp_path)
+    res = verify_submission(record)
+    check = next(c for c in res["checks"] if c["name"] == "capture_metadata_consistent")
+    assert check["status"] == "pass"
+
+
+def test_verify_detects_display_timestamp_tampering(tmp_path):
+    run, previous_run = _changed_run_with_previous(tmp_path)
+    record = create_canonical_evidence_record(run, previous_run, base_dir=tmp_path)
+    # Editing the DISPLAY run.timestamp does NOT break record_hash (which covers
+    # only content) — but it now diverges from the sealed content.captured_at, so
+    # capture_metadata_consistent fails and the submission is not verified.
+    tampered = json.loads(json.dumps(record))
+    tampered["run"]["timestamp"] = "2020-01-01T00:00:00Z"
+    res = verify_submission(tampered)
+    check = next(c for c in res["checks"] if c["name"] == "capture_metadata_consistent")
+    assert check["status"] == "fail"
+    assert res["verified"] is False
+
+
+def test_verify_capture_metadata_skips_for_legacy_record(tmp_path):
+    content = {"current_hash": f"sha256:{_sha256_text(_CURRENT)}"}
+    record = {
+        "record_hash": f"sha256:{canonical_record_hash(content)}",
+        "record_hash_method": "content-sha256-v1",
+        "content": content,
+        "run": {"timestamp": "2026-06-20T00:00:00Z"},
+        "source": {"official_url": "https://dfsa.ae/x"},
+    }
+    res = verify_submission(record, normalized=_CURRENT)
+    check = next(c for c in res["checks"] if c["name"] == "capture_metadata_consistent")
+    assert check["status"] == "skipped"
+    assert res["verified"] is True

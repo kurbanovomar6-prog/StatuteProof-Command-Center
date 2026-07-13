@@ -190,6 +190,14 @@ def create_canonical_evidence_record(
                 "raw_hash": f"sha256:{_sha256_path(raw_input)}",
                 "raw_content_path": _relative_or_absolute(raw_path, root),
                 "normalized_current_path": _relative_or_absolute(current_path, root),
+                # Seal the WHEN and WHERE of capture. These duplicate run.timestamp
+                # and source.official_url, but placing them INSIDE content brings
+                # them under record_hash, so the capture time and source URL can no
+                # longer be altered without breaking the seal. The public verifier
+                # cross-checks the display copies against these sealed values.
+                # Additive — legacy records predate them and stay valid.
+                "captured_at": timestamp,
+                "source_url": official_url,
             },
             "change": {
                 "summary": _change_summary(run_record, run_status),
