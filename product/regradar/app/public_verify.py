@@ -79,6 +79,9 @@ _HASH_PATHS: dict[str, tuple[tuple[str, ...], ...]] = {
     "current_hash": (("content", "current_hash"), ("current_hash",), ("normalized_hash",)),
     "raw_hash": (("content", "raw_hash"), ("raw_hash",)),
     "previous_hash": (("content", "previous_hash"), ("previous_hash",)),
+    # diff_hash seals the redline (diff.txt). Additive: legacy records predate it,
+    # so a submission without it simply skips the diff_bytes_match check.
+    "diff_hash": (("content", "diff_hash"), ("diff_hash",)),
     "record_hash": (("record_hash",),),
     "prev_record_hash": (("prev_record_hash",),),
 }
@@ -89,6 +92,7 @@ def verify_submission(
     *,
     raw: str | None = None,
     normalized: str | None = None,
+    diff: str | None = None,
     timestamp_token: str | None = None,
     timestamp_digest: str | None = None,
 ) -> dict[str, Any]:
@@ -116,6 +120,7 @@ def verify_submission(
             _guard(_check_record_hash_self_consistent, record, hashes, is_obj),
             _guard(_check_raw_bytes, hashes, raw),
             _guard(_check_normalized_bytes, hashes, normalized),
+            _guard(_check_diff_bytes, hashes, diff),
             _guard(_check_normalization_reproducible, raw, normalized),
         ]
 
@@ -270,6 +275,27 @@ def _check_raw_bytes(hashes: dict[str, str | None], raw: str | None) -> dict[str
     if _sha256_text(raw) == stored_bare:
         return _pass(name, "sha256(raw.txt) matches the record's raw_hash.")
     return _fail(name, "sha256(raw.txt) does not match the record's raw_hash.")
+
+
+def _check_diff_bytes(hashes: dict[str, str | None], diff: str | None) -> dict[str, str]:
+    """Verify a submitted diff.txt (the sealed redline) against the record's
+    diff_hash. Additive: a record without diff_hash (legacy, or a non-CHANGED run
+    with no diff) simply skips — never a failure."""
+    name = "diff_bytes_match"
+    if diff is None:
+        return _skip(name, "No diff.txt was submitted.")
+    stored = hashes["diff_hash"]
+    if not stored:
+        return _skip(
+            name,
+            "The record carries no diff_hash to compare the submitted diff.txt against.",
+        )
+    stored_bare = _bare_digest(stored)
+    if stored_bare is None:
+        return _fail(name, "diff_hash is not a valid sha256 digest.")
+    if _sha256_text(diff) == stored_bare:
+        return _pass(name, "sha256(diff.txt) matches the record's diff_hash.")
+    return _fail(name, "sha256(diff.txt) does not match the record's diff_hash.")
 
 
 def _check_normalized_bytes(

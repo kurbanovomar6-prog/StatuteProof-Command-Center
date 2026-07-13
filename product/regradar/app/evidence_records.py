@@ -221,6 +221,12 @@ def create_canonical_evidence_record(
             rel_diff = _relative_or_absolute(diff_path, root)
             record["change"]["diff_path"] = rel_diff
             record["files"]["diff_path"] = rel_diff
+            # Seal the redline: hash the stored diff.txt and place it INSIDE
+            # content, so record_hash below covers it and any later in-place edit
+            # to diff.txt is detectable by re-hashing against this value. Additive
+            # — legacy records predate diff_hash and stay valid (the verifier only
+            # checks it when present).
+            record["content"]["diff_hash"] = f"sha256:{_sha256_path(diff_path)}"
 
         # Seal the record with its own fingerprint LAST, once the content block is
         # fully built (current_hash + raw_hash + paths, and the previous-side

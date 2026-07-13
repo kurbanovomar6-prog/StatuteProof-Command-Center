@@ -915,7 +915,10 @@ class _Handler(BaseHTTPRequestHandler):
         Stateless integrity check of a caller-submitted evidence record. This is
         the no-login moat: it verifies the bytes the CALLER holds and never reads
         the server's evidence/ tree, so it requires trusting neither a login nor
-        StatuteProof. Body: ``{"record": {...}, "raw"?: str, "normalized"?: str}``.
+        StatuteProof. Body:
+        ``{"record": {...}, "raw"?: str, "normalized"?: str, "diff"?: str}``.
+        A submitted ``diff`` is checked against the record's sealed ``diff_hash``
+        (skipped for legacy records that predate it).
         Fail-closed: malformed input returns a clear 400, never a 500 stacktrace.
         """
         # Cheap but unauthenticated — cap per client IP.
@@ -937,16 +940,20 @@ class _Handler(BaseHTTPRequestHandler):
             return
         raw = body.get("raw")
         normalized = body.get("normalized")
+        diff = body.get("diff")
         if raw is not None and not isinstance(raw, str):
             self._send_json({"ok": False, "error": "'raw' must be a string if provided."}, 400)
             return
         if normalized is not None and not isinstance(normalized, str):
             self._send_json({"ok": False, "error": "'normalized' must be a string if provided."}, 400)
             return
+        if diff is not None and not isinstance(diff, str):
+            self._send_json({"ok": False, "error": "'diff' must be a string if provided."}, 400)
+            return
 
         # verify_submission never raises; a malformed record surfaces as failed
         # checks (verified: false), not a server error.
-        result = verify_submission(body.get("record"), raw=raw, normalized=normalized)
+        result = verify_submission(body.get("record"), raw=raw, normalized=normalized, diff=diff)
         self._send_json(result, 200)
 
     def _handle_verify_spec(self) -> None:
