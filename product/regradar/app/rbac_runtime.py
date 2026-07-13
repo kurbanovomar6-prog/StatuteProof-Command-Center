@@ -54,6 +54,7 @@ from app.rbac import (
     GLOBAL_ORG_ID,
     Principal,
     Resource,
+    ROLE_DENIED,
     ROLE_OWNER,
     can,
 )
@@ -135,11 +136,13 @@ def _resolve_from_db(user_id: int) -> tuple[int | None, str] | None:
         ).fetchone()
         if row is not None:
             role = str(row["role"])
-            # An unknown/corrupt role would DENY every action under can() and thus
-            # break an existing user — fail SAFE to owner instead. Known assignable
-            # roles (incl. auditor) are preserved so least-privilege still applies.
+            # A corrupt/unknown stored role must FAIL CLOSED, not escalate: mapping
+            # it to owner would hand full privileges to a member whose row was
+            # damaged or tampered. ROLE_DENIED grants nothing (can() denies), so a
+            # bad row locks the seat down until an owner reassigns a valid role.
+            # Known assignable roles (incl. auditor) are preserved as-is.
             if role not in ASSIGNABLE_ROLES:
-                role = ROLE_OWNER
+                role = ROLE_DENIED
             return (row["org_id"], role)
         # No membership row yet. Recover the org the user owns if one exists (the
         # backfill may not have run on this process's hot path yet), else None.
@@ -157,33 +160,38 @@ def _resolve_from_db(user_id: int) -> tuple[int | None, str] | None:
 def resolve_principal(user: Any) -> Principal:
     """Resolve the authed ``user`` to a :class:`Principal`. NEVER raises.
 
-    Fail-safe posture (preserve existing access):
+    FAIL-CLOSED posture — a failure to establish the caller's real role denies
+    rather than escalating (owner decision 2026-07-13):
 
-    * No identifiable user id → ``owner`` with no org (the caller already passed
-      ``require_auth`` to get here; owner keeps full self-access).
-    * A membership row → that ``(org_id, role)`` (unknown roles fail safe to
-      ``owner``; ``auditor`` and the other assignable roles are preserved).
+    * A membership row → that ``(org_id, role)`` (assignable roles incl.
+      ``auditor`` preserved as-is; a corrupt/unknown stored role → ``denied``).
     * No membership row, but the user owns an org → ``owner`` of that org.
-    * Nothing found, or any DB error → ``owner`` with no org.
-
-    The net effect: a solo user (the only shape in live data today) always
-    resolves to ``owner`` and therefore retains exactly the access they have under
-    the pre-Stage-2 flat model.
+    * No membership and owns no org yet → ``owner`` of their own (``org_id=None``)
+      scope. This is a newly-registered solo user before the once-per-process
+      backfill — ONBOARDING, not escalation: org-scoped reads isolate ``None`` to
+      the empty bucket, so they see none of another tenant's data.
+    * Malformed user id, or ANY DB error during lookup → ``denied`` (zero
+      capabilities). A transient failure must not hand a lesser-role member owner
+      privileges; the seat is locked until resolution succeeds again.
     """
     user_id = _safe_user_id(user)
     if user_id is None:
-        return Principal(user_id=None, org_id=None, role=ROLE_OWNER)
+        # Post-auth this should not happen; deny rather than mint owner from a
+        # malformed identity.
+        return Principal(user_id=None, org_id=None, role=ROLE_DENIED)
     try:
         found = _resolve_from_db(user_id)
     except sqlite3.Error:
-        logger.warning("rbac principal lookup failed for user %s; failing safe to owner", user_id)
-        found = None
+        logger.warning("rbac principal lookup failed for user %s; failing CLOSED (denied)", user_id)
+        return Principal(user_id=user_id, org_id=None, role=ROLE_DENIED)
     except Exception:  # noqa: BLE001 — resolution must never break a live request
-        logger.warning("rbac principal resolution error for user %s; failing safe to owner", user_id)
-        found = None
+        logger.warning("rbac principal resolution error for user %s; failing CLOSED (denied)", user_id)
+        return Principal(user_id=user_id, org_id=None, role=ROLE_DENIED)
     if found is not None:
         org_id, role = found
         return Principal(user_id=user_id, org_id=org_id, role=role)
+    # No membership and owns no org yet — onboarding (see docstring). Owner of
+    # their OWN None-scoped resources so a brand-new customer can use the product.
     return Principal(user_id=user_id, org_id=None, role=ROLE_OWNER)
 
 

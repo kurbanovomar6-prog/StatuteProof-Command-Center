@@ -3023,10 +3023,11 @@ class _Handler(BaseHTTPRequestHandler):
                     403,
                 )
                 return
-            # FAIL CLOSED on an unresolved org. resolve_principal fail-safes to
-            # Principal(org_id=None, role=owner) on a missing membership or a DB
-            # error; passing org_id=None to read_access_log would return EVERY
-            # tenant's rows (cross-tenant disclosure). Never scope-less read here.
+            # FAIL CLOSED on an unresolved org. resolve_principal yields org_id=None
+            # for a brand-new solo user before backfill (role=owner) and for a
+            # denied/error resolution (role=denied); either way passing org_id=None
+            # to read_access_log would return EVERY tenant's rows (cross-tenant
+            # disclosure). Never do a scope-less read here.
             if principal.org_id is None:
                 self._send_json(
                     {"ok": False, "message": "Your workspace could not be resolved. Try again later."},

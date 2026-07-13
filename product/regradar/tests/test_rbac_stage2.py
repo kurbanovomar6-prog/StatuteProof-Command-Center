@@ -43,7 +43,10 @@ from app.rbac import (
     EVIDENCE_VIEW,
     Principal,
     ROLE_AUDITOR,
+    ROLE_DENIED,
     ROLE_OWNER,
+    SOURCE_EDIT,
+    can,
 )
 
 
@@ -143,21 +146,47 @@ def test_user_without_membership_fails_safe_to_owner(isolated_db):
     assert principal.user_id == user["id"]
 
 
-def test_malformed_user_fails_safe_to_owner(isolated_db):
-    # Defensive: a caller that already passed require_auth but has a broken shape
-    # must not be locked out (owner fail-safe), and resolution must never raise.
-    assert rbac_runtime.resolve_principal(None).role == ROLE_OWNER
-    assert rbac_runtime.resolve_principal({"no_id": 1}).role == ROLE_OWNER
+def test_malformed_user_fails_closed_to_denied(isolated_db):
+    # FAIL-CLOSED (owner decision 2026-07-13): a caller with a broken shape must
+    # not mint an owner. Resolution never raises, but yields the zero-capability
+    # ``denied`` role.
+    for bad in (None, {"no_id": 1}):
+        principal = rbac_runtime.resolve_principal(bad)
+        assert principal.role == ROLE_DENIED
+        assert not can(principal, EVIDENCE_VIEW)
+        assert not can(principal, SOURCE_EDIT)
 
 
-def test_resolution_db_error_fails_safe_to_owner(isolated_db, monkeypatch):
+def test_resolution_db_error_fails_closed_to_denied(isolated_db, monkeypatch):
+    # A transient DB error must DENY, never escalate: we cannot read the caller's
+    # real role, so we must not assume owner (that would hand a lesser-role member
+    # full privileges on any sqlite blip).
     def _boom(_uid):
         raise RuntimeError("db down")
 
     monkeypatch.setattr(rbac_runtime, "_resolve_from_db", _boom)
     principal = rbac_runtime.resolve_principal({"id": 42})
-    assert principal.role == ROLE_OWNER  # never break an authenticated request
+    assert principal.role == ROLE_DENIED
     assert principal.user_id == 42
+    assert not can(principal, SOURCE_EDIT)  # no owner action on error
+
+
+def test_corrupt_stored_role_fails_closed_to_denied(isolated_db, monkeypatch):
+    # A membership row whose stored role is unknown/corrupt must NOT map to owner.
+    user = _new_owner("corruptrole@example.com")
+    import app.db as _db
+    conn = _db._connect()
+    try:
+        conn.execute(
+            "UPDATE org_members SET role = ? WHERE user_id = ?",
+            ("superuser-💀", user["id"]),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    principal = rbac_runtime.resolve_principal({"id": user["id"]})
+    assert principal.role == ROLE_DENIED
+    assert not can(principal, SOURCE_EDIT)
 
 
 # ── 2. audit logging on the sensitive actions ────────────────────────────────────

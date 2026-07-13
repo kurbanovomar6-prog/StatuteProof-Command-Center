@@ -53,6 +53,13 @@ ROLE_APPROVER = "approver"
 ROLE_AUDITOR = "auditor"
 # SYSTEM is a machine principal (pipeline, scheduler), not an assignable seat.
 ROLE_SYSTEM = "system"
+# DENIED is a runtime FAIL-CLOSED sentinel, not an assignable seat. It is
+# deliberately absent from ``_MATRIX`` so ``permissions_for`` returns the empty
+# set and ``can`` denies every action. ``resolve_principal`` assigns it whenever
+# it cannot trust the caller's real role (DB error, corrupt/unknown stored role,
+# malformed user), so a transient failure DENIES rather than escalating a
+# lesser-role member to owner.
+ROLE_DENIED = "denied"
 
 # Roles a human can be assigned to in ``org_members.role``. ``system`` is
 # deliberately excluded — it is not a membership seat, only the identity carried
