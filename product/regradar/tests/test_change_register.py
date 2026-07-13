@@ -678,3 +678,42 @@ def test_csv_leaves_safe_cells_unchanged():
     csv_text = render_change_register_csv(rows, meta)
     assert "Section 7 amended" in csv_text
     assert "'Section" not in csv_text
+
+
+def test_register_does_not_leak_other_tenant_assessment_when_org_none(tmp_path):
+    """Regression: build_change_register_rows must NOT surface another tenant's
+    reviewer/impact/next_action into the downloadable register when the caller's
+    org is unresolved (org_id=None). Previously `_akw = {} if org_id is None ...`
+    dropped the kwarg on None and fell back to _NO_ORG_FILTER, joining ANY org's
+    assessment onto the shared official record. Org A stamps a NON-EMPTY org_id,
+    so a None caller (scoped to the "" bucket) must see an unassessed row.
+    """
+    record = _make_canonical_record(tmp_path)
+    # Org A (org_id="1") privately assessed this shared official record.
+    secret_reviewer = "MLRO-OrgA-PRIVATE"
+    secret_action = "Escalate to OrgA board — internal"
+    org_a_row = {
+        "assessment_id": "assessment-orgA",
+        "evidence_record_id": record["run"]["run_id"],
+        "impact_level": "policy_review",
+        "reviewer_name": secret_reviewer,
+        "next_action": secret_action,
+        "assessment_status": "acknowledged",
+        "reviewed_at": "2026-06-20T01:00:00Z",
+        "org_id": "1",
+        "legal_disclaimer": LEGAL_DISCLAIMER,
+    }
+    apath = tmp_path / "data" / "evidence_assessments" / "assessments.jsonl"
+    apath.parent.mkdir(parents=True, exist_ok=True)
+    apath.write_text(json.dumps(org_a_row, sort_keys=True) + "\n", encoding="utf-8")
+
+    # Unresolved caller (org_id=None) must NOT receive Org A's private note.
+    rows_none = build_change_register_rows(base_dir=tmp_path, org_id=None)
+    assert len(rows_none) == 1
+    blob_none = json.dumps(rows_none)
+    assert secret_reviewer not in blob_none
+    assert secret_action not in blob_none
+
+    # Control: Org A itself DOES see its own assessment.
+    rows_a = build_change_register_rows(base_dir=tmp_path, org_id="1")
+    assert secret_reviewer in json.dumps(rows_a)

@@ -89,3 +89,39 @@ def test_review_history_is_org_isolated(tmp_path, monkeypatch):
     hist_a = sht.build_evidence_review_history(_REC["run_id"], org_id=ORG_A, base_dir=tmp_path)
     assert hist_a["latest_assessment"] is not None
     assert hist_a["latest_assessment"]["internal_note"] == SECRET
+
+
+def test_unresolved_caller_org_none_never_leaks_across_builders(tmp_path, monkeypatch):
+    """Regression: a caller whose org could not be resolved (org_id=None — a new
+    signup before the once-per-process backfill, or a transient resolve error)
+    must see NOTHING from an established tenant, on EVERY builder. Previously the
+    `{} if org_id is None else {...}` idiom dropped the kwarg on None and fell back
+    to load_assessments' _NO_ORG_FILTER default, leaking every tenant's private
+    reviewer/impact (review queue) and full internal_note/next_action (history +
+    timeline). Org A's note is stamped with a NON-EMPTY org_id, so a None-caller
+    (scoped to the "" bucket) must not receive it.
+    """
+    _seed_org_a_assessment(tmp_path, monkeypatch)  # org_id = "1" (non-empty)
+    monkeypatch.setattr(rq, "_read_runs", lambda root, market: [dict(_REC)])
+    monkeypatch.setattr(sht, "_find_run", lambda eid, root: dict(_REC))
+    monkeypatch.setattr(sht, "_read_runs", lambda root: [dict(_REC)])
+    monkeypatch.setattr(sht, "_find_source", lambda sid, root: None)
+
+    # Review queue: no reviewer/impact/note for the None caller.
+    q_none = rq.build_review_queue(org_id=None, status="all", base_dir=tmp_path)
+    assert SECRET not in json.dumps(q_none)
+    assert "MLRO A" not in json.dumps(q_none)
+    row = q_none["queue"][0]
+    assert row["pending_review"] is True
+    assert row["reviewer"] is None and row["impact_level"] is None
+
+    # Review history: no note body, no latest_assessment for the None caller.
+    hist_none = sht.build_evidence_review_history(_REC["run_id"], org_id=None, base_dir=tmp_path)
+    assert SECRET not in json.dumps(hist_none)
+    assert "Escalate internally" not in json.dumps(hist_none)
+    assert hist_none["latest_assessment"] is None
+
+    # Per-source timeline: no reviewer identity / note preview for the None caller.
+    tl_none = sht.build_source_timeline(_REC["source_id"], org_id=None, base_dir=tmp_path)
+    assert SECRET not in json.dumps(tl_none)
+    assert "MLRO A" not in json.dumps(tl_none)

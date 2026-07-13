@@ -285,8 +285,12 @@ def _latest_assessments_by_evidence(root: Path, org_id: Any = None) -> dict[str,
     """Latest assessment per evidence record, SCOPED to ``org_id`` when given so
     the queue never shows another tenant's private review notes."""
     latest: dict[str, dict[str, Any]] = {}
-    kw = {} if org_id is None else {"org_id": org_id}
-    for row in load_assessments(base_dir=root, **kw):
+    # Forward org_id UNCONDITIONALLY. Dropping the kwarg on None would fall back
+    # to load_assessments' _NO_ORG_FILTER default (every tenant's rows); passing
+    # None instead scopes to the "" legacy/empty bucket, so a caller whose org
+    # could not be resolved (org_id=None) sees nothing rather than leaking
+    # another tenant's private assessment notes.
+    for row in load_assessments(base_dir=root, org_id=org_id):
         evidence_id = str(row.get("evidence_record_id") or "")
         if evidence_id:
             latest[evidence_id] = row

@@ -798,6 +798,19 @@ class _Handler(BaseHTTPRequestHandler):
         scheme = "https" if not host.startswith("localhost") and not host.startswith("127.") else "http"
         return f"{scheme}://{host}"
 
+    def _public_base_url(self) -> str:
+        """Origin for links embedded in outbound EMAIL (password reset, email
+        verification). Security-sensitive: the request ``Host`` header is
+        attacker-controllable, so a poisoned Host would let an attacker mint a
+        password-reset link pointing at a hostile domain and harvest the victim's
+        single-use token (account takeover). Prefer an explicitly configured
+        public origin (STATUTEPROOF_PUBLIC_BASE_URL); only fall back to the
+        request Host for local/dev where none is set. In production the reverse
+        proxy also host-scopes the site, so this is defence in depth that holds
+        even if the API is ever exposed directly (run.py documents --host 0.0.0.0)."""
+        configured = os.environ.get("STATUTEPROOF_PUBLIC_BASE_URL", "").strip().rstrip("/")
+        return configured or self._base_url()
+
     def _disabled_endpoint(self) -> None:
         self._send_json({"ok": False, "message": "This endpoint is not available."}, 403)
 
@@ -1349,7 +1362,7 @@ class _Handler(BaseHTTPRequestHandler):
             )
             # Generate verification token and send email (non-blocking)
             token = generate_verification_token(int(user["id"]))
-            verification_url = f"{self._base_url()}/api/auth/verify-email?token={token}"
+            verification_url = f"{self._public_base_url()}/api/auth/verify-email?token={token}"
             import threading as _threading
             _threading.Thread(
                 target=_send_verification_email,
@@ -1504,7 +1517,7 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if issued:
             token, _uid = issued
-            reset_url = f"{self._base_url()}/reset-password?token={token}"
+            reset_url = f"{self._public_base_url()}/reset-password?token={token}"
             import threading as _threading
             _threading.Thread(
                 target=_send_password_reset_email,

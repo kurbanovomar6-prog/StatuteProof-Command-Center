@@ -84,8 +84,12 @@ def build_source_timeline(
     root = base_dir or _BASE_DIR
     source = _find_source(sid, root)
     runs = [row for row in _read_runs(root) if row.get("source_id") == sid]
-    _akw = {} if org_id is None else {"org_id": org_id}
-    assessments = [row for row in load_assessments(base_dir=root, **_akw) if row.get("source_id") == sid]
+    # Forward org_id unconditionally so an unresolved caller (org_id=None) scopes
+    # to the empty legacy bucket (isolate) rather than _NO_ORG_FILTER (all tenants).
+    assessments = [
+        row for row in load_assessments(base_dir=root, org_id=org_id)
+        if row.get("source_id") == sid
+    ]
 
     events: list[dict[str, Any]] = []
     if source and str(source.get("status") or "").lower() == "remediation":
@@ -275,9 +279,11 @@ def build_evidence_review_history(
     if run is None:
         raise ValueError(f"Saved evidence record not found: {evidence_id}")
 
-    _assess_kw = {} if org_id is None else {"org_id": org_id}
+    # Forward org_id unconditionally so an unresolved caller (org_id=None) scopes
+    # to the empty legacy bucket (isolate) rather than _NO_ORG_FILTER (all tenants),
+    # keeping another tenant's internal_note/next_action out of the history.
     assessments = [
-        row for row in load_assessments(base_dir=root, **_assess_kw)
+        row for row in load_assessments(base_dir=root, org_id=org_id)
         if row.get("evidence_record_id") == evidence_id
     ]
     events: list[dict[str, Any]] = []
@@ -300,7 +306,7 @@ def build_evidence_review_history(
         "message": "Review history is built only from saved evidence and assessment records.",
         "events": events,
         "total_events": len(events),
-        "latest_assessment": latest_assessment_for(evidence_id, base_dir=root, **_assess_kw),
+        "latest_assessment": latest_assessment_for(evidence_id, base_dir=root, org_id=org_id),
         "disclaimer": LEGAL_DISCLAIMER,
     }
 

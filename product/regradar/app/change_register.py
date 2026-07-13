@@ -227,11 +227,14 @@ def build_change_register_rows(
 
         # Human assessment join (assessments are keyed by run_id; fall back to
         # record_id in case a reviewer assessed by the canonical id) -----------
-        _akw = {} if org_id is None else {"org_id": org_id}
+        # Forward org_id unconditionally: an unresolved caller (org_id=None) must
+        # scope to the empty legacy bucket (isolate), never fall back to
+        # _NO_ORG_FILTER, which would leak another tenant's impact/reviewer/
+        # next_action into this downloadable CSV/XLSX/HTML register.
         assessment = (
-            latest_assessment_for(run_id, base_dir=root, **_akw) if run_id else None
+            latest_assessment_for(run_id, base_dir=root, org_id=org_id) if run_id else None
         ) or (
-            latest_assessment_for(record_id, base_dir=root, **_akw) if record_id else None
+            latest_assessment_for(record_id, base_dir=root, org_id=org_id) if record_id else None
         ) or {}
 
         # Action-log decision join (scoped to the requesting client) -----------
