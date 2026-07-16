@@ -223,7 +223,7 @@ const FAQS = [
   },
   {
     q: "Which regulators are covered on the UAE Monitor plan?",
-    a: "Selected-source monitoring includes fresh-alert eligible sources across VARA, CBUAE (rulebook), DFSA, ADGM/FSRA, DIFC laws and data protection, Ministry of Finance, Ministry of Economy DNFBP AML sources, Executive Office for AML/CFT (EOCN) sanctions sources, UAE CMA, and related official public sources. The UAE FIU website is currently geo-restricted from outside the UAE and is not counted in fresh-alert coverage. MoJ/UAE legislation/gazette sources remain blocked or candidate, and FTA listing sources remain candidate pending the fresh-alert gate.",
+    a: "Selected-source monitoring includes fresh-alert eligible sources across VARA, CBUAE (rulebook), DFSA, ADGM/FSRA, DIFC laws and data protection, Ministry of Finance, Ministry of Economy DNFBP AML sources, Executive Office for AML/CFT (EOCN) sanctions sources, UAE CMA, and related official public sources. Source access is environment-dependent and disclosed rather than assumed: some regulator websites — including the CBUAE rulebook and the DFSA site — apply access restrictions that can affect automated monitoring infrastructure. Before your pilot begins, the source readiness review reports the recorded access status of every source in your pack from our monitoring infrastructure; any source we cannot reach reliably is disclosed with its access limitation and is not counted as fresh-alert eligible coverage. The UAE FIU website is currently geo-restricted from outside the UAE and is not counted in fresh-alert coverage. MoJ/UAE legislation/gazette sources remain blocked or candidate, and FTA listing sources remain candidate pending the fresh-alert gate.",
   },
 ];
 

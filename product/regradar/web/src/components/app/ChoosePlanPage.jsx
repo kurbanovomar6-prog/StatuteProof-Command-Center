@@ -66,7 +66,7 @@ const PLANS = [
     subnote: 'No payment now — we confirm your source pack first',
     features: [
       'Validated official UAE source profile',
-      'Selected VARA / CBUAE / DFSA / ADGM / UAE FIU fresh-alert source pack',
+      'Selected VARA / CBUAE / DFSA / ADGM / SCA fresh-alert source pack',
       'Evidence records + full diff view',
       'High-risk review queue',
       'Weekly MLRO brief — Telegram (email: requires activation)',

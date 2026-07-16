@@ -19,7 +19,7 @@ const CARDS = [
   {
     icon: RadioTower,
     title: 'Monitoring infrastructure and geo-access',
-    body: 'Some UAE official sources apply geo-IP access restrictions that affect monitoring from outside the UAE. These sources are disclosed before pilot activation rather than monitored unreliably. Where a source is geo-restricted, it is flagged as such in the source readiness report, not counted as active coverage.',
+    body: 'Some UAE official sources apply geo-IP or infrastructure-level access restrictions that can affect automated monitoring. These sources are disclosed before pilot activation rather than monitored unreliably. Where a source is access-restricted, it is flagged as such in the source readiness report and is not counted as fresh-alert eligible coverage.',
   },
 ]
 

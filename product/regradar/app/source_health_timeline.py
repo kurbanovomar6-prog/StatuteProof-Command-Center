@@ -117,7 +117,7 @@ def source_health_customer_message(status: str) -> str:
         "CHANGED": "Content fingerprint changed between runs. Review required before customer alert.",
         "REMEDIATION_REQUIRED": "This source is under extraction remediation and is not currently treated as monitoring-ready.",
         "FAILED": "The latest source check failed. Manual review may be required.",
-        "ACCESS_BLOCKED": "The source could not be accessed publicly during the latest check. Manual review may be required.",
+        "ACCESS_BLOCKED": "Access from our monitoring infrastructure was blocked or restricted during the latest check (the page may remain reachable to other visitors). Manual review may be required.",
         "NO_HISTORY": "No monitoring history has been recorded yet.",
     }.get(normalized, "Source-health status is recorded for internal compliance review.")
 

@@ -147,3 +147,33 @@ describe('landing samples avoid obligation voice (LG-5)', () => {
     }
   }
 })
+
+// 2.4: the plan-selection screen (the moment money changes hands) must never
+// sell a regulator in the "fresh-alert source pack" line that has ZERO
+// fresh-alert eligible sources in the registry. Regression: it sold "UAE FIU"
+// while the pricing FAQ and onboarding honestly disclose FIU as geo-blocked.
+describe('ChoosePlanPage fresh-alert pack claim matches the registry (2.4)', () => {
+  const choosePlan = readFileSync(
+    findFile(['src/components/app/ChoosePlanPage.jsx', 'web/src/components/app/ChoosePlanPage.jsx']),
+    'utf8',
+  )
+  const packLine = (choosePlan.match(/'Selected ([^']+) fresh-alert source pack'/) || [])[1] || ''
+
+  it('has a fresh-alert pack feature line to check', () => {
+    expect(packLine.length).toBeGreaterThan(0)
+  })
+
+  it('does not sell UAE FIU as fresh-alert', () => {
+    expect(/FIU/i.test(packLine)).toBe(false)
+  })
+
+  const famOfToken = { VARA: ['vara'], CBUAE: ['cbuae'], DFSA: ['dfsa'], ADGM: ['adgm'], SCA: ['sca'], DIFC: ['difc'], EOCN: ['eocn'], MoF: ['mof'] }
+  const tokens = packLine.split('/').map(t => t.trim()).filter(Boolean)
+  for (const token of tokens) {
+    const fams = famOfToken[token]
+    it(`"${token}" has fresh-alert eligible sources in the registry`, () => {
+      expect(fams, `unknown regulator token "${token}" on the plan line — extend famOfToken`).toBeDefined()
+      expect(freshOf(fams), `"${token}" is sold as fresh-alert but registry has 0`).toBeGreaterThan(0)
+    })
+  }
+})

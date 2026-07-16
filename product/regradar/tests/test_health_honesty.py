@@ -128,3 +128,16 @@ def test_health_exposes_fresh_alert_count_leq_configured(monkeypatch, tmp_path):
     assert isinstance(data["sources_fresh_alert"], int)
     if data["sources_active"] >= 0 and data["sources_fresh_alert"] >= 0:
         assert data["sources_fresh_alert"] <= data["sources_active"]
+
+
+def test_access_blocked_message_does_not_blame_public_availability():
+    """The regulator host 403s OUR datacenter IP while serving the public.
+    The customer-facing status must never claim the source 'could not be
+    accessed publicly' — that shifts our egress problem onto the source
+    (goal 1.4, legal-language approved wording)."""
+    from app.source_health_timeline import source_health_customer_message
+
+    msg = source_health_customer_message("ACCESS_BLOCKED")
+    assert "publicly" not in msg.lower()
+    assert "our monitoring infrastructure" in msg
+    assert "reachable to other visitors" in msg
