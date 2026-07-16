@@ -26,8 +26,8 @@ const SOURCE_READINESS_PREVIEW = {
     tone: 'emerald',
   },
   VARA: {
-    status: 'Strong selected-source',
-    detail: '25 fresh-alert eligible VARA sources, including rulebook PDFs, revision updates, publications, and the official enforcement table. Selected-source depth, not complete VARA coverage.',
+    status: 'Selected-source',
+    detail: '3 fresh-alert eligible VARA sources (of 5 enabled), including the rulebook and selected publications. Selected-source depth, not complete VARA coverage.',
     tone: 'cyan',
   },
   DFSA: {
@@ -37,13 +37,13 @@ const SOURCE_READINESS_PREVIEW = {
   },
   'ADGM / FSRA': {
     status: 'Good selected-source',
-    detail: '10 fresh-alert eligible ADGM/FSRA sources across legal/document listings and selected regulatory sources, with rulebook gaps disclosed.',
+    detail: '9 fresh-alert eligible ADGM/FSRA sources (of 14 enabled) across legal/document listings and selected regulatory sources, with rulebook gaps disclosed.',
     tone: 'emerald',
   },
   'UAE FIU': {
-    status: 'AML/CFT useful',
-    detail: 'Useful AML/CFT laws, publications, typology and EOCN sanctions-related source layers. FIU homepage itself remains under remediation.',
-    tone: 'cyan',
+    status: 'Not monitored',
+    detail: 'No fresh-alert eligible FIU sources: the goAML/FIU portal is geo-blocked from our monitoring region, so it is not sold as monitored. Related AML/CFT laws and EOCN sanctions layers are covered under other regulators.',
+    tone: 'amber',
   },
   'Ministry of Finance': {
     status: 'Narrow',

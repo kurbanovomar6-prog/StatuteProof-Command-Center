@@ -54,8 +54,8 @@ const SOURCES = [
     source_id: 'AE-dfsa-aml-rulebook-module',
     regulator: 'DFSA AML Rulebook Module',
     coverageArea: 'DFSA AML/CTF & sanctions module',
-    status: 'ACTIVE',
-    caveat: 'Repointed from a frozen-version URL to the canonical current-version page (July 2026)',
+    status: 'CAVEAT',
+    caveat: 'Under adapter remediation — repointed to the canonical current-version module; not fresh-alert eligible until re-baselined',
   },
   {
     source_id: 'AE-difc-laws-and-regulations',
@@ -75,8 +75,8 @@ const SOURCES = [
     source_id: 'AE-moet-aml-170b7988',
     regulator: 'Ministry of Economy — AML',
     coverageArea: 'DNFBP AML obligations',
-    status: 'ACTIVE',
-    caveat: null,
+    status: 'CAVEAT',
+    caveat: 'Under source remediation — DNFBP AML suite not fresh-alert eligible until re-baselined',
   },
   {
     source_id: 'AE-eocn-news-en',
