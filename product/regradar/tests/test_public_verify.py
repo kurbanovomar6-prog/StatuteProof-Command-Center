@@ -359,3 +359,31 @@ def test_endpoint_rate_limit_triggers_after_n_calls(monkeypatch):
     assert statuses[0] == 200
     assert statuses[1] == 200
     assert statuses[2] == 429
+
+
+def test_ev2_flavor_b_live_record_normalized_verifies_not_altered():
+    """EV-2: a genuine live-pipeline (flavor-B) record — normalized_hash =
+    stable_content_hash(normalize(raw)) — must PASS the normalized-bytes check
+    against its real normalized.txt, instead of being falsely reported 'altered'.
+    A tampered normalized.txt still fails (matches neither flavor)."""
+    normalized = normalize_for_change_hash(RAW_TEXT)
+    flavor_b = stable_content_hash(normalized)
+    # This IS a real test only if the two flavors differ for this text.
+    assert flavor_b != stable_normalized_hash(RAW_TEXT)
+
+    record = {
+        "source_id": "AE-test-source",
+        "timestamp_utc": "2026-07-12T00:00:00Z",
+        "change_status": "FIRST_SEEN",
+        "raw_hash": hashlib.sha256(RAW_TEXT.encode("utf-8")).hexdigest(),
+        "normalized_hash": flavor_b,          # live pipeline flavor
+        "content_hash": flavor_b,
+        "prev_record_hash": "",
+    }
+    record["record_hash"] = compute_record_hash(record, "")
+
+    ok = verify_submission(record, normalized=normalized)
+    assert _status_of(ok, "normalized_bytes_match") == "pass"
+
+    tampered = verify_submission(record, normalized=normalized + "\nEXTRA TAMPERED LINE")
+    assert _status_of(tampered, "normalized_bytes_match") == "fail"

@@ -345,7 +345,24 @@ def _check_normalized_bytes(
     stored_bare = _bare_digest(stored)
     if stored_bare is None:
         return _fail(name, "current_hash is not a valid sha256 digest.")
-    if _sha256_text(normalized) == stored_bare:
+    # EV-2: a trail record's normalized_hash comes in TWO flavors — the
+    # newline-preserving sha256(normalized.txt) (intake/canonical records) OR
+    # stable_content_hash(normalized.txt), which whitespace-collapses (the live
+    # monitoring pipeline). normalized.txt IS normalize_for_change_hash(raw), so
+    # stable_content_hash(normalized.txt) reproduces the pipeline flavor exactly.
+    # Accept EITHER so a GENUINE live record verifies instead of falsely reporting
+    # "altered". Verifier-side only; stored formats and the sealed hash are
+    # untouched. A tampered normalized.txt matches neither flavor and still fails.
+    candidates = {_sha256_text(normalized)}
+    try:
+        from app.text_normalization import stable_content_hash as _content_hash
+
+        flavor_b = _content_hash(normalized)
+        if flavor_b:
+            candidates.add(flavor_b)
+    except Exception:  # noqa: BLE001 — a normalization import failure just keeps flavor-A
+        pass
+    if stored_bare in candidates:
         return _pass(name, "sha256(normalized.txt) matches the record's current_hash.")
     return _fail(name, "sha256(normalized.txt) does not match the record's current_hash.")
 
