@@ -536,6 +536,23 @@ def previous_run(source_id: str) -> dict | None:
     return None
 
 
+def last_good_run(source_id: str) -> dict | None:
+    """Most recent run for this source that carries a REAL content baseline: a
+    usable normalized/content hash and a non-failure, non-degraded status. Used
+    to resolve the true baseline when the immediate predecessor was FAILED or
+    QUALITY_DROP (which have no trustworthy hash), so a real change across a
+    transient failure/degradation is not silently reset to a new baseline."""
+    for rec in reversed(_read_runs()):
+        if rec.get("source_id") != source_id:
+            continue
+        status = str(rec.get("change_status") or "").upper()
+        if status in {"FAILED", "QUALITY_DROP"}:
+            continue
+        if rec.get("normalized_hash") or rec.get("content_hash"):
+            return rec
+    return None
+
+
 def changed_runs(
     market: str | None = None,
     source_filter: str | None = None,
@@ -559,7 +576,28 @@ def changed_runs(
     return rows[:limit]
 
 
-def classify_change(current: dict, previous: dict | None) -> str:
+def _hash_baseline(rec: dict | None) -> str | None:
+    if not rec:
+        return None
+    return rec.get("normalized_hash") or rec.get("content_hash")
+
+
+def _comparable_hashes(a: dict, b: dict) -> tuple[str | None, str | None]:
+    """Return (a_hash, b_hash) ONLY when the two records are DIRECTLY comparable:
+    both carry a normalized_hash produced under the SAME normalization_version.
+    Otherwise (None, None). This never compares a normalized hash against a
+    content hash (different algorithms) nor across normalization versions —
+    either would fabricate a spurious CHANGED. Used on the FAILED/QUALITY_DROP
+    recovery paths, which resolve against an arbitrarily-old last-good baseline
+    and so must not trust a hash-diff that isn't apples-to-apples."""
+    av = str(a.get("normalization_version") or "")
+    bv = str(b.get("normalization_version") or "")
+    if a.get("normalized_hash") and b.get("normalized_hash") and av == bv:
+        return a.get("normalized_hash"), b.get("normalized_hash")
+    return None, None
+
+
+def classify_change(current: dict, previous: dict | None, last_good: dict | None = None) -> str:
     quality = _canonical_quality(current.get("extraction_quality"))
     chars = int(current.get("extracted_chars") or 0)
     normalized_chars = int(current.get("normalized_chars") or 0)
@@ -569,9 +607,23 @@ def classify_change(current: dict, previous: dict | None) -> str:
         return "FIRST_SEEN"
 
     prev_quality = _canonical_quality(previous.get("extraction_quality"))
+    prev_status = str(previous.get("change_status") or "").upper()
     prev_chars = int(previous.get("extracted_chars") or 0)
     prev_norm_chars = int(previous.get("normalized_chars") or 0)
     if prev_quality == "FAILED" and quality != "FAILED":
+        # Recovery from a FAILED run (which carries no usable hash). Do NOT blindly
+        # reset to a new baseline — compare against the last GOOD hash so a real
+        # change that happened across the failure is still CHANGED, not silently
+        # swallowed as FIRST_SEEN (the worst failure mode: a missed regulatory
+        # change). last_good is supplied by append_run; direct callers pass None
+        # and keep the original FIRST_SEEN behaviour.
+        # Only trust a hash-diff when the two sides are DIRECTLY comparable (same
+        # normalized flavor + normalization_version). When they are not (a legacy
+        # or cross-version last_good, or a current stripped to content-only), fall
+        # back to FIRST_SEEN rather than fabricate a CHANGED from mismatched hashes.
+        cur_hash, lg_hash = _comparable_hashes(current, last_good or {})
+        if cur_hash and lg_hash:
+            return "CHANGED" if cur_hash != lg_hash else "UNCHANGED"
         return "FIRST_SEEN"
     if _GOOD_ORDER.get(prev_quality, 0) >= _GOOD_ORDER["MEDIUM"] and _GOOD_ORDER.get(quality, 0) <= _GOOD_ORDER["THIN"]:
         return "QUALITY_DROP"
@@ -591,6 +643,16 @@ def classify_change(current: dict, previous: dict | None) -> str:
     if prev_norm_chars > 0 and normalized_chars and normalized_chars < prev_norm_chars * 0.7:
         return "QUALITY_DROP"
 
+    # When the immediate predecessor was itself a QUALITY_DROP, its hash reflects
+    # DEGRADED content. Prefer the last GOOD baseline when it is DIRECTLY
+    # comparable (same normalized flavor + version); otherwise fall through to the
+    # original predecessor comparison rather than fabricate a change from a
+    # mismatched hash.
+    if prev_status == "QUALITY_DROP" and last_good is not None:
+        lg_hash, cur_hash = _comparable_hashes(last_good, current)
+        if lg_hash and cur_hash:
+            return "CHANGED" if lg_hash != cur_hash else "UNCHANGED"
+
     if previous.get("normalized_hash"):
         prev_hash = previous.get("normalized_hash")
         cur_hash = current.get("normalized_hash") or current.get("content_hash")
@@ -605,7 +667,16 @@ def classify_change(current: dict, previous: dict | None) -> str:
 def append_run(record: dict) -> dict:
     _RUN_DIR.mkdir(parents=True, exist_ok=True)
     prev = previous_run(record["source_id"])
-    record["change_status"] = classify_change(record, prev)
+    prev_status = str((prev or {}).get("change_status") or "").upper()
+    # When the immediate predecessor was FAILED/QUALITY_DROP it has no trustworthy
+    # hash. Resolve the last GOOD baseline so a real change across the failure is
+    # detected (not reset to FIRST_SEEN) and diffed against real content.
+    last_good = (
+        last_good_run(record["source_id"])
+        if (prev is not None and prev_status in {"FAILED", "QUALITY_DROP"})
+        else None
+    )
+    record["change_status"] = classify_change(record, prev, last_good=last_good)
     if (
         record["change_status"] == "UNCHANGED"
         and prev
@@ -620,7 +691,10 @@ def append_run(record: dict) -> dict:
     snapshot_base = _snapshot_base_from_record(record)
     if snapshot_base is not None:
         if record["change_status"] == "CHANGED":
-            diff_artifact = _write_diff_artifacts(record, prev, snapshot_base)
+            # Diff against the true baseline: last_good when the predecessor was a
+            # hash-less FAILED/QUALITY_DROP record, otherwise the immediate prev.
+            diff_base = last_good if (last_good is not None and _hash_baseline(last_good)) else prev
+            diff_artifact = _write_diff_artifacts(record, diff_base, snapshot_base)
         _write_proof_artifact(record, diff_artifact, snapshot_base)
     # G-hashchain: chain-and-append under one flock (reads the current tail's
     # record_hash and stamps prev_record_hash + record_hash on this record).

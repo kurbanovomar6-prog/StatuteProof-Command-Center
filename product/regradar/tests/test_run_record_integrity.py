@@ -192,3 +192,69 @@ def test_page_collapse_below_floor_is_quality_drop():
     current = _rec("good", nhash="bbb", chars=1500, nchars=120)
     previous = _rec("good", nhash="aaa", chars=5000, nchars=800)
     assert classify_change(current, previous) == "QUALITY_DROP"
+
+
+# ── reliability-audit batch 2: a real change across a FAILED/QUALITY_DROP run must
+#    be detected against the last GOOD baseline, not reset to FIRST_SEEN ──────────
+
+def test_failed_predecessor_recovery_detects_change_via_last_good():
+    # GOOD(A) -> FAILED -> GOOD(C): the change A->C must be CHANGED, not swallowed.
+    current = _rec("good", nhash="ccc")
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    last_good = _rec("good", nhash="aaa")
+    assert classify_change(current, failed_prev, last_good=last_good) == "CHANGED"
+
+
+def test_failed_predecessor_recovery_same_content_is_unchanged():
+    current = _rec("good", nhash="aaa")
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    last_good = _rec("good", nhash="aaa")
+    assert classify_change(current, failed_prev, last_good=last_good) == "UNCHANGED"
+
+
+def test_failed_predecessor_without_last_good_is_first_seen():
+    # No prior good baseline exists -> genuinely FIRST_SEEN (original behaviour,
+    # preserved for direct callers that pass no last_good).
+    current = _rec("good", nhash="aaa")
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    assert classify_change(current, failed_prev) == "FIRST_SEEN"
+
+
+def test_quality_drop_predecessor_recovery_compares_against_last_good():
+    # prev was QUALITY_DROP with a DEGRADED hash; recovery to real content that
+    # differs from the last good baseline must be CHANGED, diffed vs real content.
+    current = _rec("good", nhash="ccc")
+    qd_prev = _rec("good", nhash="deg")
+    qd_prev["change_status"] = "QUALITY_DROP"
+    last_good = _rec("good", nhash="aaa")
+    assert classify_change(current, qd_prev, last_good=last_good) == "CHANGED"
+
+
+def test_quality_drop_predecessor_recovery_to_baseline_is_unchanged():
+    current = _rec("good", nhash="aaa")
+    qd_prev = _rec("good", nhash="deg")
+    qd_prev["change_status"] = "QUALITY_DROP"
+    last_good = _rec("good", nhash="aaa")
+    assert classify_change(current, qd_prev, last_good=last_good) == "UNCHANGED"
+
+
+def test_failed_recovery_version_skew_is_first_seen_not_fabricated():
+    # last_good hashed under an OLDER normalization version is NOT comparable —
+    # must not fabricate CHANGED from cross-version hashes; fall back to FIRST_SEEN.
+    current = {"extraction_quality": "good", "extracted_chars": 5000, "normalized_chars": 4000,
+               "normalized_hash": "new", "normalization_version": "2"}
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    last_good = {"extraction_quality": "good", "extracted_chars": 5000, "normalized_chars": 4000,
+                 "normalized_hash": "old", "normalization_version": "1"}
+    assert classify_change(current, failed_prev, last_good=last_good) == "FIRST_SEEN"
+
+
+def test_failed_recovery_flavor_mismatch_is_first_seen():
+    # current normalized to empty (content_hash only) vs last_good's normalized_hash.
+    # Comparing normalized-vs-content (different algorithms) would fabricate CHANGED
+    # — must be FIRST_SEEN instead.
+    current = {"extraction_quality": "good", "extracted_chars": 5000, "normalized_chars": 0,
+               "content_hash": "xyz"}
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    last_good = _rec("good", nhash="aaa")
+    assert classify_change(current, failed_prev, last_good=last_good) == "FIRST_SEEN"
