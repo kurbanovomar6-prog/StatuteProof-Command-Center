@@ -48,6 +48,61 @@ def _days_since(latest_run_at: str | None) -> float | None:
         return None
 
 
+def _parse_run_ts(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+
+def source_change_frequency(
+    runs: list[dict[str, Any]], *, now: datetime | None = None
+) -> dict[str, Any]:
+    """Descriptive change-frequency statistics over a source's OWN recorded runs.
+
+    A factual reviewer aid — NOT an interpretation. It counts detected changes
+    (change_status == "CHANGED") in the trailing 30 days and the per-month
+    average over the observed window, and flags ``unusual_recent_activity`` ONLY
+    as an arithmetic fact (recent count more than 2x the average). It expresses
+    no impact, applicability, or compliance action — pure counts + timestamps,
+    reproducible from the evidence trail, so it stays well clear of the
+    legal-advice / obligation-mapping line.
+    """
+    _now = now or datetime.now(timezone.utc)
+    change_times: list[datetime] = []
+    earliest: datetime | None = None
+    for r in runs:
+        ts = _parse_run_ts(r.get("timestamp_utc") or r.get("timestamp") or r.get("run_at"))
+        if ts is None:
+            continue
+        if earliest is None or ts < earliest:
+            earliest = ts
+        if str(r.get("change_status") or "").upper() == "CHANGED":
+            change_times.append(ts)
+
+    changes_last_30d = sum(1 for t in change_times if (_now - t).days < 30)
+    total_changes = len(change_times)
+    months_observed = round(max((_now - earliest).days / 30.0, 1.0), 1) if earliest else 1.0
+    avg_per_month = round(total_changes / months_observed, 2) if months_observed > 0 else 0.0
+    unusual = total_changes >= 3 and avg_per_month > 0 and changes_last_30d > 2 * avg_per_month
+
+    return {
+        "changes_last_30d": changes_last_30d,
+        "total_changes_observed": total_changes,
+        "avg_changes_per_month": avg_per_month,
+        "months_observed": months_observed,
+        "unusual_recent_activity": bool(unusual),
+        "note": (
+            f"{changes_last_30d} detected change(s) in the last 30 days; "
+            f"trailing average {avg_per_month}/month over {months_observed} month(s) recorded. "
+            "Descriptive statistics over recorded runs only — not an assessment of "
+            "impact, applicability, or next steps."
+        ),
+    }
+
+
 _BASE_DIR = Path(__file__).parent.parent
 
 
@@ -117,6 +172,10 @@ def build_source_timeline(
         "events": events,
         "total_events": len(events),
         "has_real_history": bool(runs or assessments),
+        # Descriptive change-frequency stats over THIS source's recorded runs —
+        # a factual reviewer aid (no impact/applicability judgement). See
+        # source_change_frequency.
+        "change_frequency": source_change_frequency(runs),
         "disclaimer": LEGAL_DISCLAIMER,
     }
 

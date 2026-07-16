@@ -245,3 +245,40 @@ def test_health_status_generic_failure_stays_failed():
 def test_health_status_healthy_run_is_monitor_ok():
     ok_run = {"change_status": "UNCHANGED", "access_status": "ok", "extraction_quality": "OK"}
     assert _source_health_status(ok_run) == "MONITOR_OK"
+
+
+# ── source_change_frequency: factual reviewer aid, legal-safe ───────────────────
+
+from datetime import datetime, timedelta, timezone  # noqa: E402
+from app.source_health_timeline import source_change_frequency  # noqa: E402
+
+
+def _run(days_ago, status="CHANGED"):
+    ts = (datetime.now(timezone.utc) - timedelta(days=days_ago)).isoformat()
+    return {"timestamp_utc": ts, "change_status": status}
+
+
+def test_change_frequency_flags_unusual_recent_activity():
+    # 4 changes in the last 30 days on top of a long, quiet history → unusual.
+    runs = [_run(2), _run(9), _run(16), _run(25)] + [_run(d, "UNCHANGED") for d in range(40, 400, 10)] + [_run(360)]
+    freq = source_change_frequency(runs)
+    assert freq["changes_last_30d"] == 4
+    assert freq["total_changes_observed"] == 5
+    assert freq["avg_changes_per_month"] > 0
+    assert freq["unusual_recent_activity"] is True
+
+
+def test_change_frequency_empty_is_zero_and_not_unusual():
+    freq = source_change_frequency([])
+    assert freq["changes_last_30d"] == 0
+    assert freq["total_changes_observed"] == 0
+    assert freq["unusual_recent_activity"] is False
+
+
+def test_change_frequency_note_is_legal_safe():
+    """The reviewer aid must stay descriptive — no forbidden claims, no
+    compliance-action / applicability language ('you must', 'required action')."""
+    note = source_change_frequency([_run(3), _run(10), _run(20)])["note"].lower()
+    for banned in ["you must", "guarantee", "prevent", "required action", "must comply", "applicable to you"]:
+        assert banned not in note
+    assert "descriptive statistics" in note
