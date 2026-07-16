@@ -32,6 +32,16 @@ class EvidenceRecordError(ValueError):
     """Raised when an input is not a canonical evidence record."""
 
 
+class EvidenceRecordExistsError(EvidenceRecordError):
+    """Raised when a canonical evidence record already exists for a run.
+
+    A distinct type so callers can treat the benign idempotency case ("this
+    run is already sealed") differently from a real integrity failure —
+    substring-matching the message would also swallow unrelated errors that
+    happen to contain the same words.
+    """
+
+
 def create_canonical_evidence_record(
     run_record: dict[str, Any],
     previous_run: dict[str, Any] | None = None,
@@ -132,7 +142,7 @@ def create_canonical_evidence_record(
     record_dir = root / "evidence" / regulator_slug / source_id / run_id
     record_path = record_dir / "evidence-record.json"
     if record_path.exists():
-        raise EvidenceRecordError(f"Canonical evidence record already exists: {_relative_or_absolute(record_path, root)}")
+        raise EvidenceRecordExistsError(f"Canonical evidence record already exists: {_relative_or_absolute(record_path, root)}")
     if record_dir.exists() and any(record_dir.iterdir()):
         raise EvidenceRecordError(f"Canonical evidence record directory is not empty: {_relative_or_absolute(record_dir, root)}")
 

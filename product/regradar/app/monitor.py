@@ -221,24 +221,29 @@ def _maybe_alert_catastrophic_cycle(summary: dict) -> None:
 _SEAL_DEADMAN_STATE_FILE = _BASE_DIR / "data" / "seal_deadman_state.json"
 
 
-def _load_seal_degraded() -> bool:
-    """Read the persisted "seals were failing" flag. False on any error."""
+_SEAL_FAIL_STREAK_THRESHOLD = 3
+
+
+def _load_seal_state() -> dict:
+    """Read the persisted seal-deadman state. Empty dict on any error."""
     try:
         if _SEAL_DEADMAN_STATE_FILE.exists():
             data = json.loads(_SEAL_DEADMAN_STATE_FILE.read_text(encoding="utf-8"))
-            return bool(data.get("degraded", False))
+            if isinstance(data, dict):
+                return data
     except Exception as exc:  # pragma: no cover - defensive
         logger.warning("seal deadman: could not load state file: %s", exc)
-    return False
+    return {}
 
 
-def _save_seal_degraded(degraded: bool) -> None:
+def _save_seal_state(degraded: bool, fail_streak: int) -> None:
     try:
         _SEAL_DEADMAN_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
         _SEAL_DEADMAN_STATE_FILE.write_text(
             json.dumps(
                 {
                     "degraded": bool(degraded),
+                    "fail_streak": int(fail_streak),
                     "updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 },
                 indent=2,
@@ -250,43 +255,69 @@ def _save_seal_degraded(degraded: bool) -> None:
 
 
 def _maybe_alert_seal_failures(summary: dict) -> None:
-    """Fire a founder alert on the transition into systemic seal failure.
+    """Fire a founder alert when evidence durability degrades.
 
-    "Systemic" = every seal attempt in the cycle failed (and at least one was
-    attempted). Alerts keep flowing when sealing breaks — by design, the trail
-    append is the durability anchor — so without this deadman the core
-    "sealed evidence" promise can silently go dark. Edge-triggered and
-    persisted, same rate-limit philosophy as the catastrophic-cycle alert:
-    one alert on entry, one recovery note on exit, quiet in between.
+    Three trip conditions (evidence review, findings 2+3):
+    - SYSTEMIC: every seal attempt in the cycle failed (and ≥1 attempted).
+    - APPEND FAILURE: any run's trail append raised — no durable record AND
+      no alert for that source, while it still counted "ok" in the cycle.
+      This is the worst shape (disk full / permissions) and fires immediately.
+    - PARTIAL-PERSISTENT: some (not all) seals failing for
+      _SEAL_FAIL_STREAK_THRESHOLD consecutive cycles — one healthy baseline
+      seal must not mask a permanently broken source forever.
+
+    Edge-triggered and persisted: one alert on entry into the degraded state,
+    one recovery note on exit, quiet in between.
     """
     try:
         attempted = int(summary.get("seals_attempted", 0) or 0)
         failed = int(summary.get("seals_failed", 0) or 0)
+        appends_failed = int(summary.get("evidence_appends_failed", 0) or 0)
+
+        state = _load_seal_state()
+        was_degraded = bool(state.get("degraded", False))
+        streak = int(state.get("fail_streak", 0) or 0)
+
+        streak = streak + 1 if (failed > 0 or appends_failed > 0) else 0
+
         systemic = attempted > 0 and failed == attempted
-        recovered = attempted > 0 and failed == 0
-        was_degraded = _load_seal_degraded()
+        tripped = systemic or appends_failed > 0 or streak >= _SEAL_FAIL_STREAK_THRESHOLD
+        healthy = failed == 0 and appends_failed == 0
 
-        if systemic and not was_degraded:
+        if tripped and not was_degraded:
             from app.ops_alert import notify_founder
 
+            if appends_failed > 0:
+                detail = (
+                    f"{appends_failed} run(s) could not write the evidence "
+                    "trail at all — those sources produced NO durable record "
+                    "and NO alert."
+                )
+            elif systemic:
+                detail = f"Evidence sealing failed for every attempt this cycle ({failed}/{attempted})."
+            else:
+                detail = (
+                    f"Some seals have been failing for {streak} consecutive "
+                    f"cycles (latest: {failed} failed / {attempted} attempted)."
+                )
             notify_founder(
-                "🚨 StatuteProof monitor: evidence sealing FAILED for every "
-                f"attempt this cycle ({failed}/{attempted}).\n"
+                "🚨 StatuteProof monitor: evidence durability degraded\n"
+                f"{detail}\n"
                 f"cycle_id: {summary.get('cycle_id', '?')}\n"
-                "Alerts are still flowing but WITHOUT sealed canonical "
-                "records. Check disk/permissions/evidence tree, then run "
-                "`python run.py create-canonical-evidence` to backfill."
+                "Check disk/permissions/evidence tree, then run "
+                "`python run.py create-canonical-evidence` to backfill seals."
             )
-            _save_seal_degraded(True)
-        elif recovered and was_degraded:
+            _save_seal_state(True, streak)
+        elif healthy and was_degraded:
             from app.ops_alert import notify_founder
 
             notify_founder(
-                "✅ StatuteProof monitor: evidence sealing recovered "
-                f"({attempted}/{attempted} sealed, cycle_id "
-                f"{summary.get('cycle_id', '?')})."
+                "✅ StatuteProof monitor: evidence durability recovered "
+                f"(cycle_id {summary.get('cycle_id', '?')})."
             )
-            _save_seal_degraded(False)
+            _save_seal_state(False, 0)
+        else:
+            _save_seal_state(was_degraded, streak)
     except Exception as exc:  # pragma: no cover - defensive
         logger.warning("seal deadman: alert check failed: %s", exc)
 
@@ -445,6 +476,7 @@ def monitor_all_sources(
     _counter: dict = {
         "ok": 0, "unchanged": 0, "failed": 0,
         "seals_attempted": 0, "seals_failed": 0,
+        "appends_failed": 0,
     }
 
     for idx, source in enumerate(sources, 1):
@@ -598,6 +630,10 @@ def monitor_all_sources(
             _counter["seals_attempted"] += 1
             if not _sealed:
                 _counter["seals_failed"] += 1
+        # An append_run failure is worse than a seal failure: no durable
+        # record AND no alert, while the source still counts "ok" above.
+        if result.get("evidence_append_failed"):
+            _counter["appends_failed"] += 1
 
         if verbose:
             changed   = result.get("changed", False)
@@ -633,6 +669,7 @@ def monitor_all_sources(
         "sources_failed":    _counter["failed"],
         "seals_attempted":   _counter["seals_attempted"],
         "seals_failed":      _counter["seals_failed"],
+        "evidence_appends_failed": _counter["appends_failed"],
     }
     logger.info("CYCLE_SUMMARY %s", json.dumps(summary))
 

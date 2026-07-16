@@ -28,15 +28,22 @@ dst.close(); src.close()
 print(f"sqlite backup: {DB_PATH} -> {sys.argv[1]}")
 EOF
 
-# 2) Evidence trail + artifacts. --ignore-failed-read: a file rotated away
-# mid-backup must not kill the whole archive.
+# 2) Evidence trail + artifacts.
 ARCHIVE="$OUT_DIR/statuteproof-backup-$STAMP.tar.gz"
 # evidence/ holds the SEALED canonical evidence records — the artifacts the
 # product sells as durable proof. Omitting it meant droplet loss destroyed the
 # very records customers rely on. Conditional: absent until the first seal.
 EVIDENCE_DIR=""
 [ -d "$APP_ROOT/evidence" ] && EVIDENCE_DIR="evidence"
-tar -czf "$ARCHIVE" \
+# --ignore-failed-read (GNU tar only — the droplet): the live auto-seal
+# creates and, on failure, rmtree's record dirs concurrently with this walk;
+# a file vanishing mid-backup must degrade to a warning, not abort the run
+# under `set -e` (which would also skip the off-box push AND retention).
+TAR_FLAGS=""
+if tar --version 2>/dev/null | grep -q "GNU tar"; then
+  TAR_FLAGS="--ignore-failed-read"
+fi
+tar -czf "$ARCHIVE" $TAR_FLAGS \
   --exclude='data/outbox' \
   -C "$WORK" regradar.db \
   -C "$APP_ROOT" data sources.json .env.example $EVIDENCE_DIR

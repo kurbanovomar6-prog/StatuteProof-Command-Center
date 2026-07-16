@@ -258,8 +258,10 @@ def test_seal_failure_does_not_block_alert(isolated_dirs):
 def test_duplicate_seal_reports_sealed_not_failed(isolated_dirs):
     """A record sealed by a previous attempt IS sealed — the duplicate raise
     must report sealed=True (INFO), not pollute logs with the WARNING that
-    matters for real integrity failures (silent-failure review, finding 2)."""
-    from app.evidence_records import EvidenceRecordError
+    matters for real integrity failures (silent-failure review, finding 2).
+    The benign case is the TYPED EvidenceRecordExistsError — a generic error
+    whose message merely contains 'already exists' stays a real failure."""
+    from app.evidence_records import EvidenceRecordExistsError
 
     _seed_baseline(isolated_dirs)
 
@@ -272,7 +274,7 @@ def test_duplicate_seal_reports_sealed_not_failed(isolated_dirs):
             ),
             patch(
                 "app.evidence_records.create_canonical_evidence_record",
-                side_effect=EvidenceRecordError("Canonical evidence record already exists: evidence/x"),
+                side_effect=EvidenceRecordExistsError("Canonical evidence record already exists: evidence/x"),
             ),
         ],
         alerts=False,
@@ -298,7 +300,7 @@ def test_seal_deadman_alerts_on_systemic_failure_and_recovery(isolated_dirs, mon
     base = {"cycle_id": "c1"}
     # All seals failed → one alert on the transition.
     mon._maybe_alert_seal_failures({**base, "seals_attempted": 3, "seals_failed": 3})
-    assert len(notes) == 1 and "sealing FAILED" in notes[0]
+    assert len(notes) == 1 and "durability degraded" in notes[0]
     # Still failing → quiet (edge-triggered).
     mon._maybe_alert_seal_failures({**base, "seals_attempted": 2, "seals_failed": 2})
     assert len(notes) == 1
@@ -308,3 +310,95 @@ def test_seal_deadman_alerts_on_systemic_failure_and_recovery(isolated_dirs, mon
     # No attempts → no state change, no alert.
     mon._maybe_alert_seal_failures({**base, "seals_attempted": 0, "seals_failed": 0})
     assert len(notes) == 2
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# (vi) Deadman: append failure and partial-persistent streaks also trip
+# ══════════════════════════════════════════════════════════════════════════
+def test_seal_deadman_trips_immediately_on_append_failure(isolated_dirs, monkeypatch):
+    """An append_run failure means NO durable record and NO alert while the
+    source counts 'ok' — the worst shape fires the deadman immediately
+    (evidence review, finding 3)."""
+    import app.monitor as mon
+
+    monkeypatch.setattr(mon, "_SEAL_DEADMAN_STATE_FILE", isolated_dirs / "data" / "sds.json")
+    notes: list = []
+    monkeypatch.setattr("app.ops_alert.notify_founder", lambda text: notes.append(text) or True)
+
+    mon._maybe_alert_seal_failures(
+        {"cycle_id": "c1", "seals_attempted": 5, "seals_failed": 0, "evidence_appends_failed": 2}
+    )
+    assert len(notes) == 1 and "NO durable record" in notes[0]
+
+
+def test_seal_deadman_trips_on_persistent_partial_failure(isolated_dirs, monkeypatch):
+    """One healthy seal per cycle must not mask a permanently broken source:
+    partial failures for 3 consecutive cycles trip the deadman
+    (evidence review, finding 2)."""
+    import app.monitor as mon
+
+    monkeypatch.setattr(mon, "_SEAL_DEADMAN_STATE_FILE", isolated_dirs / "data" / "sds.json")
+    notes: list = []
+    monkeypatch.setattr("app.ops_alert.notify_founder", lambda text: notes.append(text) or True)
+
+    partial = {"cycle_id": "c", "seals_attempted": 3, "seals_failed": 1, "evidence_appends_failed": 0}
+    mon._maybe_alert_seal_failures(dict(partial))
+    mon._maybe_alert_seal_failures(dict(partial))
+    assert notes == [], "below the streak threshold nothing should fire"
+    mon._maybe_alert_seal_failures(dict(partial))
+    assert len(notes) == 1 and "consecutive" in notes[0]
+    # A fully healthy cycle recovers and resets the streak.
+    mon._maybe_alert_seal_failures(
+        {"cycle_id": "c", "seals_attempted": 3, "seals_failed": 0, "evidence_appends_failed": 0}
+    )
+    assert len(notes) == 2 and "recovered" in notes[1]
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# (vii) FIRST_SEEN baselines do not flood the human review queue
+# ══════════════════════════════════════════════════════════════════════════
+def test_first_seen_seal_is_baseline_not_pending_review(isolated_dirs):
+    """Mass source activation seals one baseline per source; those must not
+    land as 'pending' human reviews (evidence review, finding 7)."""
+    result = _run_live(
+        [
+            patch("app.pipeline.extract_best_text", return_value={"text": _BASE_TEXT, "method": "t"}),
+            patch("app.pipeline.get_latest_document", return_value=None),
+        ],
+        alerts=False,
+    )
+    assert result.get("canonical_evidence_sealed") is True
+    sealed = _sealed_record_paths(isolated_dirs)
+    record = json.loads(sealed[0].read_text(encoding="utf-8"))
+    review = record.get("review") or {}
+    assert review.get("review_status") == "baseline"
+    assert review.get("human_review_required") is False
+
+
+def test_generic_error_with_exists_text_stays_a_failure(isolated_dirs):
+    """The typed-error contract's other half: a GENERIC error whose message
+    happens to contain 'already exists' (e.g. an artifact-level anomaly) must
+    NOT be masked as a benign duplicate (evidence review, finding 5)."""
+    from app.evidence_records import EvidenceRecordError
+
+    _seed_baseline(isolated_dirs)
+
+    result = _run_live(
+        [
+            patch("app.pipeline.extract_best_text", return_value={"text": _CHANGED_TEXT, "method": "t"}),
+            patch(
+                "app.pipeline.get_latest_document",
+                return_value={"content": _BASE_TEXT, "content_hash": _BASE_HASH},
+            ),
+            patch(
+                "app.evidence_records.create_canonical_evidence_record",
+                side_effect=EvidenceRecordError("Canonical evidence artifact already exists: raw.txt"),
+            ),
+        ],
+        alerts=False,
+    )
+
+    assert result.get("canonical_evidence_sealed") is False, (
+        "a generic error must stay a real failure even if its text contains "
+        "'already exists' — only the typed EvidenceRecordExistsError is benign"
+    )

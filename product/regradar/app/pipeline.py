@@ -957,23 +957,64 @@ def run_pipeline_for_source(source: dict) -> dict:
                     # D8 idiom: resolve against the SAME base dir the trail
                     # just wrote to, so the snapshot/proof paths in
                     # final_record resolve where append_run put them.
-                    create_canonical_evidence_record(
-                        final_record, base_dir=_SealPath(_sr_seal._BASE_DIR)
+                    # FIRST_SEEN baselines are sealed but do NOT enter the
+                    # human review queue — the queue is for customer-facing
+                    # changes, and mass source activation would otherwise
+                    # flood it with one pending record per source.
+                    _is_baseline = final_record.get("change_status") == "FIRST_SEEN"
+                    _seal_kwargs = (
+                        {
+                            "review_status": "baseline",
+                            "human_review_required": False,
+                            "review_reason": (
+                                "Baseline capture (FIRST_SEEN) — no "
+                                "customer-facing change to review."
+                            ),
+                        }
+                        if _is_baseline
+                        else {}
+                    )
+                    _sealed_record = create_canonical_evidence_record(
+                        final_record,
+                        base_dir=_SealPath(_sr_seal._BASE_DIR),
+                        **_seal_kwargs,
                     )
                     result["canonical_evidence_sealed"] = True
-                    logger.info(
-                        "Canonical evidence sealed: source=%s run_id=%s status=%s",
-                        source.get("name"), final_record.get("run_id"),
-                        final_record.get("change_status"),
-                    )
+                    if _sealed_record.get("record_status") != "complete":
+                        # A quarantined (integrity_error) record was durably
+                        # written — sealed, but alert_proof will decline it.
+                        # Surface it so quarantining live captures is visible.
+                        result["canonical_evidence_quarantined"] = True
+                        logger.warning(
+                            "Canonical evidence sealed QUARANTINED (record_status=%s): "
+                            "source=%s run_id=%s — capture text failed the "
+                            "readability gate; the alert will carry no proof block",
+                            _sealed_record.get("record_status"),
+                            source.get("name"), final_record.get("run_id"),
+                        )
+                    else:
+                        logger.info(
+                            "Canonical evidence sealed: source=%s run_id=%s status=%s",
+                            source.get("name"), final_record.get("run_id"),
+                            final_record.get("change_status"),
+                        )
                 except Exception as seal_err:  # noqa: BLE001
-                    # A benign idempotency duplicate ("already exists") means
-                    # the record IS sealed — just not by this call. Logging it
-                    # at the same WARNING severity as a real integrity failure
-                    # would train operators to skim past the warning that
-                    # matters, so it gets INFO + sealed=True.
-                    _seal_msg = str(seal_err)
-                    if "already exists" in _seal_msg:
+                    # Typed idempotency check via isinstance with a lazy
+                    # re-import: a bare `except EvidenceRecordExistsError`
+                    # would NameError if the import inside the try was what
+                    # failed — and that NameError would escape to the outer
+                    # append except and suppress the alert send.
+                    try:
+                        from app.evidence_records import (
+                            EvidenceRecordExistsError as _ExistsErr,
+                        )
+                        _is_dup = isinstance(seal_err, _ExistsErr)
+                    except Exception:  # noqa: BLE001
+                        _is_dup = False
+                    if _is_dup:
+                        # Benign duplicate: the record IS sealed — just not by
+                        # this call. INFO, not WARNING — a warning here would
+                        # train operators to skim past the one that matters.
                         result["canonical_evidence_sealed"] = True
                         logger.info(
                             "Canonical evidence already sealed (idempotent skip): "
@@ -1170,6 +1211,12 @@ def run_pipeline_for_source(source: dict) -> dict:
                     logger.warning("Deadline radar persist failed (non-fatal): %s", _dl_err)
 
         except Exception as _sr_err:
+            # The evidence append failing means this source produced NO durable
+            # record AND no alert (durability invariant) — while still counting
+            # as "ok" in the cycle (the fetch succeeded). Without this flag a
+            # systemic trail-write failure (disk full, permissions) is invisible
+            # to every deadman. monitor_all_sources tallies it.
+            result["evidence_append_failed"] = True
             logger.warning("source_runs.append_run failed (non-fatal): %s", _sr_err)
 
     # ── G1: deliver any due deferred-cooldown alert ──────────────────────────

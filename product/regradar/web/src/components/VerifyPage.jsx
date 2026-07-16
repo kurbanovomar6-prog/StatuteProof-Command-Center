@@ -113,6 +113,7 @@ export default function VerifyPage({ onBack }) {
   const [normalizedName, setNormalizedName] = useState('')
   const [tokenB64, setTokenB64] = useState(null)
   const [tokenName, setTokenName] = useState('')
+  const [tokenDigest, setTokenDigest] = useState('')
   const [loading, setLoading] = useState(false)
   const [sampleLoading, setSampleLoading] = useState(false)
   const [error, setError] = useState('')
@@ -172,7 +173,7 @@ export default function VerifyPage({ onBack }) {
 
   // Shared verify runner: takes explicit values so the sample loader can run
   // the check immediately after loading, without racing setState.
-  async function runVerify(record, raw, normalized, timestampToken) {
+  async function runVerify(record, raw, normalized, timestampToken, timestampDigest) {
     setError('')
     setResult(null)
     setLoading(true)
@@ -182,6 +183,7 @@ export default function VerifyPage({ onBack }) {
         raw: raw ?? undefined,
         normalized: normalized ?? undefined,
         timestampToken: timestampToken ?? undefined,
+        timestampDigest: timestampDigest ?? undefined,
       })
       setResult(data)
     } catch (err) {
@@ -209,7 +211,7 @@ export default function VerifyPage({ onBack }) {
       return
     }
 
-    await runVerify(record, rawText, normalizedText, tokenB64)
+    await runVerify(record, rawText, normalizedText, tokenB64, tokenDigest)
   }
 
   async function handleLoadSample() {
@@ -233,6 +235,7 @@ export default function VerifyPage({ onBack }) {
       // next manual Verify click while the auto-run below omits it.
       setTokenB64(null)
       setTokenName('')
+      setTokenDigest('')
       await runVerify(record, raw, normalized)
     } catch {
       setError(
@@ -368,7 +371,7 @@ export default function VerifyPage({ onBack }) {
             <FileField
               id="token-file"
               label="RFC 3161 token (.tsr, optional)"
-              hint="Reports the third-party timestamp offline against record_hash."
+              hint="Reports the third-party timestamp offline. Chain-head tokens need the anchored digest below."
               fileName={tokenName}
               onChange={handleTokenFile}
               accept=".tsr,application/timestamp-reply,application/octet-stream"
@@ -377,6 +380,29 @@ export default function VerifyPage({ onBack }) {
                 setTokenName('')
               }}
             />
+            {tokenB64 ? (
+              <div className="sp-panel-muted p-3">
+                <label htmlFor="token-digest" className="sp-label mb-1">
+                  Timestamp digest (optional)
+                </label>
+                <input
+                  id="token-digest"
+                  type="text"
+                  value={tokenDigest}
+                  onChange={(event) => setTokenDigest(event.target.value)}
+                  placeholder="anchored_head_record_hash from the .tsr.json sidecar"
+                  spellCheck={false}
+                  className="sp-input w-full"
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}
+                />
+                <p className="mt-2 text-[0.7rem] leading-snug text-[var(--text-muted)]">
+                  The value the token attests. Chain-head tokens (from an
+                  evidence pack&apos;s timestamp/ folder) attest the anchored
+                  head hash — paste it here. Left empty, the check runs against
+                  this record&apos;s own record_hash.
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-6 flex items-center gap-3">

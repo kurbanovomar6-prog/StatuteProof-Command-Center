@@ -177,21 +177,39 @@ def build_evidence_pack(
         # evidence-chain HEAD hash at anchor time, not each individual diff.
         _tsr_path = root / "data" / "evidence_chain_head.tsr"
         _tsr_json_path = root / "data" / "evidence_chain_head.tsr.json"
-        _ship_tsr = _tsr_path.exists()
+        # Read both sidecar payloads ONCE, up front: the anchor thread
+        # atomically replaces these files, so two separate zf.write() calls
+        # could capture the token from anchor N and the sidecar from N+1.
+        _tsr_bytes: bytes | None = None
+        _tsr_json_bytes: bytes | None = None
+        try:
+            _tsr_bytes = _tsr_path.read_bytes()
+        except OSError:
+            _tsr_bytes = None
+        if _tsr_bytes is not None:
+            try:
+                _tsr_json_bytes = _tsr_json_path.read_bytes()
+            except OSError:
+                _tsr_json_bytes = None
+        _ship_tsr = _tsr_bytes is not None
         if _ship_tsr:
             manifest["external_timestamp"] = {
                 "included": True,
                 "token_file": "timestamp/evidence_chain_head.tsr",
                 "sidecar_file": (
                     "timestamp/evidence_chain_head.tsr.json"
-                    if _tsr_json_path.exists()
+                    if _tsr_json_bytes is not None
                     else None
                 ),
                 "scope": (
-                    "RFC 3161 timestamp token over the evidence-chain head hash "
-                    "at anchor time. Verify offline with `openssl ts -verify` "
-                    "against your own trusted TSA roots, or submit it with the "
-                    "record to the public verifier's timestamp_token field."
+                    "RFC 3161 timestamp token over the evidence-chain HEAD "
+                    "hash at anchor time — NOT over any individual record's "
+                    "record_hash. To verify: use `openssl ts -verify` against "
+                    "your own trusted TSA roots, or submit the token to the "
+                    "public verifier with timestamp_digest set to the "
+                    "anchored_head_record_hash value from the .tsr.json "
+                    "sidecar. Checking it against a record's own record_hash "
+                    "will honestly FAIL — the token attests the chain head."
                 ),
             }
 
@@ -219,10 +237,10 @@ def build_evidence_pack(
                 zf.writestr(entry["raw_arcname"], entry["raw_bytes"])
                 zf.writestr(entry["normalized_arcname"], entry["normalized_bytes"])
                 zf.writestr(entry["record_arcname"], entry["record_bytes"])
-            if _ship_tsr:
-                zf.write(_tsr_path, "timestamp/evidence_chain_head.tsr")
-                if _tsr_json_path.exists():
-                    zf.write(_tsr_json_path, "timestamp/evidence_chain_head.tsr.json")
+            if _ship_tsr and _tsr_bytes is not None:
+                zf.writestr("timestamp/evidence_chain_head.tsr", _tsr_bytes)
+                if _tsr_json_bytes is not None:
+                    zf.writestr("timestamp/evidence_chain_head.tsr.json", _tsr_json_bytes)
 
         return {
             "status": "ok",
@@ -444,16 +462,21 @@ def _render_how_to_verify(manifest: dict[str, Any]) -> str:
 ## External RFC 3161 timestamp (included)
 
 `timestamp/evidence_chain_head.tsr` is an RFC 3161 token from a third-party
-Time-Stamping Authority over the evidence-chain head hash at anchor time. It
-attests the chain head existed no later than the TSA-signed time — it is not a
-per-record stamp. Verify it against your own trusted TSA roots, for example:
+Time-Stamping Authority over the evidence-chain HEAD hash at anchor time. It
+attests the chain head existed no later than the TSA-signed time — it is
+**not a per-record stamp**, so checking it against any individual record's
+`record_hash` will honestly report a mismatch.
+
+To inspect it locally:
 
 ```
 openssl ts -reply -in timestamp/evidence_chain_head.tsr -token_in -text
 ```
 
-or submit it together with a record in the public verifier's
-`timestamp_token` field.
+To verify it on the public verify page: upload the `.tsr` token AND paste the
+`anchored_head_record_hash` value from
+`timestamp/evidence_chain_head.tsr.json` into the timestamp-digest field —
+that hash is the exact value the token attests.
 """
     return f"""# How to verify this evidence pack yourself
 

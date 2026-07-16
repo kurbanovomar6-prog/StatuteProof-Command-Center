@@ -40,12 +40,18 @@ async function authRequest(path, options = {}) {
 // Public, no-login evidence verifier. Posts a caller-held record (+ optional
 // raw/normalized text) to /api/verify and returns the check envelope. No auth,
 // no session required — the whole point is verifying without trusting us.
-export async function verifyRecord({ record, raw, normalized, timestampToken }) {
+export async function verifyRecord({ record, raw, normalized, timestampToken, timestampDigest }) {
   const body = { record }
   if (typeof raw === 'string' && raw.length) body.raw = raw
   if (typeof normalized === 'string' && normalized.length) body.normalized = normalized
   if (typeof timestampToken === 'string' && timestampToken.length) {
     body.timestamp_token = timestampToken
+  }
+  // Chain-head tokens attest the anchored head hash, not a record's own
+  // record_hash — the caller supplies that digest (from the .tsr.json
+  // sidecar) or the server defaults to the record's record_hash.
+  if (typeof timestampDigest === 'string' && timestampDigest.trim().length) {
+    body.timestamp_digest = timestampDigest.trim()
   }
 
   const response = await apiFetch('/api/verify', {

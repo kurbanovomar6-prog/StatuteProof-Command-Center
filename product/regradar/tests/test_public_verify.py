@@ -437,3 +437,41 @@ def test_endpoint_rejects_non_string_timestamp_token(monkeypatch):
     handler._handle_public_verify()
 
     assert captured["status"] == 400
+
+
+def test_endpoint_passes_timestamp_digest_through(monkeypatch):
+    """POST /api/verify with timestamp_digest must check the token against the
+    EXPLICIT digest, not the record's record_hash. Regression for the
+    evidence-trail review HIGH: chain-head tokens attest the anchored head
+    hash, so without this pass-through a GENUINE token demoed as a failure."""
+    import base64
+
+    record, raw, normalized = _genuine_trail_record()
+    handler = _bare_handler()
+    monkeypatch.setattr(handler, "_rate_limited", lambda *a, **k: False)
+    token = base64.b64encode(b"junk-not-a-real-token").decode()
+    explicit_digest = "f" * 64
+    monkeypatch.setattr(
+        handler,
+        "_read_json_strict",
+        lambda: (
+            {
+                "record": record,
+                "timestamp_token": token,
+                "timestamp_digest": f"sha256:{explicit_digest}",
+            },
+            None,
+        ),
+    )
+    captured: dict = {}
+    handler._send_json = lambda data, status=200, **kw: captured.update(data=data, status=status)  # type: ignore[method-assign]
+
+    handler._handle_public_verify()
+
+    assert captured["status"] == 200
+    ts = captured["data"].get("external_timestamp")
+    assert ts is not None and ts.get("present") is True
+    assert ts.get("checked_digest") == explicit_digest, (
+        "the explicit timestamp_digest must be the checked value, "
+        f"got {ts.get('checked_digest')!r}"
+    )
