@@ -172,3 +172,76 @@ def test_pipeline_sends_once_then_suppresses_on_rerun(trail, tmp_path):
 
     assert r2["changed"] is False, "same hash re-run is unchanged (heartbeat)"
     assert len(sends) == 1, "re-run of the same hash must send ZERO new alerts"
+
+
+_TEXT_V3 = "SECOND amendment: revised reporting threshold.\n\n" + _TEXT_V1
+
+
+def test_g1_cooldown_suppressed_change_is_deferred_then_delivered(trail, tmp_path):
+    """G1: a genuinely-new change that lands inside the cooldown must be STASHED
+    and delivered when the cooldown elapses — a delay, not a permanent loss."""
+    from datetime import datetime, timedelta, timezone
+    from app.pipeline import init_pipeline, run_pipeline_for_source
+    from app.text_normalization import normalize_for_change_hash, stable_content_hash
+    import app.pending_alerts as pa
+
+    v1_hash = stable_content_hash(normalize_for_change_hash(_TEXT_V1))
+    snap = tmp_path / "data" / "source_snapshots" / "2026-07-01" / "AE" / "AE-dedup-source" / "seed1"
+    snap.mkdir(parents=True)
+    (snap / "normalized.txt").write_text(normalize_for_change_hash(_TEXT_V1), encoding="utf-8")
+    _write(trail, [{
+        "run_id": "seed1", "source_id": "AE-dedup-source",
+        "official_url": _SOURCE["url"], "url": _SOURCE["url"],
+        "change_status": "FIRST_SEEN", "extraction_quality": "GOOD",
+        "extracted_chars": len(_TEXT_V1), "normalized_chars": len(_TEXT_V1),
+        "normalized_hash": v1_hash,
+        "snapshot_normalized_path": "data/source_snapshots/2026-07-01/AE/AE-dedup-source/seed1/normalized.txt",
+        "timestamp_utc": "2026-07-01T10:00:00+00:00",
+    }])
+
+    sends = []
+    init_pipeline(0)
+    _patches = lambda fetched, base_content, base_hash: [
+        patch("app.pipeline.ENABLE_TELEGRAM_ALERTS", True),
+        patch("app.pipeline.fetch_page", return_value="<html>x</html>"),
+        patch("app.pipeline.extract_best_text", return_value={"text": fetched, "method": "t"}),
+        patch("app.pipeline.get_latest_document", return_value={"content": base_content, "content_hash": base_hash}),
+        patch("app.pipeline.save_document", return_value=None),
+        patch("app.telegram.send_telegram_alert", side_effect=lambda p: sends.append(p) or True),
+        patch("app.pipeline.get_adapter_for_url", return_value=None),
+    ]
+
+    v2_hash = stable_content_hash(normalize_for_change_hash(_TEXT_V2))
+    # Run 1: first genuine change (fetch V2 against the V1 baseline) → alert
+    # delivered, cooldown now open.
+    import contextlib
+    with contextlib.ExitStack() as es:
+        for p in _patches(_TEXT_V2, _TEXT_V1, v1_hash):
+            es.enter_context(p)
+        r1 = run_pipeline_for_source(_SOURCE)
+    assert r1["changed"] is True and len(sends) == 1
+
+    # Run 2: a DIFFERENT genuine change inside the cooldown (fetch V3 against the
+    # V2 baseline) → CHANGED, but the alert is suppressed by the cooldown and
+    # STASHED (not sent, not lost).
+    with contextlib.ExitStack() as es:
+        for p in _patches(_TEXT_V3, _TEXT_V2, v2_hash):
+            es.enter_context(p)
+        r2 = run_pipeline_for_source(_SOURCE)
+    assert r2["changed"] is True, "V3 is a real change"
+    assert len(sends) == 1, "second change inside cooldown must NOT alert immediately"
+    stashed = pa.load("AE-dedup-source")
+    assert stashed is not None and stashed["normalized_hash"] == \
+        stable_content_hash(normalize_for_change_hash(_TEXT_V3)), \
+        "the suppressed change must be stashed for deferred delivery"
+
+    # Later sweep, cooldown elapsed: the stashed alert is delivered exactly once.
+    future = datetime.now(timezone.utc) + timedelta(hours=48)
+    delivered = pa.flush_due(_SOURCE, send_fn=lambda p: sends.append(p) or True, now=future)
+    assert delivered is True
+    assert len(sends) == 2, "the deferred change must be delivered after the cooldown"
+    assert pa.load("AE-dedup-source") is None, "stash cleared after delivery"
+
+    # Idempotent: a further flush delivers nothing more.
+    assert pa.flush_due(_SOURCE, send_fn=lambda p: sends.append(p) or True, now=future) is False
+    assert len(sends) == 2

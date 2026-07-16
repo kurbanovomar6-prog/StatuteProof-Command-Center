@@ -719,6 +719,10 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     telegram_sent = False
     alert_suppressed_reason = ""
     deferred_alert: dict | None = None
+    # G1: a vetted alert suppressed ONLY by the per-source cooldown is deferred
+    # (stashed after durable evidence, delivered when the cooldown elapses), not
+    # dropped. run_pipeline_for_source consumes this after append_run.
+    pending_cooldown_alert: dict | None = None
 
     if ENABLE_TELEGRAM_ALERTS and not is_new and final_risk_level in _ALERT_THRESHOLD:
         # A1 dedup gate: one alert per unique hash transition per source,
@@ -736,31 +740,35 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                     alert_suppressed_reason, source.get("name"), str(new_hash)[:12],
                 )
 
+        # Build the vetted payload unconditionally — it is needed both to SEND
+        # (allowed) and to STASH (deferred by cooldown). The run_id lets the
+        # deferred delivery flip the right trail record's alert_sent later.
+        alert_payload = {
+            "url":                     url,
+            "source_id":               _source_id or (source or {}).get("id") or (source or {}).get("source_id") or "",
+            "run_id":                  _run_id,
+            "source_name":             (source or {}).get("name", ""),
+            "jurisdiction":            (source or {}).get("jurisdiction", ""),
+            "risk_level":              final_risk_level,
+            "risk_reason":             final_risk_reason,
+            "executive_summary":       executive_summary,
+            "business_action_required":business_action,
+            "ai_used":                 ai_used,
+            # SF-2 human-review gate inputs: send_telegram_alert holds the
+            # automated broadcast when the run needs review. These MUST ride
+            # on the payload so the gate can see them at send time.
+            "confidence":              confidence,
+            "review_required":         review_required,
+            "added_count":             len(diff_result["added"]),
+            "removed_count":           len(diff_result["removed"]),
+            "added":                   diff_result.get("added", []),
+            "removed":                 diff_result.get("removed", []),
+            "risk_details":            rule_risk,
+            "detected_facts":          detected_facts,
+            "normalized_hash":         new_hash,
+            "checked_at_utc":          created_at,
+        }
         if alert_allowed:
-            alert_payload = {
-                "url":                     url,
-                "source_id":               _source_id or (source or {}).get("id") or (source or {}).get("source_id") or "",
-                "source_name":             (source or {}).get("name", ""),
-                "jurisdiction":            (source or {}).get("jurisdiction", ""),
-                "risk_level":              final_risk_level,
-                "risk_reason":             final_risk_reason,
-                "executive_summary":       executive_summary,
-                "business_action_required":business_action,
-                "ai_used":                 ai_used,
-                # SF-2 human-review gate inputs: send_telegram_alert holds the
-                # automated broadcast when the run needs review. These MUST ride
-                # on the payload so the gate can see them at send time.
-                "confidence":              confidence,
-                "review_required":         review_required,
-                "added_count":             len(diff_result["added"]),
-                "removed_count":           len(diff_result["removed"]),
-                "added":                   diff_result.get("added", []),
-                "removed":                 diff_result.get("removed", []),
-                "risk_details":            rule_risk,
-                "detected_facts":          detected_facts,
-                "normalized_hash":         new_hash,
-                "checked_at_utc":          created_at,
-            }
             if source is None:
                 # Bare-URL path: no trail append will follow, so send inline.
                 from app.telegram import send_telegram_alert
@@ -769,6 +777,11 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 # Source path: defer the send until append_run has durably
                 # recorded the evidence (run_pipeline_for_source).
                 deferred_alert = alert_payload
+        elif source is not None and alert_suppressed_reason == "cooldown_active":
+            # G1: suppressed ONLY by the cooldown → defer, don't drop. Stash the
+            # payload after durable evidence; a later sweep delivers it once the
+            # cooldown elapses and if it is still the source's current state.
+            pending_cooldown_alert = alert_payload
 
     # ── Step 11: Return structured result ─────────────────────────────
     return {
@@ -785,6 +798,10 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         # an alert is vetted-and-ready but must wait for durable evidence.
         # run_pipeline_for_source consumes and clears this after append_run.
         "_deferred_alert":          deferred_alert,
+        # G1 deferred-cooldown payload: non-None only when an alert was suppressed
+        # solely by the cooldown. run_pipeline_for_source stashes it after
+        # append_run so a later sweep can deliver it once the cooldown elapses.
+        "_pending_cooldown_alert":  pending_cooldown_alert,
         "alert_suppressed_reason":  alert_suppressed_reason,
         "risk_details":             rule_risk,
         "executive_summary":        executive_summary,
@@ -1011,6 +1028,22 @@ def run_pipeline_for_source(source: dict) -> dict:
                     final_record.get("run_id"),
                 )
 
+            # ── G1: stash a cooldown-suppressed alert AFTER durable evidence ──
+            # Same durability invariant as the deferred send: only after append_run
+            # has fsync'd the CHANGED record do we persist the deferred payload, so
+            # a stash can never outrun the evidence it refers to.
+            _pending_cooldown = result.pop("_pending_cooldown_alert", None)
+            if _pending_cooldown is not None and final_record.get("change_status") == "CHANGED":
+                try:
+                    from app.pending_alerts import stash as _stash_pending
+                    _stash_pending(_pending_cooldown)
+                    logger.info(
+                        "Deferred cooldown alert stashed for later delivery: "
+                        "source=%s run_id=%s", source.get("name"), final_record.get("run_id"),
+                    )
+                except Exception as _stash_err:  # noqa: BLE001
+                    logger.warning("pending-alert stash failed (non-fatal): %s", _stash_err)
+
             # ── Wire alert drafts for CHANGED runs (not FIRST_SEEN baseline) ──
             if not result.get("is_new") and final_record.get("change_status") == "CHANGED":
                 try:
@@ -1134,7 +1167,21 @@ def run_pipeline_for_source(source: dict) -> dict:
         except Exception as _sr_err:
             logger.warning("source_runs.append_run failed (non-fatal): %s", _sr_err)
 
-    # Internal marker never belongs in the returned contract. On the CHANGED
-    # path it was already pop'd; on every other path it is None and dropped here.
+    # ── G1: deliver any due deferred-cooldown alert ──────────────────────────
+    # Runs on EVERY sweep (changed or unchanged) — the only place a cooldown-
+    # suppressed alert can be retried, since an unchanged sweep short-circuits
+    # before the alert path. Placed AFTER this run's own append so a stash the
+    # current change superseded is discarded (not delivered stale). Non-fatal.
+    if ENABLE_TELEGRAM_ALERTS:
+        try:
+            from app.pending_alerts import flush_due
+            from app.telegram import send_telegram_alert
+            flush_due(source, send_fn=send_telegram_alert)
+        except Exception as _flush_err:  # noqa: BLE001
+            logger.warning("pending-alert flush failed (non-fatal): %s", _flush_err)
+
+    # Internal markers never belong in the returned contract. On the CHANGED
+    # path they were already pop'd; on every other path they are None and dropped.
     result.pop("_deferred_alert", None)
+    result.pop("_pending_cooldown_alert", None)
     return result
