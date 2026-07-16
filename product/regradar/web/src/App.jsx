@@ -468,7 +468,7 @@ export default function App() {
           <Coverage onCreateWorkspace={() => navigatePublic('source-readiness-review')} />
           <SourceTransparencyMatrix onCreateWorkspace={() => navigateRegister()} />
           <VendorTrustSection />
-          <TrustLayer />
+          <TrustLayer onVerify={() => navigatePublic('verify', { query: '#sample' })} />
 
           <Pricing
             onCreateWorkspace={() => navigateRegister()}

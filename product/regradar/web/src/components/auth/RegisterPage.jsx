@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, Eye, EyeOff, FileCheck2, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
 import { auth } from '../../api'
+import { PLAN_INTENT_LABELS, capturePlanIntentFromUrl } from '../../data/planIntent'
 
 const JOB_TITLES = [
   'MLRO',
@@ -86,17 +87,6 @@ function AuthLayout({ children }) {
   )
 }
 
-// 2.3: the pricing CTA writes ?plan=<id> into the register URL. Persisting it
-// (localStorage — it must survive the email-verification round trip) lets
-// ChoosePlanPage acknowledge the buyer's original pick instead of making them
-// re-choose from scratch at the exact moment their intent was highest.
-export const PLAN_INTENT_KEY = 'sp_plan_intent'
-const PLAN_INTENT_LABELS = {
-  starter_pilot: 'Founding Pilot',
-  professional: 'UAE Monitor',
-  consultant: 'Consultant',
-}
-
 export default function RegisterPage({ onRegister, onLogin }) {
   const [form, setForm] = useState({
     firstName: '',
@@ -108,7 +98,9 @@ export default function RegisterPage({ onRegister, onLogin }) {
     companyType: 'VARA-licensed VASP',
     jurisdiction: 'Dubai / VARA',
   })
-  const [planIntent, setPlanIntent] = useState('')
+  // Synchronous read at first render — an effect would pop the banner in a
+  // frame late (react review, finding 3). Captures ?plan= and persists it.
+  const [planIntent] = useState(capturePlanIntentFromUrl)
   const [showPass, setShowPass] = useState(false)
   const [verificationSent, setVerificationSent] = useState(false)
   const [verifiedEmail, setVerifiedEmail] = useState('')
@@ -121,23 +113,6 @@ export default function RegisterPage({ onRegister, onLogin }) {
   const [loading, setLoading] = useState(false)
   const [googleStatus, setGoogleStatus] = useState({ loading: true, available: false, message: '' })
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }))
-
-  useEffect(() => {
-    // Capture the pricing pick once on mount; fall back to a previously
-    // persisted intent (e.g. the user came back after verifying email).
-    try {
-      const fromUrl = new URLSearchParams(window.location.search).get('plan') || ''
-      if (fromUrl && PLAN_INTENT_LABELS[fromUrl]) {
-        window.localStorage.setItem(PLAN_INTENT_KEY, fromUrl)
-        setPlanIntent(fromUrl)
-      } else {
-        const stored = window.localStorage.getItem(PLAN_INTENT_KEY) || ''
-        if (PLAN_INTENT_LABELS[stored]) setPlanIntent(stored)
-      }
-    } catch {
-      // Storage disabled — intent simply isn't carried; registration works.
-    }
-  }, [])
 
   useEffect(() => {
     let active = true

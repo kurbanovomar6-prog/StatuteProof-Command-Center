@@ -28,7 +28,7 @@ const TRUST_CARDS = [
   },
 ]
 
-export default function TrustLayer() {
+export default function TrustLayer({ onVerify }) {
   return (
     <section className="py-20 bg-[#07111F]" id="trust">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -65,6 +65,11 @@ export default function TrustLayer() {
                 {card.verifyLink ? (
                   <a
                     href="/verify#sample"
+                    onClick={(event) => {
+                      if (!onVerify) return
+                      event.preventDefault()
+                      onVerify()
+                    }}
                     className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-cyan-300 transition-colors hover:text-white"
                   >
                     Verify a real record yourself — no account

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, Lock, ArrowRight, Sparkles } from 'lucide-react'
-import { PLAN_INTENT_KEY } from '../auth/RegisterPage'
+import { clearPlanIntent, readPlanIntent } from '../../data/planIntent'
 
 const PLANS = [
   {
@@ -108,28 +108,21 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
   const [confirmMsg, setConfirmMsg] = useState('')
   const [error, setError] = useState('')
   // 2.3: the plan picked on the public pricing page, carried through
-  // registration + email verification via localStorage (see RegisterPage).
-  const [carriedIntent, setCarriedIntent] = useState('')
+  // registration + email verification via localStorage. Synchronous lazy
+  // read — an effect would pop the banner/highlight in a frame late
+  // (react review, finding 3).
+  const [carriedIntent] = useState(() => {
+    const stored = readPlanIntent()
+    return PLANS.some((p) => p.id === stored) ? stored : ''
+  })
 
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(PLAN_INTENT_KEY) || ''
-      if (PLANS.some((p) => p.id === stored)) setCarriedIntent(stored)
-    } catch {
-      // Storage disabled — no carried intent to acknowledge.
-    }
-  }, [])
-
-  function clearCarriedIntent() {
-    try {
-      window.localStorage.removeItem(PLAN_INTENT_KEY)
-    } catch {
-      // Ignore — the key simply stays; it is re-validated on every read.
-    }
-  }
+  const clearCarriedIntent = clearPlanIntent
 
   async function handleSelect(planId) {
     if (planId === 'evidence_preview') {
+      // A concrete choice was made — a stale carried intent must not
+      // re-banner on a later visit (react review, finding 4).
+      clearCarriedIntent()
       onContinue()
       return
     }
