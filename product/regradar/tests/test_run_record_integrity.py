@@ -327,3 +327,48 @@ def test_append_run_survives_queue_changed_alert_failure(tmp_path, monkeypatch):
     out = sr.append_run(rec)
     assert appended.get("done") is True
     assert out["change_status"] == "CHANGED"
+
+
+# ── Keystone: version-aware rebaseline. A NORMALIZATION_VERSION bump must
+#    rebaseline each source silently (no fabricated CHANGED wave), while
+#    steady-state and legacy-unversioned comparisons are untouched.
+
+def test_version_bump_rebaselines_without_fabricating_change():
+    prev = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+            "normalized_hash": "old_v2_hash", "normalization_version": "2", "change_status": "FIRST_SEEN"}
+    current = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+               "normalized_hash": "new_v3_hash", "normalization_version": "3"}
+    # Hashes differ (normalization changed), but it is a version bump — rebaseline,
+    # never a fabricated CHANGED.
+    assert classify_change(current, prev) == "FIRST_SEEN"
+
+
+def test_same_version_compares_normally():
+    prev = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+            "normalized_hash": "H1", "normalization_version": "2"}
+    changed = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+               "normalized_hash": "H2", "normalization_version": "2"}
+    same = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+            "normalized_hash": "H1", "normalization_version": "2"}
+    assert classify_change(changed, prev) == "CHANGED"
+    assert classify_change(same, prev) == "UNCHANGED"
+
+
+def test_missing_baseline_version_does_not_trigger_reset():
+    # A legacy baseline with no normalization_version must NOT be reset (that would
+    # MISS a real change). Only a genuine version MISMATCH rebaselines.
+    prev = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+            "normalized_hash": "H1"}
+    current = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+               "normalized_hash": "H2", "normalization_version": "2"}
+    assert classify_change(current, prev) == "CHANGED"
+
+
+def test_version_bump_to_empty_normalization_is_quality_drop():
+    # Even across a version bump, an empty normalization vs a real baseline is a
+    # QUALITY_DROP — never a silent rebaseline onto an empty/dark page.
+    prev = {"extraction_quality": "GOOD", "extracted_chars": 8000, "normalized_chars": 5000,
+            "normalized_hash": "H1", "normalization_version": "2"}
+    current = {"extraction_quality": "GOOD", "extracted_chars": 6000, "normalized_chars": 0,
+               "content_hash": "x", "normalization_version": "3"}
+    assert classify_change(current, prev) == "QUALITY_DROP"

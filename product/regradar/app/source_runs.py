@@ -638,6 +638,26 @@ def classify_change(current: dict, previous: dict | None, last_good: dict | None
     prev_status = str(previous.get("change_status") or "").upper()
     prev_chars = int(previous.get("extracted_chars") or 0)
     prev_norm_chars = int(previous.get("normalized_chars") or 0)
+
+    # Version-aware rebaseline: when the stored baseline was normalized under a
+    # DIFFERENT normalization_version, its hash is NOT comparable to this run's (a
+    # normalization/hash change re-shapes the text). Re-establish the baseline
+    # under the new version WITHOUT alerting — never fabricate a CHANGED from a
+    # cross-version hash. This makes a NORMALIZATION_VERSION bump graceful: the
+    # first post-bump sweep silently rebaselines each source (change_status
+    # FIRST_SEEN == _REBASELINE_STATUS) instead of firing a false alert for every
+    # one. Mirrors _comparable_hashes on the recovery paths. Fires ONLY when BOTH
+    # sides carry a version and they differ, so steady-state comparisons and
+    # unversioned legacy baselines are untouched (dormant until an actual bump).
+    prev_nv = str(previous.get("normalization_version") or "")
+    cur_nv = str(current.get("normalization_version") or "")
+    if prev_nv and cur_nv and prev_nv != cur_nv:
+        # Never rebaseline onto an empty page (that would hide a source going dark):
+        # an empty normalization against a real prior baseline is a QUALITY_DROP.
+        if not normalized_chars and (prev_norm_chars > 0 or previous.get("normalized_hash")):
+            return "QUALITY_DROP"
+        return "FIRST_SEEN"
+
     if prev_quality == "FAILED" and quality != "FAILED":
         # Recovery from a FAILED run (which carries no usable hash). Do NOT blindly
         # reset to a new baseline — compare against the last GOOD hash so a real
@@ -865,6 +885,10 @@ def record_heartbeat(
         "extracted_chars": extracted_chars,
         "raw_chars": raw_chars,
         "normalized_chars": normalized_chars,
+        # Stamp the normalization version so a heartbeat is a version-comparable
+        # baseline: without it, a heartbeat as the latest record would defeat the
+        # version-aware rebaseline in classify_change on a NORMALIZATION_VERSION bump.
+        "normalization_version": str(NORMALIZATION_VERSION),
     }
     return append_run(record)
 
