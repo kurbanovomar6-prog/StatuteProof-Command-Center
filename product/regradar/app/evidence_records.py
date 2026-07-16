@@ -86,7 +86,19 @@ def create_canonical_evidence_record(
     expected_current_hash = _normalize_sha256(run_record.get("normalized_hash"), "normalized_hash")
     actual_current_hash = _sha256_path(current_input)
     if expected_current_hash != f"sha256:{actual_current_hash}":
-        raise EvidenceRecordError("normalized_hash does not match snapshot_normalized_path.")
+        # EV-3: the LIVE pipeline stores a flavor-B normalized_hash
+        # (stable_content_hash(normalize(...)), whitespace-collapsed) while intake
+        # stores flavor-A (sha256(normalized.txt)). Both are legitimate hashes of
+        # THIS same normalized.txt, so accept either — otherwise a live CHANGED run
+        # (the kind that fires a customer alert) can NEVER be certified and gets no
+        # sealed evidence record. The sealed content.current_hash below stays
+        # flavor-A (sha256 of the file), so the verifier contract and the sealed
+        # format are byte-identical; this only relaxes the ACCEPTANCE gate. The
+        # mojibake/empty-content quarantine still runs, so garbage is never sealed.
+        from app.text_normalization import stable_content_hash as _sch
+        _flavor_b = _sch(current_input.read_text(encoding="utf-8", errors="replace"))
+        if not (_flavor_b and f"sha256:{_flavor_b}" == expected_current_hash):
+            raise EvidenceRecordError("normalized_hash does not match snapshot_normalized_path.")
 
     if run_status != "FIRST_SEEN" and previous_run is None:
         previous_run = _find_previous_evidence_run(run_record, root)
@@ -102,8 +114,19 @@ def create_canonical_evidence_record(
         )
         previous_hash = f"sha256:{_sha256_path(previous_input)}"
         expected_previous_hash = previous_run.get("normalized_hash")
-        if expected_previous_hash and _normalize_sha256(expected_previous_hash, "previous_run.normalized_hash") != previous_hash:
-            raise EvidenceRecordError("previous_run.normalized_hash does not match previous normalized snapshot.")
+        if expected_previous_hash:
+            _exp_prev = _normalize_sha256(expected_previous_hash, "previous_run.normalized_hash")
+            if _exp_prev != previous_hash:
+                # EV-3 (symmetry): the PREVIOUS run's normalized_hash is also the
+                # live-pipeline flavor-B. Every CHANGED/UNCHANGED run resolves a
+                # previous run, so without this fallback the alert-firing case still
+                # never certifies (the current-run fallback above is not enough).
+                # Accept flavor-B here too; the sealed content.previous_hash stays
+                # flavor-A (sha256 of the file), so the sealed format is unchanged.
+                from app.text_normalization import stable_content_hash as _sch_prev
+                _prev_flavor_b = _sch_prev(previous_input.read_text(encoding="utf-8", errors="replace"))
+                if not (_prev_flavor_b and f"sha256:{_prev_flavor_b}" == _exp_prev):
+                    raise EvidenceRecordError("previous_run.normalized_hash does not match previous normalized snapshot.")
 
     regulator_slug, regulator_name = _regulator_for_run(run_record)
     record_dir = root / "evidence" / regulator_slug / source_id / run_id

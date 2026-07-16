@@ -485,3 +485,77 @@ def test_ev1_legacy_record_without_sealed_hashes_still_validates(tmp_path):
     assert "diff_hash" not in record["content"]
     assert "raw_hash" not in record["content"]
     assert validate_evidence_record(record, base_dir=tmp_path)["valid"] is True
+
+
+def test_ev3_flavor_b_live_run_certifies(tmp_path):
+    """EV-3: a live-pipeline run whose normalized_hash is the flavor-B
+    stable_content_hash(normalize(...)) must now certify (previously rejected as
+    'normalized_hash does not match snapshot_normalized_path'), so live runs get a
+    sealed evidence record. The sealed content.current_hash stays flavor-A (sha256
+    of the file) — the sealed format and verifier contract are unchanged."""
+    import hashlib
+    from app.text_normalization import stable_content_hash
+
+    run = _snapshot_run_record(tmp_path)  # FIRST_SEEN
+    # Overwrite the normalized snapshot with MULTI-LINE content so the two flavors
+    # genuinely differ (flavor-B collapses the newlines, flavor-A keeps them).
+    norm_path = tmp_path / run["snapshot_normalized_path"]
+    norm_text = "Circular 3 of 2026\nThe amended AML threshold applies.\nLicensed firms are in scope."
+    norm_path.write_text(norm_text, encoding="utf-8")
+    flavor_a = hashlib.sha256(norm_text.encode("utf-8")).hexdigest()
+    run["normalized_hash"] = stable_content_hash(norm_text)  # flavor-B (live pipeline)
+    assert run["normalized_hash"] != flavor_a, "flavors must differ or the test is vacuous"
+
+    record = create_canonical_evidence_record(run, base_dir=tmp_path)
+    # The record certifies AND validates (validate re-hashes the sealed normalized
+    # snapshot against content.current_hash), so the sealed record is internally
+    # consistent — the whole EV-3 point: a flavor-B run gets a sealed record.
+    assert validate_evidence_record(record, base_dir=tmp_path)["valid"] is True
+    assert record["content"]["current_hash"].startswith("sha256:")
+
+
+def test_ev3_still_rejects_a_hash_that_matches_neither_flavor(tmp_path):
+    """EV-3 must not weaken integrity: a normalized_hash that is neither flavor-A
+    nor flavor-B of the snapshot is still rejected."""
+    run = _snapshot_run_record(tmp_path)
+    run["normalized_hash"] = "0" * 64  # matches neither flavor
+    import pytest as _pytest
+    with _pytest.raises(EvidenceRecordError):
+        create_canonical_evidence_record(run, base_dir=tmp_path)
+
+
+def test_ev3_flavor_b_changed_run_with_flavor_b_previous_certifies(tmp_path):
+    """EV-3 (symmetry — the case the security review found unaddressed): a live
+    CHANGED run whose OWN and whose PREVIOUS run's normalized_hash are BOTH the
+    pipeline flavor-B must certify. This is the alert-firing case the fix exists
+    for, and it always resolves a previous run (the second hash check)."""
+    import hashlib
+    from app.text_normalization import stable_content_hash
+
+    base = tmp_path
+    prev_dir = base / "data" / "source_snapshots" / "2026-06-19" / "AE" / "AE-dfsa-writer-test" / "run-prev"
+    prev_text = "Circular 3 of 2026\nOriginal AML threshold applies.\nLicensed firms are in scope."
+    _write(prev_dir / "normalized.txt", prev_text)
+    _write(prev_dir / "raw.txt", "<main>" + prev_text + "</main>")
+    _write(prev_dir / "metadata.json", "{}")
+    _write(prev_dir / "proof.json", '{"proof_quality":"LIMITED"}')
+    previous_run = {
+        "run_id": "run-prev", "source_id": "AE-dfsa-writer-test",
+        "source_name": "DFSA Writer Test Source", "official_url": "https://www.dfsa.ae/example",
+        "change_status": "FIRST_SEEN", "extraction_quality": "GOOD",
+        "normalized_hash": stable_content_hash(prev_text),  # flavor-B, like the live pipeline
+        "snapshot_normalized_path": str((prev_dir / "normalized.txt").relative_to(base)),
+        "snapshot_raw_path": str((prev_dir / "raw.txt").relative_to(base)),
+        "snapshot_metadata_path": str((prev_dir / "metadata.json").relative_to(base)),
+        "proof_block_path": str((prev_dir / "proof.json").relative_to(base)),
+        "timestamp_utc": "2026-06-19T00:00:00Z",
+    }
+
+    cur = _snapshot_run_record(base, status="CHANGED")
+    cur_text = "Circular 3 of 2026\nThe AMENDED AML threshold applies.\nLicensed firms are in scope."
+    (base / cur["snapshot_normalized_path"]).write_text(cur_text, encoding="utf-8")
+    cur["normalized_hash"] = stable_content_hash(cur_text)  # flavor-B
+    assert cur["normalized_hash"] != hashlib.sha256(cur_text.encode("utf-8")).hexdigest()
+
+    record = create_canonical_evidence_record(cur, previous_run, base_dir=base)
+    assert validate_evidence_record(record, base_dir=base)["valid"] is True
