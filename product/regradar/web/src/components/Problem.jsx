@@ -15,7 +15,7 @@ const problems = [
     iconBg: 'bg-cyan-400/10 border border-cyan-300/20',
     accentBg: 'bg-[#16D9F5]',
     title: 'Your team found out about the VARA update from a LinkedIn post — not a system',
-    desc: 'When VARA amended its Virtual Assets and Related Activities Regulations in late 2024, a number of VASP compliance teams first learned about it through a consultant or peer — not through a live monitor on the official portal. The gap between publication date and internal awareness date is exactly what regulators scrutinise during an enforcement review.',
+    desc: 'Regulators update rulebooks and circulars without individual notice. When a change reaches a compliance team through a consultant or a peer instead of a monitor on the official portal, the gap between the publication date and the internal awareness date is exactly what an enforcement review examines — "when did you know, and what did you do?"',
   },
   {
     Icon: FileX,
@@ -42,7 +42,7 @@ export default function Problem() {
 
         <div className="text-center mb-12">
           <div className="sp-kicker inline-flex items-center gap-2 text-amber-200 bg-amber-400/10 border border-amber-300/20 rounded-full px-4 py-1.5 text-sm font-medium mb-4">
-            The monitoring gap regulators exploit
+            The monitoring gap an enforcement review surfaces
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">
             The circular was published three weeks ago. Did your MLRO know by end of day?

@@ -40,7 +40,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
 
         <div className="text-center mb-10">
           <div className="sp-kicker mb-4">Pricing and activation</div>
-          <h2 className="sp-heading text-3xl text-white mb-3">Honest plans for source readiness and pilot monitoring</h2>
+          <h2 className="sp-heading text-3xl text-white mb-3">Plans with disclosed limits for source readiness and pilot monitoring</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
             Founding pilots are manually activated after source readiness review. No payment method
             is stored until billing is formally set up.

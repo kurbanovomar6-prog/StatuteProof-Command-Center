@@ -252,16 +252,16 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
 
             {/* Primary headline */}
             <h1 className="sp-display sp-animate-fade-up sp-delay-1 max-w-4xl text-5xl text-white md:text-6xl lg:text-7xl">
-              Stop refreshing regulator websites every week.
+              The circular changed three weeks ago. Can you prove when you knew?
             </h1>
 
             {/* Subheadline */}
             <p className="sp-animate-fade-up sp-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              StatuteProof is built to watch selected official UAE regulator
-              sources and prepare a draft brief for review when relevant text
-              changes. Instead of spending hours checking pages manually,
-              Compliance gets a reviewed signal with source links, change
-              context and evidence.
+              StatuteProof monitors selected official UAE regulator pages — CBUAE,
+              VARA, DFSA, ADGM/FSRA, DIFC and SCA. When monitored text changes, it
+              captures a SHA-256, RFC3161-timestamped sealed diff and drafts a brief
+              with sealed evidence for your MLRO to review — so the detection date
+              lives in a record an auditor can verify, not in someone's memory.
             </p>
 
             {/* Bullets */}
@@ -301,10 +301,10 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
                 not promised. */}
             <div className="sp-animate-fade-up sp-delay-2 mt-7 grid max-w-2xl gap-2 sm:grid-cols-4">
               {[
-                [liveSourceCount != null ? String(liveSourceCount) : "6",
+                [liveSourceCount != null ? String(liveSourceCount) : "—",
                  liveSourceCount != null
                    ? "UAE official sources configured (live count)"
-                   : "Selected official UAE sources across 6 regulators"],
+                   : "Selected official UAE sources (live count unavailable)"],
                 ["Scheduled", "Checks run on an operator-set interval"],
                 ["SHA-256", "Tamper-evident fingerprint of each capture"],
                 ["Your MLRO", "Reviews every brief before action"],

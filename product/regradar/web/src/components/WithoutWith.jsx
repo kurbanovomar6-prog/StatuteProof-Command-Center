@@ -128,7 +128,7 @@ export default function WithoutWith() {
             What changes for your team
           </div>
           <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-            The compliance workflow your team actually deserves
+            A monitoring record your MLRO can show an auditor
           </h2>
           <p className="mx-auto max-w-2xl text-slate-400">
             Most compliance teams are still running manual checks, finding out about regulatory
