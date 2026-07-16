@@ -653,58 +653,12 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         len(diff_result["added"]), len(diff_result["removed"]),
     )
 
-    # ── Auto-create canonical evidence for changed/first_seen runs ────
-    result_status = "FIRST_SEEN" if is_new else "CHANGED"
-    # Build a minimal run_record from available pipeline state.
-    # create_canonical_evidence_record requires proof_block_path,
-    # snapshot_raw_path, snapshot_normalized_path, etc. which are only
-    # populated when the source monitor pipeline writes snapshot files.
-    # When those paths are absent the call is non-fatal: evidence creation
-    # is skipped and the warning is logged so the source monitor agent
-    # can produce the record from the full run record later.
-    run_record_candidate: dict = {
-        "url": url,
-        "change_status": result_status,
-        "created_at": created_at,
-    }
-    if source is not None:
-        run_record_candidate["source_id"] = _source_id or source.get("id") or source.get("source_id") or ""
-        run_record_candidate["source_name"] = source.get("name") or source.get("source_name") or ""
-        run_record_candidate["official_url"] = source.get("url") or url
-        run_record_candidate["regulator"] = source.get("regulator") or source.get("family") or source.get("jurisdiction") or ""
-    if _snapshot_paths_result:
-        run_record_candidate["run_id"] = _run_id
-        run_record_candidate["market"] = _market
-        run_record_candidate["timestamp_utc"] = _ts_utc
-        run_record_candidate["snapshot_raw_path"] = _snapshot_paths_result.get("snapshot_raw_path")
-        run_record_candidate["snapshot_normalized_path"] = _snapshot_paths_result.get("snapshot_normalized_path")
-        run_record_candidate["snapshot_pdf_text_path"] = _snapshot_paths_result.get("snapshot_pdf_text_path")
-        run_record_candidate["snapshot_metadata_path"] = _snapshot_paths_result.get("snapshot_metadata_path")
-    # Only attempt canonical evidence creation when all required snapshot paths
-    # are present.  The full source-monitor pipeline populates these fields;
-    # the lightweight pipeline path (run_pipeline called directly) does not,
-    # so the call would always raise — guard here avoids masking real errors.
-    _required_evidence_fields = (
-        run_record_candidate.get("proof_block_path")
-        and run_record_candidate.get("snapshot_raw_path")
-        and run_record_candidate.get("snapshot_normalized_path")
-        and run_record_candidate.get("run_id")
-        and run_record_candidate.get("source_id")
-        and run_record_candidate.get("source_name")
-        and run_record_candidate.get("official_url")
-        and (run_record_candidate.get("timestamp_utc") or run_record_candidate.get("run_at"))
-    )
-    if _required_evidence_fields:
-        try:
-            from app.evidence_records import create_canonical_evidence_record
-            create_canonical_evidence_record(run_record_candidate)
-            logger.info("Canonical evidence created for run at %s", url)
-        except Exception as ev_err:
-            logger.warning("Canonical evidence creation failed (non-fatal): %s", ev_err)
-    else:
-        logger.debug(
-            "Skipping canonical evidence — snapshot paths not yet provided for %s", url
-        )
+    # Canonical evidence sealing happens in run_pipeline_for_source AFTER
+    # append_run returns — proof_block_path and the trail-written snapshot
+    # paths exist only from that point, so sealing here (pre-append) is
+    # structurally impossible. The bare-URL path (run_pipeline called
+    # directly, source=None) never appends a trail record and therefore
+    # never seals — by design.
 
     # ── Step 10: Telegram alert (MEDIUM/HIGH, never on baseline) ──────
     # Durability ordering (A-durability, fix 2): the invariant is that an
@@ -983,6 +937,57 @@ def run_pipeline_for_source(source: dict) -> dict:
                 "source_runs.append_run completed: source=%s run_id=%s status=%s",
                 source.get("name"), final_record.get("run_id"), final_record.get("change_status"),
             )
+
+            # ── Auto-seal the canonical evidence record (no operator step) ──
+            # final_record carries proof_block_path and the trail-written
+            # snapshot paths only after append_run, so this is the earliest
+            # point the canonical record CAN be sealed. Sealing runs BEFORE
+            # the deferred alert send so alert routing can attach the proof
+            # block (alert_proof surfaces only record_status == "complete"
+            # records). Non-fatal by design: the run evidence is already
+            # durable in the trail, and `run.py create-canonical-evidence`
+            # remains the recovery path for a failed seal. UNCHANGED runs are
+            # not sealed — one evidence directory per unchanged check is
+            # unbounded disk for no value beyond the trail record itself.
+            if final_record.get("change_status") in ("CHANGED", "FIRST_SEEN"):
+                try:
+                    from pathlib import Path as _SealPath
+                    from app.evidence_records import create_canonical_evidence_record
+                    import app.source_runs as _sr_seal
+                    # D8 idiom: resolve against the SAME base dir the trail
+                    # just wrote to, so the snapshot/proof paths in
+                    # final_record resolve where append_run put them.
+                    create_canonical_evidence_record(
+                        final_record, base_dir=_SealPath(_sr_seal._BASE_DIR)
+                    )
+                    result["canonical_evidence_sealed"] = True
+                    logger.info(
+                        "Canonical evidence sealed: source=%s run_id=%s status=%s",
+                        source.get("name"), final_record.get("run_id"),
+                        final_record.get("change_status"),
+                    )
+                except Exception as seal_err:  # noqa: BLE001
+                    # A benign idempotency duplicate ("already exists") means
+                    # the record IS sealed — just not by this call. Logging it
+                    # at the same WARNING severity as a real integrity failure
+                    # would train operators to skim past the warning that
+                    # matters, so it gets INFO + sealed=True.
+                    _seal_msg = str(seal_err)
+                    if "already exists" in _seal_msg:
+                        result["canonical_evidence_sealed"] = True
+                        logger.info(
+                            "Canonical evidence already sealed (idempotent skip): "
+                            "source=%s run_id=%s",
+                            source.get("name"), final_record.get("run_id"),
+                        )
+                    else:
+                        result["canonical_evidence_sealed"] = False
+                        logger.warning(
+                            "Canonical evidence auto-seal failed (non-fatal; "
+                            "run.py create-canonical-evidence can recover): "
+                            "source=%s run_id=%s err=%s",
+                            source.get("name"), final_record.get("run_id"), seal_err,
+                        )
 
             # ── Send the deferred alert — ONLY now that the evidence is durable ──
             # Invariant (A-durability, fix 2): "alert sent" can never outrun

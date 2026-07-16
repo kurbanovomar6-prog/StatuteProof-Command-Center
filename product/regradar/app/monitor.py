@@ -218,6 +218,79 @@ def _maybe_alert_catastrophic_cycle(summary: dict) -> None:
         logger.warning("deadman: catastrophic-cycle alert check failed: %s", exc)
 
 
+_SEAL_DEADMAN_STATE_FILE = _BASE_DIR / "data" / "seal_deadman_state.json"
+
+
+def _load_seal_degraded() -> bool:
+    """Read the persisted "seals were failing" flag. False on any error."""
+    try:
+        if _SEAL_DEADMAN_STATE_FILE.exists():
+            data = json.loads(_SEAL_DEADMAN_STATE_FILE.read_text(encoding="utf-8"))
+            return bool(data.get("degraded", False))
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("seal deadman: could not load state file: %s", exc)
+    return False
+
+
+def _save_seal_degraded(degraded: bool) -> None:
+    try:
+        _SEAL_DEADMAN_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _SEAL_DEADMAN_STATE_FILE.write_text(
+            json.dumps(
+                {
+                    "degraded": bool(degraded),
+                    "updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("seal deadman: could not save state file: %s", exc)
+
+
+def _maybe_alert_seal_failures(summary: dict) -> None:
+    """Fire a founder alert on the transition into systemic seal failure.
+
+    "Systemic" = every seal attempt in the cycle failed (and at least one was
+    attempted). Alerts keep flowing when sealing breaks — by design, the trail
+    append is the durability anchor — so without this deadman the core
+    "sealed evidence" promise can silently go dark. Edge-triggered and
+    persisted, same rate-limit philosophy as the catastrophic-cycle alert:
+    one alert on entry, one recovery note on exit, quiet in between.
+    """
+    try:
+        attempted = int(summary.get("seals_attempted", 0) or 0)
+        failed = int(summary.get("seals_failed", 0) or 0)
+        systemic = attempted > 0 and failed == attempted
+        recovered = attempted > 0 and failed == 0
+        was_degraded = _load_seal_degraded()
+
+        if systemic and not was_degraded:
+            from app.ops_alert import notify_founder
+
+            notify_founder(
+                "🚨 StatuteProof monitor: evidence sealing FAILED for every "
+                f"attempt this cycle ({failed}/{attempted}).\n"
+                f"cycle_id: {summary.get('cycle_id', '?')}\n"
+                "Alerts are still flowing but WITHOUT sealed canonical "
+                "records. Check disk/permissions/evidence tree, then run "
+                "`python run.py create-canonical-evidence` to backfill."
+            )
+            _save_seal_degraded(True)
+        elif recovered and was_degraded:
+            from app.ops_alert import notify_founder
+
+            notify_founder(
+                "✅ StatuteProof monitor: evidence sealing recovered "
+                f"({attempted}/{attempted} sealed, cycle_id "
+                f"{summary.get('cycle_id', '?')})."
+            )
+            _save_seal_degraded(False)
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("seal deadman: alert check failed: %s", exc)
+
+
 def _classify_access_status(exc: Exception) -> str:
     """Classify an exception into a machine-readable access_status string."""
     msg = str(exc).lower()
@@ -369,7 +442,10 @@ def monitor_all_sources(
         return []
 
     results: list[dict] = []
-    _counter: dict = {"ok": 0, "unchanged": 0, "failed": 0}
+    _counter: dict = {
+        "ok": 0, "unchanged": 0, "failed": 0,
+        "seals_attempted": 0, "seals_failed": 0,
+    }
 
     for idx, source in enumerate(sources, 1):
         name = source.get("name", source["url"])
@@ -513,6 +589,16 @@ def monitor_all_sources(
         else:
             _counter["unchanged"] += 1
 
+        # Seal health: canonical_evidence_sealed is present (True/False) only
+        # on runs that ATTEMPTED a seal (CHANGED/FIRST_SEEN after append_run).
+        # Without this tally a systemic seal failure — the product's core
+        # promise going dark — is invisible outside grep'ing logs.
+        _sealed = result.get("canonical_evidence_sealed")
+        if _sealed is not None:
+            _counter["seals_attempted"] += 1
+            if not _sealed:
+                _counter["seals_failed"] += 1
+
         if verbose:
             changed   = result.get("changed", False)
             is_new    = result.get("is_new",  False)
@@ -545,11 +631,18 @@ def monitor_all_sources(
         "sources_ok":        _counter["ok"],
         "sources_unchanged": _counter["unchanged"],
         "sources_failed":    _counter["failed"],
+        "seals_attempted":   _counter["seals_attempted"],
+        "seals_failed":      _counter["seals_failed"],
     }
     logger.info("CYCLE_SUMMARY %s", json.dumps(summary))
 
     # Deadman: alert the founder on the transition into a catastrophic cycle
     # (all-fail / nothing-succeeded). Best-effort — never breaks the loop.
     _maybe_alert_catastrophic_cycle(summary)
+
+    # Seal deadman: every seal attempt failing means alerts are flowing WITHOUT
+    # sealed evidence — the core promise silently off. Best-effort, same
+    # rate-limit philosophy as the catastrophic-cycle alert.
+    _maybe_alert_seal_failures(summary)
 
     return results
