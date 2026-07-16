@@ -206,6 +206,22 @@ def is_low_content_html(html: str) -> bool:
     return total_chars < _MIN_EXTRACTED_TEXT_CHARS
 
 
+def _html_is_bot_wall(html: str) -> bool:
+    """True when the HTML is a bot-wall / JS-gate page (a known block phrase).
+
+    Distinct from merely-thin content: is_low_content_html() rejects BOTH a
+    bot-wall AND an honestly-thin page, but only a bot-wall must never be sealed
+    as best-effort content. A bot-wall commonly returns HTTP 200, so it cannot be
+    told apart by status code — the phrase match is the signal. Honest thin
+    content is monitored as-is (and surfaces as QUALITY_DROP/low_content
+    downstream); a bot-wall is refused so it can be reported as an access block
+    instead of poisoning the baseline with a challenge page."""
+    if not html:
+        return False
+    lower = html.lower()
+    return any(phrase in lower for phrase in _BLOCK_PHRASES)
+
+
 # ── Tier 1: requests ──────────────────────────────────────────────────────────
 
 _MAX_RESPONSE_BYTES = 10 * 1024 * 1024  # 10 MB hard limit
@@ -677,6 +693,19 @@ def fetch_page(url: str, *, status_out: dict | None = None, allow_proxy: bool = 
         if tier1_status in (401, 403, 451):
             raise PermissionError(
                 f"HTTP {tier1_status} — access blocked (WAF/geo) for {url}"
+            ) from exc
+
+        # A bot-wall / JS-gate Tier-1 page (Cloudflare "checking your browser",
+        # "enable javascript", etc.) commonly returns HTTP 200, so the status
+        # check above misses it. It is precisely why Tier 1 was rejected and Tier 2
+        # was tried; if Tier 2 then fails, the ONLY thing left is the challenge
+        # page — which is NOT the regulator document. Sealing it would poison the
+        # baseline (and mask a chronically-blocked source as "healthy/unchanged"
+        # forever). Report it as an access block instead of returning it.
+        if requests_html is not None and _html_is_bot_wall(requests_html):
+            raise PermissionError(
+                f"access blocked (bot-wall/JS-gate) — Tier 1 challenge page and "
+                f"Tier 2 {type(exc).__name__} for {url}"
             ) from exc
 
         if requests_html is not None:

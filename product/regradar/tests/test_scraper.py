@@ -667,6 +667,58 @@ def test_fetch_page_rejects_tier2_rendered_block_page(monkeypatch):
     assert "403" in str(ei.value).lower()
 
 
+def test_fetch_page_refuses_tier1_botwall_when_tier2_fails(monkeypatch):
+    """A Tier-1 bot-wall / JS-gate page (HTTP 200, e.g. Cloudflare 'checking your
+    browser') must NOT be sealed as best-effort content when Tier 2 then fails.
+    A bot-wall returns 200, so the 401/403/451 status check misses it — the phrase
+    check refuses it, reporting an access block instead of poisoning the baseline
+    (which would otherwise mask a chronically-blocked source as healthy forever)."""
+    from app.monitor import _classify_access_status
+
+    botwall = (
+        "<html><body><h1>Checking your browser before accessing</h1>"
+        "<p>Please enable JavaScript to continue. Cloudflare Ray ID: abc123</p>"
+        + "<p>.</p>" * 60 + "</body></html>"
+    )
+
+    def _tier1_botwall(url, status_out=None, **kw):
+        if status_out is not None:
+            status_out["http_status"] = 200
+        return botwall
+
+    def _tier2_timeout(url, status_out=None):
+        raise TimeoutError(f"Playwright navigation timed out for {url}")
+
+    monkeypatch.setattr("app.scraper._fetch_via_requests", _tier1_botwall)
+    monkeypatch.setattr("app.scraper._fetch_via_playwright", _tier2_timeout)
+
+    with pytest.raises(PermissionError) as ei:
+        fetch_page("https://rulebook.centralbank.ae/en/rulebook/x")
+    assert "blocked" in str(ei.value).lower()
+    assert _classify_access_status(ei.value) == "blocked"
+
+
+def test_fetch_page_thin_tier1_still_best_effort_when_tier2_fails(monkeypatch):
+    """An honestly-THIN Tier-1 page (no bot-wall phrase) must STILL be returned as
+    best-effort when Tier 2 fails — the bot-wall refusal must not over-reach and
+    turn every thin page into a hard failure. Thin content is monitored as-is and
+    surfaces as QUALITY_DROP/low_content downstream, not a lost run."""
+    thin = "<html><body><p>Short but real regulatory note.</p></body></html>"
+
+    def _tier1_thin(url, status_out=None, **kw):
+        if status_out is not None:
+            status_out["http_status"] = 200
+        return thin
+
+    def _tier2_timeout(url, status_out=None):
+        raise TimeoutError("Playwright timed out")
+
+    monkeypatch.setattr("app.scraper._fetch_via_requests", _tier1_thin)
+    monkeypatch.setattr("app.scraper._fetch_via_playwright", _tier2_timeout)
+
+    assert fetch_page("https://vara.ae/some-thin-page") == thin
+
+
 def test_fetch_page_tier2_browser_bypass_of_requests_403_returns_content(monkeypatch):
     """A site that 403s the requests tier but serves 200 to a real browser must
     STILL yield content — the block check uses Tier 2's own status (200), never

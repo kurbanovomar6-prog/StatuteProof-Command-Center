@@ -597,6 +597,34 @@ def _comparable_hashes(a: dict, b: dict) -> tuple[str | None, str | None]:
     return None, None
 
 
+def _is_quality_floor_drop(quality: str, normalized_chars: int, chars: int, baseline: dict) -> bool:
+    """True when the CURRENT run is DEGRADED relative to ``baseline`` (a real
+    content record). Mirrors the non-recovery quality floor (good→thin drop,
+    hard char collapse, empty normalization against a real baseline, a cross
+    below _MIN_NORMALIZED_CHARS, or a >30% normalized shrink).
+
+    On the FAILED/QUALITY_DROP recovery paths the immediate predecessor is
+    hash-less and content-less, so the floor MUST be applied against the last
+    GOOD baseline — otherwise a recovery to a degraded or empty page escapes the
+    floor and is trusted as CHANGED (fabricated) or FIRST_SEEN (silent drop)
+    instead of being surfaced as QUALITY_DROP."""
+    b_quality = _canonical_quality(baseline.get("extraction_quality"))
+    b_norm = int(baseline.get("normalized_chars") or 0)
+    b_chars = int(baseline.get("extracted_chars") or 0)
+    b_has_baseline = b_norm > 0 or bool(baseline.get("normalized_hash"))
+    if _GOOD_ORDER.get(b_quality, 0) >= _GOOD_ORDER["MEDIUM"] and _GOOD_ORDER.get(quality, 0) <= _GOOD_ORDER["THIN"]:
+        return True
+    if b_chars > 0 and chars < b_chars * 0.4:
+        return True
+    if not normalized_chars and b_has_baseline:
+        return True
+    if b_norm >= _MIN_NORMALIZED_CHARS and normalized_chars < _MIN_NORMALIZED_CHARS:
+        return True
+    if b_norm > 0 and normalized_chars and normalized_chars < b_norm * 0.7:
+        return True
+    return False
+
+
 def classify_change(current: dict, previous: dict | None, last_good: dict | None = None) -> str:
     quality = _canonical_quality(current.get("extraction_quality"))
     chars = int(current.get("extracted_chars") or 0)
@@ -617,11 +645,20 @@ def classify_change(current: dict, previous: dict | None, last_good: dict | None
         # swallowed as FIRST_SEEN (the worst failure mode: a missed regulatory
         # change). last_good is supplied by append_run; direct callers pass None
         # and keep the original FIRST_SEEN behaviour.
+        # FIRST apply the current-run quality floor against the REAL baseline
+        # (last_good), not the hash-less FAILED/QUALITY_DROP predecessor. A recovery
+        # that is itself degraded (thin, or normalizes to empty) is a QUALITY_DROP —
+        # trusting its hash here would fabricate a CHANGED or silently reset the
+        # baseline (record_quality_drop stamps quality=FAILED, so QUALITY_DROP
+        # predecessors also reach this branch).
+        lg = last_good or {}
+        if _is_quality_floor_drop(quality, normalized_chars, chars, lg):
+            return "QUALITY_DROP"
         # Only trust a hash-diff when the two sides are DIRECTLY comparable (same
         # normalized flavor + normalization_version). When they are not (a legacy
         # or cross-version last_good, or a current stripped to content-only), fall
         # back to FIRST_SEEN rather than fabricate a CHANGED from mismatched hashes.
-        cur_hash, lg_hash = _comparable_hashes(current, last_good or {})
+        cur_hash, lg_hash = _comparable_hashes(current, lg)
         if cur_hash and lg_hash:
             return "CHANGED" if cur_hash != lg_hash else "UNCHANGED"
         return "FIRST_SEEN"
@@ -649,6 +686,8 @@ def classify_change(current: dict, previous: dict | None, last_good: dict | None
     # original predecessor comparison rather than fabricate a change from a
     # mismatched hash.
     if prev_status == "QUALITY_DROP" and last_good is not None:
+        if _is_quality_floor_drop(quality, normalized_chars, chars, last_good):
+            return "QUALITY_DROP"
         lg_hash, cur_hash = _comparable_hashes(last_good, current)
         if lg_hash and cur_hash:
             return "CHANGED" if lg_hash != cur_hash else "UNCHANGED"
@@ -702,7 +741,21 @@ def append_run(record: dict) -> dict:
     global _CACHE_VALID
     _CACHE_VALID = False
     if record.get("change_status") == "CHANGED":
-        queue_changed_alert(record)  # type: ignore[reportUndefinedVariable]
+        # The durable evidence record is already fsynced above; the review-queue
+        # file is a SECONDARY artifact. Never let a failure here (disk, perms, a
+        # bad path char) unwind append_run — that would propagate to the caller's
+        # broad handler AFTER evidence was recorded, silently discarding the
+        # already-vetted deferred alert. A run whose hash then becomes the baseline
+        # would never re-enter the alert path (next sweep short-circuits UNCHANGED),
+        # so the alert would be lost forever. Log non-fatally and return normally.
+        try:
+            queue_changed_alert(record)  # type: ignore[reportUndefinedVariable]
+        except Exception as _queue_err:  # noqa: BLE001 - best-effort review queue
+            import logging as _logging
+            _logging.getLogger(__name__).warning(
+                "queue_changed_alert failed (non-fatal; evidence already recorded): source=%s run_id=%s err=%s",
+                record.get("source_id"), record.get("run_id"), _queue_err,
+            )
     return record
 
 

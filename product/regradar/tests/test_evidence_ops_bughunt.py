@@ -93,8 +93,9 @@ def test_raising_source_persists_failed_record_and_opens_circuit(trail, tmp_path
     # _consecutive_failures now sees the real failures (was always 0 pre-fix).
     assert monitor._consecutive_failures(source["url"]) >= monitor._CIRCUIT_OPEN_THRESHOLD
 
-    # The breaker has opened for this source.
-    assert source["name"] in monitor._circuit_open
+    # The breaker has opened for this source (keyed by URL, matching the failure
+    # counter — see test_circuit_breaker_keys_on_url_not_shared_name).
+    assert source["url"] in monitor._circuit_open
 
     # Next cycle short-circuits: pipeline is NOT invoked (source is skipped).
     def _must_not_be_called(_src):  # pragma: no cover - asserts non-invocation
@@ -135,7 +136,7 @@ def test_circuit_auto_resets_after_successful_probe(trail, tmp_path, monkeypatch
     monkeypatch.setattr(monitor, "run_pipeline_for_source", _always_raises)
     for _ in range(monitor._CIRCUIT_OPEN_THRESHOLD):
         monitor.monitor_all_sources(verbose=False)
-    assert source["name"] in monitor._circuit_open, "breaker should be open"
+    assert source["url"] in monitor._circuit_open, "breaker should be open"
 
     # ── Phase 2: the source recovers. Advance cycles: the open circuit skips
     #    during cooldown, then a half-open probe is allowed through and succeeds,
@@ -162,10 +163,73 @@ def test_circuit_auto_resets_after_successful_probe(trail, tmp_path, monkeypatch
 
     assert resumed, "a successful half-open probe must resume monitoring"
     # Breaker is cleared and stays cleared on subsequent successful cycles.
-    assert source["name"] not in monitor._circuit_open
+    assert source["url"] not in monitor._circuit_open
     follow_up = monitor.monitor_all_sources(verbose=False)
     assert follow_up[0].get("status") == "ok"
     assert not follow_up[0].get("circuit_open")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# G4 — the circuit breaker must key on the URL (the failure-count key), NOT the
+#      display name. Two enabled sources sharing a name but with different URLs
+#      must have INDEPENDENT breakers: one tripping must not dark the other.
+# ══════════════════════════════════════════════════════════════════════════
+def test_circuit_breaker_keys_on_url_not_shared_name(trail, tmp_path, monkeypatch):
+    import app.monitor as monitor
+
+    failing = {
+        "name": "Shared Name", "url": "https://a.example/fails",
+        "jurisdiction": "AE", "category": "banking", "status": "active", "enabled": True,
+    }
+    healthy = {
+        "name": "Shared Name", "url": "https://b.example/works",
+        "jurisdiction": "AE", "category": "banking", "status": "active", "enabled": True,
+    }
+
+    monkeypatch.setattr(monitor, "get_enabled_sources", lambda: [failing, healthy])
+    monkeypatch.setattr(monitor, "init_pipeline", lambda *_a, **_k: None)
+    monkeypatch.setattr(monitor.time, "sleep", lambda *_a, **_k: None)
+    monkeypatch.setattr(monitor, "_CIRCUIT_STATE_FILE", tmp_path / "circuit_state.json")
+    monkeypatch.setattr(monitor, "_circuit_open", set())
+    monkeypatch.setattr(monitor, "_circuit_skip_counts", {})
+
+    def _dispatch(src):
+        if src["url"] == failing["url"]:
+            raise TimeoutError("connection timed out")
+        return {
+            "source_name": src["name"], "url": src["url"],
+            "jurisdiction": src["jurisdiction"], "category": src["category"],
+            "changed": False, "status": "ok",
+        }
+
+    monkeypatch.setattr(monitor, "run_pipeline_for_source", _dispatch)
+
+    # Trip the breaker on the failing twin only.
+    for _ in range(monitor._CIRCUIT_OPEN_THRESHOLD):
+        monitor.monitor_all_sources(verbose=False)
+
+    # Only the failing URL's breaker is open — the shared name did NOT dark both.
+    assert failing["url"] in monitor._circuit_open
+    assert healthy["url"] not in monitor._circuit_open
+
+    # The healthy twin is STILL fetched and reports ok (it is not skipped).
+    fetched_healthy = {"hit": False}
+
+    def _dispatch2(src):
+        if src["url"] == failing["url"]:
+            raise AssertionError("open circuit must skip the FAILING source")
+        fetched_healthy["hit"] = True
+        return {
+            "source_name": src["name"], "url": src["url"],
+            "jurisdiction": src["jurisdiction"], "category": src["category"],
+            "changed": False, "status": "ok",
+        }
+
+    monkeypatch.setattr(monitor, "run_pipeline_for_source", _dispatch2)
+    results = monitor.monitor_all_sources(verbose=False)
+    assert fetched_healthy["hit"], "the healthy twin must not be skipped by the twin's breaker"
+    healthy_result = next(r for r in results if r.get("url") == healthy["url"])
+    assert healthy_result.get("access_status") != "circuit_open"
 
 
 # ══════════════════════════════════════════════════════════════════════════

@@ -249,12 +249,81 @@ def test_failed_recovery_version_skew_is_first_seen_not_fabricated():
     assert classify_change(current, failed_prev, last_good=last_good) == "FIRST_SEEN"
 
 
-def test_failed_recovery_flavor_mismatch_is_first_seen():
+def test_failed_recovery_flavor_mismatch_never_fabricates_change():
     # current normalized to empty (content_hash only) vs last_good's normalized_hash.
-    # Comparing normalized-vs-content (different algorithms) would fabricate CHANGED
-    # — must be FIRST_SEEN instead.
+    # Comparing normalized-vs-content (different algorithms) must NEVER fabricate a
+    # CHANGED. Because the current run is also empty-normalized against a real
+    # baseline, the quality floor (F2) takes precedence and classifies it as a
+    # QUALITY_DROP — the more informative signal — not a silent reset.
     current = {"extraction_quality": "good", "extracted_chars": 5000, "normalized_chars": 0,
                "content_hash": "xyz"}
     failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
     last_good = _rec("good", nhash="aaa")
-    assert classify_change(current, failed_prev, last_good=last_good) == "FIRST_SEEN"
+    result = classify_change(current, failed_prev, last_good=last_good)
+    assert result == "QUALITY_DROP"
+    assert result != "CHANGED"
+
+
+# ── F2: recovery from FAILED/QUALITY_DROP must apply the quality floor against
+#        the last-GOOD baseline BEFORE trusting a hash (no fabricated CHANGED,
+#        no silent FIRST_SEEN reset when the recovery is itself degraded).
+
+def test_failed_recovery_to_thin_is_quality_drop_not_fabricated_change():
+    # Outage recovers to a truncated/partial page (THIN) vs a GOOD last_good.
+    # Non-recovery path would call this QUALITY_DROP; the recovery path must too,
+    # not fabricate CHANGED off the thin hash.
+    current = {"extraction_quality": "THIN", "extracted_chars": 600,
+               "normalized_chars": 300, "normalized_hash": "ccc", "normalization_version": "2"}
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    last_good = {"extraction_quality": "GOOD", "extracted_chars": 8000,
+                 "normalized_chars": 5000, "normalized_hash": "aaa", "normalization_version": "2"}
+    assert classify_change(current, failed_prev, last_good=last_good) == "QUALITY_DROP"
+
+
+def test_failed_recovery_to_empty_normalized_is_quality_drop_not_first_seen():
+    # Recovery to a JS-shell/all-chrome page: GOOD raw chars but normalizes empty.
+    # Must be QUALITY_DROP, not a silent FIRST_SEEN baseline reset.
+    current = {"extraction_quality": "GOOD", "extracted_chars": 6000,
+               "normalized_chars": 0, "content_hash": "xyz", "normalization_version": "2"}
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    last_good = {"extraction_quality": "GOOD", "extracted_chars": 8000,
+                 "normalized_chars": 5000, "normalized_hash": "aaa", "normalization_version": "2"}
+    assert classify_change(current, failed_prev, last_good=last_good) == "QUALITY_DROP"
+
+
+def test_failed_recovery_healthy_full_page_still_detects_change():
+    # A HEALTHY recovery (passes the floor) must still compare against last_good:
+    # different hash -> CHANGED, same hash -> UNCHANGED. The floor must not swallow
+    # a legitimate change on a good recovery.
+    changed = {"extraction_quality": "GOOD", "extracted_chars": 8000,
+               "normalized_chars": 5200, "normalized_hash": "new", "normalization_version": "2"}
+    same = {"extraction_quality": "GOOD", "extracted_chars": 8000,
+            "normalized_chars": 5000, "normalized_hash": "aaa", "normalization_version": "2"}
+    failed_prev = _rec("failed", nhash="", chars=0, nchars=0)
+    last_good = {"extraction_quality": "GOOD", "extracted_chars": 8000,
+                 "normalized_chars": 5000, "normalized_hash": "aaa", "normalization_version": "2"}
+    assert classify_change(changed, failed_prev, last_good=last_good) == "CHANGED"
+    assert classify_change(same, failed_prev, last_good=last_good) == "UNCHANGED"
+
+
+# ── G2: a failing review-queue write must not unwind append_run after the
+#        durable evidence record is written (alert must survive).
+
+def test_append_run_survives_queue_changed_alert_failure(tmp_path, monkeypatch):
+    import app.source_runs as sr
+    monkeypatch.setattr(sr, "_RUN_DIR", tmp_path / "runs")
+    monkeypatch.setattr(sr, "previous_run", lambda *_a, **_k: None)
+    monkeypatch.setattr(sr, "classify_change", lambda *_a, **_k: "CHANGED")
+    monkeypatch.setattr(sr, "_snapshot_base_from_record", lambda *_a, **_k: None)
+    appended = {}
+    monkeypatch.setattr(sr, "_locked_append_record", lambda rec: appended.update(done=True))
+
+    def _boom(_rec):
+        raise OSError("disk full")
+    monkeypatch.setattr(sr, "queue_changed_alert", _boom)
+
+    rec = {"source_id": "AE-test", "run_id": "r1", "change_status": "CHANGED"}
+    # Must NOT raise: the durable record was written, the queue failure is non-fatal.
+    out = sr.append_run(rec)
+    assert appended.get("done") is True
+    assert out["change_status"] == "CHANGED"
