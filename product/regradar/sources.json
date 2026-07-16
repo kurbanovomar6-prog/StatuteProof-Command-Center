@@ -602,8 +602,8 @@
     "status": "active",
     "tier": "1",
     "official_status": "officially_linked",
-    "adapter_family": "rulebook",
-    "adapter_name": "rulebook",
+    "adapter_family": "rulebook_platform",
+    "adapter_name": "rulebook_platform",
     "adapter_config": {
       "content_selector": "main, article, body"
     },
@@ -611,7 +611,7 @@
     "baseline_runs_required": 2,
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-aml-rulebook-module/intake-20260619T151126Z/proof.json",
     "normalized_hash": "036de70eb042bad014aeadee28e08d42d891ffd9fd367f1a9bb2dfe978b7d6ed",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 URL repoint: was pinned to the frozen Thomson Reuters version path …module-aml-ver3004-26 (frozen at VER30/04-26 — a frozen version URL keeps serving the old text after the next rulebook amendment, i.e. silent stale monitoring). Repointed to the canonical current-version module URL. Verified 2026-07-12: rulebook-modules index lists both URLs; canonical page title carries no VER tag while the frozen page title shows [VER30/04-26]; both serve HTTP 200. REQUIRES single-source rebaseline (python run.py rebaseline --source-id AE-dfsa-aml-rulebook-module) on the deployment that owns the baseline, before the next scheduled sweep, to avoid one spurious CHANGED alert. | 2026-07-12 OPS: static fetch captured only a 2.8KB Thomson Reuters SPA nav shell; switched to playwright/rulebook (matches healthy sibling AE-dfsa-rulebook-thomsonreuters); min raised 500->8000; re-baseline required after deploy.",
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 URL repoint: was pinned to the frozen Thomson Reuters version path …module-aml-ver3004-26 (frozen at VER30/04-26 — a frozen version URL keeps serving the old text after the next rulebook amendment, i.e. silent stale monitoring). Repointed to the canonical current-version module URL. Verified 2026-07-12: rulebook-modules index lists both URLs; canonical page title carries no VER tag while the frozen page title shows [VER30/04-26]; both serve HTTP 200. REQUIRES single-source rebaseline (python run.py rebaseline --source-id AE-dfsa-aml-rulebook-module) on the deployment that owns the baseline, before the next scheduled sweep, to avoid one spurious CHANGED alert. | 2026-07-12 OPS: static fetch captured only a 2.8KB Thomson Reuters SPA nav shell; switched to playwright/rulebook (matches healthy sibling AE-dfsa-rulebook-thomsonreuters); min raised 500->8000; re-baseline required after deploy. | 2026-07-17 ROOT CAUSE + FIX (verified from founder laptop, NOT prod): the platform serves the module node as a static nav/TOC shell whose visible text (~24K chars of site tree) PASSES the generic scraper's 500-char low-content gate, so Tier-2 Playwright never fires and the pipeline hashed navigation chrome — hence NAV_SHELL_ONLY. Playwright does NOT help: even fully rendered, the module node carries no rule text (rendered main = 3,392 chars, zero rulebook body; text lives on ~100 per-rule child pages). Fix: new opt-in registry adapter rulebook_platform (app/adapters/rulebook_platform.py) extracts, static-only: module's own current-version tag from the book-navigation tree ([VER30/04-26] at fix time), the current-version page's full section TOC, the version-history table, and all version PDF links (sorted). Alert fires on new VER tag / TOC change / new PDF version row; other modules' version tags are excluded by URL-prefix matching (no cross-module noise). Live check 2026-07-17 from laptop: 23,822 chars, is_quality_content=True, deterministic across 2 runs (sha256 stable). NOTE this monitors module version+structure, not full per-rule text. VANTAGE CAVEAT: dfsaen.thomsonreuters.com verified reachable from the laptop only; if the prod datacenter IP is 403-blocked (as adgm.thomsonreuters.com is), add dfsaen.thomsonreuters.com to STATUTEPROOF_PROXY_HOSTS — the adapter already routes via proxy_for_url(). Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. REMAINS monitoring_mode=remediation until, on the prod deployment: pipeline no-save check OK, python run.py rebaseline --source-id AE-dfsa-aml-rulebook-module, 2 baseline runs + MONITOR_OK, then flip to fresh_alert.",
     "monitoring_mode": "remediation",
     "alert_eligible": true,
     "fresh_signal_class": "HIGH_SIGNAL",
@@ -1842,7 +1842,8 @@
     "last_checked_at": "2026-06-19T15:06:49Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-17 CADENCE: check_interval_minutes=360 — UAE targeted-financial-sanctions freeze obligations are effectively immediate/24h, so EOCN/IEC sources are re-checked every 4-6 hours by the scheduler's per-source cadence sub-cycle instead of waiting for the full-fleet cycle. Fleet default unchanged.",
+    "check_interval_minutes": 360
   },
   {
     "name": "ADGM FSRA Waivers and Modifications Register",
@@ -1956,7 +1957,8 @@
     "last_checked_at": "2026-06-19T15:06:49Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: 1,024-byte normalized run captures verified as genuine page size, not a truncation cap (live visible text ~1,923B; the 63.6KB HTML is mostly anti-bot JS; raw.txt is a non-round 1,184B and text ends at natural footer strings). expected_min_length 1000 leaves only ~24B headroom over current captures — watch for length-gate flapping. Duplicate AE-uaeiec-news-listing-next demoted to candidate (same page on a second domain); this source is the canonical EOCN news monitor."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: 1,024-byte normalized run captures verified as genuine page size, not a truncation cap (live visible text ~1,923B; the 63.6KB HTML is mostly anti-bot JS; raw.txt is a non-round 1,184B and text ends at natural footer strings). expected_min_length 1000 leaves only ~24B headroom over current captures — watch for length-gate flapping. Duplicate AE-uaeiec-news-listing-next demoted to candidate (same page on a second domain); this source is the canonical EOCN news monitor. | 2026-07-17 CADENCE: check_interval_minutes=360 — UAE targeted-financial-sanctions freeze obligations are effectively immediate/24h, so EOCN/IEC sources are re-checked every 4-6 hours by the scheduler's per-source cadence sub-cycle instead of waiting for the full-fleet cycle. Fleet default unchanged.",
+    "check_interval_minutes": 360
   },
   {
     "name": "UAE CMA Regulations Listing",
@@ -9358,7 +9360,7 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "1",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice.",
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-17 CADENCE: check_interval_minutes=240 — UAE targeted-financial-sanctions freeze obligations are effectively immediate/24h, so EOCN/IEC sources are re-checked every 4-6 hours by the scheduler's per-source cadence sub-cycle instead of waiting for the full-fleet cycle. Fleet default unchanged.",
     "monitoring_mode": "fresh_alert",
     "alert_eligible": true,
     "fresh_signal_class": "HIGH_SIGNAL",
@@ -9368,7 +9370,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "sanctions_tfs_laws_guidance",
     "expected_update_pattern": "EOCN/TFS official laws, regulations, sanctions, or UN/TFS publication area; checked daily for material AML/CFT/TFS changes.",
-    "customer_alert_policy": "Alert on material EOCN/TFS law, regulation, sanctions, UN page, publication, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material EOCN/TFS law, regulation, sanctions, UN page, publication, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "check_interval_minutes": 240
   },
   {
     "name": "EOCN UN Sanctions/TFS Page",
@@ -9398,7 +9401,7 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "1",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice.",
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-17 CADENCE: check_interval_minutes=240 — UAE targeted-financial-sanctions freeze obligations are effectively immediate/24h, so EOCN/IEC sources are re-checked every 4-6 hours by the scheduler's per-source cadence sub-cycle instead of waiting for the full-fleet cycle. Fleet default unchanged.",
     "monitoring_mode": "fresh_alert",
     "alert_eligible": true,
     "fresh_signal_class": "HIGH_SIGNAL",
@@ -9408,7 +9411,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "sanctions_tfs_laws_guidance",
     "expected_update_pattern": "EOCN/TFS official laws, regulations, sanctions, or UN/TFS publication area; checked daily for material AML/CFT/TFS changes.",
-    "customer_alert_policy": "Alert on material EOCN/TFS law, regulation, sanctions, UN page, publication, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material EOCN/TFS law, regulation, sanctions, UN page, publication, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "check_interval_minutes": 240
   },
   {
     "name": "UAEIEC / EOCN News and Sanctions Updates",
@@ -9437,7 +9441,7 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "1",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: demoted fresh_alert -> candidate as a duplicate of AE-eocn-news-en. Live check: uaeiec.gov.ae/en-us/news serves the byte-identical EOCN news page (63,638B vs 63,633B; only per-request anti-bot/CSRF tokens and the domain inside a ReadSpeaker URL differ; same title, same #NewsContainer). Canonical monitoring stays on AE-eocn-news-en (eocn.gov.ae). The 1,024-byte captures are NOT a truncation cap: live visible text is ~1.9KB, raw.txt is a non-round 1,184B, and normalized text ends at natural footer strings. Record retained for evidence continuity; do not delete.",
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: demoted fresh_alert -> candidate as a duplicate of AE-eocn-news-en. Live check: uaeiec.gov.ae/en-us/news serves the byte-identical EOCN news page (63,638B vs 63,633B; only per-request anti-bot/CSRF tokens and the domain inside a ReadSpeaker URL differ; same title, same #NewsContainer). Canonical monitoring stays on AE-eocn-news-en (eocn.gov.ae). The 1,024-byte captures are NOT a truncation cap: live visible text is ~1.9KB, raw.txt is a non-round 1,184B, and normalized text ends at natural footer strings. Record retained for evidence continuity; do not delete. | 2026-07-17 CADENCE: check_interval_minutes=360 — UAE targeted-financial-sanctions freeze obligations are effectively immediate/24h, so EOCN/IEC sources are re-checked every 4-6 hours by the scheduler's per-source cadence sub-cycle instead of waiting for the full-fleet cycle. Fleet default unchanged.",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
     "fresh_signal_class": "PENDING_VALIDATION",
@@ -9447,7 +9451,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "sanctions_tfs_news_updates",
     "expected_update_pattern": "EOCN/UAEIEC official news listing; checked daily for sanctions, TFS, strategic goods, AML/CFT, and control-list update announcements.",
-    "customer_alert_policy": "Alert on material EOCN/UAEIEC news, sanctions/TFS, strategic goods, control-list, law, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material EOCN/UAEIEC news, sanctions/TFS, strategic goods, control-list, law, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "check_interval_minutes": 360
   },
   {
     "name": "VARA News, Circulars and Regulatory Publications",
@@ -9983,12 +9988,29 @@
     "status": "active"
   },
   {
-    "name": "VARA AML/CFT Rulebook",
-    "url": "https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/",
+    "name": "VARA Compliance and Risk Management Rulebook (incl. AML/CFT Part III)",
+    "url": "https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook",
     "jurisdiction": "AE",
-    "category": "virtual_assets",
-    "enabled": false,
-    "status": "disabled_path_moved"
+    "category": "aml",
+    "enabled": true,
+    "status": "candidate",
+    "tier": "1",
+    "source_id": "AE-vara-compliance-risk-rulebook-html",
+    "adapter_family": "rulebook_platform",
+    "adapter_name": "rulebook_platform",
+    "expected_min_length": 40000,
+    "baseline_runs_required": 2,
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "fresh_signal_class": "HIGH_SIGNAL",
+    "commercial_signal_tier": "A",
+    "fresh_signal_reason": "VARA's AML/CFT obligations for licensed VASPs live in Part III of the Compliance and Risk Management Rulebook (MLRO appointment/duties, AML/CFT controls, CDD, STR, sanctions compliance). Full-text change detection on the official rulebook HTML.",
+    "fresh_signal_notes": "Candidate/pending validation: not counted as customer fresh-alert monitoring until proof, baseline, and MONITOR_OK pass on the prod deployment.",
+    "fresh_signal_type": "aml_financial_crime_rulebook",
+    "recommended_check_frequency": "daily",
+    "expected_update_pattern": "Irregular official VARA rulebook version updates (Effective From marker, version list, current-version PDF link, full rulebook text); checked daily for material changes.",
+    "customer_alert_policy": "Alert on material VARA rulebook text, version, effective-date, or document-link changes; suppress layout, navigation, and boilerplate-only changes.",
+    "notes": "2026-07-17 REPOINTED + REBUILT (was: name 'VARA AML/CFT Rulebook', url https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/, status disabled_path_moved — that path now returns HTTP 404 with no redirect; VARA moved rulebook content to rulebooks.vara.ae and folded AML/CFT into Part III of the Compliance and Risk Management Rulebook — verified 2026-07-17). New URL is the official rulebook HTML page. Adapter rulebook_platform follows the page's own 'Entire section' link (server-rendered on this platform) and captures the FULL rulebook text including the complete AML/CFT part, plus version markers ('Effective From: 19 June 2025' at intake), version list, and the current-version PDF link (VARA_EN_123_VER20250519.pdf at intake) — so a new version changes the hash even though pinned per-version PDF URLs never change (the reason the sibling AE-vara-compliance-risk-rulebook-pdf source stays disabled_static_pdf). Live check 2026-07-17 from founder laptop: 100,940 chars, is_quality_content=True, deterministic across 2 runs. Prod reachability expected OK (prod already monitors rulebooks.vara.ae: AE-vara-rulebook-updates) but NOT verified from prod today. Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. CANDIDATE until, on the prod deployment: pipeline no-save check OK, proof + 2 baseline runs + MONITOR_OK + review gates — then flip monitoring_mode to fresh_alert and alert_eligible to true. Monitoring intelligence only. Not legal advice."
   },
   {
     "name": "CBUAE Publications Hub",

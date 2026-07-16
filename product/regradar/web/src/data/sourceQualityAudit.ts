@@ -4,10 +4,10 @@
 
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: "2026-07-13",
-  totalEnabled: 116,
+  totalEnabled: 117,
   freshAlertEligible: 74,
   evidenceLibraryOnly: 4,
-  candidate: 9,
+  candidate: 10,
   remediation: 8,
   sourceLevelMonitorOk: 75,
   withProofPath: 86,
@@ -27,14 +27,14 @@ export const FAMILY_QUALITY = [
   },
   {
     family: "VARA",
-    totalEnabled: 6,
+    totalEnabled: 7,
     freshAlertEligible: 3,
     evidenceLibrary: 1,
-    candidate: 0,
+    candidate: 1,
     remediation: 0,
     status: "partial",
     gapTo25: 22,
-    notes: "3 selected official VARA sources are fresh-alert eligible. This is selected-source monitoring, not complete VARA coverage.",
+    notes: "3 selected official VARA sources are fresh-alert eligible; 1 candidate (Compliance & Risk Management Rulebook incl. AML/CFT Part III, repointed 2026-07-17, pending prod baseline gates). This is selected-source monitoring, not complete VARA coverage.",
   },
   {
     family: "DFSA",
@@ -197,7 +197,7 @@ export const SAFE_CLAIMS = [
   "StatuteProof has 74 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK status, proof records, hashes, and baseline confirmation as of the source-register review (2026-07-13).",
   "StatuteProof also maintains 4 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
   "74 UAE source records currently have MONITOR_OK status and are fresh-alert eligible.",
-  "StatuteProof maintains source-level proof files for 86 of 116 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
+  "StatuteProof maintains source-level proof files for 86 of 117 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
   "ADGM/FSRA has 9 selected proof-backed fresh-alert sources, including guidance/policy and RA/circular/rulebook style sources, with 3 remaining candidates disclosed as held.",
   "DIFC has 9 selected proof-backed fresh-alert sources, including the official DIFC Legal Database listing; this is not complete DIFC legal database coverage.",
   "UAE CMA has 6 selected proof-backed fresh-alert direct/listing sources; UAE CMA root portal and broad UAE CMA coverage remain unclaimed.",
@@ -207,7 +207,7 @@ export const SAFE_CLAIMS = [
 ] as const
 
 export const FORBIDDEN_CLAIMS = [
-  "Do not describe all 116 enabled UAE source records as live monitors.",
+  "Do not describe all 117 enabled UAE source records as live monitors.",
   "Do not describe UAE coverage as complete.",
   "Do not describe UAE legislation coverage as complete.",
   "Do not describe MoJ/Gazette coverage as complete.",

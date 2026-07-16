@@ -11,7 +11,7 @@
 //   readinessSupported = enabled AND monitoring_mode === 'fresh_alert' AND alert_eligible === true
 //   candidate          = enabled AND monitoring_mode === 'candidate'
 export const SOURCE_TRUTH = {
-  enabled: 116,
+  enabled: 117,
   // 2026-07-12 OPS audit: 8 sources (7 MOET on a maintenance-stub baseline +
   // the DFSA AML rulebook module on a JS-shell baseline) moved to remediation
   // until re-baselined on real content — honest count drops 83 → 75.
@@ -19,5 +19,8 @@ export const SOURCE_TRUTH = {
   // was confirmed byte-identical to the EOCN news listing (same page, second
   // domain) and demoted to a dedupe candidate — 75 → 74, candidate 8 → 9.
   readinessSupported: 74,
-  candidate: 9,
+  // 2026-07-17: VARA AML/CFT rulebook repointed to rulebooks.vara.ae (old path
+  // 404) and rebuilt as a candidate on the new rulebook_platform adapter —
+  // enabled 116 → 117, candidate 9 → 10. Stays candidate until prod gates.
+  candidate: 10,
 }

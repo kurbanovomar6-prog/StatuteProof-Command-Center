@@ -27,7 +27,7 @@ const SOURCE_READINESS_PREVIEW = {
   },
   VARA: {
     status: 'Selected-source',
-    detail: '3 fresh-alert eligible VARA sources (of 5 enabled), including the rulebook and selected publications. Selected-source depth, not complete VARA coverage.',
+    detail: '3 fresh-alert eligible VARA sources (of 6 enabled), including the rulebook and selected publications. Selected-source depth, not complete VARA coverage.',
     tone: 'cyan',
   },
   DFSA: {

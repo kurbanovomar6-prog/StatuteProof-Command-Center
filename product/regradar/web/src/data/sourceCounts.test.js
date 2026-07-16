@@ -71,7 +71,7 @@ describe('public coverage headline counts (SourceCoverageTable)', () => {
 describe('per-regulator matrix counts (SourceTransparencyMatrix)', () => {
   const CLAIMS = [
     { label: 'CBUAE: "25 fresh-alert eligible"', fresh: 25, prefixes: ['cbuae'] },
-    { label: 'VARA: "3 fresh-alert eligible of 5 enabled"', fresh: 3, enabled: 5, prefixes: ['vara'] },
+    { label: 'VARA: "3 fresh-alert eligible of 6 enabled"', fresh: 3, enabled: 6, prefixes: ['vara'] },
     { label: 'DIFC/DFSA: "20 fresh-alert eligible across DIFC/DFSA"', fresh: 20, prefixes: ['difc', 'dfsa'] },
     { label: 'ADGM/FSRA: "9 fresh-alert eligible of 14 enabled"', fresh: 9, enabled: 14, prefixes: ['adgm'] },
     { label: 'UAE CMA: "6 fresh-alert eligible"', fresh: 6, prefixes: ['sca'] },

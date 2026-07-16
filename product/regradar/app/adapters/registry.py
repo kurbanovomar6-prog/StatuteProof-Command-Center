@@ -25,10 +25,15 @@ from app.adapters.adgm_fsra import ADGMFSRAAdapter
 from app.adapters.sca import SCAAdapter
 from app.adapters.difc import DIFCAdapter
 from app.adapters.vara import VARAAdapter
+from app.adapters.rulebook_platform import RulebookPlatformAdapter
 
 logger = logging.getLogger(__name__)
 
 _ADAPTERS: list[SourceAdapter] = [
+    # Strictly opt-in (source adapter_name == "rulebook_platform"): must be
+    # first so it wins over the host-wide VARAAdapter for opted-in
+    # rulebooks.vara.ae sources. Engages ONLY when a source entry names it.
+    RulebookPlatformAdapter(),
     # UAE digital-asset and tax regulators — highest priority UAE adapters
     DIFCAdapter(),
     VARAAdapter(),

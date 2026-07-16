@@ -55,6 +55,105 @@ WIDTH = 68
 _CRITICAL_INTERVAL_MINUTES = 30
 _DEFAULT_PRIORITY = "standard"
 
+# ── Per-source cadence ────────────────────────────────────────────────────────
+#
+# A source may declare  "check_interval_minutes"  in sources.json to be
+# re-checked more often than the full-fleet cycle (e.g. UAE sanctions/TFS
+# sources, where the freeze obligation is effectively immediate/24h so a
+# daily fleet sweep is too slow). Sources WITHOUT the field keep the fleet
+# cadence — the default is unchanged.
+#
+# Enforcement mirrors the critical sub-cycle: between full cycles the loop
+# wakes often enough (see _next_sleep_minutes) and runs only the sources
+# whose own interval has elapsed. A full cycle counts as a run for every
+# such source, so nothing is double-checked right after a fleet sweep.
+#
+# Floor: polling an official regulator more often than every 30 minutes is
+# abuse, not monitoring — misconfigured smaller values are clamped up.
+_MIN_CUSTOM_INTERVAL_MINUTES = 30
+
+
+def get_custom_interval_minutes(source: dict) -> int | None:
+    """Return the validated per-source cadence in minutes, or None.
+
+    None means "no per-source cadence" (fleet default). Non-integer or
+    non-positive values are rejected with a warning; values below the
+    30-minute floor are clamped up to the floor.
+    """
+    if not isinstance(source, dict):
+        return None
+    raw = source.get("check_interval_minutes")
+    if raw is None:
+        return None
+    try:
+        minutes = int(raw)
+    except (TypeError, ValueError):
+        logger.warning(
+            "check_interval_minutes=%r on source %r is not an integer — ignored",
+            raw, source.get("source_id") or source.get("name"),
+        )
+        return None
+    if minutes <= 0:
+        logger.warning(
+            "check_interval_minutes=%d on source %r is not positive — ignored",
+            minutes, source.get("source_id") or source.get("name"),
+        )
+        return None
+    if minutes < _MIN_CUSTOM_INTERVAL_MINUTES:
+        logger.warning(
+            "check_interval_minutes=%d on source %r below the %d-minute floor — clamped",
+            minutes, source.get("source_id") or source.get("name"),
+            _MIN_CUSTOM_INTERVAL_MINUTES,
+        )
+        return _MIN_CUSTOM_INTERVAL_MINUTES
+    return minutes
+
+
+def _cadence_key(source: dict) -> str:
+    """Per-source cadence bookkeeping key — the URL, matching the
+    circuit-breaker key in app/monitor.py (URLs are unique per enabled
+    source; names can collide)."""
+    return source.get("url", "") or source.get("name", "")
+
+
+def _due_custom_sources(
+    sources: list[dict],
+    last_run_at: dict[str, float],
+    now_monotonic: float,
+) -> list[dict]:
+    """Return the sources whose own check_interval_minutes has elapsed
+    since their last recorded run. Pure function — unit-testable."""
+    due: list[dict] = []
+    for source in sources:
+        minutes = get_custom_interval_minutes(source)
+        if minutes is None:
+            continue
+        last = last_run_at.get(_cadence_key(source))
+        # No bookkeeping entry means the source has never run in this
+        # process — due now (the startup full cycle normally stamps it, so
+        # this only fires when that first cycle failed).
+        if last is None or (now_monotonic - last) >= minutes * 60:
+            due.append(source)
+    return due
+
+
+def _next_sleep_minutes(
+    interval: int,
+    has_critical: bool,
+    custom_sources: list[dict],
+) -> int:
+    """Sleep granularity for the watch loop: the smallest cadence that
+    must be honoured. Fleet-only deployments keep the exact old behaviour
+    (interval, or 30 when critical sources exist)."""
+    candidates = [interval]
+    if has_critical:
+        candidates.append(_CRITICAL_INTERVAL_MINUTES)
+    for source in custom_sources:
+        minutes = get_custom_interval_minutes(source)
+        if minutes is not None:
+            candidates.append(minutes)
+    return max(1, min(candidates))
+
 # sources.json lives one level above this module (project root)
 _SOURCES_JSON = Path(__file__).parent.parent / "sources.json"
 
@@ -160,6 +259,33 @@ def get_sources_by_priority(priority: str) -> list[dict]:
     logger.debug(
         "get_sources_by_priority(%r): %d sources matched", priority, len(matched)
     )
+    return matched
+
+
+def get_sources_with_custom_interval() -> list[dict]:
+    """Return all enabled sources that declare a valid per-source cadence
+    (``check_interval_minutes``), in file order. Empty list when
+    sources.json is missing or unreadable."""
+    import json as _json  # local import to avoid circular imports at module level
+
+    try:
+        raw = _SOURCES_JSON.read_text(encoding="utf-8")
+        all_sources = _json.loads(raw)
+    except Exception as exc:
+        logger.warning("get_sources_with_custom_interval: cannot read sources.json: %s", exc)
+        return []
+
+    if not isinstance(all_sources, list):
+        logger.warning("get_sources_with_custom_interval: sources.json is not a list")
+        return []
+
+    matched = [
+        s for s in all_sources
+        if isinstance(s, dict)
+        and s.get("enabled") is True
+        and get_custom_interval_minutes(s) is not None
+    ]
+    logger.debug("get_sources_with_custom_interval: %d sources matched", len(matched))
     return matched
 
 
@@ -277,6 +403,14 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
     critical_sources = get_sources_by_priority("critical")
     has_critical = len(critical_sources) > 0
 
+    # Per-source cadence (check_interval_minutes): re-checked between full
+    # cycles, exactly like the critical sub-cycle. Loaded once at startup —
+    # same lifecycle as critical_sources.
+    custom_sources = get_sources_with_custom_interval()
+    has_custom = len(custom_sources) > 0
+    # Monotonic timestamp of each custom source's last run (full cycles count).
+    custom_last_run: dict[str, float] = {}
+
     print(f"\n  {_BOLD}StatuteProof watch mode started.{_R}")
     print(
         f"  Checking all enabled sources every "
@@ -286,6 +420,16 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
         print(
             f"  {_YELLOW}Critical sources ({len(critical_sources)}): "
             f"re-checked every {_CRITICAL_INTERVAL_MINUTES} minutes.{_R}"
+        )
+    if has_custom:
+        print(
+            f"  {_YELLOW}Per-source cadence ({len(custom_sources)}): "
+            + ", ".join(
+                f"{src.get('source_id') or src.get('name', '?')}"
+                f"={get_custom_interval_minutes(src)}m"
+                for src in custom_sources
+            )
+            + f"{_R}"
         )
     print(f"  Press {_BOLD}Ctrl+C{_R} to stop.\n")
 
@@ -322,6 +466,11 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
                     results = monitor_all_sources(verbose=True)
                     _print_cycle_summary(results)
                     last_full_run_at = time.monotonic()
+                    # A full cycle sweeps every enabled source, so it counts
+                    # as a run for each per-cadence source — otherwise they
+                    # would be re-fetched immediately on the next sub-wake.
+                    for _src in custom_sources:
+                        custom_last_run[_cadence_key(_src)] = last_full_run_at
                     # Progress marker for the external watchdog. Written only
                     # after a full cycle completes without an orchestrator-level
                     # exception, so a wedged/aborted cycle leaves the file stale.
@@ -368,20 +517,36 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
                     )
                     print(f"  Recovering — will retry next cycle in 30 s.\n")
                     time.sleep(30)
-            elif has_critical:
-                # Sub-cycle: run ONLY the critical-priority sources directly,
-                # without touching standard/background sources at all.
-                logger.info(
-                    "Critical sub-cycle: running %d critical source(s)",
-                    len(critical_sources),
+            elif has_critical or has_custom:
+                # Sub-cycle: run ONLY the critical-priority sources plus any
+                # per-cadence sources whose own interval has elapsed, without
+                # touching standard/background sources at all.
+                due_custom = (
+                    _due_custom_sources(custom_sources, custom_last_run, now)
+                    if has_custom else []
                 )
+                # A source can be both critical and per-cadence — run it once.
+                _critical_keys = {_cadence_key(src) for src in critical_sources}
+                due_custom = [
+                    src for src in due_custom
+                    if _cadence_key(src) not in _critical_keys
+                ]
+                if critical_sources or due_custom:
+                    logger.info(
+                        "Sub-cycle: running %d critical + %d per-cadence source(s)",
+                        len(critical_sources), len(due_custom),
+                    )
                 try:
                     critical_results: list[dict] = []
-                    for src in critical_sources:
+                    for src in critical_sources + due_custom:
                         src_name = src.get("name", src.get("url", "?"))
                         try:
                             result = run_pipeline_for_source(src)
                             critical_results.append(result)
+                            # Stamp per-cadence bookkeeping for every source
+                            # this sub-cycle actually ran (critical included:
+                            # its 30-min sweeps also satisfy a custom cadence).
+                            custom_last_run[_cadence_key(src)] = time.monotonic()
                         except Exception as src_exc:
                             logger.error(
                                 "Critical sub-cycle error for %s: %s: %s",
@@ -399,23 +564,24 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
                             })
                     if critical_results:
                         print(
-                            f"  {_DIM}Critical sub-cycle "
+                            f"  {_DIM}Sub-cycle "
                             f"({len(critical_results)} source(s)):{_R}"
                         )
                         _print_cycle_summary(critical_results)
                 except Exception as exc:
                     logger.error(
-                        "Critical sub-cycle error: %s: %s", type(exc).__name__, exc
+                        "Sub-cycle error: %s: %s", type(exc).__name__, exc
                     )
 
+            # Sleep the smallest cadence that must be honoured: the full
+            # interval, the 30-minute critical sub-cycle when critical
+            # sources exist, or the smallest per-source cadence. Deployments
+            # without critical/per-cadence sources keep the old behaviour.
+            sleep_minutes = _next_sleep_minutes(interval, has_critical, custom_sources)
             print(
-                f"  {_DIM}Next check in "
-                f"{_CRITICAL_INTERVAL_MINUTES if has_critical else interval} "
+                f"  {_DIM}Next check in {sleep_minutes} "
                 f"minute(s) — Ctrl+C to stop.{_R}\n"
             )
-            # Sleep the shorter interval when critical sources are configured;
-            # otherwise sleep the full configured interval.
-            sleep_minutes = _CRITICAL_INTERVAL_MINUTES if has_critical else interval
             time.sleep(sleep_minutes * 60)
 
     except KeyboardInterrupt:
