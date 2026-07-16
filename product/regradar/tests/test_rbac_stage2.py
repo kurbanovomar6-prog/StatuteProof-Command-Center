@@ -199,7 +199,7 @@ def test_source_edit_writes_access_log(isolated_db, monkeypatch):
     monkeypatch.setattr("app.source_tester.source_url_exists", lambda url: False)
     monkeypatch.setattr("app.source_intake.load_sources_json", lambda: [])
     monkeypatch.setattr("app.source_intake.run_source_intake", lambda *a, **k: {"status": "CONFIRMED_ACCESSIBLE"})
-    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
+    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src, **kw: saved.update(src) or True)
 
     handler = _make_handler("POST", "/api/custom-sources")
     # SEC-3 gate is not under test here — grant the custom_sources capability.
@@ -320,7 +320,7 @@ def test_logging_failure_does_not_break_the_action(isolated_db, monkeypatch):
     monkeypatch.setattr("app.source_tester.source_url_exists", lambda url: False)
     monkeypatch.setattr("app.source_intake.load_sources_json", lambda: [])
     monkeypatch.setattr("app.source_intake.run_source_intake", lambda *a, **k: {"status": "CONFIRMED_ACCESSIBLE"})
-    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
+    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src, **kw: saved.update(src) or True)
 
     handler = _make_handler("POST", "/api/custom-sources")
     # SEC-3 gate is not under test here — grant the custom_sources capability.

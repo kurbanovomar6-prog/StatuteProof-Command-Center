@@ -355,7 +355,7 @@ def test_custom_source_add_stamps_owner(monkeypatch):
         "app.source_intake.run_source_intake",
         lambda *a, **k: {"status": "CONFIRMED_ACCESSIBLE"},
     )
-    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
+    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src, **kw: saved.update(src) or True)
     handler = _make_handler("POST", "/api/custom-sources")
     monkeypatch.setattr(
         handler, "_read_json",
@@ -373,7 +373,7 @@ def test_custom_source_add_denied_without_capability(monkeypatch):
     _patch_plan(monkeypatch, "evidence_preview")  # custom_sources: 0
     saved: dict = {}
     monkeypatch.setattr("app.source_intake.load_sources_json", lambda: [])
-    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
+    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src, **kw: saved.update(src) or True)
     handler = _make_handler("POST", "/api/custom-sources")
     monkeypatch.setattr(handler, "_read_json", lambda: {"url": "https://x.ae/r", "name": "R", "legal_confirmed": True})
     handler._handle_custom_sources_add()
@@ -391,7 +391,7 @@ def test_custom_source_add_denied_over_plan_cap(monkeypatch):
     ]
     saved: dict = {}
     monkeypatch.setattr("app.source_intake.load_sources_json", lambda: existing)
-    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
+    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src, **kw: saved.update(src) or True)
     handler = _make_handler("POST", "/api/custom-sources")
     monkeypatch.setattr(handler, "_read_json", lambda: {"url": "https://x.ae/r3", "name": "R3", "legal_confirmed": True})
     handler._handle_custom_sources_add()
@@ -844,3 +844,33 @@ def test_per_record_export_pdf_gate_is_case_insensitive(monkeypatch):
     )
     handler._handle_evidence_export_get()
     assert 403 in _statuses(handler)
+
+
+def test_append_source_enforces_cap_under_write_lock(tmp_path, monkeypatch):
+    """SEC-3 TOCTOU: append_source_to_json re-checks the owned cap UNDER its write
+    lock, so concurrent adds cannot collectively exceed the plan cap even when the
+    HTTP-layer prefilter raced and each saw 0-of-cap."""
+    import app.source_tester as st
+
+    sources_file = tmp_path / "sources.json"
+    sources_file.write_text(json.dumps([
+        {"source_id": "custom-a", "url": "https://a.ae", "custom": True, "owner_user_id": 9},
+        {"source_id": "custom-b", "url": "https://b.ae", "custom": True, "owner_user_id": 9},
+    ]), encoding="utf-8")
+    monkeypatch.setattr(st, "_SOURCES_PATH", sources_file)
+
+    # Owner 9 is already at cap 2 -> the locked re-check refuses the write.
+    ok = st.append_source_to_json(
+        {"source_id": "custom-c", "url": "https://c.ae", "custom": True, "owner_user_id": 9},
+        owner_user_id=9, custom_cap=2,
+    )
+    assert ok is False
+    entries = json.loads(sources_file.read_text(encoding="utf-8"))
+    assert not any(e.get("source_id") == "custom-c" for e in entries), "over-cap add must not be written"
+
+    # A different owner (0 owned) is unaffected.
+    ok2 = st.append_source_to_json(
+        {"source_id": "custom-d", "url": "https://d.ae", "custom": True, "owner_user_id": 42},
+        owner_user_id=42, custom_cap=2,
+    )
+    assert ok2 is True

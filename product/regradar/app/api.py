@@ -4175,7 +4175,20 @@ class _Handler(BaseHTTPRequestHandler):
             # source_id). Report a NON-oracle failure — deliberately not "already
             # in the list" — so we neither falsely claim success nor reveal that
             # another tenant monitors this URL.
-            if not append_source_to_json(new_source):
+            # SEC-3 (TOCTOU): pass the owner + cap so append_source_to_json can
+            # re-check the owned count UNDER its write lock — the early prefilter
+            # above reads the count without a lock, so concurrent adds could each
+            # see 0-of-cap and collectively exceed the plan cap. `_cap` was computed
+            # by that prefilter (reached only on the success path); recompute
+            # defensively so this never depends on that block's local staying bound.
+            from app.plan import capabilities_for as _caps_authoritative
+
+            _cap_authoritative = int(_caps_authoritative(int(user["id"])).get("custom_sources") or 0)
+            if not append_source_to_json(
+                new_source,
+                owner_user_id=int(user["id"]),
+                custom_cap=_cap_authoritative or None,
+            ):
                 self._send_json({
                     "ok": False,
                     "message": "This source could not be saved. Please re-run the readiness test and try again.",

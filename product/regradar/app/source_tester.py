@@ -520,7 +520,12 @@ def source_url_exists_for_user(url: str, user_id: int | None) -> bool:
     return False
 
 
-def append_source_to_json(source: dict) -> bool:
+def append_source_to_json(
+    source: dict,
+    *,
+    owner_user_id: int | None = None,
+    custom_cap: int | None = None,
+) -> bool:
     """
     Append `source` to sources.json atomically and race-safely.
 
@@ -573,6 +578,28 @@ def append_source_to_json(source: dict) -> bool:
                         logger.warning(
                             "append_source_to_json: duplicate source_id %r — not added",
                             source_id,
+                        )
+                        return False
+
+                # SEC-3 (TOCTOU): the AUTHORITATIVE plan-cap check. The caller's
+                # early prefilter in the HTTP layer reads the owned-count without a
+                # lock, so N concurrent adds can each observe 0-of-cap and all pass.
+                # Re-check the owned count here, under the SAME exclusive lock that
+                # guards the write, against the `entries` we are about to append to.
+                if custom_cap is not None and owner_user_id is not None:
+                    from app.tenancy import same_owner as _same_owner
+
+                    owned = sum(
+                        1
+                        for e in entries
+                        if isinstance(e, dict)
+                        and e.get("custom") is True
+                        and _same_owner(e.get("owner_user_id"), owner_user_id)
+                    )
+                    if owned >= custom_cap:
+                        logger.warning(
+                            "append_source_to_json: owner %s at custom-source cap %d — not added",
+                            owner_user_id, custom_cap,
                         )
                         return False
 
