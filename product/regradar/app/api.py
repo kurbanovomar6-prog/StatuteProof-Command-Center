@@ -793,6 +793,42 @@ class _Handler(BaseHTTPRequestHandler):
             return False
         return sid in self._denied_custom_source_ids(user)
 
+    def _caller_is_operator(self, user: dict) -> bool:
+        """True only for a global/operator principal (org_id == GLOBAL_ORG_ID).
+
+        A normal self-registered customer resolves to their own org (or None) and
+        is ROLE_OWNER of that scope — never GLOBAL_ORG_ID — so this is the
+        operator-only gate for write actions on SHARED official records whose
+        effect spans every tenant. Never raises; on failure returns False (deny).
+        """
+        try:
+            return self._caller_org_id(user) == rbac_runtime.GLOBAL_ORG_ID
+        except Exception:  # noqa: BLE001 — unresolved principal is not an operator
+            return False
+
+    def _canonical_record_is_own_custom(self, user: dict, record_id: str) -> bool:
+        """True when a canonical record's source is a CUSTOM source owned by the
+        caller — the only non-operator case where a review decision affects solely
+        the caller's own tenant (so it may bypass the operator gate). Resolves the
+        record via the SAME loader the write uses. Never raises; on failure returns
+        False (falls through to the operator requirement)."""
+        rid = str(record_id or "").strip()
+        if not rid:
+            return False
+        try:
+            from app.evidence_records import load_evidence_record
+            from app.tenancy import is_custom_source, custom_source_owner, same_owner
+
+            record, _path = load_evidence_record(rid)
+        except Exception:  # noqa: BLE001
+            return False
+        source = record.get("source") if isinstance(record.get("source"), dict) else {}
+        sid = str(source.get("source_id") or "").strip()
+        if not sid or not is_custom_source(sid):
+            return False
+        user_id = user.get("id") if isinstance(user, dict) else None
+        return same_owner(custom_source_owner(sid), user_id)
+
     def _base_url(self) -> str:
         host = self.headers.get("Host", "localhost:5001")
         scheme = "https" if not host.startswith("localhost") and not host.startswith("127.") else "http"
@@ -1491,7 +1527,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": True, "message": "Email is already verified. Please sign in."}, 200)
             return
         token = generate_verification_token(int(user["id"]))
-        verification_url = f"{self._base_url()}/api/auth/verify-email?token={token}"
+        # SEC-5: build the emailed link from the CONFIGURED public base, never the
+        # attacker-controllable Host header (parity with register/reset, 3789ab4).
+        verification_url = f"{self._public_base_url()}/api/auth/verify-email?token={token}"
         import threading as _threading
         _threading.Thread(
             target=_send_verification_email,
@@ -4020,6 +4058,40 @@ class _Handler(BaseHTTPRequestHandler):
         if not self._rbac_guard(user, rbac_runtime.SOURCE_EDIT, resource_type="source"):
             return
 
+        # SEC-3: enforce the custom_sources plan cap SERVER-SIDE (was defined in
+        # plan.py but never checked here). Rate-limit the write too — each add
+        # triggers a real outbound fetch via run_source_intake, and this handler
+        # previously had no limiter at all (its discover/test siblings do).
+        if self._rate_limited(_SOURCE_TEST_LIMITER, "custom_source_add"):
+            return
+        if not self._require_capability(user, "custom_sources"):
+            return
+        try:
+            from app.plan import capabilities_for as _caps_for
+            from app.source_intake import load_sources_json as _load_sources_for_cap
+
+            _uid = int(user["id"])
+            _cap = int(_caps_for(_uid).get("custom_sources") or 0)
+            _owned = sum(
+                1
+                for s in _load_sources_for_cap()
+                if s.get("custom") is True
+                and s.get("owner_user_id") is not None
+                and _same_owner(s.get("owner_user_id"), _uid)
+            )
+            if _cap and _owned >= _cap:
+                self._send_json(
+                    {
+                        "ok": False,
+                        "message": f"Your plan allows up to {_cap} custom source(s). Remove one or upgrade to add more.",
+                    },
+                    403,
+                )
+                return
+        except Exception:  # noqa: BLE001 — a broken limit check must fail CLOSED
+            self._send_json({"ok": False, "message": "Could not verify your custom-source limit."}, 403)
+            return
+
         body = self._read_json()
         url = str(body.get("url", "")).strip()
         name = str(body.get("name", "")).strip() or url
@@ -4475,6 +4547,18 @@ class _Handler(BaseHTTPRequestHandler):
         # tenant's private custom-source canonical record.
         if self._canonical_record_out_of_scope(user, record_id):
             self._send_json({"ok": False, "message": "That evidence record is not in your scope."}, 403)
+            return
+        # SEC-2: a decision on a SHARED official record changes brief-eligibility
+        # for EVERY tenant that relies on that record (build_risk_brief_inputs), so
+        # any self-registered ROLE_OWNER could otherwise block or force-approve
+        # other tenants' evidence. Restrict shared-official reviews to a
+        # global/operator principal; a caller may still review their OWN
+        # custom-source record (private to their tenant).
+        if not self._caller_is_operator(user) and not self._canonical_record_is_own_custom(user, record_id):
+            self._send_json(
+                {"ok": False, "message": "Only an operator may review shared official evidence."},
+                403,
+            )
             return
         try:
             from app.review_queue import record_canonical_review_action

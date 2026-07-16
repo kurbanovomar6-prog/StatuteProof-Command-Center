@@ -202,6 +202,8 @@ def test_source_edit_writes_access_log(isolated_db, monkeypatch):
     monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
 
     handler = _make_handler("POST", "/api/custom-sources")
+    # SEC-3 gate is not under test here — grant the custom_sources capability.
+    monkeypatch.setattr(handler, "_require_capability", lambda u, cap: True)
     monkeypatch.setattr(
         handler, "_read_json",
         lambda: {"url": "https://regulator.example.ae/rules", "name": "R", "legal_confirmed": True},
@@ -249,6 +251,8 @@ def test_review_approve_writes_access_log(isolated_db, monkeypatch):
     _auth_as(monkeypatch, {"id": user["id"], "email": user["email"]})
     handler = _make_handler("POST", "/api/canonical-evidence/review")
     monkeypatch.setattr(handler, "_canonical_record_out_of_scope", lambda u, r: False)
+    # SEC-2: a shared-official review requires an operator/global principal.
+    monkeypatch.setattr(handler, "_caller_is_operator", lambda u: True)
     monkeypatch.setattr(handler, "_read_json_strict", lambda: ({"record_id": "r1", "decision": "approve", "note": "ok"}, None))
     monkeypatch.setattr("app.review_queue.record_canonical_review_action", lambda *a, **k: {"status": "ok"})
 
@@ -256,6 +260,47 @@ def test_review_approve_writes_access_log(isolated_db, monkeypatch):
 
     assert 403 not in _statuses(handler)
     assert rbac.REVIEW_APPROVE in _actions_logged()
+
+
+def test_review_shared_official_by_non_operator_is_forbidden(isolated_db, monkeypatch):
+    """SEC-2: a self-registered ROLE_OWNER (non-operator) must NOT be able to
+    approve/block a SHARED official evidence record — that decision changes
+    brief-eligibility for every tenant relying on the record."""
+    user = _new_owner("attacker@example.com")
+    _auth_as(monkeypatch, {"id": user["id"], "email": user["email"]})
+    handler = _make_handler("POST", "/api/canonical-evidence/review")
+    # Not another tenant's custom record, but a shared OFFICIAL record...
+    monkeypatch.setattr(handler, "_canonical_record_out_of_scope", lambda u, r: False)
+    monkeypatch.setattr(handler, "_caller_is_operator", lambda u: False)
+    monkeypatch.setattr(handler, "_canonical_record_is_own_custom", lambda u, r: False)
+    called = {"write": False}
+    monkeypatch.setattr(
+        "app.review_queue.record_canonical_review_action",
+        lambda *a, **k: called.__setitem__("write", True) or {"status": "ok"},
+    )
+    monkeypatch.setattr(handler, "_read_json_strict", lambda: ({"record_id": "shared-official-1", "decision": "blocked", "note": "sabotage"}, None))
+
+    handler._handle_canonical_evidence_review_action()
+
+    assert 403 in _statuses(handler), "non-operator review of shared official evidence must be 403"
+    assert called["write"] is False, "the review decision must never be written"
+
+
+def test_review_own_custom_record_by_owner_is_allowed(isolated_db, monkeypatch):
+    """SEC-2: the operator gate must NOT block a customer reviewing their OWN
+    custom-source record (private to their tenant)."""
+    user = _new_owner("owner@example.com")
+    _auth_as(monkeypatch, {"id": user["id"], "email": user["email"]})
+    handler = _make_handler("POST", "/api/canonical-evidence/review")
+    monkeypatch.setattr(handler, "_canonical_record_out_of_scope", lambda u, r: False)
+    monkeypatch.setattr(handler, "_caller_is_operator", lambda u: False)
+    monkeypatch.setattr(handler, "_canonical_record_is_own_custom", lambda u, r: True)
+    monkeypatch.setattr("app.review_queue.record_canonical_review_action", lambda *a, **k: {"status": "ok"})
+    monkeypatch.setattr(handler, "_read_json_strict", lambda: ({"record_id": "custom-abcd1234", "decision": "approve", "note": "mine"}, None))
+
+    handler._handle_canonical_evidence_review_action()
+
+    assert 403 not in _statuses(handler)
 
 
 # ── 3. a logging failure must NOT break the action (isolation) ────────────────────
@@ -278,6 +323,8 @@ def test_logging_failure_does_not_break_the_action(isolated_db, monkeypatch):
     monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
 
     handler = _make_handler("POST", "/api/custom-sources")
+    # SEC-3 gate is not under test here — grant the custom_sources capability.
+    monkeypatch.setattr(handler, "_require_capability", lambda u, cap: True)
     monkeypatch.setattr(
         handler, "_read_json",
         lambda: {"url": "https://regulator.example.ae/rules", "name": "R", "legal_confirmed": True},

@@ -346,6 +346,7 @@ def test_custom_sources_list_hides_legacy_unowned(monkeypatch):
 def test_custom_source_add_stamps_owner(monkeypatch):
     """A newly added custom source records the creating user as its owner."""
     _auth(monkeypatch, user_id=7)
+    _patch_plan(monkeypatch, "professional")  # SEC-3: needs the custom_sources capability
     saved: dict = {}
     monkeypatch.setattr("app.source_tester.validate_public_url", lambda url: (True, ""))
     monkeypatch.setattr("app.source_tester.source_url_exists", lambda url: False)
@@ -363,6 +364,39 @@ def test_custom_source_add_stamps_owner(monkeypatch):
     handler._handle_custom_sources_add()
     assert saved.get("owner_user_id") == 7
     assert saved.get("custom") is True
+
+
+def test_custom_source_add_denied_without_capability(monkeypatch):
+    """SEC-3: a free-tier account (custom_sources cap 0) cannot add a custom
+    source — the cap is enforced SERVER-side, not just hidden in the UI."""
+    _auth(monkeypatch, user_id=8)
+    _patch_plan(monkeypatch, "evidence_preview")  # custom_sources: 0
+    saved: dict = {}
+    monkeypatch.setattr("app.source_intake.load_sources_json", lambda: [])
+    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
+    handler = _make_handler("POST", "/api/custom-sources")
+    monkeypatch.setattr(handler, "_read_json", lambda: {"url": "https://x.ae/r", "name": "R", "legal_confirmed": True})
+    handler._handle_custom_sources_add()
+    assert 403 in _statuses(handler)
+    assert saved == {}, "no source may be written when the plan lacks the capability"
+
+
+def test_custom_source_add_denied_over_plan_cap(monkeypatch):
+    """SEC-3: a metered plan (professional: 2 custom sources) cannot exceed its cap."""
+    _auth(monkeypatch, user_id=9)
+    _patch_plan(monkeypatch, "professional")  # custom_sources: 2
+    existing = [
+        {"custom": True, "owner_user_id": 9, "source_id": "custom-a"},
+        {"custom": True, "owner_user_id": 9, "source_id": "custom-b"},
+    ]
+    saved: dict = {}
+    monkeypatch.setattr("app.source_intake.load_sources_json", lambda: existing)
+    monkeypatch.setattr("app.source_tester.append_source_to_json", lambda src: saved.update(src) or True)
+    handler = _make_handler("POST", "/api/custom-sources")
+    monkeypatch.setattr(handler, "_read_json", lambda: {"url": "https://x.ae/r3", "name": "R3", "legal_confirmed": True})
+    handler._handle_custom_sources_add()
+    assert 403 in _statuses(handler)
+    assert saved == {}, "an over-cap add must not be written"
 
 
 # ── 3. rate limits + caps (DoS) ──────────────────────────────────────────────

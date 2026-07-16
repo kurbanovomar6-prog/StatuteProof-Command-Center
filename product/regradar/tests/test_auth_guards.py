@@ -445,6 +445,7 @@ class TestCustomSourceAddNoCrossTenantOracle:
         user_a = {"id": 101, "email": "a@example.com"}
         with patch("app.api.require_auth", return_value=user_a), \
              patch.object(handler, "_rbac_guard", return_value=True), \
+             patch.object(handler, "_require_capability", return_value=True), \
              patch("app.source_tester.validate_public_url", return_value=(True, "")):
             handler._handle_custom_sources_add()
 

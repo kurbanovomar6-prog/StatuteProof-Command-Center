@@ -547,7 +547,8 @@ def capture_playwright_network_candidates(
         }]
 
     try:
-        from app.scraper import _get_shared_browser
+        from app.scraper import _get_shared_browser, _install_ssrf_guard, _final_url_is_safe
+        from app.adapters.base import _validate_fetch_target
     except Exception as exc:
         return [{
             "candidate_url": url,
@@ -563,6 +564,14 @@ def capture_playwright_network_candidates(
     try:
         browser = _get_shared_browser()
         context = browser.new_context(user_agent=REQUESTS_UA)
+        # SSRF (SEC-1): this handler is reachable by any authenticated account via
+        # POST /api/custom-sources/discover. Without a per-request guard, page.goto
+        # below would follow a redirect/subresource to a private/link-local host
+        # (e.g. the cloud metadata IP) and _on_response would stream its body back
+        # to the caller. Install the SAME context.route()/route_web_socket() guard
+        # the scraper's Playwright tier uses (commit 9857305) — this sibling path
+        # was explicitly out of that fix's scope until now.
+        _install_ssrf_guard(context)
         page = context.new_page()
     except Exception as exc:
         return [{
@@ -581,6 +590,12 @@ def capture_playwright_network_candidates(
         if response_url in seen:
             return
         seen.add(response_url)
+        # SSRF belt-and-suspenders: even with the route guard installed, never
+        # capture/echo a body from a response whose URL does not re-validate as a
+        # public target (guards any hop the router did not surface).
+        if str(response_url or "").lower().startswith(("http://", "https://")) \
+                and _validate_fetch_target(response_url) is None:
+            return
         headers = response.headers or {}
         content_type = headers.get("content-type", "")
         if not any(marker in content_type.lower() for marker in (*_JSON_MARKERS, *_XML_MARKERS, *_PDF_MARKERS)) and not _DOC_EXT_RE.search(response_url.lower()):
@@ -602,6 +617,18 @@ def capture_playwright_network_candidates(
     try:
         page.on("response", _on_response)
         page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+        # Defense-in-depth: refuse to keep any capture if the page ultimately
+        # landed on a non-public host (a navigation the route guard may not have
+        # surfaced as a routed request).
+        if not _final_url_is_safe(page):
+            return [{
+                "candidate_url": url,
+                "source_type": "unknown",
+                "discovery_method": "playwright_network",
+                "candidate_status": "rejected",
+                "failure_reason": "Navigation resolved to a non-public address (blocked)",
+                "next_action": "reject",
+            }]
         try:
             page.wait_for_timeout(1_500)
         except Exception:
