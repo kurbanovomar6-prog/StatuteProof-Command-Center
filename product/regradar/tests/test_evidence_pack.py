@@ -448,3 +448,39 @@ def test_handler_error_does_not_leak_internal_message(monkeypatch):
     assert captured["status"] == 500
     assert secret_path not in json.dumps(captured["data"])
     assert captured["data"]["message"] == "Failed to build the evidence pack."
+
+
+def test_pack_ships_rfc3161_sidecars_when_present(tmp_path):
+    """When the chain-head RFC 3161 token exists, the pack must carry it (and
+    say so in the manifest + HOW-TO-VERIFY) — the token in the CUSTOMER'S hands
+    is what makes 'provable when you knew' third-party-attestable (EV-8)."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    (tmp_path / "data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "data" / "evidence_chain_head.tsr").write_bytes(b"\x30\x03fake-der")
+    (tmp_path / "data" / "evidence_chain_head.tsr.json").write_text("{}", encoding="utf-8")
+
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+
+    assert result["status"] == "ok", result
+    names = set(_read_zip(result["pack_path"]).keys())
+    assert "timestamp/evidence_chain_head.tsr" in names
+    assert "timestamp/evidence_chain_head.tsr.json" in names
+    ext = result["manifest"].get("external_timestamp")
+    assert ext and ext.get("included") is True
+    readme = _read_zip(result["pack_path"])["HOW-TO-VERIFY.md"].decode("utf-8")
+    assert "RFC 3161 timestamp (included)" in readme
+
+
+def test_pack_without_token_has_no_timestamp_section(tmp_path):
+    """No token → no timestamp/ entries and no manifest/README mention: the pack
+    must never imply an external timestamp the operator has not produced."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+
+    assert result["status"] == "ok", result
+    names = set(_read_zip(result["pack_path"]).keys())
+    assert not any(n.startswith("timestamp/") for n in names)
+    assert "external_timestamp" not in result["manifest"]
+    readme = _read_zip(result["pack_path"])["HOW-TO-VERIFY.md"].decode("utf-8")
+    assert "RFC 3161 timestamp (included)" not in readme

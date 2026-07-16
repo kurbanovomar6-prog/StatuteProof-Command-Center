@@ -264,9 +264,9 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
             <p className="sp-animate-fade-up sp-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
               StatuteProof monitors selected official UAE regulator pages — CBUAE,
               VARA, DFSA, ADGM/FSRA, DIFC and SCA. When monitored text changes, it
-              captures a SHA-256, RFC3161-timestamped sealed diff and drafts a brief
-              with sealed evidence for your MLRO to review — so the detection date
-              lives in a record an auditor can verify, not in someone's memory.
+              captures a SHA-256-sealed diff and drafts a brief with sealed
+              evidence for your MLRO to review — so the detection date lives in
+              a record an auditor can verify, not in someone's memory.
             </p>
 
             {/* Bullets */}

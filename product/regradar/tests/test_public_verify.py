@@ -387,3 +387,53 @@ def test_ev2_flavor_b_live_record_normalized_verifies_not_altered():
 
     tampered = verify_submission(record, normalized=normalized + "\nEXTRA TAMPERED LINE")
     assert _status_of(tampered, "normalized_bytes_match") == "fail"
+
+
+def test_endpoint_passes_timestamp_token_through(monkeypatch):
+    """POST /api/verify with a timestamp_token must surface the additive
+    external_timestamp block. Regression for EV-8: public_verify supported the
+    parameter but the API handler silently dropped it, so no caller could ever
+    exercise the token path."""
+    import base64
+
+    record, raw, normalized = _genuine_trail_record()
+    handler = _bare_handler()
+    monkeypatch.setattr(handler, "_rate_limited", lambda *a, **k: False)
+    token = base64.b64encode(b"junk-not-a-real-token").decode()
+    monkeypatch.setattr(
+        handler,
+        "_read_json_strict",
+        lambda: (
+            {"record": record, "raw": raw, "normalized": normalized, "timestamp_token": token},
+            None,
+        ),
+    )
+    captured: dict = {}
+    handler._send_json = lambda data, status=200, **kw: captured.update(data=data, status=status)  # type: ignore[method-assign]
+
+    handler._handle_public_verify()
+
+    assert captured["status"] == 200
+    data = captured["data"]
+    # Additive contract: a junk token must NEVER flip record integrity.
+    assert data["verified"] is True
+    ts = data.get("external_timestamp")
+    assert ts is not None and ts.get("present") is True
+    assert ts.get("verified") is False, "junk token must report honestly as unverified"
+
+
+def test_endpoint_rejects_non_string_timestamp_token(monkeypatch):
+    record, raw, normalized = _genuine_trail_record()
+    handler = _bare_handler()
+    monkeypatch.setattr(handler, "_rate_limited", lambda *a, **k: False)
+    monkeypatch.setattr(
+        handler,
+        "_read_json_strict",
+        lambda: ({"record": record, "timestamp_token": 123}, None),
+    )
+    captured: dict = {}
+    handler._send_json = lambda data, status=200, **kw: captured.update(data=data, status=status)  # type: ignore[method-assign]
+
+    handler._handle_public_verify()
+
+    assert captured["status"] == 400

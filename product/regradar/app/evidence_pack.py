@@ -169,6 +169,32 @@ def build_evidence_pack(
             }
 
         manifest = _build_manifest(entries, wanted, date_from, date_to)
+
+        # External RFC 3161 chain-head token (ADDITIVE): when the operator has
+        # the trusted-timestamp anchor enabled and a token exists, ship the
+        # sidecars so the recipient holds the third-party timestamp — not just
+        # our word for the capture time. Scope honesty: the token attests the
+        # evidence-chain HEAD hash at anchor time, not each individual diff.
+        _tsr_path = root / "data" / "evidence_chain_head.tsr"
+        _tsr_json_path = root / "data" / "evidence_chain_head.tsr.json"
+        _ship_tsr = _tsr_path.exists()
+        if _ship_tsr:
+            manifest["external_timestamp"] = {
+                "included": True,
+                "token_file": "timestamp/evidence_chain_head.tsr",
+                "sidecar_file": (
+                    "timestamp/evidence_chain_head.tsr.json"
+                    if _tsr_json_path.exists()
+                    else None
+                ),
+                "scope": (
+                    "RFC 3161 timestamp token over the evidence-chain head hash "
+                    "at anchor time. Verify offline with `openssl ts -verify` "
+                    "against your own trusted TSA roots, or submit it with the "
+                    "record to the public verifier's timestamp_token field."
+                ),
+            }
+
         readme = _render_how_to_verify(manifest)
         verify_script = _VERIFY_SCRIPT
 
@@ -193,6 +219,10 @@ def build_evidence_pack(
                 zf.writestr(entry["raw_arcname"], entry["raw_bytes"])
                 zf.writestr(entry["normalized_arcname"], entry["normalized_bytes"])
                 zf.writestr(entry["record_arcname"], entry["record_bytes"])
+            if _ship_tsr:
+                zf.write(_tsr_path, "timestamp/evidence_chain_head.tsr")
+                if _tsr_json_path.exists():
+                    zf.write(_tsr_json_path, "timestamp/evidence_chain_head.tsr.json")
 
         return {
             "status": "ok",
@@ -407,6 +437,24 @@ def _build_manifest(
 
 def _render_how_to_verify(manifest: dict[str, Any]) -> str:
     count = manifest.get("record_count", 0)
+    ext = manifest.get("external_timestamp") or {}
+    external_timestamp_section = ""
+    if ext.get("included"):
+        external_timestamp_section = """
+## External RFC 3161 timestamp (included)
+
+`timestamp/evidence_chain_head.tsr` is an RFC 3161 token from a third-party
+Time-Stamping Authority over the evidence-chain head hash at anchor time. It
+attests the chain head existed no later than the TSA-signed time — it is not a
+per-record stamp. Verify it against your own trusted TSA roots, for example:
+
+```
+openssl ts -reply -in timestamp/evidence_chain_head.tsr -token_in -text
+```
+
+or submit it together with a record in the public verifier's
+`timestamp_token` field.
+"""
     return f"""# How to verify this evidence pack yourself
 
 {LEGAL_DISCLAIMER}
@@ -453,7 +501,7 @@ shasum -a 256 snapshots/<record_id>/normalized.txt
 
 and check the value against `normalized_hash` for that record in
 `manifest.json`. The raw side works the same way against `raw_hash`.
-
+{external_timestamp_section}
 ## What this pack is and is not
 
 This pack is monitoring evidence: the bytes captured from monitored official

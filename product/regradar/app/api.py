@@ -997,10 +997,25 @@ class _Handler(BaseHTTPRequestHandler):
         if diff is not None and not isinstance(diff, str):
             self._send_json({"ok": False, "error": "'diff' must be a string if provided."}, 400)
             return
+        timestamp_token = body.get("timestamp_token")
+        timestamp_digest = body.get("timestamp_digest")
+        if timestamp_token is not None and not isinstance(timestamp_token, str):
+            self._send_json({"ok": False, "error": "'timestamp_token' must be a base64 string if provided."}, 400)
+            return
+        if timestamp_digest is not None and not isinstance(timestamp_digest, str):
+            self._send_json({"ok": False, "error": "'timestamp_digest' must be a string if provided."}, 400)
+            return
 
         # verify_submission never raises; a malformed record surfaces as failed
         # checks (verified: false), not a server error.
-        result = verify_submission(body.get("record"), raw=raw, normalized=normalized, diff=diff)
+        result = verify_submission(
+            body.get("record"),
+            raw=raw,
+            normalized=normalized,
+            diff=diff,
+            timestamp_token=timestamp_token,
+            timestamp_digest=timestamp_digest,
+        )
         self._send_json(result, 200)
 
     def _handle_verify_spec(self) -> None:

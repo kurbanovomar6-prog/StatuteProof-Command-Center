@@ -111,6 +111,8 @@ export default function VerifyPage({ onBack }) {
   const [rawName, setRawName] = useState('')
   const [normalizedText, setNormalizedText] = useState(null)
   const [normalizedName, setNormalizedName] = useState('')
+  const [tokenB64, setTokenB64] = useState(null)
+  const [tokenName, setTokenName] = useState('')
   const [loading, setLoading] = useState(false)
   const [sampleLoading, setSampleLoading] = useState(false)
   const [error, setError] = useState('')
@@ -137,9 +139,32 @@ export default function VerifyPage({ onBack }) {
     }
   }
 
+  async function handleTokenFile(event) {
+    setError('')
+    const file = event.target.files?.[0]
+    if (!file) {
+      setTokenB64(null)
+      setTokenName('')
+      return
+    }
+    try {
+      // .tsr is DER binary — read bytes and base64 them for the JSON body.
+      const buf = await file.arrayBuffer()
+      const bytes = new Uint8Array(buf)
+      let bin = ''
+      for (let i = 0; i < bytes.length; i += 1) bin += String.fromCharCode(bytes[i])
+      setTokenB64(btoa(bin))
+      setTokenName(file.name)
+    } catch {
+      setError('Could not read that timestamp token file.')
+      setTokenB64(null)
+      setTokenName('')
+    }
+  }
+
   // Shared verify runner: takes explicit values so the sample loader can run
   // the check immediately after loading, without racing setState.
-  async function runVerify(record, raw, normalized) {
+  async function runVerify(record, raw, normalized, timestampToken) {
     setError('')
     setResult(null)
     setLoading(true)
@@ -148,6 +173,7 @@ export default function VerifyPage({ onBack }) {
         record,
         raw: raw ?? undefined,
         normalized: normalized ?? undefined,
+        timestampToken: timestampToken ?? undefined,
       })
       setResult(data)
     } catch (err) {
@@ -175,7 +201,7 @@ export default function VerifyPage({ onBack }) {
       return
     }
 
-    await runVerify(record, rawText, normalizedText)
+    await runVerify(record, rawText, normalizedText, tokenB64)
   }
 
   async function handleLoadSample() {
@@ -318,6 +344,14 @@ export default function VerifyPage({ onBack }) {
               fileName={normalizedName}
               onChange={(event) => handleFile(event, setNormalizedText, setNormalizedName)}
             />
+            <FileField
+              id="token-file"
+              label="RFC 3161 token (.tsr, optional)"
+              hint="Reports the third-party timestamp offline against record_hash."
+              fileName={tokenName}
+              onChange={handleTokenFile}
+              accept=".tsr,application/timestamp-reply,application/octet-stream"
+            />
           </div>
 
           <div className="mt-6 flex items-center gap-3">
@@ -381,6 +415,24 @@ export default function VerifyPage({ onBack }) {
               </ul>
             </div>
 
+            {result.external_timestamp?.present ? (
+              <div className="sp-card mt-4">
+                <p className="sp-label mb-2">External RFC 3161 timestamp</p>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {result.external_timestamp.verified
+                    ? `Token verified offline: the third-party TSA attests the checked digest existed no later than ${result.external_timestamp.timestamp_utc || 'the signed time'}.`
+                    : 'Token submitted but not verified — see the token checks below. This never affects the record-integrity result above.'}
+                </p>
+                {(result.external_timestamp.checks || []).length ? (
+                  <ul className="mt-3 -my-0">
+                    {result.external_timestamp.checks.map((check) => (
+                      <CheckRow key={`ts-${check.name}`} check={check} />
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
+
             {result.disclaimer ? (
               <p className="mt-4 text-xs leading-relaxed text-[var(--text-muted)]">
                 {result.disclaimer}
@@ -393,7 +445,7 @@ export default function VerifyPage({ onBack }) {
   )
 }
 
-function FileField({ id, label, hint, fileName, onChange }) {
+function FileField({ id, label, hint, fileName, onChange, accept = '.txt,text/plain' }) {
   return (
     <div className="sp-panel-muted p-3">
       <label htmlFor={id} className="sp-label mb-1">
@@ -408,7 +460,7 @@ function FileField({ id, label, hint, fileName, onChange }) {
           {fileName || 'Choose file'}
         </span>
       </label>
-      <input id={id} type="file" accept=".txt,text/plain" onChange={onChange} className="hidden" />
+      <input id={id} type="file" accept={accept} onChange={onChange} className="hidden" />
       <p className="mt-2 text-[0.7rem] leading-snug text-[var(--text-muted)]">{hint}</p>
     </div>
   )
