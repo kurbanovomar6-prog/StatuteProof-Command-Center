@@ -44,6 +44,7 @@ a raised exception and never a fabricated line.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from pathlib import Path
 from typing import Any
@@ -92,6 +93,10 @@ _NO_DIFF_NOTE = (
 _UNPARSEABLE_NOTE = (
     "The sealed diff for this record is stored in a format that cannot be shown "
     "as a line-level redline. Open the evidence record to review the change."
+)
+_INTEGRITY_NOTE = (
+    "This alert's stored diff no longer matches its sealed evidence record, so it "
+    "is not shown as a verified redline. Open the evidence record to review it."
 )
 _PARTIAL_NOTE = (
     "Some changed content was not machine-readable (binary or improperly encoded "
@@ -394,6 +399,35 @@ def _read_sealed_diff_raw(diff_path: Any, root: Path) -> str | None:
         return None
 
 
+def _sealed_diff_matches(record: dict[str, Any], root: Path) -> bool:
+    """EV-1: False only when the stored diff.txt no longer matches the sealed
+    content.diff_hash (a redline edited in place after sealing). Additive and
+    fail-soft: returns True when no diff_hash is sealed (legacy records) or the
+    path is unresolvable/out-of-tree (the diff reader handles those), so the ONLY
+    thing this adds is a refusal to render a genuinely-tampered redline as sealed.
+    Hashes the FILE BYTES — _read_sealed_diff_raw decodes errors='replace' and
+    bounds its read, so its returned text cannot be hashed reliably."""
+    content = record.get("content")
+    diff_hash = str((content.get("diff_hash") if isinstance(content, dict) else "") or "").strip()
+    if not diff_hash:
+        return True
+    change = record.get("change") if isinstance(record.get("change"), dict) else {}
+    files = record.get("files") if isinstance(record.get("files"), dict) else {}
+    ref = str(change.get("diff_path") or files.get("diff_path") or "").strip()
+    if not ref:
+        return True
+    path = Path(ref)
+    if not path.is_absolute():
+        path = root / path
+    try:
+        resolved = path.resolve()
+        if not resolved.is_relative_to(root.resolve()) or not resolved.is_file():
+            return True
+        return f"sha256:{hashlib.sha256(resolved.read_bytes()).hexdigest()}" == diff_hash
+    except OSError:
+        return True
+
+
 def _empty_redline(proof: dict[str, Any] | None, match: dict[str, Any], *, note: str) -> dict[str, Any]:
     """A well-formed, unavailable redline carrying whatever pointer we have."""
     proof = proof if isinstance(proof, dict) else {}
@@ -467,6 +501,12 @@ def build_redline_for_match(match: dict[str, Any], *, base_dir: Path | None = No
         integrity = record.get("integrity")
         if not isinstance(integrity, dict) or integrity.get("integrity_status") != "VERIFIED":
             return _empty_redline(proof, match, note=_NO_DIFF_NOTE)
+
+        # EV-1: the integrity_status above is a stored STRING. Re-hash the stored
+        # diff against the sealed content.diff_hash so an in-place edit to the
+        # customer-facing redline is refused here, not rendered as "sealed".
+        if not _sealed_diff_matches(record, root):
+            return _empty_redline(proof, match, note=_INTEGRITY_NOTE)
 
         change_raw = record.get("change")
         change: dict[str, Any] = change_raw if isinstance(change_raw, dict) else {}

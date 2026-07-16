@@ -446,3 +446,42 @@ def test_evidence_record_schema_exists_and_requires_brief_gate_fields():
     ]
     assert "FAILED" in schema["properties"]["run"]["properties"]["status"]["enum"]
     assert "QUALITY_DROP" in schema["properties"]["run"]["properties"]["status"]["enum"]
+
+
+def test_ev1_validate_catches_tampered_diff_and_raw(tmp_path):
+    """EV-1: content.diff_hash and content.raw_hash are sealed under record_hash;
+    validate must RE-HASH the stored files so an in-place edit to the customer-
+    facing redline (or the raw evidence) is caught — not just a missing file."""
+    import hashlib
+
+    record = _canonical_record(tmp_path, status="CHANGED", with_diff=True)
+    record_dir = tmp_path / "evidence" / "dfsa" / "AE-dfsa-test" / "run_AE-dfsa-test_20260620T000000Z"
+    diff_file = record_dir / "diff.txt"
+    raw_file = record_dir / "raw.html"
+    original_diff = diff_file.read_text(encoding="utf-8")
+
+    # Seal the two hashes exactly as create_canonical_evidence_record does.
+    record["content"]["diff_hash"] = "sha256:" + hashlib.sha256(diff_file.read_bytes()).hexdigest()
+    record["content"]["raw_hash"] = "sha256:" + hashlib.sha256(raw_file.read_bytes()).hexdigest()
+    assert validate_evidence_record(record, base_dir=tmp_path)["valid"] is True
+
+    # Tamper the redline in place -> diff_hash mismatch -> invalid.
+    diff_file.write_text("- Previous text\n+ ATTACKER-INSERTED obligation\n", encoding="utf-8")
+    v = validate_evidence_record(record, base_dir=tmp_path)
+    assert v["valid"] is False
+    assert any("diff_hash" in e for e in v["errors"]), v["errors"]
+
+    # Restore the diff, tamper the raw evidence -> raw_hash mismatch -> invalid.
+    diff_file.write_text(original_diff, encoding="utf-8")
+    raw_file.write_text("<main>ATTACKER swapped raw bytes</main>", encoding="utf-8")
+    v2 = validate_evidence_record(record, base_dir=tmp_path)
+    assert v2["valid"] is False
+    assert any("raw_hash" in e for e in v2["errors"]), v2["errors"]
+
+
+def test_ev1_legacy_record_without_sealed_hashes_still_validates(tmp_path):
+    """EV-1 is additive: a legacy record with no diff_hash/raw_hash is unaffected."""
+    record = _canonical_record(tmp_path, status="CHANGED", with_diff=True)
+    assert "diff_hash" not in record["content"]
+    assert "raw_hash" not in record["content"]
+    assert validate_evidence_record(record, base_dir=tmp_path)["valid"] is True

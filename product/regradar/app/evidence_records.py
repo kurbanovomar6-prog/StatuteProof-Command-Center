@@ -294,6 +294,14 @@ def validate_evidence_record(record: dict[str, Any], base_dir: Path | None = Non
         errors.append("content.current_hash must be sha256:<64 lowercase hex>.")
 
     raw_content_path = _require_path(content, "raw_content_path", root, errors, "content.raw_content_path")
+    # EV-1: enforce raw_hash. raw_content_path was required to EXIST but never
+    # re-hashed, so raw.txt could be swapped post-seal (for bytes that normalize
+    # identically) with the chain still verifying. content.raw_hash is sealed under
+    # record_hash — re-check it here. Additive: legacy records without raw_hash are
+    # unaffected.
+    _raw_hash = str(content.get("raw_hash") or "").strip()
+    if raw_content_path is not None and _raw_hash and f"sha256:{_sha256_path(raw_content_path)}" != _raw_hash:
+        errors.append("content.raw_hash does not match raw_content_path (raw evidence tampered).")
     normalized_current_path = _require_path(
         content,
         "normalized_current_path",
@@ -362,11 +370,15 @@ def validate_evidence_record(record: dict[str, Any], base_dir: Path | None = Non
         if not diff_path:
             errors.append("CHANGED records require change.diff_path or files.diff_path.")
         else:
-            _resolve_existing_path(diff_path, root, errors, "change.diff_path/files.diff_path")
-
-    if raw_content_path is None:
-        # Keep this variable used for the required-path side effect above.
-        pass
+            diff_resolved = _resolve_existing_path(diff_path, root, errors, "change.diff_path/files.diff_path")
+            # EV-1: enforce the sealed redline. content.diff_hash is hashed into
+            # record_hash at creation, but validate only checked diff.txt EXISTED —
+            # so the one artifact a customer actually reads could be edited in place
+            # and still render as "sealed". Re-hash it here. Additive: legacy
+            # records without diff_hash are unaffected.
+            _diff_hash = str(content.get("diff_hash") or "").strip()
+            if diff_resolved is not None and _diff_hash and f"sha256:{_sha256_path(diff_resolved)}" != _diff_hash:
+                errors.append("content.diff_hash does not match the stored diff file (redline tampered).")
 
     integrity = _require_dict(record, "integrity", errors)
     if integrity.get("hash_verified") is not True:

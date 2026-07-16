@@ -347,3 +347,29 @@ def test_endpoint_scopes_by_owner_lookup_and_404s_unknown(monkeypatch, tmp_path)
     body2, status2 = _last(handler2)
     assert status2 == 404
     assert body2["message"] == "Alert not found."
+
+
+def test_ev1_tampered_sealed_diff_is_refused(tmp_path):
+    """EV-1: when content.diff_hash is sealed, an in-place edit to diff.txt must
+    make build_redline_for_match refuse to render it as a verified redline."""
+    import hashlib
+    import json as _json
+    from app.sealed_redline import _INTEGRITY_NOTE
+
+    match = _write_sealed_record(tmp_path)
+    run_dir = tmp_path / "evidence" / "vara" / "AE-vara-test" / "intake-1"
+    diff_file = run_dir / "diff.txt"
+    rec_file = run_dir / "evidence-record.json"
+
+    rec = _json.loads(rec_file.read_text(encoding="utf-8"))
+    rec["content"] = {"diff_hash": "sha256:" + hashlib.sha256(diff_file.read_bytes()).hexdigest()}
+    rec_file.write_text(_json.dumps(rec), encoding="utf-8")
+
+    # Untampered: the sealed hash matches, so the redline still renders.
+    assert build_redline_for_match(match, base_dir=tmp_path)["available"] is True
+
+    # Tampered in place: hash mismatch -> refused with the integrity note.
+    diff_file.write_text("```diff\n- original\n+ ATTACKER-INSERTED\n```\n", encoding="utf-8")
+    out = build_redline_for_match(match, base_dir=tmp_path)
+    assert out["available"] is False
+    assert out["note"] == _INTEGRITY_NOTE
