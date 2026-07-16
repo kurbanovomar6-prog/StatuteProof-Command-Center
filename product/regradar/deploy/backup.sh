@@ -31,10 +31,15 @@ EOF
 # 2) Evidence trail + artifacts. --ignore-failed-read: a file rotated away
 # mid-backup must not kill the whole archive.
 ARCHIVE="$OUT_DIR/statuteproof-backup-$STAMP.tar.gz"
+# evidence/ holds the SEALED canonical evidence records — the artifacts the
+# product sells as durable proof. Omitting it meant droplet loss destroyed the
+# very records customers rely on. Conditional: absent until the first seal.
+EVIDENCE_DIR=""
+[ -d "$APP_ROOT/evidence" ] && EVIDENCE_DIR="evidence"
 tar -czf "$ARCHIVE" \
   --exclude='data/outbox' \
   -C "$WORK" regradar.db \
-  -C "$APP_ROOT" data sources.json .env.example
+  -C "$APP_ROOT" data sources.json .env.example $EVIDENCE_DIR
 
 echo "backup written: $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
 
