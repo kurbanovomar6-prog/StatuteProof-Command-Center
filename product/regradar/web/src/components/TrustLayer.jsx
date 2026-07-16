@@ -6,6 +6,7 @@ const TRUST_CARDS = [
     objection: 'How do I know you actually captured the update?',
     answer:
       'Every monitoring run stores a cryptographic hash and a timestamped snapshot of what was extracted from the official source. Your compliance team can inspect the hash, the stored snapshot, and the diff record to verify exactly what was captured and when — without relying on our word.',
+    verifyLink: true,
   },
   {
     icon: EyeOff,
@@ -61,6 +62,14 @@ export default function TrustLayer() {
                 <p className="text-sm text-slate-200 leading-relaxed">
                   {card.answer}
                 </p>
+                {card.verifyLink ? (
+                  <a
+                    href="/verify#sample"
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-cyan-300 transition-colors hover:text-white"
+                  >
+                    Verify a real record yourself — no account
+                  </a>
+                ) : null}
               </div>
             )
           })}
