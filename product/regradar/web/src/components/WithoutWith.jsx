@@ -39,7 +39,7 @@ const AFTER = [
   },
   {
     headline: 'AI writes the first draft — you review and decide',
-    detail: 'A structured monitoring brief reaches your MLRO for review — not a raw alert. Human sign-off is required before anything is delivered to your team.',
+    detail: 'A structured monitoring brief reaches your MLRO for review — human sign-off is required before a brief is delivered to your team. High-risk alerts are held for review; routine alerts arrive automatically with the sealed evidence record.',
   },
 ]
 

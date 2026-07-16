@@ -134,3 +134,22 @@ def test_generate_report_scrubs_and_stays_clean(monkeypatch, tmp_path):
     assert legal_safety.find_forbidden_claims(html) == []
     # ...and the HIGH record must still show review required.
     assert "**Review required:** Yes" in md
+
+
+def test_report_renders_full_disclaimer_and_monitoring_title():
+    """LG-2/LG-3: the customer-facing report must carry the FULL legal disclaimer
+    and be titled a Monitoring Report (not a 'Compliance Report', which would imply
+    it assesses compliance)."""
+    from app.evidence_pack import FULL_LEGAL_DISCLAIMER
+
+    groups = {"HIGH": [], "MEDIUM": [], "LOW": []}
+    counts = {"total": 0, "high": 0, "medium": 0, "low": 0}
+    md = report._build_markdown(groups, "2026-07-16T00:00:00Z", 7, counts)
+    html = report._build_html(groups, "2026-07-16T00:00:00Z", 7, counts)
+
+    chunk = "do not constitute legal advice"
+    assert chunk in FULL_LEGAL_DISCLAIMER  # guard the canonical text
+    for out in (md, html):
+        assert "Monitoring Report" in out
+        assert "Compliance Report" not in out
+        assert chunk in out

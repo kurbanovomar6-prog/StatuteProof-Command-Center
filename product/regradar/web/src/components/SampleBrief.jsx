@@ -229,8 +229,8 @@ export default function SampleBrief() {
         </div>
 
         <p className="mx-auto mt-5 max-w-3xl text-center text-[13px] leading-relaxed text-[var(--text-secondary)]">
-          StatuteProof generates monitoring briefs for informational purposes only. All outputs are reviewed
-          before delivery. This is sample content — not real regulatory data. StatuteProof does not guarantee
+          StatuteProof generates monitoring briefs for informational purposes only. Briefs are reviewed by a
+          person before delivery. This is sample content — not real regulatory data. StatuteProof does not guarantee
           detection of all regulatory changes.
         </p>
       </div>
