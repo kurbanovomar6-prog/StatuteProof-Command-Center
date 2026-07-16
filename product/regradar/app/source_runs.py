@@ -577,7 +577,16 @@ def classify_change(current: dict, previous: dict | None) -> str:
         return "QUALITY_DROP"
     if prev_chars > 0 and chars < prev_chars * 0.4:
         return "QUALITY_DROP"
-    if normalized_chars and normalized_chars < _MIN_NORMALIZED_CHARS:
+    # An empty/near-empty normalized page against ANY prior baseline is a quality
+    # collapse — 0 chars is the strongest loss signal, and a falsy 0 previously
+    # slipped past both the floor and the ratio guard below.
+    if not normalized_chars and (prev_norm_chars > 0 or previous.get("normalized_hash")):
+        return "QUALITY_DROP"
+    # A page that CROSSES below the content floor (was substantial, now thin) is a
+    # collapse. A page that was ALWAYS short is monitored as-is: dropping every
+    # sub-floor page silently discarded a real change on a legitimately short
+    # circular (false negative). FIRST_SEEN (previous is None) already returned above.
+    if prev_norm_chars >= _MIN_NORMALIZED_CHARS and normalized_chars < _MIN_NORMALIZED_CHARS:
         return "QUALITY_DROP"
     if prev_norm_chars > 0 and normalized_chars and normalized_chars < prev_norm_chars * 0.7:
         return "QUALITY_DROP"

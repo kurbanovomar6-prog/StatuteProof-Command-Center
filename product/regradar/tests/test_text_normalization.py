@@ -35,6 +35,26 @@ class TextNormalizationTests(unittest.TestCase):
 
         self.assertNotEqual(stable_normalized_hash(should_text), stable_normalized_hash(must_text))
 
+    def test_short_percent_change_is_detected_not_collapsed(self):
+        # A short "5%" -> "8%" line must survive normalization so the change is
+        # caught. The <=3-char boilerplate filter used to erase it, collapsing a
+        # real regulatory change to the same hash (a missed change / false negative).
+        a = "Capital ratio\n5%\nApplies to licensed banks."
+        b = "Capital ratio\n8%\nApplies to licensed banks."
+        self.assertNotEqual(stable_normalized_hash(a), stable_normalized_hash(b))
+        self.assertIn("5%", normalize_for_change_hash(a))
+
+    def test_render_stamp_stripped_but_publication_date_kept(self):
+        # A render-run stamp ("Current date: ...") must be stripped so a daily
+        # reload does not fabricate CHANGED; a real "Published <date>" line must be
+        # KEPT so a genuine publication-date change IS detected.
+        d1 = "Current date: 16 July 2026\nCircular 3\nBanks must file by year end."
+        d2 = "Current date: 17 July 2026\nCircular 3\nBanks must file by year end."
+        self.assertEqual(stable_normalized_hash(d1), stable_normalized_hash(d2))
+        pub1 = "Published 1 March 2026\nBanks must file quarterly."
+        pub2 = "Published 1 April 2026\nBanks must file quarterly."
+        self.assertNotEqual(stable_normalized_hash(pub1), stable_normalized_hash(pub2))
+
     def test_duplicate_lines_do_not_change_hash(self):
         once = "Rulebook update\nLicensed firms must file reports."
         duplicated = "Rulebook update\nLicensed firms must file reports.\nLicensed firms must file reports."

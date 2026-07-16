@@ -163,3 +163,32 @@ def test_changed_run_record_carries_normalized_hash_and_is_recorded_changed(isol
         if not Path(proof_path).is_absolute() else json.loads(Path(proof_path).read_text(encoding="utf-8"))
     assert proof.get("normalized_hash") == record.get("normalized_hash")
     assert proof.get("proof_quality") != "INCOMPLETE"
+
+
+# ── reliability-audit fixes: quality-floor must not drop legit-short real changes,
+#    and must catch an empty normalized page against a baseline ─────────────────
+
+def test_legitimately_short_page_real_change_is_changed_not_dropped():
+    # A page that was ALWAYS short (~420 normalized chars) and genuinely changes
+    # must be CHANGED — the blanket sub-500 floor used to silently QUALITY_DROP it
+    # (a missed regulatory change on a short circular / false negative).
+    current = _rec("good", nhash="bbb", chars=600, nchars=420)
+    previous = _rec("good", nhash="aaa", chars=600, nchars=420)
+    assert classify_change(current, previous) == "CHANGED"
+
+
+def test_empty_normalized_against_baseline_is_quality_drop_not_fabricated_change():
+    # Extraction returned raw text but normalization stripped everything to 0.
+    # normalized_chars==0 used to slip past the floor and ratio guards (falsy 0)
+    # and fabricate CHANGED against a real baseline — it must be QUALITY_DROP.
+    current = _rec("good", nhash="", chars=5000, nchars=0)
+    previous = _rec("good", nhash="aaa", chars=5000, nchars=800)
+    assert classify_change(current, previous) == "QUALITY_DROP"
+
+
+def test_page_collapse_below_floor_is_quality_drop():
+    # Was substantial (800 normalized chars), now thin (120) — a genuine content
+    # collapse crossing below the floor stays QUALITY_DROP.
+    current = _rec("good", nhash="bbb", chars=1500, nchars=120)
+    previous = _rec("good", nhash="aaa", chars=5000, nchars=800)
+    assert classify_change(current, previous) == "QUALITY_DROP"

@@ -183,10 +183,17 @@ def _is_volatile_line(line: str) -> bool:
         return True
     if _HEX_COLOR_LINE_RE.match(line):
         return True
-    if _DATE_WORD_RE.search(line):
-        return False
+    # Strip render-run stamps FIRST. _VOLATILE_LINE_RE is prefix-anchored to
+    # render phrases ("generated at / current date / printed / retrieved /
+    # session id / …") that do NOT overlap real publication lines like
+    # "Published <date>". Checking it before the publication-date keep-guard
+    # means a render stamp that happens to contain the word "date" is dropped
+    # instead of kept — otherwise a page that prints its own render date flips
+    # CHANGED every single cycle (fabricated daily noise).
     if _VOLATILE_LINE_RE.search(line):
         return True
+    if _DATE_WORD_RE.search(line):
+        return False
     if _TIME_ONLY_RE.match(line):
         return True
     return False
@@ -234,7 +241,12 @@ def _is_boilerplate_line(line: str) -> bool:
         return True
     if lower in _BOILERPLATE_EXACT:
         return True
-    if len(lower) <= 3 and not lower.isdigit():
+    # Drop very short chrome tokens (bullets, arrows, "•", ">") — but NEVER a
+    # short token that carries regulatory signal: anything with a digit or a
+    # currency/percent symbol (e.g. "5%", "8%", "1a", "AED"). Erasing those
+    # collapsed a real change like "5%"->"8%" to the same normalized hash — a
+    # missed regulatory change (false negative).
+    if len(lower) <= 3 and not any(c.isdigit() for c in lower) and not re.search(r"[%$€£﷼]", lower):
         return True
     if len(lower) <= 24 and any(phrase in lower for phrase in _BOILERPLATE_PHRASES):
         return True
