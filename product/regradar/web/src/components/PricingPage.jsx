@@ -298,12 +298,12 @@ export default function PricingPage({
               key={plan.id}
               className={`sp-panel p-6 flex flex-col ${
                 plan.highlight
-                  ? "border-[#16D9F5]/40 bg-[#16D9F5]/5 shadow-[0_0_30px_rgba(22,217,245,0.08)]"
+                  ? "border-[var(--accent)]/40 bg-[#16D9F5]/5 shadow-[0_0_30px_rgba(22,217,245,0.08)]"
                   : ""
               }`}
             >
               {plan.badge && (
-                <div className="text-[10px] font-bold text-[#16D9F5] uppercase tracking-widest mb-2">
+                <div className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-widest mb-2">
                   {plan.badge}
                 </div>
               )}
@@ -337,7 +337,7 @@ export default function PricingPage({
                 className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                   plan.ctaPrimary
                     ? "bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F]"
-                    : "border border-slate-700 text-slate-300 hover:border-[#16D9F5]/40 hover:text-white"
+                    : "border border-slate-700 text-slate-300 hover:border-[var(--accent)]/40 hover:text-white"
                 }`}
               >
                 {plan.cta}
@@ -360,7 +360,7 @@ export default function PricingPage({
                 {PLANS_DATA.map((p) => (
                   <th
                     key={p.id}
-                    className={`text-center py-3 px-2 text-xs font-semibold ${p.highlight ? "text-[#16D9F5]" : "text-slate-300"}`}
+                    className={`text-center py-3 px-2 text-xs font-semibold ${p.highlight ? "text-[var(--accent)]" : "text-slate-300"}`}
                   >
                     {p.name}
                   </th>
@@ -419,7 +419,7 @@ export default function PricingPage({
                 >
                   {faq.q}
                   <HelpCircle
-                    className={`w-4 h-4 flex-shrink-0 ml-2 transition-colors ${openFaq === i ? "text-[#16D9F5]" : "text-slate-500"}`}
+                    className={`w-4 h-4 flex-shrink-0 ml-2 transition-colors ${openFaq === i ? "text-[var(--accent)]" : "text-slate-500"}`}
                   />
                 </button>
                 {openFaq === i && (

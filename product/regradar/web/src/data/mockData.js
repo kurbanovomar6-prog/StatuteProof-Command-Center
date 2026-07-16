@@ -14,15 +14,6 @@ export const sourceHealthRows = [
   { id: 13, name: 'UAE FIU Homepage',            jurisdiction: 'AE', flag: '🇦🇪', access: 'Covered via sub-sources', quality: 'sub_sources',       status: 'sub_sources',       verdict: 'COVERED' },
 ]
 
-export const riskTrendData = [
-  { week: 'Apr W1', HIGH: 1, MEDIUM: 2, LOW: 4 },
-  { week: 'Apr W2', HIGH: 0, MEDIUM: 3, LOW: 4 },
-  { week: 'Apr W3', HIGH: 2, MEDIUM: 1, LOW: 4 },
-  { week: 'Apr W4', HIGH: 1, MEDIUM: 2, LOW: 4 },
-  { week: 'May W1', HIGH: 3, MEDIUM: 2, LOW: 2 },
-  { week: 'May W2', HIGH: 1, MEDIUM: 3, LOW: 3 },
-  { week: 'May W3', HIGH: 0, MEDIUM: 2, LOW: 5 },
-]
 
 export const features = [
   { icon: 'Search',        title: 'Official-source monitoring',      desc: 'Your selected UAE regulatory sources are configured to be checked on a defined schedule once monitoring is activated — CBUAE, VARA, DFSA, ADGM/FSRA, and more. When something changes on an official portal, the change is captured from the source, not from a peer.' },

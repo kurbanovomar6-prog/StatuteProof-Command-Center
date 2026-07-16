@@ -7,22 +7,16 @@ import Footer from './components/Footer'
 
 const Problem               = lazy(() => import('./components/Problem'))
 const HowItWorks            = lazy(() => import('./components/HowItWorks'))
-const AIInsightSection      = lazy(() => import('./components/AIInsightSection'))
 const WithoutWith           = lazy(() => import('./components/WithoutWith'))
-const DashboardPreview      = lazy(() => import('./components/DashboardPreview'))
 const Coverage              = lazy(() => import('./components/Coverage'))
 const SourceTransparencyMatrix = lazy(() => import('./components/SourceTransparencyMatrix'))
-const BuyerSourcePacks      = lazy(() => import('./components/BuyerSourcePacks'))
-const ConfiguredMonitoring  = lazy(() => import('./components/ConfiguredMonitoring'))
 const SampleBrief           = lazy(() => import('./components/SampleBrief'))
 const TrustLayer            = lazy(() => import('./components/TrustLayer'))
 const Pricing               = lazy(() => import('./components/Pricing'))
 const Contact               = lazy(() => import('./components/Contact'))
 const EvidenceCard          = lazy(() => import('./components/EvidenceCard'))
 const SourceCoverageTable   = lazy(() => import('./components/SourceCoverageTable'))
-const AuditBinderSample     = lazy(() => import('./components/AuditBinderSample'))
 const VendorTrustSection    = lazy(() => import('./components/VendorTrustSection'))
-const ConsultationTracker   = lazy(() => import('./components/ConsultationTracker'))
 const LoginPage             = lazy(() => import('./components/auth/LoginPage'))
 const RegisterPage          = lazy(() => import('./components/auth/RegisterPage'))
 const ForgotPasswordPage    = lazy(() => import('./components/auth/ForgotPasswordPage'))
@@ -39,7 +33,7 @@ const RoomPage              = lazy(() => import('./components/RoomPage'))
 function GlobalLoader() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-[#07111F]">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#16D9F5]" />
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]" />
     </div>
   )
 }
@@ -434,19 +428,6 @@ export default function App() {
           onVerify={() => navigatePublic('verify', { query: '#sample' })}
         />
         <Suspense fallback={<div className="py-20" />}>
-          <Problem />
-          <HowItWorks />
-          <AIInsightSection />
-          <WithoutWith />
-          <SampleBrief />
-          <AuditBinderSample />
-          <Coverage onCreateWorkspace={() => navigatePublic('source-readiness-review')} />
-          <SourceTransparencyMatrix onCreateWorkspace={() => navigateRegister()} />
-          <ConsultationTracker />
-          <BuyerSourcePacks onCreateWorkspace={() => navigateRegister()} />
-          <VendorTrustSection />
-          <ConfiguredMonitoring />
-          <TrustLayer />
           {/* Evidence Section — a REAL sealed record (same asset /verify#sample loads) */}
           <section className="py-16 px-4 bg-[#07111F]" id="evidence">
             <div className="max-w-5xl mx-auto">
@@ -480,7 +461,15 @@ export default function App() {
               </div>
             </div>
           </section>
-          <DashboardPreview />
+          <Problem />
+          <HowItWorks />
+          <WithoutWith />
+          <SampleBrief />
+          <Coverage onCreateWorkspace={() => navigatePublic('source-readiness-review')} />
+          <SourceTransparencyMatrix onCreateWorkspace={() => navigateRegister()} />
+          <VendorTrustSection />
+          <TrustLayer />
+
           <Pricing
             onCreateWorkspace={() => navigateRegister()}
             onSourceReview={() => navigatePublic('source-readiness-review')}

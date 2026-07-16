@@ -82,7 +82,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
                 {plan.features.map(f => (
                   <li key={f} className="flex items-start gap-2.5 text-sm">
                     <CheckCircle
-                      className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.highlight ? 'text-[#16D9F5]' : 'text-emerald-400'}`}
+                      className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.highlight ? 'text-[var(--accent)]' : 'text-emerald-400'}`}
                     />
                     <span className="text-slate-300">{f}</span>
                   </li>
@@ -94,7 +94,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
                 className={`mt-auto w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                   plan.highlight
                     ? 'bg-[#16D9F5] hover:bg-[#11c2db] text-[#07111F]'
-                    : 'border border-slate-700 text-slate-300 hover:border-[#16D9F5]/40 hover:text-white'
+                    : 'border border-slate-700 text-slate-300 hover:border-[var(--accent)]/40 hover:text-white'
                 }`}
               >
                 {plan.cta}

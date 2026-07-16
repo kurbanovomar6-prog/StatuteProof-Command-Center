@@ -34,9 +34,8 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
             className="h-8 w-8 flex-shrink-0 object-contain transition-transform duration-300 group-hover:scale-105"
           />
           <span className="sp-display text-lg font-extrabold tracking-tight text-white">
-            Statute<span className="text-[#16D9F5]">Proof</span>
+            Statute<span className="text-[var(--accent)]">Proof</span>
           </span>
-          <span className="sp-live-dot" />
         </div>
 
         {/* Desktop nav — center */}
@@ -104,7 +103,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
                 key={l.label}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="text-sm font-medium text-slate-300 hover:text-[#16D9F5] transition-colors py-1.5"
+                className="text-sm font-medium text-slate-300 hover:text-[var(--accent)] transition-colors py-1.5"
               >
                 {l.label}
               </a>
@@ -113,7 +112,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
                 key={l.label}
                 type="button"
                 onClick={() => handleNav(l)}
-                className="py-1.5 text-left text-sm font-medium text-slate-300 hover:text-[#16D9F5]"
+                className="py-1.5 text-left text-sm font-medium text-slate-300 hover:text-[var(--accent)]"
               >
                 {l.label}
               </button>
@@ -122,7 +121,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
           <div className="pt-3 border-t border-slate-800 flex flex-col gap-2 mt-1">
             <button
               onClick={() => { setOpen(false); onSignIn?.() }}
-              className="text-sm font-medium text-slate-300 hover:text-[#16D9F5] py-2 text-center transition-colors"
+              className="text-sm font-medium text-slate-300 hover:text-[var(--accent)] py-2 text-center transition-colors"
             >
               Login
             </button>
