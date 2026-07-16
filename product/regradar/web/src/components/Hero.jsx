@@ -215,12 +215,17 @@ function ChainStrip() {
 export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
   // Live source count — landing must never hardcode coverage numbers.
   const [liveSourceCount, setLiveSourceCount] = useState(null);
+  // DH-5: the enabled count (all modes) is larger than the count that actually
+  // produces alerts — disclose both so "configured" is never read as coverage.
+  const [liveFreshAlert, setLiveFreshAlert] = useState(null);
   useEffect(() => {
     let active = true;
     fetch("/api/health")
       .then((r) => r.json())
       .then((d) => {
         if (active && Number.isFinite(d?.sources_active)) setLiveSourceCount(d.sources_active);
+        if (active && Number.isFinite(d?.sources_fresh_alert) && d.sources_fresh_alert >= 0)
+          setLiveFreshAlert(d.sources_fresh_alert);
       })
       .catch(() => {}); // fallback: the card shows "—", not a stale number
     return () => { active = false; };
@@ -303,7 +308,9 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
               {[
                 [liveSourceCount != null ? String(liveSourceCount) : "—",
                  liveSourceCount != null
-                   ? "UAE official sources configured (live count)"
+                   ? (liveFreshAlert != null
+                       ? `UAE official sources configured · ${liveFreshAlert} fresh-alert eligible`
+                       : "UAE official sources configured (live count)")
                    : "Selected official UAE sources (live count unavailable)"],
                 ["Scheduled", "Checks run on an operator-set interval"],
                 ["SHA-256", "Tamper-evident fingerprint of each capture"],

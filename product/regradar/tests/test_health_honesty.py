@@ -109,3 +109,22 @@ def test_health_no_runs_yet_is_ok_when_db_up(monkeypatch, tmp_path):
     assert data["ok"] is True
     assert data["last_run_at"] is None
     assert status == 200
+
+
+def test_health_exposes_fresh_alert_count_leq_configured(monkeypatch, tmp_path):
+    """DH-5: /api/health exposes the fresh-alert-eligible count so the landing can
+    disclose it beside 'configured'. It must be present and never exceed the
+    enabled (configured) count."""
+    monkeypatch.setattr(config, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(config, "WATCH_INTERVAL_MINUTES", 60)
+    import sqlite3
+    monkeypatch.setattr(sqlite3, "connect", _fake_ok_conn)
+    fresh = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _seed_trail(tmp_path, fresh)
+    handler = _make_handler()
+    handler._handle_health()
+    data, _status = handler._sent[-1]
+    assert "sources_fresh_alert" in data
+    assert isinstance(data["sources_fresh_alert"], int)
+    if data["sources_active"] >= 0 and data["sources_fresh_alert"] >= 0:
+        assert data["sources_fresh_alert"] <= data["sources_active"]

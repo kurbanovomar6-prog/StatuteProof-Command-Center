@@ -335,9 +335,13 @@ def render_assurance_report_markdown(
             "",
         ]
 
+    from app.evidence_pack import FULL_LEGAL_DISCLAIMER
+
     lines.append("---")
     lines.append("")
-    lines.append(f"**Disclaimer:** {LEGAL_DISCLAIMER}")
+    # LG-6: this is a formal customer-facing document, so carry the FULL brief-grade
+    # disclaimer (the short "Not legal advice" line alone under-discloses here).
+    lines.append(f"**Disclaimer:** {LEGAL_DISCLAIMER} {FULL_LEGAL_DISCLAIMER}")
     lines.append("")
 
     return "\n".join(lines)

@@ -101,8 +101,10 @@ at VARA-licensed VASPs, DFSA-authorised firms, and ADGM-registered entities.
 Your output must meet these standards:
 1. SPECIFIC: Name the regulation, article, or section that changed — never say \
 "the regulatory framework was updated" without citing what changed.
-2. ACTIONABLE: Every HIGH or MEDIUM alert must contain one specific action the \
-compliance officer should take, with a suggested timeframe.
+2. ACTIONABLE: Every HIGH or MEDIUM alert should surface one specific review step \
+the compliance officer may consider (a suggestion for their workflow, NOT a legal \
+obligation or a determination of what they are required to do), with a suggested \
+timeframe, to be confirmed with their MLRO or legal counsel.
 3. CALIBRATED: Do not overclaim. If the change is a minor editorial update, say so. \
 If it creates a new obligation, state exactly what the obligation is.
 4. UAE-AWARE: VARA governs VASPs in Dubai mainland, DFSA governs DIFC firms, \
@@ -136,8 +138,9 @@ Required JSON format (all keys mandatory):
   "confidence": 0.0,
   "executive_summary": "2-3 sentences: what changed, why it matters, who is affected. \
 Name the specific regulation or article where possible.",
-  "business_action_required": "one concrete action the compliance team must take. \
-For LOW risk: No immediate action required.",
+  "business_action_required": "one review step the compliance team may consider \
+(framed as a suggestion for their workflow, never as a legal obligation). \
+For LOW risk: 'No specific review step indicated by this change - reviewer discretion applies.'",
   "reason": "concise explanation of risk_level based on substance",
   "affected_entities": ["list of entity types e.g. VARA VASP, DFSA authorised firm"],
   "specific_obligation": "exact new obligation if any — empty string if none",

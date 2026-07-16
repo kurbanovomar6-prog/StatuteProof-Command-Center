@@ -870,10 +870,20 @@ class _Handler(BaseHTTPRequestHandler):
         now_iso = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         # Count active (enabled) sources — fast; reads sources.json once.
+        # DH-5: also expose the FRESH-ALERT-ELIGIBLE count so the landing can
+        # disclose it alongside "configured". The enabled count (all modes) is
+        # larger than the count that actually produces alerts; showing only the
+        # bigger number reads as inflated coverage.
         try:
-            active_count = len(get_enabled_sources())
+            enabled = get_enabled_sources()
+            active_count = len(enabled)
+            fresh_alert_count = sum(
+                1 for s in enabled
+                if s.get("monitoring_mode") == "fresh_alert" and s.get("alert_eligible") is True
+            )
         except Exception:
             active_count = -1
+            fresh_alert_count = -1
 
         # Read only the tail of source_runs.jsonl for the last run timestamp and a
         # recent CHANGED count. Appends are chronological, so the newest timestamp
@@ -938,6 +948,7 @@ class _Handler(BaseHTTPRequestHandler):
                 "db": db_status,
                 "stale": stale,
                 "sources_active": active_count,
+                "sources_fresh_alert": fresh_alert_count,
                 "last_run_at": last_run_at or None,
                 "changed_count": recent_changed_count,
                 "timestamp_utc": now_iso,
