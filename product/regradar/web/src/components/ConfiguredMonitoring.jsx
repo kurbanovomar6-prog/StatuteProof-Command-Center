@@ -17,7 +17,7 @@ const PROFILES = [
     icon: Building2,
     title: 'DIFC-regulated firms',
     sources: 'Primary regulators: DFSA, DIFC Laws',
-    scope: 'Alert focus after readiness review: DIFC laws, legal database and data protection, plus DFSA rulebook (including the AML module), consultations, enforcement and MLRO letters. UAE FIU is geo-restricted; FIU-layer alerts are not offered until an accessible official route clears readiness review.',
+    scope: 'Alert focus after readiness review: DIFC laws, legal database and data protection, plus DFSA rulebook (the AML module is under remediation and not counted), consultations, enforcement and MLRO letters. UAE FIU is geo-restricted; FIU-layer alerts are not offered until an accessible official route clears readiness review.',
   },
   {
     icon: BriefcaseBusiness,

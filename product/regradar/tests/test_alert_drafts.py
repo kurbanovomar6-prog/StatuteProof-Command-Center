@@ -116,7 +116,7 @@ class AlertDraftTests(unittest.TestCase):
 
         self.assertIn(HUMAN_REVIEW_BANNER, markdown)
         self.assertIn(DISCLAIMER, markdown)
-        self.assertIn("not legal advice", markdown)
+        self.assertIn("not legal advice", markdown.lower())
 
 
 if __name__ == "__main__":

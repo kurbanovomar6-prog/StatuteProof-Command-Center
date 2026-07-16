@@ -168,11 +168,11 @@ def test_rendered_channels_carry_tag_and_keep_disclaimer():
         assert "May affect:" in msg
         assert "may be relevant to your" in msg
         # Mandatory disclaimer + proof URL survive alongside the new tag.
-        assert "Monitoring information only. Not legal advice." in msg
+        assert "For monitoring information only. Not legal advice and not a guarantee of compliance." in msg
         assert "https://example.gov.ae/rules" in msg
         # The impact block never introduces a forbidden claim (footer's
         # "legal advice" is excluded — it is the mandated disclaimer wording).
-        scrubbed = msg.replace("Not legal advice.", "")
+        scrubbed = msg.replace("For monitoring information only. Not legal advice and not a guarantee of compliance.", "")
         for phrase in _FORBIDDEN_PHRASES:
             assert phrase not in scrubbed.lower(), f"forbidden phrase {phrase!r} rendered"
 

@@ -109,3 +109,41 @@ describe('sourceQualityAudit sales claims match the summary (DH-3)', () => {
     expect(/FIU has \d+ fresh-alert/.test(joined)).toBe(false)
   })
 })
+
+// DH-6: no id hardcoded as "Needs remediation" on the dashboard may actually be
+// fresh_alert in the registry (that under-claims and contradicts the public site).
+const dashboardHome = readFileSync(
+  findFile(['src/components/app/DashboardHome.jsx', 'web/src/components/app/DashboardHome.jsx']),
+  'utf8',
+)
+describe('DashboardHome remediation set has no promoted source (DH-6)', () => {
+  const block = /REMEDIATION_SOURCE_IDS\s*=\s*new Set\(\[([\s\S]*?)\]\)/.exec(dashboardHome)
+  const ids = block ? [...block[1].matchAll(/'([^']+)'/g)].map(m => m[1]) : []
+  it('parsed the remediation set', () => expect(ids.length).toBeGreaterThan(0))
+  for (const id of ids) {
+    it(`${id} is not fresh_alert in the registry`, () => {
+      const mode = modeOf.get(id)
+      if (mode !== undefined) expect(mode, `${id} is hardcoded remediation but registry mode=${mode}`).not.toBe('fresh_alert')
+    })
+  }
+})
+
+// LG-5: the landing samples must not model obligation / legal-advice voice.
+describe('landing samples avoid obligation voice (LG-5)', () => {
+  const banned = [
+    /\bmust update\b/i,
+    /must be reconfigured/i,
+    /constitutes a reportable compliance gap/i,
+    /triggers a mandatory STR obligation/i,
+    /must .{0,40}immediately/i,
+  ]
+  const files = [
+    ['SampleBrief', readFileSync(findFile(['src/components/SampleBrief.jsx', 'web/src/components/SampleBrief.jsx']), 'utf8')],
+    ['AIInsightSection', readFileSync(findFile(['src/components/AIInsightSection.jsx', 'web/src/components/AIInsightSection.jsx']), 'utf8')],
+  ]
+  for (const [name, txt] of files) {
+    for (const re of banned) {
+      it(`${name} avoids ${re}`, () => expect(re.test(txt), `${name} contains obligation-voice ${re}`).toBe(false))
+    }
+  }
+})

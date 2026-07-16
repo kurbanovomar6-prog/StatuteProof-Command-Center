@@ -3,7 +3,7 @@
 // Auditor: StatuteProof Source Quality Auditor v2
 
 export const SOURCE_QUALITY_SUMMARY = {
-  auditDate: "2026-06-21",
+  auditDate: "2026-07-13",
   totalEnabled: 116,
   freshAlertEligible: 74,
   evidenceLibraryOnly: 4,

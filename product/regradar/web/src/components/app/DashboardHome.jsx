@@ -18,10 +18,13 @@ const COV_COLOR = {
   slate:   'text-[var(--text-secondary)] bg-[var(--bg-raised)] border-[var(--border)]',
 }
 
+// DH-6: only genuinely-blocked sources belong here. AE-sca-regulations-listing was
+// promoted to fresh_alert in the registry, so hardcoding it as "Needs remediation"
+// under-claimed and contradicted the public site. (Guarded by
+// coverageClaimsHonesty.test.js: no id here may be fresh_alert in sources.json.)
 const REMEDIATION_SOURCE_IDS = new Set([
   'AE-uae-legislation-portal',
   'AE-uae-financial-intelligence-unit-uaefiu',
-  'AE-sca-regulations-listing',
 ])
 
 function StatusPill({ tone = 'slate', children }) {

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 
-DISCLAIMER = "StatuteProof provides early-warning regulatory intelligence, not legal advice."
+DISCLAIMER = "StatuteProof provides official-source monitoring intelligence. Not legal advice and not a guarantee of compliance."
 
 
 def _proof_quality(run_record: dict[str, Any], diff_artifact: dict[str, Any] | None) -> str:

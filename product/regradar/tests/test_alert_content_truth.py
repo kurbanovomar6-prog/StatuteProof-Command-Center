@@ -133,7 +133,7 @@ def test_telegram_render_omits_absent_fields_entirely():
 def test_telegram_render_mandatory_elements():
     from app.alert_content import build_alert_content, render_telegram
     msg = render_telegram(build_alert_content(_payload()))
-    assert "Monitoring information only. Not legal advice." in msg
+    assert "For monitoring information only. Not legal advice and not a guarantee of compliance." in msg
     assert "https://example.gov.ae/rules" in msg
     assert "2026-07-05" in msg, "timestamp mandatory"
     assert ".." not in msg.replace("...", ""), "no double periods"
@@ -178,7 +178,7 @@ def test_markdown_render_shares_the_same_content():
     md = render_markdown(c)
     assert "AED 50,000" in md, "email/md channel must carry the same excerpt"
     assert "penalty" in md and "sanction" in md
-    assert "Monitoring information only. Not legal advice." in md
+    assert "For monitoring information only. Not legal advice and not a guarantee of compliance." in md
     assert "https://example.gov.ae/rules" in md
     assert "Not specified" not in md and ": —" not in md
 
@@ -293,4 +293,4 @@ def test_alert_draft_markdown_embeds_shared_content_block():
     }
     md = render_alert_markdown(alert)
     assert "AED 50,000" in md, "shared excerpt must reach the draft channel"
-    assert "Monitoring information only. Not legal advice." in md
+    assert "For monitoring information only. Not legal advice and not a guarantee of compliance." in md

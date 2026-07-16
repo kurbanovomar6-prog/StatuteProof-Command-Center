@@ -23,11 +23,13 @@ const DIFF_LINES = [
   { type: 'ctx',     text: '        decisions and the rationale for non-filing.' },
 ]
 
+// Suggested review steps — a workflow prompt for the compliance team, not legal
+// advice or a determination of what the firm is required to do.
 const ACTION_STEPS = [
-  'Update transaction monitoring threshold in your AML system from AED 55,000 to AED 40,000',
-  'Brief compliance officers and front-line staff on the revised threshold before the effective date',
-  'Review transaction history for the past 90 days against the new threshold — identify any retrospective gaps',
-  'File updated procedures and threshold documentation with your MLRO and preserve this evidence record',
+  'Consider reviewing your AML transaction monitoring threshold against the amended AED 40,000 figure',
+  'Consider briefing compliance officers and front-line staff on the revised threshold before the effective date',
+  'Review the past 90 days of transactions against the new threshold to identify any gaps for your MLRO to assess',
+  'Document any threshold change with your MLRO and preserve this evidence record',
 ]
 
 // Scroll-reveal removed deliberately: content renders instantly, matching the
@@ -143,9 +145,10 @@ function AnalysisPanel() {
           Why it matters
         </p>
         <p className="text-sm leading-relaxed text-slate-300">
-          Transaction monitoring systems must be reconfigured before the effective date.
-          Any transaction above AED 40,000 now triggers a mandatory STR obligation — a 27% reduction
-          in the threshold. Failure to update constitutes a reportable compliance gap.
+          The revised threshold may require reconfiguring transaction monitoring before the effective
+          date. Transactions above AED 40,000 may now fall within STR reporting expectations — a 27%
+          reduction in the threshold. Consider reviewing your AML system configuration against the
+          amended article with your MLRO or legal counsel.
         </p>
       </div>
 
@@ -219,7 +222,7 @@ export default function AIInsightSection() {
           </span>
           <h2 className="sp-heading mt-4 text-3xl font-bold text-white md:text-4xl">
             Not just "something changed" —<br className="hidden sm:block" />
-            {' '}exactly what changed and what to do about it
+            {' '}exactly what changed and what to consider
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-400">
             StatuteProof is built to detect a change in a selected official source, store a hash-verified

@@ -26,7 +26,10 @@ from typing import Any
 from app.client_profiles import _norm_topic, source_metadata_for_alert
 from app.text_quality import strip_unreadable_chars, unreadable_ratio
 
-FOOTER = "Monitoring information only. Not legal advice."
+# LG-8: use the canonical short disclaimer verbatim (it adds "and not a guarantee
+# of compliance", which the old footer dropped). The footer is protected from
+# truncation, so the extra clause is safe.
+FOOTER = "For monitoring information only. Not legal advice and not a guarantee of compliance."
 
 _EXCERPT_CAP = 400
 

@@ -19,12 +19,14 @@ const DIFF_LINES = [
   { type: 'context', text: '   of whether the transaction is completed or not.' },
 ]
 
+// Suggested review steps — a workflow prompt for the compliance team, not legal
+// advice or a determination of what the firm is required to do.
 const ACTION_STEPS = [
-  'Update AML system transaction monitoring threshold to AED 40,000',
-  'Brief MLRO and all compliance officers on the revised threshold',
-  'Review last 90 days of transactions between AED 40,000–55,000',
-  'Update internal AML policy documentation and procedures manual',
-  'File updated procedures with senior management by 1 March 2025',
+  'Consider reviewing your AML transaction monitoring threshold against the amended AED 40,000 figure',
+  'Consider briefing the MLRO and compliance officers on the revised threshold',
+  'Review the last 90 days of transactions between AED 40,000–55,000 for your MLRO to assess',
+  'Consider updating internal AML policy documentation and procedures',
+  'Document the review with senior management and preserve this evidence record',
 ]
 
 const CIRCLE_NUMS = ['①', '②', '③', '④', '⑤']
@@ -132,10 +134,10 @@ export default function SampleBrief() {
                 Why it matters
               </div>
               <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
-                All licensed DNFBPs and financial institutions supervised by CBUAE must update their
-                transaction monitoring systems immediately. Failure to file STRs for transactions above the
-                new AED 40,000 threshold may constitute a regulatory violation and could be identified
-                in a CBUAE supervisory examination.
+                The amended threshold may affect how licensed DNFBPs and CBUAE-supervised firms
+                configure transaction monitoring. Firms may wish to review STR handling for transactions
+                above the new AED 40,000 threshold with their MLRO; unaddressed gaps could surface in a
+                CBUAE supervisory examination.
               </p>
             </div>
 
