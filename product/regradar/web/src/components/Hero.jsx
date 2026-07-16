@@ -340,7 +340,7 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
                 onClick={onViewSample}
                 className="sp-btn-secondary justify-center px-6"
               >
-                View sample evidence record
+                See a real sealed record
               </button>
             </div>
 

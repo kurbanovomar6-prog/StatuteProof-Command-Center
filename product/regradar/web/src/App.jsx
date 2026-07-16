@@ -20,7 +20,6 @@ const Pricing               = lazy(() => import('./components/Pricing'))
 const Contact               = lazy(() => import('./components/Contact'))
 const EvidenceCard          = lazy(() => import('./components/EvidenceCard'))
 const SourceCoverageTable   = lazy(() => import('./components/SourceCoverageTable'))
-const DiffViewer            = lazy(() => import('./components/DiffViewer'))
 const AuditBinderSample     = lazy(() => import('./components/AuditBinderSample'))
 const VendorTrustSection    = lazy(() => import('./components/VendorTrustSection'))
 const ConsultationTracker   = lazy(() => import('./components/ConsultationTracker'))
@@ -45,21 +44,25 @@ function GlobalLoader() {
   )
 }
 
-const SAMPLE_RECORD = {
-  _label: 'SAMPLE / FAKE',
-  source_id: 'AE-central-bank-of-the-uae',
-  regulator: 'CBUAE',
-  jurisdiction: 'UAE',
-  run_at: '2026-05-30T11:56:00Z',
+// REAL sealed record — the exact DFSA capture shipped at
+// /sample-record/record.json, the same artifact /verify#sample loads and
+// re-hashes. Every field below is pinned to that asset by
+// src/test/realRecordLanding.test.js so this card can never drift from the
+// verifiable bytes. Nothing here is invented.
+const REAL_RECORD = {
+  source_id: 'AE-dubai-financial-services-authority-dfsa',
+  regulator: 'DFSA',
+  jurisdiction: 'UAE — Dubai Financial Services Authority',
+  run_at: '2026-06-11T22:29:38+00:00',
   change_status: 'CHANGED',
   extraction_quality: 'GOOD',
-  normalized_chars: 43717,
-  normalized_hash: 'sha256:94d020105d4d...',
-  diff_excerpt: '[SAMPLE] Content change detected in CBUAE official source. Nature of change requires human review before any compliance action.',
-  proof_chain: { chain_verified: false },
+  normalized_chars: 2653,
+  normalized_hash: 'sha256:2cedc486a126302a5318a749f49e0c817eb113515aa7ddc99ac70ae1223082eb',
+  diff_excerpt:
+    '0 lines added, 5 lines removed on the official DFSA Rules and Standards page — captured 2026-06-11 and sealed under the SHA-256 above.',
+  proof_chain: { chain_verified: true, captured_at: '2026-06-11T22:29:38+00:00' },
+  source_url: 'https://www.dfsa.ae/rules-and-standards',
 };
-
-const SAMPLE_DIFF = `- [previous content snapshot — 2026-05-29]\n+ [updated content snapshot — 2026-05-30]\n  [SAMPLE content — not a real regulatory change]\n  Human review required before any compliance action.`;
 
 function syncProfileToLocalStorage(profileData) {
   const industries = Array.isArray(profileData?.industries) ? profileData.industries : []
@@ -444,26 +447,37 @@ export default function App() {
           <VendorTrustSection />
           <ConfiguredMonitoring />
           <TrustLayer />
-          {/* Evidence Demo Section — SAMPLE / FAKE */}
+          {/* Evidence Section — a REAL sealed record (same asset /verify#sample loads) */}
           <section className="py-16 px-4 bg-[#07111F]" id="evidence">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-10">
-                <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 bg-amber-400/10 border border-amber-400/20 inline-block px-3 py-1 rounded-full">SAMPLE / FAKE — demonstration only</p>
-                <h2 className="text-2xl font-bold text-white mt-4 mb-3">Evidence-backed monitoring</h2>
+                <p className="text-xs font-semibold text-cyan-300 uppercase tracking-wider mb-2 bg-cyan-400/10 border border-cyan-300/20 inline-block px-3 py-1 rounded-full">
+                  Real record — public regulator content
+                </p>
+                <h2 className="text-2xl font-bold text-white mt-4 mb-3">
+                  This is a real sealed record. Check the math yourself.
+                </h2>
                 <p className="text-slate-400 max-w-xl mx-auto text-sm">
-                  Detected changes are cryptographically hashed, timestamped, and stored for human review.
-                  Not legal advice. For monitoring information only.
+                  A change our monitor captured on the official DFSA Rules and
+                  Standards page, sealed under SHA-256. The verifier re-hashes
+                  the exact bytes you load — no account, no trust in us
+                  required. Verification confirms record integrity only; not
+                  legal advice.
                 </p>
               </div>
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <EvidenceCard record={SAMPLE_RECORD} />
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <EvidenceCard record={REAL_RECORD} />
                 <SourceCoverageTable />
               </div>
-              <DiffViewer
-                diffText={SAMPLE_DIFF}
-                sourceId="AE-cbuae-homepage"
-                detectedAt="2026-05-30"
-              />
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => navigatePublic('verify', { query: '#sample' })}
+                  className="sp-btn-primary justify-center px-6"
+                >
+                  Verify these hashes yourself — 60 seconds, no account
+                </button>
+              </div>
             </div>
           </section>
           <DashboardPreview />
