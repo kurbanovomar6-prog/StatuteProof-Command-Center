@@ -55,7 +55,7 @@ export default function HowItWorks() {
             return (
               <div
                 key={step.n}
-                className={`sp-glass sp-animate-fade-up ${delays[i] || "sp-delay-4"} flex flex-col`}
+                className={`sp-glass sp-animate-fade-up ${delays[i] || "sp-delay-4"} flex flex-col p-6`}
               >
                 <div className="mb-4">
                   <span className="sp-display text-4xl font-bold text-cyan-300/30 leading-none block mb-3">

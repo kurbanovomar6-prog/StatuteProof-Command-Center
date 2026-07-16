@@ -50,7 +50,7 @@ export default function TrustLayer() {
             return (
               <div
                 key={card.objection}
-                className="sp-panel hover:border-cyan-400/25 transition-colors duration-200"
+                className="sp-panel p-6 hover:border-cyan-400/25 transition-colors duration-200"
               >
                 <div className="w-10 h-10 rounded-lg bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center mb-4">
                   <Icon className="w-5 h-5 text-cyan-300" />
