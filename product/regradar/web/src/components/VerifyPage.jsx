@@ -147,6 +147,14 @@ export default function VerifyPage({ onBack }) {
       setTokenName('')
       return
     }
+    // A real RFC 3161 token is 2–8KB; a mispicked large file would hang the
+    // synchronous byte loop below, so fail fast instead.
+    if (file.size > 64 * 1024) {
+      setError('That file is too large to be an RFC 3161 token (max 64KB).')
+      setTokenB64(null)
+      setTokenName('')
+      return
+    }
     try {
       // .tsr is DER binary — read bytes and base64 them for the JSON body.
       const buf = await file.arrayBuffer()
@@ -220,6 +228,11 @@ export default function VerifyPage({ onBack }) {
       setRawName('raw.txt')
       setNormalizedText(normalized)
       setNormalizedName('normalized.txt')
+      // Clear any previously-chosen token: it belongs to a different record,
+      // and leaving it staged would silently pair it with the sample on the
+      // next manual Verify click while the auto-run below omits it.
+      setTokenB64(null)
+      setTokenName('')
       await runVerify(record, raw, normalized)
     } catch {
       setError(
@@ -336,6 +349,10 @@ export default function VerifyPage({ onBack }) {
               hint="Checks sha256(raw) against raw_hash."
               fileName={rawName}
               onChange={(event) => handleFile(event, setRawText, setRawName)}
+              onClear={() => {
+                setRawText(null)
+                setRawName('')
+              }}
             />
             <FileField
               id="normalized-file"
@@ -343,6 +360,10 @@ export default function VerifyPage({ onBack }) {
               hint="Checks sha256(normalized) against current_hash."
               fileName={normalizedName}
               onChange={(event) => handleFile(event, setNormalizedText, setNormalizedName)}
+              onClear={() => {
+                setNormalizedText(null)
+                setNormalizedName('')
+              }}
             />
             <FileField
               id="token-file"
@@ -351,6 +372,10 @@ export default function VerifyPage({ onBack }) {
               fileName={tokenName}
               onChange={handleTokenFile}
               accept=".tsr,application/timestamp-reply,application/octet-stream"
+              onClear={() => {
+                setTokenB64(null)
+                setTokenName('')
+              }}
             />
           </div>
 
@@ -445,22 +470,41 @@ export default function VerifyPage({ onBack }) {
   )
 }
 
-function FileField({ id, label, hint, fileName, onChange, accept = '.txt,text/plain' }) {
+function FileField({ id, label, hint, fileName, onChange, onClear, accept = '.txt,text/plain' }) {
   return (
-    <div className="sp-panel-muted p-3">
+    // focus-within ring: the input is sr-only (focusable, in the tab order —
+    // display:none would remove it from both), so the visible affordance
+    // shows keyboard focus via the wrapper.
+    <div className="sp-panel-muted p-3 focus-within:ring-1 focus-within:ring-[var(--accent)]">
       <label htmlFor={id} className="sp-label mb-1">
         {label}
       </label>
-      <label
-        htmlFor={id}
-        className="flex cursor-pointer items-center gap-2 text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-      >
-        <FileUp className="h-4 w-4 text-[var(--accent)]" />
-        <span className="truncate" style={{ fontFamily: fileName ? 'var(--font-mono)' : 'inherit' }}>
-          {fileName || 'Choose file'}
-        </span>
-      </label>
-      <input id={id} type="file" accept={accept} onChange={onChange} className="hidden" />
+      <div className="flex items-center gap-2">
+        <label
+          htmlFor={id}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+        >
+          <FileUp className="h-4 w-4 shrink-0 text-[var(--accent)]" />
+          <span className="truncate" style={{ fontFamily: fileName ? 'var(--font-mono)' : 'inherit' }}>
+            {fileName || 'Choose file'}
+          </span>
+        </label>
+        {fileName && onClear ? (
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById(id)
+              if (el) el.value = ''
+              onClear()
+            }}
+            aria-label={`Clear ${label}`}
+            className="shrink-0 text-[var(--text-muted)] transition-colors hover:text-[var(--text-secondary)]"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
+      </div>
+      <input id={id} type="file" accept={accept} onChange={onChange} className="sr-only" />
       <p className="mt-2 text-[0.7rem] leading-snug text-[var(--text-muted)]">{hint}</p>
     </div>
   )
