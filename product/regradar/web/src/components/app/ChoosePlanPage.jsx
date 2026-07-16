@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CheckCircle, Lock, ArrowRight, Sparkles } from 'lucide-react'
+import { PLAN_INTENT_KEY } from '../auth/RegisterPage'
 
 const PLANS = [
   {
@@ -106,6 +107,26 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
   const [selected, setSelected] = useState(null)
   const [confirmMsg, setConfirmMsg] = useState('')
   const [error, setError] = useState('')
+  // 2.3: the plan picked on the public pricing page, carried through
+  // registration + email verification via localStorage (see RegisterPage).
+  const [carriedIntent, setCarriedIntent] = useState('')
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(PLAN_INTENT_KEY) || ''
+      if (PLANS.some((p) => p.id === stored)) setCarriedIntent(stored)
+    } catch {
+      // Storage disabled — no carried intent to acknowledge.
+    }
+  }, [])
+
+  function clearCarriedIntent() {
+    try {
+      window.localStorage.removeItem(PLAN_INTENT_KEY)
+    } catch {
+      // Ignore — the key simply stays; it is re-validated on every read.
+    }
+  }
 
   async function handleSelect(planId) {
     if (planId === 'evidence_preview') {
@@ -115,6 +136,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
     if (planId === 'consultant') {
       setConfirmMsg('Plan request noted. Our team will contact you to discuss your requirements and activate your workspace.')
       setSelected('consultant')
+      clearCarriedIntent()
       return
     }
     setSelecting(planId)
@@ -123,6 +145,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
       await selectPlan(planId)
       setSelected(planId)
       setConfirmMsg('Plan request saved. Our team will contact you to activate your founding pilot. No payment has been processed.')
+      clearCarriedIntent()
     } catch {
       setError('Could not save plan selection. Please try again or continue with the Source Readiness Review.')
     } finally {
@@ -175,6 +198,19 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
           </ol>
         </div>
 
+        {/* 2.3: acknowledge the plan carried over from the public pricing page */}
+        {carriedIntent && !selected && !confirmMsg && (
+          <div className="mb-8 max-w-2xl mx-auto rounded-xl border border-[var(--trust-border)] bg-[var(--trust-badge)] p-4 text-sm text-center text-[var(--text-primary)]">
+            You chose{' '}
+            <span className="font-semibold">
+              {PLANS.find((p) => p.id === carriedIntent)?.name || carriedIntent}
+            </span>{' '}
+            on the pricing page — it is highlighted below. Confirm it to record
+            your intent; we verify your source pack first and no payment is
+            taken now.
+          </div>
+        )}
+
         {/* Confirm message */}
         {confirmMsg && (
           <div className="mb-8 max-w-2xl mx-auto bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-emerald-300 text-sm text-center">
@@ -207,9 +243,16 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
                 p.highlight
                   ? 'border-[var(--trust-border)] bg-[var(--trust-badge)] shadow-[0_0_30px_rgba(22,217,245,0.08)]'
                   : 'border-[var(--border-muted)] bg-[var(--bg-elevated)]'
-              } ${selected === p.id ? 'ring-2 ring-emerald-400/50' : ''}`}
+              } ${selected === p.id ? 'ring-2 ring-emerald-400/50' : ''} ${
+                !selected && carriedIntent === p.id ? 'ring-2 ring-[var(--accent)]/60' : ''
+              }`}
             >
-              {p.badge && (
+              {!selected && carriedIntent === p.id && (
+                <div className="text-[10px] font-bold text-[var(--accent)] mb-2">
+                  Your pick from the pricing page
+                </div>
+              )}
+              {p.badge && !(carriedIntent === p.id && !selected) && (
                 <div className="text-[10px] font-bold text-[var(--accent)] mb-2">
                   {p.badge}
                 </div>
