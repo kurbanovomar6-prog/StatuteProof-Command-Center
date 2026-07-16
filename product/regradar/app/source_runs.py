@@ -1108,6 +1108,16 @@ def record_from_source_result(
         "raw_chars": len(combined_raw_text),
         "normalized_chars": len(normalized_text),
         "raw_hash": _raw_hash(combined_raw_text),
+        # NOTE (F3, reliability audit): this intake normalized_hash uses the
+        # newline-preserving stable_normalized_hash flavor because the PUBLIC
+        # evidence verifier recomputes it as sha256(normalized.txt) from the sealed
+        # snapshot — the hash is bound to the sealed evidence format. The live
+        # pipeline path stores a content-hash(normalized) flavor, so an intake
+        # record vs the first recurring monitor sweep can fabricate a CHANGED for
+        # identical content. Unifying the two flavors safely requires unifying the
+        # snapshot format + verifier together (a deliberate evidence-sealing
+        # change), NOT a one-line hash swap — a naive swap desyncs the stored hash
+        # from the sealed snapshot and breaks public verification. Left as-is.
         "normalized_hash": stable_normalized_hash(combined_raw_text) or None,
         "pdf_text_hash": pdf_text_hash,
         "pdf_links_count": int(doc_info.get("pdf_links_count") or 0),

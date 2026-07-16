@@ -83,3 +83,53 @@ class TextNormalizationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NavStripEdgeGatingTests(unittest.TestCase):
+    """F1: the nav-label stripper must NOT eat interior short-line regulatory
+    lists (predicate offences, sanctioned entities, defined terms) — that made a
+    real add/remove invisible to the change hash (a missed change). It must still
+    strip leading/trailing menu chrome."""
+
+    def test_interior_offence_list_is_kept_and_change_is_detected(self):
+        base = (
+            "The following are predicate offences under the AML framework.\n"
+            "Money Laundering\nTerrorist Financing\nProliferation Financing\n"
+            "Sanctions Evasion\n"
+            "These offences apply to all licensed persons in the DIFC."
+        )
+        added = base.replace(
+            "Sanctions Evasion\n", "Sanctions Evasion\nHuman Trafficking\n")
+        # The 5-item vs 6-item list must produce DIFFERENT hashes (change caught).
+        self.assertNotEqual(stable_normalized_hash(base), stable_normalized_hash(added))
+        self.assertIn("Money Laundering", normalize_for_change_hash(base))
+        self.assertIn("Human Trafficking", normalize_for_change_hash(added))
+
+    def test_leading_menu_run_is_still_stripped(self):
+        page = (
+            "Home\nAbout\nServices\nContact\nLogin\n"
+            "Circular 5 of 2026 requires licensed firms to file quarterly reports."
+        )
+        norm = normalize_for_change_hash(page)
+        self.assertIn("Circular 5 of 2026", norm)
+        self.assertNotIn("Services", norm)
+
+    def test_trailing_footer_menu_run_is_still_stripped(self):
+        page = (
+            "Payment firms must retain AML transaction records for five years.\n"
+            "Careers\nInvestors\nNewsroom\nMediaCentre\nSitemap"
+        )
+        norm = normalize_for_change_hash(page)
+        self.assertIn("Payment firms", norm)
+        self.assertNotIn("Newsroom", norm)
+
+    def test_pure_nav_page_normalizes_empty(self):
+        from app.text_normalization import _strip_nav_label_runs
+        nav = ["Home", "About", "Services", "Contact", "Login", "Careers"]
+        self.assertEqual(_strip_nav_label_runs(nav), [])
+
+    def test_short_leading_run_is_kept(self):
+        from app.text_normalization import _strip_nav_label_runs
+        # 2 short label-like lines (< _NAV_RUN_MIN) are not a menu — keep them.
+        lines = ["Alpha", "Beta", "A full sentence of regulatory content here."]
+        self.assertEqual(_strip_nav_label_runs(lines), lines)

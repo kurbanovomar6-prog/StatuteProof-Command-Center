@@ -372,3 +372,22 @@ def test_version_bump_to_empty_normalization_is_quality_drop():
     current = {"extraction_quality": "GOOD", "extracted_chars": 6000, "normalized_chars": 0,
                "content_hash": "x", "normalization_version": "3"}
     assert classify_change(current, prev) == "QUALITY_DROP"
+
+
+def test_intake_normalized_hash_stays_bound_to_sealed_snapshot(isolated_dirs):
+    # F3 guard: the intake normalized_hash MUST equal sha256(normalize(raw)) — the
+    # newline-preserving flavor the public verifier recomputes from the sealed
+    # normalized.txt snapshot. Do NOT swap it to the pipeline content-hash flavor
+    # without also unifying the snapshot format + verifier: that desyncs the stored
+    # hash from the sealed evidence and breaks public verification.
+    import app.source_runs as sr
+    from app.text_normalization import stable_normalized_hash
+    text = "\n\n".join(f"Regulatory obligation paragraph {i}." for i in range(60))
+    source = {"id": "AE-flavor-test", "name": "Flavor Test",
+              "url": "https://example.gov.ae/x", "jurisdiction": "AE",
+              "category": "financial_regulator"}
+    result = {"url": source["url"], "final_url": source["url"], "status": "ok",
+              "extracted_text": text, "extracted_chars": len(text),
+              "fetch_method": "test", "reason": ""}
+    record = sr.record_from_source_result(run_id="rflav001", source=source, result=result)
+    assert record["normalized_hash"] == stable_normalized_hash(text)

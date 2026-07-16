@@ -18,7 +18,14 @@ import re
 # baseline reset instead of masquerading as a regulatory CHANGED event.
 # v2: signal-max F1 — page-chrome stripping (nav runs, rating counters,
 #     theme widgets, carousel positions, all-caps title taglines).
-NORMALIZATION_VERSION = 2
+# v3: reliability audit — nav-label runs are stripped only at page EDGES now.
+#     An INTERIOR run of short label-like lines is regulatory content (a
+#     predicate-offence list, a roster of licensed/sanctioned entities, a
+#     glossary), which the old any-position strip erased — making an add/remove
+#     invisible to the change hash (a missed regulatory change). This re-shapes
+#     the normalized hash for affected pages, so the version bump makes
+#     classify_change rebaseline each source once on the first sweep, no alert.
+NORMALIZATION_VERSION = 3
 
 _SPACE_RE = re.compile(r"[ \t\r\f\v]+")
 _MULTI_NEWLINE_RE = re.compile(r"\n{3,}")
@@ -209,28 +216,36 @@ def _is_nav_label(line: str) -> bool:
 
 
 def _strip_nav_label_runs(lines: list[str]) -> list[str]:
-    """Drop runs of >= _NAV_RUN_MIN consecutive nav-label lines.
+    """Drop only the LEADING and TRAILING runs of >= _NAV_RUN_MIN nav-label lines.
 
-    A lone short heading survives; a menu block ("About us / Go Back /
-    Who we are / \u2026") is chrome. Measured: DFSA pages carry ~106 nav labels
-    of 143 normalized lines (docs/signal/SIGNAL_QUALITY.md \u00a7C).
+    Menu chrome sits at the page EDGES (header nav, footer links). An INTERIOR
+    run of short label-like lines is far more likely to be regulatory content \u2014
+    a predicate-offence list, a table of defined terms, a roster of licensed or
+    sanctioned entities. The previous version dropped nav-label runs ANYWHERE on
+    the page, which erased exactly that content and made adding/removing a list
+    item invisible to the change hash: a MISSED regulatory change (the worst
+    failure mode for an evidence product). Restricting the strip to the edges
+    keeps interior lists while still removing edge nav (DFSA header+footer, the
+    ~106-label case in docs/signal/SIGNAL_QUALITY.md \u00a7C). A leading/trailing run
+    shorter than the threshold is kept (too short to be a menu).
     """
-    out: list[str] = []
-    buf: list[str] = []
+    n = len(lines)
+    if n == 0:
+        return lines
 
-    def flush() -> None:
-        if 0 < len(buf) < _NAV_RUN_MIN:
-            out.extend(buf)
-        buf.clear()
+    start = 0
+    while start < n and _is_nav_label(lines[start]):
+        start += 1
+    if start < _NAV_RUN_MIN:
+        start = 0
 
-    for line in lines:
-        if _is_nav_label(line):
-            buf.append(line)
-        else:
-            flush()
-            out.append(line)
-    flush()
-    return out
+    end = n
+    while end > start and _is_nav_label(lines[end - 1]):
+        end -= 1
+    if n - end < _NAV_RUN_MIN:
+        end = n
+
+    return lines[start:end]
 
 
 def _is_boilerplate_line(line: str) -> bool:
