@@ -96,7 +96,7 @@ def _check_one(source: dict) -> dict[str, Any]:
 
         # ── Steps 1-2: generic scraper fallback ───────────────────────
         if content is None:
-            html    = fetch_page(url)
+            html    = fetch_page(url, allow_proxy=True)
             _extr   = extract_best_text(html, url)
             content = _extr["text"]
             method  = _extr["method"]

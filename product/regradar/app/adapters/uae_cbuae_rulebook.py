@@ -16,7 +16,7 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
-from app.adapters.base import fetch_text_bounded, fetch_text_bounded_status, SourceAdapter
+from app.adapters.base import fetch_text_bounded, fetch_text_bounded_status, proxy_for_url, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.parser import extract_text
 
@@ -145,6 +145,7 @@ def extract_cbuae_rulebook_update_items(
         headers=_HEADERS,
         timeout=timeout,
         label="CBUAERulebookAdapter",
+        proxy=proxy_for_url(source_page_url),
     )
     if http_status is None:
         return {
@@ -243,7 +244,8 @@ class CBUAERulebookAdapter(SourceAdapter):
 
     def _fetch_rulebook_page(self, url: str) -> str | None:
         html = fetch_text_bounded(
-            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="CBUAERulebookAdapter"
+            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="CBUAERulebookAdapter",
+            proxy=proxy_for_url(url),
         )
         if html is None:
             return None

@@ -20,7 +20,9 @@ not pass this check, the pipeline falls back to the generic scraper.
 
 import ipaddress
 import logging
+import re
 import socket
+import os
 from urllib.parse import urlsplit, urlunsplit
 
 import requests
@@ -266,8 +268,90 @@ class _PinnedHTTPAdapter(requests.adapters.HTTPAdapter):
         return super().send(request, **kwargs)
 
 
+_CREDS_IN_URL_RE = re.compile(r"(\w+://)[^/\s:@]+:[^/\s@]+@")
+
+
+def _redact_creds(text: str) -> str:
+    """Redact ``scheme://user:pass@`` credentials from a string before logging
+    (proxy passwords leak into requests/urllib3 ProxyError messages)."""
+    return _CREDS_IN_URL_RE.sub(r"\1***@", text)
+
+
+_PROXY_ENV = "STATUTEPROOF_FETCH_PROXY"
+
+# Honest residual-risk statement for the proxied fetch path (mirrors
+# scraper.SSRF_RESIDUAL_RISK). Do not overclaim SSRF protection: on the proxied
+# path IP-pinning is impossible, so the DNS-rebind window is NOT closed for the
+# allowlisted hosts.
+PROXY_RESIDUAL_RISK = (
+    "When a fetch is routed through the owner-configured egress proxy (only the "
+    "fixed allowlist of WAF/geo-blocked regulator hosts), the target IP is NOT "
+    "pinned — the forward proxy performs its own DNS resolution and connection, "
+    "so a DNS-rebind between our host validation and the proxy's connect is not "
+    "closed for those hosts. This is bounded by (a) the fixed host allowlist, "
+    "(b) per-hop re-gating that drops the proxy the instant a redirect leaves "
+    "the allowlist, and (c) the fact that the allowlisted hosts are the "
+    "regulators' own domains, so exploiting the rebind would require "
+    "compromising the regulator's authoritative DNS."
+)
+
+# Regulator hosts our datacenter IP is WAF/geo-blocked from (verified: CBUAE,
+# DFSA news, ADGM/FSRA via Thomson Reuters all return HTTP 403 to the droplet's
+# datacenter IP while serving 200 to other IPs). A proxy is applied ONLY to
+# these hosts — never to a user-supplied custom-source URL — so an
+# attacker-influenced URL can never be aimed through the proxy at an internal
+# target. Override with env STATUTEPROOF_PROXY_HOSTS (comma-separated).
+_DEFAULT_PROXY_HOSTS: tuple[str, ...] = (
+    "centralbank.ae",
+    "dfsa.ae",
+    "adgm.thomsonreuters.com",
+)
+
+
+def _proxy_host_allowlist() -> tuple[str, ...]:
+    raw = os.environ.get("STATUTEPROOF_PROXY_HOSTS", "").strip()
+    if raw:
+        return tuple(h.strip().lower() for h in raw.split(",") if h.strip())
+    return _DEFAULT_PROXY_HOSTS
+
+
+def _host_is_proxy_allowlisted(url: str) -> bool:
+    """True iff the URL's host is on the blocked-host allowlist. Host-only,
+    exact-or-subdomain match on the lowercased hostname — so ``centralbank.ae``
+    and ``x.centralbank.ae`` match but ``centralbank.ae.evil.com`` and
+    ``notcentralbank.ae`` do not."""
+    try:
+        host = (urlsplit(url).hostname or "").lower()
+    except ValueError:
+        return False
+    if not host:
+        return False
+    for allowed in _proxy_host_allowlist():
+        if host == allowed or host.endswith("." + allowed):
+            return True
+    return False
+
+
+def proxy_for_url(url: str) -> str | None:
+    """Return the configured egress proxy IFF this URL's host is on the
+    blocked-host allowlist AND ``STATUTEPROOF_FETCH_PROXY`` is set — otherwise
+    None.
+
+    This is the ONLY gate that turns proxying on. Restricting it to an explicit
+    allowlist of known-blocked regulator hosts means the proxy is never used for
+    arbitrary or user-supplied URLs (a request to proxy an internal/metadata
+    target simply returns None → normal direct, IP-pinned, SSRF-guarded fetch).
+    Credentials live in the env value, never in code.
+    """
+    proxy = os.environ.get(_PROXY_ENV, "").strip()
+    if not proxy:
+        return None
+    return proxy if _host_is_proxy_allowlisted(url) else None
+
+
 def _guarded_get(
-    url: str, *, headers: dict, timeout: float, verify: bool, label: str
+    url: str, *, headers: dict, timeout: float, verify: bool, label: str,
+    proxy: str | None = None,
 ):
     """
     Perform an SSRF-guarded, redirect-following GET and return the final
@@ -277,6 +361,15 @@ def _guarded_get(
     fires, and connected via a per-hop pinned adapter so the vetted IP is
     the one actually dialled. Redirects are followed manually up to
     _MAX_REDIRECTS. Never raises.
+
+    ``proxy`` (optional): route through this forward proxy instead of dialling
+    the vetted IP directly. Used ONLY for an allowlist of regulator hosts our
+    datacenter IP is WAF/geo-blocked from (see ``proxy_for_url``); the proxy is
+    an explicitly owner-configured, trusted egress (never attacker-derived) and
+    is never applied to a user-supplied URL. IP-pinning is incompatible with a
+    forward proxy (the proxy does its own DNS+connect), so the pinned adapter is
+    skipped on this path — but every hop's target host is STILL SSRF-validated
+    below (loopback / RFC1918 / link-local / metadata targets are refused).
     """
     session = requests.Session()
     # Do not inherit any environment proxies / trust settings that could
@@ -302,9 +395,25 @@ def _guarded_get(
             # per urlsplit typing).
             assert host, "vetted fetch target must have a host"
 
-            adapter = _PinnedHTTPAdapter(pinned_ip=pinned_ip, server_hostname=host)
-            session.mount("https://", adapter)
-            session.mount("http://", adapter)
+            # RE-GATE THE PROXY ON EVERY HOP. Only proxy a hop whose host is
+            # still on the allowlist — a redirect that leaves the allowlist
+            # (e.g. an open redirect off an allowlisted regulator site) is
+            # fetched DIRECTLY and IP-pinned, never through the proxy. This
+            # stops one allowlisted first hop from turning the owner's egress
+            # proxy into an open relay toward an arbitrary redirect target.
+            hop_proxy = proxy if (proxy and _host_is_proxy_allowlisted(current_url)) else None
+            if hop_proxy:
+                session.proxies = {"http": hop_proxy, "https": hop_proxy}
+                # A forward proxy does its own DNS+connect; IP-pinning is
+                # incompatible, so use the default adapter (restoring it in
+                # case a prior direct hop mounted a pinned one).
+                session.mount("https://", requests.adapters.HTTPAdapter())
+                session.mount("http://", requests.adapters.HTTPAdapter())
+            else:
+                session.proxies = {}
+                adapter = _PinnedHTTPAdapter(pinned_ip=pinned_ip, server_hostname=host)
+                session.mount("https://", adapter)
+                session.mount("http://", adapter)
 
             response = session.get(
                 current_url,
@@ -339,7 +448,11 @@ def _guarded_get(
             # released when the caller closes/exhausts the response body.
             return response
     except Exception as exc:
-        logger.warning("%s: request failed for %s: %s", label, url, exc)
+        # Redact any embedded proxy/basic-auth credentials before logging: a
+        # proxy configured as http://user:pass@host:port frequently gets
+        # stringified into requests/urllib3 ProxyError messages, which would
+        # otherwise write the proxy password into application logs.
+        logger.warning("%s: request failed for %s: %s", label, url, _redact_creds(str(exc)))
         session.close()
         return None
 
@@ -421,6 +534,7 @@ def fetch_text_bounded_status(
     max_bytes: int = MAX_FETCH_BYTES,
     label: str = "adapter",
     verify: bool = True,
+    proxy: str | None = None,
 ) -> tuple[int | None, str | None]:
     """
     HTTP GET with a hard cap on decompressed body size, preserving status.
@@ -433,9 +547,12 @@ def fetch_text_bounded_status(
     _guarded_get): every hop's resolved IP is vetted BEFORE connecting and
     a non-public target (loopback / RFC1918 / link-local / cloud metadata)
     is rejected.
+
+    ``proxy`` (optional): forward-proxy egress for allowlisted blocked hosts
+    (see _guarded_get / proxy_for_url).
     """
     response = _guarded_get(
-        url, headers=headers, timeout=timeout, verify=verify, label=label
+        url, headers=headers, timeout=timeout, verify=verify, label=label, proxy=proxy
     )
     if response is None:
         return None, None
@@ -477,15 +594,20 @@ def fetch_text_bounded(
     max_bytes: int = MAX_FETCH_BYTES,
     label: str = "adapter",
     verify: bool = True,
+    proxy: str | None = None,
 ) -> str | None:
     """
     HTTP GET with a hard cap on decompressed body size.
 
     Returns decoded text on success, None on any failure (request error,
     non-200 status, oversized body). Never raises.
+
+    ``proxy`` (optional): forward-proxy egress for allowlisted blocked hosts
+    (see _guarded_get / proxy_for_url).
     """
     _, text = fetch_text_bounded_status(
-        url, headers=headers, timeout=timeout, max_bytes=max_bytes, label=label, verify=verify
+        url, headers=headers, timeout=timeout, max_bytes=max_bytes, label=label,
+        verify=verify, proxy=proxy,
     )
     return text
 

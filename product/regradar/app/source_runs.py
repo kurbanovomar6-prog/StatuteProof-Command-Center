@@ -1357,7 +1357,7 @@ def _rebaseline_fetch(url: str, source: dict) -> str:
         if is_quality_content(adapter_text):
             return adapter_text or ""
 
-    html = fetch_page(url)
+    html = fetch_page(url, allow_proxy=True)
     extraction = extract_best_text(html, url)
     return (extraction.get("text") or "") if extraction else ""
 

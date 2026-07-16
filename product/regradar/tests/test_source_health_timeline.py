@@ -211,3 +211,37 @@ class SourceHealthTimelineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ── access-block honesty: a WAF/geo 403 surfaces as ACCESS_BLOCKED, not FAILED ──
+
+from app.source_health_timeline import _source_health_status  # noqa: E402
+
+
+def test_health_status_reports_waf_block_as_access_blocked():
+    """A run the monitor flagged as a hard block (monitor_access_status='blocked',
+    which _persist_failure_record writes alongside change_status='FAILED') must
+    surface as ACCESS_BLOCKED — its own honest state — not a generic FAILED."""
+    blocked_run = {
+        "change_status": "FAILED",
+        "access_status": "failed",
+        "monitor_access_status": "blocked",
+        "error": "PermissionError: HTTP 403 — access blocked (WAF/geo) for https://rulebook.centralbank.ae/x",
+    }
+    assert _source_health_status(blocked_run) == "ACCESS_BLOCKED"
+
+
+def test_health_status_generic_failure_stays_failed():
+    """A genuine extraction/timeout failure (no block signal) must stay FAILED —
+    the block path must not swallow ordinary failures."""
+    failed_run = {
+        "change_status": "FAILED",
+        "access_status": "failed",
+        "monitor_access_status": "error",
+    }
+    assert _source_health_status(failed_run) == "FAILED"
+
+
+def test_health_status_healthy_run_is_monitor_ok():
+    ok_run = {"change_status": "UNCHANGED", "access_status": "ok", "extraction_quality": "OK"}
+    assert _source_health_status(ok_run) == "MONITOR_OK"

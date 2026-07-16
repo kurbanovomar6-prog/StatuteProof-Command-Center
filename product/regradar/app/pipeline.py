@@ -242,7 +242,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     if content is None:
         # ── Step 1: Fetch ──────────────────────────────────────────────
         logger.info("Pipeline start (generic scraper): %s", url)
-        html = fetch_page(url)
+        html = fetch_page(url, allow_proxy=True)
 
         # ── Step 2: Extract (multi-strategy) ─────────────────────────
         _extr           = extract_best_text(html, url)

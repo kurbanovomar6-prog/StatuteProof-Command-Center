@@ -542,7 +542,19 @@ def _base_event(
 def _source_health_status(run: dict[str, Any]) -> str:
     change = str(run.get("change_status") or "").upper()
     access = str(run.get("access_status") or "").lower()
+    monitor_access = str(run.get("monitor_access_status") or "").lower()
     quality = str(run.get("extraction_quality") or "").upper()
+    # A GENUINE runtime access block (the monitor set monitor_access_status
+    # ="blocked" when fetch_page raised a 401/403/451 WAF/geo block) is its own
+    # honest state — reported BEFORE the generic FAILED so a source our
+    # datacenter IP is blocked from is never presented as a mere extraction
+    # hiccup (or, worse, as healthy). Only this runtime signal preempts; the
+    # config-derived access_status ("restricted", set purely from a source's
+    # static disabled_* status) keeps its original position AFTER the
+    # quality/failure checks so a real QUALITY_DROP/FAILED on such a source is
+    # not masked as an access block.
+    if monitor_access == "blocked":
+        return "ACCESS_BLOCKED"
     if change == "QUALITY_DROP" or quality == "FAILED":
         return "QUALITY_DROP"
     if change == "FAILED":

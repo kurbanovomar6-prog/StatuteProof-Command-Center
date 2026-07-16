@@ -576,7 +576,7 @@ def test_fetch_page_falls_back_to_tier1_when_tier2_ssrf_blocked(monkeypatch):
 
     thin_html = "<html><body><p>too short</p></body></html>"
     with patch("app.scraper._fetch_via_requests", return_value=thin_html) as mocked_tier1:
-        def _tier1_side_effect(url, status_out=None):
+        def _tier1_side_effect(url, status_out=None, **kw):
             if status_out is not None:
                 status_out["http_status"] = 200
             return thin_html
@@ -592,6 +592,128 @@ def test_fetch_page_falls_back_to_tier1_when_tier2_ssrf_blocked(monkeypatch):
     # Tier 2 attempt (which never reaches the "record status" line because
     # it raises before getting there).
     assert status_out.get("http_status") == 200
+
+
+# ── access-block honesty: a WAF/geo 403 must not masquerade as a generic error ──
+
+
+def test_fetch_page_surfaces_waf_403_as_access_block(monkeypatch):
+    """A hard WAF/geo block (Tier-1 HTTP 403, Tier-2 Playwright empty) must be
+    raised as an access block — classified as 'blocked', never a generic error,
+    and the block page must never be used as best-effort content. This is the
+    live CBUAE-from-datacenter case: rulebook.centralbank.ae 403s the droplet IP."""
+    from app.monitor import _classify_access_status
+
+    def _tier1_403(url, status_out=None, **kw):
+        if status_out is not None:
+            status_out["http_status"] = 403
+        return None  # fetch_text_bounded_status returns a None body on non-2xx
+
+    def _tier2_empty(url, status_out=None):
+        raise ValueError(f"Playwright returned empty HTML for {url}")
+
+    monkeypatch.setattr("app.scraper._fetch_via_requests", _tier1_403)
+    monkeypatch.setattr("app.scraper._fetch_via_playwright", _tier2_empty)
+
+    with pytest.raises(PermissionError) as ei:
+        fetch_page("https://rulebook.centralbank.ae/en/rulebook/stored-value-facilities")
+    msg = str(ei.value).lower()
+    assert "403" in msg and "blocked" in msg
+    # The monitor classifier must now read this as a block, not a generic error.
+    assert _classify_access_status(ei.value) == "blocked"
+
+
+def test_fetch_page_block_page_body_never_used_as_content(monkeypatch):
+    """Even when Tier-1 returns a short block-page BODY (not None), a 401/403/451
+    status must prevent that body from being sealed as best-effort content — a
+    bogus '403 Forbidden' baseline is worse than an honest access-block failure."""
+    block_body = "<html><head><title>403 Forbidden</title></head><body>403</body></html>"
+
+    def _tier1_403_body(url, status_out=None, **kw):
+        if status_out is not None:
+            status_out["http_status"] = 403
+        return block_body
+
+    def _tier2_empty(url, status_out=None):
+        raise ValueError("Playwright returned empty HTML")
+
+    monkeypatch.setattr("app.scraper._fetch_via_requests", _tier1_403_body)
+    monkeypatch.setattr("app.scraper._fetch_via_playwright", _tier2_empty)
+
+    with pytest.raises(PermissionError):
+        fetch_page("https://rulebook.centralbank.ae/en/rulebook/x")
+
+
+def test_fetch_page_rejects_tier2_rendered_block_page(monkeypatch):
+    """Tier 2 (Playwright) can RENDER a WAF block page with no exception (>200
+    chars). If Tier 2's OWN HTTP status is a block (403), that body must be
+    refused — not sealed as content. (The block guard must cover Tier-2's
+    success path, not only its exception path.)"""
+    def _tier1_lowcontent(url, status_out=None, **kw):
+        if status_out is not None:
+            status_out["http_status"] = 200
+        return "<html><body><p>thin</p></body></html>"  # low → escalate to Tier 2
+
+    def _tier2_block_page(url, status_out=None):
+        if status_out is not None:
+            status_out["http_status"] = 403
+        return "<html><head><title>403 Forbidden</title></head><body>" + "x" * 400 + "</body></html>"
+
+    monkeypatch.setattr("app.scraper._fetch_via_requests", _tier1_lowcontent)
+    monkeypatch.setattr("app.scraper._fetch_via_playwright", _tier2_block_page)
+
+    with pytest.raises(PermissionError) as ei:
+        fetch_page("https://rulebook.centralbank.ae/en/rulebook/x")
+    assert "403" in str(ei.value).lower()
+
+
+def test_fetch_page_tier2_browser_bypass_of_requests_403_returns_content(monkeypatch):
+    """A site that 403s the requests tier but serves 200 to a real browser must
+    STILL yield content — the block check uses Tier 2's own status (200), never
+    Tier 1's stale 403 — so we don't over-reject a legitimate browser bypass."""
+    def _tier1_403(url, status_out=None, **kw):
+        if status_out is not None:
+            status_out["http_status"] = 403
+        return None
+
+    good_html = "<html><body><main>" + "Real regulatory content. " * 40 + "</main></body></html>"
+
+    def _tier2_ok(url, status_out=None):
+        if status_out is not None:
+            status_out["http_status"] = 200
+        return good_html
+
+    monkeypatch.setattr("app.scraper._fetch_via_requests", _tier1_403)
+    monkeypatch.setattr("app.scraper._fetch_via_playwright", _tier2_ok)
+
+    out = fetch_page("https://someregulator.example/x")
+    assert out == good_html
+
+
+def test_fetch_via_requests_proxy_gated_by_allow_proxy(monkeypatch):
+    """The proxy is engaged ONLY when allow_proxy=True (trusted monitoring). The
+    default (user-URL test path) never proxies, even for an allowlisted host —
+    closing the 'user aims the owner proxy' hole."""
+    monkeypatch.setenv("STATUTEPROOF_FETCH_PROXY", "http://proxy.example:8080")
+    monkeypatch.delenv("STATUTEPROOF_PROXY_HOSTS", raising=False)
+    captured: dict = {}
+
+    def _capture(url, *, headers, timeout, max_bytes, label, proxy=None):
+        captured["proxy"] = proxy
+        return 200, "<html>ok</html>"
+
+    monkeypatch.setattr("app.scraper.fetch_text_bounded_status", _capture)
+    from app.scraper import _fetch_via_requests
+
+    # Allowlisted host but DEFAULT (user path) → no proxy.
+    _fetch_via_requests("https://rulebook.centralbank.ae/x")
+    assert captured["proxy"] is None
+    # Trusted path + allowlisted host → proxy engaged.
+    _fetch_via_requests("https://rulebook.centralbank.ae/x", allow_proxy=True)
+    assert captured["proxy"] == "http://proxy.example:8080"
+    # Trusted path but NON-allowlisted host → still no proxy.
+    _fetch_via_requests("https://vara.ae/x", allow_proxy=True)
+    assert captured["proxy"] is None
 
 
 # ── SSRF_RESIDUAL_RISK: honesty check ──────────────────────────────────────────

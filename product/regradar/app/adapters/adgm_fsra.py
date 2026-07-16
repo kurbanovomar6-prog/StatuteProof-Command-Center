@@ -25,7 +25,7 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup  # type: ignore
 
-from app.adapters.base import fetch_text_bounded, SourceAdapter
+from app.adapters.base import fetch_text_bounded, proxy_for_url, SourceAdapter
 from app.config import HTTP_TIMEOUT_S, REQUESTS_UA
 from app.parser import extract_text  # type: ignore
 
@@ -169,7 +169,8 @@ class ADGMFSRAAdapter(SourceAdapter):
 
     def fetch_content(self, url: str, source: dict | None = None) -> str | None:
         html = fetch_text_bounded(
-            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="ADGMFSRAAdapter"
+            url, headers=_HEADERS, timeout=HTTP_TIMEOUT_S, label="ADGMFSRAAdapter",
+            proxy=proxy_for_url(url),
         )
         if html is None:
             return None

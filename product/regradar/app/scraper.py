@@ -32,8 +32,16 @@ Block / low-content detection heuristics:
 
 SSRF guard (both tiers):
   Tier 1 (requests) is guarded per-hop by app.adapters.base._guarded_get:
-  every redirect hop is resolved and IP-pinned before connecting, defeating
-  DNS-rebind. Tier 2 (Playwright/Chromium) cannot be IP-pinned the same way
+  every redirect hop's host is resolved and validated, and a DIRECT hop is
+  IP-pinned before connecting, defeating DNS-rebind. EXCEPTION — a hop routed
+  through the owner-configured egress proxy (only the fixed allowlist of
+  WAF/geo-blocked regulator hosts, e.g. CBUAE) is NOT IP-pinned: a forward
+  proxy does its own DNS+connect, so pinning is impossible on that path. The
+  host is still validated and the proxy is re-gated per hop (dropped the moment
+  a redirect leaves the allowlist), but the DNS-rebind window is not closed for
+  those 3 allowlisted regulator hosts — closing it would require compromising
+  the regulator's own DNS. See PROXY_RESIDUAL_RISK below. Tier 2
+  (Playwright/Chromium) cannot be IP-pinned the same way
   from the Python side, so it is guarded instead by intercepting every
   request the browser makes — navigation, each redirect hop, every
   subresource, AND WebSocket connections opened by the page's own JS — via
@@ -52,7 +60,7 @@ from urllib.parse import urlsplit, urlunsplit
 from bs4 import BeautifulSoup
 from playwright.sync_api import Browser as PWBrowser, TimeoutError as PWTimeout, sync_playwright
 
-from app.adapters.base import _validate_fetch_target, fetch_text_bounded_status
+from app.adapters.base import _validate_fetch_target, fetch_text_bounded_status, proxy_for_url
 from app.config import HTTP_TIMEOUT_S, PAGE_TIMEOUT_MS, REQUESTS_UA
 
 logger = logging.getLogger(__name__)
@@ -203,7 +211,9 @@ def is_low_content_html(html: str) -> bool:
 _MAX_RESPONSE_BYTES = 10 * 1024 * 1024  # 10 MB hard limit
 
 
-def _fetch_via_requests(url: str, status_out: dict | None = None) -> str | None:
+def _fetch_via_requests(
+    url: str, status_out: dict | None = None, *, allow_proxy: bool = False
+) -> str | None:
     """
     Attempt a plain HTTP GET with a bounded, streamed read.
 
@@ -226,11 +236,23 @@ def _fetch_via_requests(url: str, status_out: dict | None = None) -> str | None:
         url,
         headers={
             "User-Agent":      REQUESTS_UA,
-            "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+            # Prefer English (the UAE regulator portals this generic tier fetches
+            # are English) but keep a wildcard so a non-English source reached via
+            # the generic FALLBACK (e.g. a .ru site whose own ru-RU adapter failed)
+            # still gets a body. Adding an explicit Accept header + dropping the
+            # ru-RU default fixed worse content negotiation on some UAE portals.
+            "Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9,*;q=0.5",
         },
         timeout=HTTP_TIMEOUT_S,
         max_bytes=_MAX_RESPONSE_BYTES,
         label="Tier 1 (requests)",
+        # Route allowlisted WAF/geo-blocked regulator hosts (e.g. CBUAE) through
+        # the owner-configured egress proxy — but ONLY on trusted monitoring
+        # paths (allow_proxy=True). The user-supplied "test a custom source"
+        # path leaves allow_proxy=False, so an authenticated user can never aim
+        # the owner's proxy with an arbitrary (even allowlisted-host) URL.
+        proxy=proxy_for_url(url) if allow_proxy else None,
     )
     if status_out is not None:
         status_out["http_status"] = status
@@ -587,7 +609,7 @@ def _fetch_via_playwright(url: str, status_out: dict | None = None) -> str:
 
 # ── public API ────────────────────────────────────────────────────────────────
 
-def fetch_page(url: str, *, status_out: dict | None = None) -> str:
+def fetch_page(url: str, *, status_out: dict | None = None, allow_proxy: bool = False) -> str:
     """
     Fetch `url` and return raw HTML.
 
@@ -614,7 +636,12 @@ def fetch_page(url: str, *, status_out: dict | None = None) -> str:
     ValueError    — Both tiers returned unusable content.
     """
     # ── Step 1: Tier 1 ────────────────────────────────────────────────
-    requests_html = _fetch_via_requests(url, status_out=status_out)
+    # Always capture Tier 1's HTTP status locally (mirrored to the caller's
+    # status_out when provided) so Step 2's failure handling can tell an
+    # access BLOCK (WAF/geo 401/403/451) apart from a generic extraction error.
+    _status: dict = status_out if status_out is not None else {}
+    requests_html = _fetch_via_requests(url, status_out=_status, allow_proxy=allow_proxy)
+    tier1_status = _status.get("http_status")
 
     if requests_html is not None:
         if not is_low_content_html(requests_html):
@@ -633,10 +660,25 @@ def fetch_page(url: str, *, status_out: dict | None = None) -> str:
         )
 
     # ── Step 2: Tier 2 ────────────────────────────────────────────────
+    # Give Tier 2 its own status slot so we can tell a genuine Tier-2 HTTP
+    # status apart from a leftover Tier-1 status. A same-IP Tier 2 cannot
+    # legitimately bypass an IP block, but it CAN silently RENDER a WAF/geo
+    # block page (a >200-char "403 Forbidden" body raises no exception) — that
+    # rendered page is not the regulator document and must never be sealed.
+    _t2_status: dict = {}
     try:
-        return _fetch_via_playwright(url, status_out=status_out)
+        tier2_html = _fetch_via_playwright(url, status_out=_t2_status)
 
     except (TimeoutError, ValueError, Exception) as exc:
+        # A hard access block (WAF/geo) must be surfaced as such — never
+        # classified as a generic error, and never fed downstream as content.
+        # The block page (e.g. a 520-byte "403 Forbidden") is NOT the regulator
+        # document; using it as best-effort content would seal a bogus baseline.
+        if tier1_status in (401, 403, 451):
+            raise PermissionError(
+                f"HTTP {tier1_status} — access blocked (WAF/geo) for {url}"
+            ) from exc
+
         if requests_html is not None:
             logger.warning(
                 "Playwright failed (%s: %s) — using Tier 1 HTML as best-effort fallback",
@@ -654,6 +696,20 @@ def fetch_page(url: str, *, status_out: dict | None = None) -> str:
             # about to return here. Nothing to restore.
             return requests_html
         raise
+
+    # Tier 2 succeeded. Its status reflects the content we are about to return,
+    # so mirror it into the caller's status_out. Then refuse a rendered block
+    # page: if Tier 2's OWN status is a hard block, the body is the block page,
+    # not the document. (Using Tier 2's own status — not Tier 1's — means a
+    # legitimate browser bypass of a requests-tier 403, i.e. Tier 2 got 200,
+    # still returns real content.)
+    if "http_status" in _t2_status:
+        _status["http_status"] = _t2_status["http_status"]
+    if _t2_status.get("http_status") in (401, 403, 451):
+        raise PermissionError(
+            f"HTTP {_t2_status['http_status']} — access blocked (WAF/geo) for {url}"
+        )
+    return tier2_html
 
 
 def fetch_page_with_config(
