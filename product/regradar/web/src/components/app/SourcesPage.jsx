@@ -523,6 +523,17 @@ export default function SourcesPage({ onAddCustomSource }) {
                   <div className="rounded-lg border border-[var(--trust-border)] bg-[var(--trust-badge)] px-3 py-2 text-xs text-[var(--accent)]">
                     {timelineData.source_health_status}: {timelineData.message}
                   </div>
+                  {timelineData.change_frequency?.total_changes_observed > 0 && (
+                    <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-3 py-2 text-[11px] text-[var(--text-muted)]">
+                      <span className="font-semibold text-[var(--text-secondary)]">Change frequency:</span>{' '}
+                      {timelineData.change_frequency.changes_last_30d} detected in the last 30 days
+                      {' · avg '}{timelineData.change_frequency.avg_changes_per_month}/month
+                      {timelineData.change_frequency.unusual_recent_activity && (
+                        <span className="ml-2 rounded-md border border-amber-400/25 bg-amber-400/10 px-1.5 py-0.5 text-amber-300">unusual recent activity</span>
+                      )}
+                      <span className="mt-1 block">Descriptive statistics over recorded runs only — not an assessment of impact or applicability.</span>
+                    </div>
+                  )}
                   {timelineData.events.slice().reverse().map(event => (
                     <div key={event.event_id} className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-4 py-3">
                       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
