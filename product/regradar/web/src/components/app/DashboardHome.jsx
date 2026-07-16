@@ -100,7 +100,7 @@ function ProfileSummaryCard({ profile, currentUser, navigate, planState }) {
           </div>
           <h1 className="text-xl font-bold text-white">UAE-first pilot workspace</h1>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            {company}. Source layers are shown for review and validation; activation requires proof/diff validation.
+            {company}. Your selected source layers are listed below; our team activates monitoring after the readiness review.
           </p>
         </div>
         <button
@@ -141,7 +141,7 @@ function WorkspaceChecklist({ profile, telegramStatus, telegramLoading, navigate
     { label: 'Profile saved', detail: hasProfile ? profileLabel(profile) : 'Add markets and licence profile', status: hasProfile ? 'Complete' : 'Pending', tone: hasProfile ? 'emerald' : 'amber', action: 'settings' },
     { label: 'Telegram connected', detail: connected ? 'Account pairing confirmed' : telegramStatus?.status_error ? 'Status check failed — open Integrations to retry' : 'Connect Telegram in Integrations', status: connected ? 'Complete' : telegramLoading ? 'Checking' : telegramStatus?.status_error ? 'Unavailable' : 'Pending', tone: connected ? 'emerald' : 'amber', action: 'integrations' },
     { label: 'Source map reviewed', detail: 'Review fresh-alert eligible, limited, and access-restricted sources', status: 'To do', tone: 'slate', action: 'sources' },
-    { label: 'First reviewed brief', detail: 'Use email test-mode or Telegram preview only after review gates pass', status: 'Test mode', tone: 'slate', action: 'briefs' },
+    { label: 'First reviewed brief', detail: 'Preview a reviewed brief by email or Telegram once review gates pass', status: 'Preview', tone: 'slate', action: 'briefs' },
   ]
 
   return (
@@ -471,106 +471,25 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
     {
       label: 'Coverage limits',
       value: sourceSummary ? `${(sourceSummary.candidate_count ?? 0) + (sourceSummary.remediation_count ?? 0)}` : '—',
-      detail: 'Candidate and remediation rows stay outside fresh-alert claims.',
+      detail: 'Sources still in validation are excluded from your alert coverage — disclosed, not hidden.',
       tone: ((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) > 0 ? 'amber' : 'emerald',
       action: 'sources',
     },
     {
       label: 'Brief delivery',
-      value: 'Blocked',
-      detail: 'Customer delivery remains off until evidence and human-review gates pass.',
+      value: 'Not yet enabled',
+      detail: 'Switched on by our team after your source readiness review — nothing you need to fix.',
       tone: 'slate',
       action: 'briefs',
     },
   ]
 
-  return (
-    <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
-      <PlanBanner planState={planState} onChoosePlan={onChoosePlan} />
+  // Source status table — operator surface, rendered inside the collapsed
+  // Monitoring operations block (2.2).
+  function renderSourceTable() {
+    if (sourcesLoading || sourcesError || !(sourcesData?.sources?.length > 0)) return null
+    return (
 
-      <div className="sp-command-hero p-5 lg:p-6">
-        <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="sp-heading max-w-4xl text-2xl font-semibold leading-tight text-white md:text-3xl">
-                {sourcesError
-                  ? 'Source readiness summary is unavailable right now.'
-                  : sourcesLoading
-                  ? 'Loading UAE source readiness summary…'
-                  : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} sources eligible for fresh alerts · ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations disclosed`}
-              </h1>
-              {!sourcesLoading && !sourcesError && (
-                <MonitoringFreshness lastRunAt={sourceSummary?.last_run_at} />
-              )}
-            </div>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
-              Review what changed and what needs a decision before relying on any alert,
-              brief draft, or source claim. Monitoring intelligence only — not legal advice.
-            </p>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {attentionItems.map(item => (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => navigate(item.action)}
-                  className="group rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-4 text-left transition hover:-translate-y-0.5 hover:border-[var(--trust-border)] hover:bg-[var(--bg-elevated)]"
-                >
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <p className="text-[11px] font-bold text-[var(--text-muted)]">{item.label}</p>
-                    <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Gated'}</StatusPill>
-                  </div>
-                  <p className={`text-3xl font-semibold text-white ${typeof item.value === 'number' ? 'sp-mono' : ''}`}>{item.value}</p>
-                  <p className="mt-2 min-h-[2.4rem] text-xs leading-relaxed text-[var(--text-muted)]">{item.detail}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)]">
-                    Open <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-5">
-            <p className="text-xs font-semibold text-[var(--text-muted)]">Recommended next step</p>
-            <h2 className="mt-2 text-lg font-semibold text-white">Review source-health flags before brief work.</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-              Failed and quality-drop runs should be cleared or documented before source scope
-              is presented to anyone outside the workspace.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate('sources')}
-              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--accent-hover)]"
-            >
-              Review source health <ArrowRight className="h-4 w-4" />
-            </button>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <CommandMetric label="Enabled" value={sourceSummary?.enabled_count ?? '—'} detail="source records" />
-              <CommandMetric label="Fresh-alert eligible" value={sourceSummary?.readiness_supported_count ?? '—'} tone="emerald" detail="validated for alerts" />
-              <CommandMetric label="Limited scope" value={(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'} tone="amber" detail="excluded from claims" />
-              <CommandMetric label="Evidence records" value={widgets?.evidenceRecords ?? '—'} detail="runs with proof data" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <EvidenceChainPanel />
-
-      <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} planState={planState} />
-
-      {sourcesError && (
-        <ErrorState
-          title="Could not load source status."
-          detail={sourcesError}
-          onRetry={retrySources}
-          className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]"
-        />
-      )}
-
-      <PressureScore />
-
-      {/* Real source table — from /api/sources/status */}
-      {!sourcesLoading && !sourcesError && sourcesData?.sources?.length > 0 && (
         <div className="sp-panel p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
@@ -624,7 +543,105 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
             {sourcesData.disclaimer || 'Not legal advice. For monitoring information only.'}
           </p>
         </div>
+    )
+  }
+
+  return (
+    <div className="min-h-full space-y-5 bg-[var(--bg-navy)] p-5 pb-10">
+      <PlanBanner planState={planState} onChoosePlan={onChoosePlan} />
+
+      <div className="sp-command-hero p-5 lg:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="sp-heading max-w-4xl text-2xl font-semibold leading-tight text-white md:text-3xl">
+                {sourcesError
+                  ? 'Source readiness summary is unavailable right now.'
+                  : sourcesLoading
+                  ? 'Loading UAE source readiness summary…'
+                  : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} sources eligible for fresh alerts · ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations disclosed`}
+              </h1>
+              {!sourcesLoading && !sourcesError && (
+                <MonitoringFreshness lastRunAt={sourceSummary?.last_run_at} />
+              )}
+            </div>
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
+              Review what changed and what needs a decision before relying on any alert,
+              brief draft, or source claim. Monitoring intelligence only — not legal advice.
+            </p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {attentionItems.map(item => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => navigate(item.action)}
+                  className="group rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-4 text-left transition hover:-translate-y-0.5 hover:border-[var(--trust-border)] hover:bg-[var(--bg-elevated)]"
+                >
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <p className="text-[11px] font-bold text-[var(--text-muted)]">{item.label}</p>
+                    <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Pending'}</StatusPill>
+                  </div>
+                  <p className={typeof item.value === 'number' ? 'sp-mono text-3xl font-semibold text-white' : `font-semibold text-white ${String(item.value).length > 10 ? 'text-lg leading-snug' : 'text-3xl'}`}>{item.value}</p>
+                  <p className="mt-2 min-h-[2.4rem] text-xs leading-relaxed text-[var(--text-muted)]">{item.detail}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)]">
+                    Open <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-base)] p-5">
+            <p className="text-xs font-semibold text-[var(--text-muted)]">Recommended next step</p>
+            <h2 className="mt-2 text-lg font-semibold text-white">See what changed first.</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+              Open the review queue to see the latest sealed changes from your
+              monitored sources and decide what matters for your firm. Every
+              record carries its hash, timestamp and diff.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('review-queue')}
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--accent-hover)]"
+            >
+              Open the review queue <ArrowRight className="h-4 w-4" />
+            </button>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <CommandMetric label="Enabled" value={sourceSummary?.enabled_count ?? '—'} detail="source records" />
+              <CommandMetric label="Fresh-alert eligible" value={sourceSummary?.readiness_supported_count ?? '—'} tone="emerald" detail="validated for alerts" />
+              <CommandMetric label="Limited scope" value={(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'} tone="amber" detail="excluded from claims" />
+              <CommandMetric label="Evidence records" value={widgets?.evidenceRecords ?? '—'} detail="runs with proof data" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ProfileSummaryCard profile={profile} currentUser={currentUser} navigate={navigate} planState={planState} />
+
+      {sourcesError && (
+        <ErrorState
+          title="Could not load source status."
+          detail={sourcesError}
+          onRetry={retrySources}
+          className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]"
+        />
       )}
+
+      {/* 2.2: operator surfaces live in a collapsed block — the customer's
+          first screen leads with their sealed changes and review queue, not
+          the internal gate map and ops tables. */}
+      <details className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)]">
+        <summary className="cursor-pointer select-none px-5 py-4 text-sm font-semibold text-[var(--text-secondary)] transition-colors hover:text-white">
+          Monitoring operations — gate map, pressure score and per-source status
+        </summary>
+        <div className="space-y-5 px-5 pb-5">
+          <EvidenceChainPanel />
+          <PressureScore />
+          {renderSourceTable()}
+        </div>
+      </details>
+
 
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div className="space-y-5">
@@ -638,12 +655,12 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
             <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--bg-elevated)] p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-sm font-semibold text-white">Brief delivery readiness</h2>
-                <StatusPill tone="cyan">Test mode</StatusPill>
+                <StatusPill tone="cyan">Preview</StatusPill>
               </div>
               <div className="space-y-4 text-xs">
                 <p className="leading-relaxed text-[var(--text-primary)]">
-                  Reviewed weekly briefs can be rendered into Markdown/HTML and written to local email test-mode outbox.
-                  External email delivery is not enabled automatically.
+                  Reviewed weekly briefs render to Markdown/HTML for preview before anything reaches your inbox.
+                  External email delivery is switched on by our team, never automatically.
                 </p>
                 <button onClick={() => navigate('integrations')} className="w-full rounded-lg border border-[var(--trust-border)] px-3 py-2 text-xs font-semibold text-[var(--accent)] transition-colors hover:border-[var(--trust-border)]">
                   Open delivery settings
