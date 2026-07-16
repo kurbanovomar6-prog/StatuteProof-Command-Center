@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CheckCircle, Lock, ArrowRight, Sparkles } from 'lucide-react'
 import { clearPlanIntent, readPlanIntent } from '../../data/planIntent'
 
