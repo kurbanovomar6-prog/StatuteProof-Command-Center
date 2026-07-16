@@ -9,6 +9,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
+import { SOURCE_QUALITY_SUMMARY, SAFE_CLAIMS, AUDIT_META } from '../data/sourceQualityAudit.ts'
 
 function findFile(rels) {
   const path = rels.map(r => resolve(process.cwd(), r)).find(existsSync)
@@ -85,4 +86,26 @@ describe('SourceCoverageTable never badges a non-fresh-alert source as ACTIVE (D
       }
     })
   }
+})
+
+// DH-3: the SAFE_CLAIMS / recommendedSalesClaim strings are labelled as sales
+// copy — they must match the summary's own fresh-alert number and never carry a
+// stale figure. (This file had a stale "83" against a header of 74.)
+describe('sourceQualityAudit sales claims match the summary (DH-3)', () => {
+  const n = SOURCE_QUALITY_SUMMARY.freshAlertEligible
+
+  it('no SAFE_CLAIM or the recommendedSalesClaim carries the stale "83"', () => {
+    for (const claim of SAFE_CLAIMS) expect(claim).not.toMatch(/\b83\b/)
+    expect(AUDIT_META.recommendedSalesClaim).not.toMatch(/\b83\b/)
+  })
+
+  it('the headline fresh-alert claim states the summary number', () => {
+    expect(SAFE_CLAIMS[0]).toContain(`${n} fresh-alert-eligible`)
+    expect(AUDIT_META.recommendedSalesClaim).toContain(`${n} fresh-alert-eligible`)
+  })
+
+  it('FIU is never claimed to have fresh-alert sources', () => {
+    const joined = SAFE_CLAIMS.join(' ')
+    expect(/FIU has \d+ fresh-alert/.test(joined)).toBe(false)
+  })
 })

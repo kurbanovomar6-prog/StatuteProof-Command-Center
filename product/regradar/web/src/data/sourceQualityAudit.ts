@@ -169,13 +169,13 @@ export const KNOWN_LIMITATIONS = [
   },
   {
     source: "UAE FIU",
-    limitation: "UAE FIU has 6 fresh-alert sources. The held circulars candidate resolves to the general publications index, not a distinct circular/notice endpoint, and cannot be claimed as monitored.",
+    limitation: "UAE FIU has no fresh-alert eligible sources: the goAML/FIU portal is geo-blocked from our monitoring region, and the held circulars candidate resolves to the general publications index rather than a distinct circular/notice endpoint.",
     impact: "partial_coverage",
     clientsAffected: ["aml_mlro", "dnfbp", "vasp_crypto"],
   },
   {
     source: "EOCN / sanctions / TFS",
-    limitation: "25 selected EOCN/TFS-related sources are fresh-alert eligible. This is selected-source monitoring, not complete sanctions coverage.",
+    limitation: "4 selected EOCN sanctions-related sources are fresh-alert eligible. This is selected-source monitoring, not complete sanctions coverage.",
     impact: "resolved_with_scope",
     clientsAffected: ["sanctions_tfs", "aml_mlro", "vasp_crypto", "dnfbp"],
   },
@@ -194,9 +194,9 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  "StatuteProof has 83 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK status, proof records, hashes, and baseline confirmation as of June 21, 2026.",
+  "StatuteProof has 74 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK status, proof records, hashes, and baseline confirmation as of the source-register review (2026-07-13).",
   "StatuteProof also maintains 4 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
-  "83 UAE source records currently have MONITOR_OK status overall; all 83 of those are fresh-alert eligible.",
+  "74 UAE source records currently have MONITOR_OK status and are fresh-alert eligible.",
   "StatuteProof maintains source-level proof files for 86 of 116 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
   "ADGM/FSRA has 9 selected proof-backed fresh-alert sources, including guidance/policy and RA/circular/rulebook style sources, with 3 remaining candidates disclosed as held.",
   "DIFC has 9 selected proof-backed fresh-alert sources, including the official DIFC Legal Database listing; this is not complete DIFC legal database coverage.",
@@ -236,6 +236,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: "83 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK, source-level proof files, hashes, and baseline confirmation",
+  recommendedSalesClaim: "74 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK, source-level proof files, hashes, and baseline confirmation",
   riskBriefBoundary: "Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist.",
 } as const
