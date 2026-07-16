@@ -303,6 +303,47 @@ def test_review_own_custom_record_by_owner_is_allowed(isolated_db, monkeypatch):
     assert 403 not in _statuses(handler)
 
 
+def test_review_shared_official_by_real_non_operator_is_forbidden_e2e(isolated_db, tmp_path, monkeypatch):
+    """SEC-2 end-to-end WITHOUT mocking the gate functions: a genuine self-registered
+    owner (real resolve_principal → org_id != GLOBAL_ORG_ID) hitting a genuine
+    on-disk OFFICIAL evidence record must be 403'd by the REAL _caller_is_operator
+    and _canonical_record_is_own_custom, and nothing may be written. This is the
+    test the security review asked for — it would catch a regression in the
+    `== GLOBAL_ORG_ID` compare or in is_custom_source ownership resolution that the
+    boolean-mocking tests above cannot."""
+    import json as _json
+    import app.evidence_records as er
+
+    user = _new_owner("realattacker@example.com")
+    _auth_as(monkeypatch, {"id": user["id"], "email": user["email"]})
+
+    # Real evidence-record.json on disk for a SHARED OFFICIAL source (not custom-).
+    monkeypatch.setattr(er, "_BASE_DIR", tmp_path)
+    rec_dir = tmp_path / "evidence" / "dfsa" / "AE-dfsa-official-e2e" / "run1"
+    rec_dir.mkdir(parents=True)
+    (rec_dir / "evidence-record.json").write_text(_json.dumps({
+        "record_id": "evr-e2e-1",
+        "source": {"source_id": "AE-dfsa-official-e2e", "regulator": "DFSA"},
+        "run": {"run_id": "run1", "status": "CHANGED"},
+    }), encoding="utf-8")
+
+    wrote = {"v": False}
+    monkeypatch.setattr(
+        "app.review_queue.record_canonical_review_action",
+        lambda *a, **k: wrote.__setitem__("v", True) or {"status": "ok"},
+    )
+    handler = _make_handler("POST", "/api/canonical-evidence/review")
+    monkeypatch.setattr(
+        handler, "_read_json_strict",
+        lambda: ({"record_id": "evr-e2e-1", "decision": "blocked", "note": "sabotage"}, None),
+    )
+
+    handler._handle_canonical_evidence_review_action()
+
+    assert 403 in _statuses(handler), "a REAL non-operator must be 403 on shared official evidence"
+    assert wrote["v"] is False, "the review decision must never be written"
+
+
 # ── 3. a logging failure must NOT break the action (isolation) ────────────────────
 
 def test_logging_failure_does_not_break_the_action(isolated_db, monkeypatch):
