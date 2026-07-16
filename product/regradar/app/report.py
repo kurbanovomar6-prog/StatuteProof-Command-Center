@@ -21,7 +21,7 @@ Derived fields (not stored in DB, computed at report time):
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app.config import DB_PATH
@@ -70,7 +70,7 @@ def _fetch_records(days: int) -> list[dict]:
     if not Path(DB_PATH).exists():
         return []
 
-    cutoff = (datetime.utcnow() - timedelta(days=days)).isoformat()
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     conn = _connect()
     try:
         rows = conn.execute(
@@ -649,8 +649,8 @@ def generate_report(days: int = 7) -> dict:
         "low":    len(groups["LOW"]),
     }
 
-    generated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-    date_slug    = datetime.utcnow().strftime("%Y-%m-%d")
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    date_slug    = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     md_path   = _REPORTS_DIR / f"regradar_report_{date_slug}.md"
     html_path = _REPORTS_DIR / f"regradar_report_{date_slug}.html"

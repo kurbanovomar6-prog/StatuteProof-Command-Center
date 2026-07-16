@@ -54,6 +54,10 @@ const REAL_RECORD = {
   normalized_hash: 'sha256:2cedc486a126302a5318a749f49e0c817eb113515aa7ddc99ac70ae1223082eb',
   diff_excerpt:
     '0 lines added, 5 lines removed on the official DFSA Rules and Standards page — captured 2026-06-11 and sealed under the SHA-256 above.',
+  // EvidenceCard's proof_chain.chain_verified drives the "Verified ·
+  // SHA-256 match" line. For this shipped record it reflects
+  // record.json integrity.hash_verified (the record is legacy — it
+  // predates the record_hash self-seal), pinned by the drift test.
   proof_chain: { chain_verified: true, captured_at: '2026-06-11T22:29:38+00:00' },
   source_url: 'https://www.dfsa.ae/rules-and-standards',
 };

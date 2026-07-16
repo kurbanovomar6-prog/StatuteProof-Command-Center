@@ -64,3 +64,13 @@ describe('landing REAL_RECORD is pinned to the shipped verifiable asset (2.1)', 
     expect(evidenceSection).toContain('REAL_RECORD')
   })
 })
+
+// LOW (qa re-score): the card's "Verified · SHA-256 match" line is driven by
+// proof_chain.chain_verified — for this legacy record (no record_hash) it must
+// mirror the shipped record's integrity verdict, never free-float.
+describe('REAL_RECORD chain_verified mirrors the shipped integrity verdict', () => {
+  it('record.json integrity.hash_verified is true when the card claims verified', () => {
+    const claimsVerified = /proof_chain: \{ chain_verified: true/.test(appSrc)
+    expect(claimsVerified).toBe(record.integrity.hash_verified === true)
+  })
+})
