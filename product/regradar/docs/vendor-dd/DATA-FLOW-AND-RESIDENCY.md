@@ -1,9 +1,8 @@
 # StatuteProof — Data Flow and Residency
 
 **Audience:** vendor-risk, data-protection and compliance teams.
-**Last reviewed:** 2026-07-12. Claims are grounded in the referenced modules
-and deployment configuration; unverifiable operational details are marked
-[CONFIRM WITH OPERATOR].
+**Last reviewed:** 2026-07-18. Claims are grounded in the referenced modules
+and deployment configuration, verified against the live deployment.
 
 ---
 
@@ -92,9 +91,13 @@ read-only links the customer creates; they are not automatic outbound flows —
 
 - **Provider:** DigitalOcean (single droplet / virtual machine), Ubuntu 24.04,
   deployed per `DEPLOY.md`.
-- **Region:** [CONFIRM WITH OPERATOR] — the region is chosen at droplet
-  creation and is not recorded in the repository. It is a single region; there
-  is no multi-region replication.
+- **Region:** DigitalOcean **FRA1 (Frankfurt, Germany — EU)**, verified
+  against the live deployment 2026-07-18. It is a single region; there is no
+  multi-region replication. Note for UAE-regulated customers: monitored
+  content is public regulator material and no customer compliance decisions
+  are stored unless logged through the response-log feature (§1); hosting is
+  therefore EU-resident, not UAE-resident — assess against your own
+  outsourcing policy.
 - **TLS:** terminated by Caddy with automatically managed Let's Encrypt
   certificates; HSTS enabled (`deploy/Caddyfile`).
 - **Storage:** SQLite database + file-based evidence store on the droplet's
@@ -117,7 +120,7 @@ read-only links the customer creates; they are not automatic outbound flows —
 | Evidence-room share links | Mandatory expiry: default 30 days, hard cap 90 days, revocable | `app/evidence_room.py` |
 | OAuth state values | 10-minute expiry, single consumption | `app/auth.py` |
 | Server logs | journald capped at 500 MB; file logs rotated daily, 14 rotations, 50 MB max | `DEPLOY.md` §2, `deploy/logrotate.d/` |
-| Account data | No automated expiry. There is currently **no self-service account deletion**; deletion is handled by the operator on request. [CONFIRM WITH OPERATOR] for the deletion-request process and turnaround |
+| Account data | No automated expiry. There is currently **no self-service account deletion**; deletion is handled by the operator on a written request to the site's contact address. Manual process; no automated turnaround SLA is committed at this time |
 
 ## 7. Sub-processors
 
@@ -125,11 +128,11 @@ read-only links the customer creates; they are not automatic outbound flows —
 |---|---|---|---|
 | DigitalOcean | Hosting (compute + disk) | All stored data resides on their infrastructure | Always |
 | Telegram | Alert delivery + account pairing | Alert text; the customer's Telegram chat id | Only if the customer connects Telegram |
-| Email provider — SMTP account [CONFIRM WITH OPERATOR for the current provider]; SendGrid and Postmark are supported in code | Email delivery | Email address; brief/alert text; verification emails | Only if email delivery is configured |
-| Anthropic | Optional AI analysis of detected changes | Excerpts of monitored **public** regulator content only; no customer data | Only if `ENABLE_AI_ANALYSIS=true` — [CONFIRM WITH OPERATOR] whether currently enabled in production |
+| Email provider — Zoho Mail SMTP (current production provider, verified 2026-07-18); SendGrid and Postmark are supported in code | Email delivery | Email address; brief/alert text; verification emails | Only if email delivery is configured |
+| Anthropic | Optional AI analysis of detected changes | Excerpts of monitored **public** regulator content only; no customer data | Only if `ENABLE_AI_ANALYSIS=true` — currently **disabled** in production (verified 2026-07-18) |
 | Google | Optional sign-in identity | Google-asserted account email | Only if the customer chooses Google sign-in |
 | RFC 3161 TSA (operator-selected) | External timestamp anchoring of the evidence chain head | One SHA-256 hash; no content, no personal data | Only if `RFC3161_TSA_URL` is configured (dormant by default) |
-| Off-box backup storage (rclone/S3 or scp target) | Backup survival beyond the host | Backup archives | Only if `STATUTEPROOF_BACKUP_REMOTE` is configured — [CONFIRM WITH OPERATOR] |
+| Off-box backup storage (rclone/S3 or scp target) | Backup survival beyond the host | Backup archives | Only if `STATUTEPROOF_BACKUP_REMOTE` is configured — currently **not configured** in production (backups are local to the host; verified 2026-07-18) |
 | Let's Encrypt | TLS certificate issuance | Domain names only | Always |
 
 No other third party receives data from the system. Web typography is
@@ -151,4 +154,4 @@ relationship ends (`app/evidence_pack.py`, `app/audit_export.py`,
 *For monitoring information only. Not legal advice and not a guarantee of
 compliance.*
 
-Questions: security@statuteproof.com [CONFIRM WITH OPERATOR]
+Questions: hello@statuteproof.com (the monitored operator contact address)
