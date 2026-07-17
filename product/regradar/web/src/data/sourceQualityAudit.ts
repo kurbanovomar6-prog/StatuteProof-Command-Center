@@ -9,7 +9,7 @@ export const SOURCE_QUALITY_SUMMARY = {
   evidenceLibraryOnly: 4,
   candidate: 9,
   remediation: 45,
-  sourceLevelMonitorOk: 75,
+  sourceLevelMonitorOk: 77,
   withProofPath: 86,
 } as const
 
@@ -39,7 +39,7 @@ export const FAMILY_QUALITY = [
   {
     family: "DFSA",
     totalEnabled: 16,
-    freshAlertEligible: 1,
+    freshAlertEligible: 2,
     evidenceLibrary: 1,
     candidate: 0,
     remediation: 10,

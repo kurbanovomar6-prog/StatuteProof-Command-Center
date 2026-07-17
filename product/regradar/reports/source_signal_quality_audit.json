@@ -9,7 +9,7 @@
     "evidence_library": 4,
     "candidate": 9,
     "remediation": 45,
-    "source_level_monitor_ok": 75,
+    "source_level_monitor_ok": 77,
     "with_proof_path": 86
   },
   "family_readiness": [
@@ -38,7 +38,7 @@
     {
       "family": "DFSA",
       "total_enabled": 16,
-      "fresh_alert_eligible": 1,
+      "fresh_alert_eligible": 2,
       "evidence_library": 1,
       "candidate": 0,
       "remediation": 10,

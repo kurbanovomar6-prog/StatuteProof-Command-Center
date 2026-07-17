@@ -11,13 +11,13 @@ const PROFILES = [
     icon: Landmark,
     title: 'Payments and fintech',
     sources: 'Primary regulators: CBUAE, Ministry of Finance, UAE CMA',
-    scope: 'Alert focus: CBUAE rulebook payment regulations (payment token, retail payment services, stored value, open finance), CBUAE AML/CFT modules, Ministry of Finance financial policy notices, and the UAE CMA fintech sandbox. VARA is added only when virtual asset products are in scope.',
+    scope: 'Alert focus: ADGM, VARA and DFSA-platform regulatory pages (payment token, retail payment services, stored value, open finance), CBUAE AML/CFT modules, Ministry of Finance financial policy notices, and the UAE CMA fintech sandbox. VARA is added only when virtual asset products are in scope.',
   },
   {
     icon: Building2,
     title: 'DIFC-regulated firms',
     sources: 'Primary regulators: DFSA, DIFC Laws',
-    scope: 'Alert focus after readiness review: DIFC laws, legal database and data protection, plus DFSA rulebook (the AML module is under remediation and not counted), consultations, enforcement and MLRO letters. UAE FIU is geo-restricted; FIU-layer alerts are not offered until an accessible official route clears readiness review.',
+    scope: 'Alert focus after readiness review: DIFC laws, legal database and data protection, plus the DFSA rulebook including the AML module (fresh-alert eligible since 18 July 2026 via the rulebook platform). UAE FIU is geo-restricted; FIU-layer alerts are not offered until an accessible official route clears readiness review.',
   },
   {
     icon: BriefcaseBusiness,
