@@ -27,7 +27,7 @@ const MATRIX_ROWS = [
   },
   {
     category: 'ADGM / FSRA',
-    sourceCount: '9 fresh-alert eligible of 14 enabled',
+    sourceCount: '9 fresh-alert eligible of 15 enabled',
     statusTone: 'active',
     whatWeMonitor: 'ADGM FSRA rules and regulations, guidance and policy statements, supervision circulars, financial/cyber crime prevention, Listing Authority rules, public consultations, ADGM Courts, data protection guidance',
     limitation: 'FSRA rulebook on the Thomson Reuters platform has restricted external access. Regulatory alerts, the waivers register and RA circulars are enabled as disclosed candidates.',

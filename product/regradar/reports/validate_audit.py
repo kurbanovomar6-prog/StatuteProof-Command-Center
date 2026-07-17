@@ -171,6 +171,11 @@ def _belongs_to(source: dict, family: str) -> bool:
         # table must PARTITION the register, not overlap it.
         if _belongs_to(source, "EOCN/TFS"):
             return False
+        # Same partition rule for MoJ-owned DNFBP-supervisor sources (e.g. the
+        # MoJ AML/CFT legislation page whose notes mention DNFBPs): counted
+        # under MoJ/Gazette, never twice.
+        if _belongs_to(source, "MoJ/Gazette"):
+            return False
         return "moec.gov.ae" in url or "moet" in source_id or "dnfbp" in text or "ministry of economy" in name
     return False
 

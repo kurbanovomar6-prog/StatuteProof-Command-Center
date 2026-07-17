@@ -130,6 +130,18 @@ _HOST_RULES: tuple[tuple[str, str], ...] = (
     # Non-prudential UAE authorities and free zones.
     ("eocn.gov.ae", "EOCN"),
     ("uaeiec.gov.ae", "EOCN"),
+    # Sanctions-layer origins (2026-07-18 monitoring-census additions): the
+    # customer-facing scope for the sanctions job is EOCN — the UAE TFS
+    # regime keys on UN designations, and OFAC/UK screening is part of the
+    # same obligation set. FATF-layer (MENAFATF) feeds the same scope. The
+    # UAE FIU is the AML/CFT reporting authority — same scope family.
+    ("scsanctions.un.org", "EOCN"),
+    ("ofsistorage.blob.core.windows.net", "EOCN"),
+    ("ofac.treasury.gov", "EOCN"),
+    ("menafatf.org", "EOCN"),
+    ("uaefiu.gov.ae", "EOCN"),
+    # Basel Committee publications: prudential banking policy — CBUAE scope.
+    ("bis.org", "CBUAE"),
     ("moet.gov.ae", "MOEC"),
     ("moe.gov.ae", "MOEC"),
     ("dlp.dubai.gov.ae", "DLP"),

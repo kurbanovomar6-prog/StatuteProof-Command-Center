@@ -76,6 +76,15 @@ def belongs_to(source: dict, family: str) -> bool:
     if family == "FTA":
         return "tax.gov.ae" in url or source_id.startswith("ae-fta") or "federal tax authority" in name
     if family == "MoE/DNFBP AML":
+        # A source that already belongs to EOCN/TFS (e.g. the MoE-owned targeted
+        # financial sanctions page) is counted there, never twice — the family
+        # accounting must partition the register, not overlap it.
+        if belongs_to(source, "EOCN/TFS"):
+            return False
+        # Partition rule: MoJ-owned DNFBP-supervisor sources (notes mention
+        # DNFBPs) count under MoJ/Gazette, never twice.
+        if belongs_to(source, "MoJ/Gazette"):
+            return False
         return "moec.gov.ae" in url or "moet" in source_id or "dnfbp" in text or "ministry of economy" in name
     return False
 

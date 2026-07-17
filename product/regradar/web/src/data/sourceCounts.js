@@ -11,7 +11,7 @@
 //   readinessSupported = enabled AND monitoring_mode === 'fresh_alert' AND alert_eligible === true
 //   candidate          = enabled AND monitoring_mode === 'candidate'
 export const SOURCE_TRUTH = {
-  enabled: 117,
+  enabled: 127,
   // 2026-07-18 PROD-VANTAGE RE-MEASURE: 25 CBUAE rulebook + 10 www.dfsa.ae
   // sources demoted to remediation — both hosts return HTTP 403 to our
   // production monitoring egress on every fetch method (persistent since
@@ -30,5 +30,5 @@ export const SOURCE_TRUTH = {
   // 5 genuinely alert-worthy but unvalidated listings → candidate (VARA
   // notices/enforcement index, FTA VAT public clarifications, DFSA news hub,
   // DFSA SEO letters, DFM regulatory circulars) — candidate 9 → 14.
-  candidate: 14,
+  candidate: 24,
 }
