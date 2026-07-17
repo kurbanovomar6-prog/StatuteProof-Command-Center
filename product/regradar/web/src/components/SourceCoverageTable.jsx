@@ -137,8 +137,11 @@ export default function SourceCoverageTable() {
     <div className="overflow-hidden rounded-lg border border-[var(--border-muted)] bg-[var(--bg-elevated)] shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
       <div className="flex items-start justify-between gap-3 border-b border-[var(--border-muted)] px-4 py-3">
         <div>
-          <span className="rounded-md border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">
-            SAMPLE / DEMO
+          {/* This table renders REAL registry data (SOURCE_TRUTH + curated
+              rows drift-tested against sources.json) — a SAMPLE/DEMO stamp
+              here under-claimed and undercut the real record beside it. */}
+          <span className="rounded-md border border-cyan-300/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-200">
+            Registry-backed — selected sources
           </span>
           <h3 className="mt-2 text-sm font-semibold text-white">UAE regulatory sources</h3>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
