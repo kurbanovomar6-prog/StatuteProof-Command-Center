@@ -7,7 +7,7 @@
  * have to trust StatuteProof, you check the math yourself.
  *
  * "Load a real record" fills the form with a REAL evidence record of public
- * regulator content (a captured change on the DFSA Rules and Standards page),
+ * regulator content (the VARA Compliance & Risk Management Rulebook capture),
  * shipped as static assets under /sample-record/, so a first-time visitor can
  * run the check without holding a record. Deep link: /verify#sample auto-loads
  * that built-in record ONLY — the page never accepts records or URLs from
@@ -307,15 +307,15 @@ export default function VerifyPage({ onBack }) {
                 This is a real evidence record of public regulator content — a change our monitor
                 captured on the official{' '}
                 <a
-                  href="https://www.dfsa.ae/rules-and-standards"
+                  href="https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
                 >
-                  DFSA Rules and Standards
+                  VARA Compliance &amp; Risk Management Rulebook
                 </a>{' '}
-                page — together with the exact raw and normalized text its hashes cover. Nothing in
-                it is invented. Check the math yourself.
+                — a modern self-sealed record (every hash check runs), together with the exact raw
+                and normalized text its hashes cover. Nothing in it is invented. Check the math yourself.
               </p>
             </div>
             <button

@@ -6,8 +6,8 @@
   "current_source_truth": {
     "total_enabled": 117,
     "fresh_alert_eligible": 38,
-    "evidence_library": 4,
-    "candidate": 9,
+    "evidence_library": 20,
+    "candidate": 14,
     "remediation": 45,
     "source_level_monitor_ok": 77,
     "with_proof_path": 86
@@ -27,68 +27,68 @@
     {
       "family": "VARA",
       "total_enabled": 7,
-      "fresh_alert_eligible": 2,
-      "evidence_library": 1,
-      "candidate": 0,
+      "fresh_alert_eligible": 3,
+      "evidence_library": 2,
+      "candidate": 1,
       "remediation": 1,
       "status": "partial",
-      "gap_to_25": 23,
-      "notes": "2 VARA sources pass the full readiness gate (news/circulars, enforcement). The Compliance and Risk Management Rulebook (incl. AML/CFT Part III) was promoted to fresh_alert on 2026-07-18 after two stable production runs and counts in the register headline; its registry proof fields sync on the next intake. The 30-day revision-updates view is in remediation pending a production rebaseline. This is selected-source monitoring, not complete VARA coverage."
+      "gap_to_25": 22,
+      "notes": "2 VARA sources pass the full readiness gate (news/circulars, enforcement). The Compliance and Risk Management Rulebook (incl. AML/CFT Part III) was promoted to fresh_alert on 2026-07-18 after two stable production runs and counts in the headline and in this row; its registry proof fields sync on the next intake. The 30-day revision-updates view is in remediation pending a production rebaseline. The public register is held as an evidence-library snapshot and the regulatory-notices/enforcement index is a candidate pending validation. This is selected-source monitoring, not complete VARA coverage."
     },
     {
       "family": "DFSA",
       "total_enabled": 16,
       "fresh_alert_eligible": 2,
-      "evidence_library": 1,
-      "candidate": 0,
+      "evidence_library": 2,
+      "candidate": 2,
       "remediation": 10,
       "status": "partial_production_access",
       "gap_to_25": 24,
-      "notes": "The 10 www.dfsa.ae sources are held in remediation as a production-egress disclosure, not a content problem (HTTP 403 to our production egress on all methods since 2026-07-11). DFSA depth continues via the dfsaen.thomsonreuters.com rulebook platform, which does work from production — the rulebook source passes the full readiness gate and the AML rulebook module was promoted to fresh_alert on 2026-07-18 after rebaseline plus stable-run gates (its registry readiness fields sync on the next intake)."
+      "notes": "The 10 www.dfsa.ae sources are held in remediation as a production-egress disclosure, not a content problem (HTTP 403 to our production egress on all methods since 2026-07-11). DFSA depth continues via the dfsaen.thomsonreuters.com rulebook platform, which does work from production — the rulebook source passes the full readiness gate and the AML rulebook module was promoted to fresh_alert on 2026-07-18 after rebaseline plus stable-run gates (its registry readiness fields sync on the next intake). The DFSA public register is held as an evidence-library snapshot; the news hub (legislative amendment notices) and SEO letters listings are candidates pending validation under the same production-egress constraint."
     },
     {
       "family": "DIFC",
       "total_enabled": 12,
       "fresh_alert_eligible": 8,
-      "evidence_library": 0,
+      "evidence_library": 3,
       "candidate": 0,
       "remediation": 1,
       "status": "good",
       "gap_to_25": 17,
-      "notes": "DIFC has 8 fresh-alert sources including the official DIFC Legal Database listing; the laws-and-regulations root listing moved to remediation on 2026-07-18 after three consecutive QUALITY_DROP production runs (pending audit-record review and a production rebaseline). This is selected DIFC monitoring, not complete DIFC legal database coverage."
+      "notes": "DIFC has 8 fresh-alert sources including the official DIFC Legal Database listing; the laws-and-regulations root listing moved to remediation on 2026-07-18 after three consecutive QUALITY_DROP production runs (pending audit-record review and a production rebaseline). Three DIFC listing pages (Courts practice directions, Registrar's directions, news/announcements hub) are held as evidence-library snapshots. This is selected DIFC monitoring, not complete DIFC legal database coverage."
     },
     {
       "family": "ADGM/FSRA",
       "total_enabled": 14,
       "fresh_alert_eligible": 9,
-      "evidence_library": 0,
+      "evidence_library": 2,
       "candidate": 3,
       "remediation": 0,
       "status": "good",
       "gap_to_25": 16,
-      "notes": "ADGM/FSRA has 9 fresh-alert sources including guidance/policy and RA/circular/rulebook style sources. Three candidate rows remain held until selectors/extraction pass the same gates."
+      "notes": "ADGM/FSRA has 9 fresh-alert sources including guidance/policy and RA/circular/rulebook style sources. Three candidate rows remain held until selectors/extraction pass the same gates, and two listing pages (Office of Data Protection, media announcements hub) are held as evidence-library snapshots."
     },
     {
       "family": "Ministry of Economy / DNFBP AML",
-      "total_enabled": 9,
+      "total_enabled": 8,
       "fresh_alert_eligible": 0,
-      "evidence_library": 1,
+      "evidence_library": 2,
       "candidate": 0,
-      "remediation": 7,
+      "remediation": 6,
       "status": "remediation",
       "gap_to_25": 25,
-      "notes": "All 7 MoE DNFBP sources remain under source remediation — earlier captures were a site-maintenance page, which the quality gate rejects; none is counted until re-baselined on real content. One evidence-library homepage is kept as a snapshot only."
+      "notes": "All 6 MoE DNFBP sources remain under source remediation — earlier captures were a site-maintenance page, which the quality gate rejects; none is counted until re-baselined on real content. The MoE-owned targeted financial sanctions page is counted once, under EOCN / sanctions / TFS. Two evidence-library pages (the MoE homepage and the AML/CFT hub) are kept as snapshots only."
     },
     {
       "family": "FTA",
       "total_enabled": 6,
       "fresh_alert_eligible": 0,
       "evidence_library": 0,
-      "candidate": 5,
+      "candidate": 6,
       "remediation": 0,
       "status": "partial",
       "gap_to_25": 25,
-      "notes": "No FTA sources are currently fresh-alert eligible. FTA portal/listing extraction remains candidate/adapter work and is not counted as fresh-alert."
+      "notes": "No FTA sources are currently fresh-alert eligible. FTA portal/listing extraction remains candidate/adapter work (6 candidate listings, including the VAT public clarifications listing) and is not counted as fresh-alert."
     },
     {
       "family": "EOCN / sanctions / TFS",
@@ -138,17 +138,28 @@
       "family": "Ministry of Justice / UAE Legislation / Gazette",
       "total_enabled": 3,
       "fresh_alert_eligible": 0,
-      "evidence_library": 0,
+      "evidence_library": 3,
       "candidate": 0,
       "remediation": 0,
       "status": "partial",
       "gap_to_25": 25,
-      "notes": "MoJ/Gazette has no fresh-alert eligible sources currently. Root portal, e-Laws, and complete Official Gazette coverage remain unclaimed."
+      "notes": "MoJ/Gazette has no fresh-alert eligible sources currently. Root portal, e-Laws, and complete Official Gazette coverage remain unclaimed. Three listing pages (Dubai legislation portal laws search, MoJ news, MoJ media centre) are held as evidence-library snapshots."
+    },
+    {
+      "family": "Other UAE official sources",
+      "total_enabled": 6,
+      "fresh_alert_eligible": 0,
+      "evidence_library": 5,
+      "candidate": 1,
+      "remediation": 0,
+      "status": "evidence_library",
+      "gap_to_25": 25,
+      "notes": "Cross-regulator UAE official sources outside the named families: the DFM regulatory circulars listing is a candidate pending validation, and the ICP, TDRA, MOCCAE, JAFZA and DMCC listing pages are held as evidence-library snapshots. None is counted as fresh-alert monitoring."
     }
   ],
   "safe_claims": [
     "StatuteProof has 38 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-18).",
-    "StatuteProof also maintains 4 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
+    "StatuteProof also maintains 20 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
     "Sources whose hosts block our production monitoring egress — the CBUAE rulebook subdomain and the DFSA website (HTTP 403 to all fetch methods since 2026-07-11) — are disclosed as remediation and are not counted as fresh-alert eligible.",
     "DFSA rulebook depth continues through the DFSA rulebook platform at dfsaen.thomsonreuters.com, which does work from production, including the AML rulebook module promoted on 2026-07-18 after passing rebaseline and stable-run gates.",
     "StatuteProof maintains source-level proof files for 86 of 117 enabled UAE source snapshots; this is not customer risk-brief eligibility.",

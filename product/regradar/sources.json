@@ -9976,7 +9976,9 @@
     "jurisdiction": "AE",
     "category": "virtual_assets",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-vara-regulatory-notices-and-enforcement-index",
@@ -9985,7 +9987,9 @@
     "jurisdiction": "AE",
     "category": "virtual_assets",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false
   },
   {
     "name": "VARA Compliance and Risk Management Rulebook (incl. AML/CFT Part III)",
@@ -10062,7 +10066,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "name": "DFSA Publications Hub",
@@ -10135,7 +10141,9 @@
     "jurisdiction": "AE",
     "category": "aml",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "name": "UAE CMA Laws and Legislation",
@@ -10168,7 +10176,9 @@
     "jurisdiction": "AE",
     "category": "tax",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-adgm-office-of-data-protection",
@@ -10177,7 +10187,9 @@
     "jurisdiction": "AE",
     "category": "data_protection",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "name": "DIFC Laws and Regulations — Data Protection Section",
@@ -10218,7 +10230,9 @@
     "jurisdiction": "AE",
     "category": "legal_acts",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-difc-courts-practice-directions",
@@ -10227,7 +10241,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-difc-courts-registrar-s-directions",
@@ -10236,7 +10252,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-difc-news-and-announcements-hub",
@@ -10245,7 +10263,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-adgm-media-announcements-hub",
@@ -10254,7 +10274,9 @@
     "jurisdiction": "AE",
     "category": "adgm_fsra",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-dfsa-news-hub-legislative-amendment-notices",
@@ -10263,7 +10285,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-dfsa-seo-letters",
@@ -10272,7 +10296,9 @@
     "jurisdiction": "AE",
     "category": "financial_regulator",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-ministry-of-justice-uae-news",
@@ -10281,7 +10307,9 @@
     "jurisdiction": "AE",
     "category": "ministry_justice",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-dfm-regulatory-circulars",
@@ -10290,7 +10318,9 @@
     "jurisdiction": "AE",
     "category": "stock_exchange",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-icp-uae-news",
@@ -10299,7 +10329,9 @@
     "jurisdiction": "AE",
     "category": "immigration_regulatory",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-ministry-of-justice-uae-media-centre",
@@ -10308,7 +10340,9 @@
     "jurisdiction": "AE",
     "category": "ministry_justice",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-tdra-uae-media-centre",
@@ -10317,7 +10351,9 @@
     "jurisdiction": "AE",
     "category": "data_protection",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-moccae-media-centre",
@@ -10326,7 +10362,9 @@
     "jurisdiction": "AE",
     "category": "environmental_regulation",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-jafza-media-centre",
@@ -10335,7 +10373,9 @@
     "jurisdiction": "AE",
     "category": "freezone_authority",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   },
   {
     "source_id": "AE-dmcc-latest-news-and-regulatory-updates",
@@ -10344,6 +10384,8 @@
     "jurisdiction": "AE",
     "category": "freezone_authority",
     "enabled": true,
-    "status": "active"
+    "status": "active",
+    "monitoring_mode": "evidence_library",
+    "alert_eligible": false
   }
 ]

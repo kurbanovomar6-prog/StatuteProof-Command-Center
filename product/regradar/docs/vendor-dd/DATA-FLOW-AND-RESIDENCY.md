@@ -78,7 +78,7 @@ covered in §5 and §7.)
 | Telegram Bot API | Customer has paired Telegram and enabled alerts | Alert/brief text (derived from monitored public content) to the customer's own chat id | `app/telegram.py`, `app/telegram_clients.py` |
 | Email provider (SMTP; SendGrid/Postmark also supported in code) | Customer email delivery is configured | Verification emails, briefs/alerts to the customer's address | `app/email_delivery.py` |
 | Anthropic API (Claude) | Only when `ENABLE_AI_ANALYSIS=true` AND an API key is set; off by default | Bounded excerpts of the *monitored public regulator content*, via one of two prompt paths, each independently bounded: the **diff-analysis** path (`app/ai.py`) sends at most 20 added + 20 removed diff paragraphs, each truncated to 400 characters; the **brief** path (`app/ai_brief.py`) sends the extracted change text truncated to 6,000 characters plus a short source-metadata block (source name/URL/jurisdiction/category and, when supplied, a diff excerpt). No customer account data is included in either prompt | `app/ai.py`, `app/ai_brief.py`, `app/config.py` |
-| RFC 3161 Time-Stamping Authority | Only when `RFC3161_TSA_URL` is set; **dormant by default** | A single SHA-256 hash (the evidence chain head) — no content, no personal data | `app/rfc3161_anchor.py` |
+| RFC 3161 Time-Stamping Authority | Only when `RFC3161_TSA_URL` is set (dormant by default in code) — **enabled in production since 2026-07-18** (freetsa.org; tokens ship in evidence packs) | A single SHA-256 hash (the evidence chain head) — no content, no personal data | `app/rfc3161_anchor.py` |
 | Off-box backup remote | Only when `STATUTEPROOF_BACKUP_REMOTE` is set | The encrypted-in-transit backup archive (database + evidence tree) | `deploy/backup.sh` |
 | Admin Telegram bot (operator) | Contact-form submissions and operational alerts | Contact message contents; operational health signals | `app/api.py`, `app/ops_alert.py` |
 
@@ -131,7 +131,7 @@ read-only links the customer creates; they are not automatic outbound flows —
 | Email provider — Zoho Mail SMTP (current production provider, verified 2026-07-18); SendGrid and Postmark are supported in code | Email delivery | Email address; brief/alert text; verification emails | Only if email delivery is configured |
 | Anthropic | Optional AI analysis of detected changes | Excerpts of monitored **public** regulator content only; no customer data | Only if `ENABLE_AI_ANALYSIS=true` — currently **disabled** in production (verified 2026-07-18) |
 | Google | Optional sign-in identity | Google-asserted account email | Only if the customer chooses Google sign-in |
-| RFC 3161 TSA (operator-selected) | External timestamp anchoring of the evidence chain head | One SHA-256 hash; no content, no personal data | Only if `RFC3161_TSA_URL` is configured (dormant by default) |
+| RFC 3161 TSA (operator-selected) | External timestamp anchoring of the evidence chain head | One SHA-256 hash; no content, no personal data | Only if `RFC3161_TSA_URL` is configured — dormant by default in code, **enabled in production since 2026-07-18** (freetsa.org) |
 | Off-box backup storage (rclone/S3 or scp target) | Backup survival beyond the host | Backup archives | Only if `STATUTEPROOF_BACKUP_REMOTE` is configured — currently **not configured** in production (backups are local to the host; verified 2026-07-18) |
 | Let's Encrypt | TLS certificate issuance | Domain names only | Always |
 

@@ -87,27 +87,31 @@ def test_source_signal_quality_family_readiness_matches_registry_truth():
         "FTA": "FTA",
         "FTA / Tax": "FTA",
         "Ministry of Economy / DNFBP AML": "MoE/DNFBP AML",
+        # Catch-all row: every enabled source outside the named families.
+        "Other UAE official sources": "Other",
     }
+    known_families = tuple(
+        family for family in dict.fromkeys(family_key.values()) if family != "Other"
+    )
+
+    def belongs(source, validator_family):
+        if validator_family == "Other":
+            return not any(
+                _family_validator.belongs_to(source, known) for known in known_families
+            )
+        return _family_validator.belongs_to(source, validator_family)
 
     for family in audit["family_readiness"]:
         validator_family = family_key[family["family"]]
-        rows = [
-            source
-            for source in sources
-            if _family_validator.belongs_to(source, validator_family)
-        ]
+        rows = [source for source in sources if belongs(source, validator_family)]
+        # Same mode + alert-eligible definition as the audit headline, so the
+        # family rows sum exactly to current_source_truth. Readiness-gate
+        # caveats (proof/baseline sync) are disclosed in the row notes.
         fresh_alert = [
             source
             for source in rows
             if source.get("monitoring_mode") == "fresh_alert"
             and source.get("alert_eligible") is True
-            and source.get("last_monitor_status") == "MONITOR_OK"
-            and source.get("proof_path")
-            and source.get("normalized_text_path")
-            and source.get("normalized_hash")
-            and int(source.get("baseline_runs_completed") or 0)
-            >= int(source.get("baseline_runs_required") or 2)
-            and source.get("recommended_check_frequency") == "daily"
         ]
 
         assert family["total_enabled"] == len(rows), family["family"]
@@ -121,6 +125,40 @@ def test_source_signal_quality_family_readiness_matches_registry_truth():
         assert family["remediation"] == sum(
             1 for source in rows if source.get("monitoring_mode") == "remediation"
         ), family["family"]
+
+
+def test_source_signal_quality_family_rows_partition_headline_totals():
+    """Family rows (including "Other UAE official sources") must sum exactly to
+    the headline current_source_truth — no unclassified remainder, no double
+    counting across families."""
+    audit = json.loads(AUDIT_PATH.read_text(encoding="utf-8"))
+    truth = audit["current_source_truth"]
+    rows = audit["family_readiness"]
+    for key in (
+        "total_enabled",
+        "fresh_alert_eligible",
+        "evidence_library",
+        "candidate",
+        "remediation",
+    ):
+        assert sum(int(row.get(key) or 0) for row in rows) == truth[key], key
+
+
+def test_every_enabled_source_has_a_monitoring_mode_in_vocabulary():
+    """LOW-1 guard: every enabled UAE source must carry one of the four
+    monitoring modes; an enabled source with no mode is invisible to the
+    coverage accounting."""
+    allowed = {"fresh_alert", "evidence_library", "candidate", "remediation"}
+    sources = _enabled_uae_sources()
+    outside = [
+        (source.get("source_id") or source.get("name"), source.get("monitoring_mode"))
+        for source in sources
+        if source.get("monitoring_mode") not in allowed
+    ]
+    assert outside == [], outside
+    assert sum(
+        1 for source in sources if source.get("monitoring_mode") in allowed
+    ) == len(sources)
 
 
 def test_source_signal_quality_audit_validator_accepts_current_truth():

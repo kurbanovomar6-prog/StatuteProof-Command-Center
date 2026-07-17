@@ -44,10 +44,12 @@ describe('landing REAL_RECORD is pinned to the shipped verifiable asset (2.1)', 
     expect(appSrc).toContain(`normalized_chars: ${normalized.length}`)
   })
 
-  it('diff excerpt matches the sealed change counts', () => {
-    expect(appSrc).toContain(
-      `${record.change.lines_added} lines added, ${record.change.lines_removed} lines removed`,
-    )
+  it('the shipped record is a MODERN self-sealed record (no skipped hash checks)', () => {
+    expect(String(record.record_hash || '')).toMatch(/^sha256:[a-f0-9]{64}$/)
+    expect(record.record_hash_method).toBe('content-sha256-v1')
+    expect(String(record.content.raw_hash || '')).toMatch(/^sha256:[a-f0-9]{64}$/)
+    expect(record.content.captured_at).toBeTruthy()
+    expect(record.content.source_url).toBeTruthy()
   })
 
   it('the shipped record itself is complete and self-sealed', () => {

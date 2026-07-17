@@ -1,6 +1,6 @@
 // VerifyPage "Load a real record" — the one-click sample loader that fills the
 // public verifier with a REAL evidence record of public regulator content
-// (DFSA Rules and Standards) shipped as static assets under
+// (VARA Compliance & Risk Management Rulebook) shipped as static assets under
 // web/public/sample-record/, then runs the check. The fetch stub mirrors
 // AlertRedline.test.jsx but serves the ACTUAL shipped assets read from disk, so
 // these tests also pin the assets' own integrity (sha256(normalized) must equal
@@ -75,8 +75,8 @@ describe('sample-record static assets (shipped bytes)', () => {
     const record = JSON.parse(RECORD_TEXT)
     expect(record.record_status).toBe('complete')
     expect(record.integrity?.integrity_status).toBe('VERIFIED')
-    expect(record.source?.regulator).toBe('DFSA')
-    expect(record.source?.official_url).toMatch(/^https:\/\/www\.dfsa\.ae\//)
+    expect(record.source?.regulator).toBe('VARA')
+    expect(record.source?.official_url).toMatch(/^https:\/\/rulebooks\.vara\.ae\//)
     expect(record.content?.current_hash).toMatch(/^sha256:[a-f0-9]{64}$/)
   })
 

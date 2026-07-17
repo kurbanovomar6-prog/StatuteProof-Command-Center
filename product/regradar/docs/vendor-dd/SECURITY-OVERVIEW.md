@@ -1,7 +1,7 @@
 # StatuteProof — Security Overview
 
 **Audience:** vendor-risk and information-security teams evaluating StatuteProof.
-**Last reviewed:** 2026-07-12. Every control statement below names the module or
+**Last reviewed:** 2026-07-18. Every control statement below names the module or
 configuration file that implements it, so it can be checked against the codebase.
 Where a control does not exist, this document says so plainly (see §11, Known
 limitations).
@@ -70,9 +70,10 @@ The firewall (`ufw`) defaults to deny-incoming; `fail2ban` is enabled
 Outbound network activity: fetches of the monitored public regulator
 websites (116 enabled sources at the time of writing, from a registry of 432 —
 `sources.json`), Telegram Bot API and SMTP when those delivery channels are
-enabled, the Anthropic API when AI analysis is enabled, and the optional
-RFC 3161 timestamping authority (dormant by default). See
-`docs/vendor-dd/DATA-FLOW-AND-RESIDENCY.md`.
+enabled, the Anthropic API when AI analysis is enabled (currently disabled in
+production, verified 2026-07-18), and the RFC 3161 timestamping authority
+(dormant by default in code; enabled in production since 2026-07-18 —
+freetsa.org). See `docs/vendor-dd/DATA-FLOW-AND-RESIDENCY.md`.
 
 ## 2. Authentication
 
@@ -226,14 +227,15 @@ From `deploy/systemd/*` and `DEPLOY.md`:
   the online-backup API plus a tar of the evidence tree and source registry;
   the newest 14 archives are retained — `deploy/backup.sh`,
   `deploy/systemd/statuteproof-backup.*`.
-- **Off-box copies:** the backup script pushes each archive to an
+- **Off-box copies:** the backup script supports pushing each archive to an
   operator-configured off-box remote (rclone/S3 or scp). This is env-driven;
   when unset the script warns loudly on every run that backups are local-only.
-  Whether an off-box remote is currently configured in production:
-  [CONFIRM WITH OPERATOR].
+  An off-box remote is **not currently configured** in production (verified
+  2026-07-18): backups are local to the host, and that warning fires on every
+  run until a remote is set.
 - **Documented restore:** a step-by-step restore runbook exists
-  (`DEPLOY.md` § Restore). Restore drills are not run on a fixed calendar:
-  [CONFIRM WITH OPERATOR] for the date of the last tested restore.
+  (`DEPLOY.md` § Restore). Restore drills are not run on a fixed calendar and
+  no tested-restore date is claimed, so no recovery-time objective is claimed.
 - **Daily integrity self-check:** a read-only job re-hashes every evidence
   snapshot against its sealed hash and re-verifies the tamper-evident chain;
   any divergence pages the operator and exits non-zero —
@@ -251,9 +253,9 @@ no on-call rotation, and no formal incident-response retainer. What exists:
 - systemd restarts failed services automatically (`Restart=on-failure`).
 - Incident handling is best-effort by the operator. The operator's practice
   is to notify customers of incidents affecting their data or deliveries
-  directly; there is no automated status page. [CONFIRM WITH OPERATOR] for
-  the notification commitment and target response window offered
-  contractually.
+  directly; there is no automated status page. No contractual notification
+  commitment or target response window is currently offered — if one is
+  required, it must be negotiated explicitly; none exists by default.
 
 ## 11. Known limitations (candid)
 
@@ -280,9 +282,11 @@ We would rather you read these here than discover them in diligence:
    backups. A formal continuity/escrow arrangement: not currently in place.
 8. **Tamper-EVIDENT, not tamper-proof, evidence.** The evidence chain detects
    in-place alteration; an actor with full write access who re-links the whole
-   trail is only caught by the separately persisted head anchor and, when
-   enabled, the external RFC 3161 anchor — which is dormant by default. This
-   scope is stated in the open spec (`docs/EVIDENCE-VERIFICATION-SPEC.md` §1).
+   trail is only caught by the separately persisted head anchor and the
+   external RFC 3161 anchor — dormant by default in code, but **enabled in
+   production since 2026-07-18** (freetsa.org; tokens ship in evidence packs).
+   This scope is stated in the open spec
+   (`docs/EVIDENCE-VERIFICATION-SPEC.md` §1).
 9. **No formal SLA.** Monitoring sweep cadence is hourly by design
    (`deploy/systemd/statuteproof-scheduler.service`), but no contractual
    uptime or detection-latency guarantee is offered. Source publication
@@ -293,4 +297,4 @@ We would rather you read these here than discover them in diligence:
 *For monitoring information only. Not legal advice and not a guarantee of
 compliance.*
 
-Questions: security@statuteproof.com [CONFIRM WITH OPERATOR]
+Questions: hello@statuteproof.com (the monitored operator contact address)

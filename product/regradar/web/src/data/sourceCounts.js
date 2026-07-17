@@ -24,6 +24,11 @@ export const SOURCE_TRUTH = {
   // disclosed, not counted — that is the pricing-page promise.
   readinessSupported: 38,
   // 2026-07-18: the VARA rulebook candidate passed prod gates and was promoted
-  // to fresh_alert — candidate 10 → 9.
-  candidate: 9,
+  // to fresh_alert — candidate 10 → 9. Later the same day, the 21 enabled
+  // sources that sat OUTSIDE the monitoring_mode vocabulary (mode missing)
+  // were classified honestly: 16 register/listing monitors → evidence_library,
+  // 5 genuinely alert-worthy but unvalidated listings → candidate (VARA
+  // notices/enforcement index, FTA VAT public clarifications, DFSA news hub,
+  // DFSA SEO letters, DFM regulatory circulars) — candidate 9 → 14.
+  candidate: 14,
 }

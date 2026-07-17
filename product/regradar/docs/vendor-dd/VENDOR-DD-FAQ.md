@@ -2,10 +2,10 @@
 
 **Audience:** procurement and vendor-risk teams. Short, verifiable answers to
 the questions a financial-institution vendor questionnaire typically asks.
-**Last reviewed:** 2026-07-12. Where an answer cites a module or config file,
-the claim can be checked against the codebase. Where we cannot verify a fact
-from the code or deployment configuration, it is marked
-[CONFIRM WITH OPERATOR] rather than guessed.
+**Last reviewed:** 2026-07-18. Where an answer cites a module or config file,
+the claim can be checked against the codebase. Where a fact is not in place or
+not committed, this document says so plainly rather than guessing or implying
+otherwise.
 
 Companion documents in this pack: `SECURITY-OVERVIEW.md`,
 `DATA-FLOW-AND-RESIDENCY.md`, `EVIDENCE-INTEGRITY-WHITEPAPER.md`.
@@ -23,7 +23,10 @@ compliance guarantee, and not a substitute for qualified counsel or
 compliance professionals.
 
 **2. What is the legal entity, registration number and registered address?**
-[CONFIRM WITH OPERATOR].
+Corporate registration details are not published in this pack — nothing in the
+codebase or deployment configuration evidences them, and we would rather leave
+this unanswered here than guess. Request entity details directly through
+hello@statuteproof.com as part of contracting.
 
 **3. How large is the team?**
 StatuteProof is built and operated by a single founder-operator. We state this
@@ -35,16 +38,19 @@ No. No SOC 2, no ISO 27001, no other security certification. We do not claim
 any regulator certification, approval or partnership anywhere, and our own
 content rules forbid such claims. What we offer instead is a small, fully
 inspectable control surface: this documentation names the exact module for
-each control so the claims can be verified against the codebase.
-[CONFIRM WITH OPERATOR] for how code inspection is provided to evaluating
-teams (e.g. supervised read-only review under NDA).
+each control so the claims can be verified against the codebase. There is no
+standing, committed code-inspection programme (e.g. a scheduled supervised
+read-only review under NDA is not currently offered as a formal product);
+evaluating teams that need code inspection should arrange it case-by-case via
+hello@statuteproof.com.
 
 ## Hosting and infrastructure
 
 **5. Where is the service hosted?**
 A single DigitalOcean virtual machine (droplet) running Ubuntu 24.04, deployed
-per the runbook in `DEPLOY.md`. Region: [CONFIRM WITH OPERATOR] — single
-region, no multi-region replication.
+per the runbook in `DEPLOY.md`. Region: DigitalOcean **FRA1 (Frankfurt,
+Germany — EU)**, verified against the live deployment 2026-07-18 — single
+region, no multi-region replication (`DATA-FLOW-AND-RESIDENCY.md` §5).
 
 **6. What is the production architecture?**
 Caddy (TLS via Let's Encrypt, HSTS, security headers) reverse-proxies a
@@ -82,13 +88,17 @@ UAE data-residency rules against this service (see
 assessment.
 
 **10. Who are your sub-processors?**
-DigitalOcean (hosting); Telegram and the configured email provider (only when
-the customer enables those delivery channels); Google (only for optional
-Google sign-in); Anthropic (only if optional AI analysis is enabled — it
+DigitalOcean (hosting); Telegram and the configured email provider — currently
+Zoho Mail SMTP in production, verified 2026-07-18 (only when the customer
+enables those delivery channels); Google (only for optional Google sign-in);
+Anthropic (only if optional AI analysis is enabled — `ENABLE_AI_ANALYSIS` is
+currently **disabled** in production, verified 2026-07-18; when enabled it
 receives bounded excerpts of monitored public content, never customer data);
-an operator-selected RFC 3161 timestamping authority (dormant by default;
-receives a single hash); off-box backup storage if configured. Full table with
-"engaged when" conditions: `DATA-FLOW-AND-RESIDENCY.md` §7.
+an RFC 3161 timestamping authority — dormant by default in code, **enabled in
+production since 2026-07-18** (freetsa.org; it receives a single hash, never
+content); off-box backup storage is supported but **not currently configured**
+in production — backups are local to the host (verified 2026-07-18). Full
+table with "engaged when" conditions: `DATA-FLOW-AND-RESIDENCY.md` §7.
 
 **11. What is your data retention policy?**
 Evidence of change is kept indefinitely (that is the product); redundant
@@ -146,21 +156,25 @@ decompressed cap; 1 MB cap on TSA responses). Details with module references:
 
 **17. What is your backup and recovery capability?**
 Daily automated backups (consistent SQLite online copy + evidence tree
-archive), 14-archive retention, optional off-box copy to an operator-configured
-remote ([CONFIRM WITH OPERATOR] whether currently set), and a documented
-step-by-step restore runbook (`deploy/backup.sh`, `DEPLOY.md` § Restore).
-Recovery from host loss is restore-from-backup onto a fresh host using the
-documented deployment runbook — there is no hot standby or failover. Restore
-drills are not run on a fixed calendar ([CONFIRM WITH OPERATOR] for the last
-tested restore), so no recovery-time objective is claimed.
+archive), 14-archive retention, and a documented step-by-step restore runbook
+(`deploy/backup.sh`, `DEPLOY.md` § Restore). An off-box backup remote is
+supported by the backup script but is **not currently configured** in
+production (verified 2026-07-18) — backups are local to the host, and the
+script warns loudly on every run while that remains the case. Recovery from
+host loss is restore-from-backup onto a fresh host using the documented
+deployment runbook — there is no hot standby or failover. Restore drills are
+not run on a fixed calendar and no tested-restore date is claimed, so no
+recovery-time objective is claimed.
 
 **18. What is your incident response process?**
 Best-effort, operator-led. Automated detection exists and pages the operator:
 a daily evidence-integrity verification that alerts on any divergence, a
 30-minute watchdog for a wedged monitoring loop, and automatic service
 restarts (`deploy/systemd/`). There is no 24×7 SOC or on-call rotation, and no
-automated status page. Contractual notification windows:
-[CONFIRM WITH OPERATOR].
+automated status page. No contractual incident-notification window is
+currently committed; notification of affected customers is best-effort by the
+operator. If a contractual window is a requirement, it must be negotiated
+explicitly — none exists by default.
 
 **19. What happens if the operator is unavailable (key-person risk)?**
 Acknowledged as the largest continuity risk. Current mitigations: fully
@@ -175,9 +189,9 @@ escrow/continuity agreement is not currently in place.
 No formal SLA at present. The monitoring sweep runs hourly by design
 (`deploy/systemd/statuteproof-scheduler.service`); detection can be delayed by
 source publication delays, website changes, PDF formatting, access limits or
-source structure changes, and we say so in every report disclaimer. Uptime and
-response commitments, if required, are negotiated per contract:
-[CONFIRM WITH OPERATOR].
+source structure changes, and we say so in every report disclaimer. No uptime
+or response commitment is offered today; if one is required it would have to
+be negotiated per contract — none is in place.
 
 ## Assurance and development practice
 
@@ -205,7 +219,10 @@ currently implemented for every delivery path; review policy on live delivery
 is operator-managed. We flag this ourselves rather than overclaim.
 
 **24. Do you carry professional indemnity / cyber insurance?**
-[CONFIRM WITH OPERATOR].
+No insurance cover is claimed in this pack — nothing in the codebase or
+deployment configuration can evidence an insurance policy either way, and we
+will not assert cover we cannot show. If cover is a procurement requirement,
+raise it via hello@statuteproof.com during contracting.
 
 ## Exit and portability
 
@@ -230,4 +247,4 @@ without a StatuteProof account.
 *For monitoring information only. Not legal advice and not a guarantee of
 compliance.*
 
-Questions: security@statuteproof.com [CONFIRM WITH OPERATOR]
+Questions: hello@statuteproof.com (the monitored operator contact address)

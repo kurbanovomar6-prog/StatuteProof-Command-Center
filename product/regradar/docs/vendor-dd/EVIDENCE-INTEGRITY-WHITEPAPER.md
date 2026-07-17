@@ -2,7 +2,7 @@
 
 **Audience:** compliance officers, internal audit, and the external auditors or
 examiners who will be asked to rely on StatuteProof evidence.
-**Last reviewed:** 2026-07-12. This is a buyer-facing summary of the full open
+**Last reviewed:** 2026-07-18. This is a buyer-facing summary of the full open
 specification, `docs/EVIDENCE-VERIFICATION-SPEC.md` (published, versioned,
 no secrets). Every mechanism below is implemented in the referenced module.
 
@@ -136,15 +136,16 @@ Stated plainly, as in the open spec §1:
   a signature StatuteProof cannot forge. We do not claim "immutable" or
   "tamper-proof", and any StatuteProof material that did would be wrong.
 
-## 7. External RFC 3161 timestamp anchor — implemented, dormant by default
+## 7. External RFC 3161 timestamp anchor — enabled in production since 2026-07-18
 
 `app/rfc3161_anchor.py` implements external anchoring of the chain head to a
 third-party RFC 3161 Time-Stamping Authority (TSA):
 
-- **Status: dormant by default.** It activates only when the operator sets
-  `RFC3161_TSA_URL`; with no configuration it is a complete no-op — no network
-  calls, no threads, no files. [CONFIRM WITH OPERATOR] whether it is enabled
-  in the current production deployment.
+- **Status: enabled in production since 2026-07-18**, anchored to the
+  freetsa.org TSA; the resulting tokens ship in evidence packs. In code the
+  feature remains dormant by default: it activates only when the operator sets
+  `RFC3161_TSA_URL`, and with no configuration it is a complete no-op — no
+  network calls, no threads, no files.
 - **What it adds when enabled:** the TSA signs a token binding the head
   `record_hash` to a time StatuteProof cannot backdate. A re-linked trail
   cannot reproduce a TSA token predating the relink — upgrading the guarantee
@@ -178,4 +179,4 @@ third-party RFC 3161 Time-Stamping Authority (TSA):
 *For monitoring information only. Not legal advice and not a guarantee of
 compliance.*
 
-Questions: security@statuteproof.com [CONFIRM WITH OPERATOR]
+Questions: hello@statuteproof.com (the monitored operator contact address)

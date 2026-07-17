@@ -38,28 +38,23 @@ function GlobalLoader() {
   )
 }
 
-// REAL sealed record — the exact DFSA capture shipped at
+// REAL sealed record — the exact VARA capture shipped at
 // /sample-record/record.json, the same artifact /verify#sample loads and
-// re-hashes. Every field below is pinned to that asset by
-// src/test/realRecordLanding.test.js so this card can never drift from the
-// verifiable bytes. Nothing here is invented.
+// re-hashes. A MODERN self-sealed record (content-sha256-v1): record_hash,
+// raw_hash and sealed capture metadata all verify — no skipped hash checks.
+// Every field below is pinned to that asset by
+// src/test/realRecordLanding.test.js. Nothing here is invented.
 const REAL_RECORD = {
-  source_id: 'AE-dubai-financial-services-authority-dfsa',
-  regulator: 'DFSA',
-  jurisdiction: 'UAE — Dubai Financial Services Authority',
-  run_at: '2026-06-11T22:29:38+00:00',
-  change_status: 'CHANGED',
+  source_id: 'AE-vara-compliance-risk-rulebook-html',
+  regulator: 'VARA',
+  jurisdiction: 'UAE — Virtual Assets Regulatory Authority',
+  run_at: '2026-07-17T13:02:36.641964+00:00',
+  change_status: 'FIRST_SEEN',
   extraction_quality: 'GOOD',
-  normalized_chars: 2653,
-  normalized_hash: 'sha256:2cedc486a126302a5318a749f49e0c817eb113515aa7ddc99ac70ae1223082eb',
-  diff_excerpt:
-    '0 lines added, 5 lines removed on the official DFSA Rules and Standards page — captured 2026-06-11 and sealed under the SHA-256 above.',
-  // EvidenceCard's proof_chain.chain_verified drives the "Verified ·
-  // SHA-256 match" line. For this shipped record it reflects
-  // record.json integrity.hash_verified (the record is legacy — it
-  // predates the record_hash self-seal), pinned by the drift test.
-  proof_chain: { chain_verified: true, captured_at: '2026-06-11T22:29:38+00:00' },
-  source_url: 'https://www.dfsa.ae/rules-and-standards',
+  normalized_chars: 93826,
+  normalized_hash: 'sha256:ca42ff6e740d77c8e9da433fb5a5a6285767077ae688d4397e903f622edc2a2d',
+  proof_chain: { chain_verified: true, captured_at: '2026-07-17T13:02:36.641964+00:00' },
+  source_url: 'https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook',
 };
 
 function syncProfileToLocalStorage(profileData) {
@@ -443,12 +438,14 @@ export default function App() {
                   This is a real sealed record. Check the math yourself.
                 </h2>
                 <p className="text-slate-400 max-w-xl mx-auto text-sm">
-                  A change our monitor captured on the official DFSA Rules and
-                  Standards page, sealed under SHA-256. Sealed records are
-                  chained, and the chain head is anchored with a third-party
-                  RFC 3161 timestamp. The verifier re-hashes the exact bytes
-                  you load — no account, no trust in us required. Verification
-                  confirms record integrity only; not legal advice.
+                  The full VARA Compliance &amp; Risk Management Rulebook
+                  (including the AML/CFT part), captured from the official
+                  rulebook site and sealed under SHA-256 with a self-sealing
+                  record hash. Sealed records are chained, and the chain head
+                  is anchored with a third-party RFC 3161 timestamp. The
+                  verifier re-hashes the exact bytes you load — no account, no
+                  trust in us required. Verification confirms record integrity
+                  only; not legal advice.
                 </p>
               </div>
               <div className="grid md:grid-cols-2 gap-6 mb-8">

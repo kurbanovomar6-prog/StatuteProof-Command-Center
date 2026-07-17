@@ -43,14 +43,14 @@ const SIGNALS = [
       "Compare the updated wording against your current financial crime framework and monitoring controls. Decide whether the change requires legal review, policy refresh or no action.",
   },
   {
-    regulator: "CBUAE · AML/CFT Guidelines",
+    regulator: "ADGM FSRA · Supervision Circulars",
     dot: "green",
-    what: "A monitored CBUAE page shows updated wording in a section related to customer due diligence. The change has been captured and is ready for MLRO review.",
+    what: "A monitored FSRA supervision circulars page lists a new circular touching customer due diligence expectations. The change has been captured, hashed and is ready for MLRO review.",
     risk: "MEDIUM",
     riskNote:
-      "Affects onboarding and ongoing CDD procedures. Remediation of existing files may be required.",
+      "May affect onboarding and ongoing CDD procedures for ADGM-regulated firms. Remediation of existing files may be required.",
     consider:
-      "Review CDD workflows with your MLRO and assess whether existing customer files meet the revised standard.",
+      "Review the circular with your MLRO and assess whether existing customer files meet the revised standard.",
   },
 ];
 

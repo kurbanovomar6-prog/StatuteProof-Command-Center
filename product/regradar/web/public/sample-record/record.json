@@ -1,47 +1,47 @@
 {
   "change": {
-    "diff_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/diff.txt",
     "lines_added": 0,
-    "lines_removed": 5,
-    "summary": "Extracted 4,701 chars — sufficient for reliable generic monitoring."
+    "lines_removed": 0,
+    "summary": "First saved official-source snapshot captured for canonical evidence review."
   },
   "content": {
-    "current_hash": "sha256:2cedc486a126302a5318a749f49e0c817eb113515aa7ddc99ac70ae1223082eb",
-    "normalized_current_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/current.normalized.txt",
-    "normalized_previous_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/previous.normalized.txt",
-    "previous_hash": "sha256:8aa2f16a5562617ba7b02d250d468fbb07e956d4874bc0874b79a22acbb2b992",
-    "raw_content_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/raw.txt"
+    "captured_at": "2026-07-17T13:02:36.641964+00:00",
+    "current_hash": "sha256:ca42ff6e740d77c8e9da433fb5a5a6285767077ae688d4397e903f622edc2a2d",
+    "normalized_current_path": "evidence/vara/AE-vara-compliance-risk-rulebook-html/7240760f/current.normalized.txt",
+    "raw_content_path": "evidence/vara/AE-vara-compliance-risk-rulebook-html/7240760f/raw.txt",
+    "raw_hash": "sha256:5f80cc7f893af8090913065fdf295af6005eb919cb0aa54010c0f479f423e116",
+    "source_url": "https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook"
   },
   "files": {
-    "diff_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/diff.txt",
-    "metadata_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/metadata.json",
-    "normalized_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/current.normalized.txt",
-    "previous_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/previous.normalized.txt",
-    "raw_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/raw.txt",
-    "snapshot_path": "evidence/dfsa/AE-dubai-financial-services-authority-dfsa/AE-20260611T222827Z-db5a1dea/snapshot.txt"
+    "metadata_path": "evidence/vara/AE-vara-compliance-risk-rulebook-html/7240760f/metadata.json",
+    "normalized_path": "evidence/vara/AE-vara-compliance-risk-rulebook-html/7240760f/current.normalized.txt",
+    "raw_path": "evidence/vara/AE-vara-compliance-risk-rulebook-html/7240760f/raw.txt",
+    "snapshot_path": "evidence/vara/AE-vara-compliance-risk-rulebook-html/7240760f/snapshot.txt"
   },
   "integrity": {
     "hash_verified": true,
     "integrity_status": "VERIFIED",
-    "verified_at": "2026-06-23T15:29:42Z"
+    "verified_at": "2026-07-17T13:02:36Z"
   },
-  "record_id": "evr_AE-dubai-financial-services-authority-dfsa_AE-20260611T222827Z-db5a1dea",
+  "record_hash": "sha256:bfb25d9ae2e13557c4196fa2a108298466a7f8ddd9df491ddfdc8e08bf721828",
+  "record_hash_method": "content-sha256-v1",
+  "record_id": "evr_AE-vara-compliance-risk-rulebook-html_7240760f",
   "record_status": "complete",
   "review": {
-    "human_review_required": true,
-    "review_reason": "Customer-facing brief requires human review.",
-    "review_status": "pending"
+    "human_review_required": false,
+    "review_reason": "Baseline capture (FIRST_SEEN) — no customer-facing change to review.",
+    "review_status": "baseline"
   },
   "run": {
-    "run_id": "AE-20260611T222827Z-db5a1dea",
-    "status": "CHANGED",
-    "timestamp": "2026-06-11T22:29:38+00:00"
+    "run_id": "7240760f",
+    "status": "FIRST_SEEN",
+    "timestamp": "2026-07-17T13:02:36.641964+00:00"
   },
   "schema_version": "2.0",
   "source": {
-    "official_url": "https://www.dfsa.ae/rules-and-standards",
-    "regulator": "DFSA",
-    "source_id": "AE-dubai-financial-services-authority-dfsa",
-    "source_name": "Dubai Financial Services Authority (DFSA)"
+    "official_url": "https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook",
+    "regulator": "VARA",
+    "source_id": "AE-vara-compliance-risk-rulebook-html",
+    "source_name": "VARA Compliance and Risk Management Rulebook (incl. AML/CFT Part III)"
   }
 }

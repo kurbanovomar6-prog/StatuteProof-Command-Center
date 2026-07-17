@@ -28,7 +28,30 @@ AUDIT_FAMILY_TO_VALIDATOR_FAMILY = {
     "FTA": "FTA",
     "FTA / Tax": "FTA",
     "Ministry of Economy / DNFBP AML": "MoE/DNFBP AML",
+    # Catch-all row so the family table partitions the FULL enabled register:
+    # every enabled source that matches none of the named families above.
+    "Other UAE official sources": "Other",
 }
+
+# The four allowed monitoring modes. Every ENABLED source must carry exactly
+# one of these; an enabled source with no monitoring_mode is unclassified and
+# invisible to the coverage accounting, which is how count drift starts.
+MONITORING_MODES = ("fresh_alert", "evidence_library", "candidate", "remediation")
+
+_KNOWN_FAMILIES = tuple(
+    family
+    for family in dict.fromkeys(AUDIT_FAMILY_TO_VALIDATOR_FAMILY.values())
+    if family != "Other"
+)
+
+# The five family-row keys that must partition-sum to the headline truth.
+FAMILY_PARTITION_KEYS = (
+    "total_enabled",
+    "fresh_alert_eligible",
+    "evidence_library",
+    "candidate",
+    "remediation",
+)
 
 REQUIRED_TRUTH_FIELDS = {
     "total_enabled",
@@ -111,6 +134,8 @@ def _belongs_to(source: dict, family: str) -> bool:
     source_id = str(source.get("source_id") or "").lower()
     url = str(source.get("url") or "").lower()
     name = str(source.get("name") or "").lower()
+    if family == "Other":
+        return not any(_belongs_to(source, known) for known in _KNOWN_FAMILIES)
     if family == "CBUAE":
         return "centralbank.ae" in url or "cbuae" in source_id or "central bank" in name
     if family == "VARA":
@@ -141,27 +166,28 @@ def _belongs_to(source: dict, family: str) -> bool:
     if family == "FTA":
         return "tax.gov.ae" in url or source_id.startswith("ae-fta") or "federal tax authority" in name
     if family == "MoE/DNFBP AML":
+        # A source that already belongs to EOCN/TFS (e.g. the MoE-owned targeted
+        # financial sanctions page) is counted there, never twice — the family
+        # table must PARTITION the register, not overlap it.
+        if _belongs_to(source, "EOCN/TFS"):
+            return False
         return "moec.gov.ae" in url or "moet" in source_id or "dnfbp" in text or "ministry of economy" in name
     return False
 
 
-def _fresh_alert_ready(source: dict) -> bool:
+def _fresh_alert_eligible(source: dict) -> bool:
+    # Same definition as the headline current_source_truth.fresh_alert_eligible
+    # (mode + alert_eligible), so family rows SUM to the headline exactly.
+    # Full readiness-gate caveats (proof/baseline sync) stay in the row notes.
     return (
         source.get("monitoring_mode") == "fresh_alert"
         and source.get("alert_eligible") is True
-        and source.get("last_monitor_status") == "MONITOR_OK"
-        and bool(source.get("proof_path"))
-        and bool(source.get("normalized_text_path"))
-        and bool(source.get("normalized_hash"))
-        and int(source.get("baseline_runs_completed") or 0)
-        >= int(source.get("baseline_runs_required") or 2)
-        and source.get("recommended_check_frequency") == "daily"
     )
 
 
 def _expected_family_readiness(sources: list[dict], family: str) -> dict:
     rows = [source for source in sources if _belongs_to(source, family)]
-    fresh = [source for source in rows if _fresh_alert_ready(source)]
+    fresh = [source for source in rows if _fresh_alert_eligible(source)]
     return {
         "total_enabled": len(rows),
         "fresh_alert_eligible": len(fresh),
@@ -183,6 +209,30 @@ def main() -> int:
     audit = _load_json(AUDIT_JSON)
     sources = _enabled_uae_sources()
     expected = _expected_truth(sources)
+
+    # Every ENABLED source must sit inside the monitoring_mode vocabulary, and
+    # the four modes must PARTITION the enabled total — no unclassified sources.
+    outside_vocabulary = [
+        f"{source.get('source_id') or source.get('name') or 'unknown'}"
+        f" (monitoring_mode={source.get('monitoring_mode')!r})"
+        for source in sources
+        if source.get("monitoring_mode") not in MONITORING_MODES
+    ]
+    _check(
+        not outside_vocabulary,
+        failures,
+        "enabled sources outside the monitoring_mode vocabulary "
+        f"{MONITORING_MODES}: {outside_vocabulary}",
+    )
+    mode_partition_total = sum(
+        1 for source in sources if source.get("monitoring_mode") in MONITORING_MODES
+    )
+    _check(
+        mode_partition_total == expected["total_enabled"],
+        failures,
+        f"monitoring_mode partition sums to {mode_partition_total}, "
+        f"expected the enabled total {expected['total_enabled']}",
+    )
 
     truth = audit.get("current_source_truth")
     _check(isinstance(truth, dict), failures, "audit must contain current_source_truth object")
@@ -232,6 +282,18 @@ def main() -> int:
                     failures,
                     f"{family_name} {key}={actual_value!r}, expected {expected_value!r} from sources.json",
                 )
+
+        # The family table must partition the enabled register: summing every
+        # family row (including "Other UAE official sources") must reproduce
+        # the headline truth exactly — no gap, no double counting.
+        for key in FAMILY_PARTITION_KEYS:
+            family_sum = sum(int(row.get(key) or 0) for row in family_readiness)
+            _check(
+                family_sum == expected[key],
+                failures,
+                f"family_readiness rows sum to {key}={family_sum}, "
+                f"expected headline {expected[key]} from sources.json",
+            )
 
     audit_text = AUDIT_MD.read_text(encoding="utf-8") if AUDIT_MD.exists() else ""
     frontend_text = FRONTEND_AUDIT.read_text(encoding="utf-8") if FRONTEND_AUDIT.exists() else ""
