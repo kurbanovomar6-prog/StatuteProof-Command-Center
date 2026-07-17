@@ -78,11 +78,11 @@ describe('per-regulator matrix counts (SourceTransparencyMatrix)', () => {
     // 2026-07-18: www.dfsa.ae blocks production egress — 10 DFSA-site sources
     // demoted; depth continues via dfsaen.thomsonreuters.com (rulebook + AML
     // module) which works from production. 20 → 10.
-    { label: 'DIFC/DFSA: "10 fresh-alert eligible across DIFC/DFSA"', fresh: 10, prefixes: ['difc', 'dfsa'] },
+    { label: 'DIFC/DFSA: "11 fresh-alert eligible across DIFC/DFSA"', fresh: 11, prefixes: ['difc', 'dfsa'] },
     { label: 'ADGM/FSRA: "9 fresh-alert eligible of 14 enabled"', fresh: 9, enabled: 14, prefixes: ['adgm'] },
     // 2026-07-18: the circulars/rules/procedures page is stuck in QUALITY_DROP
     // against a stale pre-repoint baseline — remediation until prod rebaseline.
-    { label: 'UAE CMA: "5 fresh-alert eligible"', fresh: 5, prefixes: ['sca'] },
+    { label: 'UAE CMA: "6 fresh-alert eligible"', fresh: 6, prefixes: ['sca'] },
     { label: 'Tax/corporate: "MoF 7 fresh-alert"', fresh: 7, prefixes: ['mof'] },
     // "Six FTA listing sources are enabled…" + "no FTA source is counted as
     // fresh-alert eligible today" — guard both the 6 and the 0.

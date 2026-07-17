@@ -22,7 +22,7 @@ export const SOURCE_TRUTH = {
   // Compliance & Risk Management Rulebook incl. AML/CFT Part III).
   // Honest count: 74 − 38 + 2 = 38. Unreachable-from-production sources are
   // disclosed, not counted — that is the pricing-page promise.
-  readinessSupported: 38,
+  readinessSupported: 40,
   // 2026-07-18: the VARA rulebook candidate passed prod gates and was promoted
   // to fresh_alert — candidate 10 → 9. Later the same day, the 21 enabled
   // sources that sat OUTSIDE the monitoring_mode vocabulary (mode missing)

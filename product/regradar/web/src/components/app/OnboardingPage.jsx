@@ -72,7 +72,7 @@ const SOURCE_READINESS_PREVIEW = {
   },
   'UAE Capital Market Authority (UAE CMA) [Limited]': {
     status: 'Limited but useful',
-    detail: 'UAE CMA coverage includes AML/CFT, regulations listing, FATCA/CRS and corporate governance (5 fresh-alert eligible sources). The circulars/rules/procedures page is in remediation pending a production rebaseline after the July 2026 SCA→CMA site move.',
+    detail: 'UAE CMA coverage includes AML/CFT, regulations listing, circulars/rules/procedures (restored 18 July 2026 after a production rebaseline), FATCA/CRS and corporate governance (6 fresh-alert eligible sources).',
     tone: 'amber',
   },
 }

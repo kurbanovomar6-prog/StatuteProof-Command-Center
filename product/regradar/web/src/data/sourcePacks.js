@@ -70,8 +70,8 @@ export const SOURCE_PACKS = [
         sourceIds: ["AE-sca-regulations-listing"],
       },
       {
-        text: "UAE CMA circulars, rules and procedures — in remediation pending a production rebaseline after the July 2026 SCA→CMA site move",
-        status: "pending",
+        text: "UAE CMA circulars, rules and procedures — restored 18 July 2026 after a production rebaseline and clean confirmation run",
+        status: "active",
         sourceIds: ["AE-sca-circulars-rules-procedures"],
       },
       {
@@ -202,8 +202,8 @@ export const SOURCE_PACKS = [
         sourceIds: ["AE-difc-legal-database"],
       },
       {
-        text: "DIFC Laws and Regulations root listing — in remediation pending audit-record review and a production rebaseline",
-        status: "pending",
+        text: "DIFC Laws and Regulations root listing — restored 18 July 2026 (the July quality dip was a transient site glitch; content returned to its verified baseline)",
+        status: "active",
         sourceIds: ["AE-difc-laws-and-regulations"],
       },
       {
@@ -569,8 +569,8 @@ export const SOURCE_PACKS = [
     coverage: "good",
     layers: [
       {
-        text: "UAE CMA circulars, rules and procedures — in remediation pending a production rebaseline after the July 2026 SCA→CMA site move",
-        status: "pending",
+        text: "UAE CMA circulars, rules and procedures — restored 18 July 2026 after a production rebaseline and clean confirmation run",
+        status: "active",
         sourceIds: ["AE-sca-circulars-rules-procedures"],
       },
       {
@@ -605,6 +605,6 @@ export const SOURCE_PACKS = [
       },
     ],
     caveat:
-      "UAE CMA (the successor to the Securities and Commodities Authority) coverage spans 5 selected fresh-alert sources; the circulars/rules/procedures page is in remediation pending a production rebaseline after the July 2026 SCA→CMA site move. The uaecma.gov.ae root portal and full UAE CMA coverage are not claimed. DFM regulatory circulars are enabled but not yet fresh-alert eligible (pending).",
+      "UAE CMA (the successor to the Securities and Commodities Authority) coverage spans 6 selected fresh-alert sources including the circulars/rules/procedures page (restored 18 July 2026 after a production rebaseline). The uaecma.gov.ae root portal and full UAE CMA coverage are not claimed. DFM regulatory circulars are enabled but not yet fresh-alert eligible (pending).",
   },
 ];

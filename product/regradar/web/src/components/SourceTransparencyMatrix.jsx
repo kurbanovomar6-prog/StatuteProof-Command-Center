@@ -19,7 +19,7 @@ const MATRIX_ROWS = [
   },
   {
     category: 'DIFC / DFSA',
-    sourceCount: '10 fresh-alert eligible across DIFC/DFSA',
+    sourceCount: '11 fresh-alert eligible across DIFC/DFSA',
     statusTone: 'caveat',
     whatWeMonitor: 'DIFC legal database, legal notices, data protection, AML/CFT and ESR pages; DFSA rulebook on the Thomson Reuters platform (rulebook + AML/CTF module, the module promoted 18 July 2026 after passing production gates)',
     limitation: 'www.dfsa.ae currently returns HTTP 403 to our production monitoring infrastructure (persistent since 11 July 2026) — 10 DFSA-site sources (consultations, enforcement, MLRO letters, annual reports, laws/rules pages) are disclosed as in remediation and not counted. DFSA rulebook depth continues via dfsaen.thomsonreuters.com, which does work from production. The DIFC laws-and-regulations root listing is in remediation pending a production rebaseline review.',
@@ -51,7 +51,7 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Capital markets (UAE CMA)',
-    sourceCount: '5 fresh-alert eligible',
+    sourceCount: '6 fresh-alert eligible',
     statusTone: 'active',
     whatWeMonitor: 'UAE CMA circulars/rules/procedures, regulations listing, AML/CFT, corporate governance, FATCA/CRS guidance, FinTech Regulatory Sandbox',
     limitation: 'The circulars/rules/procedures page is in remediation: after the July 2026 SCA→CMA repoint, production runs are stuck comparing against the stale pre-repoint baseline until a production rebaseline is executed — disclosed, not counted. Root portal and board-decisions listing are still being validated.',

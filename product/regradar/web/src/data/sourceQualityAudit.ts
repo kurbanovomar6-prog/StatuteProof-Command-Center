@@ -5,10 +5,10 @@
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: "2026-07-18",
   totalEnabled: 117,
-  freshAlertEligible: 38,
+  freshAlertEligible: 40,
   evidenceLibraryOnly: 20,
   candidate: 14,
-  remediation: 45,
+  remediation: 43,
   sourceLevelMonitorOk: 77,
   withProofPath: 86,
 } as const
@@ -50,10 +50,10 @@ export const FAMILY_QUALITY = [
   {
     family: "DIFC",
     totalEnabled: 12,
-    freshAlertEligible: 8,
+    freshAlertEligible: 9,
     evidenceLibrary: 3,
     candidate: 0,
-    remediation: 1,
+    remediation: 0,
     status: "good",
     gapTo25: 17,
     notes: "DIFC has 8 fresh-alert sources including the official DIFC Legal Database listing; the laws-and-regulations root listing moved to remediation on 2026-07-18 after three consecutive QUALITY_DROP production runs (pending audit-record review and a production rebaseline). Three DIFC listing pages (Courts practice directions, Registrar's directions, news/announcements hub) are held as evidence-library snapshots. This is selected DIFC monitoring, not complete DIFC legal database coverage.",
@@ -105,10 +105,10 @@ export const FAMILY_QUALITY = [
   {
     family: "SCA",
     totalEnabled: 6,
-    freshAlertEligible: 5,
+    freshAlertEligible: 6,
     evidenceLibrary: 0,
     candidate: 0,
-    remediation: 1,
+    remediation: 0,
     status: "partial",
     gapTo25: 20,
     notes: "UAE CMA has 5 proof-backed fresh-alert direct/listing sources. The circulars/rules/procedures page moved to remediation on 2026-07-18: production runs have been stuck in QUALITY_DROP against a stale pre-repoint baseline since the 2026-07-12 URL repoint (production rebaseline pending). UAE CMA AML/CFT parser/noise review still blocks broad UAE CMA positioning.",
@@ -217,7 +217,7 @@ export const KNOWN_LIMITATIONS = [
 ] as const
 
 export const SAFE_CLAIMS = [
-  "StatuteProof has 38 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-18).",
+  "StatuteProof has 40 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-18).",
   "StatuteProof also maintains 20 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
   "Sources whose hosts block our production monitoring egress — the CBUAE rulebook subdomain and the DFSA website (HTTP 403 to all fetch methods since 2026-07-11) — are disclosed as remediation and are not counted as fresh-alert eligible.",
   "DFSA rulebook depth continues through the DFSA rulebook platform at dfsaen.thomsonreuters.com, which does work from production, including the AML rulebook module promoted on 2026-07-18 after passing rebaseline and stable-run gates.",
@@ -263,6 +263,6 @@ export const AUDIT_META = {
     'product/regradar/reports/source_signal_quality_audit.md',
   ],
   validatorScript: 'product/regradar/reports/validate_audit.py',
-  recommendedSalesClaim: "38 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage, with source-level proof files, hashes, and baseline confirmation",
+  recommendedSalesClaim: "40 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage, with source-level proof files, hashes, and baseline confirmation",
   riskBriefBoundary: "Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist.",
 } as const
