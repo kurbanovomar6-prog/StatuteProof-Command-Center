@@ -12,15 +12,18 @@
 //   candidate          = enabled AND monitoring_mode === 'candidate'
 export const SOURCE_TRUTH = {
   enabled: 117,
-  // 2026-07-12 OPS audit: 8 sources (7 MOET on a maintenance-stub baseline +
-  // the DFSA AML rulebook module on a JS-shell baseline) moved to remediation
-  // until re-baselined on real content — honest count drops 83 → 75.
-  // 2026-07-13 OPS source-rot audit (MEDIUM findings): the UAEIEC news listing
-  // was confirmed byte-identical to the EOCN news listing (same page, second
-  // domain) and demoted to a dedupe candidate — 75 → 74, candidate 8 → 9.
-  readinessSupported: 74,
-  // 2026-07-17: VARA AML/CFT rulebook repointed to rulebooks.vara.ae (old path
-  // 404) and rebuilt as a candidate on the new rulebook_platform adapter —
-  // enabled 116 → 117, candidate 9 → 10. Stays candidate until prod gates.
-  candidate: 10,
+  // 2026-07-18 PROD-VANTAGE RE-MEASURE: 25 CBUAE rulebook + 10 www.dfsa.ae
+  // sources demoted to remediation — both hosts return HTTP 403 to our
+  // production monitoring egress on every fetch method (persistent since
+  // 2026-07-11). Plus 3 individually-diagnosed persistent failers (UAE CMA
+  // circulars, DIFC laws root listing, VARA 30-day revision view) demoted
+  // pending production rebaselines. Two sources PASSED prod gates and were
+  // promoted (DFSA AML rulebook module via dfsaen.thomsonreuters.com, VARA
+  // Compliance & Risk Management Rulebook incl. AML/CFT Part III).
+  // Honest count: 74 − 38 + 2 = 38. Unreachable-from-production sources are
+  // disclosed, not counted — that is the pricing-page promise.
+  readinessSupported: 38,
+  // 2026-07-18: the VARA rulebook candidate passed prod gates and was promoted
+  // to fresh_alert — candidate 10 → 9.
+  candidate: 9,
 }

@@ -40,8 +40,13 @@ export const SOURCE_PACKS = [
     coverage: "good",
     layers: [
       {
-        text: "VARA Rulebook revision updates — live index of rulebook changes",
+        text: "VARA Compliance & Risk Management Rulebook — full text incl. AML/CFT Part III (promoted 18 July 2026 after two stable production runs)",
         status: "active",
+        sourceIds: ["AE-vara-compliance-risk-rulebook-html"],
+      },
+      {
+        text: "VARA Rulebook revision updates — in remediation pending a production rebaseline; rulebook change coverage continues via the full-rulebook source above",
+        status: "pending",
         sourceIds: ["AE-vara-rulebook-updates"],
       },
       {
@@ -55,17 +60,19 @@ export const SOURCE_PACKS = [
         sourceIds: ["AE-vara-enforcement"],
       },
       {
-        text: "CBUAE Payment Token Services Regulation",
-        status: "active",
+        text: "CBUAE Payment Token Services Regulation — in remediation: rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026)",
+        status: "pending",
         sourceIds: ["AE-cbuae-payment-token-services-rulebook"],
       },
       {
-        text: "UAE CMA (formerly SCA) circulars, rules and regulations listing",
+        text: "UAE CMA (formerly SCA) regulations listing",
         status: "active",
-        sourceIds: [
-          "AE-sca-circulars-rules-procedures",
-          "AE-sca-regulations-listing",
-        ],
+        sourceIds: ["AE-sca-regulations-listing"],
+      },
+      {
+        text: "UAE CMA circulars, rules and procedures — in remediation pending a production rebaseline after the July 2026 SCA→CMA site move",
+        status: "pending",
+        sourceIds: ["AE-sca-circulars-rules-procedures"],
       },
       {
         text: "UAE Executive Office (EOCN) AML/CFT laws and sanctions / TFS updates",
@@ -89,27 +96,27 @@ export const SOURCE_PACKS = [
       },
     ],
     caveat:
-      "VARA monitoring covers 3 selected fresh-alert sources (rulebook updates, news/circulars, enforcement) — selected-source monitoring, not complete VARA coverage. The UAE FIU knowledge centre (uaefiu.gov.ae) is geo-restricted from outside the UAE and is not currently delivered as fresh alerts.",
+      "VARA monitoring covers 3 selected fresh-alert sources (full Compliance & Risk Management Rulebook incl. AML/CFT Part III, news/circulars, enforcement) — selected-source monitoring, not complete VARA coverage. The CBUAE payment-token source is in remediation because rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026). The UAE FIU knowledge centre (uaefiu.gov.ae) is geo-restricted from outside the UAE and is not currently delivered as fresh alerts.",
   },
   {
     profile: "Payments & Fintech",
     bestFor:
       "Payment firms, stored value providers, fintech operators and compliance advisers",
-    coverage: "strong",
+    coverage: "limited",
     layers: [
       {
-        text: "CBUAE Rulebook Revision Updates — master change index across modules",
-        status: "active",
+        text: "CBUAE Rulebook Revision Updates — in remediation: rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026)",
+        status: "pending",
         sourceIds: ["AE-cbuae-rulebook-revision-updates"],
       },
       {
-        text: "CBUAE Retail Payment Services and Card Schemes Regulation",
-        status: "active",
+        text: "CBUAE Retail Payment Services and Card Schemes Regulation — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: ["AE-cbuae-retail-payment-services-rulebook"],
       },
       {
-        text: "CBUAE Stored Value Facilities and Retail / Large Value Payment Systems regulations",
-        status: "active",
+        text: "CBUAE Stored Value Facilities and Retail / Large Value Payment Systems regulations — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: [
           "AE-cbuae-stored-value-facilities-doclist",
           "AE-cbuae-retail-payment-systems-regulation-doclist",
@@ -117,17 +124,22 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "CBUAE Open Finance and Payment Token Services regulations",
-        status: "active",
+        text: "CBUAE Open Finance and Payment Token Services regulations — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: [
           "AE-cbuae-open-finance-rulebook",
           "AE-cbuae-payment-token-services-rulebook",
         ],
       },
       {
-        text: "DFSA and UAE CMA fintech / innovation sandbox pages",
+        text: "UAE CMA FinTech Regulatory Sandbox",
         status: "active",
-        sourceIds: ["AE-dfsa-innovation-59c1dc61", "AE-sca-fintech-sandbox"],
+        sourceIds: ["AE-sca-fintech-sandbox"],
+      },
+      {
+        text: "DFSA innovation / sandbox page — in remediation: www.dfsa.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026)",
+        status: "pending",
+        sourceIds: ["AE-dfsa-innovation-59c1dc61"],
       },
       {
         text: "UAE Executive Office (EOCN) AML/CFT and sanctions updates",
@@ -141,13 +153,13 @@ export const SOURCE_PACKS = [
       },
     ],
     caveat:
-      "CBUAE monitoring uses the rulebook.centralbank.ae subdomain; the main centralbank.ae domain is geo-restricted from outside the UAE. The UAE Legislation Portal is geo-restricted and under remediation — documented, not delivered.",
+      "All CBUAE payment sources are currently in remediation: rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 on every fetch method since 11 July 2026) — disclosed, not counted as fresh-alert eligible until access is restored and re-verified from production. The main centralbank.ae domain is geo-restricted from outside the UAE. The UAE Legislation Portal is geo-restricted and under remediation — documented, not delivered.",
   },
   {
     profile: "DIFC / DFSA",
     bestFor:
       "DIFC regulated firms, funds, advisers, law firms and compliance consultants",
-    coverage: "strong",
+    coverage: "good",
     layers: [
       {
         text: "DFSA Rulebook (Thomson Reuters modules)",
@@ -157,13 +169,13 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "DFSA AML/CTF & Sanctions rulebook module — under adapter remediation (re-baseline pending)",
-        status: "pending",
+        text: "DFSA AML/CTF & Sanctions rulebook module (Thomson Reuters platform) — promoted 18 July 2026 after rebaseline and two stable production runs",
+        status: "active",
         sourceIds: ["AE-dfsa-aml-rulebook-module"],
       },
       {
-        text: "DFSA laws, rules and legal resources",
-        status: "active",
+        text: "DFSA laws, rules and legal resources — in remediation: www.dfsa.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026)",
+        status: "pending",
         sourceIds: [
           "AE-dfsa-rulebook-official",
           "AE-dfsa-laws-rules-2dee8ba9",
@@ -171,8 +183,8 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "DFSA consultation papers and enforcement / regulatory actions",
-        status: "active",
+        text: "DFSA consultation papers and enforcement / regulatory actions — in remediation (DFSA site blocked from production, disclosed not counted)",
+        status: "pending",
         sourceIds: [
           "AE-dfsa-consultation-current",
           "AE-dfsa-regulatory-actions-current",
@@ -180,14 +192,19 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "DFSA financial crime prevention notices and MLRO letters",
-        status: "active",
+        text: "DFSA financial crime prevention notices and MLRO letters — in remediation (DFSA site blocked from production, disclosed not counted)",
+        status: "pending",
         sourceIds: ["AE-dfsa-financial-crime-mlro-letters"],
       },
       {
-        text: "DIFC Laws and Regulations and DIFC Legal Database listing",
+        text: "DIFC Legal Database listing",
         status: "active",
-        sourceIds: ["AE-difc-laws-and-regulations", "AE-difc-legal-database"],
+        sourceIds: ["AE-difc-legal-database"],
+      },
+      {
+        text: "DIFC Laws and Regulations root listing — in remediation pending audit-record review and a production rebaseline",
+        status: "pending",
+        sourceIds: ["AE-difc-laws-and-regulations"],
       },
       {
         text: "DIFC AML/CFT, Economic Substance and legal notices",
@@ -216,7 +233,7 @@ export const SOURCE_PACKS = [
       },
     ],
     caveat:
-      "Selected-source DIFC/DFSA monitoring covers 21 fresh-alert sources. The DFSA News Hub / SEO letters and DIFC Courts direction pages are enabled but not yet fresh-alert eligible (pending validation). This is not complete DIFC legal-database coverage.",
+      "Selected-source DIFC/DFSA monitoring currently covers 10 fresh-alert sources (8 DIFC, 2 on the DFSA Thomson Reuters rulebook platform). The www.dfsa.ae site blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026), so DFSA-site sources (laws/rules, consultations, enforcement, MLRO letters) are disclosed as in remediation and not counted. The DFSA News Hub / SEO letters and DIFC Courts direction pages are enabled but not yet fresh-alert eligible (pending validation). This is not complete DIFC legal-database coverage.",
   },
   {
     profile: "ADGM / FSRA",
@@ -307,14 +324,19 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "CBUAE AML/CFT rulebook, proliferation-finance and TBML guidance",
-        status: "active",
+        text: "CBUAE AML/CFT rulebook, proliferation-finance and TBML guidance — in remediation: rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026)",
+        status: "pending",
         sourceIds: [
           "AE-cbuae-amlcft-rulebook-doclist",
           "AE-cbuae-amlcft-entire-section-doclist",
           "AE-cbuae-proliferation-finance-guidance-doclist",
           "AE-cbuae-tbml-transshipment-guidance-doclist",
         ],
+      },
+      {
+        text: "VARA Compliance & Risk Management Rulebook — AML/CFT Part III (full rulebook text)",
+        status: "active",
+        sourceIds: ["AE-vara-compliance-risk-rulebook-html"],
       },
       {
         text: "Ministry of Economy DNFBP AML, TFS and goAML registration — under source remediation (earlier captures were a maintenance page; re-baseline pending)",
@@ -326,16 +348,18 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "DFSA MLRO letters and ADGM financial-crime prevention sources",
+        text: "ADGM FSRA financial and cyber crime prevention (AML/CFT)",
         status: "active",
-        sourceIds: [
-          "AE-dfsa-financial-crime-mlro-letters",
-          "AE-adgm-fsra-financial-crime-prevention",
-        ],
+        sourceIds: ["AE-adgm-fsra-financial-crime-prevention"],
       },
       {
-        text: "DFSA AML rulebook module — under adapter remediation (re-baseline pending)",
+        text: "DFSA financial crime prevention notices and MLRO letters — in remediation: www.dfsa.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026)",
         status: "pending",
+        sourceIds: ["AE-dfsa-financial-crime-mlro-letters"],
+      },
+      {
+        text: "DFSA AML/CTF & Sanctions rulebook module (Thomson Reuters platform) — promoted 18 July 2026 after rebaseline and two stable production runs",
+        status: "active",
         sourceIds: ["AE-dfsa-aml-rulebook-module"],
       },
       {
@@ -354,7 +378,7 @@ export const SOURCE_PACKS = [
       },
     ],
     caveat:
-      "AML monitoring draws on the UAE Executive Office (EOCN), Ministry of Economy DNFBP sources, and the AML/CFT modules of CBUAE, DFSA, ADGM, UAE CMA and DIFC. The UAE FIU (uaefiu.gov.ae) knowledge centre is geo-restricted from outside the UAE and under remediation — documented, not delivered as fresh alerts.",
+      "AML monitoring draws on the UAE Executive Office (EOCN), the VARA rulebook AML/CFT part, the DFSA AML rulebook module (Thomson Reuters platform), and the ADGM, UAE CMA and DIFC AML/CFT pages. The CBUAE AML/CFT rulebook sections and DFSA-site MLRO letters are in remediation because rulebook.centralbank.ae and www.dfsa.ae block our production monitoring infrastructure (HTTP 403 since 11 July 2026) — disclosed, not counted. Ministry of Economy DNFBP sources remain under source remediation. The UAE FIU (uaefiu.gov.ae) knowledge centre is geo-restricted from outside the UAE and under remediation — documented, not delivered as fresh alerts.",
   },
   {
     profile: "Tax / Corporate",
@@ -470,16 +494,16 @@ export const SOURCE_PACKS = [
     profile: "Banking & Prudential (CBUAE)",
     bestFor:
       "Banks, finance companies, exchange houses and prudential risk / compliance teams",
-    coverage: "strong",
+    coverage: "limited",
     layers: [
       {
-        text: "CBUAE Rulebook Revision Updates — master change index",
-        status: "active",
+        text: "CBUAE Rulebook Revision Updates — in remediation: rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026)",
+        status: "pending",
         sourceIds: ["AE-cbuae-rulebook-revision-updates"],
       },
       {
-        text: "Capital Adequacy, Large Exposures, Market and Operational Risk regulations",
-        status: "active",
+        text: "Capital Adequacy, Large Exposures, Market and Operational Risk regulations — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: [
           "AE-cbuae-capital-adequacy-doclist",
           "AE-cbuae-large-exposures-regulation-doclist",
@@ -488,8 +512,8 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "Risk Management, Country & Transfer Risk and Interest-Rate Risk regulations",
-        status: "active",
+        text: "Risk Management, Country & Transfer Risk and Interest-Rate Risk regulations — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: [
           "AE-cbuae-risk-management-rulebook",
           "AE-cbuae-country-transfer-risk-regulation-doclist",
@@ -497,8 +521,8 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "Consumer Protection, SME Customer Protection and Market Conduct regulations",
-        status: "active",
+        text: "Consumer Protection, SME Customer Protection and Market Conduct regulations — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: [
           "AE-cbuae-consumer-protection-rulebook-doclist",
           "AE-cbuae-sme-customer-protection-regulation-doclist",
@@ -506,8 +530,8 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "Exchange Business, Model Management and Islamic Banks risk standards",
-        status: "active",
+        text: "Exchange Business, Model Management and Islamic Banks risk standards — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: [
           "AE-cbuae-exchange-business-regulation-doclist",
           "AE-cbuae-model-management-standards-doclist",
@@ -515,9 +539,19 @@ export const SOURCE_PACKS = [
         ],
       },
       {
-        text: "Federal Decree-Law No. 6 of 2025 (Central Bank & financial institutions)",
-        status: "active",
+        text: "Federal Decree-Law No. 6 of 2025 (Central Bank & financial institutions) — in remediation (production access blocked, disclosed not counted)",
+        status: "pending",
         sourceIds: ["AE-cbuae-federal-decree-law-6-2025-doclist"],
+      },
+      {
+        text: "UAE Ministry of Finance financial legislation and UAE financial framework",
+        status: "active",
+        sourceIds: ["AE-mof-financial-legislation", "AE-mof-uae-financial-framework"],
+      },
+      {
+        text: "UAE Executive Office (EOCN) AML/CFT laws and sanctions / TFS updates",
+        status: "active",
+        sourceIds: ["AE-eocn-laws-regulations-en", "AE-eocn-tfs"],
       },
       {
         text: "CBUAE main centralbank.ae domain (regulations, circulars, publications)",
@@ -526,7 +560,7 @@ export const SOURCE_PACKS = [
       },
     ],
     caveat:
-      "CBUAE monitoring covers 25 fresh-alert rulebook and regulation modules on the rulebook.centralbank.ae subdomain. The main centralbank.ae domain (regulations, circulars, publications, licensing) is geo-restricted from outside the UAE — documented, not delivered. Selected-source monitoring, not complete CBUAE coverage.",
+      "No CBUAE source is currently counted as fresh-alert eligible: rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 on every fetch method since 11 July 2026). All 25 configured CBUAE rulebook/regulation sources are disclosed as in remediation until access is restored and re-verified from production. The main centralbank.ae domain is geo-restricted from outside the UAE — documented, not delivered. Interim banking-relevant depth runs through MoF financial legislation/framework and EOCN sanctions sources. Selected-source monitoring, not complete CBUAE coverage.",
   },
   {
     profile: "Capital Markets",
@@ -535,8 +569,8 @@ export const SOURCE_PACKS = [
     coverage: "good",
     layers: [
       {
-        text: "UAE CMA circulars, rules and procedures",
-        status: "active",
+        text: "UAE CMA circulars, rules and procedures — in remediation pending a production rebaseline after the July 2026 SCA→CMA site move",
+        status: "pending",
         sourceIds: ["AE-sca-circulars-rules-procedures"],
       },
       {
@@ -571,6 +605,6 @@ export const SOURCE_PACKS = [
       },
     ],
     caveat:
-      "UAE CMA (the successor to the Securities and Commodities Authority) coverage spans 6 selected fresh-alert sources. The uaecma.gov.ae root portal and full UAE CMA coverage are not claimed. DFM regulatory circulars are enabled but not yet fresh-alert eligible (pending).",
+      "UAE CMA (the successor to the Securities and Commodities Authority) coverage spans 5 selected fresh-alert sources; the circulars/rules/procedures page is in remediation pending a production rebaseline after the July 2026 SCA→CMA site move. The uaecma.gov.ae root portal and full UAE CMA coverage are not claimed. DFM regulatory circulars are enabled but not yet fresh-alert eligible (pending).",
   },
 ];

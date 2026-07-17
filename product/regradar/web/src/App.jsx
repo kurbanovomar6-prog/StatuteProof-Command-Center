@@ -444,10 +444,11 @@ export default function App() {
                 </h2>
                 <p className="text-slate-400 max-w-xl mx-auto text-sm">
                   A change our monitor captured on the official DFSA Rules and
-                  Standards page, sealed under SHA-256. The verifier re-hashes
-                  the exact bytes you load — no account, no trust in us
-                  required. Verification confirms record integrity only; not
-                  legal advice.
+                  Standards page, sealed under SHA-256. Sealed records are
+                  chained, and the chain head is anchored with a third-party
+                  RFC 3161 timestamp. The verifier re-hashes the exact bytes
+                  you load — no account, no trust in us required. Verification
+                  confirms record integrity only; not legal advice.
                 </p>
               </div>
               <div className="grid md:grid-cols-2 gap-6 mb-8">

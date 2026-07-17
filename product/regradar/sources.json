@@ -573,9 +573,9 @@
     "baseline_runs_required": 2,
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-financial-crime-mlro-letters/intake-20260619T151120Z/proof.json",
     "normalized_hash": "56fa887024611a571e07858caa055c3cb35e4735127a890d9b4ecbad951c7107",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DFSA AML/CFT and financial crime prevention notices; MLRO-critical content.",
@@ -611,8 +611,8 @@
     "baseline_runs_required": 2,
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-aml-rulebook-module/intake-20260619T151126Z/proof.json",
     "normalized_hash": "036de70eb042bad014aeadee28e08d42d891ffd9fd367f1a9bb2dfe978b7d6ed",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 URL repoint: was pinned to the frozen Thomson Reuters version path …module-aml-ver3004-26 (frozen at VER30/04-26 — a frozen version URL keeps serving the old text after the next rulebook amendment, i.e. silent stale monitoring). Repointed to the canonical current-version module URL. Verified 2026-07-12: rulebook-modules index lists both URLs; canonical page title carries no VER tag while the frozen page title shows [VER30/04-26]; both serve HTTP 200. REQUIRES single-source rebaseline (python run.py rebaseline --source-id AE-dfsa-aml-rulebook-module) on the deployment that owns the baseline, before the next scheduled sweep, to avoid one spurious CHANGED alert. | 2026-07-12 OPS: static fetch captured only a 2.8KB Thomson Reuters SPA nav shell; switched to playwright/rulebook (matches healthy sibling AE-dfsa-rulebook-thomsonreuters); min raised 500->8000; re-baseline required after deploy. | 2026-07-17 ROOT CAUSE + FIX (verified from founder laptop, NOT prod): the platform serves the module node as a static nav/TOC shell whose visible text (~24K chars of site tree) PASSES the generic scraper's 500-char low-content gate, so Tier-2 Playwright never fires and the pipeline hashed navigation chrome — hence NAV_SHELL_ONLY. Playwright does NOT help: even fully rendered, the module node carries no rule text (rendered main = 3,392 chars, zero rulebook body; text lives on ~100 per-rule child pages). Fix: new opt-in registry adapter rulebook_platform (app/adapters/rulebook_platform.py) extracts, static-only: module's own current-version tag from the book-navigation tree ([VER30/04-26] at fix time), the current-version page's full section TOC, the version-history table, and all version PDF links (sorted). Alert fires on new VER tag / TOC change / new PDF version row; other modules' version tags are excluded by URL-prefix matching (no cross-module noise). Live check 2026-07-17 from laptop: 23,822 chars, is_quality_content=True, deterministic across 2 runs (sha256 stable). NOTE this monitors module version+structure, not full per-rule text. VANTAGE CAVEAT: dfsaen.thomsonreuters.com verified reachable from the laptop only; if the prod datacenter IP is 403-blocked (as adgm.thomsonreuters.com is), add dfsaen.thomsonreuters.com to STATUTEPROOF_PROXY_HOSTS — the adapter already routes via proxy_for_url(). Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. REMAINS monitoring_mode=remediation until, on the prod deployment: pipeline no-save check OK, python run.py rebaseline --source-id AE-dfsa-aml-rulebook-module, 2 baseline runs + MONITOR_OK, then flip to fresh_alert.",
-    "monitoring_mode": "remediation",
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 URL repoint: was pinned to the frozen Thomson Reuters version path …module-aml-ver3004-26 (frozen at VER30/04-26 — a frozen version URL keeps serving the old text after the next rulebook amendment, i.e. silent stale monitoring). Repointed to the canonical current-version module URL. Verified 2026-07-12: rulebook-modules index lists both URLs; canonical page title carries no VER tag while the frozen page title shows [VER30/04-26]; both serve HTTP 200. REQUIRES single-source rebaseline (python run.py rebaseline --source-id AE-dfsa-aml-rulebook-module) on the deployment that owns the baseline, before the next scheduled sweep, to avoid one spurious CHANGED alert. | 2026-07-12 OPS: static fetch captured only a 2.8KB Thomson Reuters SPA nav shell; switched to playwright/rulebook (matches healthy sibling AE-dfsa-rulebook-thomsonreuters); min raised 500->8000; re-baseline required after deploy. | 2026-07-17 ROOT CAUSE + FIX (verified from founder laptop, NOT prod): the platform serves the module node as a static nav/TOC shell whose visible text (~24K chars of site tree) PASSES the generic scraper's 500-char low-content gate, so Tier-2 Playwright never fires and the pipeline hashed navigation chrome — hence NAV_SHELL_ONLY. Playwright does NOT help: even fully rendered, the module node carries no rule text (rendered main = 3,392 chars, zero rulebook body; text lives on ~100 per-rule child pages). Fix: new opt-in registry adapter rulebook_platform (app/adapters/rulebook_platform.py) extracts, static-only: module's own current-version tag from the book-navigation tree ([VER30/04-26] at fix time), the current-version page's full section TOC, the version-history table, and all version PDF links (sorted). Alert fires on new VER tag / TOC change / new PDF version row; other modules' version tags are excluded by URL-prefix matching (no cross-module noise). Live check 2026-07-17 from laptop: 23,822 chars, is_quality_content=True, deterministic across 2 runs (sha256 stable). NOTE this monitors module version+structure, not full per-rule text. VANTAGE CAVEAT: dfsaen.thomsonreuters.com verified reachable from the laptop only; if the prod datacenter IP is 403-blocked (as adgm.thomsonreuters.com is), add dfsaen.thomsonreuters.com to STATUTEPROOF_PROXY_HOSTS — the adapter already routes via proxy_for_url(). Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. REMAINS monitoring_mode=remediation until, on the prod deployment: pipeline no-save check OK, python run.py rebaseline --source-id AE-dfsa-aml-rulebook-module, 2 baseline runs + MONITOR_OK, then flip to fresh_alert. | 2026-07-18 PROD GATES PASSED: rebaseline + 2 stable runs from production vantage via rulebook_platform adapter (23,822 chars, GOOD, sha-stable) — promoted to fresh_alert.",
+    "monitoring_mode": "fresh_alert",
     "alert_eligible": true,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -877,9 +877,9 @@
     "baseline_runs_required": 2,
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-sca-circulars-rules-procedures/intake-20260619T150551Z/proof.json",
     "normalized_hash": "7fb7a5a87d0e11980bc196a590d3d51b45b0a138cf4c38f2789c82f73568ab2c",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 REPOINTED (resolves the same-day TOMBSTONE WATCH): the old .aspx path 302s to /404.aspx and the pipeline was hashing the homepage nav shell. New canonical CMA circulars page discovered via browser and verified on the app's own fetch path (python-requests, 200, no redirect, circular titles present in raw server-rendered HTML — no JS needed). Old: /en/regulations/circulars-and-procedures.aspx  New: /en/regulations/circulars-rules-and-procedures. REBASELINE REQUIRED after deploy: python run.py rebaseline --source-id AE-sca-circulars-rules-procedures (first sweep otherwise fires one spurious CHANGED vs the stale homepage-shell baseline). SCA->CMA transition still worth watching through 2027-01-01 for further path moves.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-12 REPOINTED (resolves the same-day TOMBSTONE WATCH): the old .aspx path 302s to /404.aspx and the pipeline was hashing the homepage nav shell. New canonical CMA circulars page discovered via browser and verified on the app's own fetch path (python-requests, 200, no redirect, circular titles present in raw server-rendered HTML — no JS needed). Old: /en/regulations/circulars-and-procedures.aspx  New: /en/regulations/circulars-rules-and-procedures. REBASELINE REQUIRED after deploy: python run.py rebaseline --source-id AE-sca-circulars-rules-procedures (first sweep otherwise fires one spurious CHANGED vs the stale homepage-shell baseline). SCA->CMA transition still worth watching through 2027-01-01 for further path moves. | 2026-07-18 PROD-VANTAGE RE-MEASURE: 5 consecutive QUALITY_DROP prod runs since the 2026-07-12 repoint. Diagnosis: NOT an expected_min_length gate issue (this source's floor is 500) and NOT host egress — www.uaecma.gov.ae fetches succeed from prod (sibling CMA sources run UNCHANGED). classify_change is comparing each run against the stale pre-repoint baseline (old homepage nav shell), so every capture of the new canonical page trips the shrink/floor heuristics; the single-source rebaseline this entry has required since 2026-07-12 was never executed on prod. Demoted to remediation so published counts reflect production reality. RESTORE PATH: run `python run.py rebaseline --source-id AE-sca-circulars-rules-procedures` on the prod deployment, verify MONITOR_OK plus one clean UNCHANGED sweep, flip back to fresh_alert.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "SCA circulars, rules and procedures listing; primary regulatory instrument index for capital markets; activated after proof-backed baseline but no MONITOR_OK yet.",
@@ -923,7 +923,7 @@
     "category": "legal_database",
     "enabled": true,
     "status": "active",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice.",
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: last 3 prod runs QUALITY_DROP (last-5 pattern: QUALITY_DROP, UNCHANGED, then QUALITY_DROP x3). Diagnosis: NOT host egress — www.difc.com serves prod fine (sibling DIFC sources run UNCHANGED and this source itself hit UNCHANGED mid-window). Consistent with the page shrinking/restructuring around 2026-07-17 with every later run failing the shrink/floor heuristics against the pre-change baseline — which also means a REAL content change may be sitting untriaged in the QUALITY_DROP audit records. Demoted to remediation pending human review of those records plus a prod rebaseline; not counted as fresh-alert until it holds MONITOR_OK from prod. RESTORE PATH: review the QUALITY_DROP audit records for a genuine change, run `python run.py rebaseline --source-id AE-difc-laws-and-regulations` on prod, verify a clean sweep, flip back.",
     "source_id": "AE-difc-laws-and-regulations",
     "tier": "1",
     "adapter_family": "difc_legal_database",
@@ -935,8 +935,8 @@
     "baseline_runs_required": 2,
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-difc-laws-and-regulations/intake-20260619T151730Z/proof.json",
     "normalized_hash": "421b07ad9b749e45900c6d9209242177573701c9fde1208286c3a13529aeaf3f",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DIFC laws and regulations root listing; useful discovery index but child pages provide better diff signal.",
@@ -2426,8 +2426,8 @@
       ]
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2445,7 +2445,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "VARA Rulebook Revision Updates",
@@ -2465,8 +2465,8 @@
       "max_items": 80
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "VARA rulebook revision updates listing; live index of all VARA rulebook changes; critical signal for VASP compliance.",
@@ -2483,7 +2483,7 @@
     "last_checked_at": "2026-06-19T15:08:32Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-12 OPS: repointed — the previous URL had a collapsed query separator (f_days=onchanged%3D-30+day) so the 30-day revision filter never applied; re-baseline required after deploy."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-12 OPS: repointed — the previous URL had a collapsed query separator (f_days=onchanged%3D-30+day) so the 30-day revision filter never applied; re-baseline required after deploy. | 2026-07-18 PROD-VANTAGE RE-MEASURE: 5 consecutive QUALITY_DROP prod runs. Diagnosis: NOT host egress — rulebooks.vara.ae works from prod (AE-vara-compliance-risk-rulebook-html passed 2 stable production runs on the same host this week). Two compounding causes local to this source: (1) the rebaseline required since the 2026-07-12 URL repoint (query-separator fix) was never executed on prod, so every run compares against the pre-repoint baseline; (2) the 30-day-filtered revision view (f_days/changed=-30 day) is legitimately near-empty whenever VARA publishes no revisions in a rolling month, which the quality floor reads as content collapse. Demoted to remediation; VARA rulebook change coverage continues via AE-vara-compliance-risk-rulebook-html (full rulebook text — any revision changes its hash). RESTORE PATH: rebaseline on prod and/or repoint to the unfiltered revision-updates view, verify 2 clean prod runs, flip back."
   },
   {
     "name": "DFSA Consultation Papers Current",
@@ -2503,8 +2503,8 @@
       "max_items": 100
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DFSA primary rules/standards or consultation papers listing; captures all rulebook and regulatory instrument changes.",
@@ -2521,7 +2521,7 @@
     "last_checked_at": "2026-06-19T15:17:07Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "DFSA Published Enforcement Decisions",
@@ -2579,8 +2579,8 @@
       "max_items": 80
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DFSA published enforcement decisions; directly actionable for compliance and risk officers.",
@@ -2597,7 +2597,7 @@
     "last_checked_at": "2026-06-19T15:17:07Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "CBUAE Retail Payment Services and Card Schemes Regulation",
@@ -2617,8 +2617,8 @@
       "max_items": 80
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2636,7 +2636,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "medium",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "DFSA Consultation Paper No.165",
@@ -2724,8 +2724,8 @@
       "max_items": 80
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2743,7 +2743,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "CBUAE AML/CFT Entire Section Document Links",
@@ -2763,8 +2763,8 @@
       "max_items": 80
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2782,7 +2782,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "CBUAE Consumer Protection Regulation Document Links",
@@ -2802,8 +2802,8 @@
       "max_items": 80
     },
     "fetch_method": "playwright",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2821,7 +2821,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "CBUAE Open Finance Regulation",
@@ -2839,8 +2839,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2858,7 +2858,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "CBUAE Payment Token Services Regulation",
@@ -2876,8 +2876,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2895,7 +2895,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "CBUAE Risk Management Rulebook",
@@ -2913,8 +2913,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2932,7 +2932,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: live check confirmed this page is a genuine server-rendered thin doclist index, not a JS shell (plain fetch returns 128,148B HTML; <main> holds 45 rulebook/PDF links; visible text 1,421B matches the stored 1,431B capture; no JS-app markers). No playwright needed. expected_min_length raised 500 -> 1300 (just under the live doclist size) so a collapse to nav-stub chrome fails the length gate instead of passing. The other 19 plain-fetch CBUAE rulebook sources are intentionally unchanged."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: live check confirmed this page is a genuine server-rendered thin doclist index, not a JS shell (plain fetch returns 128,148B HTML; <main> holds 45 rulebook/PDF links; visible text 1,421B matches the stored 1,431B capture; no JS-app markers). No playwright needed. expected_min_length raised 500 -> 1300 (just under the live doclist size) so a collapse to nav-stub chrome fails the length gate instead of passing. The other 19 plain-fetch CBUAE rulebook sources are intentionally unchanged. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Stored Value Facilities",
@@ -2950,8 +2950,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -2969,7 +2969,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Operational Risk Regulation",
@@ -2987,8 +2987,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3006,7 +3006,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Market Risk Regulation",
@@ -3024,8 +3024,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3043,7 +3043,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Large Exposures Regulation",
@@ -3061,8 +3061,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3080,7 +3080,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Exchange Business Regulation",
@@ -3098,8 +3098,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3117,7 +3117,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Capital Adequacy",
@@ -3135,8 +3135,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3154,7 +3154,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Large Value Payment Systems Regulation",
@@ -3172,8 +3172,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3191,7 +3191,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Federal Decree Law No. 6 of 2025",
@@ -3209,8 +3209,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3228,7 +3228,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Country and Transfer Risk Regulation",
@@ -3246,8 +3246,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3265,7 +3265,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "medium",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Interest Rate and Rate of Return Risk Regulation",
@@ -3283,8 +3283,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3302,7 +3302,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "medium",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Model Management Standards",
@@ -3320,8 +3320,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3339,7 +3339,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Retail Payment Systems Regulation",
@@ -3357,8 +3357,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3376,7 +3376,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "SME Customer Protection Regulation",
@@ -3394,8 +3394,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3413,7 +3413,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Islamic Banks Risk Management Standard",
@@ -3431,8 +3431,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3450,7 +3450,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Market Conduct Consumer Protection",
@@ -3468,8 +3468,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3487,7 +3487,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "Proliferation Finance Guidance",
@@ -3505,8 +3505,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3524,7 +3524,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "TBML and Transshipment Guidance",
@@ -3542,8 +3542,8 @@
     "adapter_config": {
       "container_selector": "main"
     },
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "CBUAE official rulebook module; licensed financial institutions must comply; any text change is directly actionable.",
@@ -3561,7 +3561,7 @@
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
   },
   {
     "name": "VARA Compliance and Risk Management Rulebook PDF",
@@ -4040,9 +4040,9 @@
     "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/normalized.txt",
     "last_monitor_status": "MONITOR_OK",
     "last_monitor_run_at": "2026-06-17T12:52:30Z",
-    "notes": "Activated 2026-06-17 as replacement for stale DFSA rules-and-standards remediation endpoint. Official DFSA annual-report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated 2026-06-17 as replacement for stale DFSA rules-and-standards remediation endpoint. Official DFSA annual-report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "MEDIUM_SIGNAL",
     "commercial_signal_tier": "B",
     "fresh_signal_reason": "DFSA annual reports; useful context but annual cadence; not primary rule-change signal.",
@@ -4075,9 +4075,9 @@
     "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/normalized.txt",
     "last_monitor_status": "MONITOR_OK",
     "last_monitor_run_at": "2026-06-17T12:52:30Z",
-    "notes": "Activated 2026-06-17 as replacement for stale generic DFSA notices remediation endpoint. Official DFSA AML report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated 2026-06-17 as replacement for stale generic DFSA notices remediation endpoint. Official DFSA AML report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "MEDIUM_SIGNAL",
     "commercial_signal_tier": "B",
     "fresh_signal_reason": "DFSA annual reports; useful context but annual cadence; not primary rule-change signal.",
@@ -5079,9 +5079,9 @@
     "noise_risk": "low",
     "source_health_risk": "low",
     "tier": "1",
-    "notes": "Activated in weak-family bulk sprint after no-save pass, two proof-backed baseline runs, mass-monitor dry-run MONITOR_OK with no hash drift, and review gates. Monitoring intelligence only. Not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated in weak-family bulk sprint after no-save pass, two proof-backed baseline runs, mass-monitor dry-run MONITOR_OK with no hash drift, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DFSA primary rules/standards or consultation papers listing; captures all rulebook and regulatory instrument changes.",
@@ -9199,9 +9199,9 @@
     "noise_risk": "medium",
     "source_health_risk": "medium",
     "tier": "1",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DFSA legal resources/rulebook area; checked daily for official laws, rules, module, link, or document changes.",
@@ -9239,9 +9239,9 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "2",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "MEDIUM_SIGNAL",
     "commercial_signal_tier": "B",
     "fresh_signal_reason": "DFSA innovation/regulatory sandbox area; checked daily for official programme or regulatory update changes.",
@@ -9279,9 +9279,9 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "1",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DFSA enforcement and regulatory action overview; checked daily for official enforcement/publication changes.",
@@ -9521,9 +9521,9 @@
     "noise_risk": "low",
     "source_health_risk": "medium",
     "tier": "1",
-    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice.",
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "notes": "Activated after no-save pass, proof-backed repeat baseline, mass-monitor dry-run MONITOR_OK, duplicate/static-detail review, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "monitoring_mode": "remediation",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "DFSA official laws/rules listing; checked daily for law, rulebook, AML/CTF, consultation, enforcement, and legal resource link changes.",
@@ -10000,8 +10000,8 @@
     "adapter_name": "rulebook_platform",
     "expected_min_length": 40000,
     "baseline_runs_required": 2,
-    "monitoring_mode": "candidate",
-    "alert_eligible": false,
+    "monitoring_mode": "fresh_alert",
+    "alert_eligible": true,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "VARA's AML/CFT obligations for licensed VASPs live in Part III of the Compliance and Risk Management Rulebook (MLRO appointment/duties, AML/CFT controls, CDD, STR, sanctions compliance). Full-text change detection on the official rulebook HTML.",
@@ -10010,7 +10010,7 @@
     "recommended_check_frequency": "daily",
     "expected_update_pattern": "Irregular official VARA rulebook version updates (Effective From marker, version list, current-version PDF link, full rulebook text); checked daily for material changes.",
     "customer_alert_policy": "Alert on material VARA rulebook text, version, effective-date, or document-link changes; suppress layout, navigation, and boilerplate-only changes.",
-    "notes": "2026-07-17 REPOINTED + REBUILT (was: name 'VARA AML/CFT Rulebook', url https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/, status disabled_path_moved — that path now returns HTTP 404 with no redirect; VARA moved rulebook content to rulebooks.vara.ae and folded AML/CFT into Part III of the Compliance and Risk Management Rulebook — verified 2026-07-17). New URL is the official rulebook HTML page. Adapter rulebook_platform follows the page's own 'Entire section' link (server-rendered on this platform) and captures the FULL rulebook text including the complete AML/CFT part, plus version markers ('Effective From: 19 June 2025' at intake), version list, and the current-version PDF link (VARA_EN_123_VER20250519.pdf at intake) — so a new version changes the hash even though pinned per-version PDF URLs never change (the reason the sibling AE-vara-compliance-risk-rulebook-pdf source stays disabled_static_pdf). Live check 2026-07-17 from founder laptop: 100,940 chars, is_quality_content=True, deterministic across 2 runs. Prod reachability expected OK (prod already monitors rulebooks.vara.ae: AE-vara-rulebook-updates) but NOT verified from prod today. Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. CANDIDATE until, on the prod deployment: pipeline no-save check OK, proof + 2 baseline runs + MONITOR_OK + review gates — then flip monitoring_mode to fresh_alert and alert_eligible to true. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-17 REPOINTED + REBUILT (was: name 'VARA AML/CFT Rulebook', url https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/, status disabled_path_moved — that path now returns HTTP 404 with no redirect; VARA moved rulebook content to rulebooks.vara.ae and folded AML/CFT into Part III of the Compliance and Risk Management Rulebook — verified 2026-07-17). New URL is the official rulebook HTML page. Adapter rulebook_platform follows the page's own 'Entire section' link (server-rendered on this platform) and captures the FULL rulebook text including the complete AML/CFT part, plus version markers ('Effective From: 19 June 2025' at intake), version list, and the current-version PDF link (VARA_EN_123_VER20250519.pdf at intake) — so a new version changes the hash even though pinned per-version PDF URLs never change (the reason the sibling AE-vara-compliance-risk-rulebook-pdf source stays disabled_static_pdf). Live check 2026-07-17 from founder laptop: 100,940 chars, is_quality_content=True, deterministic across 2 runs. Prod reachability expected OK (prod already monitors rulebooks.vara.ae: AE-vara-rulebook-updates) but NOT verified from prod today. Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. CANDIDATE until, on the prod deployment: pipeline no-save check OK, proof + 2 baseline runs + MONITOR_OK + review gates — then flip monitoring_mode to fresh_alert and alert_eligible to true. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD GATES PASSED: 2 stable production runs (100,940 chars, GOOD, sha-stable, full rulebook text incl. AML/CFT Part III) — promoted to fresh_alert."
   },
   {
     "name": "CBUAE Publications Hub",

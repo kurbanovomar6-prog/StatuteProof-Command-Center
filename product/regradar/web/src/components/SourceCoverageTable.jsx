@@ -5,15 +5,15 @@ const SOURCES = [
     source_id: 'AE-cbuae-rulebook-revision-updates',
     regulator: 'CBUAE Rulebook Revision Updates',
     coverageArea: 'Rulebook-wide revision history',
-    status: 'ACTIVE',
-    caveat: null,
+    status: 'PENDING',
+    caveat: 'In remediation — rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026); disclosed, not counted as fresh-alert eligible',
   },
   {
     source_id: 'AE-cbuae-payment-token-services-rulebook',
     regulator: 'CBUAE Payment Token Services Regulation',
     coverageArea: 'Payment token / stablecoin rules',
-    status: 'ACTIVE',
-    caveat: null,
+    status: 'PENDING',
+    caveat: 'In remediation — rulebook.centralbank.ae blocks our production monitoring infrastructure (HTTP 403 since 11 July 2026); disclosed, not counted as fresh-alert eligible',
   },
   {
     source_id: 'AE-mof-publications-and-releases',
@@ -26,8 +26,15 @@ const SOURCES = [
     source_id: 'AE-vara-rulebook-updates',
     regulator: 'VARA Rulebook Revision Updates',
     coverageArea: 'Virtual assets rulebook changes',
+    status: 'PENDING',
+    caveat: 'In remediation pending a production rebaseline — rulebook change coverage continues via the full Compliance & Risk Management Rulebook source below',
+  },
+  {
+    source_id: 'AE-vara-compliance-risk-rulebook-html',
+    regulator: 'VARA Compliance & Risk Management Rulebook',
+    coverageArea: 'Full rulebook text incl. AML/CFT Part III',
     status: 'ACTIVE',
-    caveat: null,
+    caveat: 'Promoted 18 July 2026 after two stable production runs',
   },
   {
     source_id: 'AE-vara-enforcement',
@@ -54,22 +61,22 @@ const SOURCES = [
     source_id: 'AE-dfsa-aml-rulebook-module',
     regulator: 'DFSA AML Rulebook Module',
     coverageArea: 'DFSA AML/CTF & sanctions module',
-    status: 'CAVEAT',
-    caveat: 'Under adapter remediation — repointed to the canonical current-version module; not fresh-alert eligible until re-baselined',
+    status: 'ACTIVE',
+    caveat: 'Promoted 18 July 2026 after rebaseline and two stable production runs on the Thomson Reuters rulebook platform',
   },
   {
     source_id: 'AE-difc-laws-and-regulations',
     regulator: 'DIFC Laws and Regulations',
     coverageArea: 'DIFC legal database',
-    status: 'ACTIVE',
-    caveat: null,
+    status: 'PENDING',
+    caveat: 'In remediation pending audit-record review and a production rebaseline after repeated content-quality failures from production',
   },
   {
     source_id: 'AE-sca-circulars-rules-procedures',
     regulator: 'UAE CMA Circulars, Rules and Procedures',
     coverageArea: 'Capital markets circulars',
-    status: 'ACTIVE',
-    caveat: 'Repointed to the CMA’s new canonical page during the SCA→CMA site transition (July 2026)',
+    status: 'PENDING',
+    caveat: 'In remediation — after the July 2026 SCA→CMA repoint, production runs need a rebaseline before change detection is trustworthy; disclosed, not counted',
   },
   {
     source_id: 'AE-moet-aml-170b7988',
@@ -108,7 +115,7 @@ const SOURCES = [
   },
 ]
 
-const LAST_CHECKED = '2026-07-12'
+const LAST_CHECKED = '2026-07-18'
 
 function StatusBadge({ status }) {
   if (status === 'ACTIVE') {

@@ -1,7 +1,7 @@
 // Drift guard for the PUBLIC coverage counts.
 //
 // The Source Coverage page and the Source Transparency Matrix show hard numbers
-// ("116 enabled", "83 fresh-alert eligible", "25 CBUAE", "3 of 5 VARA", ...).
+// ("117 enabled", "38 fresh-alert eligible", "0 CBUAE", "3 of 6 VARA", ...).
 // Those are compliance-facing claims: if sources.json changes and a number is
 // left stale, the site over- or under-claims coverage. This test recomputes
 // every published number straight from product/regradar/sources.json and fails
@@ -70,11 +70,19 @@ describe('public coverage headline counts (SourceCoverageTable)', () => {
 // maintainer at the exact matrix row (and the coverage page) to reconcile.
 describe('per-regulator matrix counts (SourceTransparencyMatrix)', () => {
   const CLAIMS = [
-    { label: 'CBUAE: "25 fresh-alert eligible"', fresh: 25, prefixes: ['cbuae'] },
+    // 2026-07-18: rulebook.centralbank.ae blocks production egress (HTTP 403,
+    // all methods, since 2026-07-11) — all 25 CBUAE sources are remediation.
+    // minEnabled guards against a vacuous 0===0 if the prefix stops matching.
+    { label: 'CBUAE: "0 fresh-alert eligible — production access blocked"', fresh: 0, minEnabled: 1, prefixes: ['cbuae'] },
     { label: 'VARA: "3 fresh-alert eligible of 6 enabled"', fresh: 3, enabled: 6, prefixes: ['vara'] },
-    { label: 'DIFC/DFSA: "20 fresh-alert eligible across DIFC/DFSA"', fresh: 20, prefixes: ['difc', 'dfsa'] },
+    // 2026-07-18: www.dfsa.ae blocks production egress — 10 DFSA-site sources
+    // demoted; depth continues via dfsaen.thomsonreuters.com (rulebook + AML
+    // module) which works from production. 20 → 10.
+    { label: 'DIFC/DFSA: "10 fresh-alert eligible across DIFC/DFSA"', fresh: 10, prefixes: ['difc', 'dfsa'] },
     { label: 'ADGM/FSRA: "9 fresh-alert eligible of 14 enabled"', fresh: 9, enabled: 14, prefixes: ['adgm'] },
-    { label: 'UAE CMA: "6 fresh-alert eligible"', fresh: 6, prefixes: ['sca'] },
+    // 2026-07-18: the circulars/rules/procedures page is stuck in QUALITY_DROP
+    // against a stale pre-repoint baseline — remediation until prod rebaseline.
+    { label: 'UAE CMA: "5 fresh-alert eligible"', fresh: 5, prefixes: ['sca'] },
     { label: 'Tax/corporate: "MoF 7 fresh-alert"', fresh: 7, prefixes: ['mof'] },
     // "Six FTA listing sources are enabled…" + "no FTA source is counted as
     // fresh-alert eligible today" — guard both the 6 and the 0.

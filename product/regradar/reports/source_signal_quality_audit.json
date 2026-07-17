@@ -1,14 +1,14 @@
 {
   "schema_version": "2.0",
-  "audit_date": "2026-07-13",
+  "audit_date": "2026-07-18",
   "auditor": "StatuteProof Source Quality Auditor v2",
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
     "total_enabled": 117,
-    "fresh_alert_eligible": 74,
+    "fresh_alert_eligible": 38,
     "evidence_library": 4,
-    "candidate": 10,
-    "remediation": 8,
+    "candidate": 9,
+    "remediation": 45,
     "source_level_monitor_ok": 75,
     "with_proof_path": 86
   },
@@ -16,46 +16,46 @@
     {
       "family": "CBUAE",
       "total_enabled": 25,
-      "fresh_alert_eligible": 25,
+      "fresh_alert_eligible": 0,
       "evidence_library": 0,
       "candidate": 0,
-      "remediation": 0,
-      "status": "strong_selected_source",
-      "gap_to_25": 0,
-      "notes": "25 CBUAE rulebook/regulatory sources are fresh-alert eligible."
+      "remediation": 25,
+      "status": "remediation_production_access",
+      "gap_to_25": 25,
+      "notes": "All 25 CBUAE rulebook sources are held in remediation as a production-egress disclosure, not a content problem: rulebook.centralbank.ae returns HTTP 403 to our production monitoring egress on every fetch method (persistent since 2026-07-11). Sources stay enabled and disclosed; none is counted as fresh-alert until MONITOR_OK is verified from production (restore path: production fetch proxy, owner decision)."
     },
     {
       "family": "VARA",
       "total_enabled": 7,
-      "fresh_alert_eligible": 3,
+      "fresh_alert_eligible": 2,
       "evidence_library": 1,
-      "candidate": 1,
-      "remediation": 0,
+      "candidate": 0,
+      "remediation": 1,
       "status": "partial",
-      "gap_to_25": 22,
-      "notes": "3 selected official VARA sources are fresh-alert eligible; 1 candidate (Compliance & Risk Management Rulebook incl. AML/CFT Part III, repointed 2026-07-17, pending prod baseline gates). This is selected-source monitoring, not complete VARA coverage."
+      "gap_to_25": 23,
+      "notes": "2 VARA sources pass the full readiness gate (news/circulars, enforcement). The Compliance and Risk Management Rulebook (incl. AML/CFT Part III) was promoted to fresh_alert on 2026-07-18 after two stable production runs and counts in the register headline; its registry proof fields sync on the next intake. The 30-day revision-updates view is in remediation pending a production rebaseline. This is selected-source monitoring, not complete VARA coverage."
     },
     {
       "family": "DFSA",
       "total_enabled": 16,
-      "fresh_alert_eligible": 11,
+      "fresh_alert_eligible": 1,
       "evidence_library": 1,
       "candidate": 0,
-      "remediation": 1,
-      "status": "good",
-      "gap_to_25": 13,
-      "notes": "DFSA has 12 fresh-alert sources. Static individual news/notice pages stay evidence-library and must not inflate fresh monitoring claims."
+      "remediation": 10,
+      "status": "partial_production_access",
+      "gap_to_25": 24,
+      "notes": "The 10 www.dfsa.ae sources are held in remediation as a production-egress disclosure, not a content problem (HTTP 403 to our production egress on all methods since 2026-07-11). DFSA depth continues via the dfsaen.thomsonreuters.com rulebook platform, which does work from production — the rulebook source passes the full readiness gate and the AML rulebook module was promoted to fresh_alert on 2026-07-18 after rebaseline plus stable-run gates (its registry readiness fields sync on the next intake)."
     },
     {
       "family": "DIFC",
       "total_enabled": 12,
-      "fresh_alert_eligible": 9,
+      "fresh_alert_eligible": 8,
       "evidence_library": 0,
       "candidate": 0,
-      "remediation": 0,
+      "remediation": 1,
       "status": "good",
-      "gap_to_25": 16,
-      "notes": "DIFC has 9 fresh-alert sources including the official DIFC Legal Database listing, plus 2 DIFC Courts direction sources (practice/registrar). This is selected DIFC monitoring, not complete DIFC legal database coverage."
+      "gap_to_25": 17,
+      "notes": "DIFC has 8 fresh-alert sources including the official DIFC Legal Database listing; the laws-and-regulations root listing moved to remediation on 2026-07-18 after three consecutive QUALITY_DROP production runs (pending audit-record review and a production rebaseline). This is selected DIFC monitoring, not complete DIFC legal database coverage."
     },
     {
       "family": "ADGM/FSRA",
@@ -75,9 +75,9 @@
       "evidence_library": 1,
       "candidate": 0,
       "remediation": 7,
-      "status": "good",
-      "gap_to_25": 18,
-      "notes": "7 MoE/DNFBP AML sources are fresh-alert eligible, plus one evidence-library homepage."
+      "status": "remediation",
+      "gap_to_25": 25,
+      "notes": "All 7 MoE DNFBP sources remain under source remediation — earlier captures were a site-maintenance page, which the quality gate rejects; none is counted until re-baselined on real content. One evidence-library homepage is kept as a snapshot only."
     },
     {
       "family": "FTA",
@@ -104,13 +104,13 @@
     {
       "family": "SCA",
       "total_enabled": 6,
-      "fresh_alert_eligible": 6,
+      "fresh_alert_eligible": 5,
       "evidence_library": 0,
       "candidate": 0,
-      "remediation": 0,
+      "remediation": 1,
       "status": "partial",
-      "gap_to_25": 19,
-      "notes": "UAE CMA has 6 proof-backed fresh-alert direct/listing sources after the official regulations listing passed proof-backed repeat baseline and mass-monitor MONITOR_OK. UAE CMA AML/CFT parser/noise review still blocks broad UAE CMA positioning."
+      "gap_to_25": 20,
+      "notes": "UAE CMA has 5 proof-backed fresh-alert direct/listing sources. The circulars/rules/procedures page moved to remediation on 2026-07-18: production runs have been stuck in QUALITY_DROP against a stale pre-repoint baseline since the 2026-07-12 URL repoint (production rebaseline pending). UAE CMA AML/CFT parser/noise review still blocks broad UAE CMA positioning."
     },
     {
       "family": "UAE FIU",
@@ -147,19 +147,23 @@
     }
   ],
   "safe_claims": [
-    "StatuteProof has 74 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK status, proof records, hashes, and baseline confirmation as of the source-register review (2026-07-13).",
+    "StatuteProof has 38 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-18).",
     "StatuteProof also maintains 4 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
-    "74 UAE source records currently have MONITOR_OK status and are fresh-alert eligible.",
+    "Sources whose hosts block our production monitoring egress — the CBUAE rulebook subdomain and the DFSA website (HTTP 403 to all fetch methods since 2026-07-11) — are disclosed as remediation and are not counted as fresh-alert eligible.",
+    "DFSA rulebook depth continues through the DFSA rulebook platform at dfsaen.thomsonreuters.com, which does work from production, including the AML rulebook module promoted on 2026-07-18 after passing rebaseline and stable-run gates.",
     "StatuteProof maintains source-level proof files for 86 of 117 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
     "ADGM/FSRA has 9 selected proof-backed fresh-alert sources, including guidance/policy and RA/circular/rulebook style sources, with 3 remaining candidates disclosed as held.",
-    "DIFC has 9 selected proof-backed fresh-alert sources, including the official DIFC Legal Database listing; this is not complete DIFC legal database coverage.",
-    "UAE CMA has 6 selected proof-backed fresh-alert direct/listing sources; UAE CMA root portal and broad UAE CMA coverage remain unclaimed.",
+    "DIFC has 8 selected proof-backed fresh-alert sources, including the official DIFC Legal Database listing; the laws-and-regulations root listing is in remediation pending a production rebaseline review. This is not complete DIFC legal database coverage.",
+    "UAE CMA has 5 selected proof-backed fresh-alert direct/listing sources; the circulars/rules/procedures page is in remediation pending a production rebaseline, and UAE CMA root portal and broad UAE CMA coverage remain unclaimed.",
     "MoJ/Gazette has no fresh-alert eligible sources currently; root portal, e-Laws, and complete Official Gazette coverage remain unclaimed.",
     "MoF monitoring has 7 fresh-alert eligible official MoF sources plus one evidence-library homepage, including selected publications/releases, financial legislation, ESR, DMTT/top-up tax, corporate tax, AEOI/FATCA/CRS, and UAE financial framework pages.",
-    "MoE/DNFBP AML monitoring has 7 fresh-alert eligible official sources plus one evidence-library homepage."
+    "MoE/DNFBP AML sources remain under source remediation on a maintenance-stub baseline and are not counted as fresh-alert monitoring.",
+    "VARA monitoring includes the full Compliance and Risk Management Rulebook (including AML/CFT Part III) promoted on 2026-07-18 after two stable production runs; the 30-day revision-updates view is in remediation pending a production rebaseline."
   ],
   "forbidden_claims": [
     "Do not describe all 117 enabled UAE source records as live monitors.",
+    "Do not count sources whose host blocks production egress as fresh-alert eligible.",
+    "Do not describe CBUAE rulebook sources as live monitors while production egress is blocked.",
     "Do not describe UAE coverage as complete.",
     "Do not describe UAE legislation coverage as complete.",
     "Do not describe MoJ/Gazette coverage as complete.",
@@ -178,11 +182,33 @@
     "Do not promise every regulatory update will be captured."
   ],
   "risk_brief_boundary": "Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist.",
-  "generated_at": "2026-06-21T18:15:00Z",
+  "generated_at": "2026-07-18T09:30:00Z",
   "known_limitations": [
     {
+      "source": "CBUAE",
+      "limitation": "rulebook.centralbank.ae blocks our production monitoring egress (HTTP 403 to all fetch methods, persistent since 2026-07-11). All 25 CBUAE rulebook sources are disclosed as remediation and not counted as fresh-alert eligible — this is a production-access disclosure, not a content problem. Restore path: production fetch proxy (owner decision), then re-verify MONITOR_OK from production.",
+      "impact": "production_access_blocked",
+      "clientsAffected": [
+        "banks_psp",
+        "aml_mlro",
+        "payments",
+        "compliance_management"
+      ]
+    },
+    {
+      "source": "DFSA",
+      "limitation": "www.dfsa.ae blocks our production monitoring egress (HTTP 403 to all fetch methods, persistent since 2026-07-11); 10 DFSA-site sources are disclosed as remediation and not counted. DFSA rulebook depth continues via dfsaen.thomsonreuters.com, which works from production (rulebook + AML rulebook module).",
+      "impact": "production_access_blocked",
+      "clientsAffected": [
+        "difc_entities",
+        "financial_services",
+        "aml_mlro",
+        "compliance_management"
+      ]
+    },
+    {
       "source": "ADGM/FSRA",
-      "limitation": "ADGM/FSRA has 11 selected proof-backed fresh-alert sources. Waivers, regulatory alerts, RA notices, RA AML guides, listing announcements, and Abu Dhabi/federal legislation pages remain held where current proof/baseline or selector gates did not pass cleanly.",
+      "limitation": "ADGM/FSRA has 9 selected proof-backed fresh-alert sources. Waivers, regulatory alerts, RA notices, RA AML guides, listing announcements, and Abu Dhabi/federal legislation pages remain held where current proof/baseline or selector gates did not pass cleanly.",
       "impact": "partial_coverage",
       "clientsAffected": [
         "adgm_fsra",
@@ -192,7 +218,7 @@
     },
     {
       "source": "DIFC",
-      "limitation": "DIFC has 11 selected proof-backed fresh-alert sources including the official Legal Database listing. This does not prove complete DIFC legal database coverage or item-level legal-change completeness.",
+      "limitation": "DIFC has 8 selected proof-backed fresh-alert sources including the official Legal Database listing; the laws-and-regulations root listing is in remediation pending a production rebaseline review. This does not prove complete DIFC legal database coverage or item-level legal-change completeness.",
       "impact": "partial_coverage",
       "clientsAffected": [
         "difc_entities",
@@ -201,8 +227,8 @@
       ]
     },
     {
-      "source": "SCA",
-      "limitation": "SCA has 6 proof-backed fresh-alert direct/listing sources. SCA AML/CFT parser/noise review remains unresolved and SCA root portal monitoring remains unclaimed.",
+      "source": "UAE CMA",
+      "limitation": "UAE CMA has 5 proof-backed fresh-alert direct/listing sources; the circulars/rules/procedures page is in remediation pending a production rebaseline. UAE CMA AML/CFT parser/noise review remains unresolved and UAE CMA root portal monitoring remains unclaimed.",
       "impact": "partial_coverage",
       "clientsAffected": [
         "securities_capital_markets",
@@ -255,7 +281,7 @@
     }
   ],
   "audit_meta": {
-    "generatedAt": "2026-06-21T21:55:00Z",
-    "recommendedSalesClaim": "74 fresh-alert-eligible UAE official-source endpoints with MONITOR_OK, source-level proof files, hashes, and baseline confirmation"
+    "generatedAt": "2026-07-18T09:30:00Z",
+    "recommendedSalesClaim": "38 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage, with source-level proof files, hashes, and baseline confirmation"
   }
 }

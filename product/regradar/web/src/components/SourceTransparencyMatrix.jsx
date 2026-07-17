@@ -3,27 +3,27 @@ import { ArrowRight, FileSearch, ShieldCheck } from 'lucide-react'
 const MATRIX_ROWS = [
   {
     category: 'Central bank / financial regulation',
-    sourceCount: '25 fresh-alert eligible',
-    statusTone: 'active',
-    whatWeMonitor: 'CBUAE rulebook modules (AML/CFT, consumer protection, Open Finance, payments, stored value, prudential risk), rulebook-wide revision updates',
-    limitation: 'The main centralbank.ae domain is geo-IP filtered from outside the UAE — monitoring runs on the rulebook subdomain (rulebook.centralbank.ae).',
-    whatThisMeans: 'CBUAE rule and guidance changes are tracked across individual rulebook modules — not just the main page.',
+    sourceCount: '0 fresh-alert eligible — production access blocked',
+    statusTone: 'remediation',
+    whatWeMonitor: 'CBUAE rulebook modules (AML/CFT, consumer protection, Open Finance, payments, stored value, prudential risk) and rulebook-wide revision updates are configured — but not currently counted as monitored.',
+    limitation: 'rulebook.centralbank.ae currently returns HTTP 403 to our production monitoring infrastructure on every fetch method (persistent since 11 July 2026). All 25 CBUAE sources are disclosed as in remediation and none is counted as fresh-alert eligible until access is restored and re-verified from production.',
+    whatThisMeans: 'We do not count CBUAE sources we cannot reach from production. The configuration is ready; the access block is disclosed here instead of being papered over.',
   },
   {
     category: 'Virtual assets (VARA)',
     sourceCount: '3 fresh-alert eligible of 6 enabled',
     statusTone: 'active',
-    whatWeMonitor: 'VARA rulebook revision updates, news/circulars/regulatory publications, enforcement notices',
-    limitation: 'Public register and the regulatory notices index are enabled but pending validation. Static rulebook PDFs are evidence snapshots, not change-monitored.',
+    whatWeMonitor: 'VARA Compliance & Risk Management Rulebook full text (incl. AML/CFT Part III, promoted 18 July 2026 after two stable production runs), news/circulars/regulatory publications, enforcement notices',
+    limitation: 'The 30-day rulebook revision-updates view is in remediation pending a production rebaseline (rulebook change coverage continues via the full-rulebook source). Public register and the regulatory notices index are enabled but pending validation. Static rulebook PDFs are evidence snapshots, not change-monitored.',
     whatThisMeans: 'VARA rulebook and enforcement changes are tracked through selected official sources — this is not complete VARA coverage.',
   },
   {
     category: 'DIFC / DFSA',
-    sourceCount: '20 fresh-alert eligible across DIFC/DFSA',
-    statusTone: 'active',
-    whatWeMonitor: 'DIFC laws, legal database, legal notices, data protection, AML/CFT and ESR pages; DFSA rulebook (official + Thomson Reuters modules), consultations, enforcement, MLRO letters, annual reports',
-    limitation: 'DFSA news hub, SEO letters and public register, plus the DIFC news hub and DIFC Courts directions, are enabled but pending validation. The DFSA AML rulebook module is under adapter remediation (its earlier captures did not meet the content-quality floor) and is not counted until re-baselined.',
-    whatThisMeans: 'Selected DIFC/DFSA source monitoring covers laws, rulebook, data protection and enforcement; pending sources are disclosed, not counted.',
+    sourceCount: '10 fresh-alert eligible across DIFC/DFSA',
+    statusTone: 'caveat',
+    whatWeMonitor: 'DIFC legal database, legal notices, data protection, AML/CFT and ESR pages; DFSA rulebook on the Thomson Reuters platform (rulebook + AML/CTF module, the module promoted 18 July 2026 after passing production gates)',
+    limitation: 'www.dfsa.ae currently returns HTTP 403 to our production monitoring infrastructure (persistent since 11 July 2026) — 10 DFSA-site sources (consultations, enforcement, MLRO letters, annual reports, laws/rules pages) are disclosed as in remediation and not counted. DFSA rulebook depth continues via dfsaen.thomsonreuters.com, which does work from production. The DIFC laws-and-regulations root listing is in remediation pending a production rebaseline review.',
+    whatThisMeans: 'Selected DIFC/DFSA monitoring continues where production access is proven; DFSA-site sources blocked from production are disclosed here, not counted.',
   },
   {
     category: 'ADGM / FSRA',
@@ -37,9 +37,9 @@ const MATRIX_ROWS = [
     category: 'AML / sanctions / FIU',
     sourceCount: 'Selected-source AML depth',
     statusTone: 'caveat',
-    whatWeMonitor: 'EOCN / UAEIEC AML/CFT laws, news and UN sanctions/TFS updates; CBUAE AML/CFT rulebook; DFSA MLRO letters; UAE CMA AML/CFT page',
-    limitation: 'The UAE FIU website (uaefiu.gov.ae) is geo-IP restricted from outside the UAE — no FIU source is fresh-alert eligible today. The Ministry of Economy DNFBP AML suite (goAML, TFS, beneficial ownership, business regulation) is under source remediation — its earlier captures were a site-maintenance page, which our quality gate now rejects — and is not counted until re-baselined on real content.',
-    whatThisMeans: 'AML monitoring runs through EOCN, CBUAE, DFSA and CMA official sources; the FIU access limitation and the MoE remediation are disclosed before any pilot, not discovered after it.',
+    whatWeMonitor: 'EOCN / UAEIEC AML/CFT laws, news and UN sanctions/TFS updates; UAE CMA AML/CFT page; DFSA AML/CTF rulebook module (Thomson Reuters platform); VARA rulebook AML/CFT Part III',
+    limitation: 'The UAE FIU website (uaefiu.gov.ae) is geo-IP restricted from outside the UAE — no FIU source is fresh-alert eligible today. The CBUAE AML/CFT rulebook sections and DFSA MLRO letters are in remediation because rulebook.centralbank.ae and www.dfsa.ae block our production monitoring infrastructure (HTTP 403 since 11 July 2026). The Ministry of Economy DNFBP AML suite is under source remediation — its earlier captures were a site-maintenance page, which our quality gate now rejects — and is not counted until re-baselined on real content.',
+    whatThisMeans: 'AML monitoring runs through EOCN, CMA, the DFSA rulebook platform and the VARA rulebook; the FIU, CBUAE and DFSA-site access limitations and the MoE remediation are disclosed before any pilot, not discovered after it.',
   },
   {
     category: 'Tax / corporate',
@@ -51,10 +51,10 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Capital markets (UAE CMA)',
-    sourceCount: '6 fresh-alert eligible',
+    sourceCount: '5 fresh-alert eligible',
     statusTone: 'active',
     whatWeMonitor: 'UAE CMA circulars/rules/procedures, regulations listing, AML/CFT, corporate governance, FATCA/CRS guidance, FinTech Regulatory Sandbox',
-    limitation: 'Root portal and board-decisions listing are still being validated. The SCA→CMA site transition is under active watch; the circulars page was repointed to the new canonical URL in July 2026.',
+    limitation: 'The circulars/rules/procedures page is in remediation: after the July 2026 SCA→CMA repoint, production runs are stuck comparing against the stale pre-repoint baseline until a production rebaseline is executed — disclosed, not counted. Root portal and board-decisions listing are still being validated.',
     whatThisMeans: 'Selected CMA sources are proof-backed and monitored through the regulator’s site migration. The July 2026 SCA→CMA URL move was caught and re-verified; site migrations are monitored, though we do not promise every future URL change is captured — any miss is surfaced in the evidence log, not hidden.',
   },
   {
@@ -89,6 +89,8 @@ const BADGE_STYLES = {
   partial: 'border-amber-400/25 bg-amber-400/10 text-amber-300',
   // Neutral, not amber: "not yet eligible" must not read as "partially working".
   candidate: 'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-secondary)]',
+  // Access blocked from production — must read as "not currently delivered".
+  remediation: 'border-rose-400/25 bg-rose-400/10 text-rose-300',
 }
 
 const BADGE_LABELS = {
@@ -97,6 +99,7 @@ const BADGE_LABELS = {
   partial: 'Partially active — some sources blocked from outside the UAE',
   // A category with ZERO fresh-alert-eligible sources must never read as "active".
   candidate: 'Candidate — not yet fresh-alert eligible',
+  remediation: 'In remediation — access blocked from production; not counted',
 }
 
 function StatusBadge({ tone }) {

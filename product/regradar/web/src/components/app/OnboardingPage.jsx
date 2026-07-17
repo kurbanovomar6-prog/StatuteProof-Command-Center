@@ -21,19 +21,19 @@ const SOURCE_LAYERS = [
 
 const SOURCE_READINESS_PREVIEW = {
   CBUAE: {
-    status: 'Strong selected-source',
-    detail: '25 fresh-alert eligible CBUAE rulebook/regulatory sources. Best fit for CBUAE, AML/CFT, payments, consumer protection and open-finance monitoring.',
-    tone: 'emerald',
+    status: 'In remediation — production access blocked',
+    detail: '0 fresh-alert eligible CBUAE sources right now: rulebook.centralbank.ae returns HTTP 403 to our production monitoring infrastructure (since 11 July 2026). All 25 configured rulebook/regulatory sources are disclosed as in remediation and are not counted or sold as monitored until access is restored and re-verified from production.',
+    tone: 'amber',
   },
   VARA: {
     status: 'Selected-source',
-    detail: '3 fresh-alert eligible VARA sources (of 6 enabled), including the rulebook and selected publications. Selected-source depth, not complete VARA coverage.',
+    detail: '3 fresh-alert eligible VARA sources (of 6 enabled), including the full Compliance & Risk Management Rulebook (incl. AML/CFT Part III) and selected publications. The 30-day revision-updates view is in remediation pending a production rebaseline. Selected-source depth, not complete VARA coverage.',
     tone: 'cyan',
   },
   DFSA: {
-    status: 'Useful but not complete',
-    detail: 'DFSA coverage includes useful rulebook, notice, consultation and enforcement sources; some legacy DFSA models remain under remediation.',
-    tone: 'cyan',
+    status: 'Rulebook platform only — DFSA site blocked from production',
+    detail: 'DFSA coverage currently runs on the Thomson Reuters rulebook platform (rulebook + AML/CTF module). The www.dfsa.ae site (consultations, enforcement, MLRO letters, annual reports) returns HTTP 403 to our production monitoring infrastructure (since 11 July 2026) — those 10 sources are in remediation and are not counted or sold as monitored.',
+    tone: 'amber',
   },
   'ADGM / FSRA': {
     status: 'Good selected-source',
@@ -56,8 +56,8 @@ const SOURCE_READINESS_PREVIEW = {
     tone: 'amber',
   },
   'DIFC Laws': {
-    status: 'Improved',
-    detail: 'DIFC laws/regulations include selected fresh-alert eligible legal sources, but end-to-end DIFC source scope is not claimed.',
+    status: 'Selected-source',
+    detail: 'DIFC coverage includes selected fresh-alert eligible legal sources (legal database, legal notices, data protection, AML/CFT, ESR). The laws-and-regulations root listing is in remediation pending a production rebaseline review. End-to-end DIFC source scope is not claimed.',
     tone: 'cyan',
   },
   'Ministry of Economy': {
@@ -72,7 +72,7 @@ const SOURCE_READINESS_PREVIEW = {
   },
   'UAE Capital Market Authority (UAE CMA) [Limited]': {
     status: 'Limited but useful',
-    detail: 'UAE CMA coverage includes AML/CFT, circulars/procedures, FATCA/CRS and corporate governance, but remains narrower than CBUAE.',
+    detail: 'UAE CMA coverage includes AML/CFT, regulations listing, FATCA/CRS and corporate governance (5 fresh-alert eligible sources). The circulars/rules/procedures page is in remediation pending a production rebaseline after the July 2026 SCA→CMA site move.',
     tone: 'amber',
   },
 }

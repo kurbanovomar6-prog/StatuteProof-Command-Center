@@ -1,14 +1,13 @@
 import { ArrowRight } from 'lucide-react'
 
 const ACTIVE_SOURCES = [
-  { source: 'CBUAE Rulebook — revision updates',       publishes: 'Rulebook-wide revision history across CBUAE modules',                          note: 'Monitored on rulebook.centralbank.ae; the main centralbank.ae domain is geo-IP filtered from outside the UAE' },
-  { source: 'CBUAE Rulebook — AML/CFT',                publishes: 'AML/CFT rulebook sections, document links, proliferation finance and TBML guidance', note: null },
-  { source: 'CBUAE Rulebook — payments',               publishes: 'Payment Token Services, Retail Payment Services and Card Schemes, Stored Value Facilities, payment systems regulations', note: null },
-  { source: 'CBUAE Rulebook — open finance + conduct', publishes: 'Open Finance Regulation, consumer protection, market conduct, SME customer protection', note: null },
-  { source: 'CBUAE Rulebook — prudential risk',        publishes: 'Capital adequacy, market/operational/interest-rate risk, large exposures, model management, Islamic banks risk', note: null },
+  // 2026-07-18 PROD-VANTAGE RE-MEASURE: all CBUAE rulebook rows and the
+  // www.dfsa.ae site rows moved to the caveat table — both hosts return
+  // HTTP 403 to our production monitoring infrastructure (since 2026-07-11)
+  // and are disclosed as remediation, not counted as fresh-alert eligible.
   { source: 'MoF publications + financial legislation', publishes: 'MoF publications and releases, financial legislation, UAE financial framework', note: null },
   { source: 'MoF tax policy pages',                     publishes: 'Corporate Tax, Domestic Minimum Top-up Tax, Economic Substance, AEOI/FATCA/CRS', note: 'FTA listing sources are enabled but remain candidate — see below' },
-  { source: 'VARA Rulebook revision updates',          publishes: 'VARA rulebook module changes and revision history',                            note: null },
+  { source: 'VARA Compliance & Risk Management Rulebook', publishes: 'Full rulebook text including AML/CFT Part III, version markers and the current-version PDF link', note: 'Promoted 18 July 2026 after two stable production runs' },
   { source: 'VARA News, Circulars and Publications',   publishes: 'VASP licensing news, circulars and regulatory publications',                   note: null },
   { source: 'VARA Enforcement Notices',                publishes: 'VASP enforcement actions and regulatory decisions',                            note: null },
   { source: 'ADGM FSRA Rules and Regulations',         publishes: 'FSRA rules, regulations, guidance and policy statements',                      note: null },
@@ -19,22 +18,37 @@ const ACTIVE_SOURCES = [
   { source: 'ADGM Courts',                             publishes: 'Courts legislation, procedures, forms, fees and guides',                       note: null },
   { source: 'ADGM Data Protection Guidance',           publishes: 'ADGM data protection guidance index',                                          note: 'Office of Data Protection hub is enabled, pending validation' },
   { source: 'EOCN / UAEIEC',                           publishes: 'AML/CFT laws and regulations, news, UN sanctions and TFS updates',             note: null },
-  { source: 'DIFC Laws and Regulations',               publishes: 'DIFC legal database, laws and regulations, legal notices',                     note: null },
+  { source: 'DIFC Legal Database + legal notices',     publishes: 'DIFC legal database listing and static legal notices',                        note: 'The laws-and-regulations root listing is in remediation pending a production rebaseline review' },
   { source: 'DIFC Data Protection',                    publishes: 'Commissioner materials, Regulation 10, guidance, supervision and enforcement', note: null },
   { source: 'DIFC Business — AML/CFT + ESR',           publishes: 'DIFC AML/CFT and economic substance pages',                                    note: null },
-  { source: 'DFSA Rulebook',                           publishes: 'Official rulebook plus Thomson Reuters modules, including the AML module',     note: null },
-  { source: 'DFSA Consultation Papers',                publishes: 'DFSA consultation papers — current',                                           note: null },
-  { source: 'DFSA Enforcement',                        publishes: 'Published enforcement decisions and ongoing regulatory actions',               note: null },
-  { source: 'DFSA Financial Crime + MLRO Letters',     publishes: 'Financial crime prevention notices, MLRO letters, innovation and testing licence updates', note: null },
-  { source: 'DFSA Annual + AML Reports',               publishes: 'DFSA annual regulatory reports and annual AML reports',                        note: null },
-  { source: 'Ministry of Economy — DNFBP AML',         publishes: 'AML, goAML registration, targeted financial sanctions, economic substance, auditing, business and competition regulation', note: null },
-  { source: 'UAE CMA (formerly SCA)',                  publishes: 'Circulars/rules/procedures, regulations listing, AML/CFT, corporate governance, FATCA/CRS, fintech sandbox', note: 'Circulars page repointed to the CMA’s new canonical URL during the SCA→CMA site transition (July 2026)' },
+  { source: 'DFSA Rulebook (Thomson Reuters platform)', publishes: 'Rulebook modules on dfsaen.thomsonreuters.com, including the AML/CTF & Sanctions module (promoted 18 July 2026)', note: 'The www.dfsa.ae site itself is in remediation — see the caveat table' },
+  { source: 'UAE CMA (formerly SCA)',                  publishes: 'Regulations listing, AML/CFT, corporate governance, FATCA/CRS, fintech sandbox', note: 'The circulars/rules/procedures page is in remediation pending a production rebaseline after the July 2026 SCA→CMA site move' },
 ]
 
 const CAVEAT_SOURCES = [
   {
+    source: 'CBUAE Rulebook (rulebook.centralbank.ae) — all 25 configured sources',
+    why: 'rulebook.centralbank.ae returns HTTP 403 to our production monitoring infrastructure on every fetch method (persistent since 11 July 2026). All 25 CBUAE rulebook/regulation sources — AML/CFT, payments, open finance, consumer protection and prudential risk — are disclosed as in remediation and none is counted as fresh-alert eligible until access is restored and re-verified from production. This is a production-access limitation, not a content problem.',
+  },
+  {
+    source: 'DFSA website (www.dfsa.ae) — 10 configured sources',
+    why: 'www.dfsa.ae returns HTTP 403 to our production monitoring infrastructure (persistent since 11 July 2026). The 10 DFSA-site sources — consultations, enforcement and regulatory actions, MLRO letters, annual and AML reports, laws/rules pages — are disclosed as in remediation and not counted. DFSA rulebook depth continues via dfsaen.thomsonreuters.com, which does work from production, including the AML/CTF module promoted on 18 July 2026.',
+  },
+  {
+    source: 'VARA Rulebook revision updates (30-day view)',
+    why: 'The filtered 30-day revision-updates view is in remediation pending a production rebaseline after its July 2026 URL fix. VARA rulebook change coverage continues via the full Compliance & Risk Management Rulebook source, where any revision changes the monitored text and hash.',
+  },
+  {
+    source: 'DIFC Laws and Regulations root listing',
+    why: 'The laws-and-regulations root listing repeatedly failed the content-quality floor from production in mid-July 2026 and is in remediation pending audit-record review and a production rebaseline. DIFC coverage continues via the Legal Database listing, legal notices, data protection and AML/CFT/ESR pages.',
+  },
+  {
+    source: 'Ministry of Economy — DNFBP AML suite',
+    why: 'Earlier captures were a site-maintenance page, which the content-quality gate now rejects. The DNFBP AML, goAML, TFS, economic substance, auditing and business/competition sources are under source remediation and are not counted until re-baselined on real content.',
+  },
+  {
     source: 'UAE FIU (uaefiu.gov.ae)',
-    why: 'The UAE FIU website is geo-IP restricted from outside the UAE and no FIU source is fresh-alert eligible today. Previously validated FIU pages are excluded from coverage claims until an accessible official route is re-verified. AML coverage continues through EOCN, CBUAE AML/CFT rulebook sections, Ministry of Economy DNFBP sources and DFSA/CMA AML sources.',
+    why: 'The UAE FIU website is geo-IP restricted from outside the UAE and no FIU source is fresh-alert eligible today. Previously validated FIU pages are excluded from coverage claims until an accessible official route is re-verified. AML coverage continues through EOCN sanctions sources, the VARA rulebook AML/CFT part, the DFSA AML rulebook module on the Thomson Reuters platform, and the UAE CMA and DIFC AML/CFT pages.',
   },
   {
     source: 'FTA listing sources (tax.gov.ae)',
@@ -42,7 +56,7 @@ const CAVEAT_SOURCES = [
   },
   {
     source: 'UAE Capital Market Authority (UAE CMA)',
-    why: 'UAE CMA has 6 proof-backed fresh-alert eligible sources, including the regulations listing and the circulars/rules/procedures page, which was repointed to the CMA’s new canonical URL during the SCA→CMA site transition in July 2026. The root portal and board-decisions listing are still being validated before we make broader capital-markets claims.',
+    why: 'UAE CMA has 5 proof-backed fresh-alert eligible sources, including the regulations listing. The circulars/rules/procedures page — repointed to the CMA’s new canonical URL during the July 2026 SCA→CMA site transition — is in remediation until a production rebaseline restores trustworthy change detection. The root portal and board-decisions listing are still being validated before we make broader capital-markets claims.',
   },
   {
     source: 'UAE Legislation Portal',
@@ -57,11 +71,11 @@ const CAVEAT_SOURCES = [
 const NOT_AVAILABLE_SOURCES = [
   {
     source: 'UAE FIU (uaefiu.gov.ae)',
-    reason: 'Geo-IP restricted from outside the UAE. EOCN, CBUAE, Ministry of Economy and DFSA/CMA AML sources are monitored as alternatives.',
+    reason: 'Geo-IP restricted from outside the UAE. EOCN sanctions sources, the VARA rulebook AML/CFT part, the DFSA AML rulebook module and the UAE CMA/DIFC AML pages are monitored as alternatives.',
   },
   {
     source: 'CBUAE main domain (centralbank.ae)',
-    reason: 'Geo-IP filtered from outside the UAE. The CBUAE rulebook subdomain (rulebook.centralbank.ae) is monitored instead — 25 fresh-alert eligible sources.',
+    reason: 'Geo-IP filtered from outside the UAE. The CBUAE rulebook subdomain (rulebook.centralbank.ae) is configured as the monitoring route, but it currently blocks our production infrastructure too (HTTP 403 since 11 July 2026) — all CBUAE sources are disclosed as in remediation, not counted.',
   },
   {
     source: 'UAE Cabinet — news and decisions (uaecabinet.ae)',

@@ -99,7 +99,7 @@ const PLANS_DATA = [
     badge: "Recommended",
     highlight: true,
     purpose:
-      "For MLROs and CCOs at UAE-regulated firms. Selected fresh-alert eligible official UAE sources across VARA, CBUAE, DFSA, ADGM/FSRA, DIFC, UAE CMA, EOCN and related public sources — with evidence on each configured run.",
+      "For MLROs and CCOs at UAE-regulated firms. Selected fresh-alert eligible official UAE sources across VARA, DFSA (rulebook platform), ADGM/FSRA, DIFC, UAE CMA, EOCN, MoF and related public sources — with evidence on each configured run. CBUAE and DFSA-site sources are currently in disclosed remediation (production access blocked).",
     cta: "Upgrade to UAE Monitor",
     ctaPrimary: true,
     features: [
@@ -223,7 +223,7 @@ const FAQS = [
   },
   {
     q: "Which regulators are covered on the UAE Monitor plan?",
-    a: "Selected-source monitoring includes fresh-alert eligible sources across VARA, CBUAE (rulebook), DFSA, ADGM/FSRA, DIFC laws and data protection, Ministry of Finance, Ministry of Economy DNFBP AML sources, Executive Office for AML/CFT (EOCN) sanctions sources, UAE CMA, and related official public sources. Source access is environment-dependent and disclosed rather than assumed: some regulator websites — including the CBUAE rulebook and the DFSA site — apply access restrictions that can affect automated monitoring infrastructure. Before your pilot begins, the source readiness review reports the recorded access status of every source in your pack from our monitoring infrastructure; any source we cannot reach reliably is disclosed with its access limitation and is not counted as fresh-alert eligible coverage. The UAE FIU website is currently geo-restricted from outside the UAE and is not counted in fresh-alert coverage. MoJ/UAE legislation/gazette sources remain blocked or candidate, and FTA listing sources remain candidate pending the fresh-alert gate.",
+    a: "Selected-source monitoring includes fresh-alert eligible sources across VARA, CBUAE (rulebook), DFSA, ADGM/FSRA, DIFC laws and data protection, Ministry of Finance, Ministry of Economy DNFBP AML sources, Executive Office for AML/CFT (EOCN) sanctions sources, UAE CMA, and related official public sources. Source access is environment-dependent and disclosed rather than assumed: some regulator websites apply access restrictions that can affect automated monitoring infrastructure — right now the CBUAE rulebook subdomain and the DFSA site return HTTP 403 to our production infrastructure (since 11 July 2026), so those sources are disclosed as in remediation and are not counted as fresh-alert eligible. Before your pilot begins, the source readiness review reports the recorded access status of every source in your pack from our monitoring infrastructure; any source we cannot reach reliably is disclosed with its access limitation and is not counted as fresh-alert eligible coverage. The UAE FIU website is currently geo-restricted from outside the UAE and is not counted in fresh-alert coverage. MoJ/UAE legislation/gazette sources remain blocked or candidate, and FTA listing sources remain candidate pending the fresh-alert gate.",
   },
 ];
 
