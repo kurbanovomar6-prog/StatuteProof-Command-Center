@@ -168,6 +168,11 @@ def map_source_health_status(
         return NAV_SHELL_ONLY
     if failure_code == "SELECTOR_NOT_FOUND" or status == "NEEDS_SELECTOR_REVIEW":
         return SELECTOR_BROKEN
+    # A bot-wall / JS-challenge is a REACH problem (needs headless/proxy), not a
+    # generic content dip — classify it as remediation before the QUALITY_DROP
+    # gate so the distinction survives to the dashboard (code-review 2026-07-18).
+    if failure_code == "BOT_WALL" or result.get("access_status") == "blocked":
+        return REMEDIATION_REQUIRED
     if status == "QUALITY_DROP":
         return QUALITY_DROP
     if failure_code == "SOURCE_STRUCTURE_CHANGED":

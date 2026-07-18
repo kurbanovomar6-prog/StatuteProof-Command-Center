@@ -614,6 +614,13 @@ def _source_health_status(run: dict[str, Any]) -> str:
     # not masked as an access block.
     if monitor_access == "blocked":
         return "ACCESS_BLOCKED"
+    # A runtime anti-bot / JS-challenge wall is an access block, not a content
+    # dip — report it before the FAILED/QUALITY_DROP gate so a walled source
+    # reads as "blocked (needs headless/proxy)" rather than a generic quality
+    # drop (code-review 2026-07-18). Keyed on the specific runtime failure_code,
+    # not the broad access field, so config-derived "restricted" is unaffected.
+    if str(run.get("failure_code") or "") == "BOT_WALL":
+        return "ACCESS_BLOCKED"
     if change == "QUALITY_DROP" or quality == "FAILED":
         return "QUALITY_DROP"
     if change == "FAILED":

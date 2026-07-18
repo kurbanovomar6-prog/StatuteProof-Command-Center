@@ -178,3 +178,29 @@ class BotWallDetectionTests(unittest.TestCase):
         from app.text_normalization import looks_like_bot_wall
         self.assertFalse(looks_like_bot_wall(""))
         self.assertFalse(looks_like_bot_wall("DFSA publishes new AML consultation paper CP-2026-3."))
+
+    def test_legit_page_with_template_spinner_string_is_not_a_wall(self):
+        # code-review 2026-07-18: the REAL icp.gov.ae news page carries the
+        # literal template string "Just a moment..." (a feedback-form spinner
+        # label) mid-body. A weak generic marker must NOT fire on a genuine
+        # page merely because that UI string appears deep in the content —
+        # only when it leads the page as a real challenge would. This is a
+        # <2000-char slow-news-week variant of that exact live source.
+        legit = (
+            "ICP News\nUAE announces new golden-visa category for skilled nurses.\n"
+            "The Federal Authority for Identity, Citizenship, Customs and Port "
+            "Security published updated guidance on residency procedures. " * 6
+            + "\nMessage\nJust a moment...\nThank you for sharing your review.\n"
+            + "Read more news about entry permits and Emirates ID renewals. " * 6
+        )
+        self.assertLess(len(legit), 2000)
+        from app.text_normalization import looks_like_bot_wall
+        self.assertFalse(looks_like_bot_wall(legit))
+
+    def test_weak_marker_only_fires_when_it_leads_the_page(self):
+        from app.text_normalization import looks_like_bot_wall
+        # Leading (real wall) → True; buried deep past the head window → not a wall.
+        self.assertTrue(looks_like_bot_wall("Just a moment...\nEnable JavaScript to continue."))
+        buried = ("Authorised firms must file returns quarterly. " * 12
+                  + " Please just a moment... while the portal loads your dashboard.")
+        self.assertFalse(looks_like_bot_wall(buried))

@@ -409,25 +409,41 @@ def looks_like_error_page(text: str) -> bool:
 # Bilingual by necessity: difc.com served the DDoS-Guard wall in RUSSIAN
 # ('Мы проверяем ваш браузер') and the English-only error markers missed it,
 # so 87 chars of wall text reached the hasher on the customer path
-# (source-health audit 2026-07-18). Length-capped like error pages: a real
-# multi-KB document that merely mentions "javascript" is not a wall.
-_BOT_WALL_MARKERS = re.compile(
+# (source-health audit 2026-07-18).
+#
+# STRONG markers are wall-specific — no legitimate regulator page carries
+# them — so they match anywhere under the length cap. WEAK markers ("just a
+# moment...", "checking your browser", "enable javascript to continue",
+# "verify you are human") double as ordinary template/spinner/noscript UI
+# strings: the REAL icp.gov.ae news page contains "Just a moment..." as a
+# feedback-form spinner label mid-body (code-review 2026-07-18). A wall leads
+# with them (title / first lines); a real page buries them in chrome — so weak
+# markers only count in the HEAD window, never deep in the content.
+_BOT_WALL_STRONG_MARKERS = re.compile(
+    r"""
+    (
+        cf-browser-verification|
+        ddos-?guard|
+        website\s+owner\?.{0,30}click\s+here\s+to\s+fix|
+        проверяем\s+ваш\s+браузер
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+_BOT_WALL_WEAK_MARKERS = re.compile(
     r"""
     (
         checking\s+your\s+browser|
-        cf-browser-verification|
         verify\s+you\s+are\s+human|
         enable\s+javascript\s+(and\s+cookies\s+)?to\s+continue|
         just\s+a\s+moment\.\.\.|
-        ddos-?guard|
-        website\s+owner\?.{0,30}click\s+here\s+to\s+fix|
-        проверяем\s+ваш\s+браузер|
         включите\s+javascript
     )
     """,
     re.IGNORECASE | re.VERBOSE,
 )
 _BOT_WALL_MAX_CHARS = 2000
+_BOT_WALL_WEAK_HEAD_CHARS = 300
 
 
 def looks_like_bot_wall(text: str) -> bool:
@@ -440,13 +456,20 @@ def looks_like_bot_wall(text: str) -> bool:
     error-page markers only knew 'cloudflare ray id', not the bare
     'checking your browser' / Russian / DDoS-Guard phrasings
     (source-health audit 2026-07-18).
+
+    Weak markers are checked only in the leading text so a genuine page that
+    merely mentions a spinner/noscript string deep in its chrome is not
+    misread as a wall (code-review 2026-07-18: icp.gov.ae carries the literal
+    'Just a moment...' template string mid-body).
     """
     if not text:
         return False
-    stripped = text.strip()
+    stripped = text.strip().replace("’", "'")
     if len(stripped) > _BOT_WALL_MAX_CHARS:
         return False
-    return bool(_BOT_WALL_MARKERS.search(stripped.replace("’", "'")))
+    if _BOT_WALL_STRONG_MARKERS.search(stripped):
+        return True
+    return bool(_BOT_WALL_WEAK_MARKERS.search(stripped[:_BOT_WALL_WEAK_HEAD_CHARS]))
 
 
 def stable_normalized_hash(text: str) -> str:
