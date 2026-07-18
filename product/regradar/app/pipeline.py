@@ -702,7 +702,30 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     # dropped. run_pipeline_for_source consumes this after append_run.
     pending_cooldown_alert: dict | None = None
 
-    if ENABLE_TELEGRAM_ALERTS and not is_new and final_risk_level in _ALERT_THRESHOLD:
+    # SF-3 eligibility gate: only a source the registry marks as a live
+    # fresh-alert monitor may auto-broadcast to customers. Candidates,
+    # evidence-library and remediation sources are still fetched, hashed and
+    # sealed — they just never alert until promoted. Previously the flag the
+    # UI/count is built on (alert_eligible) was NEVER read by the alert path,
+    # so a candidate with an AI-classified MEDIUM + confidence>=0.70 could
+    # slip past the review gate (security-review 2026-07-18). A source dict
+    # without registry mode/flag (direct run_pipeline(url) / manual) keeps the
+    # prior behavior. Canonical predicate mirrors api.py's fresh_alert count.
+    _mode = (source or {}).get("monitoring_mode")
+    _ae = (source or {}).get("alert_eligible")
+    source_may_alert = (
+        source is None
+        or _ae is True
+        or _mode == "fresh_alert"
+        or (_ae is None and _mode is None)
+    )
+    if source is not None and not source_may_alert:
+        logger.info(
+            "Telegram alert suppressed (not a fresh-alert source): source=%s mode=%s alert_eligible=%s",
+            source.get("name"), _mode, _ae,
+        )
+
+    if ENABLE_TELEGRAM_ALERTS and not is_new and final_risk_level in _ALERT_THRESHOLD and source_may_alert:
         # A1 dedup gate: one alert per unique hash transition per source,
         # plus a cooldown between alerts for the same source.
         alert_allowed = True

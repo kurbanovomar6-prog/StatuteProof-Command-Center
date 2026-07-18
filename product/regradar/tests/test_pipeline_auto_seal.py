@@ -77,12 +77,13 @@ def isolated_dirs(tmp_path, monkeypatch):
     sr._RUNS_CACHE = None
 
 
-def _seed_baseline(tmp_path) -> None:
+def _seed_baseline(tmp_path, source: dict | None = None) -> None:
     """Seed a FIRST_SEEN baseline whose snapshot satisfies the seal's
     previous-run integrity check (file re-hash vs normalized_hash, flavor B)."""
     import app.source_runs as sr
 
-    sid = _source_id()
+    src = source or _SOURCE
+    sid = sr.make_source_id(src)
     snap_dir = tmp_path / "data" / "source_snapshots" / "2026-06-20" / "AE" / sid / "seed0001"
     snap_dir.mkdir(parents=True, exist_ok=True)
     (snap_dir / "normalized.txt").write_text(_BASE_NORMALIZED, encoding="utf-8")
@@ -91,9 +92,9 @@ def _seed_baseline(tmp_path) -> None:
             {
                 "run_id": "seed0001",
                 "source_id": sid,
-                "source_name": _SOURCE["name"],
-                "official_url": _SOURCE["url"],
-                "url": _SOURCE["url"],
+                "source_name": src["name"],
+                "official_url": src["url"],
+                "url": src["url"],
                 "change_status": "FIRST_SEEN",
                 "extraction_quality": "GOOD",
                 "extracted_chars": len(_BASE_TEXT),
@@ -116,7 +117,7 @@ def _sealed_record_paths(tmp_path) -> list[Path]:
     return sorted((tmp_path / "evidence").glob("*/*/*/evidence-record.json"))
 
 
-def _run_live(monkeypatch_ctx_patches: list, alerts: bool):
+def _run_live(monkeypatch_ctx_patches: list, alerts: bool, source: dict | None = None):
     """Run run_pipeline_for_source under the standard hermetic patch set."""
     from app.pipeline import init_pipeline, run_pipeline_for_source
 
@@ -132,7 +133,7 @@ def _run_live(monkeypatch_ctx_patches: list, alerts: bool):
         try:
             for p in monkeypatch_ctx_patches:
                 ctx_stack.append(p.__enter__())
-            return run_pipeline_for_source(_SOURCE)
+            return run_pipeline_for_source(source or _SOURCE)
         finally:
             for p in reversed(monkeypatch_ctx_patches):
                 p.__exit__(None, None, None)
@@ -218,6 +219,77 @@ def test_changed_run_seals_before_alert_and_proof_resolves(isolated_dirs):
     )
     assert str(proof.get("record_hash", "")).startswith("sha256:")
     assert proof.get("run_id") == run_id
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# (ii-b) SF-3 eligibility gate: a CANDIDATE source seals evidence but NEVER
+#        auto-alerts, even on a genuine MEDIUM/HIGH change. The alert_eligible
+#        flag the count/UI is built on is now actually enforced by the alert
+#        path (security-review 2026-07-18).
+# ══════════════════════════════════════════════════════════════════════════
+_CANDIDATE_SOURCE = {
+    "name": "Candidate Source",
+    "url": "https://example.gov.ae/candidate-not-eligible",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": True,
+    "monitoring_mode": "candidate",
+    "alert_eligible": False,
+}
+
+
+def test_candidate_source_seals_but_never_alerts(isolated_dirs):
+    _seed_baseline(isolated_dirs, source=_CANDIDATE_SOURCE)
+
+    sends: list = []
+    result = _run_live(
+        [
+            patch("app.pipeline.extract_best_text", return_value={"text": _CHANGED_TEXT, "method": "t"}),
+            patch(
+                "app.pipeline.get_latest_document",
+                return_value={"content": _BASE_TEXT, "content_hash": _BASE_HASH},
+            ),
+            patch("app.telegram.send_telegram_alert", side_effect=lambda p: sends.append(p) or True),
+        ],
+        alerts=True,
+        source=_CANDIDATE_SOURCE,
+    )
+
+    assert result["changed"] is True, "the change is real — this is a MEDIUM/HIGH transition"
+    assert result.get("telegram_sent") is not True, (
+        "a candidate (alert_eligible=False) must NEVER auto-broadcast to customers"
+    )
+    assert sends == [], "send_telegram_alert must not be called for a candidate source"
+    # Evidence is still captured — candidates are monitored, just not alerted.
+    assert result.get("canonical_evidence_sealed") is True, (
+        "a candidate change must still auto-seal a canonical record (monitoring "
+        "continues; only the customer alert is withheld until promotion)"
+    )
+
+
+def test_fresh_alert_source_still_alerts(isolated_dirs):
+    # Control: an explicitly fresh_alert-eligible source DOES alert on change,
+    # proving the SF-3 gate blocks only non-eligible sources.
+    fresh = {**_SOURCE, "monitoring_mode": "fresh_alert", "alert_eligible": True,
+             "url": "https://example.gov.ae/fresh-eligible"}
+    _seed_baseline(isolated_dirs, source=fresh)
+    sends: list = []
+    result = _run_live(
+        [
+            patch("app.pipeline.extract_best_text", return_value={"text": _CHANGED_TEXT, "method": "t"}),
+            patch(
+                "app.pipeline.get_latest_document",
+                return_value={"content": _BASE_TEXT, "content_hash": _BASE_HASH},
+            ),
+            patch("app.telegram.send_telegram_alert", side_effect=lambda p: sends.append(p) or True),
+        ],
+        alerts=True,
+        source=fresh,
+    )
+    assert result["changed"] is True
+    assert result.get("telegram_sent") is True and len(sends) == 1, (
+        "a fresh_alert-eligible source must still alert — the gate blocks only candidates"
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════
