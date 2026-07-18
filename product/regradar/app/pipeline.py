@@ -182,6 +182,53 @@ def _extraction_quality(chars: int) -> str:
     return "failed"
 
 
+def _persist_guard_drop(
+    source: dict | None,
+    *,
+    reason: str,
+    alert_suppressed_reason: str,
+    observed_raw_chars: int = 0,
+    extraction_method: str = "",
+    failure_code: str = "",
+    access_status: str = "",
+) -> None:
+    """Write a durable, baseline-safe QUALITY_DROP trail record when a run
+    aborts in an early guard (empty / error-page / bot-wall / undecodable).
+
+    Before this, those four guards early-returned with NO durable trace, so a
+    chronically walled or wedged source kept SHOWING ITS LAST GOOD STATUS on
+    the customer timeline and the operator report — an evidence product must be
+    able to prove when it could NOT see a source (company-plan 2026-07-18).
+    record_quality_drop keeps the baseline-safety invariant (no hash → never a
+    baseline). Best-effort and source-gated: a bare run_pipeline(url) call or a
+    write failure must never change the guard's own return."""
+    if source is None:
+        return
+    try:
+        from app.source_runs import (
+            record_quality_drop,
+            previous_run,
+            make_source_id,
+        )
+        prev = previous_run(make_source_id(source)) or {}
+        record_quality_drop(
+            source,
+            reason=reason,
+            alert_suppressed_reason=alert_suppressed_reason,
+            observed_raw_chars=observed_raw_chars,
+            prev_raw_chars=prev.get("extracted_chars"),
+            prev_normalized_chars=prev.get("normalized_chars"),
+            extraction_method=extraction_method,
+            failure_code=failure_code,
+            access_status=access_status,
+        )
+    except Exception as exc:  # never let observability break the guard
+        logger.warning(
+            "Guard-drop trail record failed for %s: %s: %s",
+            (source or {}).get("url"), type(exc).__name__, exc,
+        )
+
+
 def run_pipeline(url: str, source: dict | None = None) -> dict:
     """
     Execute the full change-detection pipeline for a single URL.
@@ -258,6 +305,11 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     # ── Guard: empty / None content → quality_drop ───────────────────
     if not content or not content.strip():
         logger.warning("Empty content returned for %s — aborting with quality_drop", url)
+        _persist_guard_drop(
+            source, reason="Empty content returned — no monitorable text",
+            alert_suppressed_reason="empty_content", observed_raw_chars=extracted_chars,
+            extraction_method=extraction_method, failure_code="EMPTY_CONTENT",
+        )
         return {
             "url":                url,
             "changed":            False,
@@ -275,6 +327,12 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     from app.text_normalization import looks_like_error_page, looks_like_bot_wall
     if looks_like_error_page(content):
         logger.warning("Error page detected for %s — recording as failed, no baseline", url)
+        _persist_guard_drop(
+            source, reason="Fetched content is an HTTP error/challenge page",
+            alert_suppressed_reason="error_page", observed_raw_chars=extracted_chars,
+            extraction_method=extraction_method, failure_code="ERROR_PAGE",
+            access_status="error_page",
+        )
         return {
             "url":                url,
             "changed":            False,
@@ -297,6 +355,12 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     # (headless/proxy remediation), distinct from a genuinely down source.
     if looks_like_bot_wall(content):
         logger.warning("Bot-wall / JS-challenge detected for %s — recording as blocked, no baseline", url)
+        _persist_guard_drop(
+            source, reason="Fetched content is an anti-bot / JS-challenge wall",
+            alert_suppressed_reason="bot_wall", observed_raw_chars=extracted_chars,
+            extraction_method=extraction_method, failure_code="BOT_WALL",
+            access_status="blocked",
+        )
         return {
             "url":                url,
             "changed":            False,
@@ -321,6 +385,11 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         logger.warning(
             "Undecodable content for %s (%d chars) — aborting with quality_drop",
             url, len(content),
+        )
+        _persist_guard_drop(
+            source, reason="Undecodable content (replacement/control chars) — mis-decoded body",
+            alert_suppressed_reason="undecodable", observed_raw_chars=extracted_chars,
+            extraction_method=extraction_method, failure_code="UNDECODABLE",
         )
         return {
             "url":                url,

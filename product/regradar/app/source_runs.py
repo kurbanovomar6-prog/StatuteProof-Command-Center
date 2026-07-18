@@ -903,6 +903,8 @@ def record_quality_drop(
     prev_raw_chars: int | None = None,
     prev_normalized_chars: int | None = None,
     extraction_method: str = "",
+    failure_code: str = "",
+    access_status: str = "",
 ) -> dict:
     """A-MEDIUM(1): write a durable QUALITY_DROP audit record for a suppressed
     run (e.g. a content-shrink scraper break) so the gap is auditable instead of
@@ -958,6 +960,14 @@ def record_quality_drop(
         "alert_suppressed_reason": alert_suppressed_reason,
         "limitations_notes": reason,
     }
+    # Access-block signals (bot-wall / WAF): carried so _source_health_status
+    # can classify the record as ACCESS_BLOCKED (needs headless/proxy) rather
+    # than a generic quality dip. Only set when provided to avoid noising up
+    # ordinary content-shrink drops.
+    if failure_code:
+        record["failure_code"] = failure_code
+    if access_status:
+        record["access_status"] = access_status
     _RUN_DIR.mkdir(parents=True, exist_ok=True)
     _locked_append_record(record)
     global _CACHE_VALID

@@ -293,6 +293,52 @@ def test_fresh_alert_source_still_alerts(isolated_dirs):
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# (ii-c) Guard-path observability: a bot-wall run leaves a DURABLE QUALITY_DROP
+#        trail record (failure_code=BOT_WALL, no hash → never a baseline), so a
+#        walled source is auditable instead of showing its last good status.
+# ══════════════════════════════════════════════════════════════════════════
+_WALL_TEXT = "Мы проверяем ваш браузер\nWebsite owner? Click here to fix\nEnable JavaScript to continue"
+
+
+def _read_trail_records(tmp_path) -> list:
+    import app.source_runs as sr
+    if not sr._RUN_FILE.exists():
+        return []
+    return [json.loads(ln) for ln in sr._RUN_FILE.read_text(encoding="utf-8").splitlines() if ln.strip()]
+
+
+def test_bot_wall_run_persists_durable_quality_drop_record(isolated_dirs):
+    _seed_baseline(isolated_dirs)  # a prior good baseline exists
+
+    result = _run_live(
+        [
+            patch("app.pipeline.extract_best_text", return_value={"text": _WALL_TEXT, "method": "t"}),
+            patch(
+                "app.pipeline.get_latest_document",
+                return_value={"content": _BASE_TEXT, "content_hash": _BASE_HASH},
+            ),
+        ],
+        alerts=True,
+    )
+
+    # The run is a quality_drop, not a change, and never seals the wall.
+    assert result.get("changed") is not True
+    assert result.get("canonical_evidence_sealed") is not True
+
+    records = _read_trail_records(isolated_dirs)
+    drops = [r for r in records if r.get("change_status") == "QUALITY_DROP" and r.get("failure_code") == "BOT_WALL"]
+    assert len(drops) == 1, (
+        "a bot-walled run must leave exactly one durable BOT_WALL quality-drop "
+        f"trail record (got records: {[r.get('change_status') for r in records]})"
+    )
+    drop = drops[0]
+    # Baseline-safety: the wall record carries NO usable hash, so it can never
+    # be resolved as a baseline — the prior good baseline survives.
+    assert drop.get("normalized_hash") is None and drop.get("content_hash") is None
+    assert drop.get("access_status") == "blocked"
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # (iii) A seal failure never blocks the alert
 # ══════════════════════════════════════════════════════════════════════════
 def test_seal_failure_does_not_block_alert(isolated_dirs):
