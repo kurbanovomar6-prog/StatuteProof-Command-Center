@@ -263,6 +263,13 @@ def consume_pairing_code(code: str, chat_id: str, from_user: dict | None = None)
                 telegram_username = ?,
                 telegram_first_name = ?,
                 telegram_paired_at = ?,
+                -- Pairing IS the explicit opt-in to alerts: the customer ran
+                -- /start CODE specifically to receive them, and the bot's
+                -- success message promises exactly this. Without this the flag
+                -- stayed at its DEFAULT 0 and delivery (get_all_linked_chat_ids,
+                -- filtering telegram_alerts_enabled = 1) silently excluded every
+                -- paired customer (live CRITICAL, 2026-07-18).
+                telegram_alerts_enabled = 1,
                 updated_at = ?
             WHERE user_id = ?
             """,
