@@ -218,6 +218,31 @@ class DIFCAdapter(SourceAdapter):
             return None
 
     def _fetch_via_playwright(self, url: str) -> str | None:
+        """Dispatch the sync-Playwright path safely from ANY context.
+
+        playwright.sync_api refuses to run inside a live asyncio event loop
+        ("Sync API inside the asyncio loop" — 981 occurrences in the prod
+        journal). When that happened the adapter silently fell back to the
+        generic scraper, which extracted the SAME text but with a degraded
+        quality signal — the cause of the intermittent QUALITY_DROP flapping
+        on DIFC fresh-alert sources (constant chars, flapping status). Run
+        the sync API on a dedicated thread when a loop is running.
+        """
+        try:
+            import asyncio
+            asyncio.get_running_loop()
+            in_loop = True
+        except RuntimeError:
+            in_loop = False
+        if in_loop:
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=1, thread_name_prefix="difc-playwright"
+            ) as ex:
+                return ex.submit(self._fetch_via_playwright_impl, url).result()
+        return self._fetch_via_playwright_impl(url)
+
+    def _fetch_via_playwright_impl(self, url: str) -> str | None:
         """
         Core Playwright extraction path.
 
