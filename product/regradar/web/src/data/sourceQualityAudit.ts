@@ -4,10 +4,10 @@
 
 export const SOURCE_QUALITY_SUMMARY = {
   auditDate: "2026-07-18",
-  totalEnabled: 131,
+  totalEnabled: 132,
   freshAlertEligible: 40,
   evidenceLibraryOnly: 20,
-  candidate: 28,
+  candidate: 29,
   remediation: 43,
   sourceLevelMonitorOk: 42,
   withProofPath: 86,
@@ -148,10 +148,10 @@ export const FAMILY_QUALITY = [
   },
   {
     family: "Other / international official sources",
-    totalEnabled: 14,
+    totalEnabled: 15,
     freshAlertEligible: 0,
     evidenceLibrary: 5,
-    candidate: 9,
+    candidate: 10,
     remediation: 0,
     status: "evidence_library",
     gapTo25: 25,
@@ -221,7 +221,7 @@ export const SAFE_CLAIMS = [
   "StatuteProof also maintains 20 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
   "Sources whose hosts block our production monitoring egress — the CBUAE rulebook subdomain and the DFSA website (HTTP 403 to all fetch methods since 2026-07-11) — are disclosed as remediation and are not counted as fresh-alert eligible.",
   "DFSA rulebook depth continues through the DFSA rulebook platform at dfsaen.thomsonreuters.com, which does work from production, including the AML rulebook module promoted on 2026-07-18 after passing rebaseline and stable-run gates.",
-  "StatuteProof maintains source-level proof files for 86 of 131 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
+  "StatuteProof maintains source-level proof files for 86 of 132 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
   "ADGM/FSRA has 9 selected proof-backed fresh-alert sources, including guidance/policy and RA/circular/rulebook style sources, with 3 remaining candidates disclosed as held.",
   "DIFC has 8 selected proof-backed fresh-alert sources, including the official DIFC Legal Database listing; the laws-and-regulations root listing is in remediation pending a production rebaseline review. This is not complete DIFC legal database coverage.",
   "UAE CMA has 5 selected proof-backed fresh-alert direct/listing sources; the circulars/rules/procedures page is in remediation pending a production rebaseline, and UAE CMA root portal and broad UAE CMA coverage remain unclaimed.",
@@ -232,7 +232,7 @@ export const SAFE_CLAIMS = [
 ] as const
 
 export const FORBIDDEN_CLAIMS = [
-  "Do not describe all 131 enabled UAE source records as live monitors.",
+  "Do not describe all 132 enabled UAE source records as live monitors.",
   "Do not count sources whose host blocks production egress as fresh-alert eligible.",
   "Do not describe CBUAE rulebook sources as live monitors while production egress is blocked.",
   "Do not describe UAE coverage as complete.",

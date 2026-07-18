@@ -10745,5 +10745,40 @@
     "baseline_runs_required": 2,
     "tier": "2",
     "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (165KB). The only outside-reachable Kuwait channel worth shipping (Kuwait CMA geo-fences its own site — DO NOT promise CMA coverage). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "EU Consolidated Financial Sanctions List (RSS)",
+    "url": "https://webgate.ec.europa.eu/fsd/fsf/public/rss",
+    "jurisdiction": "AE",
+    "category": "sanctions",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "AE-eu-consolidated-sanctions-rss",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 300,
+    "baseline_runs_required": 2,
+    "tier": "1",
+    "adapter_name": "xml_feed",
+    "adapter_family": "xml_feed",
+    "check_interval_minutes": 240,
+    "notes": "2026-07-18 ADDED as candidate (source-gap-analysis, adversarially verified: real+official+not-covered). Closes the sanctions 'big-4' — we cover UN/OFSI/OFAC, this is the EU DG FISMA consolidated list an MLRO spots missing in a first demo. Verified reachable FROM PRODUCTION today (200, RSS 3.9KB). RSS lists file-format variants (PDF/CSV/XML) with per-item <title> version (v1.0), <pubDate> (list update date), and <guid> checksum; xml_feed processes <item> only so the channel <lastBuildDate> regeneration noise never fires. The download link carries a static versioned token (base64 'token-2017'), not a per-request session token. CANDIDATE until 2 stable prod baselines + intake gates pass. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "SAMA Rulebook (Saudi Central Bank)",
+    "url": "https://rulebook.sama.gov.sa/en",
+    "jurisdiction": "SA",
+    "category": "rulebook",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "GCC-sa-sama-rulebook",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 400,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "regulator_code": "GCC",
+    "check_interval_minutes": 720,
+    "notes": "2026-07-18 ADDED as candidate (GCC layer, source-gap-analysis adversarially verified). The KSA mirror of our CBUAE rulebook coverage — codified banking/payments/fintech regulations; rule-text diffs for any UAE bank/PSP with a Saudi branch. Verified reachable FROM PRODUCTION today (200, real rulebook TOC content via generic extractor). CANDIDATE until 2 stable prod baselines. jurisdiction=SA so excluded from the UAE-scope audit until the GCC layer launches. Monitoring intelligence only. Not legal advice."
   }
 ]

@@ -142,6 +142,9 @@ _HOST_RULES: tuple[tuple[str, str], ...] = (
     ("scsanctions.un.org", "EOCN"),
     ("ofsistorage.blob.core.windows.net", "EOCN"),
     ("ofac.treasury.gov", "EOCN"),
+    # EU consolidated financial sanctions list (DG FISMA) — the 4th of the
+    # "big-4" sanctions regimes UAE MLROs screen against, alongside UN/OFSI/OFAC.
+    ("webgate.ec.europa.eu", "EOCN"),
     ("menafatf.org", "EOCN"),
     ("uaefiu.gov.ae", "EOCN"),
     # Basel Committee publications: prudential banking policy — CBUAE scope.

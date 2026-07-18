@@ -67,6 +67,7 @@ _ALLOWED_HOSTS = (
     "scsanctions.un.org",
     "bis.org",
     "uaefiu.gov.ae",
+    "webgate.ec.europa.eu",
 )
 
 # Bounded output: feeds are capped per item count and per field length so a

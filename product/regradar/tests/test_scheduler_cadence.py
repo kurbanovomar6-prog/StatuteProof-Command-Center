@@ -35,6 +35,9 @@ EXPECTED_CADENCE_SOURCES = {
     # 2026-07-18: UN consolidated list joins the sanctions-urgency band (the
     # UAE 24h freeze obligation keys on these designations).
     "AE-un-consolidated-sanctions-xml": 240,
+    # 2026-07-18: EU consolidated financial sanctions (DG FISMA) joins the
+    # sanctions-urgency band alongside UN — same UAE 24h freeze obligation.
+    "AE-eu-consolidated-sanctions-rss": 240,
     # 2026-07-18: OFSI is a cadence CAP, not an urgency opt-in — the 5.4 MB
     # consolidated-list fetch declares a 12h appetite so it can never ride a
     # sanctions-band cadence. NOTE (honest limitation): with the current
@@ -43,11 +46,14 @@ EXPECTED_CADENCE_SOURCES = {
     # ACCELERATES sources relative to a slower fleet interval; the cap takes
     # real effect only when the fleet interval exceeds it.
     "AE-uk-ofsi-consolidated-list": 720,
+    # 2026-07-18: SAMA rulebook (GCC layer) — a 12h cap, not sanctions urgency;
+    # codified KSA rule-text changes slowly, no freeze-obligation clock.
+    "GCC-sa-sama-rulebook": 720,
 }
 
 # Sources whose declared cadence is a bandwidth/appetite CAP (slower than the
 # sanctions-urgency band) rather than an urgency opt-in.
-CADENCE_CAP_SOURCES = {"AE-uk-ofsi-consolidated-list"}
+CADENCE_CAP_SOURCES = {"AE-uk-ofsi-consolidated-list", "GCC-sa-sama-rulebook"}
 
 
 # ── get_custom_interval_minutes ──────────────────────────────────────────────

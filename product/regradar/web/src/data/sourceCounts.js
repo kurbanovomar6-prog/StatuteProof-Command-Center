@@ -14,7 +14,7 @@ export const SOURCE_TRUTH = {
   // Whole-register count (UAE + international layer + 6 GCC divergence-feed
   // candidates added 2026-07-18). The backend audit reports the UAE-scope
   // subset (131) — two scopes, both true, labeled accordingly in the UI.
-  enabled: 137,
+  enabled: 139,
   // 2026-07-18 PROD-VANTAGE RE-MEASURE: 25 CBUAE rulebook + 10 www.dfsa.ae
   // sources demoted to remediation — both hosts return HTTP 403 to our
   // production monitoring egress on every fetch method (persistent since
@@ -33,5 +33,5 @@ export const SOURCE_TRUTH = {
   // 5 genuinely alert-worthy but unvalidated listings → candidate (VARA
   // notices/enforcement index, FTA VAT public clarifications, DFSA news hub,
   // DFSA SEO letters, DFM regulatory circulars) — candidate 9 → 14.
-  candidate: 34,
+  candidate: 36,
 }
