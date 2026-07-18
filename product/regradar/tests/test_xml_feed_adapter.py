@@ -181,6 +181,25 @@ def test_doctype_payload_is_refused():
     assert XmlFeedAdapter.parse_payload(payload, _BIS_URL) is None
 
 
+def test_doctype_pushed_past_4kb_prolog_is_still_refused():
+    """Security regression (2026-07-18): a legal >4KB prolog comment must not
+    let a billion-laughs DOCTYPE slip past the entity-expansion guard. The
+    prefix-window scan this replaced was bypassable exactly this way."""
+    padding = b"<!-- " + (b"A" * 4296) + b" -->"
+    bomb = (
+        b'<?xml version="1.0"?>'
+        + padding
+        + b'<!DOCTYPE lolz ['
+        + b'<!ENTITY lol "lol">'
+        + b'<!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;">'
+        + b'<!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;">'
+        + b']>'
+        + b'<rss><channel><item><title>&lol3;</title></item></channel></rss>'
+    )
+    assert b"<!DOCTYPE" not in bomb[:4096], "prolog padding must push DOCTYPE past 4KB"
+    assert XmlFeedAdapter.parse_payload(bomb, _BIS_URL) is None
+
+
 # ── UN consolidated list ─────────────────────────────────────────────────────
 
 def test_un_output_contains_counts_digest_and_excerpt():

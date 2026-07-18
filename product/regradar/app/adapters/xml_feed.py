@@ -83,9 +83,12 @@ _WS_RE = re.compile(r"\s+")
 # Entity-expansion guard: a DOCTYPE (and therefore any ENTITY declaration)
 # has no business in an official feed payload; refusing it outright closes
 # billion-laughs / external-entity tricks without needing defusedxml. The
-# declaration must appear before the root element, so scanning a bounded
-# prefix is sufficient.
-_DOCTYPE_SCAN_BYTES = 4096
+# WHOLE buffer is scanned (not a prefix): XML permits arbitrary comments and
+# processing-instructions in the prolog BEFORE the DOCTYPE, so a >4KB comment
+# would legally push a billion-laughs DOCTYPE past any bounded prefix window
+# and reach ET.fromstring() unfiltered (security review, 2026-07-18). The
+# buffer is already capped at ≤10MB by fetch_bytes_bounded, so a full
+# substring scan costs milliseconds.
 
 
 def _host_of(url: str) -> str:
@@ -160,8 +163,9 @@ class XmlFeedAdapter(SourceAdapter):
     @staticmethod
     def parse_payload(data: bytes, url: str) -> str | None:
         """Turn raw feed bytes into normalized monitor text. Never raises."""
-        head = data[:_DOCTYPE_SCAN_BYTES]
-        if b"<!DOCTYPE" in head or b"<!ENTITY" in head:
+        # Scan the ENTIRE bounded buffer — a DOCTYPE can be pushed arbitrarily
+        # deep by a legal prolog comment, so a prefix window is bypassable.
+        if b"<!DOCTYPE" in data or b"<!ENTITY" in data:
             logger.warning(
                 "XmlFeedAdapter: refusing payload with DOCTYPE/ENTITY "
                 "declaration from %s", url,
