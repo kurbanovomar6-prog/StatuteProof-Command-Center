@@ -133,3 +133,48 @@ class NavStripEdgeGatingTests(unittest.TestCase):
         # 2 short label-like lines (< _NAV_RUN_MIN) are not a menu — keep them.
         lines = ["Alpha", "Beta", "A full sentence of regulatory content here."]
         self.assertEqual(_strip_nav_label_runs(lines), lines)
+
+
+class BotWallDetectionTests(unittest.TestCase):
+    """A JS/anti-bot challenge page must never become a monitoring baseline.
+
+    Source-health audit 2026-07-18: difc.com intermittently served a DDoS-Guard
+    wall in RUSSIAN ('Мы проверяем ваш браузер') that the customer path
+    (run_pipeline) did NOT catch — looks_like_error_page + is_mostly_unreadable
+    both returned False, so 87 chars of wall text were hashable content. The
+    existing error-page markers only knew 'cloudflare ray id', not the bare
+    'checking your browser' / Russian variant / 'Website owner? click here to
+    fix' DDoS-Guard phrasing.
+    """
+
+    def test_difc_russian_ddos_guard_wall_is_detected(self):
+        from app.text_normalization import looks_like_bot_wall
+        # The exact text extracted from difc.com on prod (2026-07-18).
+        wall = "Мы проверяем ваш браузер\nWebsite owner? Click here to fix\nEnable JavaScript to continue"
+        self.assertTrue(looks_like_bot_wall(wall))
+
+    def test_english_cloudflare_wall_is_detected(self):
+        from app.text_normalization import looks_like_bot_wall
+        self.assertTrue(looks_like_bot_wall(
+            "Checking your browser before accessing the site. This process is automatic."
+        ))
+
+    def test_just_a_moment_and_verify_human_walls_detected(self):
+        from app.text_normalization import looks_like_bot_wall
+        self.assertTrue(looks_like_bot_wall("Just a moment...\nEnable JavaScript and cookies to continue"))
+        self.assertTrue(looks_like_bot_wall("Verify you are human by completing the action below."))
+
+    def test_real_document_mentioning_javascript_is_not_a_wall(self):
+        from app.text_normalization import looks_like_bot_wall
+        # A long, genuine regulatory doc that merely mentions javascript must
+        # NOT be misread as a wall — length cap protects real content.
+        doc = ("This Regulation sets out obligations for authorised firms. " * 60
+               + "Firms should enable JavaScript for the online portal. "
+               + "Article 5 requires records to be kept for six years. " * 40)
+        self.assertGreater(len(doc), 2000)
+        self.assertFalse(looks_like_bot_wall(doc))
+
+    def test_empty_and_normal_short_text_are_not_walls(self):
+        from app.text_normalization import looks_like_bot_wall
+        self.assertFalse(looks_like_bot_wall(""))
+        self.assertFalse(looks_like_bot_wall("DFSA publishes new AML consultation paper CP-2026-3."))

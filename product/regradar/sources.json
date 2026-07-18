@@ -586,11 +586,12 @@
     "customer_alert_policy": "Alert on material DFSA title, link, date, rulebook text, listing row, enforcement, consultation, or normalized-hash changes; suppress layout, navigation, cookie, and boilerplate-only changes.",
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-financial-crime-mlro-letters/intake-20260619T151120Z/normalized.txt",
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T15:17:07Z",
     "noise_risk": "low",
-    "source_health_risk": "medium"
+    "source_health_risk": "medium",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "source_id": "AE-dfsa-aml-rulebook-module",
@@ -2440,12 +2441,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-rulebook-revision-updates/intake-20260619T145540Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 4,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "VARA Rulebook Revision Updates",
@@ -2516,12 +2518,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-consultation-current/intake-20260619T151155Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T15:17:07Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "DFSA Published Enforcement Decisions",
@@ -2592,12 +2595,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-regulatory-actions-current/intake-20260619T151228Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T15:17:07Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "CBUAE Retail Payment Services and Card Schemes Regulation",
@@ -2631,12 +2635,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-retail-payment-services-rulebook/intake-20260619T145559Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "medium",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "DFSA Consultation Paper No.165",
@@ -2738,12 +2743,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-amlcft-rulebook-doclist/intake-20260619T145619Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "CBUAE AML/CFT Entire Section Document Links",
@@ -2777,12 +2783,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-amlcft-entire-section-doclist/intake-20260619T145639Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "CBUAE Consumer Protection Regulation Document Links",
@@ -2816,12 +2823,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-consumer-protection-rulebook-doclist/intake-20260619T145656Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "CBUAE Open Finance Regulation",
@@ -2853,12 +2861,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-open-finance-rulebook/intake-20260619T145706Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "CBUAE Payment Token Services Regulation",
@@ -2890,12 +2899,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-payment-token-services-rulebook/intake-20260619T145710Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "CBUAE Risk Management Rulebook",
@@ -2927,12 +2937,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-risk-management-rulebook/intake-20260619T145716Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: live check confirmed this page is a genuine server-rendered thin doclist index, not a JS shell (plain fetch returns 128,148B HTML; <main> holds 45 rulebook/PDF links; visible text 1,421B matches the stored 1,431B capture; no JS-app markers). No playwright needed. expected_min_length raised 500 -> 1300 (just under the live doclist size) so a collapse to nav-stub chrome fails the length gate instead of passing. The other 19 plain-fetch CBUAE rulebook sources are intentionally unchanged. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. 2026-07-13 OPS source-rot audit: live check confirmed this page is a genuine server-rendered thin doclist index, not a JS shell (plain fetch returns 128,148B HTML; <main> holds 45 rulebook/PDF links; visible text 1,421B matches the stored 1,431B capture; no JS-app markers). No playwright needed. expected_min_length raised 500 -> 1300 (just under the live doclist size) so a collapse to nav-stub chrome fails the length gate instead of passing. The other 19 plain-fetch CBUAE rulebook sources are intentionally unchanged. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Stored Value Facilities",
@@ -2964,12 +2975,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-stored-value-facilities-doclist/intake-20260619T145719Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Operational Risk Regulation",
@@ -3001,12 +3013,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-operational-risk-regulation-doclist/intake-20260619T145723Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Market Risk Regulation",
@@ -3038,12 +3051,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-market-risk-regulation-doclist/intake-20260619T145726Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Large Exposures Regulation",
@@ -3075,12 +3089,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-large-exposures-regulation-doclist/intake-20260619T145729Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Exchange Business Regulation",
@@ -3112,12 +3127,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-exchange-business-regulation-doclist/intake-20260619T145733Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Capital Adequacy",
@@ -3149,12 +3165,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-capital-adequacy-doclist/intake-20260619T145737Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Large Value Payment Systems Regulation",
@@ -3186,12 +3203,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-large-value-payment-systems-doclist/intake-20260619T145740Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Federal Decree Law No. 6 of 2025",
@@ -3223,12 +3241,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-federal-decree-law-6-2025-doclist/intake-20260619T145746Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Country and Transfer Risk Regulation",
@@ -3260,12 +3279,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-country-transfer-risk-regulation-doclist/intake-20260619T145751Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 62,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "medium",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Interest Rate and Rate of Return Risk Regulation",
@@ -3297,12 +3317,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-interest-rate-risk-regulation-doclist/intake-20260619T145755Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "medium",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Model Management Standards",
@@ -3334,12 +3355,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-model-management-standards-doclist/intake-20260619T145759Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Retail Payment Systems Regulation",
@@ -3371,12 +3393,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-retail-payment-systems-regulation-doclist/intake-20260619T145803Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "SME Customer Protection Regulation",
@@ -3408,12 +3431,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-sme-customer-protection-regulation-doclist/intake-20260619T145806Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Islamic Banks Risk Management Standard",
@@ -3445,12 +3469,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-islamic-banks-risk-management-doclist/intake-20260619T145810Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Market Conduct Consumer Protection",
@@ -3482,12 +3507,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-market-conduct-consumer-protection-doclist/intake-20260619T145814Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "Proliferation Finance Guidance",
@@ -3519,12 +3545,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-proliferation-finance-guidance-doclist/intake-20260619T145818Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "TBML and Transshipment Guidance",
@@ -3556,12 +3583,13 @@
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-cbuae-tbml-transshipment-guidance-doclist/intake-20260619T145826Z/normalized.txt",
     "baseline_runs_required": 2,
     "baseline_runs_completed": 3,
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_checked_at": "2026-06-19T14:58:00Z",
     "noise_risk": "low",
     "source_health_risk": "medium",
-    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back."
+    "notes": "Activated for daily fresh official-source monitoring after no-save pass, proof, repeat baseline, mass-monitor MONITOR_OK, and review gates. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "VARA Compliance and Risk Management Rulebook PDF",
@@ -4038,7 +4066,7 @@
     "normalized_hash": "5ac1b92a2d6cb782b2f5ec076c39866019568b99c712299662d0e36b8c17348e",
     "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/proof.json",
     "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-reports/intake-20260617T125202Z/normalized.txt",
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_run_at": "2026-06-17T12:52:30Z",
     "notes": "Activated 2026-06-17 as replacement for stale DFSA rules-and-standards remediation endpoint. Official DFSA annual-report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
     "monitoring_mode": "remediation",
@@ -4050,7 +4078,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "dfsa_regulatory_update",
     "expected_update_pattern": "Irregular official DFSA rulebook, consultation, financial crime, enforcement, or regulatory-action updates; checked daily for material changes.",
-    "customer_alert_policy": "Alert on material DFSA rulebook, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material DFSA rulebook, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "source_id": "AE-dfsa-annual-aml-reports",
@@ -4073,7 +4102,7 @@
     "normalized_hash": "693cf380283f665545f0a20de732d6363efbdcf7fa3abba9fab782dfbc9f98b1",
     "proof_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/proof.json",
     "normalized_text_path": "data/source_snapshots/2026-06-17/AE/AE-dfsa-annual-aml-reports/intake-20260617T125203Z/normalized.txt",
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_run_at": "2026-06-17T12:52:30Z",
     "notes": "Activated 2026-06-17 as replacement for stale generic DFSA notices remediation endpoint. Official DFSA AML report PDF listing passed no-save, two proof-backed baselines with stable hash, mass-monitor dry-run MONITOR_OK, and agent gates. Monitoring intelligence only, not legal advice. | 2026-07-18 PROD-VANTAGE RE-MEASURE: host blocks datacenter egress (HTTP 403 to all methods, persistent since 2026-07-11) — demoted from fresh_alert so published coverage counts reflect production reality, per the pricing-page promise that unreachable sources are not counted as fresh-alert eligible. RESTORE PATH: set STATUTEPROOF_FETCH_PROXY (owner O2), verify MONITOR_OK from prod, flip back.",
     "monitoring_mode": "remediation",
@@ -4085,7 +4114,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "dfsa_regulatory_update",
     "expected_update_pattern": "Irregular official DFSA rulebook, consultation, financial crime, enforcement, or regulatory-action updates; checked daily for material changes.",
-    "customer_alert_policy": "Alert on material DFSA rulebook, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material DFSA rulebook, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "source_id": "AE-fta-tax-legislation-listing",
@@ -5072,7 +5102,7 @@
     "proof_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-rulebook-official/intake-20260618T203128Z/proof.json",
     "normalized_text_path": "data/source_snapshots/2026-06-18/AE/AE-dfsa-rulebook-official/intake-20260618T203128Z/normalized.txt",
     "normalized_hash": "b1342652d2c6c2c61a7eefb43257e71939827725c0da2a5ccd458f6487d7fc30",
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 62,
     "last_monitor_hash": "b1342652d2c6c2c61a7eefb43257e71939827725c0da2a5ccd458f6487d7fc30",
     "last_checked_at": "2026-06-18T20:35:36Z",
@@ -5089,7 +5119,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "dfsa_regulatory_update",
     "expected_update_pattern": "Irregular official DFSA rulebook, consultation, financial crime, enforcement, or regulatory-action updates; checked daily for material changes.",
-    "customer_alert_policy": "Alert on material DFSA rulebook, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material DFSA rulebook, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "DFSA — Consultation Papers",
@@ -9192,7 +9223,7 @@
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/proof.json",
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-legal-resources-3dc15494/intake-20260619T163941Z/normalized.txt",
     "normalized_hash": "5a3dfe36349a78e119d47db8cb377b1a5a610454ce76dd0afd2d9390cb3afc42",
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 62,
     "last_monitor_hash": "5a3dfe36349a78e119d47db8cb377b1a5a610454ce76dd0afd2d9390cb3afc42",
     "last_checked_at": "2026-06-19T16:39:41Z",
@@ -9209,7 +9240,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "dfsa_legal_rulebook_updates",
     "expected_update_pattern": "DFSA legal resources/rulebook area; checked daily for official laws, rules, module, link, or document changes.",
-    "customer_alert_policy": "Alert on material DFSA legal resource, law, rulebook, module, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material DFSA legal resource, law, rulebook, module, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "DFSA Innovation and Testing Licence Updates",
@@ -9232,7 +9264,7 @@
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/proof.json",
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-innovation-59c1dc61/intake-20260619T164001Z/normalized.txt",
     "normalized_hash": "666acff55b5b4900b7fbfca95057868e7875f549c8b6b7c7948b4629be0e63c8",
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_monitor_hash": "666acff55b5b4900b7fbfca95057868e7875f549c8b6b7c7948b4629be0e63c8",
     "last_checked_at": "2026-06-19T16:40:01Z",
@@ -9249,7 +9281,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "dfsa_regulatory_innovation_updates",
     "expected_update_pattern": "DFSA innovation/regulatory sandbox area; checked daily for official programme or regulatory update changes.",
-    "customer_alert_policy": "Alert on material DFSA innovation, testing licence, regulatory programme, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material DFSA innovation, testing licence, regulatory programme, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "DFSA Enforcement Overview and Updates",
@@ -9272,7 +9305,7 @@
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/proof.json",
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-what-we-do-enforcement-1a837c50/intake-20260619T164016Z/normalized.txt",
     "normalized_hash": "460a2a00cf0976540b7f67320ffe1829412ec46ea02e7a1a8fbcfe882f6de0ca",
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_monitor_hash": "460a2a00cf0976540b7f67320ffe1829412ec46ea02e7a1a8fbcfe882f6de0ca",
     "last_checked_at": "2026-06-19T16:40:16Z",
@@ -9289,7 +9322,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "dfsa_enforcement_updates",
     "expected_update_pattern": "DFSA enforcement and regulatory action overview; checked daily for official enforcement/publication changes.",
-    "customer_alert_policy": "Alert on material DFSA enforcement, regulatory action, decision, notice, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material DFSA enforcement, regulatory action, decision, notice, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "UAE CMA FinTech Regulatory Sandbox",
@@ -9514,7 +9548,7 @@
     "proof_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-2dee8ba9/intake-20260619T174216Z/proof.json",
     "normalized_text_path": "data/source_snapshots/2026-06-19/AE/AE-dfsa-laws-rules-2dee8ba9/intake-20260619T174216Z/normalized.txt",
     "normalized_hash": "c4fdcae99dae37e7d42aa2b35b57523602035abe75812ce201c49c34602e3560",
-    "last_monitor_status": "MONITOR_OK",
+    "last_monitor_status": "REMEDIATION_REQUIRED",
     "last_monitor_quality_score": 65,
     "last_monitor_hash": "c4fdcae99dae37e7d42aa2b35b57523602035abe75812ce201c49c34602e3560",
     "last_checked_at": "2026-06-19T17:42:16Z",
@@ -9531,7 +9565,8 @@
     "recommended_check_frequency": "daily",
     "fresh_signal_type": "dfsa_laws_rules_updates",
     "expected_update_pattern": "DFSA official laws/rules listing; checked daily for law, rulebook, AML/CTF, consultation, enforcement, and legal resource link changes.",
-    "customer_alert_policy": "Alert on material DFSA law, rule, rulebook module, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes."
+    "customer_alert_policy": "Alert on material DFSA law, rule, rulebook module, consultation, enforcement, title, link, date, or normalized-hash changes; suppress layout and boilerplate-only changes.",
+    "last_monitor_failure_reason": "Real-path prod probe 2026-07-18: source unreachable/blocked from droplet (was stale MONITOR_OK)"
   },
   {
     "name": "ADGM Courts Legislation and Procedures",

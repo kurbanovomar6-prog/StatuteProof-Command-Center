@@ -13,7 +13,7 @@ Source file: `product/regradar/sources.json`
 | Evidence-library only | 20 |
 | Candidate | 14 |
 | Remediation | 45 |
-| Source-level MONITOR_OK | 77 |
+| Source-level MONITOR_OK | 42 |
 | Sources with proof path | 86 |
 
 These are monitoring-truth counts, not legal completeness claims. The 2026-07-18 register review

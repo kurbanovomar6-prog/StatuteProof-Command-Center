@@ -403,6 +403,52 @@ def looks_like_error_page(text: str) -> bool:
     return bool(_ERROR_PAGE_MARKERS.search(stripped.replace("’", "'")))
 
 
+# Anti-bot / JS-challenge walls (Cloudflare, DDoS-Guard, hCaptcha interstitials).
+# Distinct from _ERROR_PAGE_MARKERS: a wall is not an HTTP error — it is a
+# "prove you're human" interstitial served with 200/403 in place of the page.
+# Bilingual by necessity: difc.com served the DDoS-Guard wall in RUSSIAN
+# ('Мы проверяем ваш браузер') and the English-only error markers missed it,
+# so 87 chars of wall text reached the hasher on the customer path
+# (source-health audit 2026-07-18). Length-capped like error pages: a real
+# multi-KB document that merely mentions "javascript" is not a wall.
+_BOT_WALL_MARKERS = re.compile(
+    r"""
+    (
+        checking\s+your\s+browser|
+        cf-browser-verification|
+        verify\s+you\s+are\s+human|
+        enable\s+javascript\s+(and\s+cookies\s+)?to\s+continue|
+        just\s+a\s+moment\.\.\.|
+        ddos-?guard|
+        website\s+owner\?.{0,30}click\s+here\s+to\s+fix|
+        проверяем\s+ваш\s+браузер|
+        включите\s+javascript
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+_BOT_WALL_MAX_CHARS = 2000
+
+
+def looks_like_bot_wall(text: str) -> bool:
+    """True when fetched content is an anti-bot / JS-challenge interstitial.
+
+    A wall must never be hashed as a baseline: it is served in place of the
+    real page, so sealing it makes the source's genuine recovery alert as
+    CHANGED and, while walled, the source is effectively unmonitored. The
+    customer path (run_pipeline) previously missed these — the existing
+    error-page markers only knew 'cloudflare ray id', not the bare
+    'checking your browser' / Russian / DDoS-Guard phrasings
+    (source-health audit 2026-07-18).
+    """
+    if not text:
+        return False
+    stripped = text.strip()
+    if len(stripped) > _BOT_WALL_MAX_CHARS:
+        return False
+    return bool(_BOT_WALL_MARKERS.search(stripped.replace("’", "'")))
+
+
 def stable_normalized_hash(text: str) -> str:
     """Return SHA-256 of normalized text, or an empty string for empty input."""
     normalized = normalize_for_change_hash(text)

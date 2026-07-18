@@ -9,7 +9,7 @@
     "evidence_library": 20,
     "candidate": 28,
     "remediation": 43,
-    "source_level_monitor_ok": 77,
+    "source_level_monitor_ok": 42,
     "with_proof_path": 86,
     "scope_note": "This audit covers the UAE monitoring register (jurisdiction AE), including the international-obligation layer (UN/OFAC/OFSI/FATF-adjacent/BIS) that serves UAE compliance duties. The 6 GCC divergence-feed candidates (SA/QA/KW jurisdictions, added 2026-07-18) are tracked outside this UAE-scope audit until that product layer launches."
   },

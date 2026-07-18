@@ -272,7 +272,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     # ── Guard (F1): error pages are fetch failures, never baselines ────
     # A Cloudflare 502 / VARA 404 stored as baseline made the *recovery*
     # alert as CHANGED (2026-06-11, docs/signal/judgment_table.md).
-    from app.text_normalization import looks_like_error_page
+    from app.text_normalization import looks_like_error_page, looks_like_bot_wall
     if looks_like_error_page(content):
         logger.warning("Error page detected for %s — recording as failed, no baseline", url)
         return {
@@ -285,6 +285,30 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "extraction_method":  extraction_method,
             "error":              "Fetched content is an HTTP error/challenge page — not stored as baseline",
             "ai_skipped_reason":  "error_page",
+            "ai_calls_used":      _AI_RUN_BUDGET["count"],
+        }
+
+    # ── Guard (F1b): anti-bot / JS-challenge walls are never baselines ──
+    # difc.com intermittently served a DDoS-Guard wall (in Russian) that the
+    # error-page markers missed, so 87 chars of wall text reached the hasher
+    # on the customer path — sealing it would make the real recovery alert as
+    # CHANGED and, while walled, the source is dark (source-health audit
+    # 2026-07-18). "blocked" access_status flags it as a reach problem
+    # (headless/proxy remediation), distinct from a genuinely down source.
+    if looks_like_bot_wall(content):
+        logger.warning("Bot-wall / JS-challenge detected for %s — recording as blocked, no baseline", url)
+        return {
+            "url":                url,
+            "changed":            False,
+            "status":             "quality_drop",
+            "access_status":      "blocked",
+            "failure_code":       "BOT_WALL",
+            "extracted_chars":    extracted_chars,
+            "extraction_quality": "failed",
+            "extraction_method":  extraction_method,
+            "error":              "Fetched content is an anti-bot / JS-challenge wall — not stored as baseline",
+            "remediation_hint":   "Source served a browser-challenge wall; needs a headless/residential fetch path.",
+            "ai_skipped_reason":  "bot_wall",
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
 

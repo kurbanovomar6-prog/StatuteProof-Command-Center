@@ -9,7 +9,7 @@ export const SOURCE_QUALITY_SUMMARY = {
   evidenceLibraryOnly: 20,
   candidate: 28,
   remediation: 43,
-  sourceLevelMonitorOk: 77,
+  sourceLevelMonitorOk: 42,
   withProofPath: 86,
 } as const
 
