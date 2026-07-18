@@ -10398,10 +10398,13 @@
     "source_id": "AE-un-consolidated-sanctions-xml",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 200000,
+    "expected_min_length": 2000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 2.2MB XML); origin of the UN designations the UAE 24h freeze obligation keys on — monitoring the source beats EOCN republication lag; machine-readable; GET follows a 302 to a signed blob. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 2.2MB XML); origin of the UN designations the UAE 24h freeze obligation keys on — monitoring the source beats EOCN republication lag; machine-readable; GET follows a 302 to a signed blob. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: Tier-1 fetch crashed with RuntimeError (apparent_encoding read on a consumed streamed body — no charset on the signed-blob response) and the XML has no semantic HTML tags for the generic tiers anyway. Fixed via new opt-in xml_feed registry adapter: follows the 302 to the signed Azure blob under the per-hop SSRF guard, parses the CONSOLIDATED_LIST, and emits a deterministic structured monitor (per-kind entry counts + sha256 digest over sorted DATAID|VERSIONNUM|REFERENCE|LISTED_ON|LAST_DAY_UPDATED rows + top-30 recently-updated excerpt). Root dateGenerated attribute is excluded so regeneration noise never fires a change; output changes exactly when the entry set changes. Verified locally 2026-07-18: 3,480 chars, identical across 2 consecutive live fetches. expected_min_length 200000→2000 (~60% of observed 3,480 — output is a bounded summary now, not the 2.2MB raw XML). check_interval_minutes=240 for sanctions urgency (UAE 24h freeze obligation). Requires prod re-baseline before alerting.",
+    "adapter_name": "xml_feed",
+    "adapter_family": "xml_feed",
+    "check_interval_minutes": 240
   },
   {
     "name": "UK OFSI Consolidated Sanctions List",
@@ -10416,7 +10419,8 @@
     "expected_min_length": 500000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 6.4MB static blob w/ Last-Modified); UK-nexus/correspondent exposure for DIFC firms; zero bot protection. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 6.4MB static blob w/ Last-Modified); UK-nexus/correspondent exposure for DIFC firms; zero bot protection. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy (5.4M chars observed). check_interval_minutes=720 added to cap cadence appetite on the 5.4MB fetch; expected_min_length 500000 kept.",
+    "check_interval_minutes": 720
   },
   {
     "name": "US OFAC Recent Actions",
@@ -10428,10 +10432,15 @@
     "source_id": "AE-us-ofac-recent-actions",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 8000,
+    "expected_min_length": 750,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 43KB); UAE banks and VASPs screen OFAC; crypto-wallet designations hit VARA firms directly; slow host — long timeouts. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 43KB); UAE banks and VASPs screen OFAC; crypto-wallet designations hit VARA firms directly; slow host — long timeouts. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: the dated recent-actions listing is server-rendered in .view-content as plain divs (no p/li/td), so is_low_content_html rejected Tier 1 and Playwright's rendered-DOM variant extracted only 441 chars of chrome. Fixed via new opt-in html_listing registry adapter: static requests-tier fetch + adapter_config content_selector .view-content → cleaned listing lines (titles + dates + categories); selector miss falls back loudly to the generic path. Verified locally 2026-07-18: 1,265 chars / 30 lines, identical across 2 consecutive fetches. expected_min_length 8000→750 (~60% of observed 1,265). Requires prod re-baseline before alerting.",
+    "adapter_name": "html_listing",
+    "adapter_family": "html_listing",
+    "adapter_config": {
+      "content_selector": ".view-content"
+    }
   },
   {
     "name": "UAE FIU Articles & Guidelines (RSS)",
@@ -10443,10 +10452,12 @@
     "source_id": "AE-uaefiu-articles-guidelines-rss",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 2000,
+    "expected_min_length": 880,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 7.8KB text/xml); official FIU RSS sidesteps the Angular front-end AND the droplet block that dark-ened the FIU family — guidance/typologies for reporting entities incl. VASPs. (Press-release RSS returned 522 from prod — retry later.) CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 7.8KB text/xml); official FIU RSS sidesteps the Angular front-end AND the droplet block that dark-ened the FIU family — guidance/typologies for reporting entities incl. VASPs. (Press-release RSS returned 522 from prod — retry later.) CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: RSS has no semantic HTML tags → Tier 1 always rejected → Playwright rendered Chromium's XML-viewer chrome, extraction saw 266 chars of viewer UI. Fixed via opt-in xml_feed registry adapter (RSS 2.0 parse, whitespace-padded fields normalized; title | date | link sorted by link). Verified locally 2026-07-18: 1,467 chars / 8 items, identical across 2 consecutive fetches (www→apex 301 followed under SSRF guard). expected_min_length 2000→880 (~60% of observed 1,467). Requires prod re-baseline before alerting.",
+    "adapter_name": "xml_feed",
+    "adapter_family": "xml_feed"
   },
   {
     "name": "DIFC Courts Judgments and Orders",
@@ -10458,10 +10469,10 @@
     "source_id": "AE-difccourts-judgments-orders",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 10000,
+    "expected_min_length": 2800,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 61KB static); several new items weekly incl. crypto-sector disputes; counterparty/litigation intelligence for DIFC firms. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 61KB static); several new items weekly incl. crypto-sector disputes; counterparty/litigation intelligence for DIFC firms. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy. expected_min_length 10000→2800 (~60% of observed 4,670)."
   },
   {
     "name": "ADGM Courts Judgments",
@@ -10473,10 +10484,10 @@
     "source_id": "AE-adgm-courts-judgments",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 15000,
+    "expected_min_length": 800,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 109KB static); completes the ADGM beachhead story; ~monthly cadence. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 109KB static); completes the ADGM beachhead story; ~monthly cadence. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy. expected_min_length 15000→800 (~60% of observed 1,283)."
   },
   {
     "name": "MoJ AML/CFT Laws and Legislation",
@@ -10488,10 +10499,10 @@
     "source_id": "AE-moj-aml-cft-legislation",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 20000,
+    "expected_min_length": 300,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 170KB static .aspx); MoJ supervises lawyer/notary DNFBPs — currently only touched via generic news. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 170KB static .aspx); MoJ supervises lawyer/notary DNFBPs — currently only touched via generic news. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy. expected_min_length 20000→300 (~60% of observed 511)."
   },
   {
     "name": "DFSA Consultation Papers (current)",
@@ -10503,14 +10514,19 @@
     "source_id": "AE-dfsa-consultation-papers-current",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 15000,
+    "expected_min_length": 1500,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 144KB static); restores the DFSA consultation channel lost to the www.dfsa.ae block, via the rulebook platform prod already reaches; supersedes the stale hardcoded CP-165 source. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 144KB static); restores the DFSA consultation channel lost to the www.dfsa.ae block, via the rulebook platform prod already reaches; supersedes the stale hardcoded CP-165 source. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: the current-papers node's own region is ~500 chars of intro + prev/next links (350 extracted on prod) — the actual CP listing is served by the entire-section view (/entiresection/14834, server-rendered, 1,771 chars), which rulebook_platform rejected as a JS shell under its 3,000-char default. Fixed by opting the source into rulebook_platform with the new config-gated adapter_config.entire_section_min_chars=1200 (default stays 3000 — every existing rulebook_platform source's output is byte-identical). Verified locally 2026-07-18: 2,510 chars incl. full CP-174/CP-173 listing with appendix PDF rows, identical across 2 consecutive fetches. expected_min_length 15000→1500 (~60% of observed 2,510). Requires prod re-baseline before alerting.",
+    "adapter_name": "rulebook_platform",
+    "adapter_family": "rulebook_platform",
+    "adapter_config": {
+      "entire_section_min_chars": 1200
+    }
   },
   {
     "name": "MENAFATF Publications",
-    "url": "https://www.menafatf.org/information-center/menafatf-publications",
+    "url": "https://www.menafatf.org/information-center/general-publications",
     "jurisdiction": "AE",
     "category": "aml",
     "enabled": true,
@@ -10518,10 +10534,15 @@
     "source_id": "AE-menafatf-publications",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 20000,
+    "expected_min_length": 830,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 215KB); MERs/follow-ups feeding UAE FATF ratings; low cadence. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 215KB); MERs/follow-ups feeding UAE FATF ratings; low cadence. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: the configured URL is a category HUB whose entire real content is 4 category tiles (106 chars — prod extraction was correct, the page choice was wrong); new publications never appear on the hub. URL repointed to the actual dated listing child page /information-center/general-publications (verified: carries the publications incl. annual reports with titles + dates, server-rendered) + opt-in html_listing adapter with content_selector #content. Verified locally 2026-07-18: 1,388 chars / 57 lines, identical across 2 consecutive fetches. expected_min_length 20000→830 (~60% of observed 1,388). Requires prod re-baseline before alerting.",
+    "adapter_name": "html_listing",
+    "adapter_family": "html_listing",
+    "adapter_config": {
+      "content_selector": "#content"
+    }
   },
   {
     "name": "BIS Basel Committee Publications (RSS)",
@@ -10533,9 +10554,161 @@
     "source_id": "AE-bis-bcbs-publications-rss",
     "monitoring_mode": "candidate",
     "alert_eligible": false,
-    "expected_min_length": 5000,
+    "expected_min_length": 2100,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 32KB RSS); policy-team value for banking-adjacent firms; machine-readable; lowest priority of the batch. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 32KB RSS); policy-team value for banking-adjacent firms; machine-readable; lowest priority of the batch. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: same Tier-1 RuntimeError (application/rss+xml has no charset → apparent_encoding on a consumed streamed body) = FAILED/0 on prod; RSS also has no semantic HTML tags so the generic tiers cannot score it. Fixed via opt-in xml_feed registry adapter (RSS 1.0 RDF parse; title | date | link per item, sorted by stable link slug, capped at 100 items). Verified locally 2026-07-18: 3,607 chars / 25 items, identical across 2 consecutive fetches. expected_min_length 5000→2100 (~60% of observed 3,607). Requires prod re-baseline before alerting.",
+    "adapter_name": "xml_feed",
+    "adapter_family": "xml_feed"
+  },
+  {
+    "name": "UAE Good Delivery / Emirates Bullion Committee Rules",
+    "url": "https://ugd.gov.ae/",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "AE-ugd-ebc-gold-rules",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 1500,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (118KB WordPress). Official federal gold-standard platform: EBC accreditation + risk-based due-diligence rules for the DPMS persona. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "DMCC Compliance & Regulations Knowledge Bank",
+    "url": "https://dmcc.ae/members/support/knowledge-bank/compliance-and-regulations",
+    "jurisdiction": "AE",
+    "category": "aml",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "AE-dmcc-compliance-guidance-hub",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 1500,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (126KB HubSpot server-rendered). Free-zone supervisor guidance for DMCC DPMS members (AML/CFT guidelines, DPMS supplemental guidance). Distinct from the monitored dmcc.ae/latest-news. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "UAE PDPL Data Protection Laws Status (u.ae)",
+    "url": "https://u.ae/en/about-the-uae/digital-uae/data/data-protection-laws",
+    "jurisdiction": "AE",
+    "category": "data_protection",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "AE-uae-pdpl-status",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 1200,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (72KB). THE official status-watch for PDPL executive regulations — third-party claims they were issued are unverifiable on official sources; diffing this page is exactly the value. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "ADGM Registration Authority Public Notices",
+    "url": "https://www.adgm.com/registration-authority/public-notices",
+    "jurisdiction": "AE",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "AE-adgm-ra-public-notices",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 20000,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (870KB server-rendered list). Strike-offs and involuntary actions — corporate service provider / registered agent signal, distinct from monitored RA circulars. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "SAMA Rulebook — Circulars (Saudi Arabia)",
+    "url": "https://rulebook.sama.gov.sa/en/sama-circulars",
+    "jurisdiction": "SA",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "GCC-sa-sama-circulars",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 15000,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (399KB plain HTML, ~300 dated rows). The single best KSA channel — circular-level granularity with In-Force/Superseded flags; UAE-based consultancies formally track SAMA (Waystone ME updates). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "SAMA Media Center — All News (Saudi Arabia)",
+    "url": "https://www.sama.gov.sa/en-US/MediaCenter/News/Pages/AllNews.aspx",
+    "jurisdiction": "SA",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "GCC-sa-sama-news",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 8000,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (116KB SharePoint list). Enforcement + licensing signal (license revocations observed July 2026). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "Saudi CMA — Implementing Regulations",
+    "url": "https://cma.gov.sa/en/RulesRegulations/Regulations/Pages/default.aspx",
+    "jurisdiction": "SA",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "GCC-sa-cma-regulations",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 15000,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (372KB static). Rule-change granularity for the KSA capital-markets regime. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "QFCRA Rulebook (Qatar Financial Centre)",
+    "url": "https://qfcra-en.thomsonreuters.com/rulebook/qfcra-rules",
+    "jurisdiction": "QA",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "GCC-qa-qfcra-rulebook",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 8000,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (80KB ToC, 25 modules incl. AML/CFTR). QFC is where foreign firms sit — the natural first Qatar source; English, active, reachable (unlike TLS-broken QCB gov hosts). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "QFCRA News (Qatar Financial Centre)",
+    "url": "https://www.qfcra.com/news/",
+    "jurisdiction": "QA",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "GCC-qa-qfcra-news",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 8000,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (160KB mostly static). Rule issuance + enforcement settlements. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "Central Bank of Kuwait — Press Releases",
+    "url": "https://www.cbk.gov.kw/en/cbk-news/announcements-and-press-releases/press-releases",
+    "jurisdiction": "KW",
+    "category": "financial_regulator",
+    "enabled": true,
+    "status": "candidate",
+    "source_id": "GCC-kw-cbk-press",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 10000,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (165KB). The only outside-reachable Kuwait channel worth shipping (Kuwait CMA geo-fences its own site — DO NOT promise CMA coverage). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
   }
 ]

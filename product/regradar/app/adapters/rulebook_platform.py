@@ -84,7 +84,34 @@ _BOILERPLATE_LINES = {
 
 # The "Entire section" view is server-rendered on VARA (full rulebook text)
 # but a JS shell on DFSA. Only accept it when it clearly carries substance.
+# Per-source override: adapter_config.entire_section_min_chars — some nodes
+# (e.g. the DFSA current consultation-papers listing) are legitimately small
+# but fully server-rendered; the override is read ONLY from the opted-in
+# source's own config, so every existing source keeps the 3000-char default
+# and a byte-identical output.
 _MIN_ENTIRE_SECTION_CHARS = 3000
+# Floor for the override: below this a page is indistinguishable from the
+# DFSA JS shell, which the default threshold exists to reject.
+_MIN_ENTIRE_SECTION_FLOOR = 600
+
+
+def _entire_section_min_chars(source: dict | None) -> int:
+    config = (source or {}).get("adapter_config")
+    if not isinstance(config, dict):
+        return _MIN_ENTIRE_SECTION_CHARS
+    raw = config.get("entire_section_min_chars")
+    if raw is None:
+        return _MIN_ENTIRE_SECTION_CHARS
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        logger.warning(
+            "rulebook_platform: non-integer entire_section_min_chars %r "
+            "on source %r — using default",
+            raw, (source or {}).get("source_id"),
+        )
+        return _MIN_ENTIRE_SECTION_CHARS
+    return max(value, _MIN_ENTIRE_SECTION_FLOOR)
 
 # Reject the final document when it is too thin to be a meaningful
 # version/structure snapshot (shell page, blocked page, moved node).
@@ -191,7 +218,9 @@ class RulebookPlatformAdapter(SourceAdapter):
                 return anchor["href"]
         return None
 
-    def _entire_section_text(self, page_url: str, href: str) -> str | None:
+    def _entire_section_text(
+        self, page_url: str, href: str, min_chars: int = _MIN_ENTIRE_SECTION_CHARS,
+    ) -> str | None:
         target = self._same_host_abs(page_url, href)
         if target is None:
             return None
@@ -205,7 +234,7 @@ class RulebookPlatformAdapter(SourceAdapter):
         if block is None:
             return None
         text = "\n".join(_clean_lines(block.get_text("\n", strip=True)))
-        if len(text) < _MIN_ENTIRE_SECTION_CHARS:
+        if len(text) < min_chars:
             # JS shell (DFSA) — not usable as content.
             logger.info(
                 "RulebookPlatformAdapter: entire-section view is a shell "
@@ -242,9 +271,9 @@ class RulebookPlatformAdapter(SourceAdapter):
 
     # ── main entry point ──────────────────────────────────────────────────
 
-    def fetch_content(self, url: str, source: dict | None = None) -> str | None:  # noqa: ARG002
+    def fetch_content(self, url: str, source: dict | None = None) -> str | None:
         try:
-            return self._fetch_content_inner(url)
+            return self._fetch_content_inner(url, source)
         except Exception as exc:  # contract: never raise
             logger.warning(
                 "RulebookPlatformAdapter unexpected error for %s: %s: %s",
@@ -252,7 +281,7 @@ class RulebookPlatformAdapter(SourceAdapter):
             )
             return None
 
-    def _fetch_content_inner(self, url: str) -> str | None:
+    def _fetch_content_inner(self, url: str, source: dict | None = None) -> str | None:
         html = self._get(url)
         if html is None:
             logger.warning("RulebookPlatformAdapter: fetch failed for %s", url)
@@ -290,7 +319,11 @@ class RulebookPlatformAdapter(SourceAdapter):
         #    else the current-version page's section structure (DFSA).
         entire_href = self._entire_section_href(region)
         entire_text = (
-            self._entire_section_text(url, entire_href) if entire_href else None
+            self._entire_section_text(
+                url, entire_href, min_chars=_entire_section_min_chars(source),
+            )
+            if entire_href
+            else None
         )
         if entire_text:
             blocks.append("Full rulebook text (entire section view):\n" + entire_text)

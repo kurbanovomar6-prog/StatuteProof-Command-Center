@@ -526,6 +526,35 @@ def fetch_bytes_bounded(
         return read_bytes_bounded(response, max_bytes, label=label)
 
 
+def _detect_encoding(data: bytes) -> str | None:
+    """
+    Best-effort charset detection from already-read body bytes.
+
+    Used instead of ``response.apparent_encoding`` because that property
+    re-reads ``response.content``, which raises RuntimeError once a streamed
+    body has been consumed by ``read_bytes_bounded``. Detection runs on a
+    bounded prefix (charset detection saturates quickly and a full 10 MB
+    scan is pure waste). Returns None when no detector is available or
+    detection fails — callers fall back to UTF-8. Never raises.
+    """
+    sample = data[:65536]
+    if not sample:
+        return None
+    try:
+        from charset_normalizer import from_bytes  # requests dependency
+
+        best = from_bytes(sample).best()
+        return best.encoding if best is not None else None
+    except Exception:
+        pass
+    try:
+        import chardet  # legacy requests environments
+
+        return chardet.detect(sample).get("encoding")
+    except Exception:
+        return None
+
+
 def fetch_text_bounded_status(
     url: str,
     *,
@@ -579,7 +608,17 @@ def fetch_text_bounded_status(
         if data is None:
             return status, None
 
-        encoding = response.encoding or response.apparent_encoding or "utf-8"
+        # Encoding resolution MUST NOT touch response.apparent_encoding here:
+        # that property reads response.content, and on a streamed response
+        # whose body was already consumed by read_bytes_bounded above,
+        # requests raises RuntimeError("The content for this response was
+        # already consumed"). Any response without a charset in its
+        # Content-Type (e.g. application/rss+xml from bis.org, or the UN
+        # sanctions XML served from a signed Azure blob) therefore crashed
+        # the whole Tier-1 fetch — observed as FAILED/0-char runs on the
+        # 2026-07 candidate sweep. Detect the charset from the bytes we
+        # already hold instead.
+        encoding = response.encoding or _detect_encoding(data) or "utf-8"
         try:
             return status, data.decode(encoding, errors="replace")
         except LookupError:

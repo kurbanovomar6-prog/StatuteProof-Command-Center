@@ -26,6 +26,8 @@ from app.adapters.sca import SCAAdapter
 from app.adapters.difc import DIFCAdapter
 from app.adapters.vara import VARAAdapter
 from app.adapters.rulebook_platform import RulebookPlatformAdapter
+from app.adapters.xml_feed import XmlFeedAdapter
+from app.adapters.html_listing import HtmlListingAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,12 @@ _ADAPTERS: list[SourceAdapter] = [
     # first so it wins over the host-wide VARAAdapter for opted-in
     # rulebooks.vara.ae sources. Engages ONLY when a source entry names it.
     RulebookPlatformAdapter(),
+    # Strictly opt-in like RulebookPlatformAdapter (adapter_name ==
+    # "xml_feed" / "html_listing" + host allowlist): official XML/RSS feeds
+    # and selector-scoped static listings. Placed before the host-wide
+    # adapters for the same first-wins reason.
+    XmlFeedAdapter(),
+    HtmlListingAdapter(),
     # UAE digital-asset and tax regulators — highest priority UAE adapters
     DIFCAdapter(),
     VARAAdapter(),

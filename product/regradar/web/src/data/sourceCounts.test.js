@@ -79,7 +79,7 @@ describe('per-regulator matrix counts (SourceTransparencyMatrix)', () => {
     // demoted; depth continues via dfsaen.thomsonreuters.com (rulebook + AML
     // module) which works from production. 20 → 10.
     { label: 'DIFC/DFSA: "11 fresh-alert eligible across DIFC/DFSA"', fresh: 11, prefixes: ['difc', 'dfsa'] },
-    { label: 'ADGM/FSRA: "9 fresh-alert eligible of 15 enabled"', fresh: 9, enabled: 15, prefixes: ['adgm'] },
+    { label: 'ADGM/FSRA: "9 fresh-alert eligible of 16 enabled"', fresh: 9, enabled: 16, prefixes: ['adgm'] },
     // 2026-07-18: the circulars/rules/procedures page is stuck in QUALITY_DROP
     // against a stale pre-repoint baseline — remediation until prod rebaseline.
     { label: 'UAE CMA: "6 fresh-alert eligible"', fresh: 6, prefixes: ['sca'] },

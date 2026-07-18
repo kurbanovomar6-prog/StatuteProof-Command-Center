@@ -88,7 +88,7 @@ def test_source_signal_quality_family_readiness_matches_registry_truth():
         "FTA / Tax": "FTA",
         "Ministry of Economy / DNFBP AML": "MoE/DNFBP AML",
         # Catch-all row: every enabled source outside the named families.
-        "Other UAE official sources": "Other",
+        "Other / international official sources": "Other",
     }
     known_families = tuple(
         family for family in dict.fromkeys(family_key.values()) if family != "Other"
@@ -128,7 +128,7 @@ def test_source_signal_quality_family_readiness_matches_registry_truth():
 
 
 def test_source_signal_quality_family_rows_partition_headline_totals():
-    """Family rows (including "Other UAE official sources") must sum exactly to
+    """Family rows (including "Other / international official sources") must sum exactly to
     the headline current_source_truth — no unclassified remainder, no double
     counting across families."""
     audit = json.loads(AUDIT_PATH.read_text(encoding="utf-8"))

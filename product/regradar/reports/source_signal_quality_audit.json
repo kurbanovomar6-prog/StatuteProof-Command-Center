@@ -4,13 +4,14 @@
   "auditor": "StatuteProof Source Quality Auditor v2",
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
-    "total_enabled": 127,
+    "total_enabled": 131,
     "fresh_alert_eligible": 40,
     "evidence_library": 20,
-    "candidate": 24,
+    "candidate": 28,
     "remediation": 43,
     "source_level_monitor_ok": 77,
-    "with_proof_path": 86
+    "with_proof_path": 86,
+    "scope_note": "This audit covers the UAE monitoring register (jurisdiction AE), including the international-obligation layer (UN/OFAC/OFSI/FATF-adjacent/BIS) that serves UAE compliance duties. The 6 GCC divergence-feed candidates (SA/QA/KW jurisdictions, added 2026-07-18) are tracked outside this UAE-scope audit until that product layer launches."
   },
   "family_readiness": [
     {
@@ -59,10 +60,10 @@
     },
     {
       "family": "ADGM/FSRA",
-      "total_enabled": 15,
+      "total_enabled": 16,
       "fresh_alert_eligible": 9,
       "evidence_library": 2,
-      "candidate": 4,
+      "candidate": 5,
       "remediation": 0,
       "status": "good",
       "gap_to_25": 16,
@@ -146,15 +147,15 @@
       "notes": "MoJ/Gazette has no fresh-alert eligible sources currently. Root portal, e-Laws, and complete Official Gazette coverage remain unclaimed. Three listing pages (Dubai legislation portal laws search, MoJ news, MoJ media centre) are held as evidence-library snapshots."
     },
     {
-      "family": "Other UAE official sources",
-      "total_enabled": 11,
+      "family": "Other / international official sources",
+      "total_enabled": 14,
       "fresh_alert_eligible": 0,
       "evidence_library": 5,
-      "candidate": 6,
+      "candidate": 9,
       "remediation": 0,
       "status": "evidence_library",
       "gap_to_25": 25,
-      "notes": "Cross-regulator UAE official sources outside the named families: the DFM regulatory circulars listing is a candidate pending validation, and the ICP, TDRA, MOCCAE, JAFZA and DMCC listing pages are held as evidence-library snapshots. None is counted as fresh-alert monitoring."
+      "notes": "Catch-all row partitioning the FULL enabled register: UN/OFAC/OFSI sanctions origins, MENAFATF, BIS and the GCC divergence-feed candidates (SAMA, Saudi CMA, QFCRA, CBK — added 2026-07-18, prod-probed) plus UAE channels outside the named families."
     }
   ],
   "safe_claims": [
@@ -162,7 +163,7 @@
     "StatuteProof also maintains 20 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
     "Sources whose hosts block our production monitoring egress — the CBUAE rulebook subdomain and the DFSA website (HTTP 403 to all fetch methods since 2026-07-11) — are disclosed as remediation and are not counted as fresh-alert eligible.",
     "DFSA rulebook depth continues through the DFSA rulebook platform at dfsaen.thomsonreuters.com, which does work from production, including the AML rulebook module promoted on 2026-07-18 after passing rebaseline and stable-run gates.",
-    "StatuteProof maintains source-level proof files for 86 of 127 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
+    "StatuteProof maintains source-level proof files for 86 of 131 enabled UAE source snapshots; this is not customer risk-brief eligibility.",
     "ADGM/FSRA has 9 selected proof-backed fresh-alert sources, including guidance/policy and RA/circular/rulebook style sources, with 3 remaining candidates disclosed as held.",
     "DIFC has 8 selected proof-backed fresh-alert sources, including the official DIFC Legal Database listing; the laws-and-regulations root listing is in remediation pending a production rebaseline review. This is not complete DIFC legal database coverage.",
     "UAE CMA has 5 selected proof-backed fresh-alert direct/listing sources; the circulars/rules/procedures page is in remediation pending a production rebaseline, and UAE CMA root portal and broad UAE CMA coverage remain unclaimed.",
@@ -172,7 +173,7 @@
     "VARA monitoring includes the full Compliance and Risk Management Rulebook (including AML/CFT Part III) promoted on 2026-07-18 after two stable production runs; the 30-day revision-updates view is in remediation pending a production rebaseline."
   ],
   "forbidden_claims": [
-    "Do not describe all 127 enabled UAE source records as live monitors.",
+    "Do not describe all 131 enabled UAE source records as live monitors.",
     "Do not count sources whose host blocks production egress as fresh-alert eligible.",
     "Do not describe CBUAE rulebook sources as live monitors while production egress is blocked.",
     "Do not describe UAE coverage as complete.",

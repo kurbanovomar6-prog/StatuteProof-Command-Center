@@ -32,7 +32,22 @@ EXPECTED_CADENCE_SOURCES = {
     "AE-eocn-laws-regulations-en": 360,
     "AE-eocn-news-en": 360,
     "AE-uaeiec-news-listing-next": 360,
+    # 2026-07-18: UN consolidated list joins the sanctions-urgency band (the
+    # UAE 24h freeze obligation keys on these designations).
+    "AE-un-consolidated-sanctions-xml": 240,
+    # 2026-07-18: OFSI is a cadence CAP, not an urgency opt-in — the 5.4 MB
+    # consolidated-list fetch declares a 12h appetite so it can never ride a
+    # sanctions-band cadence. NOTE (honest limitation): with the current
+    # hourly fleet cycle (deploy: run.py watch --interval 60) a full sweep
+    # still fetches every enabled source, so check_interval_minutes only
+    # ACCELERATES sources relative to a slower fleet interval; the cap takes
+    # real effect only when the fleet interval exceeds it.
+    "AE-uk-ofsi-consolidated-list": 720,
 }
+
+# Sources whose declared cadence is a bandwidth/appetite CAP (slower than the
+# sanctions-urgency band) rather than an urgency opt-in.
+CADENCE_CAP_SOURCES = {"AE-uk-ofsi-consolidated-list"}
 
 
 # ── get_custom_interval_minutes ──────────────────────────────────────────────
@@ -167,6 +182,10 @@ def test_sanctions_sources_have_4_to_6_hour_cadence():
     }
     assert declared == EXPECTED_CADENCE_SOURCES
     for source_id, minutes in declared.items():
+        if source_id in CADENCE_CAP_SOURCES:
+            # Appetite caps sit ABOVE the urgency band by definition.
+            assert int(minutes) > 360, source_id
+            continue
         assert 240 <= int(minutes) <= 360, source_id
     # Every opted-in source must be enabled — cadence on a disabled source
     # is a configuration lie.

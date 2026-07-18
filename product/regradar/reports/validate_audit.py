@@ -30,7 +30,7 @@ AUDIT_FAMILY_TO_VALIDATOR_FAMILY = {
     "Ministry of Economy / DNFBP AML": "MoE/DNFBP AML",
     # Catch-all row so the family table partitions the FULL enabled register:
     # every enabled source that matches none of the named families above.
-    "Other UAE official sources": "Other",
+    "Other / international official sources": "Other",
 }
 
 # The four allowed monitoring modes. Every ENABLED source must carry exactly
@@ -289,7 +289,7 @@ def main() -> int:
                 )
 
         # The family table must partition the enabled register: summing every
-        # family row (including "Other UAE official sources") must reproduce
+        # family row (including "Other / international official sources") must reproduce
         # the headline truth exactly — no gap, no double counting.
         for key in FAMILY_PARTITION_KEYS:
             family_sum = sum(int(row.get(key) or 0) for row in family_readiness)

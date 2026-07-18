@@ -66,6 +66,10 @@ REGULATOR_CODES: tuple[str, ...] = (
     "MOCCAE",
     "JAFZA",
     "DMCC",
+    # Neighbouring-regime layer (2026-07-18 GCC census): one scope code for
+    # the whole GCC divergence feed — customers scope "GCC" as a layer;
+    # per-country codes can split it later if demand shows.
+    "GCC",
     "OTHER",
 )
 
@@ -142,6 +146,19 @@ _HOST_RULES: tuple[tuple[str, str], ...] = (
     ("uaefiu.gov.ae", "EOCN"),
     # Basel Committee publications: prudential banking policy — CBUAE scope.
     ("bis.org", "CBUAE"),
+    # UAE Good Delivery / Emirates Bullion Committee: the federal gold
+    # due-diligence regime for DPMS — Ministry of Economy supervision scope.
+    ("ugd.gov.ae", "MOEC"),
+    # u.ae federal portal (PDPL status page): operated under TDRA.
+    ("u.ae", "TDRA"),
+    # GCC divergence-feed hosts (2026-07-18 census, prod-probed 200).
+    ("rulebook.sama.gov.sa", "GCC"),
+    ("sama.gov.sa", "GCC"),
+    ("cma.gov.sa", "GCC"),
+    ("qfcra-en.thomsonreuters.com", "GCC"),
+    ("qfcra.com", "GCC"),
+    ("cbk.gov.kw", "GCC"),
+    ("cbb.gov.bh", "GCC"),
     ("moet.gov.ae", "MOEC"),
     ("moe.gov.ae", "MOEC"),
     ("dlp.dubai.gov.ae", "DLP"),

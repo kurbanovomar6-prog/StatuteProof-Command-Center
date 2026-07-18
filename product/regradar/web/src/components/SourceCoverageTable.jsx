@@ -156,7 +156,7 @@ export default function SourceCoverageTable() {
           </p>
         </div>
         <div className="text-right text-xs">
-          <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} enabled UAE source records</p>
+          <p className="font-semibold text-cyan-200">{SOURCE_TRUTH.enabled} enabled official-source records</p>
           <p className="text-emerald-200">{SOURCE_TRUTH.readinessSupported} fresh-alert eligible</p>
           {/* The remainder (enabled − fresh) so the three lines reconcile to
               `enabled` and this never undercounts the pending set the
