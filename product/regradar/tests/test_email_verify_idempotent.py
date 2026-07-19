@@ -75,3 +75,20 @@ def test_unknown_and_unverified_tokens_do_not_resolve(isolated_db):
     user_id = _user("cco@vasp.ae")
     token = generate_verification_token(user_id)
     assert verified_user_for_consumed_token(token) is None
+
+
+def test_consumed_but_unverified_token_fails_closed(isolated_db):
+    # Security regression (review 2026-07-18): a token consumed WITHOUT
+    # completing verification (used_at set, email_verified still 0) must NOT
+    # resolve — otherwise the idempotent path could fake a verified user.
+    from app.auth import (
+        generate_verification_token,
+        consume_verification_token,
+        verified_user_for_consumed_token,
+    )
+
+    user_id = _user("unfinished@firm.ae")
+    token = generate_verification_token(user_id)
+    # Consume (burns the token) but deliberately do NOT call mark_email_verified.
+    assert consume_verification_token(token) == user_id
+    assert verified_user_for_consumed_token(token) is None

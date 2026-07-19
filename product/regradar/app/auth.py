@@ -398,7 +398,7 @@ def verified_user_for_consumed_token(token: str) -> int | None:
     try:
         row = conn.execute(
             """
-            SELECT t.user_id, t.used_at, u.email_verified
+            SELECT t.user_id, t.used_at, t.expires_at, u.email_verified
             FROM email_verification_tokens t
             JOIN users u ON u.id = t.user_id
             WHERE t.token = ?
@@ -411,6 +411,17 @@ def verified_user_for_consumed_token(token: str) -> int | None:
             return None  # fresh token — normal consume handles it
         if not row["email_verified"]:
             return None  # consumed but never completed — do not fake success
+        # Bound the idempotent window to the token's lifetime so a long-expired
+        # link can't return "already verified" indefinitely (an account-exists
+        # oracle). A scanner burns the token within seconds of send, so a real
+        # human's click almost always lands inside the validity window; a rare
+        # post-expiry click just signs in normally (they are already verified).
+        try:
+            expires_at = datetime.fromisoformat(row["expires_at"]).replace(tzinfo=timezone.utc)
+            if _now() > expires_at:
+                return None
+        except (TypeError, ValueError):
+            return None
         return int(row["user_id"])
     finally:
         conn.close()
