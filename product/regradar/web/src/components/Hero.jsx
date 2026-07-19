@@ -61,9 +61,12 @@ const chainSteps = [
   ["04", "Brief", "Draft released only after approval"],
 ];
 
-// Regulator name strip shown below headline
+// Regulator name strip shown below headline. CBUAE is intentionally NOT listed
+// here: rulebook.centralbank.ae returns HTTP 403 to our production monitoring
+// egress on every method (persistent since 2026-07-11), so we do not present it
+// as actively monitored. Its configured-but-access-restricted status is
+// disclosed in the coverage/transparency matrix rather than claimed in the hero.
 const REGULATOR_STRIP = [
-  "CBUAE",
   "DFSA",
   "ADGM / FSRA",
   "VARA",
@@ -252,7 +255,7 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
           <div className="sp-reveal sp-animate-fade-up">
             {/* Trust badge */}
             <span className="sp-badge-trust sp-animate-fade-up sp-delay-1 mb-5 inline-flex">
-              Official UAE sources only
+              Official sources only
             </span>
 
             {/* Primary headline */}
@@ -262,8 +265,8 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
 
             {/* Subheadline */}
             <p className="sp-animate-fade-up sp-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              StatuteProof monitors selected official UAE regulator pages — CBUAE,
-              VARA, DFSA, ADGM/FSRA, DIFC and SCA. When monitored text changes, it
+              StatuteProof monitors selected official UAE regulator pages across
+              VARA, DFSA, ADGM/FSRA, DIFC and UAE CMA. When monitored text changes, it
               captures a SHA-256-sealed diff and drafts a brief with sealed
               evidence for your MLRO to review — so the detection date lives in
               a record an auditor can verify, not in someone's memory.
@@ -272,7 +275,7 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
             {/* Bullets */}
             <ul className="sp-animate-fade-up sp-delay-2 mt-6 max-w-xl space-y-2.5">
               {[
-                "Reduce weekly manual checks across VARA, DFSA, FSRA, UAE CMA and CBUAE.",
+                "Reduce weekly manual checks across VARA, DFSA, FSRA, UAE CMA and DIFC.",
                 "See what changed, where it changed and why it may matter to your firm.",
                 "Give MLRO, CCO and Compliance one shared brief for review.",
               ].map((point) => (
@@ -309,9 +312,9 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
                 [liveSourceCount != null ? String(liveSourceCount) : "—",
                  liveSourceCount != null
                    ? (liveFreshAlert != null
-                       ? `UAE official sources configured · ${liveFreshAlert} fresh-alert eligible`
-                       : "UAE official sources configured (live count)")
-                   : "Selected official UAE sources (live count unavailable)"],
+                       ? `official sources configured · ${liveFreshAlert} fresh-alert eligible`
+                       : "official sources configured (live count)")
+                   : "Selected official sources (live count unavailable)"],
                 ["Scheduled", "Checks run on an operator-set interval"],
                 ["SHA-256", "Tamper-evident fingerprint of each capture"],
                 ["Your MLRO", "Reviews every brief before action"],
