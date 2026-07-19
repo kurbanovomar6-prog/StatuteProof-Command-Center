@@ -22,9 +22,9 @@ import { verifyRecord } from '../api'
 const SPEC_HREF = '/api/verify-spec'
 
 // Static, repo-pinned assets: a real evidence record captured by the monitor
-// from the official DFSA "Rules and Standards" page, plus the exact raw and
-// normalized text its hashes cover. Copied byte-for-byte from the evidence
-// store; nothing in it is invented.
+// from the official VARA Compliance & Risk Management Rulebook page, plus the
+// exact raw and normalized text its hashes cover. Copied byte-for-byte from the
+// evidence store; nothing in it is invented.
 const SAMPLE_ASSETS = {
   record: '/sample-record/record.json',
   raw: '/sample-record/raw.txt',
@@ -62,6 +62,9 @@ const CHECK_TITLES = {
   raw_bytes_match: 'Raw bytes match',
   normalized_bytes_match: 'Normalized bytes match',
   normalization_reproducible: 'Normalization reproducible',
+  diff_bytes_match: 'Sealed diff bytes match',
+  capture_metadata_consistent: 'Capture metadata consistent',
+  internal_error: 'Internal error',
 }
 
 function readFileAsText(file) {
@@ -111,6 +114,8 @@ export default function VerifyPage({ onBack }) {
   const [rawName, setRawName] = useState('')
   const [normalizedText, setNormalizedText] = useState(null)
   const [normalizedName, setNormalizedName] = useState('')
+  const [diffText, setDiffText] = useState(null)
+  const [diffName, setDiffName] = useState('')
   const [tokenB64, setTokenB64] = useState(null)
   const [tokenName, setTokenName] = useState('')
   const [tokenDigest, setTokenDigest] = useState('')
@@ -173,7 +178,7 @@ export default function VerifyPage({ onBack }) {
 
   // Shared verify runner: takes explicit values so the sample loader can run
   // the check immediately after loading, without racing setState.
-  async function runVerify(record, raw, normalized, timestampToken, timestampDigest) {
+  async function runVerify(record, raw, normalized, diff, timestampToken, timestampDigest) {
     setError('')
     setResult(null)
     setLoading(true)
@@ -182,6 +187,7 @@ export default function VerifyPage({ onBack }) {
         record,
         raw: raw ?? undefined,
         normalized: normalized ?? undefined,
+        diff: diff ?? undefined,
         timestampToken: timestampToken ?? undefined,
         timestampDigest: timestampDigest ?? undefined,
       })
@@ -211,7 +217,7 @@ export default function VerifyPage({ onBack }) {
       return
     }
 
-    await runVerify(record, rawText, normalizedText, tokenB64, tokenDigest)
+    await runVerify(record, rawText, normalizedText, diffText, tokenB64, tokenDigest)
   }
 
   async function handleLoadSample() {
@@ -366,6 +372,17 @@ export default function VerifyPage({ onBack }) {
               onClear={() => {
                 setNormalizedText(null)
                 setNormalizedName('')
+              }}
+            />
+            <FileField
+              id="diff-file"
+              label="diff.txt (optional)"
+              hint="Checks sha256(diff) against the record's diff_hash — the sealed redline. Legacy/no-change records skip it."
+              fileName={diffName}
+              onChange={(event) => handleFile(event, setDiffText, setDiffName)}
+              onClear={() => {
+                setDiffText(null)
+                setDiffName('')
               }}
             />
             <FileField
