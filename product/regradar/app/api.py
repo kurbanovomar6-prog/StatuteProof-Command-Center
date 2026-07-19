@@ -41,6 +41,7 @@ from app.auth import (
     exchange_google_oauth_code,
     generate_verification_token,
     consume_verification_token,
+    verified_user_for_consumed_token,
     generate_password_reset_token,
     consume_password_reset_token,
     set_user_password,
@@ -1512,6 +1513,18 @@ class _Handler(BaseHTTPRequestHandler):
         token = (qs.get("token") or [""])[0]
         user_id = consume_verification_token(token)
         if user_id is None:
+            # Idempotent re-click: a corporate mail scanner (Safe Links / URL
+            # Defense) commonly pre-fetches the link and burns the single-use
+            # token before the human clicks — the pre-fetch already verified the
+            # email. Show success for an already-verified user rather than a
+            # scary "invalid link" error (our ICP runs exactly these scanners).
+            already = verified_user_for_consumed_token(token)
+            if already is not None:
+                self._send_json(
+                    {"ok": True, "verified": True, "message": "Email already verified. Please sign in to continue."},
+                    200,
+                )
+                return
             self._send_json(
                 {"ok": False, "message": "Verification link is invalid or has expired. Please request a new one."},
                 400,

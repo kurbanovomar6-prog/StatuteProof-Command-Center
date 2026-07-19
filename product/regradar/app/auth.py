@@ -377,6 +377,45 @@ def consume_verification_token(token: str) -> int | None:
         conn.close()
 
 
+def verified_user_for_consumed_token(token: str) -> int | None:
+    """Idempotent-success resolver for an ALREADY-consumed verification token.
+
+    Corporate mail scanners (Safe Links / URL Defense) pre-fetch the link and
+    burn the single-use token before the human clicks; the pre-fetch also marks
+    the user verified. On the human's later click consume_verification_token
+    returns None, and without this the handler shows a scary "invalid or
+    expired" error for a user whose email IS verified. This returns the user_id
+    ONLY when the token exists, was already consumed (used_at set), and that
+    user is now email_verified — so a genuinely bad / expired / consumed-but-
+    unverified token still fails closed and the single-use guarantee is intact
+    for the fresh path.
+    """
+    clean = str(token or "").strip()
+    if not clean:
+        return None
+    ensure_auth_tables()
+    conn = _connect()
+    try:
+        row = conn.execute(
+            """
+            SELECT t.user_id, t.used_at, u.email_verified
+            FROM email_verification_tokens t
+            JOIN users u ON u.id = t.user_id
+            WHERE t.token = ?
+            """,
+            (clean,),
+        ).fetchone()
+        if row is None:
+            return None
+        if row["used_at"] is None:
+            return None  # fresh token — normal consume handles it
+        if not row["email_verified"]:
+            return None  # consumed but never completed — do not fake success
+        return int(row["user_id"])
+    finally:
+        conn.close()
+
+
 def mark_email_verified(user_id: int) -> None:
     """Set email_verified=1 for user_id."""
     ensure_auth_tables()
