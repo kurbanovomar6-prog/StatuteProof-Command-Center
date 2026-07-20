@@ -241,7 +241,12 @@ def fetch_document(
         headers={
             "User-Agent":      REQUESTS_UA,
             "Accept":          "application/pdf,application/octet-stream,*/*",
-            "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+            # English-first with wildcard (mirrors the Tier-1 scraper headers):
+            # this path serves UAE/GCC regulator document hosts, and a
+            # ru-RU-first fingerprint was a bot-wall trigger / wrong content
+            # negotiation there (audit 2026-07-20). The wildcard keeps
+            # non-English document hosts serving a body.
+            "Accept-Language": "en-US,en;q=0.9,*;q=0.5",
         },
         timeout=timeout,
         verify=True,

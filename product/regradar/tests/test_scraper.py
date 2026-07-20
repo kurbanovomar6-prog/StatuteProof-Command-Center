@@ -549,6 +549,25 @@ def test_fetch_page_with_config_playwright_surfaces_http_status(monkeypatch):
 # explicit per-source config path.
 
 
+def test_tier2_browser_context_uses_en_us_locale():
+    """Audit 07-20 HIGH: the generic Tier-2 context launched with a ru-RU
+    locale — a wrong fingerprint for UAE/GCC regulator portals (bot-wall
+    trigger, wrong content negotiation). The per-source path already uses
+    en-US (scraper.py per-source Playwright run); Tier 2 must match."""
+    captured: dict = {}
+
+    class _CaptureBrowser:
+        def new_context(self, **kwargs):
+            captured.update(kwargs)
+            raise RuntimeError("stop after capturing context kwargs")
+
+    with patch("app.scraper._get_shared_browser", return_value=_CaptureBrowser()):
+        with pytest.raises(RuntimeError):
+            _fetch_via_playwright("https://vara.ae/circulars")
+
+    assert captured.get("locale") == "en-US"
+
+
 def test_fetch_via_playwright_blocks_direct_nav_to_metadata_ip():
     browser = _browser_for(response_status=None)
     with patch("app.scraper._get_shared_browser", return_value=browser):

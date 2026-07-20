@@ -2428,6 +2428,7 @@
     },
     "fetch_method": "playwright",
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2622,6 +2623,7 @@
     },
     "fetch_method": "playwright",
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2730,6 +2732,7 @@
     },
     "fetch_method": "playwright",
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2770,6 +2773,7 @@
     },
     "fetch_method": "playwright",
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2810,6 +2814,7 @@
     },
     "fetch_method": "playwright",
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2848,6 +2853,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2886,6 +2892,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2924,6 +2931,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -2962,6 +2970,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3000,6 +3009,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3038,6 +3048,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3076,6 +3087,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3114,6 +3126,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3152,6 +3165,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3190,6 +3204,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3228,6 +3243,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3266,6 +3282,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3304,6 +3321,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3342,6 +3360,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3380,6 +3399,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3418,6 +3438,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3456,6 +3477,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3494,6 +3516,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3532,6 +3555,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
@@ -3570,6 +3594,7 @@
       "container_selector": "main"
     },
     "monitoring_mode": "remediation",
+    "proxy_remediation": true,
     "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",

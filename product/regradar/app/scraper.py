@@ -540,7 +540,7 @@ def _fetch_via_playwright(url: str, status_out: dict | None = None) -> str:
     browser = _get_shared_browser()
     context = browser.new_context(
         user_agent=REQUESTS_UA,
-        locale="ru-RU",
+        locale="en-US",
         viewport={"width": 1280, "height": 900},
     )
     _install_ssrf_guard(context)

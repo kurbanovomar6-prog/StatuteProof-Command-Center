@@ -209,6 +209,28 @@ def test_fetch_document_follows_public_redirect(monkeypatch):
     ]
 
 
+# ── fingerprint honesty: UAE/GCC document fetches must negotiate English ──────
+
+def test_fetch_document_sends_en_us_accept_language(monkeypatch):
+    """Audit 07-20 HIGH: fetch_document sent a ru-RU-first Accept-Language —
+    a wrong fingerprint for the UAE/GCC regulator document hosts this path
+    serves (bot-wall trigger + wrong content negotiation). Must be
+    English-first, mirroring the Tier-1 scraper headers."""
+    import app.document_extractor as de
+
+    captured_headers: dict = {}
+
+    def _capture_guarded_get(url, *, headers, **kwargs):
+        captured_headers.update(headers)
+        return None
+
+    monkeypatch.setattr(de, "_guarded_get", _capture_guarded_get)
+
+    out = fetch_document("https://rulebook.centralbank.ae/x.pdf")
+    assert out["status"] == "failed"  # guard stub returned None; no network
+    assert captured_headers["Accept-Language"].startswith("en-US")
+
+
 # ── existing semantics preserved through the rewrite ──────────────────────────
 
 def test_fetch_document_skips_unsupported_scheme(monkeypatch):

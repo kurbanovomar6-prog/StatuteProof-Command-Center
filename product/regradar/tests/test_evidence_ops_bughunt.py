@@ -107,6 +107,73 @@ def test_raising_source_persists_failed_record_and_opens_circuit(trail, tmp_path
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# Audit 07-20 HIGH — the breaker window must survive FLEET-SCALE dilution.
+# ══════════════════════════════════════════════════════════════════════════
+def test_circuit_opens_at_fleet_scale(trail, tmp_path, monkeypatch):
+    """Audit 07-20 HIGH: with a ~139-source fleet appending ~139 trail records
+    per cycle, a 200-LINE history window spans barely one cycle, so a single
+    always-failing URL never accumulates _CIRCUIT_OPEN_THRESHOLD consecutive
+    records inside the window and the breaker can never open in production.
+    The 1-source tests above cannot catch this — the whole file fits their
+    window. Red before the byte-bounded per-URL scan; green after."""
+    import uuid as _uuid
+
+    import app.monitor as monitor
+
+    fleet_size = 139
+    failing = {
+        "name": "Fleet Failing Source", "url": "https://fails.example/fleet",
+        "jurisdiction": "AE", "category": "banking", "status": "active", "enabled": True,
+    }
+    healthy = [
+        {"name": f"Healthy {i}", "url": f"https://ok.example/src-{i}",
+         "jurisdiction": "AE", "category": "banking", "status": "active", "enabled": True}
+        for i in range(fleet_size - 1)
+    ]
+    # Failing source FIRST: by breaker-check time its newest FAILED record is
+    # maximally diluted by the 138 records appended after it each cycle.
+    sources = [failing] + healthy
+
+    # Healthy sources append REAL trail records — that is exactly what dilutes
+    # the window in production (classify_change sees access "ok" + GOOD quality
+    # → non-FAILED change_status).
+    def _fake_pipeline(src):
+        if src["url"] == failing["url"]:
+            raise TimeoutError("connection timed out")
+        trail.append_run({
+            "run_id": _uuid.uuid4().hex[:8],
+            "source_id": trail.make_source_id(src),
+            "source_name": src["name"],
+            "official_url": src["url"], "url": src["url"],
+            "market": "AE", "jurisdiction": "AE", "category": "banking",
+            "access_status": "ok", "extraction_quality": "GOOD",
+            "extracted_chars": 1200, "normalized_chars": 1200,
+            "raw_hash": "r-" + src["url"], "normalized_hash": "n-" + src["url"],
+            "content_hash": "c-" + src["url"],
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "pipeline_version": "4.2",
+        })
+        return {"changed": False, "status": "unchanged", "url": src["url"]}
+
+    monkeypatch.setattr(monitor, "run_pipeline_for_source", _fake_pipeline)
+    monkeypatch.setattr(monitor, "get_enabled_sources", lambda: sources)
+    monkeypatch.setattr(monitor, "init_pipeline", lambda *_a, **_k: None)
+    monkeypatch.setattr(monitor.time, "sleep", lambda *_a, **_k: None)
+    monkeypatch.setattr(monitor, "_CIRCUIT_STATE_FILE", tmp_path / "circuit_state.json")
+    monkeypatch.setattr(monitor, "_DEADMAN_STATE_FILE", tmp_path / "deadman_state.json")
+    monkeypatch.setattr(monitor, "_circuit_open", set())
+    monkeypatch.setattr(monitor, "_circuit_skip_counts", {})
+
+    for _ in range(monitor._CIRCUIT_OPEN_THRESHOLD):
+        monitor.monitor_all_sources(verbose=False)
+
+    assert monitor._consecutive_failures(failing["url"]) >= monitor._CIRCUIT_OPEN_THRESHOLD
+    assert failing["url"] in monitor._circuit_open, (
+        "breaker must open for a URL that failed every cycle at fleet scale"
+    )
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # WARN-6 — circuit breaker must AUTO-RESET on a successful probe/run so a
 #          transient outage does not skip a source forever.
 # ══════════════════════════════════════════════════════════════════════════

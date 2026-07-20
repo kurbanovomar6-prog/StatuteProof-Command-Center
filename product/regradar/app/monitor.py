@@ -33,6 +33,7 @@ Resilience features
 
 import json
 import logging
+import os
 import time
 import uuid
 from datetime import datetime, timezone
@@ -65,8 +66,15 @@ _CIRCUIT_OPEN_THRESHOLD = 3
 # the cycle immediately after opening still skips.
 _CIRCUIT_PROBE_EVERY_N_CYCLES = 5
 
-# How many recent JSONL records to scan per source when checking history.
-_CIRCUIT_HISTORY_SCAN = 200
+# Bytes (not lines) of source_runs.jsonl tail to scan when counting per-URL
+# consecutive failures. A LINE-count window goes dead at fleet scale: ~139
+# enabled sources append ~139 records per cycle, so a 200-line tail spanned
+# barely one cycle and no single URL could ever show _CIRCUIT_OPEN_THRESHOLD
+# consecutive records inside the window — the breaker could effectively never
+# open (audit 2026-07-20). A byte-bounded tail (4 MiB ≈ thousands of records ≈
+# many full cycles at current fleet size) keeps the read bounded while always
+# covering enough cycles for any single URL.
+_CIRCUIT_HISTORY_SCAN_BYTES = 4 * 1024 * 1024
 
 # Per-source count of cycles skipped while the circuit is open; drives the
 # half-open probe cadence. Not persisted — a process restart simply probes
@@ -392,9 +400,11 @@ def _consecutive_failures(source_url: str) -> int:
     Count consecutive FAILED statuses for source_url from source_runs.jsonl,
     reading from newest record backwards.
 
-    Reads the last _CIRCUIT_HISTORY_SCAN lines of the JSONL file and counts
-    consecutive "FAILED" change_status values for the given URL, stopping at
-    the first non-failure.  Returns 0 when the file is absent or unreadable.
+    Reads a byte-bounded tail (_CIRCUIT_HISTORY_SCAN_BYTES) of the JSONL file
+    and counts consecutive "FAILED" change_status values for the given URL,
+    stopping at the first non-failure for that URL.  Records belonging to
+    OTHER sources are skipped, not counted — that is what makes the window
+    fleet-size-independent.  Returns 0 when the file is absent or unreadable.
     """
     try:
         # Resolve the run file the SAME way append_run does (honoring
@@ -405,17 +415,25 @@ def _consecutive_failures(source_url: str) -> int:
         run_file = source_run_path()
         if not run_file.exists():
             return 0
-        raw_lines = run_file.read_text(encoding="utf-8").splitlines()
+        with run_file.open("rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            size = fh.tell()
+            start = max(0, size - _CIRCUIT_HISTORY_SCAN_BYTES)
+            fh.seek(start)
+            blob = fh.read()
     except Exception as exc:
         logger.warning("circuit_breaker: cannot read source_runs.jsonl: %s", exc)
         return 0
 
-    # Scan only the tail of the file to keep this O(scan_window).
-    tail = raw_lines[-_CIRCUIT_HISTORY_SCAN:]
+    raw_lines = blob.decode("utf-8", errors="replace").splitlines()
+    if start > 0 and raw_lines:
+        # Seeked into the middle of a record — drop the partial first line.
+        raw_lines = raw_lines[1:]
 
-    # Collect records for this URL in chronological order, then reverse.
-    url_records: list[dict] = []
-    for line in tail:
+    # Newest-backwards: count consecutive FAILED records for THIS url, stopping
+    # at the first non-failure for the url.
+    count = 0
+    for line in reversed(raw_lines):
         line = line.strip()
         if not line:
             continue
@@ -423,12 +441,8 @@ def _consecutive_failures(source_url: str) -> int:
             record = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if record.get("url") == source_url or record.get("official_url") == source_url:
-            url_records.append(record)
-
-    # Count consecutive failures from newest backwards.
-    count = 0
-    for record in reversed(url_records):
+        if record.get("url") != source_url and record.get("official_url") != source_url:
+            continue
         status = str(record.get("change_status") or record.get("status") or "").upper()
         if status == "FAILED":
             count += 1

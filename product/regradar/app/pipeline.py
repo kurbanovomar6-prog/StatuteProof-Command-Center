@@ -229,6 +229,34 @@ def _persist_guard_drop(
         )
 
 
+def _source_may_auto_alert(source: dict | None) -> bool:
+    """SF-3 eligibility gate: only a source the registry marks as a live
+    fresh-alert monitor may auto-broadcast to customers. Candidates,
+    evidence-library and remediation sources are still fetched, hashed and
+    sealed — they just never alert until promoted. Previously the flag the
+    UI/count is built on (alert_eligible) was NEVER read by the alert path,
+    so a candidate with an AI-classified MEDIUM + confidence>=0.70 could
+    slip past the review gate (security-review 2026-07-18). A source dict
+    without registry mode/flag (direct run_pipeline(url) / manual) keeps the
+    prior behavior. Canonical predicate mirrored by api.py's fresh_alert
+    count and source_summary.py, with ONE deliberate difference: the counts
+    use sources.proxy_remediation_verified (routing config alone is not
+    evidence — a proxy-remediation source is only COUNTED after a recorded
+    successful production run), while this routing gate uses the unverified
+    predicate because an alert is self-evidencing: it can only fire on a
+    successful, sealed fetch made in the same run.
+    """
+    _mode = (source or {}).get("monitoring_mode")
+    _ae = (source or {}).get("alert_eligible")
+    if source is None or _ae is True or _mode == "fresh_alert" or (_ae is None and _mode is None):
+        return True
+    # Proxy-remediation re-entry: a remediation source explicitly flagged as
+    # WAF/geo-blocked re-enters the alert pool the moment the owner-configured
+    # egress proxy can actually route it (see sources.proxy_unblocked_remediation).
+    from app.sources import proxy_unblocked_remediation
+    return proxy_unblocked_remediation(source)
+
+
 def run_pipeline(url: str, source: dict | None = None) -> dict:
     """
     Execute the full change-detection pipeline for a single URL.
@@ -771,27 +799,13 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     # dropped. run_pipeline_for_source consumes this after append_run.
     pending_cooldown_alert: dict | None = None
 
-    # SF-3 eligibility gate: only a source the registry marks as a live
-    # fresh-alert monitor may auto-broadcast to customers. Candidates,
-    # evidence-library and remediation sources are still fetched, hashed and
-    # sealed — they just never alert until promoted. Previously the flag the
-    # UI/count is built on (alert_eligible) was NEVER read by the alert path,
-    # so a candidate with an AI-classified MEDIUM + confidence>=0.70 could
-    # slip past the review gate (security-review 2026-07-18). A source dict
-    # without registry mode/flag (direct run_pipeline(url) / manual) keeps the
-    # prior behavior. Canonical predicate mirrors api.py's fresh_alert count.
-    _mode = (source or {}).get("monitoring_mode")
-    _ae = (source or {}).get("alert_eligible")
-    source_may_alert = (
-        source is None
-        or _ae is True
-        or _mode == "fresh_alert"
-        or (_ae is None and _mode is None)
-    )
+    # SF-3 eligibility gate — see _source_may_auto_alert (module-level so the
+    # api.py / source_summary.py counts can stay mirrored with the alert path).
+    source_may_alert = _source_may_auto_alert(source)
     if source is not None and not source_may_alert:
         logger.info(
             "Telegram alert suppressed (not a fresh-alert source): source=%s mode=%s alert_eligible=%s",
-            source.get("name"), _mode, _ae,
+            source.get("name"), source.get("monitoring_mode"), source.get("alert_eligible"),
         )
 
     if ENABLE_TELEGRAM_ALERTS and not is_new and final_risk_level in _ALERT_THRESHOLD and source_may_alert:

@@ -6,8 +6,13 @@ import json
 from pathlib import Path
 from typing import Any
 
-
-_BASE_DIR = Path(__file__).parent.parent
+from app.config import BASE_DIR as _BASE_DIR
+from app.source_runs import source_run_path
+from app.sources import (
+    latest_run_status_map,
+    proxy_remediation_verified,
+    proxy_unblocked_remediation,
+)
 
 
 def build_sources_summary(
@@ -44,17 +49,37 @@ def build_sources_summary(
         "candidate": 0,
         "remediation": 0,
     }
+    # Mirrors pipeline._source_may_auto_alert, EXCEPT the proxy-remediation
+    # branch uses the VERIFIED variant: a proxy-routed remediation source is
+    # counted only after a successful production run is recorded in the trail
+    # (config alone is not evidence — see sources.proxy_remediation_verified).
+    # ONE classification pass, ONE trail read: a promoted source moves OUT of
+    # remediation into fresh-alert so the buckets stay disjoint and still
+    # partition enabled_count. The trail tail is read once (status_map) rather
+    # than once per source — this runs on unauthenticated /api/health.
+    runs_file = (
+        source_run_path()
+        if base_dir is None
+        else root / "data" / "source_runs" / "source_runs.jsonl"
+    )
+    # Skip the trail read entirely when no source is proxy-routed (the routing
+    # predicate is pure config — no I/O).
+    status_map = (
+        latest_run_status_map(runs_file)
+        if any(proxy_unblocked_remediation(item) for item in enabled_sources)
+        else {}
+    )
+    fresh_alert_sources: list[dict[str, Any]] = []
     for item in enabled_sources:
         mode = str(item.get("monitoring_mode") or "").lower().strip()
         if mode in mode_counts:
             mode_counts[mode] += 1
-
-    fresh_alert_sources = [
-        item
-        for item in enabled_sources
-        if str(item.get("monitoring_mode") or "").lower().strip() == "fresh_alert"
-        and item.get("alert_eligible") is True
-    ]
+        if mode == "fresh_alert" and item.get("alert_eligible") is True:
+            fresh_alert_sources.append(item)
+        elif proxy_remediation_verified(item, status_map=status_map):
+            fresh_alert_sources.append(item)
+            if mode in mode_counts:
+                mode_counts[mode] -= 1  # promoted: counted as fresh-alert only
     legacy_active = [
         item
         for item in enabled_sources
