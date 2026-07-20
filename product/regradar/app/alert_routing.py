@@ -657,12 +657,54 @@ def _is_still_approved(alert_id: str) -> bool:
     return bool(review and review.get("new_status") in _get_approved_statuses())
 
 
+def _official_alert_blocked_by_plan(user_id: int, source_id: object) -> bool:
+    """True when this user must NOT receive THIS alert's official-source content.
+
+    Audit 07-20 FIX 6: this is the per-user CHOKE POINT — both the dashboard
+    handler (POST /api/delivery/send-preview-alert) and the scheduler's
+    instant/digest dispatch funnel through ``send_preview_alert_to_user``, which
+    had no plan check at all, so an authenticated FREE account could make the
+    product deliver the paid official-source deliverable to its own Telegram.
+
+    Gates on the SAME switch as every other delivery path
+    (``telegram_pairing.alerts_require_plan``) and the same eligibility rule
+    (``telegram_pairing.plan_eligible_user_ids`` — operator exemption OR the
+    founder-ACTIVATED ``official_alerts`` capability).
+
+    Custom-source alerts are NOT gated: a customer's own private source is not
+    the official-source deliverable. A source that cannot be classified counts
+    as OFFICIAL (fail CLOSED), as does any unexpected internal failure.
+    """
+    try:
+        from app.telegram_pairing import alerts_require_plan, plan_eligible_user_ids
+
+        if not alerts_require_plan():
+            return False
+        try:
+            from app.tenancy import is_custom_source
+
+            if is_custom_source(source_id):
+                return False
+        except Exception as exc:  # noqa: BLE001 — unclassifiable → OFFICIAL
+            logger.warning("source classification failed, gating as official: %s", type(exc).__name__)
+        return not plan_eligible_user_ids([int(user_id)])
+    except Exception as exc:  # noqa: BLE001 — fail CLOSED, as the other gates do
+        logger.error("_official_alert_blocked_by_plan failed: %s", type(exc).__name__)
+        return True
+
+
 def send_preview_alert_to_user(user_id: int, alert_id: str) -> dict:
     safe_alert_id = str(alert_id or "").strip()
     preview = build_routing_preview_for_user(int(user_id))
     match = next((item for item in preview["matches"] if item.get("alert_id") == safe_alert_id), None)
     if not match:
         return {"ok": False, "reason": "Alert not found.", "code": "not_found"}
+    if _official_alert_blocked_by_plan(int(user_id), match.get("source_id")):
+        return {
+            "ok": False,
+            "reason": "Official-source alert delivery is not included in your current plan.",
+            "code": "plan_required",
+        }
     if not match.get("delivery_ready"):
         return {
             "ok": False,

@@ -67,9 +67,15 @@ def test_deliver_alert_reaches_subscribed_users(isolated_db, monkeypatch):
     # Pre-fix: the import of get_all_linked_chat_ids raised ImportError, the
     # broad except swallowed it, and this returned 0 (no user ever reached).
     import app.telegram as tg
+    from app.plan import activate_plan
 
-    _make_paired_user("d@co.com", "444444", alerts_enabled=True)
-    _make_paired_user("e@co.com", "555555", alerts_enabled=True)
+    uid_d = _make_paired_user("d@co.com", "444444", alerts_enabled=True)
+    uid_e = _make_paired_user("e@co.com", "555555", alerts_enabled=True)
+    # 2026-07-20 plan gate: the official broadcast now requires an ACTIVATED
+    # paid plan (see tests/test_alert_plan_gating.py) — activate both users so
+    # this test keeps proving its original point (import path + delivery reach).
+    activate_plan(uid_d, "professional")
+    activate_plan(uid_e, "professional")
 
     sent_to: list[str] = []
 
@@ -182,6 +188,12 @@ def test_send_preview_alert_retries_after_failed_send(isolated_db, monkeypatch):
     # onboarding must be complete for delivery readiness
     from app.profile import update_profile
     update_profile(user_id, {"onboarding_completed": 1})
+    # 2026-07-20 plan gate (FIX 6): the per-user send path now requires an
+    # ACTIVATED paid plan for OFFICIAL sources (see
+    # tests/test_alert_plan_gating.py) — activate so this test keeps proving its
+    # original point (retry after a failed send).
+    from app.plan import activate_plan
+    activate_plan(user_id, "professional")
 
     alert_id = "reviewed-alert-1"
     match = {
@@ -255,6 +267,9 @@ def test_send_preview_alert_marks_failed_when_send_raises(isolated_db, monkeypat
     user_id = _make_paired_user("raise@co.com", "777777", alerts_enabled=True)
     from app.profile import update_profile
     update_profile(user_id, {"onboarding_completed": 1})
+    # 2026-07-20 plan gate (FIX 6), as above.
+    from app.plan import activate_plan
+    activate_plan(user_id, "professional")
 
     alert_id = "reviewed-alert-raise"
     match = {
@@ -315,3 +330,52 @@ def test_send_preview_alert_marks_failed_when_send_raises(isolated_db, monkeypat
              if row["delivery_type"] == "reviewed_alert_preview"]
     assert len(logs2) == 1
     assert logs2[0]["status"] == "sent"
+
+
+# ── 2026-07-20 FIX 6: the per-user send path is plan-gated ──────────────────
+
+def test_free_user_preview_send_is_refused_not_delivered(isolated_db, monkeypatch):
+    """The two retry tests above now activate a plan because a FREE account is
+    refused on this path. Pin that contract here so it cannot silently regress
+    back to delivering the paid official-source deliverable for free.
+    """
+    import app.alert_routing as ar
+
+    monkeypatch.delenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", raising=False)
+    monkeypatch.delenv("STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS", raising=False)
+
+    user_id = _make_paired_user("free-g3@co.com", "888888", alerts_enabled=True)
+    from app.profile import update_profile
+    update_profile(user_id, {"onboarding_completed": 1})
+
+    alert_id = "reviewed-alert-free"
+    match = {
+        "alert_id": alert_id,
+        "source_id": "AE-1",
+        "source_name": "DFSA",
+        "source_url": "https://example.ae/x",
+        "title": "Reviewed alert",
+        "risk_level": "MEDIUM",
+        "change_type": "REGULATORY_UPDATE",
+        "market": "AE",
+        "jurisdiction": "AE",
+        "topics": ["aml"],
+        "executive_summary": "Something changed.",
+        "limitations": [],
+        "score": 85,
+        "matched": True,
+        "delivery_ready": True,
+        "reviewed_at": "2026-07-10T00:00:00+00:00",
+    }
+    monkeypatch.setattr(
+        ar, "build_routing_preview_for_user", lambda uid, days=14: {"matches": [dict(match)]}
+    )
+    monkeypatch.setattr(ar, "_is_still_approved", lambda aid: True)
+
+    sent: list[str] = []
+    monkeypatch.setattr(ar, "send_telegram_message", lambda cid, text: (sent.append(str(cid)), True)[1])
+
+    result = ar.send_preview_alert_to_user(user_id, alert_id)
+    assert result["ok"] is False
+    assert result["code"] == "plan_required"
+    assert sent == []

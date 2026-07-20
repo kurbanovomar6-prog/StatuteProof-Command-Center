@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 import secrets
 import sqlite3
@@ -461,3 +462,167 @@ def get_linked_alert_user_ids() -> list[int]:
     finally:
         conn.close()
     return [int(row["user_id"]) for row in rows if row["user_id"] is not None]
+
+
+def alerts_require_plan() -> bool:
+    """Is the plan gate on the official-source deliverable active? Default ON.
+
+    Single source of truth for the flag, so every delivery path gates on the
+    SAME switch: ``app/telegram.py`` (broadcast), ``app/digest_cadence.py``
+    (scheduled instant + digest dispatch) and ``app/deadline_radar.py``
+    (reminder broadcast pool). Owner-flippable: set
+    STATUTEPROOF_ALERTS_REQUIRE_PLAN=0 to restore the ungated pilot behavior
+    (every paired+enabled account receives official-source content).
+    """
+    return str(os.getenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN") or "1").strip().lower() not in {
+        "0", "false", "no", "off",
+    }
+
+
+def _alert_plan_exempt_user_ids() -> set[int]:
+    """Resolve STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS to user ids.
+
+    The env var holds a comma-separated list of founder/operator account emails
+    that stay exempt from the official-alert plan gate (default: empty — no
+    exemptions). Emails are normalized with strip().lower() and matched against
+    ``users.normalized_email`` (with a LOWER(email) fallback for legacy rows
+    where normalized_email is NULL). Never raises — returns an empty set on any
+    failure.
+    """
+    raw = os.getenv("STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS") or ""
+    emails = [e.strip().lower() for e in raw.split(",") if e.strip()]
+    if not emails:
+        return set()
+    try:
+        conn = _connect()
+        try:
+            placeholders = ",".join("?" for _ in emails)
+            rows = conn.execute(
+                f"""
+                SELECT id
+                FROM users
+                WHERE normalized_email IN ({placeholders})
+                   OR LOWER(email) IN ({placeholders})
+                """,
+                (*emails, *emails),
+            ).fetchall()
+        finally:
+            conn.close()
+        return {int(row["id"]) for row in rows if row["id"] is not None}
+    except Exception as exc:  # noqa: BLE001 — an exemption lookup must never crash delivery
+        logger.warning("_alert_plan_exempt_user_ids failed: %s", type(exc).__name__)
+        return set()
+
+
+def filter_plan_eligible_chat_ids(chat_ids: list[str]) -> list[str]:
+    """Revenue gate for the OFFICIAL-SOURCE Telegram broadcast (audit 07-20).
+
+    Applied by app/telegram.py on TOP of ``get_all_linked_chat_ids()``'s return
+    value when STATUTEPROOF_ALERTS_REQUIRE_PLAN is on (the default). A chat_id
+    is kept (input order preserved) when ANY of:
+
+      * it does NOT resolve to any user_profiles row — deliberate fail-open for
+        unresolvable ids ONLY. These occur in monkeypatched tests or during a
+        mid-flight unlink; every production broadcast chat_id comes from this
+        same user_profiles table, so a real free user always resolves and is
+        gated;
+      * a mapped user is listed in STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS
+        (founder/operator exemption, see ``_alert_plan_exempt_user_ids``);
+      * a mapped user's founder-ACTIVATED plan grants the ``official_alerts``
+        capability (``app.plan.has_capability`` — reads active_capabilities, so
+        a self-selected paid intent grants nothing; lookup errors fail closed
+        to free tier).
+
+    Migration note: with the gate ON, previously paired FREE accounts stop
+    receiving official-source broadcasts. Their Telegram pairing is untouched —
+    delivery resumes the moment a founder runs ``run.py activate-plan`` for
+    them. The owner can consciously set STATUTEPROOF_ALERTS_REQUIRE_PLAN=0 to
+    restore the ungated pilot behavior.
+
+    On an unexpected internal failure this returns [] — fail CLOSED. The
+    founder-chat pilot fallback in ``send_telegram_alert`` then still delivers
+    the alert to the founder, so nothing is silently lost.
+    """
+    if not chat_ids:
+        return []
+    try:
+        # Lazy import: telegram_pairing must not import app.plan at module top
+        # (import-cycle risk via app.db consumers).
+        from app.plan import has_capability
+
+        ensure_telegram_pairing_tables()
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                """
+                SELECT user_id, telegram_chat_id
+                FROM user_profiles
+                WHERE telegram_chat_id IS NOT NULL
+                  AND TRIM(telegram_chat_id) != ''
+                """
+            ).fetchall()
+        finally:
+            conn.close()
+        chat_to_users: dict[str, set[int]] = {}
+        for row in rows:
+            chat_id = str(row["telegram_chat_id"]).strip()
+            if chat_id and row["user_id"] is not None:
+                chat_to_users.setdefault(chat_id, set()).add(int(row["user_id"]))
+
+        exempt_ids = _alert_plan_exempt_user_ids()
+        eligible: list[str] = []
+        for chat_id in chat_ids:
+            mapped_users = chat_to_users.get(str(chat_id).strip())
+            if not mapped_users:
+                # Unresolvable → pass through (see docstring).
+                eligible.append(chat_id)
+                continue
+            if any(uid in exempt_ids for uid in mapped_users) or any(
+                has_capability(uid, "official_alerts") for uid in mapped_users
+            ):
+                eligible.append(chat_id)
+        return eligible
+    except Exception as exc:  # noqa: BLE001 — fail CLOSED; founder fallback still fires
+        logger.error("filter_plan_eligible_chat_ids failed: %s", type(exc).__name__)
+        return []
+
+
+def plan_eligible_user_ids(user_ids: list[int]) -> list[int]:
+    """User-id twin of ``filter_plan_eligible_chat_ids`` (audit 07-20).
+
+    Applied by ``app/digest_cadence.run_scheduled_digests`` on TOP of
+    ``get_linked_alert_user_ids()``'s return value when
+    ``alerts_require_plan()`` is on — the scheduled dispatcher resolves per-user
+    profiles, so it gates user ids rather than chat ids. A user id is kept
+    (input order preserved) when it is listed in
+    STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS or its founder-ACTIVATED plan grants
+    the ``official_alerts`` capability.
+
+    Fail-direction difference from the chat_id filter, deliberate: that filter
+    passes through chat_ids it cannot map to a user_profiles row (fail-OPEN for
+    UNRESOLVABLE ids only). Here the input already IS the user id — there is no
+    mapping step and therefore nothing unresolvable — so an id that holds no
+    capability is dropped, including an unknown id (``has_capability`` falls
+    back to free-tier caps). On an unexpected internal failure this returns []
+    — fail CLOSED, matching the chat_id filter.
+    """
+    if not user_ids:
+        return []
+    try:
+        # Lazy import: telegram_pairing must not import app.plan at module top
+        # (import-cycle risk via app.db consumers).
+        from app.plan import has_capability
+
+        exempt_ids = _alert_plan_exempt_user_ids()
+        eligible: list[int] = []
+        for raw in user_ids:
+            try:
+                uid = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if uid in exempt_ids or has_capability(uid, "official_alerts"):
+                eligible.append(uid)
+        return eligible
+    except Exception as exc:  # noqa: BLE001 — fail CLOSED, as above
+        logger.error("plan_eligible_user_ids failed: %s", type(exc).__name__)
+        return []

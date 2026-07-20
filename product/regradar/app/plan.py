@@ -36,6 +36,7 @@ PLAN_CAPABILITIES = {
         "manual_activation_required": False,
         "source_limit": 0,
         "custom_sources": 0,
+        "official_alerts": False,   # official-source Telegram broadcast is a paid deliverable
         "weekly_briefs": False,
         "audit_export": False,
         "pdf_export": False,
@@ -49,6 +50,7 @@ PLAN_CAPABILITIES = {
         "manual_activation_required": True,
         "source_limit": 3,          # 3 official UAE sources, manually curated
         "custom_sources": 0,
+        "official_alerts": True,    # receives the official-source Telegram broadcast
         "weekly_briefs": "status_only",  # source status summary only
         "audit_export": False,
         "pdf_export": False,
@@ -63,6 +65,7 @@ PLAN_CAPABILITIES = {
         "manual_activation_required": True,
         "source_limit": 172,        # selected fresh-alert eligible UAE sources after readiness gates
         "custom_sources": 2,        # requires activation
+        "official_alerts": True,    # receives the official-source Telegram broadcast
         "weekly_briefs": True,      # Telegram; email requires activation
         "audit_export": True,
         "pdf_export": True,         # PDF audit pack for internal compliance files
@@ -77,6 +80,7 @@ PLAN_CAPABILITIES = {
         "manual_activation_required": True,
         "source_limit": 999,
         "custom_sources": 999,
+        "official_alerts": True,    # receives the official-source Telegram broadcast
         "weekly_briefs": True,
         "audit_export": True,
         "pdf_export": True,         # PDF audit pack for internal compliance files
@@ -255,12 +259,22 @@ def set_plan_intent(user_id: int, plan_name: str) -> dict[str, Any]:
     This only records what the user *wants* — it never grants capabilities.
     Entitlements follow the ACTIVATED plan (see ``activate_plan`` /
     ``capabilities_for``), which only a founder can set.
+
+    The returned state carries one extra key, ``intent_changed`` (bool): True
+    when ``plan_name`` differs from the previously stored intent. Callers that
+    page a human on plan intent (POST /api/plan) use it to dedupe — re-posting
+    the SAME plan must not re-notify (2026-07-20 review). It is metadata, not
+    plan state: the API handler pops it before responding.
     """
     if plan_name not in PLAN_NAMES:
         raise ValueError(f"Unknown plan: {plan_name}")
     now_str = _iso(_now())
     conn = _connect()
     try:
+        row = conn.execute(
+            "SELECT plan_name FROM users WHERE id = ? LIMIT 1", (user_id,)
+        ).fetchone()
+        previous_plan = str(row["plan_name"] or "") if row is not None else ""
         conn.execute(
             "UPDATE users SET plan_name = ?, plan_intent_at = ? WHERE id = ?",
             (plan_name, now_str, user_id),
@@ -268,7 +282,9 @@ def set_plan_intent(user_id: int, plan_name: str) -> dict[str, Any]:
         conn.commit()
     finally:
         conn.close()
-    return get_plan_state(user_id)
+    state = get_plan_state(user_id)
+    state["intent_changed"] = plan_name != previous_plan
+    return state
 
 
 def activate_plan(user_id: int, plan_name: str) -> dict[str, Any]:

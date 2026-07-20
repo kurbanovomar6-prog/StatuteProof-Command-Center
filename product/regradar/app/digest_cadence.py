@@ -45,7 +45,12 @@ from app.profile import (
     CADENCE_INSTANT,
     CADENCE_WEEKLY,
 )
-from app.telegram_pairing import get_linked_alert_user_ids, get_telegram_link
+from app.telegram_pairing import (
+    alerts_require_plan,
+    get_linked_alert_user_ids,
+    get_telegram_link,
+    plan_eligible_user_ids,
+)
 from app.user_delivery import (
     create_delivery_log,
     reclaim_failed_delivery_log,
@@ -685,7 +690,19 @@ def run_scheduled_digests(
     """
     reference = now or _now_utc()
     try:
-        ids = user_ids if user_ids is not None else get_linked_alert_user_ids()
+        if user_ids is not None:
+            # Explicit override: operator/test driven, deliberately UNGATED
+            # (mirrors deadline_radar.send_due_reminders' recipients= path).
+            ids = list(user_ids)
+        else:
+            # Plan gate on the paid core deliverable (audit 07-20): this
+            # scheduled path ships the SAME official-source content as the
+            # broadcast in app/telegram.py, so it reads the same flag and the
+            # same eligibility rule — otherwise a free paired account keeps
+            # receiving instant alerts and digests every cycle.
+            ids = get_linked_alert_user_ids()
+            if alerts_require_plan():
+                ids = plan_eligible_user_ids(ids)
     except Exception as exc:  # pragma: no cover - defensive
         logger.warning("run_scheduled_digests: could not resolve users: %s", exc)
         return {"users": 0, "instant_sent": 0, "digests_sent": 0, "heartbeats_sent": 0, "errors": 1}

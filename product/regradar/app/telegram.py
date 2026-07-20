@@ -27,6 +27,20 @@ from app import telegram_settings as _ts
 # Customer delivery helper
 # ---------------------------------------------------------------------------
 
+def _alerts_require_plan() -> bool:
+    """Plan gate on the official-source broadcast — default ON (audit 07-20).
+
+    Thin alias over ``telegram_pairing.alerts_require_plan``, which is the one
+    switch every delivery path reads (broadcast here, scheduled digests in
+    app/digest_cadence.py, deadline reminders in app/deadline_radar.py). Kept
+    under this name for existing callers. Lazy import: app.telegram is imported
+    from many modules and must not pull the pairing DB layer at import time.
+    """
+    from app.telegram_pairing import alerts_require_plan
+
+    return alerts_require_plan()
+
+
 def _deliver_alert_to_subscribed_users(message: str, *, source_id: object = None) -> int:
     """
     Send a formatted alert message to subscribed customers via the ALERTS bot
@@ -44,7 +58,11 @@ def _deliver_alert_to_subscribed_users(message: str, *, source_id: object = None
     raising if anything goes wrong.
     """
     try:
-        from app.telegram_pairing import get_alert_chat_ids_for_user, get_all_linked_chat_ids
+        from app.telegram_pairing import (
+            filter_plan_eligible_chat_ids,
+            get_alert_chat_ids_for_user,
+            get_all_linked_chat_ids,
+        )
         from app.tenancy import custom_source_owner, is_custom_source
 
         if source_id is not None and is_custom_source(source_id):
@@ -59,7 +77,17 @@ def _deliver_alert_to_subscribed_users(message: str, *, source_id: object = None
                 return 0
             chat_ids = get_alert_chat_ids_for_user(owner_id)
         else:
+            # Server-side plan gate on the paid core deliverable (audit 07-20):
+            # the official-source broadcast reaches only founder-ACTIVATED paid
+            # plans + operator emails in STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS.
+            # The custom-source owner branch above is deliberately NOT gated —
+            # it delivers only the owner's own private-source content, and
+            # custom sources are themselves plan-gated at creation. Chat ids
+            # that do not resolve to a user_profiles row pass through the
+            # filter (see filter_plan_eligible_chat_ids docstring).
             chat_ids = get_all_linked_chat_ids()
+            if _alerts_require_plan():
+                chat_ids = filter_plan_eligible_chat_ids(chat_ids)
     except Exception as exc:
         logger.debug("_deliver_alert_to_subscribed_users: could not resolve recipients: %s", exc)
         return 0

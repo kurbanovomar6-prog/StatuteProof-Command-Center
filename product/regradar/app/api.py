@@ -146,6 +146,47 @@ def _notify_founder_registration(
     except Exception as exc:  # noqa: BLE001 — deliberately swallow everything
         logger.warning("Founder registration notify failed: %s", type(exc).__name__)
 
+
+def _notify_founder_plan_intent(email: str, plan_name: str) -> None:
+    """Best-effort Telegram note to the founder when a customer records
+    paid-plan intent.
+
+    Fire-and-forget from _handle_plan_set; must NEVER raise — the customer is
+    told "Our team will contact you", so the founder MUST be paged, but a
+    Telegram outage or missing config cannot be allowed to fail the plan
+    request.
+    """
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+    try:
+        from app.plan import PLAN_DISPLAY, PLAN_PRICE_MONTHLY
+
+        lines = [
+            "💼 Plan intent recorded",
+            f"Plan: {PLAN_DISPLAY.get(plan_name, plan_name)} ({plan_name})",
+        ]
+        price = PLAN_PRICE_MONTHLY.get(plan_name, 0)
+        if isinstance(price, (int, float)) and price > 0:
+            lines.append(f"Price: ${price}/mo")
+        lines.append(f"Email: {email}")
+        lines.append("Action: review and run activate-plan (DEPLOY.md §10)")
+        lines.append(
+            f"Time (UTC): {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}"
+        )
+        resp = _req.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={
+                "chat_id": TELEGRAM_CHAT_ID,
+                "text": "\n".join(lines),
+                "disable_web_page_preview": True,
+            },
+            timeout=_TELEGRAM_TIMEOUT_S,
+        )
+        if not resp.json().get("ok"):
+            logger.warning("Founder plan-intent notify: Telegram API returned not-ok")
+    except Exception as exc:  # noqa: BLE001 — deliberately swallow everything
+        logger.warning("Founder plan-intent notify failed: %s", type(exc).__name__)
+
 # CORS_ALLOWED_ORIGIN env var controls which origin is permitted.
 # Leave unset in production (same-origin deployment) — no CORS headers will be sent.
 # Set to http://localhost:5173 for local development against the Vite dev server.
@@ -262,6 +303,12 @@ class _RateLimiter:
 _REGISTER_LIMITER = _RateLimiter(5, 3600)
 _LOGIN_LIMITER = _RateLimiter(10, 3600)
 _CONTACT_LIMITER = _RateLimiter(3, 3600)
+# POST /api/plan (plan intent): a settings mutation that also pages the founder
+# on the admin bot (2026-07-20 review — unthrottled, so an authenticated free
+# account could loop it to bury real ops pages in the founder channel and churn
+# one notify thread per request). Changing a plan is a rare, deliberate act;
+# 10/hour per IP is generous for a human and caps the abuse surface.
+_PLAN_INTENT_LIMITER = _RateLimiter(10, 3600)
 _SOURCE_TEST_LIMITER = _RateLimiter(10, 3600)
 _PAIR_GENERATE_LIMITER = _RateLimiter(10, 3600)
 _TELEGRAM_TEST_LIMITER = _RateLimiter(5, 3600)
@@ -859,13 +906,21 @@ class _Handler(BaseHTTPRequestHandler):
         beyond 2x the watch interval. Uptime monitors that key on HTTP status
         therefore see failure; the dashboard (which reads ``ok`` from the JSON
         body regardless of status) shows "degraded". Only the tail of the trail
-        is read so an unauthenticated probe cannot force an unbounded file scan.
+        is read, and at most twice per request (once for the last-run/changed
+        figures, once for the proxy-verified fresh-alert count — never once per
+        source), so an unauthenticated probe cannot force an unbounded file scan
+        or a scan that grows with the source count.
         """
         import json as _json_mod
         from datetime import datetime, timezone
 
         from app.config import BASE_DIR as _BASE_DIR, WATCH_INTERVAL_MINUTES as _WATCH_MIN
-        from app.sources import get_enabled_sources
+        from app.sources import (
+            get_enabled_sources,
+            latest_run_status_map,
+            proxy_remediation_verified,
+            proxy_unblocked_remediation,
+        )
 
         now = datetime.now(timezone.utc)
         now_iso = now.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -878,9 +933,25 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             enabled = get_enabled_sources()
             active_count = len(enabled)
+            # Mirrors pipeline._source_may_auto_alert, EXCEPT the
+            # proxy-remediation branch uses the VERIFIED variant: a
+            # proxy-routed remediation source is only counted after a
+            # successful production run is recorded (config alone is not
+            # evidence — see sources.proxy_remediation_verified). The trail
+            # tail is read and parsed ONCE per request and reused for every
+            # source: this endpoint is unauthenticated, so a per-source read
+            # would let one anonymous probe force N bounded scans.
+            # Skip the trail read entirely when no source is proxy-routed
+            # (the predicate is pure config — no I/O).
+            _status_map = (
+                latest_run_status_map()
+                if any(proxy_unblocked_remediation(s) for s in enabled)
+                else {}
+            )
             fresh_alert_count = sum(
                 1 for s in enabled
-                if s.get("monitoring_mode") == "fresh_alert" and s.get("alert_eligible") is True
+                if (s.get("monitoring_mode") == "fresh_alert" and s.get("alert_eligible") is True)
+                or proxy_remediation_verified(s, status_map=_status_map)
             )
         except Exception:
             active_count = -1
@@ -2042,6 +2113,11 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send_json(payload, 404)
             elif code == "not_ready":
                 self._send_json(payload, 400)
+            elif code == "plan_required":
+                # Audit 07-20 FIX 6: free account asked for the paid
+                # official-source deliverable. 402 — not a server fault, and the
+                # message says nothing about plan internals or other tenants.
+                self._send_json(payload, 402)
             elif code == "telegram_failed":
                 self._send_json(payload, 502)
             else:
@@ -3575,6 +3651,9 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _handle_plan_set(self) -> None:
         """POST /api/plan — record plan intent (no payment processed)."""
+        if self._rate_limited(_PLAN_INTENT_LIMITER, "plan_set"):
+            return
+
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
@@ -3597,6 +3676,25 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "message": f"Unknown plan: {plan_name}"}, 400)
                 return
             state = set_plan_intent(int(user["id"]), plan_name)
+            # ``intent_changed`` is dedupe metadata from set_plan_intent, not
+            # customer-facing plan state — strip it before building the payload.
+            # Missing key (e.g. a patched/legacy return) defaults to True so a
+            # genuine intent is never silently dropped.
+            intent_changed = bool(state.pop("intent_changed", True))
+            # Founder heads-up via the admin bot — best-effort, never blocks or
+            # fails the plan request (see _notify_founder_plan_intent). Without
+            # this the customer was promised "Our team will contact you" while
+            # nobody was told. Only fired when the recorded intent actually
+            # CHANGED (2026-07-20 review: re-posting the same plan must not
+            # re-page the founder channel), and the endpoint itself is throttled
+            # by _PLAN_INTENT_LIMITER above.
+            if intent_changed:
+                import threading as _threading
+                _threading.Thread(
+                    target=_notify_founder_plan_intent,
+                    args=(str(user.get("email") or ""), plan_name),
+                    daemon=True,
+                ).start()
             self._send_json({
                 "ok": True,
                 "plan": state,

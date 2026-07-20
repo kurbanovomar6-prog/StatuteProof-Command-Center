@@ -638,8 +638,10 @@ def send_due_reminders(
 
     ``send_fn`` and ``recipients`` are injectable for tests; in production they
     default to ``app.telegram.send_telegram_message`` and the subscribed
-    customers (``app.telegram_pairing.get_all_linked_chat_ids``) — the same
-    channel customer alerts use.
+    customers (``app.telegram_pairing.get_all_linked_chat_ids``, plan-filtered
+    while ``alerts_require_plan()`` is on) — the same channel, and the same
+    gate, customer alerts use. An explicit ``recipients=`` list is NOT
+    plan-filtered: it is an operator/test-driven override.
     """
     due = due_reminders(as_of=as_of, lead_stages=lead_stages, base_dir=base_dir)
     summary: dict[str, Any] = {
@@ -664,8 +666,23 @@ def send_due_reminders(
     # owner below and never broadcast to every paired customer (tenancy).
     if recipients is None:
         try:
-            from app.telegram_pairing import get_all_linked_chat_ids
+            from app.telegram_pairing import (
+                alerts_require_plan,
+                filter_plan_eligible_chat_ids,
+                get_all_linked_chat_ids,
+            )
             broadcast_recipients = [str(c) for c in (get_all_linked_chat_ids() or [])]
+            # Plan gate on the paid core deliverable (audit 07-20): a reminder
+            # carries source_name, the official URL and a verbatim diff excerpt,
+            # so the broadcast pool reads the SAME flag and filter as the alert
+            # broadcast in app/telegram.py. An explicit recipients= override
+            # (operator/test driven) is deliberately NOT gated, and the
+            # per-owner custom-source branch below is out of scope — it ships
+            # only the owner's own plan-gated private source.
+            if alerts_require_plan():
+                broadcast_recipients = [
+                    str(c) for c in filter_plan_eligible_chat_ids(broadcast_recipients)
+                ]
         except Exception as exc:  # pragma: no cover - defensive
             logger.warning("deadline radar: could not resolve recipients: %s", exc)
             broadcast_recipients = []
