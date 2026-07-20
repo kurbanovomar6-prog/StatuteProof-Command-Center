@@ -33,6 +33,14 @@ def isolated_db(tmp_path, monkeypatch):
     yield tmp_path / "digest.db"
 
 
+def activate_plan(user_id: int, plan_name: str) -> None:
+    """Give a test customer a founder-ACTIVATED plan (the scheduled dispatcher
+    is plan-gated — see tests/test_alert_plan_gating.py)."""
+    from app.plan import activate_plan as _activate
+
+    _activate(int(user_id), plan_name)
+
+
 def _make_paired_user(email: str, chat_id: str, *, alerts_enabled: bool = True) -> int:
     from app.auth import create_user
     from app.profile import update_profile
@@ -544,6 +552,9 @@ class TestRunScheduledDigests:
         import app.digest_cadence as dc
 
         user_id = _make_paired_user("e2e@co.com", "900040")
+        # The scheduled dispatcher is plan-gated (see tests/test_alert_plan_gating.py):
+        # this feature test is about cadence, so give the customer an activated plan.
+        activate_plan(user_id, "professional")
         preview = _preview([_match("h1", risk="HIGH", score=40), _match("m1", risk="MEDIUM", score=60)])
 
         monkeypatch.setattr(dc, "build_routing_preview_for_user", lambda uid, days: preview)
@@ -573,7 +584,7 @@ class TestRunScheduledDigests:
     def test_idempotent_across_two_cycles(self, isolated_db, tmp_path, monkeypatch):
         import app.digest_cadence as dc
 
-        _make_paired_user("e2e2@co.com", "900041")
+        activate_plan(_make_paired_user("e2e2@co.com", "900041"), "professional")
         preview = _preview([_match("m1", risk="MEDIUM", score=60)])
         monkeypatch.setattr(dc, "build_routing_preview_for_user", lambda uid, days: preview)
         monkeypatch.setattr(dc, "send_preview_alert_to_user", lambda uid, aid: {"ok": True})
