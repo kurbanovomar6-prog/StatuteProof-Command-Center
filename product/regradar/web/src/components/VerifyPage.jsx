@@ -6,12 +6,17 @@
  * server never reads its own evidence store — that is the whole point: you do not
  * have to trust StatuteProof, you check the math yourself.
  *
- * "Load a real record" fills the form with a REAL evidence record of public
- * regulator content (the VARA Compliance & Risk Management Rulebook capture),
- * shipped as static assets under /sample-record/, so a first-time visitor can
- * run the check without holding a record. Deep link: /verify#sample auto-loads
- * that built-in record ONLY — the page never accepts records or URLs from
- * location params (no reflected-content vector).
+ * The sample loaders fill the form with a REAL evidence record of public
+ * regulator content, shipped as static assets, so a first-time visitor can run
+ * the check without holding a record:
+ *   - CHANGED sample (/sample-record-changed/): a real captured change of the
+ *     official DIFC Laws and Regulations page WITH its sealed diff, so the
+ *     diff_bytes_match check runs. Deep link: /verify#sample.
+ *   - baseline sample (/sample-record/): the VARA Compliance & Risk Management
+ *     Rulebook capture (FIRST_SEEN, no diff). Deep link: /verify#sample-baseline.
+ * Nothing else is ever read from location — only these two fixed hashes; the
+ * page never accepts records or URLs from location params (no
+ * reflected-content vector).
  *
  * Disclaimer: verification confirms record integrity only. Not legal advice.
  */
@@ -21,20 +26,43 @@ import { verifyRecord } from '../api'
 
 const SPEC_HREF = '/api/verify-spec'
 
-// Static, repo-pinned assets: a real evidence record captured by the monitor
-// from the official VARA Compliance & Risk Management Rulebook page, plus the
-// exact raw and normalized text its hashes cover. Copied byte-for-byte from the
-// evidence store; nothing in it is invented.
-const SAMPLE_ASSETS = {
+// Static, repo-pinned assets: real evidence records captured by the monitor
+// from official regulator pages, plus the exact raw/normalized/diff text their
+// hashes cover. Copied byte-for-byte from the evidence store (the changed
+// record re-sealed under the current record-hash schema by
+// tools/make_verify_sample.py); nothing in them is invented.
+const BASELINE_SAMPLE_ASSETS = {
   record: '/sample-record/record.json',
   raw: '/sample-record/raw.txt',
   normalized: '/sample-record/normalized.txt',
+}
+const CHANGED_SAMPLE_ASSETS = {
+  record: '/sample-record-changed/record.json',
+  raw: '/sample-record-changed/raw.txt',
+  normalized: '/sample-record-changed/normalized.txt',
+  diff: '/sample-record-changed/diff.txt',
+  // Real RFC 3161 token from a public TSA (freetsa.org) attesting the changed
+  // record's record_hash — lets the sample also demonstrate the offline
+  // third-party timestamp check. Optional: if it cannot be fetched, the record
+  // check still runs without it.
+  token: '/sample-record-changed/token.tsr',
 }
 
 async function fetchSampleAsset(path) {
   const response = await fetch(path)
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
   return response.text()
+}
+
+// Binary variant for the .tsr token (DER): returns base64 for the JSON body,
+// the same encoding handleTokenFile produces for a user-picked file.
+async function fetchSampleAssetBase64(path) {
+  const response = await fetch(path)
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  const bytes = new Uint8Array(await response.arrayBuffer())
+  let bin = ''
+  for (let i = 0; i < bytes.length; i += 1) bin += String.fromCharCode(bytes[i])
+  return btoa(bin)
 }
 
 const STATUS_META = {
@@ -220,15 +248,20 @@ export default function VerifyPage({ onBack }) {
     await runVerify(record, rawText, normalizedText, diffText, tokenB64, tokenDigest)
   }
 
-  async function handleLoadSample() {
+  async function handleLoadSample(kind = 'changed') {
     setError('')
     setResult(null)
     setSampleLoading(true)
     try {
-      const [recordStr, raw, normalized] = await Promise.all([
-        fetchSampleAsset(SAMPLE_ASSETS.record),
-        fetchSampleAsset(SAMPLE_ASSETS.raw),
-        fetchSampleAsset(SAMPLE_ASSETS.normalized),
+      const assets = kind === 'baseline' ? BASELINE_SAMPLE_ASSETS : CHANGED_SAMPLE_ASSETS
+      const [recordStr, raw, normalized, diff, token] = await Promise.all([
+        fetchSampleAsset(assets.record),
+        fetchSampleAsset(assets.raw),
+        fetchSampleAsset(assets.normalized),
+        assets.diff ? fetchSampleAsset(assets.diff) : Promise.resolve(null),
+        // The token is a bonus check — never let a missing token block the
+        // record verification itself.
+        assets.token ? fetchSampleAssetBase64(assets.token).catch(() => null) : Promise.resolve(null),
       ])
       const record = JSON.parse(recordStr)
       setRecordText(recordStr.trim())
@@ -236,13 +269,19 @@ export default function VerifyPage({ onBack }) {
       setRawName('raw.txt')
       setNormalizedText(normalized)
       setNormalizedName('normalized.txt')
-      // Clear any previously-chosen token: it belongs to a different record,
-      // and leaving it staged would silently pair it with the sample on the
-      // next manual Verify click while the auto-run below omits it.
-      setTokenB64(null)
-      setTokenName('')
-      setTokenDigest('')
-      await runVerify(record, raw, normalized)
+      // Stage (or clear) the sealed diff alongside the record it belongs to: a
+      // previously-staged diff from another record must never silently pair
+      // with this one on a later manual Verify click.
+      setDiffText(diff)
+      setDiffName(diff != null ? 'diff.txt' : '')
+      // Stage the sample's own token (attesting THIS record's record_hash), or
+      // clear any previously-chosen one: a token from a different record must
+      // never silently pair with this sample on the next manual Verify click.
+      const tokenDigestValue = token != null ? record.record_hash || '' : ''
+      setTokenB64(token)
+      setTokenName(token != null ? 'token.tsr' : '')
+      setTokenDigest(tokenDigestValue)
+      await runVerify(record, raw, normalized, diff, token, tokenDigestValue || undefined)
     } catch {
       setError(
         'The real record could not be loaded right now. Please try again, or paste a record.json you hold.',
@@ -253,15 +292,18 @@ export default function VerifyPage({ onBack }) {
   }
 
   useEffect(() => {
-    // Deep link: /verify#sample auto-loads the built-in real record ONLY.
-    // Nothing else is ever read from the location — no arbitrary URLs, no
-    // pasted records via params.
+    // Deep links: /verify#sample auto-loads the built-in CHANGED record (with
+    // its sealed diff); /verify#sample-baseline the FIRST_SEEN baseline. ONLY
+    // these two fixed hashes — nothing else is ever read from the location (no
+    // arbitrary URLs, no pasted records via params).
     if (autoLoadedRef.current) return
-    if (typeof window !== 'undefined' && window.location.hash === '#sample') {
+    if (typeof window === 'undefined') return
+    const { hash } = window.location
+    if (hash === '#sample' || hash === '#sample-baseline') {
       autoLoadedRef.current = true
       // Defer past the effect body: the effect only reads the external URL and
       // schedules the load; all state updates happen in the microtask.
-      queueMicrotask(handleLoadSample)
+      queueMicrotask(() => handleLoadSample(hash === '#sample-baseline' ? 'baseline' : 'changed'))
     }
     // Mount-only by design; handleLoadSample is stable in behaviour.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -310,8 +352,23 @@ export default function VerifyPage({ onBack }) {
                 No record on hand? Load a real one.
               </p>
               <p className="mt-1 text-[0.8rem] leading-relaxed text-[var(--text-secondary)]">
-                This is a real evidence record of public regulator content — a change our monitor
-                captured on the official{' '}
+                Each is a real evidence record of public regulator content. The CHANGED record is a
+                captured text difference between two consecutive monitoring runs of the official{' '}
+                <a
+                  href="https://www.difc.ae/business/laws-regulations/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+                >
+                  DIFC Laws and Regulations
+                </a>{' '}
+                page — including extraction variance, so it is not by itself evidence of a
+                regulatory amendment. It is a self-sealed record together with the exact raw,
+                normalized, and diff text its hashes cover, so the &quot;Sealed diff bytes
+                match&quot; check runs. Its change.lines_added / change.lines_removed fields are a
+                legacy line-prefix count over the diff file; the summary line inside the sealed diff
+                is authoritative for how much text moved. The baseline record is the first capture
+                of the official{' '}
                 <a
                   href="https://rulebooks.vara.ae/rulebook/compliance-and-risk-management-rulebook"
                   target="_blank"
@@ -319,20 +376,32 @@ export default function VerifyPage({ onBack }) {
                   className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
                 >
                   VARA Compliance &amp; Risk Management Rulebook
-                </a>{' '}
-                — a modern self-sealed record (every hash check runs), together with the exact raw
-                and normalized text its hashes cover. Nothing in it is invented. Check the math yourself.
+                </a>
+                . Nothing in them is invented. Check the math yourself.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleLoadSample}
-              disabled={sampleLoading || loading}
-              className="sp-btn-secondary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <FileSearch className="h-4 w-4 text-[var(--accent)]" />
-              {sampleLoading ? 'Loading record…' : 'Load a real record'}
-            </button>
+            <div className="flex shrink-0 flex-col items-stretch gap-2">
+              <button
+                type="button"
+                onClick={() => handleLoadSample('changed')}
+                disabled={sampleLoading || loading}
+                className="sp-btn-secondary justify-center disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <FileSearch className="h-4 w-4 text-[var(--accent)]" />
+                {sampleLoading
+                  ? 'Loading record…'
+                  : 'Load a real CHANGED record — includes the sealed diff'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLoadSample('baseline')}
+                disabled={sampleLoading || loading}
+                className="sp-btn-secondary justify-center disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <FileSearch className="h-4 w-4 text-[var(--accent)]" />
+                Load a real baseline record
+              </button>
+            </div>
           </div>
         </section>
 

@@ -1,0 +1,53 @@
+{
+  "change": {
+    "diff_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/diff.txt",
+    "lines_added": 0,
+    "lines_removed": 5,
+    "summary": "Extracted 9,150 chars — sufficient for reliable generic monitoring."
+  },
+  "content": {
+    "captured_at": "2026-05-30T12:10:44+00:00",
+    "current_hash": "sha256:54f6c51ea21a18465c388c8d3ac94ae84a098ecabc560dbdbf086796169faac7",
+    "diff_hash": "sha256:3f3c7bffc083e848e09664b1dcb983bbc86258296390cdc3568b08d37705272d",
+    "normalized_current_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/current.normalized.txt",
+    "normalized_previous_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/previous.normalized.txt",
+    "previous_hash": "sha256:a9fc2c308223124cd3623c7f651e3e69aa3023c9510569a0d831ba347fbdaf94",
+    "raw_content_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/raw.txt",
+    "raw_hash": "sha256:3bbdea5d20425f5d2f2e45a92ebfac692d71cf8f8d2def0357b5dffc66d738eb",
+    "source_url": "https://www.difc.ae/business/laws-regulations/"
+  },
+  "files": {
+    "diff_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/diff.txt",
+    "metadata_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/metadata.json",
+    "normalized_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/current.normalized.txt",
+    "previous_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/previous.normalized.txt",
+    "raw_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/raw.txt",
+    "snapshot_path": "evidence/difc/AE-difc-laws-and-regulations/AE-20260530T120622Z-21527790/snapshot.txt"
+  },
+  "integrity": {
+    "hash_verified": true,
+    "integrity_status": "VERIFIED",
+    "verified_at": "2026-06-23T15:29:42Z"
+  },
+  "record_hash": "sha256:39ffa3396f78128abd1c98e07999e3fc35ba8189ac82027be41c5c6cb2d2d491",
+  "record_hash_method": "content-sha256-v1",
+  "record_id": "evr_AE-difc-laws-and-regulations_AE-20260530T120622Z-21527790",
+  "record_status": "complete",
+  "review": {
+    "human_review_required": true,
+    "review_reason": "Customer-facing brief requires human review.",
+    "review_status": "pending"
+  },
+  "run": {
+    "run_id": "AE-20260530T120622Z-21527790",
+    "status": "CHANGED",
+    "timestamp": "2026-05-30T12:10:44+00:00"
+  },
+  "schema_version": "2.0",
+  "source": {
+    "official_url": "https://www.difc.ae/business/laws-regulations/",
+    "regulator": "DIFC",
+    "source_id": "AE-difc-laws-and-regulations",
+    "source_name": "DIFC Laws and Regulations"
+  }
+}

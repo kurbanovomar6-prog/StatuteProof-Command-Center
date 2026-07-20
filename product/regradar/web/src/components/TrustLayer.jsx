@@ -5,7 +5,7 @@ const TRUST_CARDS = [
     icon: Hash,
     objection: 'How do I know you actually captured the update?',
     answer:
-      'Every monitoring run stores a cryptographic hash and a timestamped snapshot of what was extracted from the official source. Your compliance team can inspect the hash, the stored snapshot, and the diff record to verify exactly what was captured and when — without relying on our word. The evidence chain is additionally anchored with an RFC 3161 timestamp from a third-party time-stamping authority — each anchor covers the chain head at the time it is issued, and the token ships in your evidence exports so you can verify it independently of us.',
+      'Every monitoring run stores a cryptographic hash and a timestamped snapshot of what was extracted from the official source. Your compliance team can inspect the hash, the stored snapshot, and the diff record to verify exactly what was captured and when — without relying on our word. The evidence chain additionally supports RFC 3161 timestamp anchoring by a third-party time-stamping authority — when anchoring is enabled, each anchor covers the chain head at the time it is issued, the token is included in your evidence exports, and you can verify it offline on the public Verify page, independently of us.',
     verifyLink: true,
   },
   {

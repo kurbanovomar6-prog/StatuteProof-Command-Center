@@ -1,0 +1,133 @@
+# Source Diff
+
+- Previous run: AE-20260530T120041Z-9589cd9c
+- Current run: AE-20260530T120622Z-21527790
+- Quality: GOOD
+- Meaningful change: True
+- Summary: 0 added, 31 removed, 0 changed chunks; 96 unchanged.
+
+## Removed Chunks
+
+```text
+Laws and Regulations in Dubai International Financial Centre (DIFC)
+```
+
+```text
+DIFC’s unique legal and regulatory framework is based on international standards and principles of common law that is tailored to the region's unique needs, creating the optimal environment for financial services and related industries and services to grow.
+```
+
+```text
+The Dubai International Financial Centre ("DIFC") was launched in accordance with United Arab Emirates (UAE) Federal Decree No. 35 of 2004 as a part of Dubai's strategic vision to diversify its economic resources and attract capital and investments in the region. It is a Financial Free Zone defined in Federal Law No. 8 of 2004 , as an independent jurisdiction within the UAE, DIFC is empowered to create its own legal and regulatory framework for all civil and commercial matters.
+```
+
+```text
+DIFC’s unique legal and regulatory framework is based on international standards and principles of common law that is tailored to the region's unique needs, creating the optimal environment for financial services and related industries and services to grow. For a brief history of the UAE laws creating the DIFC click here.
+```
+
+```text
+The following three independent bodies have been established at the DIFC under Dubai Law 5 of 2021 to enable and support the growth and development of businesses in the Centre: the DIFC Authority, the Dubai Financial Services Authority ("DFSA") and the DIFC Courts.
+```
+
+```text
+Dubai International Financial Centre Authority DIFC Authority oversees the strategic development, operational management and planning of the Dubai International Financial Centre. It is also responsible for the development and administration of laws and regulations other than those related to the financial services.
+```
+
+```text
+Dubai International Financial Centre Authority
+```
+
+```text
+DIFC Authority oversees the strategic development, operational management and planning of the Dubai International Financial Centre. It is also responsible for the development and administration of laws and regulations other than those related to the financial services.
+```
+
+```text
+Dubai Financial Services Authority (DFSA) DFSA is an independent regulator of financial and related services conducted in or from the Centre. The DFSA supervises regulated companies and monitors their compliance with applicable laws and rules. The Regulatory Law, DIFC Law No. 1 of 2004 grants the DFSA its powers as a financial services regulator. Read more
+```
+
+```text
+Dubai Financial Services Authority (DFSA)
+```
+
+```text
+DFSA is an independent regulator of financial and related services conducted in or from the Centre. The DFSA supervises regulated companies and monitors their compliance with applicable laws and rules. The Regulatory Law, DIFC Law No. 1 of 2004 grants the DFSA its powers as a financial services regulator. Read more
+```
+
+```text
+DIFC Courts Operating within a common law framework to ensure the highest international standards of legal procedure and dispute resolution. The DIFC Courts acts as an independent administration of justice for resolving all civil and commercial laws. Read more
+```
+
+```text
+Operating within a common law framework to ensure the highest international standards of legal procedure and dispute resolution. The DIFC Courts acts as an independent administration of justice for resolving all civil and commercial laws. Read more
+```
+
+```text
+Overview of the UAE laws creating the DIFC
+```
+
+```text
+Federal Law No. 8 of 2004 ( English / Arabic )
+```
+
+```text
+Federal Law No. 8 of 2004 on “The Financial Free Zones in the United Arab Emirates”:
+```
+
+```text
+Allows the creation of a Financial Free Zone in any Emirate of the UAE, by a Federal Decree.
+```
+
+```text
+Exempts the Financial Free Zones and the Financial Activities from all Federal civil and commercial laws.
+```
+
+```text
+Confirms the application of Federal criminal laws in the Financial Free Zones, including the Federal Laws on Anti-Money Laundering;
+```
+
+```text
+Prohibits DIFC authorised firms from dealing in deposit taking from the State’s markets and in the UAE Dirham.
+```
+
+```text
+Restricts DIFC authorised insurers’ dealings in the State to carrying out re-insurance activities.
+```
+
+```text
+Federal Decree No. 35 of 2004 ( English )
+```
+
+```text
+Federal Decree No. 35 of 2004 created the DIFC as a Financial Free Zone in Dubai (the DIFC Law). The Federal Cabinet also made two Cabinet Resolutions that.
+```
+
+```text
+Set out the geographic boundaries of the DIFC.
+```
+
+```text
+Allow the centre bodies and authorised firms to operate outside the DIFC for the first four years because the DIFC was still under construction.
+```
+
+```text
+Dubai Law No. 5 of 2021 on “The Establishment of the Dubai International Financial Centre” acknowledges the creation of the DIFC and:
+```
+
+```text
+Recognises the financial and administrative independence of the DIFC
+```
+
+```text
+Creates the DIFC centre bodies, which include the DIFC Authority, DFSA and DRA.
+```
+
+```text
+Exempts the DIFC from Dubai laws and regulations, under certain conditions.
+```
+
+```text
+Cabinet Resolution No. 28 of 2007 ( English / Arabic )
+```
+
+```text
+Cabinet Resolution No. 28 of 2007 on “Implementing Federal Law No. 8 of of 2004 on Financial Free Zones” further detailed certain provisions of the Financial Free Zones Law.
+```

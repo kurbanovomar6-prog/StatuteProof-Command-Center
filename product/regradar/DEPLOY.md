@@ -90,6 +90,14 @@ nano .env    # fill: SECRET_KEY, ENVIRONMENT=production, NEW telegram tokens,
 chown regradar:regradar .env && chmod 600 .env
 ```
 
+Alert plan gate (added 2026-07-20):
+
+- `STATUTEPROOF_ALERTS_REQUIRE_PLAN` — default `1`: official-source Telegram
+  broadcasts go only to founder-activated paid plans + exempt operator
+  emails. Set `0` to restore the ungated pilot broadcast.
+- `STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS` — comma-separated founder/operator
+  account emails exempt from the gate.
+
 ## 5. Frontend build (≈3 min)
 
 ```bash
@@ -131,6 +139,40 @@ Notes:
 - Startup logs will print `BASELINE DIVERGENCE` errors for legacy pre-2026-07
   records — expected documented history; new runs realign the derived index.
 
+### 7b. RFC 3161 evidence-chain anchoring (optional — recommended)
+
+Why: upgrades the evidence chain from tamper-evident to externally anchored —
+a third-party time-stamping authority signs the chain head, so the anchor can
+be verified offline, independently of us. The anchor code
+(`app/rfc3161_anchor.py`) is **dormant until enabled**: with `RFC3161_TSA_URL`
+unset there is zero behavior change. The dependency (`asn1crypto==1.5.1`) is
+already pinned in `requirements.txt`.
+
+```bash
+# Enable: add the TSA URL to /srv/regradar/.env (any RFC 3161 TSA works;
+# freetsa.org is a free public one), then restart the services.
+echo 'RFC3161_TSA_URL=https://freetsa.org/tsr' >> /srv/regradar/.env
+systemctl restart statuteproof-api statuteproof-scheduler
+
+# Force an anchor now + verify (run from /srv/regradar):
+cd /srv/regradar
+sudo -u regradar /srv/regradar/.venv/bin/python -c \
+  "import json; from app.rfc3161_anchor import anchor_head_now; print(json.dumps(anchor_head_now(), indent=2))"
+# expect: a token dict, and these sidecars to appear:
+ls -la /srv/regradar/data/evidence_chain_head.tsr /srv/regradar/data/evidence_chain_head.tsr.json
+
+# Offline check of the token (raw DER, readable by openssl ts):
+openssl ts -reply -in /srv/regradar/data/evidence_chain_head.tsr -text | head
+```
+
+Notes:
+- After enabling, every capture re-anchors the chain head out-of-band
+  (`spawn_head_anchor` in `app/source_runs.py`) — no cron needed.
+- Optional knobs: `RFC3161_TSA_TIMEOUT_S`, `RFC3161_TSA_CERT_REQ`,
+  `RFC3161_TSA_POLICY_OID`.
+- All anchor failures are logged and swallowed — anchoring never blocks or
+  fails a capture.
+
 ## 8. Reverse proxy + TLS (≈4 min)
 
 ```bash
@@ -170,6 +212,34 @@ echo 'STATUTEPROOF_BACKUP_REMOTE=backups@offbox.example:/srv/statuteproof-backup
 systemctl restart statuteproof-backup.timer   # timer re-reads EnvironmentFile on next run
 ```
 
+Since 2026-07-20 the missing remote is enforced, not just warned about:
+`deploy/deploy-check.sh` (§ 6) **FAILS** when `STATUTEPROOF_BACKUP_REMOTE` is
+unset. `STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY=1` is a dev-only override — never
+set it on prod. In addition, `backup.sh` pages the founder via the admin
+Telegram bot (same channel as the heartbeat/integrity watchdogs) whenever the
+off-box push fails or is skipped without the override.
+
+## External uptime probe (2-minute step, free tier)
+
+The on-droplet deadman (`statuteproof-heartbeat.timer`) cannot page anyone if
+the droplet itself dies — the watchdog dies with it. Close that gap with an
+owner-created external heartbeat service (StatuteProof only sends the ping):
+
+1. Create a free check at [healthchecks.io](https://healthchecks.io) (or an
+   UptimeRobot heartbeat monitor).
+2. Set the check's period/grace to **at least 40 min** — the heartbeat timer
+   pings every 30 min, so anything tighter false-alarms.
+3. Copy the check's ping URL into `/srv/regradar/.env`:
+
+   ```bash
+   echo 'STATUTEPROOF_HEARTBEAT_PING_URL=<ping url>' >> /srv/regradar/.env
+   ```
+
+No restart needed — the heartbeat oneshot re-reads `.env` each run. From then
+on, `run.py heartbeat-check` GETs the URL after each SUCCESSFUL internal check
+(and deliberately stays silent on a stale/missing heartbeat), so the external
+service alerts the owner when pings stop arriving.
+
 **Total: ≈30 min.**
 
 ## 10. Plan re-activation for paying customers — REQUIRED after this deploy
@@ -199,6 +269,21 @@ sudo -u regradar python3 run.py activate-plan --list
 
 Only activate accounts you have independently confirmed are paying — a
 self-selected paid `plan_name` is an intent, not proof of payment.
+
+## Stripe payment links — owner-only step (optional until billing launch)
+
+1. Stripe Dashboard → Payment Links → create two links: Founding Pilot
+   ($199/mo) and UAE Monitor ($399/mo).
+2. Paste the `https://buy.stripe.com/...` URLs into
+   `web/src/data/constants.js` → `STRIPE_LINK_FOUNDING_PILOT` /
+   `STRIPE_LINK_UAE_MONITOR`.
+3. Rebuild the frontend (step 5) and redeploy.
+4. Empty strings keep the current fallback: the pricing CTA routes to
+   registration + plan-intent, which pages the founder via the admin bot.
+5. Payment Links are public checkout URLs — no Stripe secret key ever goes
+   into the repo or `.env` for this flow.
+6. After a customer pays, activation is still the manual
+   `run.py activate-plan` step from §10 — payment does not auto-activate.
 
 ## First-hour smoke-test checklist
 

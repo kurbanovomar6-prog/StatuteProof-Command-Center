@@ -39,8 +39,9 @@ function GlobalLoader() {
 }
 
 // REAL sealed record — the exact VARA capture shipped at
-// /sample-record/record.json, the same artifact /verify#sample loads and
-// re-hashes. A MODERN self-sealed record (content-sha256-v1): record_hash,
+// /sample-record/record.json, the same artifact /verify#sample-baseline loads
+// and re-hashes (/verify#sample loads the DIFC CHANGED record instead).
+// A MODERN self-sealed record (content-sha256-v1): record_hash,
 // raw_hash and sealed capture metadata all verify — no skipped hash checks.
 // Every field below is pinned to that asset by
 // src/test/realRecordLanding.test.js. Nothing here is invented.
@@ -427,7 +428,7 @@ export default function App() {
           onVerify={() => navigatePublic('verify', { query: '#sample' })}
         />
         <Suspense fallback={<div className="py-20" />}>
-          {/* Evidence Section — a REAL sealed record (same asset /verify#sample loads) */}
+          {/* Evidence Section — a REAL sealed record (same asset /verify#sample-baseline loads) */}
           <section className="py-16 px-4 bg-[#07111F]" id="evidence">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-10">
@@ -441,8 +442,9 @@ export default function App() {
                   The full VARA Compliance &amp; Risk Management Rulebook
                   (including the AML/CFT part), captured from the official
                   rulebook site and sealed under SHA-256 with a self-sealing
-                  record hash. Sealed records are chained, and the chain head
-                  is anchored with a third-party RFC 3161 timestamp. The
+                  record hash. Sealed records are chained, and the chain
+                  supports third-party RFC 3161 timestamp anchoring — when an
+                  anchor token is present, the verifier checks it offline. The
                   verifier re-hashes the exact bytes you load — no account, no
                   trust in us required. Verification confirms record integrity
                   only; not legal advice.
@@ -455,7 +457,7 @@ export default function App() {
               <div className="text-center">
                 <button
                   type="button"
-                  onClick={() => navigatePublic('verify', { query: '#sample' })}
+                  onClick={() => navigatePublic('verify', { query: '#sample-baseline' })}
                   className="sp-btn-primary justify-center px-6"
                 >
                   Verify these hashes yourself — 60 seconds, no account
