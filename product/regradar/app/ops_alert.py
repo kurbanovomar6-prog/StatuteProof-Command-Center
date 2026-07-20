@@ -48,6 +48,9 @@ _HEARTBEAT_STALE_MULTIPLIER = 2
 # Matches api.py's _TELEGRAM_TIMEOUT_S — a wedged Telegram must not wedge us too.
 _TELEGRAM_TIMEOUT_S = 10
 
+# External uptime probe timeout — the ping must never block the oneshot.
+_PING_TIMEOUT_S = 10
+
 # Disable switch for smoke tests / dry-run environments. Mirrors
 # CONTACT_DELIVERY_DISABLED semantics (accepts the usual truthy spellings).
 _DISABLED_TRUTHY = {"1", "true", "yes", "on"}
@@ -113,6 +116,56 @@ def notify_founder(text: str) -> bool:
         return False
 
 
+def ping_external_heartbeat() -> bool:
+    """Best-effort GET to an owner-created external uptime probe.
+
+    The internal deadman watchdog lives on the very droplet it watches, so a
+    dead droplet can never page anyone. The fix is an external heartbeat
+    service (healthchecks.io / UptimeRobot heartbeat — the OWNER creates the
+    account and URL; we only send the ping): it alerts when pings STOP
+    arriving. That is why this is called only after a SUCCESSFUL internal
+    heartbeat check and deliberately NOT on the stale/missing paths — silence
+    at the external service is the alarm signal.
+
+    Returns
+    -------
+    bool
+        True only when the probe URL is configured and answered 2xx.
+        False on any other outcome: disabled, unset URL, non-2xx status,
+        network error, or timeout. NEVER raises.
+    """
+    # Same kill switch as notify_founder: STATUTEPROOF_OPS_ALERTS_DISABLED
+    # silences ALL outbound ops traffic. Without this a staging box or restore
+    # drill carrying a production .env would keep the external deadman green
+    # through a real production outage.
+    if _ops_alerts_disabled():
+        logger.info("heartbeat: external ping suppressed via env")
+        return False
+
+    # Read at call time (not import time) so the systemd oneshot picks up a
+    # newly set .env value without a code change, and tests can toggle it
+    # with monkeypatch — same rationale as _ops_alerts_disabled.
+    url = os.getenv("STATUTEPROOF_HEARTBEAT_PING_URL", "").strip()
+    if not url:
+        logger.debug("heartbeat: no external ping URL configured — skipping")
+        return False
+
+    try:
+        resp = _req.get(url, timeout=_PING_TIMEOUT_S)
+        if 200 <= resp.status_code < 300:
+            logger.info("heartbeat: external ping delivered")
+            return True
+        # Log the outcome only — healthchecks-style ping URLs embed a secret
+        # UUID, so the URL itself stays out of warning-level logs.
+        logger.warning(
+            "heartbeat: external ping rejected (HTTP %s)", resp.status_code
+        )
+        return False
+    except Exception as exc:  # noqa: BLE001 — deliberately swallow everything
+        logger.warning("heartbeat: external ping failed: %s", type(exc).__name__)
+        return False
+
+
 def _heartbeat_stale_seconds() -> int:
     """Max heartbeat age (seconds) before the loop is considered wedged."""
     interval_min = max(1, int(WATCH_INTERVAL_MINUTES or 60))
@@ -172,6 +225,9 @@ def check_heartbeat(now: float | None = None) -> bool:
             return True
 
         logger.info("heartbeat: fresh (%ds old, threshold %ds)", int(age), stale_after)
+        # Fresh = healthy: tell the external probe we're alive. Stale/missing
+        # paths deliberately do NOT ping — silence upstream is the page.
+        ping_external_heartbeat()
         return False
     except Exception as exc:  # pragma: no cover - defensive
         logger.warning("heartbeat: check failed: %s", type(exc).__name__)

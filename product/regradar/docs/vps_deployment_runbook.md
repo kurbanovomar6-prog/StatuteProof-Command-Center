@@ -1,5 +1,11 @@
 # RegRadar — VPS Deployment Runbook
 
+> **SUPERSEDED (2026-07-20).** This document describes the old nginx-based
+> stack and is kept for history only. Current production is a DigitalOcean
+> droplet running **Caddy + systemd units** with the app at `/srv/regradar`.
+> Use [`DEPLOY.md`](../DEPLOY.md) for fresh deploys and
+> [`UPDATE.md`](../UPDATE.md) for updates and rollback.
+
 ## Overview
 
 RegRadar requires two processes running together:

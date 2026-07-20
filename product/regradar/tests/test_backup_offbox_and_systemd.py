@@ -57,12 +57,14 @@ if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
       echo "off-box copy (rclone): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
     else
       echo "WARNING: off-box copy (rclone) failed; local archive kept, continuing to retention" >&2
+      BACKUP_PAGE_MSG="🚨 StatuteProof off-box backup push FAILED (rclone). The archive exists only on the droplet. Check: journalctl -u statuteproof-backup"
     fi
   else
     if scp "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"; then
       echo "off-box copy (scp): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
     else
       echo "WARNING: off-box copy (scp) failed; local archive kept, continuing to retention" >&2
+      BACKUP_PAGE_MSG="🚨 StatuteProof off-box backup push FAILED (scp). The archive exists only on the droplet. Check: journalctl -u statuteproof-backup"
     fi
   fi
 fi
@@ -212,6 +214,9 @@ _WARN_BLOCK = """\
 if [ -z "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
   echo "WARNING: STATUTEPROOF_BACKUP_REMOTE is unset — backups are LOCAL-ONLY on this droplet;" >&2
   echo "WARNING: the evidence trail is NOT protected against droplet loss. Set STATUTEPROOF_BACKUP_REMOTE in .env (see DEPLOY.md § 9) to push each archive off-box." >&2
+  if [ "${STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY:-}" != "1" ]; then
+    BACKUP_PAGE_MSG="⚠️ StatuteProof backup ran LOCAL-ONLY: STATUTEPROOF_BACKUP_REMOTE is unset, so the evidence trail does NOT survive droplet loss. Set it in /srv/regradar/.env (DEPLOY.md § 9)."
+  fi
 fi
 """
 

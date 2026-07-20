@@ -72,6 +72,21 @@ else
     || warn "TELEGRAM_BOT_TOKEN empty — founder contact notifications disabled"
 fi
 
+echo "── backup & uptime protection ───────────────────────────"
+# Off-box backup is what lets the sealed evidence trail survive droplet loss —
+# a missing remote is a deploy FAILURE, not a warning (audit 2026-07-20).
+# STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY=1 is a documented DEV-ONLY override.
+if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
+  ok "STATUTEPROOF_BACKUP_REMOTE set — backup archives push off-box"
+elif [ "${STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY:-}" = "1" ]; then
+  warn "backups are LOCAL-ONLY (STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY=1 dev override — never use on prod)"
+else
+  bad "STATUTEPROOF_BACKUP_REMOTE is unset — evidence trail does not survive droplet loss; set it in .env (DEPLOY.md § 9) or export STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY=1 (dev only)"
+fi
+[ -n "${STATUTEPROOF_HEARTBEAT_PING_URL:-}" ] \
+  && ok "STATUTEPROOF_HEARTBEAT_PING_URL set — external uptime probe wired" \
+  || warn "STATUTEPROOF_HEARTBEAT_PING_URL empty — no external uptime probe (see DEPLOY.md § External uptime probe)"
+
 echo "── app config validation ────────────────────────────────"
 if "$PY_BIN" run.py validate-config >/tmp/sp-validate-config.out 2>&1; then
   ok "run.py validate-config passed"
