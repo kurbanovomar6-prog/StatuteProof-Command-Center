@@ -101,10 +101,23 @@ class ForbiddenClaimError(ValueError):
 # phrases. Folded to their Latin lookalike so an adversarial source cannot
 # smuggle "guarantee сompliance" (Cyrillic с) past the substring scan. AI models
 # emit ASCII, so this only matters for deliberately-crafted source content.
+# Audited 2026-07-21 against every ASCII letter used by FORBIDDEN_PHRASES and
+# BRIEF_EXTRA_PHRASES: the Greek epsilons were missing, so "guarantεe
+# compliance" passed the gate while the Cyrillic spelling was blocked. Only
+# genuine lookalikes are listed — no mapping is invented for letters that have
+# no plausible Cyrillic/Greek confusable (f, g, n, …). Covered by
+# tests/test_legal_safety_homoglyphs.py, which is data-driven off this table.
 _CONFUSABLE_FOLD = str.maketrans({
+    # Cyrillic
     "а": "a", "с": "c", "е": "e", "о": "o", "р": "p", "х": "x", "у": "y",
     "і": "i", "ѕ": "s", "ј": "j", "ԁ": "d", "һ": "h", "ӏ": "l", "т": "t",
-    "ν": "v", "ο": "o", "ρ": "p", "α": "a", "ϲ": "c", "е": "e",
+    "г": "r", "м": "m", "ѵ": "v",
+    # Greek
+    "α": "a", "β": "b", "γ": "y", "ε": "e", "ϵ": "e", "ι": "i", "κ": "k",
+    "μ": "m", "ν": "v", "ο": "o", "ρ": "p", "ς": "c", "ϲ": "c", "τ": "t",
+    "υ": "u", "χ": "x", "ω": "w",
+    # NFKC rewrites the lunate sigma ϲ (a c-lookalike) to the final sigma ς, so
+    # ς must fold to "c" as well or the ϲ row never fires after normalization.
 })
 
 
@@ -118,9 +131,16 @@ def _fold(text: str) -> str:
     whitespace run to a single space before the substring scan closes that
     bypass (found by the test-coverage audit 2026-07-13). Punctuation is left
     intact, so it never merges two words that were separated by a full stop.
+
+    The homoglyph table is applied BEFORE and AFTER normalization, and the
+    lowercase pass runs between them: NFKC rewrites some confusables into other
+    non-Latin letters (ϲ→ς) and some symbol forms into their letter (ϵ→ε), while
+    an upper-case Cyrillic "Е" only becomes a table key once lowercased. One
+    pass in isolation misses a class each way; two passes cover all of them.
     """
     import unicodedata
-    folded = unicodedata.normalize("NFKC", str(text or "")).translate(_CONFUSABLE_FOLD).lower()
+    raw = str(text or "").translate(_CONFUSABLE_FOLD)
+    folded = unicodedata.normalize("NFKC", raw).lower().translate(_CONFUSABLE_FOLD)
     return " ".join(folded.split())
 
 

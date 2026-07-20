@@ -22,12 +22,32 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-# Current measured line coverage is ~68% (23,492 statements). This floor is a
-# non-regression ratchet — raise it (never lower it) as coverage improves toward
-# the 80% project target.
-fail_under = 66
+# Measured 2026-07-21 with the CI command (pytest tests/ -q --tb=short --cov=app
+# --cov-report=term-missing:skip-covered): 24,708 statements, 7,608 missed,
+# 69.21% total. The floor sits ~1pt below that measurement so ordinary churn
+# cannot turn the backend job red on arrival. This is a non-regression ratchet —
+# raise it (never lower it) as coverage improves toward the 80% project target.
+fail_under = 68
 exclude_also = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
+]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+# Default rule set (E4/E7/E9/F) minus the categories with existing accepted
+# hits on the current tree (census 2026-07-21: 92 hits total). This is a
+# ratchet in spirit: REMOVE entries as the backlog is cleared; never add
+# entries to silence new code.
+ignore = [
+    "E402",  # module-import-not-at-top-of-file (22 existing)
+    "E701",  # multiple-statements-on-one-line-colon (3 existing)
+    "E731",  # lambda-assignment (1 existing)
+    "E741",  # ambiguous-variable-name (10 existing)
+    "F401",  # unused-import (34 existing)
+    "F541",  # f-string-missing-placeholders (14 existing)
+    "F841",  # unused-variable (8 existing)
 ]
