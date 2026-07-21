@@ -2,7 +2,7 @@
 
 **Audience:** procurement and vendor-risk teams. Short, verifiable answers to
 the questions a financial-institution vendor questionnaire typically asks.
-**Last reviewed:** 2026-07-18. Where an answer cites a module or config file,
+**Last reviewed:** 2026-07-20. Where an answer cites a module or config file,
 the claim can be checked against the codebase. Where a fact is not in place or
 not committed, this document says so plainly rather than guessing or implying
 otherwise.
@@ -62,9 +62,11 @@ separate hardened systemd services and timers. Full diagram:
 **7. Is data encrypted in transit and at rest?**
 In transit: yes — TLS on all customer traffic (Caddy/Let's Encrypt), and
 outbound deliveries go over TLS to Telegram/SMTP endpoints. At rest: the
-application does not add its own encryption-at-rest layer; disk-level
-protection is what the hosting provider supplies for droplet volumes. Stated
-plainly. The integrity (rather than confidentiality) of evidence at rest is
+application does not add its own encryption-at-rest layer for on-host data;
+disk-level protection is what the hosting provider supplies for droplet
+volumes. Stated plainly. The one exception is the off-box backup archive,
+which is encrypted on the host (age or gpg AES-256) before it is pushed to the
+operator's remote, and is never pushed if that encryption is unavailable. The integrity (rather than confidentiality) of evidence at rest is
 separately protected by hash sealing and daily re-verification
 (`EVIDENCE-INTEGRITY-WHITEPAPER.md`).
 
@@ -96,8 +98,12 @@ currently **disabled** in production, verified 2026-07-18; when enabled it
 receives bounded excerpts of monitored public content, never customer data);
 an RFC 3161 timestamping authority — dormant by default in code, **enabled in
 production since 2026-07-18** (freetsa.org; it receives a single hash, never
-content); off-box backup storage is supported but **not currently configured**
-in production — backups are local to the host (verified 2026-07-18). Full
+content); off-box backup storage — **required in code** since 2026-07-20, so
+any host deployed from that code pushes a daily archive to an operator-chosen
+remote, encrypted on the host before it is sent; that requirement **takes
+effect on the production host at its next deploy**, and until then production
+backups are local to the host. Ask us for the deploy date and for that remote's
+provider and region as part of your assessment. Full
 table with "engaged when" conditions: `DATA-FLOW-AND-RESIDENCY.md` §7.
 
 **11. What is your data retention policy?**
@@ -158,9 +164,21 @@ decompressed cap; 1 MB cap on TSA responses). Details with module references:
 Daily automated backups (consistent SQLite online copy + evidence tree
 archive), 14-archive retention, and a documented step-by-step restore runbook
 (`deploy/backup.sh`, `DEPLOY.md` § Restore). An off-box backup remote is
-supported by the backup script but is **not currently configured** in
-production (verified 2026-07-18) — backups are local to the host, and the
-script warns loudly on every run while that remains the case. Recovery from
+**required in code** since 2026-07-20: the deploy gate fails without one, so a
+host deployed from that code copies each archive to an operator-chosen remote.
+That copy is encrypted on the host first (age public key or gpg AES-256) and
+the push is refused outright if encryption is unavailable or its tooling is not
+installed, so an archive containing account data never leaves the host in
+clear. A single development-only override (`STATUTEPROOF_ALLOW_UNENCRYPTED_BACKUP`)
+exists to let a local developer push without encryption, and a second
+(`STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY`) lets a developer skip the off-box
+remote entirely; the deploy gate **refuses both on a production host** (one
+identified by `ENVIRONMENT=production` or the `/srv/regradar` install path) and
+flags them as failures, so neither can be used to weaken a live deployment — we
+disclose them here rather than state the controls as unqualified absolutes. That requirement **takes effect on the
+production host at its next deploy**; before that deploy the live host keeps
+backups locally only, so they do not survive host loss — ask us for the deploy
+date. Recovery from
 host loss is restore-from-backup onto a fresh host using the documented
 deployment runbook — there is no hot standby or failover. Restore drills are
 not run on a fixed calendar and no tested-restore date is claimed, so no

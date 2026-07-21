@@ -51,17 +51,17 @@ def test_backup_sh_is_valid_bash():
 # the test does not need a real SQLite DB. Any drift between this literal and
 # the script is caught by test_offbox_block_matches_script below.
 _OFFBOX_BLOCK = """\
-if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ]; then
+if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ] && [ -n "$PUSH_FILE" ]; then
   if command -v rclone >/dev/null 2>&1; then
-    if rclone copy "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"; then
-      echo "off-box copy (rclone): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+    if rclone copy "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
+      echo "off-box copy (rclone): $PUSH_FILE -> $STATUTEPROOF_BACKUP_REMOTE"
     else
       echo "WARNING: off-box copy (rclone) failed; local archive kept, continuing to retention" >&2
       BACKUP_PAGE_MSG="🚨 StatuteProof off-box backup push FAILED (rclone). The archive exists only on the droplet. Check: journalctl -u statuteproof-backup"
     fi
   else
-    if scp "$ARCHIVE" "$STATUTEPROOF_BACKUP_REMOTE"; then
-      echo "off-box copy (scp): $ARCHIVE -> $STATUTEPROOF_BACKUP_REMOTE"
+    if scp "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
+      echo "off-box copy (scp): $PUSH_FILE -> $STATUTEPROOF_BACKUP_REMOTE"
     else
       echo "WARNING: off-box copy (scp) failed; local archive kept, continuing to retention" >&2
       BACKUP_PAGE_MSG="🚨 StatuteProof off-box backup push FAILED (scp). The archive exists only on the droplet. Check: journalctl -u statuteproof-backup"
@@ -110,6 +110,8 @@ def _run_offbox(
         "PATH": f"{binn}:/usr/bin:/bin",
         "sentinel": str(sentinel),
         "ARCHIVE": str(tmp_path / "statuteproof-backup-TEST.tar.gz"),
+        # Set by the encryption step (2b); the push block only ever sends this.
+        "PUSH_FILE": str(tmp_path / "statuteproof-backup-TEST.tar.gz.age"),
     }
     if remote is not None:
         env["STATUTEPROOF_BACKUP_REMOTE"] = remote

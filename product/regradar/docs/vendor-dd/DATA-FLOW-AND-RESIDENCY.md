@@ -1,7 +1,7 @@
 # StatuteProof — Data Flow and Residency
 
 **Audience:** vendor-risk, data-protection and compliance teams.
-**Last reviewed:** 2026-07-18. Claims are grounded in the referenced modules
+**Last reviewed:** 2026-07-20. Claims are grounded in the referenced modules
 and deployment configuration, verified against the live deployment.
 
 ---
@@ -79,7 +79,7 @@ covered in §5 and §7.)
 | Email provider (SMTP; SendGrid/Postmark also supported in code) | Customer email delivery is configured | Verification emails, briefs/alerts to the customer's address | `app/email_delivery.py` |
 | Anthropic API (Claude) | Only when `ENABLE_AI_ANALYSIS=true` AND an API key is set; off by default | Bounded excerpts of the *monitored public regulator content*, via one of two prompt paths, each independently bounded: the **diff-analysis** path (`app/ai.py`) sends at most 20 added + 20 removed diff paragraphs, each truncated to 400 characters; the **brief** path (`app/ai_brief.py`) sends the extracted change text truncated to 6,000 characters plus a short source-metadata block (source name/URL/jurisdiction/category and, when supplied, a diff excerpt). No customer account data is included in either prompt | `app/ai.py`, `app/ai_brief.py`, `app/config.py` |
 | RFC 3161 Time-Stamping Authority | Only when `RFC3161_TSA_URL` is set (dormant by default in code) — **enabled in production since 2026-07-18** (freetsa.org; tokens ship in evidence packs) | A single SHA-256 hash (the evidence chain head) — no content, no personal data | `app/rfc3161_anchor.py` |
-| Off-box backup remote | Only when `STATUTEPROOF_BACKUP_REMOTE` is set | The encrypted-in-transit backup archive (database + evidence tree) | `deploy/backup.sh` |
+| Off-box backup remote (operator-chosen; required in code since 2026-07-20 — **takes effect on the production host at its next deploy**) | Every backup run (daily 02:30 UTC + before each update) — `STATUTEPROOF_BACKUP_REMOTE` is mandatory, the deploy gate fails without it | The backup archive (database + evidence tree), **encrypted on the host before it is sent** (age public key or gpg AES-256) and sent over the remote's own transport; the push is refused if encryption is unavailable | `deploy/backup.sh`, `deploy/deploy-check.sh` |
 | Admin Telegram bot (operator) | Contact-form submissions and operational alerts | Contact message contents; operational health signals | `app/api.py`, `app/ops_alert.py` |
 
 Customer-facing exports (Evidence Packs, Audit Vault, Regulator Binder,
@@ -104,8 +104,14 @@ read-only links the customer creates; they are not automatic outbound flows —
   disk. Disk-level encryption at rest is whatever the provider supplies for
   droplet volumes; StatuteProof does not add application-level encryption at
   rest (stated plainly; see the FAQ).
-- **Backups:** daily on-box archives (14 retained) with an optional off-box
-  remote — see `SECURITY-OVERVIEW.md` §9.
+- **Backups:** daily on-box archives (14 retained, plaintext on the droplet
+  that already holds the live database) plus a **required** off-box copy to an
+  operator-chosen remote. That copy — and only that copy — is encrypted by the
+  application before it leaves the host (age or gpg AES-256). The remote's
+  jurisdiction is a deployment decision and should be recorded in your own
+  outsourcing assessment — see `SECURITY-OVERVIEW.md` §9. The requirement lands
+  with the 2026-07-20 change and **takes effect on the production host at its
+  next deploy**; before that deploy, production backups are local-only.
 
 ## 6. Retention posture
 
@@ -132,7 +138,7 @@ read-only links the customer creates; they are not automatic outbound flows —
 | Anthropic | Optional AI analysis of detected changes | Excerpts of monitored **public** regulator content only; no customer data | Only if `ENABLE_AI_ANALYSIS=true` — currently **disabled** in production (verified 2026-07-18) |
 | Google | Optional sign-in identity | Google-asserted account email | Only if the customer chooses Google sign-in |
 | RFC 3161 TSA (operator-selected) | External timestamp anchoring of the evidence chain head | One SHA-256 hash; no content, no personal data | Only if `RFC3161_TSA_URL` is configured — dormant by default in code, **enabled in production since 2026-07-18** (freetsa.org) |
-| Off-box backup storage (rclone/S3 or scp target) | Backup survival beyond the host | Backup archives | Only if `STATUTEPROOF_BACKUP_REMOTE` is configured — currently **not configured** in production (backups are local to the host; verified 2026-07-18) |
+| Off-box backup storage (operator-chosen rclone/S3 or scp target) | Backup survival beyond the host | The backup archive (database + evidence tree), encrypted on the host before it is sent | **Required** by the deploy gate since 2026-07-20; this **takes effect on the production host at its next deploy**, so at the time of writing production backups are still local to the host only. Ask us for the deploy date and for the remote's provider and region — that remote is a sub-processor of yours once it is live |
 | Let's Encrypt | TLS certificate issuance | Domain names only | Always |
 
 No other third party receives data from the system. Web typography is

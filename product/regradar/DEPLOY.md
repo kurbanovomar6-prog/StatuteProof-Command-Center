@@ -87,8 +87,18 @@ cp .env.example .env
 nano .env    # fill: SECRET_KEY, ENVIRONMENT=production, NEW telegram tokens,
              # email: STATUTEPROOF_EMAIL_PROVIDER=smtp + Zoho app password
              # (precondition 3 — local_outbox is NOT acceptable on prod)
+             # backups (§ 9 explains each — set them NOW so § 6 gates the real
+             # config, not a half-configured host):
+             #   STATUTEPROOF_BACKUP_REMOTE=<rclone remote or scp target>
+             #   STATUTEPROOF_BACKUP_AGE_RECIPIENT=age1...   (preferred)
+             #   ...or STATUTEPROOF_BACKUP_PASSPHRASE=<alphanumeric>
 chown regradar:regradar .env && chmod 600 .env
 ```
+
+> **Set the backup vars here, not later.** § 6 is the gate that catches a
+> missing remote, a missing encryption secret, a secret whose tool is not
+> installed, and a passphrase that `.env` sourcing mangles. A var written after
+> § 6 is a var the gate never saw. § 9 re-runs the gate for the same reason.
 
 Alert plan gate (added 2026-07-20):
 
@@ -119,6 +129,13 @@ cd /srv/regradar && sudo -u regradar bash deploy/deploy-check.sh
 **Do not continue until it prints `DEPLOY-CHECK PASSED`.** Every ✗ names the
 exact missing var/file.
 
+> There is no way past the backup gates on a production host.
+> `STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY=1` and
+> `STATUTEPROOF_ALLOW_UNENCRYPTED_BACKUP=1` are development-machine overrides:
+> with `ENVIRONMENT=production` (or an install at `/srv/regradar`) deploy-check
+> **fails** on either of them and `backup.sh` ignores them. Fix the config —
+> § 9 has the two-line form of each value.
+
 ## 7. Services (≈3 min)
 
 ```bash
@@ -130,6 +147,12 @@ systemctl enable --now statuteproof-api statuteproof-scheduler \
     statuteproof-verify.timer
 systemctl status statuteproof-api --no-pager | head -5   # expect: active (running)
 curl -s http://127.0.0.1:5001/api/health                  # expect: {"ok": true, ...}
+
+# Prove the timers actually RUN — enabling is the step people skip, and a
+# documented control that never fires is worse than a known gap. Re-running
+# deploy-check now asserts each timer is BOTH enabled and active; before this
+# step it only warns that the units are not installed yet.
+bash deploy/deploy-check.sh   # expect: ✓ statuteproof-*.timer enabled and active
 ```
 
 Notes:
@@ -212,12 +235,80 @@ echo 'STATUTEPROOF_BACKUP_REMOTE=backups@offbox.example:/srv/statuteproof-backup
 systemctl restart statuteproof-backup.timer   # timer re-reads EnvironmentFile on next run
 ```
 
+**Encryption is mandatory for anything that leaves the droplet.** The archive
+contains `regradar.db`: password hashes, emails, `telegram_chat_id`s, and the
+sessions table whose ids are bearer credentials — anyone who reads one archive
+can replay live sessions until they expire. `backup.sh` therefore encrypts the
+archive before the push and **refuses the push entirely** (loud stderr warning
++ founder page) if it cannot. The local copy in `backups/` stays plaintext by
+design: the droplet already holds the live database, so it adds no new
+exposure, and retention/restore stay simple.
+
+These are the values § 4 asked you to put in `.env`. Install the tool **before**
+writing its secret: a recipient set without `age` on the box is the exact state
+`backup.sh` refuses and deploy-check fails on. Use the `echo` lines only if you
+left the var blank in § 4.
+
+```bash
+# Preferred — age, public-key: generate the key pair OFF the droplet
+apt-get install -y age
+age-keygen -o statuteproof-backup.key      # on your laptop; KEEP THIS FILE SAFE
+# -> prints: Public key: age1....  (only the PUBLIC key goes on the droplet)
+echo 'STATUTEPROOF_BACKUP_AGE_RECIPIENT=age1...' >> /srv/regradar/.env
+
+# ...or fallback — gpg symmetric with a generated ALPHANUMERIC passphrase
+apt-get install -y gnupg
+openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | head -c 40   # store this in the password manager
+echo 'STATUTEPROOF_BACKUP_PASSPHRASE=PasteTheAlphanumericValueHere' >> /srv/regradar/.env
+```
+
+> **The passphrase must be alphanumeric, and the line must be single-quoted as
+> shown.** `.env` is SOURCED by both `backup.sh` and `deploy-check.sh`, so bash
+> applies parameter expansion, command substitution and word splitting to every
+> value: `a$b` silently becomes `a`, and a space truncates the value. gpg would
+> then encrypt with a passphrase nobody stored and every archive would be
+> unrecoverable. `deploy/deploy-check.sh` FAILS when the raw `.env` bytes and
+> the sourced value differ, or when the passphrase contains `$`, a backtick or
+> whitespace.
+
+> **Losing the age identity file or the passphrase means losing every off-box
+> archive — there is no recovery path.** Store it in the founder's password
+> manager, never on the droplet, and test a restore (§ Restore from backup)
+> before you rely on it.
+
 Since 2026-07-20 the missing remote is enforced, not just warned about:
 `deploy/deploy-check.sh` (§ 6) **FAILS** when `STATUTEPROOF_BACKUP_REMOTE` is
 unset. `STATUTEPROOF_ALLOW_LOCAL_BACKUP_ONLY=1` is a dev-only override — never
-set it on prod. In addition, `backup.sh` pages the founder via the admin
-Telegram bot (same channel as the heartbeat/integrity watchdogs) whenever the
-off-box push fails or is skipped without the override.
+set it on prod. The same gate covers encryption: deploy-check **FAILS** when
+`STATUTEPROOF_BACKUP_REMOTE` is set but neither
+`STATUTEPROOF_BACKUP_AGE_RECIPIENT` nor `STATUTEPROOF_BACKUP_PASSPHRASE` is —
+**and equally when the secret is set but its tool (`age` / `gpg`) is not
+installed**, because `backup.sh` requires both and refuses the push otherwise;
+do not skip the `apt-get install` line above.
+`STATUTEPROOF_ALLOW_UNENCRYPTED_BACKUP=1` is the dev-machine override there, and
+off production it makes `backup.sh` push in the clear. **Both overrides are
+refused on a production host** (`ENVIRONMENT=production`/`prod`,
+`STATUTEPROOF_ENV`, or an install at `/srv/regradar`): deploy-check FAILS on
+either, and `backup.sh` ignores and reports them rather than pushing plaintext
+or skipping the off-box copy. In addition, `backup.sh` pages the founder via
+the admin Telegram bot (same channel as the heartbeat/integrity watchdogs)
+whenever the off-box push fails, is refused for lack of working encryption, or
+is skipped.
+
+**Close the loop — re-run the gate against the finished `.env`.** § 6 ran
+before the encryption tooling existed, so run it again here; a gate that never
+saw the final config is not a gate. Then prove the encrypt-and-push path once,
+at deploy time, instead of learning it was broken at 02:30 UTC:
+
+```bash
+cd /srv/regradar && sudo -u regradar bash deploy/deploy-check.sh
+sudo -u regradar bash /srv/regradar/deploy/backup.sh
+```
+
+Expect `DEPLOY-CHECK PASSED`, then an `encrypted for off-box push (age|gpg): …`
+line followed by `off-box copy (rclone|scp): …`. Anything else — `REFUSED`, a
+founder page, a push warning — is a live backup fault; fix it before you treat
+this deploy as done.
 
 ## External uptime probe (2-minute step, free tier)
 
@@ -312,7 +403,46 @@ self-selected paid `plan_name` is an intent, not proof of payment.
 
 If the droplet was lost, first pull the newest archive back from the off-box
 remote (`STATUTEPROOF_BACKUP_REMOTE`) into `/srv/regradar/backups/` — e.g.
-`rclone copy <remote> /srv/regradar/backups/` — then restore it locally:
+`rclone copy <remote> /srv/regradar/backups/`.
+
+**Off-box archives are encrypted** (§ 9), so decrypt before extracting. Use
+whichever suffix the archive carries; the key material lives with the founder,
+never on the droplet:
+
+```bash
+cd /srv/regradar/backups
+# age (.tar.gz.age) — needs the PRIVATE identity file kept off-box
+age --decrypt -i statuteproof-backup.key \
+    -o statuteproof-backup-<STAMP>.tar.gz \
+       statuteproof-backup-<STAMP>.tar.gz.age
+# ...or gpg (.tar.gz.gpg) — prompts for STATUTEPROOF_BACKUP_PASSPHRASE
+gpg --decrypt -o statuteproof-backup-<STAMP>.tar.gz \
+       statuteproof-backup-<STAMP>.tar.gz.gpg
+# Sanity check before you rely on it:
+tar -tzf statuteproof-backup-<STAMP>.tar.gz | head   # expect regradar.db, data/, evidence/
+```
+
+An archive nobody can decrypt is worse than no archive, so **test a restore**
+on a throwaway box after every key rotation and at least quarterly: decrypt,
+extract, and confirm `tar -tzf` lists `regradar.db`. A restore drill box must
+not carry the production `STATUTEPROOF_HEARTBEAT_PING_URL`.
+
+**What the archive holds — and what it does not.** `deploy/backup.sh` tars
+exactly five paths: `regradar.db`, `data/` (minus `data/outbox`), `evidence/`,
+`sources.json` and `.env.example`. Every one of them is restored below;
+`evidence/` is a *sibling* of `data/`, so the `data/` rsync does not cover it,
+and restoring the database without the sealed evidence tree is precisely the
+BASELINE DIVERGENCE state the last line warns about.
+
+**Not in the archive** — these must be reconstructed by hand from §§ 1-9:
+`.env` (secrets: `SECRET_KEY`, telegram tokens, SMTP, backup keys — only
+`.env.example` is archived, deliberately), the Python venv (`.venv/`), the
+built frontend (`web/dist/`), the systemd units and Caddyfile under `/etc`,
+`logs/`, and `data/outbox` (excluded on purpose — a queued outbox replayed
+after a restore re-sends old mail).
+
+Then restore locally (a local `backups/` archive is already plaintext — skip
+straight here):
 
 ```bash
 systemctl stop statuteproof-api statuteproof-scheduler statuteproof-telegram-bot
@@ -320,8 +450,15 @@ cd /srv/regradar
 mkdir -p /tmp/restore
 tar -xzf backups/statuteproof-backup-<STAMP>.tar.gz -C /tmp/restore
 rsync -a /tmp/restore/data/ data/
+[ -d /tmp/restore/evidence ] && rsync -a /tmp/restore/evidence/ evidence/   # absent only before the first seal
+cp /tmp/restore/sources.json sources.json
 cp /tmp/restore/regradar.db "$(.venv/bin/python -c 'import sys; sys.path.insert(0,"."); from app.config import DB_PATH; print(DB_PATH)')"
 chown -R regradar:regradar /srv/regradar
+# Re-verify the sealed trail BEFORE anything starts writing to it: this
+# re-hashes every snapshot against its stored evidence hash and re-checks the
+# tamper-evident chain. A clean run here is what makes the restored evidence
+# tree usable as proof; a divergence means the archive and the DB disagree.
+sudo -u regradar .venv/bin/python run.py verify-trail
 systemctl start statuteproof-api statuteproof-scheduler statuteproof-telegram-bot
 # Verify: /api/health 200, then check startup logs — BASELINE DIVERGENCE
 # beyond the known legacy set means trail/index mismatch from the restore.
@@ -335,7 +472,9 @@ systemctl start statuteproof-api statuteproof-scheduler statuteproof-telegram-bo
   keeps the newest 14 archives in `backups/`. Manual run:
   `bash deploy/backup.sh`. Set `STATUTEPROOF_BACKUP_REMOTE` in `.env` to also
   push each archive off-box (see § 9, strongly recommended); unset means on-box
-  copies only and the script warns loudly on every run.
+  copies only and the script warns loudly on every run. Off-box copies are
+  always encrypted (age or gpg, § 9) — without a working encryption secret the
+  push is refused, not downgraded to plaintext.
 - **Evidence integrity self-check**: `statuteproof-verify.timer` runs daily
   (~04:20 UTC, after backup + compaction). It re-hashes every snapshot against
   its stored evidence hash and re-verifies the tamper-evident chain

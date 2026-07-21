@@ -1,7 +1,7 @@
 # StatuteProof — Security Overview
 
 **Audience:** vendor-risk and information-security teams evaluating StatuteProof.
-**Last reviewed:** 2026-07-18. Every control statement below names the module or
+**Last reviewed:** 2026-07-20. Every control statement below names the module or
 configuration file that implements it, so it can be checked against the codebase.
 Where a control does not exist, this document says so plainly (see §11, Known
 limitations).
@@ -227,12 +227,22 @@ From `deploy/systemd/*` and `DEPLOY.md`:
   the online-backup API plus a tar of the evidence tree and source registry;
   the newest 14 archives are retained — `deploy/backup.sh`,
   `deploy/systemd/statuteproof-backup.*`.
-- **Off-box copies:** the backup script supports pushing each archive to an
-  operator-configured off-box remote (rclone/S3 or scp). This is env-driven;
-  when unset the script warns loudly on every run that backups are local-only.
-  An off-box remote is **not currently configured** in production (verified
-  2026-07-18): backups are local to the host, and that warning fires on every
-  run until a remote is set.
+- **Off-box copies:** each archive is pushed to an operator-configured off-box
+  remote (rclone/S3 or scp). Since 2026-07-20 this is **required in code**: the
+  deploy gate (`deploy/deploy-check.sh`) fails when `STATUTEPROOF_BACKUP_REMOTE`
+  is unset, so a host deployed from that code copies the database and evidence
+  tree to storage outside the droplet on every run. **The archive is encrypted
+  before it leaves the host** — age public-key encryption
+  (`STATUTEPROOF_BACKUP_AGE_RECIPIENT`, private identity held off-box) or gpg
+  symmetric AES-256; the same gate fails when a remote is configured without an
+  encryption secret, or with a secret whose tool is not installed, and
+  `backup.sh` refuses the push outright rather than sending an archive in clear.
+  The remote is operator-chosen, so its jurisdiction is a deployment decision —
+  see DATA-FLOW-AND-RESIDENCY.md § 4.
+  **Deployment status (stated plainly):** this control **takes effect on the
+  production host at its next deploy**. Until that deploy the live host's
+  backups are local to the droplet only, so they do not survive host loss. Ask
+  us for the deploy date and for the remote's provider and region.
 - **Documented restore:** a step-by-step restore runbook exists
   (`DEPLOY.md` § Restore). Restore drills are not run on a fixed calendar and
   no tested-restore date is claimed, so no recovery-time objective is claimed.
