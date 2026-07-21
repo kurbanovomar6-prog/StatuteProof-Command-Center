@@ -588,25 +588,43 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             allowed, principal = rbac_runtime.evaluate(user, action)
         except Exception:  # noqa: BLE001 — RBAC must never break a live request
-            # Fail OPEN (an existing owner must never be locked out by RBAC
-            # plumbing) but record the anomaly in the immutable audit trail so a
-            # gate that fell open is never silent. STAGE-3 GATE: before any real
-            # `auditor` seat is assignable to a customer, this branch MUST flip to
-            # fail-CLOSED (deny) for non-owner-resolvable failures — see rbac review.
-            logger.warning(
-                "rbac evaluate failed for %s; %s", action,
-                "denying (fail-closed)" if fail_closed else "allowing (fail-open)",
-            )
-            rbac_runtime.log_sensitive_action(
-                user, action, result=rbac_runtime.RESULT_ERROR,
-                resource_type=resource_type, resource_id=resource_id,
+            # RBAC evaluation errored. This gate protects MUTATIONS only — every
+            # call site passes a mutating action (settings/source/alert/review/
+            # evidence-share); read-only observation uses ``_rbac_log_export``,
+            # which never denies — so on error we FAIL CLOSED: deny the mutation
+            # with a clean 403 rather than silently allowing it (the last security
+            # fail-open in the tree). This is safe to ship even though only
+            # ``owner`` seats exist in live data today: the ONLY caller re-admitted
+            # is one we can still POSITIVELY resolve as the org ``owner`` — the
+            # legitimate owner must never be locked out by an RBAC plumbing glitch.
+            # ``resolve_principal`` is itself fail-closed (never raises; a lookup
+            # failure yields role=``denied``), so this re-admits a genuine owner
+            # only, never escalates a lesser (auditor/reviewer) seat.
+            try:
+                principal = rbac_runtime.resolve_principal(user)
+            except Exception:  # noqa: BLE001 — resolution must not raise here
+                principal = None
+            is_owner = (
+                principal is not None
+                and getattr(principal, "role", None) == rbac_runtime.ROLE_OWNER
             )
             # High-stakes governance actions (minting/revoking an external
-            # evidence-room credential) pass fail_closed=True: if RBAC evaluation
-            # errors we DENY, never mint a durable external credential on a plumbing
-            # failure. The default stays fail-open so an RBAC glitch can never lock
-            # an existing owner out of an ordinary mutation (no-regression).
-            if fail_closed:
+            # evidence-room credential) pass fail_closed=True and DENY even the
+            # owner on error — never mint a durable external credential on a
+            # plumbing failure. Everyone else fails closed unless they resolve to
+            # owner.
+            deny = fail_closed or not is_owner
+            logger.warning(
+                "rbac evaluate failed for %s; %s", action,
+                "denying (fail-closed)" if deny else "allowing owner (no-regression)",
+            )
+            rbac_runtime.log_sensitive_action(
+                user, action,
+                result=rbac_runtime.RESULT_ERROR if deny else rbac_runtime.RESULT_ALLOW,
+                resource_type=resource_type, resource_id=resource_id,
+                principal=principal,
+            )
+            if deny:
                 self._send_json(
                     {"ok": False, "message": "Authorization could not be verified. Please retry."},
                     403,
