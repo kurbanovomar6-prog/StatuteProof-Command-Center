@@ -58,6 +58,14 @@ const PUBLIC_COPY_FILES = [
   'BuyerSourcePacks.jsx',
   'WithoutWith.jsx',
   'Problem.jsx',
+  // New landing blocks (audit 2026-07-21 build): enforcement reality, honest
+  // category comparison, consolidated FAQ / vendor-DD, in-page verifier. Each
+  // is a customer-facing surface, so the delivery-channel + forbidden-claims
+  // guards must read it too.
+  'EnforcementReality.jsx',
+  'Comparison.jsx',
+  'FaqSection.jsx',
+  'InlineVerify.jsx',
 ].map(name => [
   name,
   readFileSync(findFile([`src/components/${name}`, `web/src/components/${name}`]), 'utf8'),
@@ -499,6 +507,10 @@ describe('public landing files carry no forbidden claims', () => {
     ['App.jsx', appSrc],
     ['TrustLayer.jsx', trustLayerSrc],
     ['VerifyPage.jsx', verifyPageSrc],
+    // New landing blocks (2026-07-21 build).
+    ...PUBLIC_COPY_FILES.filter(([name]) =>
+      ['EnforcementReality.jsx', 'Comparison.jsx', 'FaqSection.jsx', 'InlineVerify.jsx'].includes(name),
+    ),
   ]
   for (const [name, src] of files) {
     for (const re of FORBIDDEN) {
@@ -507,4 +519,62 @@ describe('public landing files carry no forbidden claims', () => {
       })
     }
   }
+})
+
+// Enforcement-reality block (Block 4): the AED-fine / personal-liability cards
+// are EXTERNAL regulatory news the reader can verify, never StatuteProof claims
+// or predictions. So the block must (a) attribute every fact to an external
+// source with a verifiable https link, (b) carry no fear-selling forbidden
+// phrasing ("prevent fines", "avoid penalties"), and (c) never assert that
+// StatuteProof monitors enforcement broadly in the present tense — enforcement
+// monitoring beyond the disclosed fresh-alert sources is a stub (backlog #2).
+describe('enforcement-reality block presents external news, not product claims', () => {
+  const src = readFileSync(
+    findFile(['src/components/EnforcementReality.jsx', 'web/src/components/EnforcementReality.jsx']),
+    'utf8',
+  )
+  const copy = copyOf(src)
+
+  it('attributes the cited facts to external sources with verifiable links', () => {
+    expect(copy).toMatch(/https?:\/\//)
+    expect(copy).toMatch(/report(ed|s|ing)|source:|as covered by|per /i)
+  })
+
+  it('never sells fine-avoidance (no forbidden fear claims)', () => {
+    for (const re of [/prevent fines/i, /avoid (all )?(fines|penalties)/i, /never miss/i, /guarantee[sd]? compliance/i]) {
+      expect(re.test(copy), `EnforcementReality contains ${re}`).toBe(false)
+    }
+  })
+
+  it('makes no present-tense broad enforcement-monitoring scope claim', () => {
+    const BROAD = [
+      /\bwe monitor (all|every|each)\b[^.]{0,40}\benforcement\b/i,
+      /monitor(s|ing)?\b[^.]{0,30}\b(all|every)\b[^.]{0,30}\benforcement (actions?|notices?)\b/i,
+      /\benforcement\b[^.]{0,30}\bfully (monitored|covered)\b/i,
+    ]
+    const offenders = sentences(src).filter(s => BROAD.some(re => re.test(s)))
+    expect(offenders, 'EnforcementReality broad enforcement-monitoring claim(s)').toEqual([])
+  })
+})
+
+// Honest comparison block (Block 11): per the iron rule, our column may state
+// only what WE do — never "no competitor does X" / "nobody else" / "only we".
+describe('comparison block claims only what we do', () => {
+  const src = readFileSync(
+    findFile(['src/components/Comparison.jsx', 'web/src/components/Comparison.jsx']),
+    'utf8',
+  )
+  const copy = copyOf(src)
+  it('never asserts a universal competitor negative', () => {
+    for (const re of [
+      /no (other )?competitor\b/i,
+      /nobody else\b/i,
+      /no one else\b/i,
+      /\bonly we\b/i,
+      /\bthe only (vendor|tool|product|service)\b/i,
+      /no (other )?(vendor|tool|product) (can|does|offers)/i,
+    ]) {
+      expect(re.test(copy), `Comparison contains universal-negative claim ${re}`).toBe(false)
+    }
+  })
 })

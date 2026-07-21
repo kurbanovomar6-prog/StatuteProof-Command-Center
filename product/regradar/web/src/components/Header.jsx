@@ -5,15 +5,22 @@ const navLinks = [
   { label: 'How It Works',    href: '#how-it-works' },
   { label: 'Source Coverage', href: '#coverage' },
   { label: 'Evidence',        href: '#evidence' },
+  // Verify is the public, no-login verification tool — surfaced top-level
+  // rather than buried in the footer, since checking the math yourself is the
+  // strongest trust proof on the page.
+  { label: 'Verify',          action: 'verify' },
   { label: 'Pricing',         action: 'pricing' },
 ]
 
-export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, onPricing }) {
+export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, onPricing, onVerify }) {
   const [open, setOpen] = useState(false)
 
   function handleNav(link) {
     if (link.action === 'pricing') {
       onPricing?.()
+      setOpen(false)
+    } else if (link.action === 'verify') {
+      onVerify?.()
       setOpen(false)
     }
   }

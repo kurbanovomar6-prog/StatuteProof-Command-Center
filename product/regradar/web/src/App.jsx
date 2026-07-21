@@ -4,13 +4,18 @@ import { appPageToPath, pathToRoute, publicViewToPath } from './routeMap'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
+import InlineVerify from './components/InlineVerify'
 
 const Problem               = lazy(() => import('./components/Problem'))
+const EnforcementReality    = lazy(() => import('./components/EnforcementReality'))
 const HowItWorks            = lazy(() => import('./components/HowItWorks'))
 const WithoutWith           = lazy(() => import('./components/WithoutWith'))
 const Coverage              = lazy(() => import('./components/Coverage'))
 const SourceTransparencyMatrix = lazy(() => import('./components/SourceTransparencyMatrix'))
+const Comparison            = lazy(() => import('./components/Comparison'))
 const SampleBrief           = lazy(() => import('./components/SampleBrief'))
+const AuditBinderSample     = lazy(() => import('./components/AuditBinderSample'))
+const FaqSection            = lazy(() => import('./components/FaqSection'))
 const TrustLayer            = lazy(() => import('./components/TrustLayer'))
 const Pricing               = lazy(() => import('./components/Pricing'))
 const Contact               = lazy(() => import('./components/Contact'))
@@ -420,6 +425,7 @@ export default function App() {
         onCreateWorkspace={() => navigateRegister()}
         onSourceReview={() => navigatePublic('source-readiness-review')}
         onPricing={() => navigatePublic('pricing')}
+        onVerify={() => navigatePublic('verify')}
       />
       <main>
         <Hero
@@ -454,24 +460,22 @@ export default function App() {
                 <EvidenceCard record={REAL_RECORD} />
                 <SourceCoverageTable />
               </div>
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => navigatePublic('verify', { query: '#sample-baseline' })}
-                  className="sp-btn-primary justify-center px-6"
-                >
-                  Verify these hashes yourself — 60 seconds, no account
-                </button>
-              </div>
+              <InlineVerify
+                onOpenFull={() => navigatePublic('verify', { query: '#sample-baseline' })}
+              />
             </div>
           </section>
           <Problem />
+          <EnforcementReality />
           <HowItWorks />
           <WithoutWith />
           <SampleBrief />
+          <AuditBinderSample />
           <Coverage onCreateWorkspace={() => navigatePublic('source-readiness-review')} />
           <SourceTransparencyMatrix onCreateWorkspace={() => navigateRegister()} />
+          <Comparison />
           <VendorTrustSection />
+          <FaqSection />
           <TrustLayer onVerify={() => navigatePublic('verify', { query: '#sample' })} />
 
           <Pricing
