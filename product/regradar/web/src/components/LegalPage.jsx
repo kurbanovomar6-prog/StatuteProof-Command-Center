@@ -149,7 +149,7 @@ const PRIVACY_SECTIONS = [
   {
     heading: '8. Security',
     paragraphs: [
-      'We apply industry-standard technical and organisational measures to protect your data, including TLS encryption in transit, encryption at rest for stored artefacts, access controls limited to authorised personnel, and WAL-mode SQLite database integrity.',
+      'We apply technical and organisational measures to protect your data, including TLS encryption in transit, encrypted off-box backup archives, access controls limited to authorised personnel, WAL-mode SQLite database integrity, and hash-sealed evidence records with daily integrity re-verification. We do not add an application-level encryption-at-rest layer for data stored on the server; disk-level protection is what our hosting provider supplies.',
       'No system is completely secure. In the event of a personal data breach that is likely to result in a risk to your rights and freedoms, we will notify you and the relevant supervisory authority as required by applicable law.',
     ],
   },

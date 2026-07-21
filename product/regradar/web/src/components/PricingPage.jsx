@@ -78,7 +78,7 @@ const PLANS_DATA = [
       { label: "Custom sources", value: false },
       {
         label: "Weekly MLRO brief",
-        value: "Email + Telegram (source status summary)",
+        value: "Manual on request — not automated yet (source status summary)",
       },
       { label: "High-risk review queue", value: false },
       { label: "MLRO response log", value: false },
@@ -115,7 +115,7 @@ const PLANS_DATA = [
       { label: "Source readiness review", value: true },
       { label: "Evidence records + full diff view", key: "Diff view", value: true },
       { label: "Custom sources", value: "Up to 2 — requires activation" },
-      { label: "Weekly MLRO brief", value: "Email + Telegram" },
+      { label: "Weekly MLRO brief", value: "Manual on request — not automated yet" },
       { label: "High-risk review queue", value: true },
       { label: "MLRO response log", value: "Roadmap Q3 2026" },
       {
@@ -155,7 +155,7 @@ const PLANS_DATA = [
       { label: "Source readiness review", value: true },
       { label: "Evidence records + full diff view", key: "Diff view", value: true },
       { label: "Custom sources", value: "Custom — pilot roadmap" },
-      { label: "Weekly MLRO brief", value: "Email + Telegram + API (roadmap)" },
+      { label: "Weekly MLRO brief", value: "Manual on request — not automated yet; API on roadmap" },
       { label: "High-risk review queue", value: "Pilot roadmap" },
       { label: "MLRO response log", value: "Roadmap Q3 2026" },
       {

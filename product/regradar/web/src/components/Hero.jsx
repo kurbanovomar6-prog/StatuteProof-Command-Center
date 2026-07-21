@@ -370,7 +370,7 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
               <div className="flex flex-wrap items-center gap-4">
                 <MonitoringStatusBadge />
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/50 px-3 py-1 text-xs font-medium text-slate-300">
-                  Email delivery included — Telegram optional
+                  Alerts are delivered to Telegram — a linked chat is required
                 </div>
               </div>
               <div className="flex items-start gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm leading-relaxed text-emerald-50/80">
