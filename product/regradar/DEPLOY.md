@@ -373,8 +373,10 @@ self-selected paid `plan_name` is an intent, not proof of payment.
    registration + plan-intent, which pages the founder via the admin bot.
 5. Payment Links are public checkout URLs — no Stripe secret key ever goes
    into the repo or `.env` for this flow.
-6. After a customer pays, activation is still the manual
-   `run.py activate-plan` step from §10 — payment does not auto-activate.
+6. After a customer pays, the `/api/stripe/webhook` endpoint auto-activates the
+   plan (and auto-downgrades on cancel/refund) once `STRIPE_WEBHOOK_SECRET` and
+   `STRIPE_PRICE_TO_PLAN` are set — see the go-live checklist. The manual
+   `run.py activate-plan` (§10) and the admin panel remain available as overrides.
 
 ## First-hour smoke-test checklist
 
