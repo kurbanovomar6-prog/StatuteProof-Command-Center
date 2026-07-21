@@ -30,6 +30,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_plan as api_plan
 import app.db as app_db
 import app.rbac_runtime as rbac_runtime
 from app import rbac
@@ -84,7 +85,11 @@ def _make_handler(method: str, path: str, body: dict | None = None) -> _Handler:
 
 
 def _auth_as(monkeypatch, user: dict | None) -> None:
+    # The admin handlers moved into app.api_plan and read ``require_auth`` from
+    # that module's namespace, so patch it there too (kept on app.api for any
+    # non-moved handler this helper also serves).
     monkeypatch.setattr(api, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_plan, "require_auth", lambda handler: user)
 
 
 def _last(handler: _Handler) -> tuple[dict, int]:

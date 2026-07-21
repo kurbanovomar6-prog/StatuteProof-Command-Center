@@ -34,6 +34,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_plan as api_plan
+import app.api_telegram as api_telegram
 import app.db as app_db
 from app.api import _Handler
 from app.auth import OAuthAccountError, create_user
@@ -97,7 +99,12 @@ def _last(handler: _Handler):
 
 
 def _auth_as(monkeypatch, user: dict | None) -> None:
+    # ``require_auth`` is read as a bare global inside each handler's own module.
+    # Handlers that moved into mixin modules (app.api_telegram, app.api_plan) read
+    # it from THEIR namespace, so patch it everywhere a moved handler lives.
     monkeypatch.setattr(api, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_telegram, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_plan, "require_auth", lambda handler: user)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -683,7 +690,7 @@ def test_telegram_pair_generate_scopes_to_caller_id(monkeypatch):
         return {"code": "SP-ABC123", "expires_at": "2026-01-01T00:00:00Z"}
 
     _auth_as(monkeypatch, {"id": 55})
-    monkeypatch.setattr(api, "create_pairing_code", _create)
+    monkeypatch.setattr(api_telegram, "create_pairing_code", _create)
     handler = _make_handler("POST", "/api/telegram/pair/generate")
     handler._handle_telegram_pair_generate()
     data, status, _ = _last(handler)
@@ -698,7 +705,7 @@ def test_telegram_pair_generate_error_is_500(monkeypatch):
     def _boom(uid):
         raise RuntimeError("pairing store down")
 
-    monkeypatch.setattr(api, "create_pairing_code", _boom)
+    monkeypatch.setattr(api_telegram, "create_pairing_code", _boom)
     handler = _make_handler("POST", "/api/telegram/pair/generate")
     handler._handle_telegram_pair_generate()
     _, status, _ = _last(handler)
@@ -721,7 +728,7 @@ def test_telegram_pair_status_scopes_to_caller(monkeypatch):
         return {"linked": True}
 
     _auth_as(monkeypatch, {"id": 99})
-    monkeypatch.setattr(api, "get_pairing_status", _status)
+    monkeypatch.setattr(api_telegram, "get_pairing_status", _status)
     handler = _make_handler("GET", "/api/telegram/pair/status")
     handler._handle_telegram_pair_status()
     data, status, _ = _last(handler)
@@ -745,7 +752,7 @@ def test_telegram_pair_unlink_operates_on_caller_only(monkeypatch):
         seen["uid"] = uid
 
     _auth_as(monkeypatch, {"id": 77})
-    monkeypatch.setattr(api, "unlink_telegram", _unlink)
+    monkeypatch.setattr(api_telegram, "unlink_telegram", _unlink)
     handler = _make_handler("POST", "/api/telegram/pair/unlink")
     handler._handle_telegram_pair_unlink()
     data, status, _ = _last(handler)
@@ -927,7 +934,7 @@ def test_pairing_instructions_point_at_the_alerts_bot(monkeypatch):
     following the old text sent the code to the wrong bot and pairing silently
     failed. In two-bot production the instruction must carry the alerts username.
     """
-    monkeypatch.setattr(api, "TELEGRAM_ALERTS_BOT_USERNAME", "statuteproofalerts_bot")
+    monkeypatch.setattr(api_telegram, "TELEGRAM_ALERTS_BOT_USERNAME", "statuteproofalerts_bot")
     monkeypatch.setattr(api, "TELEGRAM_BOT_USERNAME", "StatuteProof_bot")
     handler = _make_handler("POST", "/api/telegram/pair/generate")
     text = handler._telegram_instructions("SP-ABC123")
@@ -936,9 +943,9 @@ def test_pairing_instructions_point_at_the_alerts_bot(monkeypatch):
 
     # Single-bot dev: TELEGRAM_ALERTS_BOT_USERNAME is populated from the legacy
     # var by config, so the instruction still resolves to the configured bot.
-    monkeypatch.setattr(api, "TELEGRAM_ALERTS_BOT_USERNAME", "solo_bot")
+    monkeypatch.setattr(api_telegram, "TELEGRAM_ALERTS_BOT_USERNAME", "solo_bot")
     assert "@solo_bot" in handler._telegram_instructions("SP-XYZ")
 
     # No username configured at all -> generic, no broken @-handle.
-    monkeypatch.setattr(api, "TELEGRAM_ALERTS_BOT_USERNAME", "")
+    monkeypatch.setattr(api_telegram, "TELEGRAM_ALERTS_BOT_USERNAME", "")
     assert handler._telegram_instructions("SP-1") == "Send /start SP-1 to our Telegram bot."

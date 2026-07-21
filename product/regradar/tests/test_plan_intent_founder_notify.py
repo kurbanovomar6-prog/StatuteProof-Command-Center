@@ -29,6 +29,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api_module
+import app.api_plan as api_plan_module
 import app.db as app_db
 from app.api import _Handler, _RateLimiter
 
@@ -87,10 +88,10 @@ class TestFounderNotifyOnPlanIntent:
             captured.append((email, plan_name))
             fired.set()
 
-        with patch.object(api_module, "require_auth", return_value=dict(_USER)), \
+        with patch.object(api_plan_module, "require_auth", return_value=dict(_USER)), \
              patch("app.plan.set_plan_intent", return_value=dict(_PLAN_STATE)), \
              patch.object(
-                 api_module, "_notify_founder_plan_intent", side_effect=_fake_notify
+                 api_plan_module, "_notify_founder_plan_intent", side_effect=_fake_notify
              ):
             handler._handle_plan_set()
 
@@ -128,10 +129,10 @@ class TestFounderNotifyOnPlanIntent:
 
         threading.excepthook = _capture_hook
         try:
-            with patch.object(api_module, "require_auth", return_value=dict(_USER)), \
+            with patch.object(api_plan_module, "require_auth", return_value=dict(_USER)), \
                  patch("app.plan.set_plan_intent", return_value=dict(_PLAN_STATE)), \
                  patch.object(
-                     api_module, "_notify_founder_plan_intent", side_effect=_boom
+                     api_plan_module, "_notify_founder_plan_intent", side_effect=_boom
                  ):
                 handler._handle_plan_set()
 
@@ -161,8 +162,8 @@ class TestFounderNotifyOnPlanIntent:
         """Unknown plan → 400 and the notify helper is never invoked."""
         handler = _make_handler({"plan_name": "not_a_plan"})
 
-        with patch.object(api_module, "require_auth", return_value=dict(_USER)), \
-             patch.object(api_module, "_notify_founder_plan_intent") as mock_notify:
+        with patch.object(api_plan_module, "require_auth", return_value=dict(_USER)), \
+             patch.object(api_plan_module, "_notify_founder_plan_intent") as mock_notify:
             handler._handle_plan_set()
 
         payload, status = handler._sent[-1]
@@ -182,10 +183,10 @@ class TestPlanIntentAbuseHardening:
 
     def test_plan_set_is_rate_limited_per_ip(self):
         """Beyond the limiter budget → 429, no intent write, no founder page."""
-        with patch.object(api_module, "_PLAN_INTENT_LIMITER", _RateLimiter(2, 3600)), \
-             patch.object(api_module, "require_auth", return_value=dict(_USER)), \
+        with patch.object(api_plan_module, "_PLAN_INTENT_LIMITER", _RateLimiter(2, 3600)), \
+             patch.object(api_plan_module, "require_auth", return_value=dict(_USER)), \
              patch("app.plan.set_plan_intent", return_value=dict(_PLAN_STATE)) as mock_set, \
-             patch.object(api_module, "_notify_founder_plan_intent") as mock_notify:
+             patch.object(api_plan_module, "_notify_founder_plan_intent") as mock_notify:
             statuses = []
             for _ in range(3):
                 handler = _make_handler({"plan_name": "professional"})
@@ -204,9 +205,9 @@ class TestPlanIntentAbuseHardening:
         state["intent_changed"] = False
         handler = _make_handler({"plan_name": "professional"})
 
-        with patch.object(api_module, "require_auth", return_value=dict(_USER)), \
+        with patch.object(api_plan_module, "require_auth", return_value=dict(_USER)), \
              patch("app.plan.set_plan_intent", return_value=state), \
-             patch.object(api_module, "_notify_founder_plan_intent") as mock_notify:
+             patch.object(api_plan_module, "_notify_founder_plan_intent") as mock_notify:
             handler._handle_plan_set()
 
         payload, status = handler._sent[-1]
