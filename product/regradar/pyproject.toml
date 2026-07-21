@@ -22,13 +22,15 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-# Measured 2026-07-21 (pytest tests/ --cov=app): 75.67% total, 4070 tests, after
-# two coverage cycles hardening the critical modules (ai 100%, coverage 100%,
-# source_readiness 99%, telegram_onboarding 99%, scheduler 98%, telegram 96%,
-# source_discovery 90%, document_extractor 83%, api.py ~63%). The floor sits
-# ~1.5pt below that measurement so ordinary churn cannot turn the backend job red
-# on arrival. Non-regression ratchet — raise it (never lower it) toward 80%.
-fail_under = 74
+# Measured 2026-07-22 (pytest tests/ --cov=app): 76.49% total, 4207 tests, after
+# further hardening cycles: the critical modules (ai 100%, coverage 100%,
+# tenancy 100%, user_delivery 99%, telegram_pairing 98%, source_readiness 99%,
+# telegram_onboarding 99%, scheduler 98%) plus new fail-closed security/alert
+# branch coverage (tenancy, user_delivery, alert_routing, telegram_pairing). The
+# floor sits ~1.5pt below that measurement so ordinary churn cannot turn the
+# backend job red on arrival. Non-regression ratchet — raise it (never lower it)
+# toward 80%.
+fail_under = 75
 exclude_also = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
