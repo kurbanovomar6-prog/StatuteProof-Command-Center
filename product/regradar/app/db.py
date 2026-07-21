@@ -395,6 +395,48 @@ def ensure_checklist_table(conn: sqlite3.Connection | None = None) -> None:
             conn.close()
 
 
+# ── Stripe webhook idempotency ledger — one row per PROCESSED Stripe event ───────
+#
+# Stripe redelivers the same event (network retry, dashboard resend) and an
+# attacker who captured one delivery can replay it. This table is the replay
+# guard for the entitlement-granting webhook (app/stripe_webhook.py): the event
+# id is inserted BEFORE the plan is activated, under a UNIQUE constraint, so a
+# redelivered or replayed event id collides and is recognised as already-seen,
+# and activate_plan runs AT MOST ONCE per real Stripe event.
+#
+# PURELY ADDITIVE: no existing table is altered; only the Stripe webhook path
+# touches it. ``event_id`` is Stripe's ``evt_...`` id (its global identifier).
+_CREATE_STRIPE_EVENTS_TABLE = """
+    CREATE TABLE IF NOT EXISTS stripe_webhook_events (
+        id           INTEGER   PRIMARY KEY AUTOINCREMENT,
+        event_id     TEXT      NOT NULL UNIQUE,
+        event_type   TEXT      NOT NULL DEFAULT '',
+        processed_at TIMESTAMP NOT NULL,
+        outcome      TEXT      NOT NULL DEFAULT ''
+    );
+"""
+
+
+def ensure_stripe_events_table(conn: sqlite3.Connection | None = None) -> None:
+    """Provision the Stripe webhook idempotency table. Cheap + idempotent + additive.
+
+    Mirrors ``ensure_checklist_table``: constant-cost ``CREATE TABLE IF NOT
+    EXISTS`` only, safe to call from every Stripe webhook DB operation.
+    Deliberately NOT chained into ``ensure_auth_tables`` — the table is touched
+    only by the Stripe webhook module, so the per-request session path is
+    unchanged.
+    """
+    owned_conn = conn is None
+    if conn is None:
+        conn = _connect()
+    try:
+        conn.executescript(_CREATE_STRIPE_EVENTS_TABLE)
+        conn.commit()
+    finally:
+        if owned_conn:
+            conn.close()
+
+
 # ── Sealed decision log — per-org, append-only, chained (Stage 1: INERT) ────────
 #
 # One row per SEALED review decision a user records against monitored evidence

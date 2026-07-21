@@ -397,6 +397,12 @@ _VERIFY_LIMITER = _RateLimiter(60, 3600)
 # — see app.evidence_room.MAX_ROOM_RECORDS) but it does scan the evidence tree,
 # so the same 60/hour ceiling applies to bound disk work from probes.
 _ROOM_LIMITER = _RateLimiter(60, 3600)
+# Public, no-login Stripe webhook (POST /api/stripe/webhook). Authenticated by
+# the Stripe signature, not a session, so it is internet-facing and unauthenticated
+# at the HTTP layer — cap per client IP to bound a flood of forged/garbage bodies
+# hitting the HMAC verify. Real Stripe delivery volume for billing events is far
+# below this ceiling; a burst of rejects is cheap but still worth bounding.
+_STRIPE_WEBHOOK_LIMITER = _RateLimiter(120, 3600)
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -475,6 +481,23 @@ class _Handler(BaseHTTPRequestHandler):
             return json.loads(self.rfile.read(length))
         except (json.JSONDecodeError, ValueError):
             return {}
+
+    def _read_raw_body(self) -> bytes | None:
+        """Read the RAW request body bytes, honouring the shared size cap.
+
+        Used where the exact bytes matter and must NOT be re-encoded by a JSON
+        round-trip — specifically the Stripe webhook, whose signature is computed
+        over the raw payload. Returns ``None`` (after emitting a 413) when the body
+        exceeds ``_MAX_BODY_BYTES``, and ``b""`` when there is no body.
+        """
+        length = int(self.headers.get("Content-Length", 0) or 0)
+        if not length:
+            return b""
+        if length > self._MAX_BODY_BYTES:
+            self.close_connection = True
+            self._send_json({"ok": False, "message": "Request body too large."}, 413)
+            return None
+        return self.rfile.read(length)
 
     def _read_json_strict(self) -> tuple[dict | None, str | None]:
         length = int(self.headers.get("Content-Length", 0))
@@ -1512,6 +1535,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_plan_set()
         elif path == "/api/admin/activate-plan":
             self._handle_admin_activate_plan()
+        elif path == "/api/stripe/webhook":
+            self._handle_stripe_webhook()
         elif path == "/api/telegram/pair/generate":
             self._handle_telegram_pair_generate()
         elif path == "/api/telegram/pair/unlink":
@@ -4016,6 +4041,40 @@ class _Handler(BaseHTTPRequestHandler):
             "plan": state,
             "message": f"Activated {state.get('active_plan_display', plan_name)} for {target.get('email')}.",
         })
+
+    def _handle_stripe_webhook(self) -> None:
+        """POST /api/stripe/webhook — payment → plan entitlement automation.
+
+        UNAUTHENTICATED at the HTTP layer BY DESIGN (Stripe, not a logged-in user,
+        calls it), but SECURED by Stripe signature verification over the RAW body
+        — never by session auth. This is the ONLY self-service path to
+        ``app.plan.activate_plan``; it reuses that founder-only activation rather
+        than forking entitlement logic.
+
+        The raw bytes are read BEFORE any JSON parse (the signature is computed
+        over them). All verification, idempotency, price→plan mapping, user
+        resolution, activation, and audit live in ``app.stripe_webhook`` — this
+        handler only marshals the HTTP request/response. A missing/invalid
+        signature yields 400 and activates nothing; a verified event is
+        acknowledged with 200 whether or not it resulted in an activation, so
+        Stripe never enters a retry loop on a benign (unknown-price / unresolved-
+        user) event.
+        """
+        if self._rate_limited(_STRIPE_WEBHOOK_LIMITER, "stripe_webhook"):
+            return
+        payload = self._read_raw_body()
+        if payload is None:  # 413 already emitted by _read_raw_body
+            return
+        sig_header = self.headers.get("Stripe-Signature", "")
+        try:
+            from app.stripe_webhook import handle_webhook
+
+            status, body = handle_webhook(payload, sig_header)
+        except Exception as exc:  # noqa: BLE001 — never leak internals to Stripe
+            logger.error("stripe webhook handler failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "error": "Internal server error."}, 500)
+            return
+        self._send_json(body, status)
 
     def _handle_save(self) -> None:
         body = self._read_json()
