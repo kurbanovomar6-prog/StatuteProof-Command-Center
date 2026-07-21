@@ -64,6 +64,7 @@ from app import rbac_runtime
 from app.config import (
     BASE_DIR,
     CONTACT_DELIVERY_DISABLED,
+    TELEGRAM_ALERTS_BOT_USERNAME,
     TELEGRAM_BOT_USERNAME,
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
@@ -1993,8 +1994,13 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _telegram_instructions(self, code: str) -> str:
-        if TELEGRAM_BOT_USERNAME:
-            return f"Send /start {code} to @{TELEGRAM_BOT_USERNAME} in Telegram."
+        # The /start CODE listener runs on the ALERTS bot (telegram_settings.get_token
+        # prefers TELEGRAM_ALERTS_BOT_TOKEN = @statuteproofalerts_bot), NOT the
+        # founder-only admin bot. Direct the customer at the alerts bot or pairing
+        # silently fails. TELEGRAM_ALERTS_BOT_USERNAME falls back to the legacy
+        # TELEGRAM_BOT_USERNAME in single-bot dev, so this is safe there too.
+        if TELEGRAM_ALERTS_BOT_USERNAME:
+            return f"Send /start {code} to @{TELEGRAM_ALERTS_BOT_USERNAME} in Telegram."
         return f"Send /start {code} to our Telegram bot."
 
     def _handle_telegram_pair_generate(self) -> None:
@@ -2011,7 +2017,7 @@ class _Handler(BaseHTTPRequestHandler):
                 "ok": True,
                 "code": result["code"],
                 "expires_at": result["expires_at"],
-                "bot_username": TELEGRAM_BOT_USERNAME or "",
+                "bot_username": TELEGRAM_ALERTS_BOT_USERNAME or "",
                 "instructions": self._telegram_instructions(result["code"]),
             })
         except Exception as exc:

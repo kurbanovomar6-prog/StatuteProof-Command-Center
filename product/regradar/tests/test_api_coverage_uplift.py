@@ -915,3 +915,30 @@ def test_admin_activate_plan_non_numeric_user_id_is_no_such_account(isolated_db,
     data, status, _ = _last(handler)
     assert status == 400
     assert data["message"] == "No such account."
+
+
+def test_pairing_instructions_point_at_the_alerts_bot(monkeypatch):
+    """Pairing instructions must name the ALERTS bot (@statuteproofalerts_bot),
+    not the founder-only admin bot.
+
+    Regression: _telegram_instructions used TELEGRAM_BOT_USERNAME (the admin
+    @StatuteProof_bot), but the /start CODE listener runs on the alerts token
+    (telegram_settings.get_token prefers TELEGRAM_ALERTS_BOT_TOKEN). A customer
+    following the old text sent the code to the wrong bot and pairing silently
+    failed. In two-bot production the instruction must carry the alerts username.
+    """
+    monkeypatch.setattr(api, "TELEGRAM_ALERTS_BOT_USERNAME", "statuteproofalerts_bot")
+    monkeypatch.setattr(api, "TELEGRAM_BOT_USERNAME", "StatuteProof_bot")
+    handler = _make_handler("POST", "/api/telegram/pair/generate")
+    text = handler._telegram_instructions("SP-ABC123")
+    assert "@statuteproofalerts_bot" in text
+    assert "StatuteProof_bot" not in text  # never the admin bot
+
+    # Single-bot dev: TELEGRAM_ALERTS_BOT_USERNAME is populated from the legacy
+    # var by config, so the instruction still resolves to the configured bot.
+    monkeypatch.setattr(api, "TELEGRAM_ALERTS_BOT_USERNAME", "solo_bot")
+    assert "@solo_bot" in handler._telegram_instructions("SP-XYZ")
+
+    # No username configured at all -> generic, no broken @-handle.
+    monkeypatch.setattr(api, "TELEGRAM_ALERTS_BOT_USERNAME", "")
+    assert handler._telegram_instructions("SP-1") == "Send /start SP-1 to our Telegram bot."
