@@ -404,9 +404,11 @@ def test_owner_passes_every_mutating_gate(isolated_db, monkeypatch):
     assert 403 not in _statuses(handler)
 
 
-def test_gate_fails_open_when_rbac_errors(isolated_db, monkeypatch):
-    # If the RBAC evaluation itself throws, the gate must ALLOW (never break an
-    # already-authenticated request).
+def test_gate_allows_resolvable_owner_when_rbac_errors(isolated_db, monkeypatch):
+    # If RBAC evaluation itself throws, the gate must never lock out a legitimate
+    # OWNER (no-regression). A user with no membership resolves to owner via the
+    # onboarding fail-safe, so an evaluation error still ALLOWS them. Non-owner
+    # seats fail CLOSED on the same error — see tests/test_rbac_fail_closed.py.
     def _boom(*a, **k):
         raise RuntimeError("rbac exploded")
 
