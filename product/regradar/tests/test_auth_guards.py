@@ -362,6 +362,7 @@ class TestHeavyReadRateLimits:
         handler = _make_handler("GET", "/api/evidence")
         user = {"id": 1, "email": "a@example.com"}
         with patch("app.api.require_auth", return_value=user), \
+             patch("app.api_evidence.require_auth", return_value=user), \
              patch.object(api_module._EVIDENCE_LIST_LIMITER, "is_allowed", return_value=False):
             handler._handle_evidence_list()
         statuses = [s for _, s in handler._sent]  # type: ignore[attr-defined]

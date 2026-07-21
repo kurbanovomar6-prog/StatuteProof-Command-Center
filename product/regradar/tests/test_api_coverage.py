@@ -31,6 +31,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_alerts as api_alerts
+import app.api_auth as api_auth
 from app.api import _Handler
 
 # Reuse the proven harness from the sibling uplift suite (pytest "prepend"
@@ -53,7 +55,7 @@ def test_auth_me_unauthenticated_is_401(monkeypatch):
 
 def test_auth_me_returns_public_user(monkeypatch):
     _auth_as(monkeypatch, {"id": 12, "email": "u@e.com", "password_hash": "SECRET"})
-    monkeypatch.setattr(api, "make_public_user", lambda u: {"id": u["id"], "email": u["email"]})
+    monkeypatch.setattr(api_auth, "make_public_user", lambda u: {"id": u["id"], "email": u["email"]})
     handler = _make_handler("GET", "/api/auth/me")
     handler._handle_auth_me()
     data, status, _ = _last(handler)
@@ -64,7 +66,7 @@ def test_auth_me_returns_public_user(monkeypatch):
 
 @pytest.mark.parametrize("available", [True, False])
 def test_google_status_reflects_configuration(monkeypatch, available):
-    monkeypatch.setattr(api, "google_oauth_available", lambda: available)
+    monkeypatch.setattr(api_auth, "google_oauth_available", lambda: available)
     handler = _make_handler("GET", "/api/auth/google/status")
     handler._handle_auth_google_status()
     data, status, _ = _last(handler)
@@ -101,7 +103,7 @@ def test_action_log_get_scopes_to_caller(monkeypatch):
         return [{"decision": "monitor"}]
 
     _auth_as(monkeypatch, {"id": 44})
-    monkeypatch.setattr(api, "get_action_log", _get)
+    monkeypatch.setattr(api_alerts, "get_action_log", _get)
     handler = _make_handler("GET", "/api/alerts/action-log?alert_id=alert-9")
     handler._handle_alert_action_log_get()
     data, status, _ = _last(handler)
@@ -145,7 +147,7 @@ def test_action_log_post_invalid_decision_is_400(monkeypatch):
 
 def test_action_log_post_save_failure_is_500(monkeypatch):
     _auth_as(monkeypatch, {"id": 1})
-    monkeypatch.setattr(api, "save_action_log_entry", lambda *a, **k: None)
+    monkeypatch.setattr(api_alerts, "save_action_log_entry", lambda *a, **k: None)
     handler = _make_handler("POST", "/api/alerts/action-log",
                             {"alert_id": "a1", "decision": "act"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -162,7 +164,7 @@ def test_action_log_post_success_is_201_and_scoped(monkeypatch):
         return {"id": 1, "decision": decision}
 
     _auth_as(monkeypatch, {"id": 88})
-    monkeypatch.setattr(api, "save_action_log_entry", _save)
+    monkeypatch.setattr(api_alerts, "save_action_log_entry", _save)
     handler = _make_handler("POST", "/api/alerts/action-log",
                             {"alert_id": "a1", "decision": "no_action", "notes": "x"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -187,7 +189,7 @@ def test_checklist_get_unauthenticated_is_401(monkeypatch):
 
 def test_checklist_get_invalid_alert_id_is_400(monkeypatch):
     _auth_as(monkeypatch, {"id": 1})
-    monkeypatch.setattr(api, "checklist_valid_alert_id", lambda aid: False)
+    monkeypatch.setattr(api_alerts, "checklist_valid_alert_id", lambda aid: False)
     handler = _make_handler("GET", "/api/alerts/checklist?alert_id=@@@")
     handler._handle_alert_checklist_get()
     data, status, _ = _last(handler)
@@ -203,9 +205,9 @@ def test_checklist_get_scopes_to_caller_and_returns_framing(monkeypatch):
         return [{"id": 1, "text": "call MLRO"}]
 
     _auth_as(monkeypatch, {"id": 33})
-    monkeypatch.setattr(api, "checklist_valid_alert_id", lambda aid: True)
-    monkeypatch.setattr(api, "list_checklist_items", _list)
-    monkeypatch.setattr(api, "CHECKLIST_FRAMING", {"note": "your words"})
+    monkeypatch.setattr(api_alerts, "checklist_valid_alert_id", lambda aid: True)
+    monkeypatch.setattr(api_alerts, "list_checklist_items", _list)
+    monkeypatch.setattr(api_alerts, "CHECKLIST_FRAMING", {"note": "your words"})
     handler = _make_handler("GET", "/api/alerts/checklist?alert_id=a1")
     handler._handle_alert_checklist_get()
     data, status, _ = _last(handler)
@@ -217,7 +219,7 @@ def test_checklist_get_scopes_to_caller_and_returns_framing(monkeypatch):
 
 def test_checklist_add_empty_text_is_400(monkeypatch):
     _auth_as(monkeypatch, {"id": 1})
-    monkeypatch.setattr(api, "checklist_valid_alert_id", lambda aid: True)
+    monkeypatch.setattr(api_alerts, "checklist_valid_alert_id", lambda aid: True)
     handler = _make_handler("POST", "/api/alerts/checklist",
                             {"alert_id": "a1", "text": "   "})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -229,8 +231,8 @@ def test_checklist_add_empty_text_is_400(monkeypatch):
 
 def test_checklist_add_full_list_is_400(monkeypatch):
     _auth_as(monkeypatch, {"id": 1})
-    monkeypatch.setattr(api, "checklist_valid_alert_id", lambda aid: True)
-    monkeypatch.setattr(api, "add_checklist_item", lambda *a, **k: None)
+    monkeypatch.setattr(api_alerts, "checklist_valid_alert_id", lambda aid: True)
+    monkeypatch.setattr(api_alerts, "add_checklist_item", lambda *a, **k: None)
     handler = _make_handler("POST", "/api/alerts/checklist",
                             {"alert_id": "a1", "text": "do the thing"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -248,8 +250,8 @@ def test_checklist_add_success_is_201_and_scoped(monkeypatch):
         return {"id": 5, "text": text}
 
     _auth_as(monkeypatch, {"id": 77})
-    monkeypatch.setattr(api, "checklist_valid_alert_id", lambda aid: True)
-    monkeypatch.setattr(api, "add_checklist_item", _add)
+    monkeypatch.setattr(api_alerts, "checklist_valid_alert_id", lambda aid: True)
+    monkeypatch.setattr(api_alerts, "add_checklist_item", _add)
     handler = _make_handler("POST", "/api/alerts/checklist",
                             {"alert_id": "a1", "text": "file SAR"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -279,7 +281,7 @@ def test_checklist_update_delete_success(monkeypatch):
         return True
 
     _auth_as(monkeypatch, {"id": 9})
-    monkeypatch.setattr(api, "delete_checklist_item", _del)
+    monkeypatch.setattr(api_alerts, "delete_checklist_item", _del)
     handler = _make_handler("PUT", "/api/alerts/checklist",
                             {"item_id": 3, "delete": True})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -292,7 +294,7 @@ def test_checklist_update_delete_success(monkeypatch):
 
 def test_checklist_update_delete_not_found_is_404(monkeypatch):
     _auth_as(monkeypatch, {"id": 9})
-    monkeypatch.setattr(api, "delete_checklist_item", lambda uid, iid: False)
+    monkeypatch.setattr(api_alerts, "delete_checklist_item", lambda uid, iid: False)
     handler = _make_handler("PUT", "/api/alerts/checklist",
                             {"item_id": 3, "delete": True})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -313,7 +315,7 @@ def test_checklist_update_nothing_to_update_is_400(monkeypatch):
 
 def test_checklist_update_not_found_is_404(monkeypatch):
     _auth_as(monkeypatch, {"id": 9})
-    monkeypatch.setattr(api, "update_checklist_item", lambda uid, iid, **kw: None)
+    monkeypatch.setattr(api_alerts, "update_checklist_item", lambda uid, iid, **kw: None)
     handler = _make_handler("PUT", "/api/alerts/checklist",
                             {"item_id": 3, "status": "done"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -330,7 +332,7 @@ def test_checklist_update_success_passes_only_supplied_fields(monkeypatch):
         return {"id": item_id, **kwargs}
 
     _auth_as(monkeypatch, {"id": 9})
-    monkeypatch.setattr(api, "update_checklist_item", _upd)
+    monkeypatch.setattr(api_alerts, "update_checklist_item", _upd)
     handler = _make_handler("PUT", "/api/alerts/checklist",
                             {"item_id": 3, "status": "done"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]

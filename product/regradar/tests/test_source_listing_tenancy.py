@@ -43,6 +43,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_evidence as api_evidence
 import app.db as app_db
 from app.api import _Handler
 
@@ -80,6 +81,7 @@ def _last_payload(handler: _Handler) -> dict:
 
 def _auth(monkeypatch, user_id: int) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
 
 
 # User 1 (victim) owns a PRIVATE custom source; user 2 must never see it.
@@ -259,6 +261,7 @@ def test_evidence_list_drops_other_tenants_custom_source_runs(monkeypatch, tmp_p
         encoding="utf-8",
     )
     monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api_evidence, "BASE_DIR", tmp_path)
     handler = _make_handler("GET", "/api/evidence?market=AE")
     handler._handle_evidence_list()
 

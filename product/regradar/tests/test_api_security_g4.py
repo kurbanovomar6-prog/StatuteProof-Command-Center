@@ -253,9 +253,9 @@ def test_verify_email_does_not_set_session_cookie():
     h = _make_handler("GET", "/api/auth/verify-email?token=T")
     h._send_json = _fake_send_json  # type: ignore[method-assign]
 
-    with patch("app.api.consume_verification_token", return_value=42) as consume, \
-         patch("app.api.mark_email_verified") as mark, \
-         patch("app.api.create_session") as create_sess:
+    with patch("app.api_auth.consume_verification_token", return_value=42) as consume, \
+         patch("app.api_auth.mark_email_verified") as mark, \
+         patch("app.api_auth.create_session") as create_sess:
         h._handle_auth_verify_email()
 
     consume.assert_called_once_with("T")

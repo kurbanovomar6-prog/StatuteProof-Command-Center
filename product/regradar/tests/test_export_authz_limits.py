@@ -29,6 +29,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_evidence as api_evidence
 import app.db as app_db
 import app.plan as plan
 from app.api import _Handler, _RateLimiter
@@ -88,6 +89,7 @@ def _patch_plan(monkeypatch, plan_name: str) -> None:
 
 def _auth(monkeypatch, user_id: int = 1) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
 
 
 # ── 1a. plan capability helpers (pure) ───────────────────────────────────────
@@ -317,6 +319,7 @@ _TWO_USER_SOURCES = [
 
 def _list_for_user(monkeypatch, user_id: int) -> list[dict]:
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
     monkeypatch.setattr("app.source_intake.load_sources_json", lambda: _TWO_USER_SOURCES)
     handler = _make_handler("GET", "/api/custom-sources")
     captured: dict = {}
@@ -593,6 +596,7 @@ def test_evidence_pack_refused_for_self_selected_unactivated_account(_activation
     uid = _new_user_id("pack@x.io")
     set_plan_intent(uid, "consultant")  # self-selected, NOT activated
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": uid, "email": "pack@x.io"})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: {"id": uid, "email": "pack@x.io"})
     monkeypatch.setattr(
         "app.evidence_pack.build_evidence_pack",
         lambda *a, **k: pytest.fail("unactivated self-selected account reached the builder"),

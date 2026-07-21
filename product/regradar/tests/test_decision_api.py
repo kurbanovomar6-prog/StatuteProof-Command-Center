@@ -36,6 +36,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_alerts as api_alerts
 import app.db as app_db
 import app.decision_records as decision_records
 import app.rbac_runtime as rbac_runtime
@@ -112,6 +113,7 @@ def _last(handler: _Handler) -> tuple[dict, int]:
 
 def _auth_as(monkeypatch, user: dict) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: dict(user))
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: dict(user))
 
 
 def _new_owner(email: str, full_name: str | None = None) -> dict:
@@ -159,6 +161,7 @@ def org_with_auditor(isolated_db):
 
 def test_get_requires_auth(isolated_db, monkeypatch):
     monkeypatch.setattr(api, "require_auth", lambda handler: None)
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: None)
     handler = _make_handler("GET", f"/api/alerts/decisions?alert_id={ALERT}")
     handler._handle_alert_decisions_get()
     _, status = _last(handler)
@@ -167,6 +170,7 @@ def test_get_requires_auth(isolated_db, monkeypatch):
 
 def test_post_requires_auth(isolated_db, monkeypatch):
     monkeypatch.setattr(api, "require_auth", lambda handler: None)
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: None)
     handler = _make_handler("POST", "/api/alerts/decisions", body=_seal_body())
     handler._handle_alert_decisions_post()
     _, status = _last(handler)
@@ -227,7 +231,7 @@ def test_post_oversize_statement_is_rejected_never_truncated(isolated_db, monkey
     owner = _new_owner("bounds@example.com")
     org_id = _owned_org_id(owner["id"])
     _auth_as(monkeypatch, {"id": owner["id"], "email": owner["email"]})
-    monkeypatch.setattr(api, "find_routing_match_for_user", lambda *a, **k: _match())
+    monkeypatch.setattr(api_alerts, "find_routing_match_for_user", lambda *a, **k: _match())
 
     handler = _make_handler(
         "POST", "/api/alerts/decisions",
@@ -246,7 +250,7 @@ def test_auditor_post_is_denied_403_and_nothing_is_sealed(org_with_auditor, monk
     _owner, auditor, org_id = org_with_auditor
     _auth_as(monkeypatch, {"id": auditor["id"], "email": auditor["email"]})
     monkeypatch.setattr(
-        api, "find_routing_match_for_user",
+        api_alerts, "find_routing_match_for_user",
         lambda *a, **k: pytest.fail("auditor seal reached the alert loader"),
     )
     handler = _make_handler("POST", "/api/alerts/decisions", body=_seal_body())
@@ -313,7 +317,7 @@ def test_post_unknown_alert_is_404_no_oracle(isolated_db, monkeypatch):
         seen.append((user_id, alert_id))
         return None  # unknown OR another tenant's — indistinguishable
 
-    monkeypatch.setattr(api, "find_routing_match_for_user", fake_find)
+    monkeypatch.setattr(api_alerts, "find_routing_match_for_user", fake_find)
     handler = _make_handler("POST", "/api/alerts/decisions", body=_seal_body())
     handler._handle_alert_decisions_post()
     body, status = _last(handler)
@@ -326,7 +330,7 @@ def test_post_unknown_alert_is_404_no_oracle(isolated_db, monkeypatch):
 def test_post_alert_without_proof_is_refused_409(isolated_db, monkeypatch):
     owner = _new_owner("noproof@example.com")
     _auth_as(monkeypatch, {"id": owner["id"], "email": owner["email"]})
-    monkeypatch.setattr(api, "find_routing_match_for_user", lambda *a, **k: _match(proof=None))
+    monkeypatch.setattr(api_alerts, "find_routing_match_for_user", lambda *a, **k: _match(proof=None))
 
     handler = _make_handler("POST", "/api/alerts/decisions", body=_seal_body())
     handler._handle_alert_decisions_post()
@@ -352,7 +356,7 @@ def test_happy_path_seals_and_binds_reviewed_from_the_match(isolated_db, monkeyp
         monkeypatch,
         {"id": owner["id"], "email": owner["email"], "full_name": "A. Rahman"},
     )
-    monkeypatch.setattr(api, "find_routing_match_for_user", lambda *a, **k: _match())
+    monkeypatch.setattr(api_alerts, "find_routing_match_for_user", lambda *a, **k: _match())
 
     handler = _make_handler("POST", "/api/alerts/decisions", body=_seal_body())
     handler._handle_alert_decisions_post()
@@ -386,7 +390,7 @@ def test_happy_path_seals_and_binds_reviewed_from_the_match(isolated_db, monkeyp
 def test_display_name_falls_back_to_email(isolated_db, monkeypatch):
     owner = _new_owner("noname@example.com")  # no full_name on the account
     _auth_as(monkeypatch, {"id": owner["id"], "email": owner["email"], "full_name": None})
-    monkeypatch.setattr(api, "find_routing_match_for_user", lambda *a, **k: _match())
+    monkeypatch.setattr(api_alerts, "find_routing_match_for_user", lambda *a, **k: _match())
 
     handler = _make_handler("POST", "/api/alerts/decisions", body=_seal_body())
     handler._handle_alert_decisions_post()
@@ -402,7 +406,7 @@ def test_amend_flow_seals_a_linked_correction(isolated_db, monkeypatch):
         monkeypatch,
         {"id": owner["id"], "email": owner["email"], "full_name": "A. Rahman"},
     )
-    monkeypatch.setattr(api, "find_routing_match_for_user", lambda *a, **k: _match())
+    monkeypatch.setattr(api_alerts, "find_routing_match_for_user", lambda *a, **k: _match())
 
     first = _make_handler("POST", "/api/alerts/decisions", body=_seal_body())
     first._handle_alert_decisions_post()

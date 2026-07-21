@@ -34,6 +34,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_alerts as api_alerts
+import app.api_auth as api_auth
+import app.api_evidence as api_evidence
 import app.api_plan as api_plan
 import app.api_telegram as api_telegram
 import app.db as app_db
@@ -100,11 +103,15 @@ def _last(handler: _Handler):
 
 def _auth_as(monkeypatch, user: dict | None) -> None:
     # ``require_auth`` is read as a bare global inside each handler's own module.
-    # Handlers that moved into mixin modules (app.api_telegram, app.api_plan) read
-    # it from THEIR namespace, so patch it everywhere a moved handler lives.
+    # Handlers that moved into mixin modules (app.api_telegram, app.api_plan,
+    # app.api_auth, app.api_alerts, app.api_evidence) read it from THEIR
+    # namespace, so patch it everywhere a moved handler lives.
     monkeypatch.setattr(api, "require_auth", lambda handler: user)
     monkeypatch.setattr(api_telegram, "require_auth", lambda handler: user)
     monkeypatch.setattr(api_plan, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_auth, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: user)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -129,7 +136,7 @@ def test_login_bad_json_is_400():
 
 
 def test_login_unknown_email_is_401(monkeypatch):
-    monkeypatch.setattr(api, "get_user_by_email", lambda email: None)
+    monkeypatch.setattr(api_auth, "get_user_by_email", lambda email: None)
     handler = _make_handler(
         "POST", "/api/auth/login",
         {"email": "nobody@example.com", "password": "whatever"},
@@ -142,11 +149,11 @@ def test_login_unknown_email_is_401(monkeypatch):
 
 def test_login_wrong_password_is_401(monkeypatch):
     monkeypatch.setattr(
-        api, "get_user_by_email",
+        api_auth, "get_user_by_email",
         lambda email: {"id": 1, "is_active": True, "email_verified": True,
                        "password_hash": "hash", "email": email},
     )
-    monkeypatch.setattr(api, "verify_password", lambda pw, h: False)
+    monkeypatch.setattr(api_auth, "verify_password", lambda pw, h: False)
     handler = _make_handler(
         "POST", "/api/auth/login",
         {"email": "user@example.com", "password": "wrong"},
@@ -159,11 +166,11 @@ def test_login_wrong_password_is_401(monkeypatch):
 
 def test_login_inactive_account_is_401(monkeypatch):
     monkeypatch.setattr(
-        api, "get_user_by_email",
+        api_auth, "get_user_by_email",
         lambda email: {"id": 1, "is_active": False, "email_verified": True,
                        "password_hash": "hash", "email": email},
     )
-    monkeypatch.setattr(api, "verify_password", lambda pw, h: True)
+    monkeypatch.setattr(api_auth, "verify_password", lambda pw, h: True)
     handler = _make_handler(
         "POST", "/api/auth/login",
         {"email": "user@example.com", "password": "correct"},
@@ -176,13 +183,13 @@ def test_login_inactive_account_is_401(monkeypatch):
 
 def test_login_unverified_email_is_403_and_not_bypassable(monkeypatch):
     monkeypatch.setattr(
-        api, "get_user_by_email",
+        api_auth, "get_user_by_email",
         lambda email: {"id": 1, "is_active": True, "email_verified": False,
                        "password_hash": "hash", "email": email},
     )
-    monkeypatch.setattr(api, "verify_password", lambda pw, h: True)
+    monkeypatch.setattr(api_auth, "verify_password", lambda pw, h: True)
     # No session is minted for an unverified account.
-    monkeypatch.setattr(api, "create_session",
+    monkeypatch.setattr(api_auth, "create_session",
                         lambda uid: pytest.fail("create_session must NOT run for unverified email"))
     handler = _make_handler(
         "POST", "/api/auth/login",
@@ -198,13 +205,13 @@ def test_login_unverified_email_is_403_and_not_bypassable(monkeypatch):
 
 def test_login_success_sets_session_cookie_and_200(monkeypatch):
     monkeypatch.setattr(
-        api, "get_user_by_email",
+        api_auth, "get_user_by_email",
         lambda email: {"id": 42, "is_active": True, "email_verified": True,
                        "password_hash": "hash", "email": email},
     )
-    monkeypatch.setattr(api, "verify_password", lambda pw, h: True)
-    monkeypatch.setattr(api, "create_session", lambda uid: "sess-token-xyz")
-    monkeypatch.setattr(api, "make_public_user", lambda u: {"id": u["id"], "email": u["email"]})
+    monkeypatch.setattr(api_auth, "verify_password", lambda pw, h: True)
+    monkeypatch.setattr(api_auth, "create_session", lambda uid: "sess-token-xyz")
+    monkeypatch.setattr(api_auth, "make_public_user", lambda u: {"id": u["id"], "email": u["email"]})
     handler = _make_handler(
         "POST", "/api/auth/login",
         {"email": "user@example.com", "password": "correct"},
@@ -222,16 +229,16 @@ def test_login_success_sets_session_cookie_and_200(monkeypatch):
 
 def test_login_create_session_raises_is_500(monkeypatch):
     monkeypatch.setattr(
-        api, "get_user_by_email",
+        api_auth, "get_user_by_email",
         lambda email: {"id": 1, "is_active": True, "email_verified": True,
                        "password_hash": "hash", "email": email},
     )
-    monkeypatch.setattr(api, "verify_password", lambda pw, h: True)
+    monkeypatch.setattr(api_auth, "verify_password", lambda pw, h: True)
 
     def _boom(uid):
         raise RuntimeError("session store down")
 
-    monkeypatch.setattr(api, "create_session", _boom)
+    monkeypatch.setattr(api_auth, "create_session", _boom)
     handler = _make_handler(
         "POST", "/api/auth/login",
         {"email": "user@example.com", "password": "correct"},
@@ -766,7 +773,7 @@ def test_telegram_pair_unlink_operates_on_caller_only(monkeypatch):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def test_google_start_not_configured_is_503(monkeypatch):
-    monkeypatch.setattr(api, "google_oauth_available", lambda: False)
+    monkeypatch.setattr(api_auth, "google_oauth_available", lambda: False)
     handler = _make_handler("GET", "/api/auth/google/start")
     handler._handle_auth_google_start()
     data, status, _ = _last(handler)
@@ -775,9 +782,9 @@ def test_google_start_not_configured_is_503(monkeypatch):
 
 
 def test_google_start_success_redirects_to_authorization_url(monkeypatch):
-    monkeypatch.setattr(api, "google_oauth_available", lambda: True)
-    monkeypatch.setattr(api, "create_google_oauth_state", lambda next_path: "state-token")
-    monkeypatch.setattr(api, "google_oauth_authorization_url",
+    monkeypatch.setattr(api_auth, "google_oauth_available", lambda: True)
+    monkeypatch.setattr(api_auth, "create_google_oauth_state", lambda next_path: "state-token")
+    monkeypatch.setattr(api_auth, "google_oauth_authorization_url",
                         lambda state: f"https://accounts.google.com/o/oauth2?state={state}")
     handler = _make_handler("GET", "/api/auth/google/start?next=/app/settings")
     handler._handle_auth_google_start()
@@ -788,12 +795,12 @@ def test_google_start_success_redirects_to_authorization_url(monkeypatch):
 
 
 def test_google_start_oauth_account_error_is_503(monkeypatch):
-    monkeypatch.setattr(api, "google_oauth_available", lambda: True)
+    monkeypatch.setattr(api_auth, "google_oauth_available", lambda: True)
 
     def _boom(next_path):
         raise OAuthAccountError("password account cannot use Google")
 
-    monkeypatch.setattr(api, "create_google_oauth_state", _boom)
+    monkeypatch.setattr(api_auth, "create_google_oauth_state", _boom)
     handler = _make_handler("GET", "/api/auth/google/start")
     handler._handle_auth_google_start()
     _, status, _ = _last(handler)
@@ -801,12 +808,12 @@ def test_google_start_oauth_account_error_is_503(monkeypatch):
 
 
 def test_google_start_generic_error_is_500(monkeypatch):
-    monkeypatch.setattr(api, "google_oauth_available", lambda: True)
+    monkeypatch.setattr(api_auth, "google_oauth_available", lambda: True)
 
     def _boom(next_path):
         raise RuntimeError("state store down")
 
-    monkeypatch.setattr(api, "create_google_oauth_state", _boom)
+    monkeypatch.setattr(api_auth, "create_google_oauth_state", _boom)
     handler = _make_handler("GET", "/api/auth/google/start")
     handler._handle_auth_google_start()
     _, status, _ = _last(handler)
@@ -821,7 +828,7 @@ def test_google_callback_user_cancelled_redirects_to_cancelled(monkeypatch):
 
 
 def test_google_callback_missing_state_redirects_to_failed(monkeypatch):
-    monkeypatch.setattr(api, "consume_google_oauth_state", lambda state: None)
+    monkeypatch.setattr(api_auth, "consume_google_oauth_state", lambda state: None)
     handler = _make_handler("GET", "/api/auth/google/callback?code=abc&state=bad")
     handler._handle_auth_google_callback()
     location, _, _ = handler._redirects[-1]  # type: ignore[attr-defined]
@@ -829,12 +836,12 @@ def test_google_callback_missing_state_redirects_to_failed(monkeypatch):
 
 
 def test_google_callback_success_sets_cookie_and_redirects_next(monkeypatch):
-    monkeypatch.setattr(api, "consume_google_oauth_state",
+    monkeypatch.setattr(api_auth, "consume_google_oauth_state",
                         lambda state: {"next_path": "/app/dashboard"})
-    monkeypatch.setattr(api, "exchange_google_oauth_code", lambda code: {"email": "g@e.com"})
-    monkeypatch.setattr(api, "link_or_create_google_user",
+    monkeypatch.setattr(api_auth, "exchange_google_oauth_code", lambda code: {"email": "g@e.com"})
+    monkeypatch.setattr(api_auth, "link_or_create_google_user",
                         lambda claims: {"id": 8, "is_active": True})
-    monkeypatch.setattr(api, "create_session", lambda uid: "goog-sess")
+    monkeypatch.setattr(api_auth, "create_session", lambda uid: "goog-sess")
     handler = _make_handler("GET", "/api/auth/google/callback?code=abc&state=good")
     handler._handle_auth_google_callback()
     location, status, extra = handler._redirects[-1]  # type: ignore[attr-defined]
@@ -845,12 +852,12 @@ def test_google_callback_success_sets_cookie_and_redirects_next(monkeypatch):
 
 
 def test_google_callback_inactive_account_redirects_to_failed(monkeypatch):
-    monkeypatch.setattr(api, "consume_google_oauth_state",
+    monkeypatch.setattr(api_auth, "consume_google_oauth_state",
                         lambda state: {"next_path": "/app"})
-    monkeypatch.setattr(api, "exchange_google_oauth_code", lambda code: {"email": "g@e.com"})
-    monkeypatch.setattr(api, "link_or_create_google_user",
+    monkeypatch.setattr(api_auth, "exchange_google_oauth_code", lambda code: {"email": "g@e.com"})
+    monkeypatch.setattr(api_auth, "link_or_create_google_user",
                         lambda claims: {"id": 8, "is_active": False})
-    monkeypatch.setattr(api, "create_session",
+    monkeypatch.setattr(api_auth, "create_session",
                         lambda uid: pytest.fail("no session for an inactive account"))
     handler = _make_handler("GET", "/api/auth/google/callback?code=abc&state=good")
     handler._handle_auth_google_callback()
@@ -859,13 +866,13 @@ def test_google_callback_inactive_account_redirects_to_failed(monkeypatch):
 
 
 def test_google_callback_exchange_raises_redirects_to_failed(monkeypatch):
-    monkeypatch.setattr(api, "consume_google_oauth_state",
+    monkeypatch.setattr(api_auth, "consume_google_oauth_state",
                         lambda state: {"next_path": "/app"})
 
     def _boom(code):
         raise RuntimeError("token exchange failed")
 
-    monkeypatch.setattr(api, "exchange_google_oauth_code", _boom)
+    monkeypatch.setattr(api_auth, "exchange_google_oauth_code", _boom)
     handler = _make_handler("GET", "/api/auth/google/callback?code=abc&state=good")
     handler._handle_auth_google_callback()
     location, _, _ = handler._redirects[-1]  # type: ignore[attr-defined]

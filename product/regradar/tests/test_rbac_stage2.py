@@ -32,6 +32,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_evidence as api_evidence
 import app.db as app_db
 import app.rbac_runtime as rbac_runtime
 from app import rbac
@@ -90,6 +91,7 @@ def _statuses(handler: _Handler) -> list[int]:
 
 def _auth_as(monkeypatch, user: dict) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: dict(user))
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: dict(user))
 
 
 def _new_owner(email: str) -> dict:

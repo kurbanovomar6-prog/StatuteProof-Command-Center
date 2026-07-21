@@ -277,6 +277,7 @@ from io import BytesIO  # noqa: E402
 from unittest.mock import MagicMock  # noqa: E402
 
 import app.api as api  # noqa: E402
+import app.api_alerts as api_alerts
 from app.api import _Handler  # noqa: E402
 
 
@@ -306,6 +307,7 @@ def _last(handler: _Handler) -> tuple[dict, int]:
 
 def test_endpoint_requires_auth(monkeypatch):
     monkeypatch.setattr(api, "require_auth", lambda handler: None)
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: None)
     handler = _make_handler("/api/alerts/redline?alert_id=draft-x1")
     handler._handle_alert_redline_get()
     _, status = _last(handler)
@@ -314,6 +316,7 @@ def test_endpoint_requires_auth(monkeypatch):
 
 def test_endpoint_rejects_malformed_alert_id(monkeypatch):
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 1})
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: {"id": 1})
     handler = _make_handler("/api/alerts/redline?alert_id=..%2F..%2Fetc")
     handler._handle_alert_redline_get()
     _, status = _last(handler)
@@ -327,13 +330,14 @@ def test_endpoint_scopes_by_owner_lookup_and_404s_unknown(monkeypatch, tmp_path)
     monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
     match = _write_sealed_record(tmp_path)
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7})
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: {"id": 7})
     seen: list[tuple[int, str]] = []
 
     def fake_find(user_id, alert_id, days=14):
         seen.append((user_id, alert_id))
         return match if alert_id == "draft-x1" else None
 
-    monkeypatch.setattr(api, "find_routing_match_for_user", fake_find)
+    monkeypatch.setattr(api_alerts, "find_routing_match_for_user", fake_find)
 
     # Known alert (in the caller's scope) → redline payload.
     import app.sealed_redline as sr

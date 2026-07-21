@@ -729,13 +729,16 @@ def test_evidence_listing_labels_a_skipped_cycle_as_not_fetched(
     from unittest.mock import MagicMock
 
     import app.api as api
+    import app.api_evidence as api_evidence
     import app.monitor as monitor
 
     walled = _src("Chronically Walled", "https://walled.example/evidence")
     _open_breaker_then_skip_one_cycle(monitor, tmp_path, monkeypatch, walled)
 
     monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api_evidence, "BASE_DIR", tmp_path)
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 1, "email": "u@x.io"})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: {"id": 1, "email": "u@x.io"})
 
     handler = api._Handler.__new__(api._Handler)
     handler.command = "GET"

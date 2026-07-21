@@ -33,6 +33,7 @@ if PRODUCT_DIR not in sys.path:
 import pytest
 
 import app.api as api
+import app.api_evidence as api_evidence
 import app.evidence_assessment as evidence_assessment
 import app.source_health_timeline as source_health_timeline
 import app.review_queue as review_queue
@@ -98,6 +99,7 @@ def _status(handler: _Handler) -> int:
 
 def _auth(monkeypatch, user_id: int) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
 
 
 def _patch_sources(monkeypatch) -> None:
@@ -203,6 +205,7 @@ def test_evidence_review_history_scoped(monkeypatch, tmp_path):
 def test_evidence_diff_scoped(monkeypatch, tmp_path):
     _seed_victim_run(tmp_path)
     monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api_evidence, "BASE_DIR", tmp_path)
     _patch_sources(monkeypatch)
 
     _auth(monkeypatch, _ATTACKER_ID)
@@ -249,6 +252,7 @@ def test_briefs_list_scoped(monkeypatch, tmp_path):
         encoding="utf-8",
     )
     monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api_evidence, "BASE_DIR", tmp_path)
     _patch_sources(monkeypatch)
 
     _auth(monkeypatch, _ATTACKER_ID)
@@ -268,6 +272,7 @@ def test_briefs_list_scoped(monkeypatch, tmp_path):
 def test_briefs_generate_scoped(monkeypatch, tmp_path):
     _seed_victim_run(tmp_path)
     monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api_evidence, "BASE_DIR", tmp_path)
     monkeypatch.setattr("app.config.ENABLE_AI_ANALYSIS", False, raising=False)
     _patch_sources(monkeypatch)
 

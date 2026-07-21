@@ -19,6 +19,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api_module
+import app.api_auth as api_auth
 from app.api import _Handler, _notify_founder_registration
 
 
@@ -76,10 +77,10 @@ class TestFounderNotifyOnRegistration:
             captured["company"] = company_name
             fired.set()
 
-        with patch.object(api_module, "create_user") as mock_create, \
-             patch.object(api_module, "generate_verification_token", return_value="tok"), \
-             patch.object(api_module, "_send_verification_email"), \
-             patch.object(api_module, "_notify_founder_registration", side_effect=_fake_notify), \
+        with patch.object(api_auth, "create_user") as mock_create, \
+             patch.object(api_auth, "generate_verification_token", return_value="tok"), \
+             patch.object(api_auth, "_send_verification_email"), \
+             patch.object(api_auth, "_notify_founder_registration", side_effect=_fake_notify), \
              patch.object(handler, "_rate_limited", return_value=False, create=True):
             mock_create.return_value = {"id": 7, "email": _REGISTER_BODY["email"]}
             handler._handle_auth_register()
@@ -122,10 +123,10 @@ class TestFounderNotifyOnRegistration:
 
         threading.excepthook = _capture_hook
         try:
-            with patch.object(api_module, "create_user") as mock_create, \
-                 patch.object(api_module, "generate_verification_token", return_value="tok"), \
-                 patch.object(api_module, "_send_verification_email"), \
-                 patch.object(api_module, "_notify_founder_registration", side_effect=_boom), \
+            with patch.object(api_auth, "create_user") as mock_create, \
+                 patch.object(api_auth, "generate_verification_token", return_value="tok"), \
+                 patch.object(api_auth, "_send_verification_email"), \
+                 patch.object(api_auth, "_notify_founder_registration", side_effect=_boom), \
                  patch.object(handler, "_rate_limited", return_value=False, create=True):
                 mock_create.return_value = {"id": 8, "email": _REGISTER_BODY["email"]}
                 handler._handle_auth_register()

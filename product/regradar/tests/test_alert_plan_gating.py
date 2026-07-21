@@ -647,6 +647,7 @@ def test_exempt_operator_preview_is_not_redacted(isolated_db, monkeypatch):
 def _redline_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
     """Drive GET /api/alerts/redline for ``user_id`` with a stubbed match."""
     import app.api as api
+    import app.api_alerts as api_alerts
     import app.sealed_redline as sealed_redline
 
     handler = api._Handler.__new__(api._Handler)
@@ -665,8 +666,9 @@ def _redline_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
     handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
 
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(api_alerts, "require_auth", lambda h: {"id": int(user_id)})
     monkeypatch.setattr(
-        api,
+        api_alerts,
         "find_routing_match_for_user",
         lambda uid, alert_id, days=14: _full_match(source_id),
     )
@@ -765,6 +767,7 @@ _DIFF_TEXT = "# diff\n+ firms must ensure and evidence ongoing compliance\n"
 
 def _evidence_diff_handler(monkeypatch, tmp_path, user_id: int, source_id: str = "AE-1"):
     import app.api as api
+    import app.api_evidence as api_evidence
 
     runs_dir = tmp_path / "data" / "source_runs"
     runs_dir.mkdir(parents=True, exist_ok=True)
@@ -797,7 +800,9 @@ def _evidence_diff_handler(monkeypatch, tmp_path, user_id: int, source_id: str =
     handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
 
     monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api_evidence, "BASE_DIR", tmp_path)
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda h: {"id": int(user_id)})
     monkeypatch.setattr(api._Handler, "_source_visible_to", lambda self, user, sid: True)
     handler._handle_evidence_diff_get()
     return sent[-1]
@@ -1124,6 +1129,7 @@ def _decision_match(source_id: str = "AE-1") -> dict:
 def _decision_seal_handler(monkeypatch, tmp_path, user_id: int, source_id: str = "AE-1"):
     """Drive POST /api/decisions for ``user_id`` with a stubbed match."""
     import app.api as api
+    import app.api_alerts as api_alerts
     import app.decision_records as decision_records
 
     monkeypatch.setattr(decision_records, "_BASE_DIR", tmp_path)
@@ -1144,8 +1150,9 @@ def _decision_seal_handler(monkeypatch, tmp_path, user_id: int, source_id: str =
     handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
 
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id), "email": "x@co.com"})
+    monkeypatch.setattr(api_alerts, "require_auth", lambda h: {"id": int(user_id), "email": "x@co.com"})
     monkeypatch.setattr(
-        api, "find_routing_match_for_user", lambda uid, alert_id, days=14: _decision_match(source_id)
+        api_alerts, "find_routing_match_for_user", lambda uid, alert_id, days=14: _decision_match(source_id)
     )
     handler._rate_limited = lambda *a, **kw: False
     handler._rbac_guard = lambda *a, **kw: True

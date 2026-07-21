@@ -26,6 +26,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_alerts as api_alerts
 import app.db as app_db
 import app.action_checklist as checklist
 from app.access_log import read_access_log
@@ -80,6 +81,7 @@ def _make_handler(method: str, path: str, *, real_ip: str = "10.0.0.9") -> _Hand
 
 def _auth_as(monkeypatch, user: dict) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: dict(user))
+    monkeypatch.setattr(api_alerts, "require_auth", lambda handler: dict(user))
 
 
 def _last(handler: _Handler) -> tuple[dict, int]:

@@ -18,6 +18,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api  # noqa: E402
+import app.api_evidence as api_evidence
 import app.db as app_db  # noqa: E402
 from app.access_log import append_access_log  # noqa: E402
 from app.api import _Handler  # noqa: E402
@@ -72,6 +73,7 @@ def test_owner_reads_only_their_org_rows(isolated_db, monkeypatch):
     append_access_log(actor_user_id=other["id"], org_id=other_org, action="evidence.export", result="allow", resource_id="secret")
 
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": owner["id"], "email": owner["email"]})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda h: {"id": owner["id"], "email": owner["email"]})
     handler = _make_handler("/api/audit-log")
     handler._handle_audit_log_get()
 
@@ -104,6 +106,7 @@ def test_unresolved_org_fails_closed_not_all_rows(isolated_db, monkeypatch):
     assert resolve_principal({"id": other["id"]}).org_id is None
 
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": other["id"], "email": other["email"]})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda h: {"id": other["id"], "email": other["email"]})
     handler = _make_handler("/api/audit-log")
     handler._handle_audit_log_get()
     data, status = handler._sent[-1]
@@ -114,6 +117,7 @@ def test_unresolved_org_fails_closed_not_all_rows(isolated_db, monkeypatch):
 
 def test_unauthenticated_is_401(isolated_db, monkeypatch):
     monkeypatch.setattr(api, "require_auth", lambda h: None)
+    monkeypatch.setattr(api_evidence, "require_auth", lambda h: None)
     handler = _make_handler("/api/audit-log")
     handler._handle_audit_log_get()
     _data, status = handler._sent[-1]
@@ -131,6 +135,7 @@ def test_non_owner_is_403(isolated_db, monkeypatch):
     assert assign_org_role({"id": owner["id"]}, auditor["id"], org_id, "auditor")["ok"]
 
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": auditor["id"], "email": auditor["email"]})
+    monkeypatch.setattr(api_evidence, "require_auth", lambda h: {"id": auditor["id"], "email": auditor["email"]})
     handler = _make_handler("/api/audit-log")
     handler._handle_audit_log_get()
     _data, status = handler._sent[-1]
