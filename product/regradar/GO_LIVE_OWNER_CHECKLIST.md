@@ -60,18 +60,19 @@ the same `activate_plan` your admin panel uses) — no more SSH activation. A
 logged-in buyer is resolved by `client_reference_id`; an anonymous buyer by the
 email they verified in-app.
 
-**Cancellations / refunds are a MANUAL step (admin panel), by deliberate design.**
-Automated *downgrade* on cancel/refund was built and then **removed** because it
-was unsafe with client-side Stripe Payment Links: nothing in that checkout is a
-trustworthy identity assertion (the buyer controls both the email and the
-`client_reference_id` URL param), so an automated downgrade could be weaponized to
-strip a *paying* customer's access. Activation is safe (worst case: a harmless
-gifted upgrade); a downgrade is not. Safe automated revocation requires creating
-the Stripe **Checkout Session server-side** (so the server sets the identity from
-the authenticated session, not the buyer) — which needs your Stripe **secret**
-key. When you provide `STRIPE_SECRET_KEY`, that server-side-checkout prerequisite
-can be built and then automated revocation becomes safe to add. Until then, cancel
-a subscriber in the admin panel — it fails safe (they keep access until you act).
+**Cancellations / refunds are now handled automatically — and safely.** The
+webhook also processes `customer.subscription.deleted`, `charge.refunded`,
+`charge.dispute.created` and a *final* `invoice.payment_failed`, downgrading the
+customer to the free tier. A first attempt at this was reverted for a
+customer-takedown risk; the shipped version uses a **set-of-grants** model that
+is provably safe even with client-side Payment Links: activation only ever
+*appends* the payer's grant (never lowers a plan), and a cancel/refund removes
+only *that customer's* grant and re-derives the plan to the highest surviving
+grant — so an attacker's cancel can never strip a customer paying via their own
+Stripe customer. It resolves the user only from the customer→grant ledger, never
+a buyer-typed email. No extra config beyond §3 is needed; subscribe your webhook
+to those cancel/refund events too. You can still override any plan in the admin
+panel at any time.
 
 Note: founding-pilot copy still says "manually activated after source readiness
 review" — that is your intentional gating. Change the copy when you want the
