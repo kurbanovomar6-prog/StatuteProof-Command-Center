@@ -312,11 +312,16 @@ def _word_inflections(word: str) -> tuple[str, ...]:
 # Closed-class fillers a marketer naturally slips between the words of a claim:
 # "guarantees FULL compliance", "guarantee YOUR compliance", "guarantee OF
 # compliance", "guarantee 100% compliance". Requiring the words to be adjacent
-# let every one of those through. The gap is capped at two of these listed words
-# — an open-ended gap would start matching across unrelated clauses, and only
-# closed-class fillers can appear, so an honest sentence cannot be joined into a
-# claim. The denial anchor is measured from the FIRST word of the match, so
-# widening the gap does not weaken the "does not guarantee …" neutralization.
+# let every one of those through. A finite cap (was three) is itself a bypass:
+# one determiner in front of a three-filler stack — "guarantees YOUR full ongoing
+# regulatory compliance", a plain marketing sentence — already overflows it, and
+# any fixed bound N is escaped by stacking N+1 fillers. Because ONLY closed-class
+# fillers can appear in the gap (a single content word breaks the chain), the gap
+# is left UNBOUNDED: an honest sentence never stacks four-plus pure
+# determiners/quantifiers between "guarantee" and "compliance", so an unbounded
+# closed-class gap cannot join unrelated clauses into a claim. The denial anchor
+# is measured from the FIRST word of the match, so widening the gap does not
+# weaken the "does not guarantee …" neutralization.
 _PHRASE_GAP_WORDS = (
     "a", "an", "the", "this", "that", "these", "those",
     "my", "our", "your", "their", "its", "his", "her",
@@ -325,7 +330,7 @@ _PHRASE_GAP_WORDS = (
     "regulatory", "legal", "of", "100%",
 )
 _PHRASE_SEPARATOR = (
-    r"\s+(?:(?:" + "|".join(re.escape(w) for w in _PHRASE_GAP_WORDS) + r")\s+){0,2}"
+    r"\s+(?:(?:" + "|".join(re.escape(w) for w in _PHRASE_GAP_WORDS) + r")\s+)*"
 )
 
 

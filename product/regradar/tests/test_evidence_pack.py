@@ -671,6 +671,100 @@ def test_pack_ships_rfc3161_sidecars_when_present(tmp_path):
     assert "RFC 3161 timestamp (included)" in readme
 
 
+# ── bundled verify.py: record self-seal + capture-metadata cross-check ───────────
+
+def test_bundled_verify_py_checks_record_self_seal(tmp_path):
+    """The bundled verify.py recomputes the record self-seal over the bundled
+    evidence-record.json content block and cross-checks capture metadata, printing
+    PASS for both on a clean pack (never SKIP for a modern sealed record)."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "clean")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "RESULT: PASS" in proc.stdout
+    assert "[record_seal]" in proc.stdout           # the self-seal was actually recomputed
+    assert "[capture_metadata]" in proc.stdout      # the metadata cross-check ran
+    # A modern sealed record must genuinely PASS these, not be skipped.
+    assert "PASS  cbuae-test-run-001 [record_seal]" in proc.stdout or "[record_seal] record_hash recomputes" in proc.stdout
+    assert "FAIL" not in proc.stdout
+
+
+def test_bundled_verify_py_fails_on_tampered_evidence_record(tmp_path):
+    """Editing the bundled evidence-record.json content (leaving raw/normalized
+    untouched) must make verify.py FAIL: the snapshot re-hashes still pass, but the
+    record self-seal no longer recomputes from the altered content block.
+
+    Regression: verify.py previously only re-hashed raw/normalized/diff and never
+    recomputed the record self-seal, so a tampered evidence-record.json shipped
+    as PASS."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "tampered")
+
+    # Tamper a SEALED field inside the bundled record's content block, leaving the
+    # snapshots (raw.txt/normalized.txt) byte-for-byte intact.
+    rec_file = next(extracted.glob("snapshots/*/evidence-record.json"))
+    record = json.loads(rec_file.read_text(encoding="utf-8"))
+    record["content"]["source_url"] = "https://evil.example/injected"
+    rec_file.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[record_seal]" in proc.stdout
+
+
+def test_bundled_verify_py_fails_on_display_metadata_edit(tmp_path):
+    """Editing a DISPLAY field (run.timestamp) while leaving the sealed
+    content.captured_at AND the record_hash untouched must FAIL the capture-metadata
+    cross-check — mirroring app.public_verify._check_capture_metadata_consistent.
+
+    This is the case the record-hash recompute alone cannot catch: the display
+    field is not inside the sealed content block, so tampering it leaves the seal
+    self-consistent; the cross-check against the sealed copy is what flags it."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "meta")
+
+    rec_file = next(extracted.glob("snapshots/*/evidence-record.json"))
+    record = json.loads(rec_file.read_text(encoding="utf-8"))
+    # Only touch the DISPLAY timestamp; content.captured_at and record_hash stay put.
+    record.setdefault("run", {})["timestamp"] = "1999-01-01T00:00:00Z"
+    rec_file.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[capture_metadata]" in proc.stdout
+    # The record self-seal itself still recomputes (content block was untouched),
+    # proving it is the cross-check — not the hash recompute — that caught this.
+    assert "PASS  cbuae-test-run-001 [record_seal]" in proc.stdout or "[record_seal] record_hash recomputes" in proc.stdout
+
+
+def test_bundled_verify_py_record_seal_matches_public_verify(tmp_path):
+    """The inlined canonical_record_hash in verify.py must agree with the product's
+    app.public_verify: the SAME bundled record verifies as record_hash_self_consistent
+    through public_verify, and verify.py's inlined recompute reaches the same verdict."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    contents = _read_zip(result["pack_path"])
+    row = json.loads(contents["manifest.json"])["records"][0]
+    record = json.loads(contents[row["evidence_record_file"]])
+
+    report = verify_submission(record)
+    by_name = {c["name"]: c["status"] for c in report["checks"]}
+    assert by_name["record_hash_self_consistent"] == "pass", report
+    assert by_name["capture_metadata_consistent"] == "pass", report
+
+    # verify.py's inlined recompute reaches the same PASS verdict (subprocess run).
+    extracted = _extract(result["pack_path"], tmp_path / "agree")
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "[record_seal] record_hash recomputes" in proc.stdout
+
+
 def test_pack_without_token_has_no_timestamp_section(tmp_path):
     """No token → no timestamp/ entries and no manifest/README mention: the pack
     must never imply an external timestamp the operator has not produced."""

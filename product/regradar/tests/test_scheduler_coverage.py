@@ -258,8 +258,29 @@ def test_full_cycle_orchestrator_error_recovers(tmp_path, monkeypatch, capsys):
 def test_subcycle_isolates_one_failing_source(tmp_path, monkeypatch):
     """Core reliability guarantee: in the critical sub-cycle a single source
     that raises must NOT abort the sweep — the remaining sources still run and
-    the failure is recorded as an error result, not propagated."""
+    the failure is recorded as an error result, not propagated.
+
+    The sub-cycle now routes each source through monitor._run_one_source (the
+    same helper the full cycle uses), so the failing source is retried once and
+    recorded as a durable error result before the sweep moves on to the next."""
+    import app.monitor as monitor
+    import app.source_runs as sr
+
     _quiet_loop_env(monkeypatch, tmp_path)
+
+    # Isolate the breaker + run trail so the helper's durable FAILED record and
+    # circuit state stay hermetic (never touch real data).
+    monkeypatch.setattr(monitor, "_CIRCUIT_STATE_FILE", tmp_path / "circuit_state.json")
+    monkeypatch.setattr(monitor, "_circuit_open", set())
+    monkeypatch.setattr(monitor, "_circuit_skip_counts", {})
+    run_dir = tmp_path / "data" / "source_runs"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(sr, "_BASE_DIR", tmp_path)
+    monkeypatch.setattr(sr, "_RUN_DIR", run_dir)
+    monkeypatch.setattr(sr, "_RUN_FILE", run_dir / "source_runs.jsonl")
+    monkeypatch.setattr(sr, "_SNAPSHOT_DIR", tmp_path / "data" / "source_snapshots")
+    sr._CACHE_VALID = False
+    sr._RUNS_CACHE = None
 
     src_bad = {"name": "bad", "url": "https://x/bad", "jurisdiction": "AE"}
     src_good = {"name": "good", "url": "https://x/good", "jurisdiction": "AE"}
@@ -282,7 +303,9 @@ def test_subcycle_isolates_one_failing_source(tmp_path, monkeypatch):
             raise RuntimeError("fetch failed hard")
         return {"source_name": src["name"], "changed": False, "status": "ok"}
 
-    monkeypatch.setattr(scheduler, "run_pipeline_for_source", _pipeline)
+    # The sub-cycle drives the pipeline through monitor._run_one_source, so the
+    # seam to patch is monitor.run_pipeline_for_source, not scheduler's.
+    monkeypatch.setattr(monitor, "run_pipeline_for_source", _pipeline)
 
     # Capture every results list the loop hands to the summary printer; the
     # full cycle passes [] first, the sub-cycle passes the per-source results.
@@ -293,21 +316,26 @@ def test_subcycle_isolates_one_failing_source(tmp_path, monkeypatch):
 
     monkeypatch.setattr(scheduler, "_print_cycle_summary", _capture_summary)
 
-    # Break on the 2nd sleep: iter1 = full cycle (sleep #1), iter2 = sub-cycle
-    # (sleep #2 → stop).
+    # monitor and scheduler share the `time` module, so the helper's short retry
+    # sleep and the loop's long cadence sleep hit the same patched function.
+    # Gate on duration: swallow the retry sleep, count only the cadence sleep.
+    # iter1 = full cycle (cadence sleep #1); iter2 = sub-cycle (cadence sleep
+    # #2 → stop) — the failing source finishes its retry + record first.
     sleeps = {"n": 0}
 
-    def _sleep(*_a, **_k):
-        sleeps["n"] += 1
-        if sleeps["n"] >= 2:
-            raise KeyboardInterrupt
+    def _sleep(secs=0, *_a, **_k):
+        if secs and secs >= 60:
+            sleeps["n"] += 1
+            if sleeps["n"] >= 2:
+                raise KeyboardInterrupt
 
     monkeypatch.setattr(scheduler.time, "sleep", _sleep)
 
     scheduler.run_watch_loop(interval_minutes=60)
 
-    # The good source ran even though the bad one raised first.
-    assert pipeline_calls == ["bad", "good"]
+    # The good source ran even though the bad one raised first; the bad source
+    # is attempted twice (initial + one retry) by the shared helper.
+    assert pipeline_calls == ["bad", "bad", "good"]
 
     # The sub-cycle's results are the non-empty call carrying both sources.
     sub_results = next(r for r in summary_calls if r)

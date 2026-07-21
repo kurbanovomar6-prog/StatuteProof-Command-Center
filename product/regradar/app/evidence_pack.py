@@ -600,8 +600,10 @@ _VERIFY_SCRIPT = '''#!/usr/bin/env python3
 """Standalone StatuteProof evidence-pack verifier.
 
 Recompute the SHA-256 of every snapshot in this pack and compare it against the
-hashes recorded in manifest.json. Standard library only; no StatuteProof code
-is required and no network access is used.
+hashes recorded in manifest.json. For each record it also recomputes the record
+SELF-SEAL over the bundled evidence-record.json content block and cross-checks
+the displayed capture time / source URL against the sealed copies. Standard
+library only; no StatuteProof code is required and no network access is used.
 
 Usage:  python3 verify.py        (run from inside the unzipped pack)
 
@@ -624,6 +626,88 @@ def sha256_file(path):
         for chunk in iter(lambda: handle.read(65536), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def canonical_record_hash(content):
+    """Bare lowercase-hex SHA-256 of a record's content block.
+
+    Byte-identical to app.record_hashing.canonical_record_hash: compact,
+    sorted-key, non-ASCII-preserving, NaN-rejecting UTF-8 JSON. Inlined here so
+    the standalone verifier needs no StatuteProof code to reproduce the seal.
+    """
+    payload = json.dumps(
+        content, sort_keys=True, separators=(",", ":"),
+        ensure_ascii=False, allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _bare_digest(value):
+    """Strip an optional sha256: prefix and lowercase; returns "" for non-str."""
+    text = str(value or "").strip()
+    if text.lower().startswith("sha256:"):
+        text = text[len("sha256:"):]
+    return text.lower()
+
+
+def check_record_seal(record_id, record):
+    """Recompute the record self-seal over the bundled content block.
+
+    Mirrors app.public_verify._check_record_hash_self_consistent for the
+    published content-sha256-v1 scheme: recompute canonical_record_hash(content)
+    and compare it to the record's own top-level record_hash. Any edit to the
+    bundled evidence-record.json content changes the recomputed hash and reports
+    FAIL. A legacy record with no seal, or an unrecognized scheme, is skipped
+    (never failed). Returns 1 on FAIL, else 0.
+    """
+    stored = record.get("record_hash")
+    if not stored:
+        print("SKIP  %s [record_seal] no record_hash (legacy record); nothing to self-check" % record_id)
+        return 0
+    if record.get("record_hash_method") != "content-sha256-v1":
+        print("SKIP  %s [record_seal] unrecognized record_hash_method; skipping self-seal" % record_id)
+        return 0
+    content = record.get("content")
+    if not isinstance(content, dict):
+        print("FAIL  %s [record_seal] record_hash_method is content-sha256-v1 but no content block" % record_id)
+        return 1
+    if canonical_record_hash(content) == _bare_digest(stored):
+        print("PASS  %s [record_seal] record_hash recomputes from the sealed content block" % record_id)
+        return 0
+    print("FAIL  %s [record_seal] record_hash does NOT recompute from content - the record was altered" % record_id)
+    return 1
+
+
+def check_capture_metadata(record_id, record):
+    """Cross-check displayed capture metadata against the SEALED copies.
+
+    Mirrors app.public_verify._check_capture_metadata_consistent: the sealed
+    content.captured_at / content.source_url are covered by record_hash, so a
+    display-only edit to run.timestamp or source.official_url (that left the
+    sealed value untouched) is caught here. Skips records predating the sealed
+    fields. Returns 1 on FAIL, else 0.
+    """
+    content = record.get("content")
+    content = content if isinstance(content, dict) else {}
+    sealed_ts = content.get("captured_at")
+    sealed_url = content.get("source_url")
+    if sealed_ts is None and sealed_url is None:
+        print("SKIP  %s [capture_metadata] no sealed captured_at/source_url (legacy record)" % record_id)
+        return 0
+    run = record.get("run")
+    run = run if isinstance(run, dict) else {}
+    source = record.get("source")
+    source = source if isinstance(source, dict) else {}
+    mismatches = []
+    if sealed_ts is not None and "timestamp" in run and run.get("timestamp") != sealed_ts:
+        mismatches.append("run.timestamp != sealed content.captured_at")
+    if sealed_url is not None and "official_url" in source and source.get("official_url") != sealed_url:
+        mismatches.append("source.official_url != sealed content.source_url")
+    if mismatches:
+        print("FAIL  %s [capture_metadata] %s" % (record_id, "; ".join(mismatches)))
+        return 1
+    print("PASS  %s [capture_metadata] displayed capture time and source URL match the sealed values" % record_id)
+    return 0
 
 
 def main():
@@ -667,6 +751,27 @@ def main():
                 else:
                     print("FAIL  %s [diff] expected=%s actual=%s" % (record_id, expected, actual))
                     failures += 1
+        # Record self-seal + capture-metadata cross-check over the bundled
+        # evidence-record.json. Re-hashing the snapshots proves the bytes are
+        # intact; this proves the RECORD binding them (its content block, and the
+        # capture time / source URL it displays) has not been altered either.
+        rec_rel = record.get("evidence_record_file")
+        if rec_rel:
+            rec_target = HERE / rec_rel
+            if not rec_target.exists():
+                print("FAIL  %s [record_seal] evidence-record.json missing: %s" % (record_id, rec_rel))
+                failures += 1
+            else:
+                try:
+                    bundled = json.loads(rec_target.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    bundled = None
+                if not isinstance(bundled, dict):
+                    print("FAIL  %s [record_seal] evidence-record.json is not readable JSON" % record_id)
+                    failures += 1
+                else:
+                    failures += check_record_seal(record_id, bundled)
+                    failures += check_capture_metadata(record_id, bundled)
     print()
     if failures:
         print("RESULT: FAIL - %d hash mismatch(es); these bytes do NOT match the recorded manifest." % failures)

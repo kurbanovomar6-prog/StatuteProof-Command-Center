@@ -15,8 +15,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app.config import BASE_DIR, WATCH_INTERVAL_MINUTES
-from app.monitor import monitor_all_sources
-from app.pipeline import run_pipeline_for_source
+from app.monitor import (
+    _new_cycle_counter,
+    _run_one_source,
+    monitor_all_sources,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -538,30 +541,33 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
                     )
                 try:
                     critical_results: list[dict] = []
-                    for src in critical_sources + due_custom:
-                        src_name = src.get("name", src.get("url", "?"))
-                        try:
-                            result = run_pipeline_for_source(src)
-                            critical_results.append(result)
-                            # Stamp per-cadence bookkeeping for every source
-                            # this sub-cycle actually ran (critical included:
-                            # its 30-min sweeps also satisfy a custom cadence).
+                    sub_sources = critical_sources + due_custom
+                    sub_total = len(sub_sources)
+                    # Throwaway tally: _run_one_source mutates a counter in
+                    # place; the sub-cycle does not emit a CYCLE_SUMMARY, so it
+                    # is discarded.
+                    sub_counter = _new_cycle_counter()
+                    for idx, src in enumerate(sub_sources, 1):
+                        # Route through the SAME per-source helper the full
+                        # cycle uses, so the sub-cycle gains circuit-breaker
+                        # skip, 2-attempt retry, durable FAILED / QUALITY_DROP
+                        # trail records, and breaker open/clear. Previously the
+                        # sub-cycle called the pipeline in a bare try/except
+                        # that only fed a printed summary — a raising source
+                        # left no durable FAILED record, never incremented the
+                        # consecutive-failure count, and an OPEN circuit was
+                        # re-probed every tick.
+                        result = _run_one_source(
+                            src, idx, sub_total, False, sub_counter
+                        )
+                        critical_results.append(result)
+                        # Stamp per-cadence bookkeeping only when the source was
+                        # actually run to a (non-error) result — matching the
+                        # prior behaviour of not resetting the cadence timer on
+                        # a failure or a circuit-open skip, so a failing source
+                        # is retried rather than silenced for a full cadence.
+                        if result.get("status") != "error":
                             custom_last_run[_cadence_key(src)] = time.monotonic()
-                        except Exception as src_exc:
-                            logger.error(
-                                "Critical sub-cycle error for %s: %s: %s",
-                                src_name, type(src_exc).__name__, src_exc,
-                            )
-                            critical_results.append({
-                                "source_name":   src_name,
-                                "url":           src.get("url", ""),
-                                "jurisdiction":  src.get("jurisdiction", ""),
-                                "category":      src.get("category", ""),
-                                "changed":       False,
-                                "status":        "error",
-                                "access_status": "error",
-                                "error":         f"{type(src_exc).__name__}: {src_exc}",
-                            })
                     if critical_results:
                         print(
                             f"  {_DIM}Sub-cycle "

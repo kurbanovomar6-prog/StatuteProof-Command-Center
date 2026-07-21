@@ -12,11 +12,15 @@ Runs unattended on a systemd timer
 (``deploy/systemd/statuteproof-verify.{service,timer}``), so two properties are
 non-negotiable:
 
-  * READ-ONLY over the evidence trail AND the sealed decision chain. It calls
-    ``verify_evidence_trail.verify_trail`` and
-    ``app.decision_records.verify_all_org_chains`` (both read-only — they
-    recompute hashes and compare heads, mutating nothing) and posts a Telegram
-    message on divergence. It never mutates the trail, a record, or a head file.
+  * READ-ONLY over the evidence trail, the sealed decision chain, AND the
+    customer-held canonical evidence tree. It calls
+    ``verify_evidence_trail.verify_trail``,
+    ``app.decision_records.verify_all_org_chains``, and
+    ``app.evidence_records.validate_evidence_record`` over every
+    ``evidence/**/evidence-record.json`` (all read-only — they recompute hashes,
+    compare heads, and re-check sealed record fingerprints, mutating nothing) and
+    posts a Telegram message on divergence. It never mutates the trail, a record,
+    or a head file.
     One ADDITIVE exception rides on this timer: the dormant-by-default RFC 3161
     decision-head anchor sweep (``app.decision_anchor``). With
     ``RFC3161_TSA_URL`` unset (the default) it is a complete no-op; when an
@@ -29,10 +33,11 @@ non-negotiable:
     failure can never turn a watchdog run into a crash.
 
 Exit codes (mirror ``verify-trail`` / ``heartbeat-check``):
-  0  trail is clean (verified and/or unverifiable records only) AND every
-     sealed decision chain re-verifies.
+  0  trail is clean (verified and/or unverifiable records only), every sealed
+     decision chain re-verifies, AND every canonical evidence record re-validates.
   1  at least one divergence — an evidence hash mismatch, a broken capture
-     chain, or a broken sealed decision chain — founder alerted.
+     chain, a broken sealed decision chain, or a canonical evidence record that
+     no longer re-validates against its sealed hashes — founder alerted.
   2  bad CLI arguments (argparse).
 """
 
@@ -132,6 +137,36 @@ def build_decision_divergence_summary(broken: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def build_canonical_evidence_divergence_summary(tampered: list[dict]) -> str:
+    """Build a concise, plain-text founder alert for tampered canonical evidence.
+
+    Sent through ``notify_founder`` with no parse mode (no escaping needed).
+    ``tampered`` is one entry per customer-held ``evidence-record.json`` that no
+    longer re-validates — a sealed raw/normalized/diff artifact whose bytes no
+    longer match the stored hash, or a record whose self-seal no longer recomputes.
+    """
+    lines = ["\U0001F6A8 StatuteProof canonical evidence record INTEGRITY FAILURE"]
+    lines.append(
+        f"{len(tampered)} canonical evidence record(s) failed re-validation "
+        "(a sealed raw/normalized/diff artifact or the record self-seal no longer "
+        "matches):"
+    )
+    for t in tampered[:_MAX_DETAIL_LINES]:
+        rid = t.get("record_id") or "<unknown record>"
+        src = t.get("source_id") or "<unknown source>"
+        reason = "; ".join(t.get("errors") or []) or "validation failed"
+        lines.append(f"  • {rid} ({src}): {reason}")
+    extra = len(tampered) - _MAX_DETAIL_LINES
+    if extra > 0:
+        lines.append(f"  … and {extra} more")
+    lines.append(
+        "A customer-held evidence record can no longer be re-verified against its "
+        "sealed hashes. Run `run.py verify-trail-watch` and investigate before "
+        "relying on that evidence."
+    )
+    return "\n".join(lines)
+
+
 def _verify_decision_chains_best_effort() -> bool:
     """Re-verify every org's sealed decision chain; page the founder on a break.
 
@@ -161,6 +196,96 @@ def _verify_decision_chains_best_effort() -> bool:
             )
         return True
     summary = build_decision_divergence_summary(broken)
+    print(summary, file=sys.stderr)
+    _alert_best_effort(summary)
+    return False
+
+
+# ``validate_evidence_record`` is a COMPLETENESS + brief-eligibility gate, not a
+# pure tamper detector. It also rejects records the product never certified — a
+# QUARANTINE record (``record_status='integrity_error'``: the VARA-mojibake path,
+# written whenever normalized content is undecodable/empty), a not-brief-eligible
+# run status, or a certified-but-unreadable snapshot. Those are NORMAL, untampered
+# product outputs; paging the founder on them would false-alarm on every scheduled
+# run for as long as any such record exists on disk, dulling the one alert meant
+# for real tamper. The watchdog therefore pages ONLY on POSITIVE tamper, exactly
+# as this module documents: a sealed raw/normalized/diff artifact whose bytes no
+# longer match the stored hash, or a record self-seal that no longer recomputes.
+# Every such error from ``validate_evidence_record`` carries the phrase
+# "does not match"; no completeness, readability, or eligibility error does. Match
+# on that marker so a benign non-certified record is never mistaken for tamper.
+_TAMPER_ERROR_MARKER = "does not match"
+
+
+def _tamper_errors(errors: list[str]) -> list[str]:
+    """Keep only the hash/self-seal mismatch errors — the positive-tamper subset.
+
+    Completeness, readability, and brief-eligibility failures (e.g. a quarantine
+    record's ``record_status must be complete.`` or ``… saturated with undecodable
+    characters …``) are legitimate, untampered product states, not tamper, and
+    must never page the founder. See ``_TAMPER_ERROR_MARKER``.
+    """
+    return [e for e in errors if _TAMPER_ERROR_MARKER in e]
+
+
+def _verify_canonical_evidence_best_effort() -> bool:
+    """Re-validate every customer-held canonical evidence record; page on tamper.
+
+    Mirrors ``_verify_decision_chains_best_effort``: walks the
+    ``evidence/**/evidence-record.json`` tree via
+    ``app.evidence_records.list_canonical_evidence_records`` and re-runs
+    ``app.evidence_records.validate_evidence_record`` on each — which re-hashes
+    the sealed raw/normalized/diff artifacts against their stored values AND
+    enforces the record self-seal. The tree is anchored to the SAME base dir the
+    rest of the watchdog uses (``source_runs._BASE_DIR``), so the evidence
+    artifacts checked here are exactly those co-located with the source-evidence
+    trail already being watched.
+
+    Returns True when every record re-validates OR the pass is merely unavailable
+    (missing dir / read error / import failure — never a false page); False ONLY
+    on POSITIVE tamper (a record that fails validation), in which case the founder
+    has already been paged. NEVER raises: a failure here can neither crash the
+    watchdog nor flip its verdict on the other passes. Read-only — it recomputes
+    hashes and re-validates, mutating nothing.
+    """
+    try:
+        from app import evidence_records, source_runs
+
+        base_dir = source_runs._BASE_DIR
+        rows = evidence_records.list_canonical_evidence_records(base_dir=base_dir)
+    except Exception:  # noqa: BLE001 — an add-on pass must never break the watchdog
+        logger.warning(
+            "verify-trail-watch: canonical-evidence re-validate failed — swallowed"
+        )
+        return True
+
+    tampered: list[dict] = []
+    for row in rows:
+        ref = row.get("record_path") or row.get("record_id")
+        if not ref:
+            continue
+        try:
+            record, _ = evidence_records.load_evidence_record(ref, base_dir=base_dir)
+            validation = evidence_records.validate_evidence_record(record, base_dir=base_dir)
+        except Exception:  # noqa: BLE001 — a read/parse error is infra, not tamper
+            continue
+        if not validation.get("valid"):
+            tamper = _tamper_errors(validation.get("errors") or [])
+            # A validation failure that carries NO hash/self-seal mismatch is a
+            # benign non-certified/unreadable/not-brief-eligible record (e.g. a
+            # VARA-mojibake quarantine), not tamper — never page on it.
+            if not tamper:
+                continue
+            tampered.append(
+                {
+                    "record_id": row.get("record_id") or str(ref),
+                    "source_id": row.get("source_id", ""),
+                    "errors": tamper,
+                }
+            )
+    if not tampered:
+        return True
+    summary = build_canonical_evidence_divergence_summary(tampered)
     print(summary, file=sys.stderr)
     _alert_best_effort(summary)
     return False
@@ -254,6 +379,16 @@ def run_watch(argv: list[str] | None = None) -> int:
     # trail verdict. Read-only: it recomputes seals and compares heads, mutating
     # nothing.
     if not _verify_decision_chains_best_effort():
+        exit_code = 1
+
+    # Fleet-wide re-validate of the CUSTOMER-HELD CANONICAL EVIDENCE tree, on the
+    # SAME daily timer. A record whose sealed raw/normalized/diff artifact no
+    # longer hash-matches, or whose self-seal no longer recomputes, pages the
+    # founder best-effort and forces a non-zero exit, exactly like an
+    # evidence-trail or decision-chain divergence; a missing tree or read error is
+    # best-effort and never false-alarms. Read-only: it recomputes hashes and
+    # re-validates, mutating nothing.
+    if not _verify_canonical_evidence_best_effort():
         exit_code = 1
 
     # Dormant-by-default RFC 3161 decision-head anchor sweep (additive sidecars

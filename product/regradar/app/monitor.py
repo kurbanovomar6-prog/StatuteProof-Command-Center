@@ -656,6 +656,237 @@ def _maybe_open_circuit(name: str, source_url: str, circuit_key: str) -> None:
     )
 
 
+def _new_cycle_counter() -> dict:
+    """Fresh per-cycle tally shared by _run_one_source and the CYCLE_SUMMARY log."""
+    return {
+        "ok": 0, "unchanged": 0, "failed": 0, "quality_drop": 0,
+        "seals_attempted": 0, "seals_failed": 0,
+        "appends_failed": 0,
+    }
+
+
+def _run_one_source(
+    source: dict,
+    idx: int,
+    total: int,
+    verbose: bool,
+    counter: dict,
+) -> dict:
+    """
+    Run the change-detection pipeline for ONE source with the full reliability
+    envelope: circuit-breaker skip (with half-open probe), 2-attempt retry,
+    durable FAILED / QUALITY_DROP trail records, and breaker open/clear on the
+    outcome.
+
+    Returns exactly one result dict (the shape appended to the cycle results
+    list) and mutates ``counter`` in place. Shared by the full cycle
+    (monitor_all_sources) and the scheduler critical/per-cadence sub-cycle so
+    both paths get identical durable-trail and breaker behaviour — a raising
+    source now leaves a FAILED record, counts toward _consecutive_failures, and
+    an OPEN circuit is skipped rather than re-probed every sub-cycle.
+    """
+    name = source.get("name", source["url"])
+    jur  = source.get("jurisdiction", "")
+    # Circuit-breaker key: the source URL — the SAME key _consecutive_failures
+    # counts by (it filters trail records on url/official_url). Keying the
+    # breaker on the display `name` let two same-named sources share one
+    # breaker (one's trip darkened both; one's success cleared the other), and
+    # the derived source_id can collide on same-name+same-jurisdiction sources
+    # without an explicit id. URLs are unique per enabled source, so this
+    # aligns the breaker state 1:1 with the failure count. `name` stays for
+    # display/logging only.
+    circuit_key = source.get("url", "") or name
+
+    # ── circuit-breaker: skip open sources, with a half-open probe ────────
+    # An OPEN circuit is skipped for _CIRCUIT_PROBE_EVERY_N_CYCLES cycles,
+    # after which one probe is allowed through (fall past this block). A
+    # successful probe auto-resets the breaker (see _clear_circuit on the
+    # success path); a failing probe re-arms the skip. This is what lets a
+    # source recover from a transient outage without a process restart.
+    if circuit_key in _circuit_open:
+        skipped = _circuit_skip_counts.get(circuit_key, 0)
+        if skipped < _CIRCUIT_PROBE_EVERY_N_CYCLES:
+            _circuit_skip_counts[circuit_key] = skipped + 1
+            logger.warning(
+                "CIRCUIT_OPEN [%d/%d]: %s — skipping (>= %d consecutive "
+                "historical failures; auto-probe in %d cycle(s), or delete "
+                "%s to reset now)",
+                idx, total, name, _CIRCUIT_OPEN_THRESHOLD,
+                _CIRCUIT_PROBE_EVERY_N_CYCLES - skipped, _CIRCUIT_STATE_FILE,
+            )
+            if verbose:
+                print(f"  [{idx}/{total}] {name}  — SKIPPED (circuit open)", flush=True)
+            counter["failed"] += 1
+            # Durable proof that this source was NOT seen this cycle.
+            _persist_circuit_open_record(source)
+            return {
+                "source_name":   name,
+                "url":           source.get("url", ""),
+                "jurisdiction":  source.get("jurisdiction", ""),
+                "category":      source.get("category", ""),
+                "source_status": source.get("status", "active"),
+                "changed":       False,
+                "status":        "error",
+                "access_status": "circuit_open",
+                "error":         "Circuit open: too many consecutive failures",
+                "circuit_open":  True,
+            }
+        # Cooldown elapsed — allow a single half-open probe this cycle.
+        _circuit_skip_counts[circuit_key] = 0
+        logger.info(
+            "CIRCUIT_HALF_OPEN [%d/%d]: %s — probing after cooldown",
+            idx, total, name,
+        )
+
+    if verbose:
+        label = f"{name}  ({jur})" if jur else name
+        print(f"  [{idx}/{total}] {label} ...", flush=True)
+
+    logger.info(
+        "Monitoring [%d/%d]: %s — %s", idx, total, name, source["url"]
+    )
+
+    # ── per-source retry loop (max 1 retry after 5 s) ────────────────────
+    last_exc: Exception | None = None
+    result: dict | None = None
+
+    for attempt in range(2):  # attempt 0 = first try, attempt 1 = retry
+        try:
+            result = run_pipeline_for_source(source)
+            last_exc = None
+            break  # success — exit retry loop
+        except KeyboardInterrupt:
+            raise
+        except Exception as exc:
+            last_exc = exc
+            if attempt == 0:
+                logger.warning(
+                    "Retry [%d/%d] attempt 1 failed for %s (%s: %s) — "
+                    "retrying in %ds",
+                    idx, total, name, type(exc).__name__, exc,
+                    _RETRY_DELAY_SECONDS,
+                )
+                time.sleep(_RETRY_DELAY_SECONDS)
+            else:
+                logger.error(
+                    "Retry [%d/%d] attempt 2 failed for %s (%s: %s) — "
+                    "recording error",
+                    idx, total, name, type(exc).__name__, exc,
+                )
+
+    if last_exc is not None:
+        # Both attempts failed — write error record.
+        error_msg     = f"{type(last_exc).__name__}: {last_exc}"
+        access_status = _classify_access_status(last_exc)
+
+        if verbose:
+            print(f"       → error: {error_msg}")
+
+        counter["failed"] += 1
+
+        # Persist a FAILED trail record so _consecutive_failures() can see
+        # this failure — a raising pipeline never reaches append_run itself.
+        _persist_failure_record(source, error_msg, access_status)
+
+        # ── circuit-breaker check ─────────────────────────────────────
+        _maybe_open_circuit(name, source.get("url", ""), circuit_key)
+        return {
+            "source_name":   name,
+            "url":           source.get("url", ""),
+            "jurisdiction":  source.get("jurisdiction", ""),
+            "category":      source.get("category", ""),
+            "source_status": source.get("status", "active"),
+            "changed":       False,
+            "status":        "error",
+            "access_status": access_status,
+            "error":         error_msg,
+        }
+
+    # ── non-raising path ─────────────────────────────────────────────────
+    assert result is not None
+
+    if not _result_yielded_usable_content(result):
+        # Guard-abort: the run returned cleanly but produced no usable
+        # content (bot wall / error page / empty / undecodable / shrink
+        # suppression). It is NOT a success — it must not clear the
+        # breaker, and its QUALITY_DROP trail record counts toward the
+        # consecutive-failure threshold like a hard failure does.
+        counter["quality_drop"] += 1
+        logger.warning(
+            "QUALITY_DROP [%d/%d]: %s — run yielded no usable content "
+            "(status=%s); breaker counter NOT reset",
+            idx, total, name, result.get("status"),
+        )
+        if verbose:
+            print(f"       -> quality drop ({result.get('status')})")
+        # The sticky content-shrink suppression is NOT darkness: the source
+        # is reachable and its content genuinely changed. Counting it would
+        # open the breaker on a live, changing page and stop fetching it —
+        # and because the shrink guard re-fires every cycle until a human
+        # re-baselines, a breaker opened for any other reason could never be
+        # cleared by such a probe. The source demonstrably answered, so
+        # treat it as recovery for breaker purposes.
+        #
+        # _is_non_dark_suppression only agrees when the run brought back a
+        # PLAUSIBLE page (>= _PLAUSIBLE_PAGE_CHARS). A short unrecognised
+        # wall page also lands on the shrink path, and letting that clear
+        # the breaker would hand the monitored host control of our own
+        # reliability control; below the floor we fall through to
+        # _maybe_open_circuit and treat the cycle as darkness.
+        if _is_non_dark_suppression(result):
+            _clear_circuit(circuit_key)
+        else:
+            _maybe_open_circuit(name, source.get("url", ""), circuit_key)
+        return result
+
+    # Auto-reset the breaker: a successful run clears a previously-open
+    # circuit so a source recovers on its own after a transient outage.
+    _clear_circuit(circuit_key)
+
+    if result.get("changed"):
+        counter["ok"] += 1
+    else:
+        counter["unchanged"] += 1
+
+    # Seal health: canonical_evidence_sealed is present (True/False) only
+    # on runs that ATTEMPTED a seal (CHANGED/FIRST_SEEN after append_run).
+    # Without this tally a systemic seal failure — the product's core
+    # promise going dark — is invisible outside grep'ing logs.
+    _sealed = result.get("canonical_evidence_sealed")
+    if _sealed is not None:
+        counter["seals_attempted"] += 1
+        if not _sealed:
+            counter["seals_failed"] += 1
+    # An append_run failure is worse than a seal failure: no durable
+    # record AND no alert, while the source still counts "ok" above.
+    if result.get("evidence_append_failed"):
+        counter["appends_failed"] += 1
+
+    if verbose:
+        changed   = result.get("changed", False)
+        is_new    = result.get("is_new",  False)
+        risk      = result.get("risk_level", "LOW") if changed else ""
+        if not changed:
+            status_str = "unchanged"
+        elif is_new:
+            status_str = f"baseline stored  [{risk}]"
+        else:
+            added = result.get("added_count", 0)
+            rem   = result.get("removed_count", 0)
+            status_str = (
+                f"changed  [{risk}]  "
+                f"+{added} added  -{rem} removed"
+            )
+        print(f"       -> {status_str}")
+
+    logger.info(
+        "Done [%d/%d]: %s  changed=%s risk=%s",
+        idx, total, name,
+        result.get("changed"), result.get("risk_level", "—"),
+    )
+    return result
+
+
 def monitor_all_sources(
     verbose: bool = False,
 ) -> list[dict]:
@@ -692,216 +923,13 @@ def monitor_all_sources(
         return []
 
     results: list[dict] = []
-    _counter: dict = {
-        "ok": 0, "unchanged": 0, "failed": 0, "quality_drop": 0,
-        "seals_attempted": 0, "seals_failed": 0,
-        "appends_failed": 0,
-    }
+    _counter: dict = _new_cycle_counter()
 
     for idx, source in enumerate(sources, 1):
-        name = source.get("name", source["url"])
-        jur  = source.get("jurisdiction", "")
-        # Circuit-breaker key: the source URL — the SAME key _consecutive_failures
-        # counts by (it filters trail records on url/official_url). Keying the
-        # breaker on the display `name` let two same-named sources share one
-        # breaker (one's trip darkened both; one's success cleared the other), and
-        # the derived source_id can collide on same-name+same-jurisdiction sources
-        # without an explicit id. URLs are unique per enabled source, so this
-        # aligns the breaker state 1:1 with the failure count. `name` stays for
-        # display/logging only.
-        circuit_key = source.get("url", "") or name
-
-        # ── circuit-breaker: skip open sources, with a half-open probe ────────
-        # An OPEN circuit is skipped for _CIRCUIT_PROBE_EVERY_N_CYCLES cycles,
-        # after which one probe is allowed through (fall past this block). A
-        # successful probe auto-resets the breaker (see _clear_circuit on the
-        # success path); a failing probe re-arms the skip. This is what lets a
-        # source recover from a transient outage without a process restart.
-        if circuit_key in _circuit_open:
-            skipped = _circuit_skip_counts.get(circuit_key, 0)
-            if skipped < _CIRCUIT_PROBE_EVERY_N_CYCLES:
-                _circuit_skip_counts[circuit_key] = skipped + 1
-                logger.warning(
-                    "CIRCUIT_OPEN [%d/%d]: %s — skipping (>= %d consecutive "
-                    "historical failures; auto-probe in %d cycle(s), or delete "
-                    "%s to reset now)",
-                    idx, total, name, _CIRCUIT_OPEN_THRESHOLD,
-                    _CIRCUIT_PROBE_EVERY_N_CYCLES - skipped, _CIRCUIT_STATE_FILE,
-                )
-                if verbose:
-                    print(f"  [{idx}/{total}] {name}  — SKIPPED (circuit open)", flush=True)
-                results.append({
-                    "source_name":   name,
-                    "url":           source.get("url", ""),
-                    "jurisdiction":  source.get("jurisdiction", ""),
-                    "category":      source.get("category", ""),
-                    "source_status": source.get("status", "active"),
-                    "changed":       False,
-                    "status":        "error",
-                    "access_status": "circuit_open",
-                    "error":         "Circuit open: too many consecutive failures",
-                    "circuit_open":  True,
-                })
-                _counter["failed"] += 1
-                # Durable proof that this source was NOT seen this cycle.
-                _persist_circuit_open_record(source)
-                continue
-            # Cooldown elapsed — allow a single half-open probe this cycle.
-            _circuit_skip_counts[circuit_key] = 0
-            logger.info(
-                "CIRCUIT_HALF_OPEN [%d/%d]: %s — probing after cooldown",
-                idx, total, name,
-            )
-
-        if verbose:
-            label = f"{name}  ({jur})" if jur else name
-            print(f"  [{idx}/{total}] {label} ...", flush=True)
-
-        logger.info(
-            "Monitoring [%d/%d]: %s — %s", idx, total, name, source["url"]
-        )
-
-        # ── per-source retry loop (max 1 retry after 5 s) ────────────────────
-        last_exc: Exception | None = None
-        result: dict | None = None
-
-        for attempt in range(2):  # attempt 0 = first try, attempt 1 = retry
-            try:
-                result = run_pipeline_for_source(source)
-                last_exc = None
-                break  # success — exit retry loop
-            except KeyboardInterrupt:
-                raise
-            except Exception as exc:
-                last_exc = exc
-                if attempt == 0:
-                    logger.warning(
-                        "Retry [%d/%d] attempt 1 failed for %s (%s: %s) — "
-                        "retrying in %ds",
-                        idx, total, name, type(exc).__name__, exc,
-                        _RETRY_DELAY_SECONDS,
-                    )
-                    time.sleep(_RETRY_DELAY_SECONDS)
-                else:
-                    logger.error(
-                        "Retry [%d/%d] attempt 2 failed for %s (%s: %s) — "
-                        "recording error",
-                        idx, total, name, type(exc).__name__, exc,
-                    )
-
-        if last_exc is not None:
-            # Both attempts failed — write error record.
-            error_msg     = f"{type(last_exc).__name__}: {last_exc}"
-            access_status = _classify_access_status(last_exc)
-
-            if verbose:
-                print(f"       → error: {error_msg}")
-
-            error_record: dict = {
-                "source_name":   name,
-                "url":           source.get("url", ""),
-                "jurisdiction":  source.get("jurisdiction", ""),
-                "category":      source.get("category", ""),
-                "source_status": source.get("status", "active"),
-                "changed":       False,
-                "status":        "error",
-                "access_status": access_status,
-                "error":         error_msg,
-            }
-            results.append(error_record)
-            _counter["failed"] += 1
-
-            # Persist a FAILED trail record so _consecutive_failures() can see
-            # this failure — a raising pipeline never reaches append_run itself.
-            _persist_failure_record(source, error_msg, access_status)
-
-            # ── circuit-breaker check ─────────────────────────────────────
-            _maybe_open_circuit(name, source.get("url", ""), circuit_key)
-            continue
-
-        # ── non-raising path ─────────────────────────────────────────────────
-        assert result is not None
-        results.append(result)
-
-        if not _result_yielded_usable_content(result):
-            # Guard-abort: the run returned cleanly but produced no usable
-            # content (bot wall / error page / empty / undecodable / shrink
-            # suppression). It is NOT a success — it must not clear the
-            # breaker, and its QUALITY_DROP trail record counts toward the
-            # consecutive-failure threshold like a hard failure does.
-            _counter["quality_drop"] += 1
-            logger.warning(
-                "QUALITY_DROP [%d/%d]: %s — run yielded no usable content "
-                "(status=%s); breaker counter NOT reset",
-                idx, total, name, result.get("status"),
-            )
-            if verbose:
-                print(f"       -> quality drop ({result.get('status')})")
-            # The sticky content-shrink suppression is NOT darkness: the source
-            # is reachable and its content genuinely changed. Counting it would
-            # open the breaker on a live, changing page and stop fetching it —
-            # and because the shrink guard re-fires every cycle until a human
-            # re-baselines, a breaker opened for any other reason could never be
-            # cleared by such a probe. The source demonstrably answered, so
-            # treat it as recovery for breaker purposes.
-            #
-            # _is_non_dark_suppression only agrees when the run brought back a
-            # PLAUSIBLE page (>= _PLAUSIBLE_PAGE_CHARS). A short unrecognised
-            # wall page also lands on the shrink path, and letting that clear
-            # the breaker would hand the monitored host control of our own
-            # reliability control; below the floor we fall through to
-            # _maybe_open_circuit and treat the cycle as darkness.
-            if _is_non_dark_suppression(result):
-                _clear_circuit(circuit_key)
-            else:
-                _maybe_open_circuit(name, source.get("url", ""), circuit_key)
-            continue
-
-        # Auto-reset the breaker: a successful run clears a previously-open
-        # circuit so a source recovers on its own after a transient outage.
-        _clear_circuit(circuit_key)
-
-        if result.get("changed"):
-            _counter["ok"] += 1
-        else:
-            _counter["unchanged"] += 1
-
-        # Seal health: canonical_evidence_sealed is present (True/False) only
-        # on runs that ATTEMPTED a seal (CHANGED/FIRST_SEEN after append_run).
-        # Without this tally a systemic seal failure — the product's core
-        # promise going dark — is invisible outside grep'ing logs.
-        _sealed = result.get("canonical_evidence_sealed")
-        if _sealed is not None:
-            _counter["seals_attempted"] += 1
-            if not _sealed:
-                _counter["seals_failed"] += 1
-        # An append_run failure is worse than a seal failure: no durable
-        # record AND no alert, while the source still counts "ok" above.
-        if result.get("evidence_append_failed"):
-            _counter["appends_failed"] += 1
-
-        if verbose:
-            changed   = result.get("changed", False)
-            is_new    = result.get("is_new",  False)
-            risk      = result.get("risk_level", "LOW") if changed else ""
-            if not changed:
-                status_str = "unchanged"
-            elif is_new:
-                status_str = f"baseline stored  [{risk}]"
-            else:
-                added = result.get("added_count", 0)
-                rem   = result.get("removed_count", 0)
-                status_str = (
-                    f"changed  [{risk}]  "
-                    f"+{added} added  -{rem} removed"
-                )
-            print(f"       -> {status_str}")
-
-        logger.info(
-            "Done [%d/%d]: %s  changed=%s risk=%s",
-            idx, total, name,
-            result.get("changed"), result.get("risk_level", "—"),
-        )
+        # Per-source body extracted into _run_one_source so the scheduler
+        # critical/per-cadence sub-cycle runs the identical breaker + retry +
+        # durable-trail path. Behaviour-preserving for this full cycle.
+        results.append(_run_one_source(source, idx, total, verbose, _counter))
 
     # ── structured cycle summary log ─────────────────────────────────────────
     summary = {

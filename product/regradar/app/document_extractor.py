@@ -377,12 +377,18 @@ def extract_pdf_text(file_bytes: bytes) -> dict:
                 if t and t.strip():
                     parts.append(t.strip())
         text = _normalise_text("\n\n".join(parts))
-        if text:
+        if text and len(text) >= _LOW_CHARS:
             result.update(
                 text=text, chars=len(text),
                 quality=_quality(len(text)), method="pdfplumber", error="",
             )
             return result
+        # pdfplumber gave something too short — record method, fall through to OCR
+        if text:
+            result.update(
+                text=text, chars=len(text),
+                quality=_quality(len(text)), method="pdfplumber", error="",
+            )
     except ImportError:
         logger.debug("document_extractor: pdfplumber not installed")
     except Exception as exc:

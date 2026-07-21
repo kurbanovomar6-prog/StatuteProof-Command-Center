@@ -314,10 +314,15 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
                 len(adapter_text) if adapter_text else 0,
             )
 
+    _fetch_status: dict = {}
     if content is None:
         # ── Step 1: Fetch ──────────────────────────────────────────────
+        # Capture the real HTTP status of the tier whose body we actually use
+        # (status_out is populated by fetch_page). fetch_page already RAISES on
+        # a hard access block (401/403/451); the status we read here is for the
+        # remaining >=400 errors (404/500/503…) whose bodies return normally.
         logger.info("Pipeline start (generic scraper): %s", url)
-        html = fetch_page(url, allow_proxy=True)
+        html = fetch_page(url, status_out=_fetch_status, allow_proxy=True)
 
         # ── Step 2: Extract (multi-strategy) ─────────────────────────
         _extr           = extract_best_text(html, url)
@@ -329,6 +334,41 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
 
     extracted_chars    = len(content) if content else 0
     extraction_method  = f"adapter:{adapter_used}" if adapter_used else _generic_method
+
+    # ── Guard (F1c): a rendered HTTP error page is a fetch failure ─────
+    # fetch_page RAISES on a hard access block (401/403/451), but a 404/500/503
+    # whose body Playwright renders into a large templated page returns
+    # normally. Its >1500-char body slips past looks_like_error_page (capped at
+    # _ERROR_PAGE_MAX_CHARS), so without a status check that error template
+    # could be hashed and sealed as a baseline — poisoning the source and making
+    # the eventual recovery alert as CHANGED. A >=400 status means the body is
+    # an error page, not the regulator document, so drop it. (HTTP-200 soft-404s
+    # are out of scope here — this only trusts the transport-level status.)
+    _http_status = _fetch_status.get("http_status")
+    if isinstance(_http_status, int) and _http_status >= 400:
+        logger.warning(
+            "HTTP %d for %s — rendered error page, recording as quality_drop, no baseline",
+            _http_status, url,
+        )
+        _persist_guard_drop(
+            source, reason=f"HTTP {_http_status} — fetched content is an error page",
+            alert_suppressed_reason="http_error", observed_raw_chars=extracted_chars,
+            extraction_method=extraction_method, failure_code="HTTP_ERROR",
+            access_status="error_page",
+        )
+        return {
+            "url":                url,
+            "changed":            False,
+            "status":             "quality_drop",
+            "access_status":      "error_page",
+            "failure_code":       "HTTP_ERROR",
+            "http_status":        _http_status,
+            "extracted_chars":    extracted_chars,
+            "extraction_quality": "failed",
+            "extraction_method":  extraction_method,
+            "ai_skipped_reason":  "quality_drop",
+            "ai_calls_used":      _AI_RUN_BUDGET["count"],
+        }
 
     # ── Guard: empty / None content → quality_drop ───────────────────
     if not content or not content.strip():
