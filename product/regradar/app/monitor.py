@@ -555,7 +555,7 @@ def _record_is_dark(record: dict | None) -> bool:
     # evidence, the operator log line would report an inflated "consecutive
     # unusable runs" count, and the documented 3-run threshold would stop being
     # what is enforced. Same rule the coverage certificate already applies.
-    from app.source_runs import is_skipped_cycle
+    from app.source_runs import _canonical_quality, is_skipped_cycle
 
     if is_skipped_cycle(record):
         return False
@@ -566,7 +566,14 @@ def _record_is_dark(record: dict | None) -> bool:
         return False
     if _is_non_dark_suppression(record):
         return False
-    return str(record.get("extraction_quality") or "").upper() in _DARK_QUALITY_LEVELS
+    # Canonicalize before the membership test: the pipeline writes
+    # extraction_quality="low_content" for thin pages (pipeline._extraction_quality),
+    # and _QUALITY_ALIASES maps LOW_CONTENT->THIN. Without this, low_content — the
+    # DOMINANT dark subclass in the real trail (22 low_content vs 4 THIN) — read as
+    # not-dark, so a chronically thin/bot-walled source could never open the breaker
+    # and its success-path counterpart re-cleared it. Compare canonical to canonical.
+    quality = _canonical_quality(record.get("extraction_quality") or "")
+    return str(quality or "").upper() in _DARK_QUALITY_LEVELS
 
 
 def _consecutive_failures(source_url: str) -> int:

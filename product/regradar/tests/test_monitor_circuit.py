@@ -764,3 +764,28 @@ def test_evidence_listing_labels_a_skipped_cycle_as_not_fetched(
     )
     for row in skips:
         assert "not fetched" in str(row.get("limitations_notes") or "").lower()
+
+
+def test_low_content_quality_drop_counts_as_dark():
+    """The dominant production dark subclass must trip the breaker.
+
+    Regression: pipeline._extraction_quality writes extraction_quality
+    "low_content" for thin pages; _QUALITY_ALIASES maps LOW_CONTENT->THIN, but
+    _record_is_dark tested the raw value against {FAILED, THIN} without
+    canonicalizing, so a chronically thin/bot-walled source (22 low_content vs
+    4 THIN in the real trail) read as not-dark and could never open the
+    breaker — and its success-path twin _result_yielded_usable_content read it
+    as usable and re-cleared a broken source.
+    """
+    from app.monitor import _record_is_dark, _result_yielded_usable_content
+
+    for raw in ("low_content", "LOW_CONTENT", "thin", "THIN", "FAILED"):
+        rec = {"change_status": "QUALITY_DROP", "extraction_quality": raw}
+        assert _record_is_dark(rec) is True, f"{raw!r} must be dark"
+        # the clear-path twin must NOT treat a dark result as usable
+        assert _result_yielded_usable_content({"status": "ok", "run_record": rec}) is False
+
+    # a genuine success must still be usable and not dark
+    good = {"change_status": "FIRST_SEEN", "extraction_quality": "GOOD"}
+    assert _record_is_dark(good) is False
+    assert _result_yielded_usable_content({"status": "ok", "run_record": good}) is True
