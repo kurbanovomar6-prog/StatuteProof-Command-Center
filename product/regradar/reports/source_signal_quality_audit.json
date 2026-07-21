@@ -1,14 +1,14 @@
 {
   "schema_version": "2.0",
-  "audit_date": "2026-07-18",
+  "audit_date": "2026-07-21",
   "auditor": "StatuteProof Source Quality Auditor v2",
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
-    "total_enabled": 132,
-    "fresh_alert_eligible": 40,
+    "total_enabled": 133,
+    "fresh_alert_eligible": 41,
     "evidence_library": 20,
-    "candidate": 29,
-    "remediation": 43,
+    "candidate": 28,
+    "remediation": 44,
     "source_level_monitor_ok": 42,
     "with_proof_path": 86,
     "scope_note": "This audit covers the UAE monitoring register (jurisdiction AE), including the international-obligation layer (UN/OFAC/OFSI/FATF-adjacent/BIS) that serves UAE compliance duties. The 6 GCC divergence-feed candidates (SA/QA/KW jurisdictions, added 2026-07-18) are tracked outside this UAE-scope audit until that product layer launches."
@@ -16,11 +16,11 @@
   "family_readiness": [
     {
       "family": "CBUAE",
-      "total_enabled": 25,
+      "total_enabled": 26,
       "fresh_alert_eligible": 0,
       "evidence_library": 0,
       "candidate": 0,
-      "remediation": 25,
+      "remediation": 26,
       "status": "remediation_production_access",
       "gap_to_25": 25,
       "notes": "All 25 CBUAE rulebook sources are held in remediation as a production-egress disclosure, not a content problem: rulebook.centralbank.ae returns HTTP 403 to our production monitoring egress on every fetch method (persistent since 2026-07-11). Sources stay enabled and disclosed; none is counted as fresh-alert until MONITOR_OK is verified from production (restore path: production fetch proxy, owner decision)."
@@ -28,9 +28,9 @@
     {
       "family": "VARA",
       "total_enabled": 7,
-      "fresh_alert_eligible": 3,
+      "fresh_alert_eligible": 4,
       "evidence_library": 2,
-      "candidate": 1,
+      "candidate": 0,
       "remediation": 1,
       "status": "partial",
       "gap_to_25": 22,
@@ -159,7 +159,7 @@
     }
   ],
   "safe_claims": [
-    "StatuteProof has 40 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-18).",
+    "StatuteProof has 41 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-21).",
     "StatuteProof also maintains 20 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
     "Sources whose hosts block our production monitoring egress — the CBUAE rulebook subdomain and the DFSA website (HTTP 403 to all fetch methods since 2026-07-11) — are disclosed as remediation and are not counted as fresh-alert eligible.",
     "DFSA rulebook depth continues through the DFSA rulebook platform at dfsaen.thomsonreuters.com, which does work from production, including the AML rulebook module promoted on 2026-07-18 after passing rebaseline and stable-run gates.",
@@ -194,7 +194,7 @@
     "Do not promise every regulatory update will be captured."
   ],
   "risk_brief_boundary": "Source snapshot proof is not a canonical evidence record. Customer risk briefs remain blocked until complete evidence-record.json packages and brief eligibility gates exist.",
-  "generated_at": "2026-07-18T09:30:00Z",
+  "generated_at": "2026-07-21T00:00:00Z",
   "known_limitations": [
     {
       "source": "CBUAE",
@@ -294,6 +294,6 @@
   ],
   "audit_meta": {
     "generatedAt": "2026-07-18T09:30:00Z",
-    "recommendedSalesClaim": "40 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage, with source-level proof files, hashes, and baseline confirmation"
+    "recommendedSalesClaim": "41 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage, with source-level proof files, hashes, and baseline confirmation"
   }
 }

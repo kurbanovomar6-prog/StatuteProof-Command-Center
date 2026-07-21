@@ -11,10 +11,10 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Virtual assets (VARA)',
-    sourceCount: '3 fresh-alert eligible of 6 enabled',
+    sourceCount: '4 fresh-alert eligible of 6 enabled',
     statusTone: 'active',
     whatWeMonitor: 'VARA Compliance & Risk Management Rulebook full text (incl. AML/CFT Part III, promoted 18 July 2026 after two stable production runs), news/circulars/regulatory publications, enforcement notices',
-    limitation: 'The 30-day rulebook revision-updates view is in remediation pending a production rebaseline (rulebook change coverage continues via the full-rulebook source). Public register and the regulatory notices index are enabled but pending validation. Static rulebook PDFs are evidence snapshots, not change-monitored.',
+    limitation: 'The 30-day rulebook revision-updates view is in remediation pending a production rebaseline (rulebook change coverage continues via the full-rulebook source). The public register is enabled but pending validation. Static rulebook PDFs are evidence snapshots, not change-monitored.',
     whatThisMeans: 'VARA rulebook and enforcement changes are tracked through selected official sources — this is not complete VARA coverage.',
   },
   {

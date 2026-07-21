@@ -14,7 +14,10 @@ export const SOURCE_TRUTH = {
   // Whole-register count (UAE + international layer + 6 GCC divergence-feed
   // candidates added 2026-07-18). The backend audit reports the UAE-scope
   // subset (131) — two scopes, both true, labeled accordingly in the UI.
-  enabled: 139,
+  // 2026-07-21: +1 enabled — CBUAE Enforcement (administrative/financial
+  // sanctions) added in disclosed remediation (centralbank.ae is proxy-only,
+  // HTTP 403 direct); it is NOT counted as fresh-alert, only disclosed.
+  enabled: 140,
   // 2026-07-18 PROD-VANTAGE RE-MEASURE: 25 CBUAE rulebook + 10 www.dfsa.ae
   // sources demoted to remediation — both hosts return HTTP 403 to our
   // production monitoring egress on every fetch method (persistent since
@@ -25,7 +28,10 @@ export const SOURCE_TRUTH = {
   // Compliance & Risk Management Rulebook incl. AML/CFT Part III).
   // Honest count: 74 − 38 + 2 = 38. Unreachable-from-production sources are
   // disclosed, not counted — that is the pricing-page promise.
-  readinessSupported: 40,
+  // 2026-07-21: +1 — VARA Regulatory Notices and Enforcement Index promoted
+  // candidate -> fresh_alert on enforcement-monitoring discovery (same host as
+  // the MONITOR_OK VARA enforcement table; server-renders dated notices).
+  readinessSupported: 41,
   // 2026-07-18: the VARA rulebook candidate passed prod gates and was promoted
   // to fresh_alert — candidate 10 → 9. Later the same day, the 21 enabled
   // sources that sat OUTSIDE the monitoring_mode vocabulary (mode missing)
@@ -33,5 +39,7 @@ export const SOURCE_TRUTH = {
   // 5 genuinely alert-worthy but unvalidated listings → candidate (VARA
   // notices/enforcement index, FTA VAT public clarifications, DFSA news hub,
   // DFSA SEO letters, DFM regulatory circulars) — candidate 9 → 14.
-  candidate: 36,
+  // 2026-07-21: −1 — the VARA regulatory-notices index was promoted out of
+  // candidate to fresh_alert (see readinessSupported above).
+  candidate: 35,
 }
