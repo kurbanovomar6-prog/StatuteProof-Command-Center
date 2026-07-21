@@ -10,9 +10,8 @@ Legal-safety contract (mandatory):
 
 * Every customer-facing render carries the standard disclaimer
   (``LEGAL_DISCLAIMER``).
-* The forbidden-claims guard reused from
-  ``app.monthly_assurance_report._FORBIDDEN_PHRASES`` runs over every rendered
-  output; a match raises before the bytes can leave the process.
+* The ONE forbidden-claims guard (``app.legal_safety``) runs over every
+  rendered output; a match raises before the bytes can leave the process.
 * Rows are **evidence-grounded**: each field is copied from a real canonical
   evidence record, a human assessment, or an action-log decision. Nothing is
   invented, nothing is phrased as advice or a guarantee, and every row carries
@@ -38,7 +37,7 @@ from app.evidence_records import (
     list_canonical_evidence_records,
     load_evidence_record,
 )
-from app.monthly_assurance_report import _FORBIDDEN_PHRASES
+from app.legal_safety import assert_no_forbidden_claims as _assert_no_forbidden_claims
 
 logger = logging.getLogger(__name__)
 
@@ -465,22 +464,19 @@ def _timestamp_date(timestamp: str) -> date | None:
 def assert_no_forbidden_claims(text: str) -> None:
     """Raise ``ChangeRegisterError`` if any forbidden phrase appears in ``text``.
 
-    Reuses the exact ``_FORBIDDEN_PHRASES`` guard from the monthly assurance
-    report so the register and the assurance report share one banned-claim list.
-
-    The standard disclaimer legitimately *denies* forbidden claims — it contains
-    "Not legal advice", which embeds the banned substring "legal advice". Like
-    the monthly assurance report (which scans the content section only), the
-    known-safe disclaimer text is neutralized before scanning so the disclaimer
-    can never trip its own guard, while any *other* occurrence of a banned
-    phrase in row content still raises.
+    Thin adapter over the ONE canonical guard in ``app.legal_safety`` — it only
+    swaps in this module's exception type and label. It used to carry its own
+    ``lower()`` + substring scan, which meant the paths importing it (the
+    deadline reminders in ``app.deadline_radar`` and the digests in
+    ``app.digest_cadence``) silently missed the whitespace-collapse, homoglyph
+    folding and inflection matching that ``legal_safety`` applies: "We
+    guarantee\\ncompliance." shipped from those paths while the same string was
+    blocked everywhere else. Delegating keeps every delivery path on one
+    implementation; do not reintroduce a local scan here.
     """
-    lowered = str(text or "").lower().replace(LEGAL_DISCLAIMER.lower(), " ")
-    hits = [phrase for phrase in _FORBIDDEN_PHRASES if phrase in lowered]
-    if hits:
-        raise ChangeRegisterError(
-            "Change register output contains forbidden claim(s): " + ", ".join(sorted(hits))
-        )
+    _assert_no_forbidden_claims(
+        text, exc=ChangeRegisterError, label="Change register output"
+    )
 
 
 # ── metadata ───────────────────────────────────────────────────────────────────
