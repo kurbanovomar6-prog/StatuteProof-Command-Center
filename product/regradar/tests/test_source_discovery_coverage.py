@@ -29,7 +29,11 @@ class _Resp:
         self._text = text
         self.url = url
         self.headers = {}
-        self._body = body
+        # The discovery read path now streams the body via iter_content and
+        # decodes it (bounded), instead of touching resp.text — mirror a real
+        # requests.Response so the fake feeds content through the same seam.
+        self._body = body or text.encode("utf-8")
+        self.encoding = "utf-8"
 
     @property
     def ok(self):

@@ -31,7 +31,12 @@ from urllib.parse import urljoin, urlparse
 import requests as _req
 from bs4 import BeautifulSoup
 
-from app.adapters.base import _guarded_get
+from app.adapters.base import (
+    MAX_FETCH_BYTES,
+    _detect_encoding,
+    _guarded_get,
+    read_bytes_bounded,
+)
 from app.config import (
     DISCOVERY_MAX_LINKS,
     DISCOVERY_MAX_SAMPLE_DOCS,
@@ -69,6 +74,36 @@ def _safe_get(
     return _guarded_get(
         url, headers=headers, timeout=timeout, verify=True, label="discovery"
     )
+
+
+def _read_text_bounded(resp) -> str:
+    """
+    Read an ALREADY-FETCHED streamed response body under a hard cap on the
+    DECOMPRESSED size, then decode to text.
+
+    ``resp.text`` buffers and gzip/br-decompresses the ENTIRE body into memory
+    unbounded. A tiny attacker-controlled compressed payload — served from a
+    public host that passes ``validate_public_url`` — can inflate to gigabytes
+    and OOM-kill the single-process API for every tenant (a decompression
+    bomb). ``read_bytes_bounded`` aborts the read once the inflated size
+    crosses ``MAX_FETCH_BYTES`` (the same 10 MB cap the scraper tier uses), so
+    an oversized body is refused rather than buffered whole.
+
+    Returns "" on overflow or read failure (matching the "no usable body"
+    contract callers already handle). Never raises.
+    """
+    data = read_bytes_bounded(resp, MAX_FETCH_BYTES, label="discovery")
+    if not data:
+        return ""
+    # Must NOT use resp.apparent_encoding: it re-reads resp.content, which
+    # raises once the streamed body has been consumed above. Detect from the
+    # bytes already in hand instead (same approach as adapters.base).
+    encoding = resp.encoding or _detect_encoding(data) or "utf-8"
+    try:
+        return data.decode(encoding, errors="replace")
+    except LookupError:
+        return data.decode("utf-8", errors="replace")
+
 
 # ── constants ─────────────────────────────────────────────────────────────────
 
@@ -978,7 +1013,7 @@ def discover_source(
                 with resp:
                     final_url = resp.url or url
                     http_status = resp.status_code
-                    html = resp.text if resp.ok else ""
+                    html = _read_text_bounded(resp) if resp.ok else ""
                     if not resp.ok:
                         warnings.append(f"HTTP {resp.status_code}")
     except Exception as exc:
@@ -990,7 +1025,7 @@ def discover_source(
             robots_resp = _safe_get(_origin(final_url) + "/robots.txt", headers={"User-Agent": REQUESTS_UA}, timeout=_PROBE_TIMEOUT)
             if robots_resp is not None:
                 with robots_resp:
-                    robots_text = robots_resp.text if robots_resp.ok else ""
+                    robots_text = _read_text_bounded(robots_resp) if robots_resp.ok else ""
         except Exception as exc:
             warnings.append(f"robots.txt fetch failed: {type(exc).__name__}")
 
@@ -1058,7 +1093,7 @@ def _probe(url: str) -> tuple[int | None, str, str | None]:
             return None, "", None
         with resp:
             ct = resp.headers.get("content-type", "")
-            return resp.status_code, ct, (resp.text if resp.ok else None)
+            return resp.status_code, ct, (_read_text_bounded(resp) if resp.ok else None)
     except _req.RequestException as exc:
         logger.debug("discovery._probe %s: %s", url, exc)
         return None, "", None
@@ -1432,7 +1467,7 @@ def discover_source_capabilities(url: str, deep: bool = False) -> dict:
             with resp:
                 http_status = resp.status_code
                 if resp.ok:
-                    raw_html   = resp.text
+                    raw_html   = _read_text_bounded(resp)
                     html_chars = len(raw_html)
     except _req.RequestException as exc:
         logger.debug("discovery: Layer 1 failed for %s: %s", url, exc)

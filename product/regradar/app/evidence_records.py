@@ -19,6 +19,58 @@ from app.record_hashing import RECORD_HASH_METHOD, canonical_record_hash
 from app.text_quality import is_mostly_unreadable
 
 
+# The full-record ("attribution") seal, ADDITIVE to the content-only ``record_hash``.
+# ``record_hash`` (content-sha256-v1) seals ONLY ``record["content"]`` — the hashes
+# and paths. The display/attribution/narrative fields a human auditor actually READS
+# (source.regulator, source.source_name, change.summary, change.lines_added/removed,
+# run.status, review.review_status) sit OUTSIDE that seal, so a holder of a genuine
+# record could forge them (flip the regulator, rewrite the change summary, mark a
+# pending record "approved") and leave content/capture-metadata intact. This second
+# seal binds those fields alongside the sealed content block, so on records that
+# carry it the public verifier FAILS on any forged attribution field. Legacy records
+# predate it and are honestly reported as content+capture-metadata scope instead.
+ATTRIBUTION_HASH_METHOD = "attribution-sha256-v1"
+
+
+def attribution_seal_payload(record: dict[str, Any]) -> dict[str, Any]:
+    """Return the canonical payload sealed by ``attribution_hash``.
+
+    Binds the display/attribution/narrative fields (which the content-only
+    ``record_hash`` leaves forgeable) alongside the already-sealed ``content``
+    block. Scalars are coerced to ``str``/``int`` because
+    :func:`app.record_hashing.canonical_record_hash` forbids floats and requires a
+    byte-stable, standard-tool-reproducible serialization. Both the writer and the
+    public verifier build the payload through THIS function so the two sides can
+    never drift.
+    """
+    def _dict(key: str) -> dict[str, Any]:
+        value = record.get(key)
+        return value if isinstance(value, dict) else {}
+
+    content = _dict("content")
+    source = _dict("source")
+    run = _dict("run")
+    change = _dict("change")
+    review = _dict("review")
+
+    def _int(value: Any) -> int:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
+    return {
+        "content": content,
+        "source_regulator": str(source.get("regulator") or ""),
+        "source_name": str(source.get("source_name") or ""),
+        "run_status": str(run.get("status") or ""),
+        "change_summary": str(change.get("summary") or ""),
+        "change_lines_added": _int(change.get("lines_added")),
+        "change_lines_removed": _int(change.get("lines_removed")),
+        "review_status": str(review.get("review_status") or ""),
+    }
+
+
 _BASE_DIR = Path(__file__).parent.parent
 _SHA256_RE = re.compile(r"^sha256:[a-f0-9]{64}$")
 _ALLOWED_RUN_STATUSES = {"FIRST_SEEN", "UNCHANGED", "CHANGED", "FAILED", "QUALITY_DROP"}
@@ -277,6 +329,14 @@ def create_canonical_evidence_record(
         record["record_hash"] = f"sha256:{canonical_record_hash(record['content'])}"
         record["record_hash_method"] = RECORD_HASH_METHOD
 
+        # Additive full-record seal: bind the attribution/change/status fields the
+        # content-only record_hash leaves forgeable. Computed LAST, over the fully
+        # built content + source/run/change/review blocks, through the shared
+        # payload builder the verifier reuses. Legacy records predate this and stay
+        # valid; the verifier reports their honest (limited) scope.
+        record["attribution_hash"] = f"sha256:{canonical_record_hash(attribution_seal_payload(record))}"
+        record["attribution_hash_method"] = ATTRIBUTION_HASH_METHOD
+
         validation = validate_evidence_record(record, base_dir=root)
         if not validation["valid"]:
             raise EvidenceRecordError("; ".join(validation["errors"]))
@@ -438,6 +498,23 @@ def validate_evidence_record(record: dict[str, Any], base_dir: Path | None = Non
             stored = str(record.get("record_hash") or "").strip().lower().removeprefix("sha256:")
             if stored != expected:
                 errors.append("record_hash does not match content")
+
+    # Additive full-record seal check (attribution-sha256-v1). Records written after
+    # this change also bind their attribution/change/status fields under
+    # attribution_hash; recompute it through the SAME shared payload builder the
+    # writer used and flag any mismatch. The attribution seal EXTENDS the content
+    # seal (its payload embeds the content block), so it is only authoritative while
+    # record_hash is present — a record downgraded to legacy (no content seal) is not
+    # held to it. Legacy records predate BOTH fields and stay valid.
+    if (
+        record.get("record_hash")
+        and record.get("attribution_hash_method") == ATTRIBUTION_HASH_METHOD
+        and record.get("attribution_hash")
+    ):
+        expected_attr = canonical_record_hash(attribution_seal_payload(record))
+        stored_attr = str(record.get("attribution_hash") or "").strip().lower().removeprefix("sha256:")
+        if stored_attr != expected_attr:
+            errors.append("attribution_hash does not match the record's attribution/change/status fields")
 
     return {"valid": not errors, "errors": errors}
 

@@ -1,11 +1,22 @@
-"""Plan and trial state management — no Stripe, no payment processing."""
+"""Plan and trial state management.
+
+Payment *processing* lives in ``app.stripe_webhook``; this module only decides
+capabilities from the founder-activated plan. One cross-cutting exception: a
+MANUAL/admin activation ALSO records a server-side SENTINEL grant in the Stripe
+grant ledger (``customer_id='manual'``) so that a comped/manual tier acts as a
+FLOOR the Stripe revocation/downgrade re-derivation can never strip (see
+``activate_plan`` and ``app.stripe_webhook``).
+"""
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from app.db import _connect
+
+logger = logging.getLogger(__name__)
 
 TRIAL_DAYS = 7
 
@@ -287,15 +298,54 @@ def set_plan_intent(user_id: int, plan_name: str) -> dict[str, Any]:
     return state
 
 
-def activate_plan(user_id: int, plan_name: str) -> dict[str, Any]:
+def _record_manual_floor_grant(user_id: int, plan_name: str) -> None:
+    """Record a server-only SENTINEL grant so a manual activation acts as a FLOOR.
+
+    A manual/admin activation sets the ``activated_plan`` column but, historically,
+    wrote NO row to the Stripe grant ledger. When a Stripe lifecycle event later
+    re-derived a user's tier from the *surviving grants* (revocation / downgrade),
+    the manual activation was invisible to that ledger and the user silently fell
+    to the free tier — stripping a comped/manual consultant on a normal Stripe
+    cancel or downgrade of an unrelated (or lower) grant.
+
+    Recording a sentinel grant keyed to ``customer_id='manual'`` fixes this: the
+    re-derivation takes the MAX over surviving grants, so the manual tier floors
+    the result. The sentinel is UNFORGEABLE and UN-STRIPPABLE by any Stripe event:
+    it is written only here (a founder-only, server-side path — never a buyer HTTP
+    request), and every genuine Stripe revocation/downgrade carries a real
+    ``cus_...`` customer id and removes/updates ONLY that customer's own grant,
+    never the literal ``'manual'`` sentinel. Best-effort — a ledger write failure
+    is logged but never turns a successful activation into an error.
+    """
+    try:
+        from app.stripe_webhook import MANUAL_GRANT_CUSTOMER_ID, _record_grant
+
+        _record_grant(int(user_id), MANUAL_GRANT_CUSTOMER_ID, plan_name)
+    except Exception:  # noqa: BLE001 — the floor is a safeguard, never a hard dep
+        logger.warning(
+            "activate_plan: failed to record manual floor grant for user %s", user_id
+        )
+
+
+def activate_plan(
+    user_id: int, plan_name: str, *, record_manual_grant: bool = True
+) -> dict[str, Any]:
     """Activate ``plan_name`` for a user — the ONLY path that grants paid caps.
 
     This is deliberately founder-only: it is invoked from the ``activate-plan``
-    CLI subcommand (which requires shell/SSH access to the production host), and
-    there is no self-service HTTP endpoint that reaches it. Setting the
-    ``activated_plan`` column is what makes ``capabilities_for`` return the paid
+    CLI subcommand (which requires shell/SSH access to the production host) and the
+    admin panel, and there is no self-service HTTP endpoint that reaches it. Setting
+    the ``activated_plan`` column is what makes ``capabilities_for`` return the paid
     plan's capabilities; until then a user who self-selected a paid plan keeps
     ``evidence_preview`` (free-tier) capabilities.
+
+    ``record_manual_grant`` (default True) records a server-side SENTINEL grant so a
+    manual/admin activation acts as a FLOOR in the Stripe grant ledger that a later
+    Stripe revocation/downgrade of a DIFFERENT customer can never strip (see
+    :func:`_record_manual_floor_grant`). The Stripe webhook — which already records
+    the *real* paying customer's grant and re-derives tiers from that ledger — is
+    the ONE caller that passes ``record_manual_grant=False`` so it never double-
+    records a bogus ``'manual'`` sentinel over its genuine customer grants.
 
     Passing ``evidence_preview`` (or a to-be-added future value) effectively
     de-activates paid access. Raises ``ValueError`` on an unknown plan or a
@@ -326,6 +376,10 @@ def activate_plan(user_id: int, plan_name: str) -> dict[str, Any]:
         conn.commit()
     finally:
         conn.close()
+    # Only after the activation is durably committed (and the user proven to exist)
+    # do we floor the grant ledger, so a manual tier survives Stripe re-derivation.
+    if record_manual_grant:
+        _record_manual_floor_grant(user_id, plan_name)
     return get_plan_state(user_id)
 
 

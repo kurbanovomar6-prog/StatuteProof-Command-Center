@@ -41,7 +41,11 @@ ENTITLEMENT LIFECYCLE (the grant SET — app.db.stripe_customer_grants):
    user may hold grants from several customers at once). Re-recording the same
    customer refreshes its row. The grant is recorded for EVERY resolved, mapped,
    signed payment — including one blocked by the rank guard (see 2) — so a genuine
-   payment always leaves a surviving grant of its own.
+   payment always leaves a surviving grant of its own. A MANUAL/admin activation
+   (``app.plan.activate_plan``) additionally records a server-only SENTINEL grant
+   under ``MANUAL_GRANT_CUSTOMER_ID`` so a comped/manual tier floors the ledger and
+   survives re-derivation; no Stripe event can strip it (rules 3/4 touch only the
+   event's real ``cus_...`` grant, never the ``'manual'`` sentinel).
 2. PLAN (RANK) GUARD — an activation applies the mapped plan ONLY when it does not
    LOWER the user's current active plan (rank of new ≥ rank of current). A gift of
    a cheaper plan therefore cannot downgrade a genuinely-paying victim; the active
@@ -123,6 +127,14 @@ _SUBSCRIPTION_UPDATE_EVENT_TYPE = "customer.subscription.updated"
 
 # The free tier a revocation downgrades to (must be a known ``app.plan`` plan).
 FREE_PLAN = "evidence_preview"
+
+# Sentinel "customer id" for a MANUAL/admin (non-Stripe) activation's floor grant.
+# ``app.plan.activate_plan`` records a grant under this id so a comped/manual tier
+# survives Stripe grant re-derivation. It is unforgeable and un-strippable by any
+# Stripe event: real Stripe customer ids are always ``cus_...`` (Stripe sets them
+# from the payer), so a revocation/downgrade — which removes/updates ONLY the event
+# customer's own grant — never touches this literal ``"manual"`` row.
+MANUAL_GRANT_CUSTOMER_ID = "manual"
 
 # Audit action labels recorded in the immutable access log.
 STRIPE_ACTIVATE = "stripe.activate_plan"
@@ -692,7 +704,9 @@ def _process_activation(event_id: str, obj: dict) -> tuple[int, dict[str, Any]]:
     try:
         from app.plan import activate_plan
 
-        activate_plan(user_id, plan)
+        # record_manual_grant=False: this path already appends the REAL paying
+        # customer's grant below; it must never write a bogus 'manual' sentinel.
+        activate_plan(user_id, plan, record_manual_grant=False)
     except Exception as exc:  # noqa: BLE001 — activation failed; record and ack
         _record_outcome(event_id, "activation_error")
         logger.error("stripe webhook %s: activate_plan failed: %s", event_id, type(exc).__name__)
@@ -797,7 +811,9 @@ def _process_revocation(
         try:
             from app.plan import activate_plan
 
-            activate_plan(user_id, target_plan)
+            # record_manual_grant=False: a Stripe-driven downgrade must NOT write a
+            # 'manual' floor sentinel — the tier is re-derived from real grants.
+            activate_plan(user_id, target_plan, record_manual_grant=False)
         except Exception as exc:  # noqa: BLE001 — downgrade failed for this user; ack
             logger.error(
                 "stripe webhook %s: downgrade of user %s failed: %s",
@@ -900,7 +916,9 @@ def _process_subscription_update(
         try:
             from app.plan import activate_plan
 
-            activate_plan(user_id, target_plan)
+            # record_manual_grant=False: a Stripe-driven plan change must NOT write a
+            # 'manual' floor sentinel — the tier is re-derived from real grants.
+            activate_plan(user_id, target_plan, record_manual_grant=False)
         except Exception as exc:  # noqa: BLE001 — plan change failed for this user; ack
             logger.error(
                 "stripe webhook %s: plan change of user %s failed: %s",

@@ -49,6 +49,7 @@ import hashlib
 import re
 from typing import Any
 
+from app.evidence_records import ATTRIBUTION_HASH_METHOD, attribution_seal_payload
 from app.record_hashing import RECORD_HASH_METHOD, canonical_record_hash
 from app.source_runs import compute_record_hash
 from app.text_normalization import normalize_for_change_hash
@@ -57,6 +58,17 @@ from app.text_normalization import normalize_for_change_hash
 STATUS_PASS = "pass"
 STATUS_FAIL = "fail"
 STATUS_SKIPPED = "skipped"
+
+# ── sealed-scope vocabulary ─────────────────────────────────────────────────────
+# What a passing verification actually PROVES about this record. ``record_hash``
+# (content-sha256-v1) binds only the content bytes/paths + capture metadata; the
+# attribution seal (attribution-sha256-v1) additionally binds the regulator, source
+# name, change summary, line counts, run status, and review status a human auditor
+# READS. A legacy record that predates the attribution seal cannot bind those fields,
+# so its scope is honestly reported as limited rather than as an unqualified pass.
+SCOPE_FULL = "content+attribution+capture-metadata"
+SCOPE_LIMITED = "content+capture-metadata"
+SCOPE_CONTENT = "content"
 
 # Stable, published identifier for the open spec (docs/EVIDENCE-VERIFICATION-SPEC.md).
 SPEC_URL = "/verify-spec"
@@ -125,6 +137,7 @@ def verify_submission(
             _guard(_check_record_is_object, record),
             _guard(_check_hash_formats, hashes, is_obj),
             _guard(_check_record_hash_self_consistent, record, hashes, is_obj),
+            _guard(_check_attribution_seal_consistent, record, is_obj),
             _guard(_check_certificate_content_hash_self_consistent, record, is_obj),
             _guard(_check_raw_bytes, hashes, raw),
             _guard(_check_normalized_bytes, hashes, normalized),
@@ -140,6 +153,10 @@ def verify_submission(
         response = {
             "ok": True,
             "verified": verified,
+            # Qualify WHAT the pass covers, so a record that binds only its content
+            # bytes is never presented as an unqualified verified:true over the
+            # regulator/change-summary/status fields it does not seal.
+            "verified_scope": _verified_scope(record, checks),
             "checks": checks,
             "spec_url": SPEC_URL,
             "disclaimer": DISCLAIMER,
@@ -153,6 +170,7 @@ def verify_submission(
         return {
             "ok": True,
             "verified": False,
+            "verified_scope": SCOPE_CONTENT,
             "checks": [
                 _fail(
                     "internal_error",
@@ -268,6 +286,113 @@ def _check_record_hash_self_consistent(
         "record_hash does not recompute from the record's fields — "
         "the record was altered.",
     )
+
+
+def _carries_forgeable_attribution(record: Any) -> bool:
+    """True when a record carries the DISPLAY attribution/change/status fields.
+
+    These are the fields a human auditor reads (regulator, source name, change
+    summary, run status, review status). When present WITHOUT an attribution seal,
+    they are forgeable, so the pass must be qualified as limited scope.
+    """
+    if not isinstance(record, dict):
+        return False
+
+    def _has(block: str, key: str) -> bool:
+        value = record.get(block)
+        return isinstance(value, dict) and bool(str(value.get(key) or "").strip())
+
+    return (
+        _has("source", "regulator")
+        or _has("source", "source_name")
+        or _has("run", "status")
+        or _has("change", "summary")
+        or _has("review", "review_status")
+    )
+
+
+def _check_attribution_seal_consistent(record: Any, is_obj: bool) -> dict[str, str]:
+    """Recompute the full-record ``attribution_hash`` seal (attribution-sha256-v1).
+
+    ``record_hash`` covers only ``content`` — the regulator, source name, change
+    summary, line counts, run status, and review status a human auditor READS are
+    outside it, so a holder of a genuine record could forge them (flip CBUAE→VARA,
+    rewrite the change summary, mark a pending record "approved") with content and
+    capture metadata untouched. Records sealed with ``attribution_hash`` bind those
+    fields; recompute through the SAME shared payload builder the writer used and
+    FAIL on any mismatch. A record without the seal (legacy, or a non-canonical
+    shape) is not failed — it is reported as skipped, and :func:`_verified_scope`
+    downgrades the pass to limited scope so it is never an unqualified pass over
+    unsealed attribution fields.
+    """
+    name = "attribution_seal_consistent"
+    if not is_obj:
+        return _skip(name, "No record object to recompute.")
+    stored = record.get("attribution_hash")
+    # The attribution seal extends the content seal (its payload embeds the content
+    # block), so it is authoritative only while record_hash is present. A record with
+    # no content seal is legacy/downgraded — its attribution fields are unsealed, so
+    # the pass is reported as limited scope rather than held to the attribution seal.
+    has_content_seal = bool(isinstance(record.get("record_hash"), str) and record["record_hash"].strip())
+    if not (isinstance(stored, str) and stored.strip() and has_content_seal):
+        if _carries_forgeable_attribution(record):
+            return _skip(
+                name,
+                "This record carries no attribution_hash: its regulator, source name, "
+                "change summary, line counts, run status, and review status are DISPLAY "
+                "fields NOT covered by this record's seal — only the content bytes and "
+                "capture metadata are cryptographically bound.",
+            )
+        return _skip(
+            name,
+            "The record carries no attribution_hash (e.g. a legacy record predating "
+            "the attribution-sha256-v1 seal); nothing to self-check.",
+        )
+    if record.get("attribution_hash_method") != ATTRIBUTION_HASH_METHOD:
+        return _fail(
+            name,
+            "attribution_hash_method is not the supported attribution-sha256-v1 scheme.",
+        )
+    stored_bare = _bare_digest(stored)
+    if stored_bare is None:
+        return _fail(name, "attribution_hash is not a valid sha256 digest.")
+    try:
+        recomputed = canonical_record_hash(attribution_seal_payload(record))
+    except (ValueError, TypeError):
+        return _fail(
+            name,
+            "The record's attribution fields could not be canonically re-hashed "
+            "(they contain a value that cannot be sealed).",
+        )
+    if recomputed == stored_bare:
+        return _pass(
+            name,
+            "attribution_hash recomputes from the record's regulator, source name, "
+            "change summary, line counts, run status, and review status.",
+        )
+    return _fail(
+        name,
+        "attribution_hash does not recompute from the record's attribution/change/status "
+        "fields — the regulator, change summary, run status, or review status was altered.",
+    )
+
+
+def _verified_scope(record: Any, checks: list[dict[str, str]]) -> str:
+    """Report WHAT a passing verification actually binds for this record.
+
+    ``full`` when the attribution seal recomputes; ``content+capture-metadata`` when
+    the record carries forgeable attribution fields but no attribution seal (so the
+    pass must not be read as covering them); ``content`` otherwise.
+    """
+    attribution_passed = any(
+        c["name"] == "attribution_seal_consistent" and c["status"] == STATUS_PASS
+        for c in checks
+    )
+    if attribution_passed:
+        return SCOPE_FULL
+    if _carries_forgeable_attribution(record):
+        return SCOPE_LIMITED
+    return SCOPE_CONTENT
 
 
 def _is_coverage_certificate(record: Any) -> bool:

@@ -241,6 +241,40 @@ else
   done
 fi
 
+# The three PERSISTENT daemons carry the whole product between timer ticks:
+# statuteproof-api (the web app), statuteproof-scheduler (the monitoring engine
+# — there is NO scheduler.timer; the loop lives inside this long-running
+# service), and statuteproof-telegram-bot (customer pairing + alert delivery).
+# File-presence above only proves the units shipped in the checkout. An operator
+# who enables the four timers but never enables the scheduler daemon gets a green
+# deploy-check while ZERO monitoring runs and no alert ever fires — so verify the
+# daemons at runtime the same way the timers are, with the same host-only guard.
+echo "── core daemons ─────────────────────────────────────────"
+if ! command -v systemctl >/dev/null 2>&1; then
+  warn "systemctl unavailable — daemon enablement unverified (not a droplet)"
+else
+  for unit in statuteproof-api.service statuteproof-scheduler.service \
+              statuteproof-telegram-bot.service; do
+    # Pipe-free on purpose (see scheduled-timers block): `... | grep -q` under
+    # `set -o pipefail` reports a SIGPIPE failure whenever grep exits on an early
+    # match while systemctl is still writing, so installed units intermittently
+    # read as "not installed".
+    case "$(systemctl list-unit-files "$unit" 2>/dev/null || true)" in
+      *"$unit"*) unit_installed=1 ;;
+      *) unit_installed=0 ;;
+    esac
+    if [ "$unit_installed" != 1 ]; then
+      warn "$unit not installed yet — install and enable it (DEPLOY.md § 7), then re-run this check"
+    elif [ "$(systemctl is-enabled "$unit" 2>/dev/null)" != "enabled" ]; then
+      bad "$unit is installed but NOT enabled — it will not survive reboot; run: systemctl enable --now $unit"
+    elif [ "$(systemctl is-active "$unit" 2>/dev/null)" != "active" ]; then
+      bad "$unit is enabled but NOT active — run: systemctl start $unit"
+    else
+      ok "$unit enabled and active"
+    fi
+  done
+fi
+
 echo "─────────────────────────────────────────────────────────"
 if [ "$FAIL" -ne 0 ]; then
   echo "${RED}DEPLOY-CHECK FAILED — fix the ✗ items above before starting services.${NC}"

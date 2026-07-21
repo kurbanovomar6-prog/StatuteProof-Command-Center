@@ -288,3 +288,75 @@ def test_capture_rejects_navigation_to_private_final_url(monkeypatch):
     assert out[0]["candidate_status"] == "rejected"
     assert "non-public" in out[0]["failure_reason"].lower()
     assert ctx.route_calls  # guard still installed before the navigation was refused
+
+
+# ── SEC-2: decompression-bomb DoS on the discovery read path ──────────────────
+# resp.text buffers AND gzip/br-inflates the ENTIRE body into memory unbounded.
+# A tiny attacker-controlled compressed payload (public host, passes the SSRF
+# guard) can inflate to gigabytes and OOM-kill the single-process API for all
+# tenants. _read_text_bounded must abort the read at MAX_FETCH_BYTES instead of
+# consuming the whole inflated stream.
+
+class _BombResp:
+    """
+    Streamed response whose iter_content yields an effectively unbounded
+    decompressed body — the 1 MB chunks stand in for what a gzip/brotli bomb
+    inflates to once requests decompresses it. It records how many chunks were
+    actually pulled so the test can prove the read stopped early.
+    """
+
+    def __init__(self):
+        self.status_code = 200
+        self.url = "https://public.example/bomb"
+        self.headers = {"content-type": "text/html"}
+        self.encoding = "utf-8"
+        self.chunks_pulled = 0
+        self.closed = False
+
+    @property
+    def ok(self):
+        return True
+
+    @property
+    def text(self):  # pragma: no cover - must NEVER be used by the guarded path
+        raise AssertionError("resp.text on the discovery path is an unbounded read")
+
+    def iter_content(self, chunk_size):
+        # 1 MiB per chunk; 100_000 chunks == ~100 GiB if ever fully consumed.
+        one_mb = b"A" * (1024 * 1024)
+        for _ in range(100_000):
+            self.chunks_pulled += 1
+            yield one_mb
+
+    def close(self):
+        self.closed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def test_read_text_bounded_refuses_decompression_bomb():
+    from app.adapters.base import MAX_FETCH_BYTES
+
+    bomb = _BombResp()
+    out = sd._read_text_bounded(bomb)
+
+    # Oversized body is refused, not returned.
+    assert out == ""
+    # The read aborted almost immediately — only enough chunks to cross the cap
+    # were pulled, NOT the full ~100 GiB stream. (MAX_FETCH_BYTES is 10 MiB, so
+    # ~11 one-MiB chunks; a fully-buffered read would pull all 100_000.)
+    cap_mb = MAX_FETCH_BYTES // (1024 * 1024)
+    assert bomb.chunks_pulled <= cap_mb + 2
+    assert bomb.chunks_pulled < 100_000
+    # The streamed connection was released on overflow.
+    assert bomb.closed is True
+
+
+def test_read_text_bounded_decodes_small_body():
+    """A normal (sub-cap) body still decodes correctly through the bounded read."""
+    resp = _FakeResp(200, body="<html>ok</html>".encode("utf-8"))
+    assert sd._read_text_bounded(resp) == "<html>ok</html>"

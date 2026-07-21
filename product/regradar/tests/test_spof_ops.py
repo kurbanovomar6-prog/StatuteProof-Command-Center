@@ -1165,6 +1165,130 @@ def test_deploy_check_timer_block_matches_script():
     assert _DEPLOY_CHECK_TIMER_BLOCK.strip() in _read(DEPLOY_CHECK_SH)
 
 
+# --- deploy-check: the PERSISTENT daemons are enabled AND active -------------
+
+# There is NO scheduler.timer — the monitoring loop lives inside the long-running
+# statuteproof-scheduler.service. File-presence alone lets an operator enable the
+# four timers but never the scheduler daemon and still see DEPLOY-CHECK PASSED
+# while ZERO monitoring runs and no alert ever fires. deploy-check must therefore
+# runtime-verify the three core daemons the same way it verifies the timers.
+_DEPLOY_CHECK_DAEMON_BLOCK = """\
+echo "── core daemons ─────────────────────────────────────────"
+if ! command -v systemctl >/dev/null 2>&1; then
+  warn "systemctl unavailable — daemon enablement unverified (not a droplet)"
+else
+  for unit in statuteproof-api.service statuteproof-scheduler.service \\
+              statuteproof-telegram-bot.service; do
+    # Pipe-free on purpose (see scheduled-timers block): `... | grep -q` under
+    # `set -o pipefail` reports a SIGPIPE failure whenever grep exits on an early
+    # match while systemctl is still writing, so installed units intermittently
+    # read as "not installed".
+    case "$(systemctl list-unit-files "$unit" 2>/dev/null || true)" in
+      *"$unit"*) unit_installed=1 ;;
+      *) unit_installed=0 ;;
+    esac
+    if [ "$unit_installed" != 1 ]; then
+      warn "$unit not installed yet — install and enable it (DEPLOY.md § 7), then re-run this check"
+    elif [ "$(systemctl is-enabled "$unit" 2>/dev/null)" != "enabled" ]; then
+      bad "$unit is installed but NOT enabled — it will not survive reboot; run: systemctl enable --now $unit"
+    elif [ "$(systemctl is-active "$unit" 2>/dev/null)" != "active" ]; then
+      bad "$unit is enabled but NOT active — run: systemctl start $unit"
+    else
+      ok "$unit enabled and active"
+    fi
+  done
+fi
+"""
+
+_DAEMONS = [
+    "statuteproof-api.service",
+    "statuteproof-scheduler.service",
+    "statuteproof-telegram-bot.service",
+]
+
+
+def _stub_systemctl_units(
+    tmp_path: Path, units, *, installed: bool, enabled: str, active: str
+) -> str:
+    binn = tmp_path / "sbin"
+    binn.mkdir(exist_ok=True)
+    p = binn / "systemctl"
+    listing = (
+        'for u in ' + " ".join(units) + '; do echo "$u enabled"; done\n'
+        if installed
+        else 'true\n'
+    )
+    p.write_text(
+        '#!/usr/bin/env bash\n'
+        'case "$1" in\n'
+        '  list-unit-files) ' + listing + '    ;;\n'
+        f'  is-enabled) echo "{enabled}" ;;\n'
+        f'  is-active) echo "{active}" ;;\n'
+        'esac\n'
+        'exit 0\n'
+    )
+    p.chmod(0o755)
+    return f"{binn}:/usr/bin:/bin"
+
+
+@requires_bash
+def test_deploy_check_daemons_pass_when_enabled_and_active(tmp_path):
+    path = _stub_systemctl_units(tmp_path, _DAEMONS, installed=True, enabled="enabled", active="active")
+    result = _run_block(_DEPLOY_CHECK_DAEMON_BLOCK, {}, path=path)
+    assert result.returncode == 0, result.stdout + result.stderr
+    ok_lines = [l for l in result.stdout.splitlines() if l.startswith("OK:")]
+    assert len(ok_lines) == len(_DAEMONS)
+    for daemon in _DAEMONS:
+        assert any(daemon in l for l in ok_lines), daemon
+
+
+@requires_bash
+def test_deploy_check_daemons_fail_when_installed_but_not_enabled(tmp_path):
+    """The gap this fix closes: scheduler daemon shipped, documented, never enabled."""
+    path = _stub_systemctl_units(tmp_path, _DAEMONS, installed=True, enabled="disabled", active="active")
+    result = _run_block(_DEPLOY_CHECK_DAEMON_BLOCK, {}, path=path)
+    assert result.returncode == 1, result.stdout + result.stderr
+    bad_lines = [l for l in result.stdout.splitlines() if l.startswith("BAD:")]
+    assert len(bad_lines) == len(_DAEMONS)
+    assert all("NOT enabled" in l for l in bad_lines)
+
+
+@requires_bash
+def test_deploy_check_daemons_fail_when_enabled_but_inactive(tmp_path):
+    path = _stub_systemctl_units(tmp_path, _DAEMONS, installed=True, enabled="enabled", active="inactive")
+    result = _run_block(_DEPLOY_CHECK_DAEMON_BLOCK, {}, path=path)
+    assert result.returncode == 1, result.stdout + result.stderr
+    bad_lines = [l for l in result.stdout.splitlines() if l.startswith("BAD:")]
+    assert len(bad_lines) == len(_DAEMONS)
+    assert all("NOT active" in l for l in bad_lines)
+
+
+@requires_bash
+def test_deploy_check_daemons_warn_before_units_are_installed(tmp_path):
+    """deploy-check runs BEFORE § 7 too — not-yet-installed must not hard-fail."""
+    path = _stub_systemctl_units(tmp_path, _DAEMONS, installed=False, enabled="", active="")
+    result = _run_block(_DEPLOY_CHECK_DAEMON_BLOCK, {}, path=path)
+    assert result.returncode == 0, result.stdout + result.stderr
+    warn_lines = [l for l in result.stdout.splitlines() if l.startswith("WARN:")]
+    assert len(warn_lines) == len(_DAEMONS)
+    assert all("not installed yet" in l for l in warn_lines)
+
+
+@requires_bash
+def test_deploy_check_daemons_warn_without_systemctl(tmp_path):
+    """Dev laptops / containers have no systemd — warn, never fail."""
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    result = _run_block(_DEPLOY_CHECK_DAEMON_BLOCK, {}, path=str(empty))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "BAD:" not in result.stdout
+    assert "WARN:systemctl unavailable" in result.stdout
+
+
+def test_deploy_check_daemon_block_matches_script():
+    assert _DEPLOY_CHECK_DAEMON_BLOCK.strip() in _read(DEPLOY_CHECK_SH)
+
+
 # --- deploy-check: the service-file presence loop covers the CORE units -----
 
 # Every unit DEPLOY.md § 7 ships as CORE must be asserted present by
