@@ -437,6 +437,94 @@ def ensure_stripe_events_table(conn: sqlite3.Connection | None = None) -> None:
             conn.close()
 
 
+# ── Stripe grant ledger — the SET of Stripe customers granting a user's plan ─────
+#
+# The anti-takedown keystone for the entitlement webhook (app/stripe_webhook.py).
+# One row per DISTINCT (user, granting customer) pair — i.e. a user may hold
+# grants from MULTIPLE customers at once. This SET model (not a single grantor)
+# is what makes client-side Payment Links safe against a refund/cancel takedown:
+#
+#   PLAN GUARD — an activation may RAISE or keep a user's active plan, but an
+#       activation can never LOWER it, so an attacker cannot "gift" a cheaper plan
+#       to downgrade a genuinely-paying victim (see app.stripe_webhook rank guard).
+#   REVOCATION MAPPING — a revocation event resolves the affected user(s) ONLY via
+#       this customer→user mapping (never a buyer-typed email), removes ONLY the
+#       revoked customer's grant for that user, and downgrades to the free tier
+#       ONLY when the user has ZERO remaining granting customers. An attacker's
+#       cancel can therefore only ever remove the attacker's OWN grant — a victim
+#       who is also paying via a DIFFERENT customer keeps that surviving grant and
+#       is never stripped.
+#
+# PURELY ADDITIVE: no existing table is altered; only the Stripe webhook path
+# touches it. The PRIMARY KEY is the composite ``(user_id, granting_customer_id)``
+# so re-recording the same customer refreshes rather than duplicates; a grant row
+# is DELETED when that customer revokes, so a leftover mapping can never trigger a
+# stale downgrade.
+_CREATE_STRIPE_GRANTS_TABLE = """
+    CREATE TABLE IF NOT EXISTS stripe_customer_grants (
+        user_id              INTEGER   NOT NULL REFERENCES users(id),
+        granting_customer_id TEXT      NOT NULL,
+        plan                 TEXT      NOT NULL,
+        granted_at           TIMESTAMP NOT NULL,
+        updated_at           TIMESTAMP NOT NULL,
+        PRIMARY KEY (user_id, granting_customer_id)
+    );
+"""
+
+_CREATE_STRIPE_GRANTS_INDEXES = """
+    CREATE INDEX IF NOT EXISTS idx_stripe_grants_customer
+        ON stripe_customer_grants(granting_customer_id);
+    CREATE INDEX IF NOT EXISTS idx_stripe_grants_user
+        ON stripe_customer_grants(user_id);
+"""
+
+
+def ensure_stripe_customer_grants_table(conn: sqlite3.Connection | None = None) -> None:
+    """Provision the Stripe grant ledger. Cheap + idempotent + additive.
+
+    Mirrors ``ensure_stripe_events_table``: constant-cost ``CREATE TABLE IF NOT
+    EXISTS`` only, safe to call from every Stripe webhook DB operation.
+    Deliberately NOT chained into ``ensure_auth_tables`` — the table is touched
+    only by the Stripe webhook module, so the per-request session path is
+    unchanged.
+
+    Also performs a one-time, data-preserving migration from the pre-SET shape
+    (``user_id`` as the SOLE primary key → at most one grantor per user) to the
+    SET shape (composite ``(user_id, granting_customer_id)`` primary key → a user
+    may hold grants from multiple customers). Preserving multiple grants is what
+    lets a genuinely-paying victim's grant SURVIVE an attacker's separate grant
+    being revoked. Idempotent: on the already-migrated (or fresh) shape it is a
+    no-op beyond the constant-cost ``CREATE ... IF NOT EXISTS``.
+    """
+    owned_conn = conn is None
+    if conn is None:
+        conn = _connect()
+    try:
+        conn.executescript(_CREATE_STRIPE_GRANTS_TABLE)
+        info = conn.execute(
+            "PRAGMA table_info(stripe_customer_grants)"
+        ).fetchall()
+        pk_cols = {row[1] for row in info if row[5] > 0}
+        if pk_cols == {"user_id"}:
+            # Old single-grantor shape: rebuild with the composite PK, carrying
+            # every existing grant forward (INSERT OR IGNORE is a safety net —
+            # the old shape can hold at most one row per user, so no collision).
+            conn.executescript(
+                "ALTER TABLE stripe_customer_grants RENAME TO _stripe_grants_old;"
+                + _CREATE_STRIPE_GRANTS_TABLE
+                + "INSERT OR IGNORE INTO stripe_customer_grants "
+                "(user_id, granting_customer_id, plan, granted_at, updated_at) "
+                "SELECT user_id, granting_customer_id, plan, granted_at, updated_at "
+                "FROM _stripe_grants_old;"
+                "DROP TABLE _stripe_grants_old;"
+            )
+        conn.executescript(_CREATE_STRIPE_GRANTS_INDEXES)
+        conn.commit()
+    finally:
+        if owned_conn:
+            conn.close()
+
+
 # ── Sealed decision log — per-org, append-only, chained (Stage 1: INERT) ────────
 #
 # One row per SEALED review decision a user records against monitored evidence
