@@ -25,6 +25,7 @@ import app.api as api
 from app.api import _Handler
 from app.evidence_assessment import LEGAL_DISCLAIMER
 from app.evidence_records import create_canonical_evidence_record
+from app.public_verify import verify_submission
 from app.evidence_pack import (
     EvidencePackError,
     FULL_LEGAL_DISCLAIMER,
@@ -76,6 +77,44 @@ def _make_record(
         "proof_block_path": str((run_dir / "proof.json").relative_to(base)),
     }
     return create_canonical_evidence_record(run, base_dir=base)
+
+
+def _run_dict(base: Path, *, source_id: str, run_id: str, timestamp: str,
+              text: str, change_status: str, market: str = "AE") -> dict:
+    run_dir = base / "data" / "source_snapshots" / timestamp[:10] / market / source_id / run_id
+    normalized_hash = _write(run_dir / "normalized.txt", text)
+    _write(run_dir / "raw.txt", f"<main>{text}</main>")
+    _write(run_dir / "metadata.json", json.dumps({"provider": "fixture"}, sort_keys=True))
+    _write(run_dir / "proof.json", json.dumps({"proof_quality": "GOOD"}, sort_keys=True))
+    return {
+        "run_id": run_id,
+        "timestamp_utc": timestamp,
+        "market": market,
+        "source_id": source_id,
+        "source_name": f"{source_id} Source",
+        "category": "regulatory",
+        "official_url": f"https://example.gov/{source_id}",
+        "access_status": "accessible",
+        "fetch_method": "fixture",
+        "extraction_quality": "GOOD",
+        "change_status": change_status,
+        "normalized_hash": normalized_hash,
+        "snapshot_raw_path": str((run_dir / "raw.txt").relative_to(base)),
+        "snapshot_normalized_path": str((run_dir / "normalized.txt").relative_to(base)),
+        "snapshot_metadata_path": str((run_dir / "metadata.json").relative_to(base)),
+        "proof_block_path": str((run_dir / "proof.json").relative_to(base)),
+    }
+
+
+def _make_changed(base: Path, *, source_id: str, run_id: str, timestamp: str,
+                  previous_text: str, current_text: str) -> dict:
+    """Create a CHANGED record (with a real sealed diff artifact) vs a prior state."""
+    previous_run = _run_dict(base, source_id=source_id, run_id=f"{run_id}-prev",
+                             timestamp="2026-02-01T09:00:00Z", text=previous_text,
+                             change_status="FIRST_SEEN")
+    run = _run_dict(base, source_id=source_id, run_id=run_id, timestamp=timestamp,
+                    text=current_text, change_status="CHANGED")
+    return create_canonical_evidence_record(run, previous_run, base_dir=base)
 
 
 def _read_zip(pack_path: str) -> dict[str, bytes]:
@@ -285,6 +324,167 @@ def test_bundled_verify_py_fails_on_tampered_snapshot(tmp_path):
     assert proc.returncode == 1, proc.stdout + proc.stderr
     assert "RESULT: FAIL" in proc.stdout
     assert "FAIL" in proc.stdout
+
+
+# ── sealed-diff parity with the Regulator Binder (CHANGED records) ───────────────
+
+def _changed_pack(tmp_path):
+    _make_changed(
+        tmp_path, source_id="dfsa-test", run_id="run-changed", timestamp="2026-03-20T10:00:00Z",
+        previous_text="Original rulebook clause A applies to firms.",
+        current_text="Amended rulebook clause A applies to firms and branches.",
+    )
+    result = build_evidence_pack(["dfsa-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    assert result["status"] == "ok", result
+    return result
+
+
+def test_changed_record_pack_ships_diff_and_seal_hashes(tmp_path):
+    """A CHANGED record's pack must ship diff.txt and surface diff_hash +
+    previous_hash + record_hash — the same sealed-diff material the Binder ships,
+    so the pack and binder do not disagree about what is verifiable."""
+    result = _changed_pack(tmp_path)
+    contents = _read_zip(result["pack_path"])
+    manifest = json.loads(contents["manifest.json"])
+    row = manifest["records"][0]
+
+    # The sealed redline rides along and is referenced by the manifest row.
+    assert "diff_file" in row
+    assert row["diff_file"] in contents
+    diff_bytes = contents[row["diff_file"]]
+    assert b"@@" in diff_bytes or b"##" in diff_bytes or b"---" in diff_bytes
+
+    # diff_hash + previous_hash + record_hash are surfaced and internally consistent.
+    assert hashlib.sha256(diff_bytes).hexdigest() == row["diff_hash"]
+    assert row["previous_hash"]
+    assert row["record_hash"]
+
+    # The manifest hashes equal what the product sealed into the record itself.
+    rec_bytes = contents[row["evidence_record_file"]]
+    sealed = json.loads(rec_bytes)
+    assert row["diff_hash"] == sealed["content"]["diff_hash"].replace("sha256:", "")
+    assert row["previous_hash"] == sealed["content"]["previous_hash"].replace("sha256:", "")
+    assert row["record_hash"] == sealed["record_hash"].replace("sha256:", "")
+
+
+def test_pack_changed_record_verifies_sealed_diff_through_public_verify(tmp_path):
+    """End-to-end: a customer's auditor can take the pack's own bytes (record +
+    normalized + diff.txt) and run the SAME canonical sealed-diff check the Verify
+    page runs (app.public_verify), and it passes."""
+    result = _changed_pack(tmp_path)
+    contents = _read_zip(result["pack_path"])
+    row = json.loads(contents["manifest.json"])["records"][0]
+
+    record = json.loads(contents[row["evidence_record_file"]])
+    normalized = contents[row["normalized_snapshot_file"]].decode("utf-8")
+    diff = contents[row["diff_file"]].decode("utf-8")
+
+    report = verify_submission(record, normalized=normalized, diff=diff)
+    by_name = {c["name"]: c["status"] for c in report["checks"]}
+    assert by_name["diff_bytes_match"] == "pass", report
+    assert by_name["record_hash_self_consistent"] == "pass", report
+    assert by_name["normalized_bytes_match"] == "pass", report
+    assert report["verified"] is True, report
+
+
+def test_pack_bundled_verify_checks_sealed_diff(tmp_path):
+    """The bundled verify.py re-hashes the sealed diff and reports PASS on a clean
+    pack, and FAIL if a single byte of diff.txt is altered."""
+    result = _changed_pack(tmp_path)
+
+    clean = _extract(result["pack_path"], tmp_path / "clean")
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=clean, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "RESULT: PASS" in proc.stdout
+    assert "[diff]" in proc.stdout          # the sealed diff was actually checked
+    assert "FAIL" not in proc.stdout
+
+    tampered = _extract(result["pack_path"], tmp_path / "tampered")
+    target = next(tampered.glob("snapshots/*/diff.txt"))
+    target.write_text(target.read_text(encoding="utf-8") + "TAMPERED", encoding="utf-8")
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=tampered, capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[diff]" in proc.stdout
+
+
+def test_pack_excludes_changed_record_with_tampered_diff(tmp_path):
+    """A post-seal edit to diff.txt must NOT ship as clean evidence — the record
+    is excluded when its diff bytes diverge from the sealed content.diff_hash,
+    mirroring the raw/normalized snapshot protections."""
+    record = _make_changed(
+        tmp_path, source_id="dfsa-test", run_id="run-changed", timestamp="2026-03-20T10:00:00Z",
+        previous_text="Original rulebook clause A applies to firms.",
+        current_text="Amended rulebook clause A applies to firms and branches.",
+    )
+    diff_rel = record["files"]["diff_path"]
+    diff_path = tmp_path / diff_rel
+    assert diff_path.exists()
+    diff_path.write_text(diff_path.read_text(encoding="utf-8") + "\nFABRICATED", encoding="utf-8")
+
+    result = build_evidence_pack(["dfsa-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    assert result["status"] == "empty"
+    assert result["record_count"] == 0
+
+
+def test_first_seen_pack_carries_no_diff_and_stays_valid(tmp_path):
+    """A FIRST_SEEN record has no diff — the pack must not ship one nor force one,
+    and both the bundled verify.py and public_verify still report it valid."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    contents = _read_zip(result["pack_path"])
+    row = json.loads(contents["manifest.json"])["records"][0]
+
+    assert "diff_file" not in row
+    assert "diff_hash" not in row
+    assert not any(n.endswith("/diff.txt") for n in contents)
+
+    # public_verify with no diff → diff check skipped, record still verified.
+    record = json.loads(contents[row["evidence_record_file"]])
+    normalized = contents[row["normalized_snapshot_file"]].decode("utf-8")
+    report = verify_submission(record, normalized=normalized, diff=None)
+    by_name = {c["name"]: c["status"] for c in report["checks"]}
+    assert by_name["diff_bytes_match"] == "skipped", report
+    assert report["verified"] is True, report
+
+    extracted = _extract(result["pack_path"], tmp_path / "clean")
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "RESULT: PASS" in proc.stdout
+
+
+def test_pack_and_binder_agree_on_changed_record(tmp_path):
+    """The two customer deliverables must not disagree about what is verifiable:
+    for the SAME CHANGED record, both ship the identical sealed diff bytes and both
+    surface a record_hash that recomputes through the canonical verifier."""
+    from app.regulator_binder import build_regulator_binder
+
+    _make_changed(
+        tmp_path, source_id="dfsa-test", run_id="run-changed", timestamp="2026-03-20T10:00:00Z",
+        previous_text="Original rulebook clause A applies to firms.",
+        current_text="Amended rulebook clause A applies to firms and branches.",
+    )
+    pack = build_evidence_pack(["dfsa-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    binder = build_regulator_binder(["dfsa-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    assert pack["status"] == "ok" and binder["status"] == "ok"
+
+    p = _read_zip(pack["pack_path"])
+    b = _read_zip(binder["binder_path"])
+    prow = json.loads(p["manifest.json"])["records"][0]
+    brow = json.loads(b["manifest.json"])["records"][0]
+
+    # Identical sealed diff bytes and identical record self-seal across artifacts.
+    assert p[prow["diff_file"]] == b[brow["diff_file"]]
+    assert prow["record_hash"] == brow["record_hash"]
+
+    # The same record verifies through public_verify from either artifact's bytes.
+    for contents, row in ((p, prow), (b, brow)):
+        record = json.loads(contents[row["evidence_record_file"]])
+        diff = contents[row["diff_file"]].decode("utf-8")
+        report = verify_submission(record, diff=diff)
+        by_name = {c["name"]: c["status"] for c in report["checks"]}
+        assert by_name["diff_bytes_match"] == "pass"
+        assert by_name["record_hash_self_consistent"] == "pass"
 
 
 # ── legal safety: disclaimer + forbidden claims ──────────────────────────────────

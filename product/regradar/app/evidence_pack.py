@@ -234,6 +234,8 @@ def build_evidence_pack(
                 zf.writestr(entry["raw_arcname"], entry["raw_bytes"])
                 zf.writestr(entry["normalized_arcname"], entry["normalized_bytes"])
                 zf.writestr(entry["record_arcname"], entry["record_bytes"])
+                if entry.get("diff_arcname") and entry.get("diff_bytes") is not None:
+                    zf.writestr(entry["diff_arcname"], entry["diff_bytes"])
             if _ship_tsr and _tsr_bytes is not None:
                 zf.writestr("timestamp/evidence_chain_head.tsr", _tsr_bytes)
                 if _tsr_json_bytes is not None:
@@ -348,6 +350,9 @@ def _entry_from_record(
     files = record.get("files")
     if not isinstance(files, dict):
         files = {}
+    change = record.get("change")
+    if not isinstance(change, dict):
+        change = {}
     record_id = str(record.get("record_id") or "").strip()
     if not record_id:
         return None
@@ -386,6 +391,36 @@ def _entry_from_record(
         raw_hash = recorded_raw
 
     safe_id = _safe_arc(record_id)
+
+    # Sealed-diff parity with the Regulator Binder: for a CHANGED record the
+    # pipeline persisted a diff.txt (the sealed redline) and sealed its SHA-256 as
+    # content.diff_hash. Ship that diff.txt and surface its hash + the previous
+    # hash + the record self-seal so a customer's auditor can run the SAME sealed-
+    # diff check (app.public_verify) the binder advertises — WITHOUT the pack and
+    # binder disagreeing about what is verifiable. FIRST_SEEN records carry no diff
+    # and must never be forced to (below stays None → no diff shipped).
+    recorded_diff = str(content.get("diff_hash") or "").strip().lower().removeprefix("sha256:")
+    previous_hash = str(content.get("previous_hash") or "").strip().lower().removeprefix("sha256:")
+    record_hash = str(record.get("record_hash") or "").strip().lower().removeprefix("sha256:")
+    diff_bytes: bytes | None = None
+    diff_arcname: str | None = None
+    diff_hash: str | None = None
+    if recorded_diff:
+        diff_path = _safe_under_root(str(change.get("diff_path") or files.get("diff_path") or ""), root)
+        if diff_path is not None and diff_path.exists():
+            candidate = diff_path.read_bytes()
+            # Same protection as raw/normalized: a diff.txt whose bytes no longer
+            # match the sealed content.diff_hash is tampered evidence — skip the
+            # whole record rather than ship a redline that fails its own seal.
+            if hashlib.sha256(candidate).hexdigest() != recorded_diff:
+                logger.warning(
+                    "build_evidence_pack: skipping %s (diff bytes != recorded diff_hash)", record_id
+                )
+                return None
+            diff_bytes = candidate
+            diff_arcname = f"snapshots/{safe_id}/diff.txt"
+            diff_hash = recorded_diff
+
     return {
         "record_id": record_id,
         "source_id": source_id,
@@ -397,12 +432,17 @@ def _entry_from_record(
         "timestamp": str(run.get("timestamp") or ""),
         "raw_hash": raw_hash,
         "normalized_hash": normalized_hash,
+        "record_hash": record_hash,
+        "previous_hash": previous_hash,
+        "diff_hash": diff_hash,
         "raw_bytes": raw_bytes,
         "normalized_bytes": normalized_bytes,
         "record_bytes": record_path.read_bytes(),
+        "diff_bytes": diff_bytes,
         "raw_arcname": f"snapshots/{safe_id}/raw.txt",
         "normalized_arcname": f"snapshots/{safe_id}/normalized.txt",
         "record_arcname": f"snapshots/{safe_id}/evidence-record.json",
+        "diff_arcname": diff_arcname,
     }
 
 
@@ -412,8 +452,9 @@ def _build_manifest(
     date_from: str,
     date_to: str,
 ) -> dict[str, Any]:
-    records = [
-        {
+    records = []
+    for e in entries:
+        row = {
             "record_id": e["record_id"],
             "source_id": e["source_id"],
             "source_name": e["source_name"],
@@ -428,8 +469,18 @@ def _build_manifest(
             "normalized_snapshot_file": e["normalized_arcname"],
             "evidence_record_file": e["record_arcname"],
         }
-        for e in entries
-    ]
+        # The record self-seal, when present (legacy records predate it and are
+        # simply omitted — the pack stays valid without it).
+        if e.get("record_hash"):
+            row["record_hash"] = e["record_hash"]
+        # CHANGED records: the sealed redline + its hash + the previous-state hash,
+        # so verify.py and app.public_verify can run the sealed-diff check.
+        if e.get("previous_hash"):
+            row["previous_hash"] = e["previous_hash"]
+        if e.get("diff_arcname") and e.get("diff_hash"):
+            row["diff_hash"] = e["diff_hash"]
+            row["diff_file"] = e["diff_arcname"]
+        records.append(row)
     return {
         "pack_type": "statuteproof_evidence_pack",
         "schema_version": "1.0",
@@ -494,6 +545,9 @@ yourself, offline, with nothing but a standard Python 3 install.
   hashed for change detection.
 - `snapshots/<record_id>/evidence-record.json` — the canonical record for
   provenance.
+- `snapshots/<record_id>/diff.txt` — the sealed redline (the diff against the
+  previous captured state), present only for records where a change was detected.
+  Its SHA-256 is recorded as `diff_hash` in `manifest.json`.
 - `verify.py` — a standalone checker (Python standard library only, no
   StatuteProof imports).
 
@@ -505,11 +559,12 @@ From inside the unzipped pack folder:
 python3 verify.py
 ```
 
-For every record it re-reads the two snapshot files, recomputes each SHA-256,
-and compares the result to `manifest.json`. It prints `PASS` when the bytes
-match the recorded hash and `FAIL` when they do not, then exits non-zero if any
-record fails. If a single byte of a snapshot is altered, its hash changes and
-that record reports `FAIL`.
+For every record it re-reads the snapshot files (and, where a change was
+detected, the sealed `diff.txt`), recomputes each SHA-256, and compares the
+result to `manifest.json`. It prints `PASS` when the bytes match the recorded
+hash and `FAIL` when they do not, then exits non-zero if any record fails. If a
+single byte of a snapshot or diff is altered, its hash changes and that record
+reports `FAIL`.
 
 ## Verify by hand (no scripts)
 
@@ -594,6 +649,23 @@ def main():
             else:
                 print("FAIL  %s [%s] expected=%s actual=%s" % (record_id, label, expected, actual))
                 failures += 1
+        # Sealed diff (the redline) for CHANGED records only. FIRST_SEEN records
+        # carry no diff_file and are correctly skipped here — a first capture has
+        # nothing to diff against. A single altered byte of diff.txt fails this.
+        diff_rel = record.get("diff_file")
+        if diff_rel:
+            expected = str(record.get("diff_hash") or "").lower().replace("sha256:", "")
+            target = HERE / diff_rel
+            if not target.exists():
+                print("FAIL  %s [diff] sealed diff file missing: %s" % (record_id, diff_rel))
+                failures += 1
+            else:
+                actual = sha256_file(target)
+                if actual == expected:
+                    print("PASS  %s [diff] sha256=%s" % (record_id, actual))
+                else:
+                    print("FAIL  %s [diff] expected=%s actual=%s" % (record_id, expected, actual))
+                    failures += 1
     print()
     if failures:
         print("RESULT: FAIL - %d hash mismatch(es); these bytes do NOT match the recorded manifest." % failures)
