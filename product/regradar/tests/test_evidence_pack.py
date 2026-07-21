@@ -22,6 +22,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app.api as api
+import app.api_reports as api_reports
 from app.api import _Handler
 from app.evidence_assessment import LEGAL_DISCLAIMER
 from app.evidence_records import create_canonical_evidence_record
@@ -535,6 +536,7 @@ def _bare_handler() -> _Handler:
 
 def test_handler_rejects_unauthenticated(monkeypatch):
     monkeypatch.setattr(api, "require_auth", lambda handler: None)
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: None)
     handler = _bare_handler()
     captured: dict = {}
     handler._send_json = lambda data, status=200, **kw: captured.update(data=data, status=status)  # type: ignore[method-assign]
@@ -554,6 +556,7 @@ def test_handler_streams_zip_for_authenticated_client(monkeypatch, tmp_path):
     fake_zip.write_bytes(buf.getvalue())
 
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 1, "email": "c@x.io"})
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: {"id": 1, "email": "c@x.io"})
     import app.evidence_pack as ep
     monkeypatch.setattr(
         ep,
@@ -599,6 +602,7 @@ def test_handler_streams_zip_for_authenticated_client(monkeypatch, tmp_path):
 def test_handler_413_when_selection_too_large(monkeypatch):
     """The handler maps the builder's too_large status to HTTP 413."""
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
     handler = _bare_handler()
     monkeypatch.setattr(
         handler, "_read_json_strict",
@@ -626,6 +630,7 @@ def test_handler_error_does_not_leak_internal_message(monkeypatch):
     """A builder error must return a generic 500 — never forward internal detail
     (e.g. an absolute server path in an OSError) to the client."""
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
     handler = _bare_handler()
     monkeypatch.setattr(
         handler, "_read_json_strict",

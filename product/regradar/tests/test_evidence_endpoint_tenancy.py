@@ -34,6 +34,7 @@ import pytest
 
 import app.api as api
 import app.api_evidence as api_evidence
+import app.api_reports as api_reports
 import app.evidence_assessment as evidence_assessment
 import app.source_health_timeline as source_health_timeline
 import app.review_queue as review_queue
@@ -100,6 +101,7 @@ def _status(handler: _Handler) -> int:
 def _auth(monkeypatch, user_id: int) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
     monkeypatch.setattr(api_evidence, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: {"id": user_id, "email": "u@x.io"})
 
 
 def _patch_sources(monkeypatch) -> None:

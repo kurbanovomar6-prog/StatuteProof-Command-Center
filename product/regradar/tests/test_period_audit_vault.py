@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app.api as api
+import app.api_reports as api_reports
 from app.api import _Handler
 from app.audit_export import build_period_audit_vault, validate_date_range
 
@@ -189,6 +190,7 @@ def _bare_handler() -> _Handler:
 def test_audit_vault_handler_413_when_selection_too_large(monkeypatch):
     """The handler maps the builder's too_large status to HTTP 413."""
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
     handler = _bare_handler()
     monkeypatch.setattr(
         handler, "_read_json_strict",
@@ -215,6 +217,7 @@ def test_audit_vault_handler_error_does_not_leak_internal_message(monkeypatch):
     """A builder error must return a generic 500 — never forward internal detail
     (e.g. an absolute server path in an OSError) to the client."""
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: {"id": 7, "email": "c@x.io"})
     handler = _bare_handler()
     monkeypatch.setattr(
         handler, "_read_json_strict",

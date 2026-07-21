@@ -521,6 +521,7 @@ def _preview_fixture(source_id: str = "AE-1") -> dict:
 def _preview_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
     """Drive GET /api/delivery/preview for ``user_id`` with a stubbed builder."""
     import app.api as api
+    import app.api_account as api_account
 
     handler = api._Handler.__new__(api._Handler)
     handler.command = "GET"
@@ -538,8 +539,12 @@ def _preview_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
     handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
 
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(api_account, "require_auth", lambda h: {"id": int(user_id)})
     monkeypatch.setattr(
         api, "build_routing_preview_for_user", lambda uid, days=14: _preview_fixture(source_id)
+    )
+    monkeypatch.setattr(
+        api_account, "build_routing_preview_for_user", lambda uid, days=14: _preview_fixture(source_id)
     )
     handler._handle_delivery_preview()
     return sent[-1]
@@ -1011,6 +1016,7 @@ def _calendar_result(source_id: str = "AE-1") -> dict:
 def _effective_dates_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
     """Drive GET /api/calendar/effective-dates with a stubbed builder."""
     import app.api as api
+    import app.api_reports as api_reports
     import app.effective_dates as effective_dates
 
     handler = api._Handler.__new__(api._Handler)
@@ -1029,6 +1035,7 @@ def _effective_dates_handler(monkeypatch, user_id: int, source_id: str = "AE-1")
     handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
 
     monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(api_reports, "require_auth", lambda h: {"id": int(user_id)})
     monkeypatch.setattr(
         effective_dates, "upcoming_key_dates", lambda **kw: _calendar_result(source_id)
     )

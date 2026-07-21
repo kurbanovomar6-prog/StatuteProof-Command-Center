@@ -35,6 +35,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app.api as api
+import app.api_account as api_account
 import app.db as app_db
 import app.evidence_room as evidence_room
 from app.access_log import read_access_log
@@ -174,12 +175,17 @@ def _make_handler(method: str = "POST", path: str = "/", body: dict | None = Non
 
 def _auth_as(monkeypatch, user: dict | None) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: dict(user) if user else None)
+    monkeypatch.setattr(api_account, "require_auth", lambda handler: dict(user) if user else None)
 
 
 def _fresh_limiters(monkeypatch) -> None:
     """Isolate the shared module-level limiters from other tests' hits."""
-    monkeypatch.setattr(api, "_EXPORT_LIMITER", _RateLimiter(1000, 3600))
-    monkeypatch.setattr(api, "_ROOM_LIMITER", _RateLimiter(1000, 3600))
+    _export_lim = _RateLimiter(1000, 3600)
+    _room_lim = _RateLimiter(1000, 3600)
+    monkeypatch.setattr(api, "_EXPORT_LIMITER", _export_lim)
+    monkeypatch.setattr(api_account, "_EXPORT_LIMITER", _export_lim)
+    monkeypatch.setattr(api, "_ROOM_LIMITER", _room_lim)
+    monkeypatch.setattr(api_account, "_ROOM_LIMITER", _room_lim)
 
 
 # ── token lifecycle: creation → hash-only storage ────────────────────────────────
@@ -630,7 +636,9 @@ def test_no_mutation_route_exists_under_api_room(isolated_db, entitled, monkeypa
 
 
 def test_room_endpoint_is_rate_limited_per_ip(isolated_db, monkeypatch):
-    monkeypatch.setattr(api, "_ROOM_LIMITER", _RateLimiter(1, 3600))
+    _room_lim = _RateLimiter(1, 3600)
+    monkeypatch.setattr(api, "_ROOM_LIMITER", _room_lim)
+    monkeypatch.setattr(api_account, "_ROOM_LIMITER", _room_lim)
     first = _make_handler(method="GET", path="/api/room/" + "D" * 43)
     first.do_GET()
     assert first._sent[-1][1] == 404  # consumed the single slot

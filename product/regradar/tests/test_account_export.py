@@ -32,6 +32,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_account as api_account
 import app.db as app_db
 import app.decision_records as decision_records
 from app import account_export
@@ -94,6 +95,7 @@ def _make_handler(path: str = "/api/account/export", ip: str = "10.0.0.9") -> _H
 
 def _auth_as(monkeypatch, user: dict) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: dict(user))
+    monkeypatch.setattr(api_account, "require_auth", lambda handler: dict(user))
 
 
 def _new_owner(email: str, full_name: str | None = None) -> dict:

@@ -32,7 +32,10 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_account as api_account
 import app.api_evidence as api_evidence
+import app.api_reports as api_reports
+import app.api_sources as api_sources
 import app.db as app_db
 import app.rbac_runtime as rbac_runtime
 from app import rbac
@@ -92,6 +95,9 @@ def _statuses(handler: _Handler) -> list[int]:
 def _auth_as(monkeypatch, user: dict) -> None:
     monkeypatch.setattr(api, "require_auth", lambda handler: dict(user))
     monkeypatch.setattr(api_evidence, "require_auth", lambda handler: dict(user))
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: dict(user))
+    monkeypatch.setattr(api_sources, "require_auth", lambda handler: dict(user))
+    monkeypatch.setattr(api_account, "require_auth", lambda handler: dict(user))
 
 
 def _new_owner(email: str) -> dict:
@@ -239,6 +245,7 @@ def test_alert_send_writes_access_log(isolated_db, monkeypatch):
     user = _new_owner("sender@example.com")
     _auth_as(monkeypatch, {"id": user["id"], "email": user["email"]})
     monkeypatch.setattr(api, "send_preview_alert_to_user", lambda uid, alert_id: {"ok": True, "message": "sent"})
+    monkeypatch.setattr(api_account, "send_preview_alert_to_user", lambda uid, alert_id: {"ok": True, "message": "sent"})
 
     handler = _make_handler("POST", "/api/delivery/send-preview-alert")
     monkeypatch.setattr(handler, "_read_json_strict", lambda: ({"alert_id": "abc123"}, None))

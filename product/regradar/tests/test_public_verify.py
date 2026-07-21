@@ -21,6 +21,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app.api as api
+import app.api_account as api_account
 from app.api import _Handler, _RateLimiter
 from app.public_verify import (
     STATUS_FAIL,
@@ -273,6 +274,7 @@ def test_endpoint_requires_no_auth(monkeypatch):
         return None
 
     monkeypatch.setattr(api, "require_auth", _tripwire)
+    monkeypatch.setattr(api_account, "require_auth", _tripwire)
 
     record, raw, normalized = _genuine_trail_record()
     handler = _bare_handler()
@@ -336,7 +338,9 @@ def test_endpoint_non_string_raw_is_400(monkeypatch):
 def test_endpoint_rate_limit_triggers_after_n_calls(monkeypatch):
     record, raw, normalized = _genuine_trail_record()
     # Fresh 2-per-window limiter so the third call is throttled deterministically.
-    monkeypatch.setattr(api, "_VERIFY_LIMITER", _RateLimiter(2, 3600))
+    _shared_verify_limiter = _RateLimiter(2, 3600)
+    monkeypatch.setattr(api, "_VERIFY_LIMITER", _shared_verify_limiter)
+    monkeypatch.setattr(api_account, "_VERIFY_LIMITER", _shared_verify_limiter)
 
     statuses: list[int] = []
 

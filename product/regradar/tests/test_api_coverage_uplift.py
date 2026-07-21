@@ -34,10 +34,13 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app.api as api
+import app.api_account as api_account
 import app.api_alerts as api_alerts
 import app.api_auth as api_auth
 import app.api_evidence as api_evidence
 import app.api_plan as api_plan
+import app.api_reports as api_reports
+import app.api_sources as api_sources
 import app.api_telegram as api_telegram
 import app.db as app_db
 from app.api import _Handler
@@ -104,14 +107,18 @@ def _last(handler: _Handler):
 def _auth_as(monkeypatch, user: dict | None) -> None:
     # ``require_auth`` is read as a bare global inside each handler's own module.
     # Handlers that moved into mixin modules (app.api_telegram, app.api_plan,
-    # app.api_auth, app.api_alerts, app.api_evidence) read it from THEIR
-    # namespace, so patch it everywhere a moved handler lives.
+    # app.api_auth, app.api_alerts, app.api_evidence, app.api_reports,
+    # app.api_sources, app.api_account) read it from THEIR namespace, so patch
+    # it everywhere a moved handler lives.
     monkeypatch.setattr(api, "require_auth", lambda handler: user)
     monkeypatch.setattr(api_telegram, "require_auth", lambda handler: user)
     monkeypatch.setattr(api_plan, "require_auth", lambda handler: user)
     monkeypatch.setattr(api_auth, "require_auth", lambda handler: user)
     monkeypatch.setattr(api_alerts, "require_auth", lambda handler: user)
     monkeypatch.setattr(api_evidence, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_reports, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_sources, "require_auth", lambda handler: user)
+    monkeypatch.setattr(api_account, "require_auth", lambda handler: user)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -448,7 +455,7 @@ def test_profile_update_empty_body_is_accepted_as_empty_update(monkeypatch):
     # to update_profile as an empty update and succeeds — no 400 is raised.
     _auth_as(monkeypatch, {"id": 1})
     seen = {}
-    monkeypatch.setattr(api, "update_profile",
+    monkeypatch.setattr(api_account, "update_profile",
                         lambda uid, body: seen.setdefault("body", body) or {"ok": True})
     handler = _make_handler("PUT", "/api/profile")
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -469,7 +476,7 @@ def test_profile_update_bad_json_is_400(monkeypatch):
 
 def test_profile_update_value_error_is_400(monkeypatch):
     _auth_as(monkeypatch, {"id": 1})
-    monkeypatch.setattr(api, "update_profile",
+    monkeypatch.setattr(api_account, "update_profile",
                         lambda uid, body: (_ for _ in ()).throw(ValueError("industry too long")))
     handler = _make_handler("PUT", "/api/profile", {"industry": "x" * 9999})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
@@ -485,7 +492,7 @@ def test_profile_update_generic_error_is_500(monkeypatch):
     def _boom(uid, body):
         raise RuntimeError("db down")
 
-    monkeypatch.setattr(api, "update_profile", _boom)
+    monkeypatch.setattr(api_account, "update_profile", _boom)
     handler = _make_handler("PUT", "/api/profile", {"company_name": "Acme"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]
     handler._handle_profile_update()
@@ -495,7 +502,7 @@ def test_profile_update_generic_error_is_500(monkeypatch):
 
 def test_profile_update_success_is_200(monkeypatch):
     _auth_as(monkeypatch, {"id": 7})
-    monkeypatch.setattr(api, "update_profile",
+    monkeypatch.setattr(api_account, "update_profile",
                         lambda uid, body: {"company_name": body.get("company_name")})
     handler = _make_handler("PUT", "/api/profile", {"company_name": "Acme Ltd"})
     handler._rbac_guard = lambda user, action, **kw: True  # type: ignore[method-assign]

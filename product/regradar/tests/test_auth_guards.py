@@ -152,7 +152,8 @@ class TestValidatePublicUrlRejectsInternalUrls:
         handler = _make_handler(
             "POST", "/api/custom-sources/discover", body={"url": "http://localhost"}
         )
-        with patch("app.api.require_auth", return_value=FAKE_USER):
+        with patch("app.api.require_auth", return_value=FAKE_USER), \
+             patch("app.api_sources.require_auth", return_value=FAKE_USER):
             # Rate limiter must allow this call through.
             with patch.object(handler, "_rate_limited", return_value=False):
                 handler._handle_custom_source_discover()
@@ -163,7 +164,8 @@ class TestValidatePublicUrlRejectsInternalUrls:
         handler = _make_handler(
             "POST", "/api/custom-sources/discover", body={"url": "http://192.168.1.1"}
         )
-        with patch("app.api.require_auth", return_value=FAKE_USER):
+        with patch("app.api.require_auth", return_value=FAKE_USER), \
+             patch("app.api_sources.require_auth", return_value=FAKE_USER):
             with patch.object(handler, "_rate_limited", return_value=False):
                 handler._handle_custom_source_discover()
         self._assert_400(handler)
@@ -173,7 +175,8 @@ class TestValidatePublicUrlRejectsInternalUrls:
         handler = _make_handler(
             "POST", "/api/custom-sources/test", body={"url": "http://localhost"}
         )
-        with patch("app.api.require_auth", return_value=FAKE_USER):
+        with patch("app.api.require_auth", return_value=FAKE_USER), \
+             patch("app.api_sources.require_auth", return_value=FAKE_USER):
             with patch.object(handler, "_rate_limited", return_value=False):
                 handler._handle_custom_source_test()
         self._assert_400(handler)
@@ -183,7 +186,8 @@ class TestValidatePublicUrlRejectsInternalUrls:
         handler = _make_handler(
             "POST", "/api/custom-sources/test", body={"url": "http://192.168.1.1"}
         )
-        with patch("app.api.require_auth", return_value=FAKE_USER):
+        with patch("app.api.require_auth", return_value=FAKE_USER), \
+             patch("app.api_sources.require_auth", return_value=FAKE_USER):
             with patch.object(handler, "_rate_limited", return_value=False):
                 handler._handle_custom_source_test()
         self._assert_400(handler)
@@ -194,7 +198,8 @@ class TestValidatePublicUrlRejectsInternalUrls:
             handler = _make_handler(
                 "POST", "/api/custom-sources/discover", body={"url": url}
             )
-            with patch("app.api.require_auth", return_value=FAKE_USER):
+            with patch("app.api.require_auth", return_value=FAKE_USER), \
+                 patch("app.api_sources.require_auth", return_value=FAKE_USER):
                 with patch.object(handler, "_rate_limited", return_value=False):
                     handler._handle_custom_source_discover()
             statuses = [s for _, s in handler._sent]  # type: ignore[attr-defined]
@@ -206,7 +211,8 @@ class TestValidatePublicUrlRejectsInternalUrls:
             handler = _make_handler(
                 "POST", "/api/custom-sources/test", body={"url": url}
             )
-            with patch("app.api.require_auth", return_value=FAKE_USER):
+            with patch("app.api.require_auth", return_value=FAKE_USER), \
+                 patch("app.api_sources.require_auth", return_value=FAKE_USER):
                 with patch.object(handler, "_rate_limited", return_value=False):
                     handler._handle_custom_source_test()
             statuses = [s for _, s in handler._sent]  # type: ignore[attr-defined]
@@ -410,6 +416,7 @@ class TestCustomSourceAddNoCrossTenantOracle:
         )
         user_a = {"id": 101, "email": "a@example.com"}
         with patch("app.api.require_auth", return_value=user_a), \
+             patch("app.api_sources.require_auth", return_value=user_a), \
              patch.object(handler, "_rbac_guard", return_value=True), \
              patch("app.source_tester.validate_public_url", return_value=(True, "")), \
              patch("app.source_intake.run_source_intake",
@@ -445,6 +452,7 @@ class TestCustomSourceAddNoCrossTenantOracle:
         )
         user_a = {"id": 101, "email": "a@example.com"}
         with patch("app.api.require_auth", return_value=user_a), \
+             patch("app.api_sources.require_auth", return_value=user_a), \
              patch.object(handler, "_rbac_guard", return_value=True), \
              patch.object(handler, "_require_capability", return_value=True), \
              patch("app.source_tester.validate_public_url", return_value=(True, "")):
