@@ -58,7 +58,20 @@ payment credential is in the code; you provide them:
 Result: a completed Stripe payment automatically activates the buyer's plan (via
 the same `activate_plan` your admin panel uses) — no more SSH activation. A
 logged-in buyer is resolved by `client_reference_id`; an anonymous buyer by the
-email they verified in-app. Cancellations/refunds remain a manual step for now.
+email they verified in-app.
+
+**Cancellations / refunds are a MANUAL step (admin panel), by deliberate design.**
+Automated *downgrade* on cancel/refund was built and then **removed** because it
+was unsafe with client-side Stripe Payment Links: nothing in that checkout is a
+trustworthy identity assertion (the buyer controls both the email and the
+`client_reference_id` URL param), so an automated downgrade could be weaponized to
+strip a *paying* customer's access. Activation is safe (worst case: a harmless
+gifted upgrade); a downgrade is not. Safe automated revocation requires creating
+the Stripe **Checkout Session server-side** (so the server sets the identity from
+the authenticated session, not the buyer) — which needs your Stripe **secret**
+key. When you provide `STRIPE_SECRET_KEY`, that server-side-checkout prerequisite
+can be built and then automated revocation becomes safe to add. Until then, cancel
+a subscriber in the admin panel — it fails safe (they keep access until you act).
 
 Note: founding-pilot copy still says "manually activated after source readiness
 review" — that is your intentional gating. Change the copy when you want the
