@@ -185,6 +185,7 @@ def _load_runs_by_source(root: Path) -> dict[str, list[dict[str, Any]]]:
                 try:
                     parsed = json.loads(line)
                 except json.JSONDecodeError:
+                    logger.warning("coverage certificate: skipping unparseable source_runs line in %s", path)
                     continue
                 if not isinstance(parsed, dict):
                     continue

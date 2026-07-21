@@ -330,6 +330,7 @@ def _build_run_risk_index(root: Path) -> dict[str, str]:
             try:
                 row = json.loads(line)
             except json.JSONDecodeError:
+                logger.warning("change register: skipping unparseable source_runs line while building risk index")
                 continue
             run_id = str(row.get("run_id") or "").strip()
             risk = str(row.get("risk_level") or "").strip()

@@ -641,6 +641,10 @@ def load_canonical_evidence_review_records(
         try:
             parsed = json.loads(line)
         except json.JSONDecodeError:
+            import logging as _logging
+            _logging.getLogger(__name__).warning(
+                "load_canonical_evidence_review_records: skipping unparseable review line in %s", path
+            )
             continue
         if isinstance(parsed, dict):
             rows.append(parsed)
@@ -1015,6 +1019,10 @@ def _find_previous_evidence_run(record: dict[str, Any], root: Path) -> dict[str,
         try:
             parsed = json.loads(line)
         except json.JSONDecodeError:
+            import logging as _logging
+            _logging.getLogger(__name__).warning(
+                "_find_previous_evidence_run: skipping unparseable run line in %s", run_file
+            )
             continue
         if parsed.get("source_id") == source_id:
             rows.append(parsed)

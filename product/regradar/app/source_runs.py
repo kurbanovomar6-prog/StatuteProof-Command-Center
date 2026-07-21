@@ -497,6 +497,10 @@ def _read_runs() -> list[dict]:
             try:
                 rows.append(json.loads(line))
             except json.JSONDecodeError:
+                import logging as _logging
+                _logging.getLogger(__name__).warning(
+                    "load_all_runs: skipping unparseable source_runs line"
+                )
                 continue
     except FileNotFoundError:
         rows = []

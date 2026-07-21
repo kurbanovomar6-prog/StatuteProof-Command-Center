@@ -304,6 +304,7 @@ def _collect_pack_entries(
         try:
             record = json.loads(record_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
+            logger.warning("evidence_pack: skipping unreadable/corrupt evidence record %s", record_path)
             continue
         if not isinstance(record, dict):
             continue
