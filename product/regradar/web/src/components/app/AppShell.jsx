@@ -15,6 +15,7 @@ const IntegrationsPage = lazy(() => import('./IntegrationsPage'))
 const SettingsPage    = lazy(() => import('./SettingsPage'))
 const EvidencePage    = lazy(() => import('./EvidencePage'))
 const BillingPage     = lazy(() => import('./BillingPage'))
+const AdminPage       = lazy(() => import('./AdminPage'))
 
 function PageLoader() {
   return (
@@ -28,6 +29,11 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
   const [page, setPage]           = useState(initialPage)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Founder-only affordance. This is a UI hint sourced from the server's plan
+  // response; every /api/admin endpoint independently re-checks the operator
+  // gate, so hiding the link is convenience, not the authorization boundary.
+  const isAdmin = Boolean(planState?.is_admin)
 
   function navigate(target) {
     setPage(target)
@@ -53,6 +59,9 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
       case 'review-queue': return <ReviewQueuePage />
       case 'integrations': return <IntegrationsPage />
       case 'billing':      return <BillingPage planState={planState} />
+      case 'admin':        return isAdmin
+                             ? <AdminPage />
+                             : <div className="mx-auto max-w-2xl p-6"><div className="sp-panel p-6 text-center"><h1 className="text-lg font-semibold text-white mb-1">Not available</h1><p className="text-sm text-[var(--text-secondary)]">This area is reserved for the StatuteProof operator.</p></div></div>
       case 'settings':     return <SettingsPage onResetWorkspace={onSignOut} planState={planState} />
       default:             return <DashboardHome navigate={navigate} currentUser={currentUser} planState={planState} onChoosePlan={onChoosePlan} />
     }
@@ -94,6 +103,22 @@ export default function AppShell({ initialPage = 'dashboard', currentUser, onSig
           navigate={navigate}
           currentUser={currentUser}
         />
+        {isAdmin && (
+          <div className="flex items-center justify-end gap-2 border-b border-[var(--border-muted)] bg-[var(--bg-raised)] px-4 py-1.5">
+            <span className="text-xs text-[var(--text-secondary)]">Operator</span>
+            <button
+              type="button"
+              onClick={() => navigate('admin')}
+              className={`text-xs font-medium px-2.5 py-1 rounded-md border ${
+                page === 'admin'
+                  ? 'border-[var(--accent)] text-[var(--accent)]'
+                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              Admin
+            </button>
+          </div>
+        )}
         <main className="flex-1 overflow-y-auto scroll-smooth">
           <Suspense fallback={<PageLoader />}>
             {renderPage()}

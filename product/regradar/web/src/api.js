@@ -443,6 +443,25 @@ export const plan = {
   },
 }
 
+// Founder admin panel. Both calls are gated server-side (identity + the
+// owner-only plan.admin RBAC action); the client gate is only a UI hint. A
+// non-founder call is answered 403 and rejects here.
+export const admin = {
+  listAccounts() {
+    return authRequest('/api/admin/accounts')
+  },
+
+  activatePlan({ userId, email, planName }) {
+    const body = { plan_name: planName }
+    if (userId != null && userId !== '') body.user_id = userId
+    else if (email) body.email = email
+    return authRequest('/api/admin/activate-plan', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+}
+
 export const actionLog = {
   list(alertId) {
     return authRequest(`/api/alerts/action-log?alert_id=${encodeURIComponent(alertId)}`)

@@ -47,6 +47,7 @@ from app.auth import (
     set_user_password,
     mark_email_verified,
     get_user_by_email,
+    get_user_by_id,
     google_oauth_authorization_url,
     google_oauth_available,
     link_or_create_google_user,
@@ -114,6 +115,27 @@ logger = logging.getLogger(__name__)
 
 _TELEGRAM_TIMEOUT_S = 10
 _CONTACT_QUEUE = BASE_DIR / "data" / "contact_requests.jsonl"
+
+
+def _admin_email_allowlist() -> frozenset[str]:
+    """Normalized founder emails permitted to reach the admin panel.
+
+    Sourced from ``STATUTEPROOF_ADMIN_EMAILS`` (comma-separated). Empty when
+    unset, so the founder admin surface is CLOSED by default until a founder
+    email is explicitly configured — a deployment choice, never a hardcoded
+    operator baked into the image. Never raises; a malformed entry is skipped.
+    """
+    raw = os.environ.get("STATUTEPROOF_ADMIN_EMAILS", "")
+    out: set[str] = set()
+    for part in str(raw).split(","):
+        candidate = part.strip()
+        if not candidate:
+            continue
+        try:
+            out.add(normalize_email(candidate))
+        except Exception:  # noqa: BLE001 — a bad allowlist entry must not crash the gate
+            continue
+    return frozenset(out)
 
 
 def _notify_founder_registration(
@@ -313,6 +335,10 @@ _CONTACT_LIMITER = _RateLimiter(3, 3600)
 # one notify thread per request). Changing a plan is a rare, deliberate act;
 # 10/hour per IP is generous for a human and caps the abuse surface.
 _PLAN_INTENT_LIMITER = _RateLimiter(10, 3600)
+# Founder admin panel (account roster + plan activation). Founder-only after the
+# gate, but rate-limited anyway: a bounded budget caps brute-force / audit-log
+# flooding attempts and keeps every call (allow AND deny) cheap to audit.
+_ADMIN_LIMITER = _RateLimiter(60, 3600)
 _SOURCE_TEST_LIMITER = _RateLimiter(10, 3600)
 _PAIR_GENERATE_LIMITER = _RateLimiter(10, 3600)
 _TELEGRAM_TEST_LIMITER = _RateLimiter(5, 3600)
@@ -876,6 +902,65 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception:  # noqa: BLE001 — unresolved principal is not an operator
             return False
 
+    def _caller_is_admin(self, user: dict) -> bool:
+        """True ONLY for the founder/operator — the founder admin panel gate.
+
+        Two independent, POSITIVE signals (either suffices; both fail-safe):
+        * an operator principal (GLOBAL-org scope), or
+        * an account whose normalized email is in the configured founder allowlist
+          (``STATUTEPROOF_ADMIN_EMAILS``).
+
+        A normal self-registered customer resolves to their OWN org (never the
+        GLOBAL scope) and is not in the allowlist, so this is False for them even
+        though RBAC calls them ``owner`` of their org-of-one. That is why the admin
+        panel layers this identity check on top of the ``plan.admin`` role gate:
+        being an org ``owner`` is not enough to reach it. Never raises — an
+        unresolved / malformed identity is never admin.
+        """
+        try:
+            if self._caller_is_operator(user):
+                return True
+            email = user.get("email") if isinstance(user, dict) else None
+            if not email:
+                return False
+            return normalize_email(email) in _admin_email_allowlist()
+        except Exception:  # noqa: BLE001 — an unresolved identity is never admin
+            return False
+
+    def _admin_guard(self, user: dict, *, resource_id: str = "") -> bool:
+        """Founder-only gate for the admin panel. Returns True only for the founder.
+
+        Layered, and audited on BOTH outcomes so an admin action is never silent:
+
+        1. Positive founder/operator identity (``_caller_is_admin``). A non-founder
+           authenticated account — an ordinary customer, who is ``owner`` of its
+           own org-of-one and would otherwise PASS the ``plan.admin`` role check —
+           is stopped HERE, before any target lookup, with a clean, generic 403
+           and an audited denial. Because it never reaches a target, it can never
+           act as an existence oracle for another account.
+        2. The fail-closed RBAC role gate on the owner-only ``plan.admin`` action
+           (``_rbac_guard`` with ``fail_closed=True``), which also writes the
+           allow/deny decision to the immutable access log and, on an RBAC
+           plumbing error, DENIES rather than granting an entitlement.
+        """
+        if not self._caller_is_admin(user):
+            rbac_runtime.log_sensitive_action(
+                user,
+                rbac_runtime.PLAN_ADMIN,
+                result=rbac_runtime.RESULT_DENY,
+                resource_type="plan",
+                resource_id=str(resource_id or ""),
+            )
+            self._send_json({"ok": False, "message": "Not available."}, 403)
+            return False
+        return self._rbac_guard(
+            user,
+            rbac_runtime.PLAN_ADMIN,
+            resource_type="plan",
+            resource_id=str(resource_id or ""),
+            fail_closed=True,
+        )
+
     def _canonical_record_is_own_custom(self, user: dict, record_id: str) -> bool:
         """True when a canonical record's source is a CUSTOM source owned by the
         caller — the only non-operator case where a review decision affects solely
@@ -1363,6 +1448,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_briefs_list()
         elif path == "/api/plan":
             self._handle_plan_get()
+        elif path == "/api/admin/accounts":
+            self._handle_admin_accounts()
         elif path == "/api/alerts/action-log":
             self._handle_alert_action_log_get()
         elif path == "/api/alerts/checklist":
@@ -1418,6 +1505,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._handle_auth_reset_password()
         elif path == "/api/plan":
             self._handle_plan_set()
+        elif path == "/api/admin/activate-plan":
+            self._handle_admin_activate_plan()
         elif path == "/api/telegram/pair/generate":
             self._handle_telegram_pair_generate()
         elif path == "/api/telegram/pair/unlink":
@@ -3732,7 +3821,13 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             from app.plan import get_plan_state
             state = get_plan_state(int(user["id"]))
-            self._send_json({"ok": True, "plan": state})
+            # Founder-only UI hint carried INSIDE the plan state (the frontend
+            # stores `data.plan` as planState, so a top-level sibling would be
+            # dropped). It only toggles whether the admin nav is shown — it is NOT
+            # an authorization boundary: every admin endpoint independently
+            # re-checks _admin_guard server-side.
+            state["is_admin"] = self._caller_is_admin(user)
+            self._send_json({"ok": True, "plan": state, "is_admin": state["is_admin"]})
         except Exception as exc:
             logger.error("plan_get failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
@@ -3794,6 +3889,123 @@ class _Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             logger.error("plan_set failed: %s", type(exc).__name__)
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_admin_accounts(self) -> None:
+        """GET /api/admin/accounts — founder-only account roster (no secrets).
+
+        Bounded, read-only. Every field is operational (email, verification,
+        plan intent vs. activated tier, telegram-linked bool, created_at); no
+        password hash, session id, or raw token is ever returned.
+        """
+        if self._rate_limited(_ADMIN_LIMITER, "admin_accounts"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        if not self._admin_guard(user):
+            return
+        try:
+            from app.plan import list_accounts_admin
+
+            params = parse_qs(urlparse(self.path).query)
+            try:
+                limit = int((params.get("limit") or ["100"])[0])
+            except (TypeError, ValueError):
+                limit = 100
+            try:
+                offset = int((params.get("offset") or ["0"])[0])
+            except (TypeError, ValueError):
+                offset = 0
+            accounts = list_accounts_admin(limit=limit, offset=offset)
+            self._send_json({"ok": True, "accounts": accounts, "count": len(accounts)})
+        except Exception as exc:
+            logger.error("admin_accounts failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+
+    def _handle_admin_activate_plan(self) -> None:
+        """POST /api/admin/activate-plan — founder activates/changes a customer plan.
+
+        Body: ``{user_id | email, plan_name}``. Grants a BILLING TIER only — it
+        calls ``app.plan.activate_plan`` (which sets the ``activated_plan`` column)
+        and NEVER touches org membership / RBAC roles, so it cannot escalate a
+        caller (or anyone) to owner/operator. Founder-gated (``_admin_guard``);
+        the activation is written to the immutable access log with the target and
+        the tier. Returns the new plan state (no secrets).
+        """
+        if self._rate_limited(_ADMIN_LIMITER, "admin_activate_plan"):
+            return
+        user = require_auth(self)
+        if not user:
+            self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        # Identity + role gate BEFORE reading the body or touching any target, so a
+        # non-founder never learns whether a target exists.
+        if not self._admin_guard(user):
+            return
+        body, error = self._read_json_strict()
+        if error:
+            self._send_json({"ok": False, "message": error}, 400)
+            return
+        if body is None:
+            self._send_json({"ok": False, "message": "Request body required."}, 400)
+            return
+
+        from app.plan import PLAN_NAMES, activate_plan
+
+        plan_name = str(body.get("plan_name", "")).strip()
+        if plan_name not in PLAN_NAMES:
+            self._send_json({"ok": False, "message": f"Unknown plan: {plan_name}"}, 400)
+            return
+
+        # Resolve the target by explicit id, else by email. Only ONE tenant is
+        # ever touched, chosen by the founder — no IDOR: a non-founder never
+        # reaches this point (blocked by _admin_guard above).
+        target = None
+        raw_uid = body.get("user_id")
+        raw_email = body.get("email")
+        if raw_uid is not None and str(raw_uid).strip() != "":
+            try:
+                target = get_user_by_id(int(raw_uid))
+            except (TypeError, ValueError):
+                target = None
+        elif raw_email:
+            target = get_user_by_email(str(raw_email))
+
+        if not target:
+            self._send_json({"ok": False, "message": "No such account."}, 400)
+            return
+
+        target_id = int(target["id"])
+        try:
+            state = activate_plan(target_id, plan_name)
+        except ValueError as exc:
+            self._send_json({"ok": False, "message": str(exc)}, 400)
+            return
+        except Exception as exc:
+            logger.error("admin_activate_plan failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+            return
+
+        # Record WHO activated WHOM to WHAT, WHEN — a specific, immutable audit row
+        # beyond the generic plan.admin allow logged by _admin_guard.
+        rbac_runtime.log_sensitive_action(
+            user,
+            rbac_runtime.PLAN_ADMIN,
+            result=rbac_runtime.RESULT_ALLOW,
+            resource_type="plan",
+            resource_id=f"user:{target_id}->{plan_name}",
+        )
+        self._send_json({
+            "ok": True,
+            "account": {
+                "id": target_id,
+                "email": target.get("email"),
+                "activated_plan": state.get("active_plan_name"),
+            },
+            "plan": state,
+            "message": f"Activated {state.get('active_plan_display', plan_name)} for {target.get('email')}.",
+        })
 
     def _handle_save(self) -> None:
         body = self._read_json()

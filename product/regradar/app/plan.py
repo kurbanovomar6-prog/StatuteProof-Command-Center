@@ -329,6 +329,87 @@ def activate_plan(user_id: int, plan_name: str) -> dict[str, Any]:
     return get_plan_state(user_id)
 
 
+def list_accounts_admin(limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+    """Read-only account roster for the founder admin panel. NO secrets, ever.
+
+    Returns bounded, non-sensitive fields only — id, email, email_verified,
+    plan_name (self-selected intent), activated_plan (the founder-activated tier,
+    the entitlement source of truth), plan_intent_at, telegram_linked (a BOOLEAN,
+    never the chat id itself), and created_at. It deliberately never selects
+    ``password_hash``, session ids, or any token / raw chat-id value: an admin
+    listing must never widen the blast radius of a read.
+
+    Tolerant of a pre-migration schema (absent ``activated_plan`` / ``user_profiles``).
+    Bounded by ``limit`` (1..500) and ``offset``; sorted newest-first by id. This
+    is a pure read — it never activates, mutates, or changes activation semantics.
+    """
+    try:
+        capped = max(1, min(int(limit), 500))
+    except (TypeError, ValueError):
+        capped = 100
+    try:
+        off = max(0, int(offset))
+    except (TypeError, ValueError):
+        off = 0
+
+    conn = _connect()
+    try:
+        ucols = {r[1] for r in conn.execute("PRAGMA table_info(users)")}
+        has_activated = "activated_plan" in ucols
+        has_intent_at = "plan_intent_at" in ucols
+        has_verified = "email_verified" in ucols
+        has_created = "created_at" in ucols
+        # The Telegram link lives on user_profiles.telegram_chat_id; expose only a
+        # boolean, and only when that table/column exist on this schema.
+        up_exists = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='user_profiles'"
+        ).fetchone() is not None
+        has_tg = up_exists and "telegram_chat_id" in {
+            r[1] for r in conn.execute("PRAGMA table_info(user_profiles)")
+        }
+
+        cols = ["u.id AS id", "u.email AS email", "u.plan_name AS plan_name"]
+        cols.append("u.activated_plan AS activated_plan" if has_activated else "'' AS activated_plan")
+        cols.append("u.plan_intent_at AS plan_intent_at" if has_intent_at else "NULL AS plan_intent_at")
+        cols.append("u.email_verified AS email_verified" if has_verified else "0 AS email_verified")
+        cols.append("u.created_at AS created_at" if has_created else "NULL AS created_at")
+        if has_tg:
+            cols.append(
+                "(SELECT CASE WHEN p.telegram_chat_id IS NOT NULL AND p.telegram_chat_id != '' "
+                "THEN 1 ELSE 0 END FROM user_profiles p WHERE p.user_id = u.id LIMIT 1) AS tg_linked"
+            )
+        else:
+            cols.append("0 AS tg_linked")
+
+        rows = conn.execute(
+            f"SELECT {', '.join(cols)} FROM users u ORDER BY u.id DESC LIMIT ? OFFSET ?",
+            (capped, off),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        intent = row["plan_name"] if row["plan_name"] in PLAN_NAMES else "evidence_preview"
+        activated_raw = str((row["activated_plan"] or "")).strip()
+        active_plan = activated_raw if activated_raw in PLAN_NAMES else "evidence_preview"
+        intent_is_paid = bool(PLAN_CAPABILITIES.get(intent, {}).get("manual_activation_required"))
+        out.append({
+            "id": int(row["id"]),
+            "email": row["email"],
+            "email_verified": bool(row["email_verified"]),
+            "plan_name": intent,
+            "plan_display": PLAN_DISPLAY.get(intent, intent),
+            "activated_plan": active_plan,
+            "active_plan_display": PLAN_DISPLAY.get(active_plan, active_plan),
+            "plan_intent_at": row["plan_intent_at"],
+            "telegram_linked": bool(row["tg_linked"]),
+            "created_at": row["created_at"],
+            "needs_activation": intent_is_paid and active_plan != intent,
+        })
+    return out
+
+
 def list_user_plans() -> list[dict[str, Any]]:
     """Return every user's plan intent vs. activated plan, for the operator CLI.
 

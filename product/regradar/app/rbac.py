@@ -97,6 +97,17 @@ SETTINGS_EDIT = "settings.edit"
 MEMBER_VIEW = "member.view"
 MEMBER_MANAGE = "member.manage"    # invite/remove members, change roles
 
+# ── operator/founder governance action (NOT a tenant-level action) ────────────────
+# PLAN_ADMIN authorizes the founder admin panel: listing accounts and
+# activating/changing a customer's BILLING PLAN (tier). It grants ENTITLEMENTS
+# (billing tiers), NEVER an RBAC role — role assignment stays in MEMBER_MANAGE, a
+# separate action. It is deliberately owner-ONLY and kept OUT of ``ALL_ACTIONS``
+# so it is not swept into the ``admin`` role's grant. This action is only the
+# ROLE check; the admin panel in ``app/api.py`` ADDITIONALLY requires operator /
+# founder identity, so being an ``owner`` of an org-of-one is not enough to reach
+# it. See ``app/api.py``::_caller_is_admin / _admin_guard.
+PLAN_ADMIN = "plan.admin"
+
 # The full vocabulary. ``can`` denies any action string not in this set.
 ALL_ACTIONS = frozenset(
     {
@@ -189,7 +200,9 @@ SYSTEM = Principal(user_id=None, org_id=GLOBAL_ORG_ID, role=ROLE_SYSTEM)
 #               mutate sources/settings/members.
 
 _MATRIX: dict[str, frozenset[str]] = {
-    ROLE_OWNER: ALL_ACTIONS,
+    # PLAN_ADMIN is owner-ONLY and lives OUTSIDE ``ALL_ACTIONS``, so it is granted
+    # here explicitly and NOT inherited by ``admin`` below.
+    ROLE_OWNER: ALL_ACTIONS | frozenset({PLAN_ADMIN}),
     ROLE_ADMIN: ALL_ACTIONS - frozenset({MEMBER_MANAGE}),
     ROLE_APPROVER: _READ_ACTIONS
     | frozenset({EVIDENCE_EXPORT, REVIEW_SUBMIT, REVIEW_APPROVE, ALERT_SEND}),
