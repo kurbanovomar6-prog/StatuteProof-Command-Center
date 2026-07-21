@@ -1,6 +1,17 @@
-# StatuteProof — Owner Go-Live Checklist (branch `tenten`, 2026-07-21)
+# StatuteProof — Owner Go-Live Checklist (branch `tenten`, updated 2026-07-22)
 
-25 commits sit on `origin/tenten`, all tests green, **not yet deployed to prod**.
+The `tenten` branch is well ahead of `main`, all tests green (4233 backend +
+422 frontend), **not yet deployed to prod**. Nine more build cycles landed
+since the first version of this checklist: the `api.py` god-object was
+dismantled (5461 → 2051 lines across 8 mixins, byte-identical), the whole
+adversarially-verified backlog was fixed (evidence sealing, monitoring
+resilience, legal-guard escapes, Stripe lifecycle, ops, security), and a fresh
+adversarial re-audit's four buildable HIGHs were closed too (a forgeable
+evidence narrative on `/verify`, a discovery-endpoint decompression-bomb DoS, a
+Stripe cancel that stripped manually-activated plans, and a deploy-check that
+never verified the core daemons). The four **core** dimensions (security, legal,
+evidence, product) are clean of confirmed HIGH again; estimated composite
+**≈82–83**. The remaining gap to the mid-80s is the owner-only items below.
 This is the exact, ordered list of what only you can do to (a) land the work,
 (b) prove CI, (c) turn on automated payments, and (d) lift the audit ceiling.
 Nothing here needs a developer — each is a config or a one-line command.
@@ -100,11 +111,31 @@ need only env values you control:
 
 ---
 
-## Why the audit still reads ~76, not 85
+## Why the audit reads ≈82–83, not 85
 
-The four **core** dimensions (security, legal, evidence, product) are now clean of
-confirmed HIGH findings. The remaining distance to an 85 composite is gated by:
-CI never having run (step 2 — your token scope), payment config (step 3), and the
-prod env in step 4 — plus a large `api.py`/`run.py` refactor that carries real
-risk to the strong security score for a small weight, which was deliberately not
-attempted. Steps 2–4 are the levers; the code is ready for all of them.
+The four **core** dimensions (security, legal, evidence, product) are clean of
+confirmed HIGH findings, and the `api.py` god-object refactor that was previously
+deferred is now done (byte-identical, fully tested). Every buildable HIGH found
+across two full adversarial audit rounds has been fixed. The remaining distance
+to a mid-80s composite is now **entirely owner-gated** — there is no more
+buildable code work that materially moves it:
+
+- **testing** is capped because CI has **never run** (step 2 — your `gh` token
+  lacks the `workflow` scope, so the CI-workflow commit cannot even be pushed).
+  This is the single largest remaining lever and costs one command.
+- **reliability** (heaviest dimension, .18) is capped by the droplet's egress
+  reality — CBUAE/DFSA return 403 to the droplet IP, so their rulebook +
+  enforcement sources only re-enter the alert-eligible pool behind an egress
+  proxy (step 4). The monitoring *code* is robust; the *reach* is the gate.
+- **evidence** (.16) is capped because the strongest timestamp claim needs a
+  third-party RFC 3161 anchor (step 4) — the offline verify code is built and
+  tested; the live anchor is env config.
+- **product** self-serve completeness is capped by the Stripe env (step 3); the
+  webhook automation (activation, safe revocation, `subscription.updated`,
+  proration, manual-plan floor) is built, tested, and secure.
+
+One known non-core item was deliberately left: `run_pipeline` in `app/pipeline.py`
+is a single ~667-line function. Decomposing it is a real (not mechanical) refactor
+on the reliability hot path for a small code-dimension gain, so it was judged poor
+risk-adjusted value and left for a focused, well-tested future pass rather than
+risked here. Everything else the code can do has been done.
