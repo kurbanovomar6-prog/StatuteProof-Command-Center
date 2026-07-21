@@ -61,6 +61,27 @@ def _run(
     return rec
 
 
+def _skip_run(source_id: str, day: int, *, name: str | None = None) -> dict:
+    """A cycle the circuit breaker SKIPPED: a durable trail record proving the
+    source was not fetched — no HTTP request was made at all."""
+    rec = _run(
+        source_id,
+        day,
+        change_status="QUALITY_DROP",
+        normalized_hash=None,
+        error=(
+            "Circuit open — source skipped after consecutive unusable runs; "
+            "not fetched this cycle"
+        ),
+        name=name,
+    )
+    rec["record_type"] = "quality_drop"
+    rec["alert_suppressed_reason"] = "circuit_open"
+    rec["failure_code"] = "CIRCUIT_OPEN"
+    rec["access_status"] = "circuit_open"
+    return rec
+
+
 def _write_runs(base: Path, runs: list[dict]) -> None:
     path = base / "data" / "source_runs" / "source_runs.jsonl"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -356,6 +377,59 @@ class CoverageCertificateTest(unittest.TestCase):
         row = cert["sources"][0]
         self.assertEqual(row["checks_in_period"], 1)
         self.assertEqual(row["changed_count"], 0)  # the May CHANGED is excluded
+
+    # ── skipped (circuit-open) cycles are not checks ────────────────────────
+
+    def test_circuit_open_skips_are_not_counted_as_checks(self):
+        """A cycle skipped by the circuit breaker issues no HTTP request at
+        all. Counting its trail record as a "recorded check" would make the
+        certificate assert monitoring work that never happened, and would reset
+        the staleness clock for exactly the sources that went dark."""
+        _write_sources(
+            self.base,
+            [{"source_id": "AE-walled", "name": "Walled Source", "url": "https://walled.example/"}],
+        )
+        runs = [_run("AE-walled", 1)]
+        runs += [_skip_run("AE-walled", day) for day in range(2, 15)]
+        _write_runs(self.base, runs)
+
+        cert = self._cert()
+        row = next(r for r in cert["sources"] if r["source_id"] == "AE-walled")
+
+        self.assertEqual(row["checks_in_period"], 1)
+        self.assertEqual(row["skipped_cycles"], 13)
+        self.assertEqual(row["quality_drop_count"], 0)
+        self.assertTrue(row["first_check_utc"].startswith("2026-06-01"))
+        self.assertTrue(row["last_check_utc"].startswith("2026-06-01"))
+        self.assertEqual(row["last_check_gap_days"], 14)
+        self.assertEqual(cert["summary"]["total_checks"], 1)
+        self.assertEqual(cert["summary"]["total_skipped_cycles"], 13)
+
+        # The disclosure must name the skipped cycles and must NOT describe
+        # them as checks that recorded an extraction problem.
+        self.assertIn("not fetched", row["gap_disclosure"])
+        self.assertNotIn("recorded a quality drop", row["gap_disclosure"])
+        self.assertIn("trails the end of the period", row["gap_disclosure"])
+
+        md = render_coverage_certificate_markdown(cert)
+        self.assertIn("performed 1 recorded check(s)", md)
+        self.assertIn("not fetched", md)
+
+    def test_circuit_open_only_source_reports_no_coverage(self):
+        """A source that was skipped every cycle has no coverage at all."""
+        _write_sources(
+            self.base,
+            [{"source_id": "AE-dark", "name": "Dark Source", "url": "https://dark.example/"}],
+        )
+        _write_runs(self.base, [_skip_run("AE-dark", day) for day in range(1, 15)])
+
+        cert = self._cert()
+        row = next(r for r in cert["sources"] if r["source_id"] == "AE-dark")
+        self.assertEqual(row["checks_in_period"], 0)
+        self.assertEqual(row["skipped_cycles"], 14)
+        self.assertEqual(row["last_check_utc"], "")
+        self.assertEqual(row["continuity_status"], "NO_COVERAGE")
+        self.assertEqual(cert["summary"]["total_checks"], 0)
 
     # ── rendering + exports ─────────────────────────────────────────────────
 

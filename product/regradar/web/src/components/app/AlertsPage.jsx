@@ -243,17 +243,51 @@ export default function AlertsPage({ navigate }) {
                 </div>
                 <h3 className="text-sm font-semibold text-white">{item.title || 'Reviewed alert'}</h3>
                 <p className="mt-1 text-xs text-[var(--text-muted)]">{item.market || item.jurisdiction || 'Market not specified'} · {item.source_name || 'Source not specified'}</p>
-                <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-[var(--text-secondary)]">{item.executive_summary || 'No executive summary recorded.'}</p>
-                {item.source_url && (
-                  <a
-                    href={item.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent)]"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    Official source
-                  </a>
+                {/* The backend empties the paid fields for a non-eligible plan and
+                    marks the match `plan_redacted`. Read the marker: the falsy
+                    fallback below would otherwise tell the customer that nothing
+                    was recorded for a change that was analysed and sealed. */}
+                {item.plan_redacted ? (
+                  <div className="mt-3 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
+                    {/* Only claim a seal when this match actually carries one:
+                        `proof` is fail-soft (app/alert_proof.py) and the plan
+                        redaction leaves it untouched, so a redacted card can
+                        legitimately have none — and the proof panel below then
+                        says so. */}
+                    <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
+                      {item.proof
+                        ? 'Summary, recommended action and the official-source link are withheld on your current plan. The change was detected and its evidence record is sealed.'
+                        : 'Summary, recommended action and the official-source link are withheld on your current plan. The change was detected on a monitored official source.'}
+                    </p>
+                    <a
+                      href="/app/billing"
+                      onClick={(event) => {
+                        if (navigate) {
+                          event.preventDefault()
+                          navigate('billing')
+                        }
+                      }}
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--text-primary)]"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Upgrade to see the full alert
+                    </a>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-[var(--text-secondary)]">{item.executive_summary || 'No executive summary recorded.'}</p>
+                    {item.source_url && (
+                      <a
+                        href={item.source_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent)]"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Official source
+                      </a>
+                    )}
+                  </>
                 )}
                 <AlertProofPanel item={item} navigate={navigate} />
                 <div className="mt-4 flex flex-wrap items-center gap-2">

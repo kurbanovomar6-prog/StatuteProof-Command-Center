@@ -322,6 +322,9 @@ def test_endpoint_rejects_malformed_alert_id(monkeypatch):
 
 def test_endpoint_scopes_by_owner_lookup_and_404s_unknown(monkeypatch, tmp_path):
     """The alert is resolved ONLY through the owner-scoped targeted lookup."""
+    # Entitlement is covered in tests/test_alert_plan_gating.py; this test is
+    # about TENANCY, so take the plan gate out of the way.
+    monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
     match = _write_sealed_record(tmp_path)
     monkeypatch.setattr(api, "require_auth", lambda handler: {"id": 7})
     seen: list[tuple[int, str]] = []

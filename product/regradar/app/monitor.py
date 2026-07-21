@@ -26,8 +26,12 @@ Each item in the returned list is either:
 Resilience features
 -------------------
 - Per-source retry: one retry after 5 s on first failure.
-- Circuit-breaker: source skipped after >= 5 consecutive failures
-  (tracked in _circuit_open module-level set; reset on process restart).
+- Circuit-breaker: source skipped after >= _CIRCUIT_OPEN_THRESHOLD consecutive
+  DARK runs — FAILED (raised) or QUALITY_DROP with a thin/failed extraction
+  (bot wall, error page, empty/undecodable body, chronically thin page). A
+  reachable source whose content merely shrank is NOT dark and never trips it.
+  Tracked in the _circuit_open module-level set and persisted to
+  _CIRCUIT_STATE_FILE; every skipped cycle still writes a trail record.
 - Structured CYCLE_SUMMARY log line at end of each run.
 """
 
@@ -58,6 +62,62 @@ _DEADMAN_STATE_FILE = _BASE_DIR / "data" / "deadman_state.json"
 
 # How many consecutive historical failures before a circuit opens.
 _CIRCUIT_OPEN_THRESHOLD = 3
+
+# Trail statuses that mean "this cycle produced NO usable content for this
+# source" — the breaker counts them under ONE shared threshold.
+#
+# FAILED  : the fetch/pipeline raised (timeout, 403, connection error).
+# QUALITY_DROP: the pipeline aborted in an early guard — empty body, HTTP
+#   error/challenge page, anti-bot wall, undecodable body — or a run that
+#   returned cleanly but extracted a thin/failed page. No usable content, no
+#   baseline, no alert: the source is dark. A quality drop that only means
+#   "content shrank" is excluded (see _NON_DARK_SUPPRESSION_REASONS).
+#
+# Why ONE threshold rather than two: the production trail (2026-07-20) carries
+# 123 QUALITY_DROP against 51 FAILED, and a chronically walled source flips
+# between them cycle to cycle (403 one cycle, challenge page the next). Two
+# separate counters would each reset on the other's records and could stay
+# under their thresholds forever, so the breaker would never open on exactly
+# the fleet's most common failure mode. Both statuses carry identical
+# operational meaning — nothing usable was retrieved — so they share a counter.
+_UNUSABLE_RUN_STATUSES = frozenset({"FAILED", "QUALITY_DROP"})
+
+# Result-dict statuses returned by a NON-raising pipeline run that nonetheless
+# yielded nothing usable (the guard-abort paths in app/pipeline.py). Such a run
+# must never be treated as a recovery signal: before this, it took the monitor's
+# success path and auto-cleared the breaker, so a permanently walled source was
+# re-probed every cycle and could never stay open.
+_UNUSABLE_RESULT_STATUSES = frozenset(
+    {"quality_drop", "error_page", "error", "failed"}
+)
+
+# Suppression reasons that are NOT darkness and must never count toward the
+# breaker. The content-shrink guard (app/pipeline.py) is sticky BY DESIGN: it
+# deliberately leaves the baseline intact, so it re-fires on EVERY later cycle
+# until a human re-baselines. The source is reachable and its content genuinely
+# changed — exactly the HIGH-risk event the product exists to catch — so
+# tripping the breaker there would stop fetching a live, changing page.
+_NON_DARK_SUPPRESSION_REASONS = frozenset({"content_shrink"})
+
+# ...but ONLY when the run actually retrieved a plausible page. Which guard a
+# response lands in is decided entirely by the bytes the monitored host returns:
+# app/pipeline.py runs the marker guards (looks_like_error_page /
+# looks_like_bot_wall / is_mostly_unreadable) first and falls through to the
+# shrink path when none match — and a short, novel wall page matches none of
+# them ("Access to this resource is restricted by the site administrator.", the
+# DIFC incident: 87 chars). Without a floor, a remote host could keep an open
+# breaker permanently CLEARED, and a chronically walled source could never open
+# it, by serving a stub: the site we monitor would be steering our own
+# reliability control. 500 chars is pipeline._extraction_quality's own "good"
+# threshold — above it the page is plausible content, below it it is a stub.
+_PLAUSIBLE_PAGE_CHARS = 500
+
+# Extraction-quality levels that mean "nothing usable came back". A trail record
+# classified QUALITY_DROP by classify_change (the dominant class in production:
+# a page that keeps extracting to 62 chars) is dark even though the pipeline
+# never aborted in a guard and returned status "ok". A QUALITY_DROP with a GOOD
+# extraction is a content-size change, not darkness — it stays out of the count.
+_DARK_QUALITY_LEVELS = frozenset({"FAILED", "THIN"})
 
 # Half-open cadence: an OPEN circuit is skipped for this many cycles, then a
 # single probe is allowed through. A successful probe auto-resets the breaker
@@ -395,13 +455,128 @@ def _persist_failure_record(source: dict, error_msg: str, access_status: str) ->
         )
 
 
+def _persist_circuit_open_record(source: dict) -> None:
+    """Write a durable QUALITY_DROP trail record for a cycle SKIPPED because the
+    breaker is open.
+
+    Without it, the dominant steady state of a chronically walled source is a
+    silent gap: 5 of every 6 cycles would leave no trace at all, so the coverage
+    certificate would show neither a check nor a reason for those cycles. An
+    evidence product must be able to prove when it could NOT see a source. The
+    record is hash-free (record_quality_drop invariant), so it can never become
+    a baseline. Best-effort: a write failure must never break the monitor loop.
+    """
+    try:
+        from app.source_runs import make_source_id, previous_run, record_quality_drop
+
+        prev = previous_run(make_source_id(source)) or {}
+        record_quality_drop(
+            source,
+            reason=(
+                "Circuit open — source skipped after consecutive unusable runs; "
+                "not fetched this cycle"
+            ),
+            alert_suppressed_reason="circuit_open",
+            prev_raw_chars=prev.get("extracted_chars"),
+            prev_normalized_chars=prev.get("normalized_chars"),
+            failure_code="CIRCUIT_OPEN",
+            access_status="circuit_open",
+        )
+    except Exception as exc:  # never let observability break the loop
+        logger.warning(
+            "circuit_breaker: could not persist CIRCUIT_OPEN trail record "
+            "for %s: %s", source.get("name", source.get("url", "")), exc,
+        )
+
+
+def _result_yielded_usable_content(result: dict | None) -> bool:
+    """True when a non-raising pipeline result represents a REAL success.
+
+    A guard-abort (empty body / error page / bot wall / undecodable /
+    suppressed shrink) returns cleanly but produced no hash and no baseline —
+    it is not a recovery signal and must not clear the breaker.
+    """
+    if not result:
+        return False
+    status = str(result.get("status") or "").lower()
+    if status in _UNUSABLE_RESULT_STATUSES:
+        return False
+    # A run can return status "ok" and still be dark: the fetch succeeded but
+    # the extraction is thin/failed, so classify_change stamps the trail record
+    # QUALITY_DROP. That is production's dominant quality-drop class.
+    return not _record_is_dark(result.get("run_record") or {})
+
+
+def _observed_chars(payload: dict) -> int:
+    """How much content this run ACTUALLY retrieved.
+
+    Trail records written by record_quality_drop deliberately carry the PREVIOUS
+    good sizes in ``extracted_chars`` (so the next shrink guard still compares
+    against the true baseline) and the sizes actually seen this run under
+    ``observed_raw_chars`` — read the observed field first or a stub run would
+    look 4.2k chars big.
+    """
+    for key in ("observed_raw_chars", "extracted_chars"):
+        if key in payload:
+            try:
+                return int(payload.get(key) or 0)
+            except (TypeError, ValueError):
+                return 0
+    return 0
+
+
+def _is_non_dark_suppression(payload: dict | None) -> bool:
+    """True when a quality drop came from a suppression that does NOT mean the
+    source is dark (today: the sticky content-shrink guard) AND the run brought
+    back enough content to prove the source really answered.
+
+    The size floor is what keeps this decision OURS rather than the remote
+    host's: see _PLAUSIBLE_PAGE_CHARS. A stub/wall that falls through to the
+    shrink path is darkness, not a live page whose content merely shrank.
+    """
+    if not payload:
+        return False
+    reason = str(payload.get("alert_suppressed_reason") or "").lower()
+    if not (
+        reason in _NON_DARK_SUPPRESSION_REASONS or bool(payload.get("shrink_suppressed"))
+    ):
+        return False
+    return _observed_chars(payload) >= _PLAUSIBLE_PAGE_CHARS
+
+
+def _record_is_dark(record: dict | None) -> bool:
+    """True when a trail record proves this cycle retrieved nothing usable."""
+    if not record:
+        return False
+    # A cycle we deliberately SKIPPED never contacted the source, so it is
+    # evidence of ABSENCE of a check — never evidence that the source is dark.
+    # Counting our own CIRCUIT_OPEN output would make the breaker feed on
+    # itself: once open it would stay open on non-fetches rather than on fetch
+    # evidence, the operator log line would report an inflated "consecutive
+    # unusable runs" count, and the documented 3-run threshold would stop being
+    # what is enforced. Same rule the coverage certificate already applies.
+    from app.source_runs import is_skipped_cycle
+
+    if is_skipped_cycle(record):
+        return False
+    status = str(record.get("change_status") or record.get("status") or "").upper()
+    if status == "FAILED":
+        return True
+    if status != "QUALITY_DROP":
+        return False
+    if _is_non_dark_suppression(record):
+        return False
+    return str(record.get("extraction_quality") or "").upper() in _DARK_QUALITY_LEVELS
+
+
 def _consecutive_failures(source_url: str) -> int:
     """
-    Count consecutive FAILED statuses for source_url from source_runs.jsonl,
-    reading from newest record backwards.
+    Count consecutive unusable statuses (_UNUSABLE_RUN_STATUSES — FAILED and
+    QUALITY_DROP) for source_url from source_runs.jsonl, reading from newest
+    record backwards.
 
     Reads a byte-bounded tail (_CIRCUIT_HISTORY_SCAN_BYTES) of the JSONL file
-    and counts consecutive "FAILED" change_status values for the given URL,
+    and counts consecutive unusable change_status values for the given URL,
     stopping at the first non-failure for that URL.  Records belonging to
     OTHER sources are skipped, not counted — that is what makes the window
     fleet-size-independent.  Returns 0 when the file is absent or unreadable.
@@ -430,8 +605,8 @@ def _consecutive_failures(source_url: str) -> int:
         # Seeked into the middle of a record — drop the partial first line.
         raw_lines = raw_lines[1:]
 
-    # Newest-backwards: count consecutive FAILED records for THIS url, stopping
-    # at the first non-failure for the url.
+    # Newest-backwards: count consecutive unusable records for THIS url,
+    # stopping at the first usable run for the url.
     count = 0
     for line in reversed(raw_lines):
         line = line.strip()
@@ -444,11 +619,34 @@ def _consecutive_failures(source_url: str) -> int:
         if record.get("url") != source_url and record.get("official_url") != source_url:
             continue
         status = str(record.get("change_status") or record.get("status") or "").upper()
-        if status == "FAILED":
+        if _record_is_dark(record):
             count += 1
+        elif status in _UNUSABLE_RUN_STATUSES:
+            # A quality drop that is NOT darkness (sticky shrink suppression, or
+            # a good extraction reclassified on size): neutral — it neither
+            # proves the source is dark nor proves it recovered.
+            continue
         else:
             break
     return count
+
+
+def _maybe_open_circuit(name: str, source_url: str, circuit_key: str) -> None:
+    """Open the breaker when the trail shows >= threshold consecutive unusable
+    runs for this source. Called from BOTH the raising-failure path and the
+    guard-abort path — a source that is dark without raising is exactly the
+    chronic failure the breaker exists to detect."""
+    consec = _consecutive_failures(source_url)
+    if consec < _CIRCUIT_OPEN_THRESHOLD:
+        return
+    if circuit_key not in _circuit_open:
+        _circuit_open.add(circuit_key)
+        _save_circuit_state(_circuit_open)
+    logger.warning(
+        "CIRCUIT_BREAKER open for %s after %d consecutive unusable runs "
+        "(FAILED/QUALITY_DROP) — source will be skipped; delete %s to reset",
+        name, consec, _CIRCUIT_STATE_FILE,
+    )
 
 
 def monitor_all_sources(
@@ -488,7 +686,7 @@ def monitor_all_sources(
 
     results: list[dict] = []
     _counter: dict = {
-        "ok": 0, "unchanged": 0, "failed": 0,
+        "ok": 0, "unchanged": 0, "failed": 0, "quality_drop": 0,
         "seals_attempted": 0, "seals_failed": 0,
         "appends_failed": 0,
     }
@@ -538,6 +736,8 @@ def monitor_all_sources(
                     "circuit_open":  True,
                 })
                 _counter["failed"] += 1
+                # Durable proof that this source was NOT seen this cycle.
+                _persist_circuit_open_record(source)
                 continue
             # Cooldown elapsed — allow a single half-open probe this cycle.
             _circuit_skip_counts[circuit_key] = 0
@@ -609,22 +809,46 @@ def monitor_all_sources(
             _persist_failure_record(source, error_msg, access_status)
 
             # ── circuit-breaker check ─────────────────────────────────────
-            source_url = source.get("url", "")
-            consec = _consecutive_failures(source_url)
-            if consec >= _CIRCUIT_OPEN_THRESHOLD:
-                _circuit_open.add(circuit_key)
-                _save_circuit_state(_circuit_open)
-                logger.warning(
-                    "CIRCUIT_BREAKER opened for %s after %d consecutive "
-                    "historical failures — source will be skipped; "
-                    "delete %s to reset",
-                    name, consec, _CIRCUIT_STATE_FILE,
-                )
+            _maybe_open_circuit(name, source.get("url", ""), circuit_key)
             continue
 
-        # ── success path ─────────────────────────────────────────────────────
+        # ── non-raising path ─────────────────────────────────────────────────
         assert result is not None
         results.append(result)
+
+        if not _result_yielded_usable_content(result):
+            # Guard-abort: the run returned cleanly but produced no usable
+            # content (bot wall / error page / empty / undecodable / shrink
+            # suppression). It is NOT a success — it must not clear the
+            # breaker, and its QUALITY_DROP trail record counts toward the
+            # consecutive-failure threshold like a hard failure does.
+            _counter["quality_drop"] += 1
+            logger.warning(
+                "QUALITY_DROP [%d/%d]: %s — run yielded no usable content "
+                "(status=%s); breaker counter NOT reset",
+                idx, total, name, result.get("status"),
+            )
+            if verbose:
+                print(f"       -> quality drop ({result.get('status')})")
+            # The sticky content-shrink suppression is NOT darkness: the source
+            # is reachable and its content genuinely changed. Counting it would
+            # open the breaker on a live, changing page and stop fetching it —
+            # and because the shrink guard re-fires every cycle until a human
+            # re-baselines, a breaker opened for any other reason could never be
+            # cleared by such a probe. The source demonstrably answered, so
+            # treat it as recovery for breaker purposes.
+            #
+            # _is_non_dark_suppression only agrees when the run brought back a
+            # PLAUSIBLE page (>= _PLAUSIBLE_PAGE_CHARS). A short unrecognised
+            # wall page also lands on the shrink path, and letting that clear
+            # the breaker would hand the monitored host control of our own
+            # reliability control; below the floor we fall through to
+            # _maybe_open_circuit and treat the cycle as darkness.
+            if _is_non_dark_suppression(result):
+                _clear_circuit(circuit_key)
+            else:
+                _maybe_open_circuit(name, source.get("url", ""), circuit_key)
+            continue
 
         # Auto-reset the breaker: a successful run clears a previously-open
         # circuit so a source recovers on its own after a transient outage.
@@ -681,6 +905,10 @@ def monitor_all_sources(
         "sources_ok":        _counter["ok"],
         "sources_unchanged": _counter["unchanged"],
         "sources_failed":    _counter["failed"],
+        # Guard-aborted sources (dark, but not raising). Counted separately
+        # from `unchanged` so a fleet-wide bot-wall no longer reads as a
+        # healthy all-unchanged cycle in the summary or to the deadman.
+        "sources_quality_drop": _counter["quality_drop"],
         "seals_attempted":   _counter["seals_attempted"],
         "seals_failed":      _counter["seals_failed"],
         "evidence_appends_failed": _counter["appends_failed"],

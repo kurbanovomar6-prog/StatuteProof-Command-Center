@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from app.evidence_assessment import LEGAL_DISCLAIMER
+from app.legal_safety import find_forbidden_claims as _find_forbidden_claims
 from app.monthly_assurance_report import _FORBIDDEN_PHRASES
 from app.source_health_timeline import source_health_customer_message
 
@@ -98,13 +99,22 @@ _ALL_FORBIDDEN: tuple[str, ...] = tuple(
 def contains_forbidden_claim(text: str) -> str | None:
     """Return the first forbidden phrase found in ``text``, or None if clean.
 
-    Reuses the shared _FORBIDDEN_PHRASES tuple so the certificate can never
-    diverge from the monthly-assurance ban list, plus a few coverage-specific
-    over-promise phrases. Case-insensitive substring match.
+    Thin adapter over the ONE canonical guard in ``app.legal_safety``, passing
+    this module's superset of needles. It used to be a bare ``lower()`` +
+    substring scan, so the certificate — the most audit-facing artefact the
+    product emits — silently missed the whitespace-collapse, homoglyph folding
+    and inflection matching applied everywhere else: "StatuteProof guarantees
+    compliance." and "We guarantee\\ncompliance." rendered clean here while the
+    same strings were blocked on every other delivery path. The canonical guard
+    also neutralizes the product's fixed disclaimers and directly-negated
+    occurrences, so the vetted denial wording still cannot trip its own guard.
+    Do not reintroduce a local scan here.
     """
-    haystack = str(text or "").lower()
+    hits = set(_find_forbidden_claims(text, phrases=_ALL_FORBIDDEN))
+    # Preserve the historical return contract: the FIRST needle in _ALL_FORBIDDEN
+    # order, not an alphabetical pick.
     for phrase in _ALL_FORBIDDEN:
-        if phrase and phrase in haystack:
+        if phrase in hits:
             return phrase
     return None
 
@@ -259,6 +269,15 @@ def _has_proof_hash(run: dict[str, Any]) -> bool:
     return bool(run.get("normalized_hash") or run.get("content_hash"))
 
 
+def _is_skipped_cycle(run: dict[str, Any]) -> bool:
+    """True for a trail record written for a cycle in which the source was NOT
+    fetched (circuit breaker open). Evidence of a non-check, never a check."""
+    return (
+        str(run.get("failure_code") or "").upper() == "CIRCUIT_OPEN"
+        or str(run.get("access_status") or "").lower() == "circuit_open"
+    )
+
+
 def _run_ts(run: dict[str, Any]) -> datetime | None:
     return _parse_ts(run.get("timestamp_utc") or run.get("run_at"))
 
@@ -276,9 +295,17 @@ def _source_continuity(
 ) -> dict[str, Any]:
     """Build one per-source continuity row from recorded runs in the period."""
     in_period: list[tuple[datetime, dict[str, Any]]] = []
+    skipped_cycles = 0
     for run in runs:
         ts = _run_ts(run)
         if ts is None or ts < start_dt or ts > end_dt:
+            continue
+        # A cycle skipped by the circuit breaker issued no request at all: it
+        # proves the ABSENCE of a check and must never be counted or dated as
+        # one (it would inflate "recorded checks" and reset the staleness
+        # clock for exactly the sources that went dark).
+        if _is_skipped_cycle(run):
+            skipped_cycles += 1
             continue
         in_period.append((ts, run))
     in_period.sort(key=lambda pair: pair[0])
@@ -349,6 +376,7 @@ def _source_continuity(
         max_gap=max_gap,
         failed_count=failed_count,
         quality_drop_count=quality_drop_count,
+        skipped_cycles=skipped_cycles,
         last_check_gap_days=last_check_gap_days,
         degraded_reasons=degraded_reasons,
     )
@@ -370,6 +398,7 @@ def _source_continuity(
         "source_name": source_name,
         "official_url": official_url,
         "checks_in_period": checks_in_period,
+        "skipped_cycles": skipped_cycles,
         "successful_checks": successful_checks,
         "first_check_utc": first_check,
         "last_check_utc": last_check,
@@ -400,15 +429,23 @@ def _gap_disclosure(
     max_gap: int,
     failed_count: int,
     quality_drop_count: int,
+    skipped_cycles: int,
     last_check_gap_days: int,
     degraded_reasons: list[str],
 ) -> str:
     """Plain-English, honest per-source gap statement (no over-promise)."""
+    skipped_sentence = (
+        f"{skipped_cycles} monitoring cycle(s) were skipped and the source was not fetched "
+        f"(recorded in the evidence trail); those cycles are not counted as checks."
+        if skipped_cycles
+        else ""
+    )
     if continuity_status == "NO_COVERAGE":
-        return (
+        text = (
             "No successful check with a proof hash was recorded for this source during the period. "
             "Treat this source as UNVERIFIED for the period and review it directly."
         )
+        return f"{text} {skipped_sentence}".strip() if skipped_sentence else text
     parts: list[str] = []
     if gap_days > 0:
         parts.append(
@@ -421,6 +458,8 @@ def _gap_disclosure(
         parts.append(
             f"{quality_drop_count} check(s) recorded a quality drop; extraction may need manual review."
         )
+    if skipped_sentence:
+        parts.append(skipped_sentence)
     if last_check_gap_days > 0:
         parts.append(
             f"The last recorded check trails the end of the period by {last_check_gap_days} day(s)."
@@ -562,6 +601,7 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "sources_degraded": sum(1 for r in rows if r["degraded"]),
         "sources_continuous": sum(1 for r in rows if r["continuity_status"] == "CONTINUOUS"),
         "total_checks": sum(r["checks_in_period"] for r in rows),
+        "total_skipped_cycles": sum(r.get("skipped_cycles", 0) for r in rows),
         "total_successful_checks": sum(r["successful_checks"] for r in rows),
         "total_days_with_proof_hash": sum(r["days_with_proof_hash"] for r in rows),
     }
@@ -695,6 +735,7 @@ def render_coverage_certificate_markdown(certificate: dict[str, Any]) -> str:
         f"| Sources with one or more gap days | {summary.get('sources_with_gaps', 0)} |",
         f"| Sources with a failed/degraded check | {summary.get('sources_degraded', 0)} |",
         f"| Total recorded checks | {summary.get('total_checks', 0)} |",
+        f"| Cycles skipped, source not fetched | {summary.get('total_skipped_cycles', 0)} |",
         f"| Total days with a proof hash | {summary.get('total_days_with_proof_hash', 0)} |",
         "",
     ]
@@ -729,7 +770,10 @@ def render_coverage_certificate_markdown(certificate: dict[str, Any]) -> str:
     # Gap disclosure detail — never hide a gap.
     flagged = [
         r for r in rows
-        if r.get("gap_days", 0) > 0 or r.get("degraded") or r.get("change_state") == "NO_PROOF"
+        if r.get("gap_days", 0) > 0
+        or r.get("degraded")
+        or r.get("skipped_cycles", 0) > 0
+        or r.get("change_state") == "NO_PROOF"
     ]
     lines += ["## Gap & Degradation Disclosure", ""]
     if flagged:

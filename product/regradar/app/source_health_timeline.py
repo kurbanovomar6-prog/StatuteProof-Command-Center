@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from app.evidence_assessment import LEGAL_DISCLAIMER, load_assessments, latest_assessment_for
+from app.source_runs import is_skipped_cycle
 
 
 STALE_AFTER_DAYS = 7  # sources not checked in 7+ days are flagged stale
@@ -113,6 +114,13 @@ def source_health_customer_message(status: str) -> str:
         "MONITOR_OK": "Monitoring is active and the latest extraction passed quality checks.",
         "SOURCE_HEALTH_OK": "Monitoring is active and the latest extraction passed quality checks.",
         "QUALITY_DROP": "Extraction quality changed. Manual review may be required.",
+        # A cycle the monitor deliberately SKIPPED. No request was issued, so
+        # neither "a run happened" nor "an extraction degraded" may be claimed.
+        "NOT_CHECKED": (
+            "This source was not fetched during this cycle — checks were paused "
+            "after repeated unusable runs. No check was performed and no "
+            "extraction was attempted."
+        ),
         "HASH_DRIFT": "Content fingerprint changed between runs. Review required before customer alert.",
         "CHANGED": "Content fingerprint changed between runs. Review required before customer alert.",
         "REMEDIATION_REQUIRED": "This source is under extraction remediation and is not currently treated as monitoring-ready.",
@@ -434,6 +442,11 @@ def _read_source_registry(base_dir: Path) -> dict[str, dict[str, Any]]:
 
 
 def _events_from_run(run: dict[str, Any], *, index: int) -> list[dict[str, Any]]:
+    # A skipped cycle is ONE honest event, not a MONITOR_RUN plus a quality
+    # drop. Emitting those two would assert that a run happened and that an
+    # extraction happened and degraded; the source was never contacted.
+    if is_skipped_cycle(run):
+        return [_skipped_cycle_event(run, index=index)]
     events = [_run_event(run, index=index)]
     if run.get("proof_block_path"):
         events.append(_evidence_created_event(run))
@@ -459,6 +472,23 @@ def _run_event(run: dict[str, Any], *, index: int) -> dict[str, Any]:
         source_health_status=status,
         customer_safe_message=source_health_customer_message(status),
     )
+
+
+def _skipped_cycle_event(run: dict[str, Any], *, index: int) -> dict[str, Any]:
+    """Timeline event for a cycle in which the source was NOT fetched."""
+    event = _base_event(
+        run,
+        "MONITOR_SKIPPED",
+        seed=f"skipped:{run.get('run_id')}:{index}",
+        source_health_status="NOT_CHECKED",
+        customer_safe_message=source_health_customer_message("NOT_CHECKED"),
+    )
+    # The trail record stamps extraction_quality="FAILED" so classify_change can
+    # never resolve it as a baseline. Nothing was extracted, so surfacing that
+    # value to a customer would report a failed extraction that never ran.
+    event["extraction_quality"] = None
+    event["remediation_reason"] = run.get("limitations_notes")
+    return event
 
 
 def _evidence_created_event(run: dict[str, Any]) -> dict[str, Any]:
@@ -599,6 +629,13 @@ def _base_event(
 
 
 def _source_health_status(run: dict[str, Any]) -> str:
+    # A CIRCUIT_OPEN record proves the ABSENCE of a check: the monitor skipped
+    # the source and issued no request. Reporting it as QUALITY_DROP would tell
+    # the customer we extracted something and it degraded — a claim the cycle
+    # cannot back. Checked first: it outranks every content-derived state
+    # because there was no content.
+    if is_skipped_cycle(run):
+        return "NOT_CHECKED"
     change = str(run.get("change_status") or "").upper()
     access = str(run.get("access_status") or "").lower()
     monitor_access = str(run.get("monitor_access_status") or "").lower()

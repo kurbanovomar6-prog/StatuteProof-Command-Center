@@ -506,15 +506,30 @@ def _read_runs() -> list[dict]:
     return _RUNS_CACHE
 
 
+def is_skipped_cycle(rec: dict | None) -> bool:
+    """True for a trail record written for a cycle in which the source was NOT
+    fetched (circuit breaker open). It proves absence of a check — it is never
+    itself a check, so consumers that count or date "checks" must exclude it."""
+    if not rec:
+        return False
+    return (
+        str(rec.get("failure_code") or "").upper() == "CIRCUIT_OPEN"
+        or str(rec.get("access_status") or "").lower() == "circuit_open"
+    )
+
+
 def latest_runs(
     market: str | None = None,
     source_filter: str | None = None,
+    include_skipped: bool = True,
 ) -> dict[str, dict]:
     market_norm = market.upper() if market else None
     source_norm = source_filter.lower() if source_filter else None
     latest: dict[str, dict] = {}
 
     for rec in _read_runs():
+        if not include_skipped and is_skipped_cycle(rec):
+            continue
         if market_norm and str(rec.get("market", "")).upper() != market_norm:
             continue
         if source_norm:

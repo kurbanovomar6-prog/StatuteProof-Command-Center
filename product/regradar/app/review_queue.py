@@ -21,6 +21,7 @@ from app.evidence_records import (
     record_canonical_evidence_review,
 )
 from app.source_health_timeline import source_health_customer_message
+from app.source_runs import is_skipped_cycle
 
 logger = logging.getLogger(__name__)
 
@@ -308,6 +309,16 @@ def _read_runs(root: Path, market: str) -> list[dict[str, Any]]:
         try:
             row = json.loads(line)
         except json.JSONDecodeError:
+            continue
+        # A CIRCUIT_OPEN record documents a cycle the monitor SKIPPED: no
+        # request was issued, so it carries no hash, no diff and no extraction
+        # — there is nothing for a human to review. Queuing it would put the
+        # source's own darkness in front of the reviewer as a pending
+        # failed-extraction item; at production cadence one chronically walled
+        # source contributes ~20 such rows a day and retention keeps them 30
+        # days. The record stays in the trail (that is its purpose) and stays
+        # visible on the source timeline as NOT_CHECKED.
+        if is_skipped_cycle(row):
             continue
         if str(row.get("market") or row.get("jurisdiction") or "").upper() == market:
             rows.append(row)

@@ -55,7 +55,9 @@ export default function AlertProofPanel({ item, navigate }) {
       {open && (
         <div className="mt-2 rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] p-3">
           <p className="text-[11px] font-semibold text-[var(--text-primary)]">
-            Sealed evidence record — re-check its hashes yourself.
+            {item.plan_redacted
+              ? 'Sealed evidence record.'
+              : 'Sealed evidence record — re-check its hashes yourself.'}
           </p>
 
           <dl className="mt-2 space-y-1.5 text-[11px]">
@@ -88,8 +90,23 @@ export default function AlertProofPanel({ item, navigate }) {
           </dl>
 
           {/* Structured sealed redline; mounts (and fetches) only while this
-              panel is open. Falls back to the raw excerpt when unavailable. */}
-          <AlertRedline alertId={item.alert_id} fallbackExcerpt={item.diff_excerpt} />
+              panel is open. Falls back to the raw excerpt when unavailable.
+              When the plan withholds the official-source text the API answers
+              402, so we say that plainly instead of firing a doomed request —
+              the record above IS sealed, only its content is withheld. */}
+          {item.plan_redacted ? (
+            /* Do not promise independent verification to this tier: a redacted
+               user has audit_export=False, so the evidence pack (the only route
+               to the record JSON the public verifier needs) answers 403 and the
+               diff answers 402. State the gate instead of the capability. */
+            <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-muted)]">
+              The change text for this alert is withheld on your current plan. The evidence record
+              above is sealed and stored; exporting it to re-check its hashes independently requires
+              an active plan.
+            </p>
+          ) : (
+            <AlertRedline alertId={item.alert_id} fallbackExcerpt={item.diff_excerpt} />
+          )}
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <a
@@ -100,20 +117,24 @@ export default function AlertProofPanel({ item, navigate }) {
               <ExternalLink className="h-3 w-3" />
               Open evidence record
             </a>
-            <a
-              href="/verify"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--accent)] transition-colors hover:text-[var(--text-primary)]"
-            >
-              <ExternalLink className="h-3 w-3" />
-              Verify independently
-            </a>
+            {!item.plan_redacted && (
+              <a
+                href="/verify"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--accent)] transition-colors hover:text-[var(--text-primary)]"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Verify independently
+              </a>
+            )}
           </div>
-          <p className="mt-1.5 text-[10px] leading-relaxed text-[var(--text-muted)]">
-            Open the evidence record (or export its pack), then paste it into the public verifier to
-            re-check its hashes yourself — without trusting us.
-          </p>
+          {!item.plan_redacted && (
+            <p className="mt-1.5 text-[10px] leading-relaxed text-[var(--text-muted)]">
+              Open the evidence record (or export its pack), then paste it into the public verifier
+              to re-check its hashes yourself — without trusting us.
+            </p>
+          )}
         </div>
       )}
     </div>

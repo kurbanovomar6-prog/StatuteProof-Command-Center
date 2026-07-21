@@ -15,9 +15,9 @@ captured (from the canonical ``evidence/`` tree — see
 Legal safety (non-negotiable):
 
 * Every customer-facing artifact carries the standard disclaimer.
-* A forbidden-claims guard (reusing the shared ``_FORBIDDEN_PHRASES`` tuple from
-  ``app.monthly_assurance_report``) runs over the authored prose before it is
-  written into the ZIP; a banned claim refuses the pack.
+* A forbidden-claims guard (delegating to the ONE canonical guard in
+  ``app.legal_safety``) runs over the authored prose before it is written into
+  the ZIP; a banned claim refuses the pack.
 * Evidence-grounded only: the pack ships bytes StatuteProof actually captured
   and the SHA-256 it recorded at capture time. It asserts what changed / what a
   reviewer may wish to check — never advice, never a guarantee. The pack is
@@ -39,7 +39,7 @@ from typing import Any
 
 from app.audit_export import validate_date_range, validate_source_ids
 from app.evidence_assessment import LEGAL_DISCLAIMER
-from app.monthly_assurance_report import _FORBIDDEN_PHRASES
+from app.legal_safety import assert_no_forbidden_claims as _assert_no_forbidden_claims
 
 logger = logging.getLogger(__name__)
 
@@ -84,24 +84,21 @@ class EvidencePackError(ValueError):
 def assert_no_forbidden_claims(text: str) -> None:
     """Raise ``EvidencePackError`` if a forbidden phrase appears in ``text``.
 
-    Reuses the exact ``_FORBIDDEN_PHRASES`` tuple shared across the product. The
-    standard disclaimers legitimately *deny* forbidden claims (they contain
-    "legal advice", "guarantee compliance", "prevent fines" in negated form), so
-    both known-safe disclaimer strings are neutralized before scanning — the
-    disclaimer can never trip its own guard, while any other banned phrase in
-    authored prose still raises.
+    Thin adapter over the ONE canonical guard in ``app.legal_safety`` — it only
+    swaps in this module's exception type and label. It used to carry its own
+    ``lower()`` + substring scan, so the pack README/verify script AND the
+    customer-facing Evidence Room (which re-exports this function) silently
+    missed the whitespace-collapse, homoglyph folding and inflection matching
+    that ``legal_safety`` applies: "StatuteProof guarantees compliance." and
+    "We guarantee\\ncompliance." shipped from here while the same strings were
+    blocked on every other delivery path. The canonical guard also neutralizes
+    the product's fixed disclaimers (which legitimately DENY banned claims), so
+    a disclaimer still cannot trip its own guard. Do not reintroduce a local
+    scan here.
     """
-    lowered = (
-        str(text or "")
-        .lower()
-        .replace(LEGAL_DISCLAIMER.lower(), " ")
-        .replace(FULL_LEGAL_DISCLAIMER.lower(), " ")
+    _assert_no_forbidden_claims(
+        text, exc=EvidencePackError, label="Evidence pack prose"
     )
-    hits = sorted({phrase for phrase in _FORBIDDEN_PHRASES if phrase in lowered})
-    if hits:
-        raise EvidencePackError(
-            "Evidence pack prose contains forbidden claim(s): " + ", ".join(hits)
-        )
 
 
 def build_evidence_pack(

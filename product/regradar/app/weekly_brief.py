@@ -56,6 +56,7 @@ logger = logging.getLogger(__name__)
 # too, closing the gaps the old hardcoded list missed.
 from app.legal_safety import BRIEF_EXTRA_PHRASES as _BRIEF_EXTRA_PHRASES
 from app.legal_safety import FORBIDDEN_PHRASES as _CANONICAL_FORBIDDEN
+from app.legal_safety import find_forbidden_claims as _find_forbidden_claims
 
 FORBIDDEN_IN_BRIEF = tuple(
     dict.fromkeys([*_CANONICAL_FORBIDDEN, *_BRIEF_EXTRA_PHRASES])
@@ -67,12 +68,22 @@ def legal_scan_brief(brief: dict) -> list[str]:
     STEP 2 — Scan brief fields for forbidden legal claims before delivery.
 
     Returns a list of flag strings; empty list means the brief is clean.
+
+    Delegates matching to the ONE canonical guard (``app.legal_safety``) with
+    the brief's superset of needles. It used to be a bare ``lower()`` +
+    substring scan, which meant this gate — the ONLY consumer of
+    ``BRIEF_EXTRA_PHRASES`` in the product — missed the whitespace-collapse,
+    homoglyph folding and inflection matching: "This ensures you are compliant."
+    and "StatuteProof guarantees compliance." passed here, and nothing
+    downstream carries the brief-extra phrases, so those had no remaining net.
     """
     flags = []
     for field in ("executive_summary", "business_action_required", "specific_obligation"):
-        text = str(brief.get(field) or "").lower()
+        text = str(brief.get(field) or "")
+        hits = set(_find_forbidden_claims(text, phrases=FORBIDDEN_IN_BRIEF))
+        # Keep the historical flag ORDER (ban-list order, not alphabetical).
         for phrase in FORBIDDEN_IN_BRIEF:
-            if phrase in text:
+            if phrase in hits:
                 flags.append(f"FORBIDDEN phrase '{phrase}' in field '{field}'")
     return flags
 

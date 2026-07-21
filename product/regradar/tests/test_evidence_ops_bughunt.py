@@ -31,6 +31,48 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
+# ── module guard: tests must never mutate LIVE product data ─────────────────
+@pytest.fixture(autouse=True)
+def live_data_untouched(tmp_path, monkeypatch):
+    """Assert this module leaves product/regradar/data byte-identical.
+
+    monitor_all_sources() is called from several tests here WITHOUT patching
+    the ops-state files, so the suite rewrote the real data/deadman_state.json
+    on every run (its md5 changed run to run). That is live product data, and
+    the same code path fires the founder Telegram alert on the degraded->OK
+    transition edge — a test run must never be able to send that.
+
+    Redirect the ops state into tmp_path (same convention as the neighbouring
+    tests/test_monitor_circuit.py::_isolate_breaker), then prove it worked by
+    comparing the live files byte-for-byte around every test.
+    """
+    import app.monitor as monitor
+    import app.source_runs as sr
+
+    live = [
+        monitor._DEADMAN_STATE_FILE,
+        monitor._SEAL_DEADMAN_STATE_FILE,
+        monitor._CIRCUIT_STATE_FILE,
+        sr._RUN_FILE,
+    ]
+    before = [p.read_bytes() if p.exists() else None for p in live]
+
+    monkeypatch.setattr(monitor, "_DEADMAN_STATE_FILE", tmp_path / "deadman_state.json")
+    monkeypatch.setattr(
+        monitor, "_SEAL_DEADMAN_STATE_FILE", tmp_path / "seal_deadman_state.json"
+    )
+    monkeypatch.setattr(monitor, "_maybe_alert_catastrophic_cycle", lambda *_a, **_k: None)
+    monkeypatch.setattr(monitor, "_maybe_alert_seal_failures", lambda *_a, **_k: None)
+
+    yield
+
+    after = [p.read_bytes() if p.exists() else None for p in live]
+    assert after == before, (
+        "tests must not mutate live product data: "
+        f"{[str(p) for p, b, a in zip(live, before, after) if b != a]}"
+    )
+
+
 # ── shared fixture: redirect the run trail to a tmp dir ──────────────────────
 @pytest.fixture
 def trail(tmp_path, monkeypatch):
