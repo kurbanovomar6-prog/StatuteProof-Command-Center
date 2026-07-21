@@ -4,6 +4,7 @@ import {
   CONTACT_EMAIL,
   STRIPE_LINK_FOUNDING_PILOT,
   STRIPE_LINK_UAE_MONITOR,
+  stripeCheckoutUrl,
 } from '../data/constants'
 
 const STRIPE_LINKS = {
@@ -11,7 +12,7 @@ const STRIPE_LINKS = {
   professional:  STRIPE_LINK_UAE_MONITOR,
 }
 
-export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPlan }) {
+export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPlan, currentUser }) {
   function handleCta(plan) {
     if (plan.ctaType === 'source_review') {
       onSourceReview?.()
@@ -21,11 +22,14 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
       window.location.assign(`mailto:${CONTACT_EMAIL}?subject=Compliance%20Consultant%20Plan`)
       return
     }
-    // Paid plans: open Stripe link if configured, otherwise route to registration
+    // Paid plans: open Stripe link if configured, otherwise route to registration.
+    // A logged-in buyer carries their id as client_reference_id so the webhook
+    // resolves them unambiguously; an anonymous buyer gets the plain link and
+    // resolves via the verified-email fallback after registering.
     if (plan.routePlan) {
       const stripeLink = STRIPE_LINKS[plan.routePlan]
       if (stripeLink) {
-        window.open(stripeLink, '_blank', 'noopener,noreferrer')
+        window.open(stripeCheckoutUrl(stripeLink, currentUser?.id), '_blank', 'noopener,noreferrer')
         return
       }
       onSelectPlan?.(plan.routePlan)

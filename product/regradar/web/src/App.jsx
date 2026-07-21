@@ -482,6 +482,7 @@ export default function App() {
             onCreateWorkspace={() => navigateRegister()}
             onSourceReview={() => navigatePublic('source-readiness-review')}
             onSelectPlan={navigateRegister}
+            currentUser={currentUser}
           />
           <Contact
             onCreateWorkspace={() => navigateRegister()}
