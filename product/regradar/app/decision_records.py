@@ -941,3 +941,101 @@ def verify_decision_head(org_id: int) -> dict[str, Any]:
         "investigate a possible re-seal/relink with a rewritten head"
     )
     return result
+
+
+# ── fleet-wide re-verify (the daily watchdog's decision-chain coverage) ──────────
+
+def _org_ids_with_head_dir() -> set[int]:
+    """Org ids that have a persisted decision-chain head directory. Never raises.
+
+    Complements the DB scan in :func:`verify_all_org_chains`: an org whose rows
+    were deleted (append-only triggers dropped) but whose
+    ``data/decision_chain/<org>/`` directory lingers is invisible to
+    ``SELECT DISTINCT org_id`` yet must still be checked —
+    :func:`verify_decision_head` reports the resulting ``diverged``. Only
+    canonical ``str(int(org_id))`` directory names are accepted (the exact names
+    the writer creates), mirroring ``app.decision_anchor._org_id_from_dirname``.
+    """
+    root = _BASE_DIR / "data" / "decision_chain"
+    found: set[int] = set()
+    try:
+        if not root.is_dir():
+            return found
+        for entry in root.iterdir():
+            name = entry.name
+            if (
+                name.isascii()
+                and name.isdigit()
+                and str(int(name)) == name
+                and entry.is_dir()
+            ):
+                found.add(int(name))
+    except OSError:
+        logger.warning("decision head-dir discovery failed (non-fatal)")
+    return found
+
+
+def verify_all_org_chains() -> dict[str, Any]:
+    """Re-verify EVERY org's sealed decision chain + head anchor. Never raises.
+
+    The fleet-wide counterpart the daily integrity watchdog
+    (``tools/verify_trail_watch``) runs so the founder-paging timer covers the
+    customer's sealed decision chain the SAME way it covers the source-evidence
+    trail. Discovers orgs from BOTH the ``decision_records`` table
+    (``DISTINCT org_id``) and the persisted head-file directory
+    (:func:`_org_ids_with_head_dir`), so an org whose rows were deleted but whose
+    head file lingers is still checked. For each org it runs
+    :func:`verify_decision_chain` (recomputes every seal + prev linkage, via the
+    shared ``canonical_record_hash``) and :func:`verify_decision_head` (computed
+    head vs the separately-persisted anchor).
+
+    Returns ``{"ok": bool, "orgs_checked": int, "broken": [...], "error":
+    str | None}``. ``broken`` lists ONLY orgs with POSITIVE tamper evidence — a
+    chain that no longer recomputes, or a ``diverged`` head — so the watchdog
+    pages the founder on a non-empty ``broken`` and NEVER on a bare
+    infrastructure ``error`` (no false alarms). ``ok`` is True exactly when
+    nothing is broken AND org discovery succeeded.
+    """
+    broken: list[dict[str, Any]] = []
+    org_ids: set[int] = set()
+    error: str | None = None
+    try:
+        ensure_decision_table()
+        conn = _connect()
+        try:
+            for row in conn.execute("SELECT DISTINCT org_id FROM decision_records"):
+                try:
+                    org_ids.add(int(row["org_id"]))
+                except (TypeError, ValueError):
+                    continue
+        finally:
+            conn.close()
+    except Exception as exc:  # noqa: BLE001 — diagnostic; never raises across boundary
+        logger.warning("verify_all_org_chains discovery failed: %s", type(exc).__name__)
+        error = "discovery_error"
+
+    org_ids |= _org_ids_with_head_dir()
+
+    for oid in sorted(org_ids):
+        chain = verify_decision_chain(oid)
+        head = verify_decision_head(oid)
+        chain_ok = bool(chain.get("ok"))
+        head_diverged = head.get("status") == HEAD_DIVERGED
+        if not chain_ok or head_diverged:
+            broken.append(
+                {
+                    "org_id": oid,
+                    "chain_ok": chain_ok,
+                    "broken_at": chain.get("broken_at"),
+                    "chain_reason": chain.get("reason"),
+                    "head_status": head.get("status"),
+                    "head_reason": head.get("reason"),
+                }
+            )
+
+    return {
+        "ok": (not broken) and error is None,
+        "orgs_checked": len(org_ids),
+        "broken": broken,
+        "error": error,
+    }

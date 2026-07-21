@@ -12,10 +12,12 @@ Runs unattended on a systemd timer
 (``deploy/systemd/statuteproof-verify.{service,timer}``), so two properties are
 non-negotiable:
 
-  * READ-ONLY over the evidence trail. It only calls
-    ``verify_evidence_trail.verify_trail`` (read-only) and posts a Telegram
-    message. It never mutates the trail, a record, or a head file. One
-    ADDITIVE exception rides on this timer: the dormant-by-default RFC 3161
+  * READ-ONLY over the evidence trail AND the sealed decision chain. It calls
+    ``verify_evidence_trail.verify_trail`` and
+    ``app.decision_records.verify_all_org_chains`` (both read-only — they
+    recompute hashes and compare heads, mutating nothing) and posts a Telegram
+    message on divergence. It never mutates the trail, a record, or a head file.
+    One ADDITIVE exception rides on this timer: the dormant-by-default RFC 3161
     decision-head anchor sweep (``app.decision_anchor``). With
     ``RFC3161_TSA_URL`` unset (the default) it is a complete no-op; when an
     operator opts in, it writes ONLY additive timestamp sidecars next to each
@@ -27,8 +29,10 @@ non-negotiable:
     failure can never turn a watchdog run into a crash.
 
 Exit codes (mirror ``verify-trail`` / ``heartbeat-check``):
-  0  trail is clean (verified and/or unverifiable records only).
-  1  at least one divergence (hash mismatch or broken chain) — founder alerted.
+  0  trail is clean (verified and/or unverifiable records only) AND every
+     sealed decision chain re-verifies.
+  1  at least one divergence — an evidence hash mismatch, a broken capture
+     chain, or a broken sealed decision chain — founder alerted.
   2  bad CLI arguments (argparse).
 """
 
@@ -91,6 +95,75 @@ def build_divergence_summary(report: "vt.TrailReport") -> str:
         "and investigate before delivering any brief."
     )
     return "\n".join(lines)
+
+
+def build_decision_divergence_summary(broken: list[dict]) -> str:
+    """Build a concise, plain-text founder alert for a broken decision chain.
+
+    Sent through ``notify_founder`` with no parse mode (no escaping needed).
+    ``broken`` is ``app.decision_records.verify_all_org_chains()['broken']`` — one
+    entry per org that failed re-verification, each either a broken chain link or
+    a diverged head.
+    """
+    lines = ["\U0001F6A8 StatuteProof sealed decision chain INTEGRITY FAILURE"]
+    lines.append(
+        f"{len(broken)} org decision chain(s) failed re-verification "
+        "(a sealed reviewer decision no longer recomputes, or the head diverged):"
+    )
+    for b in broken[:_MAX_DETAIL_LINES]:
+        org = b.get("org_id")
+        if not b.get("chain_ok", True):
+            lines.append(
+                f"  • org {org}: chain broken at seq {b.get('broken_at')} "
+                f"({b.get('chain_reason')})"
+            )
+        else:
+            lines.append(
+                f"  • org {org}: head {b.get('head_status')} "
+                f"({b.get('head_reason')})"
+            )
+    extra = len(broken) - _MAX_DETAIL_LINES
+    if extra > 0:
+        lines.append(f"  … and {extra} more")
+    lines.append(
+        "A customer's sealed decision log can no longer be re-verified. Re-run "
+        "`run.py verify-trail-watch` and investigate before relying on that record."
+    )
+    return "\n".join(lines)
+
+
+def _verify_decision_chains_best_effort() -> bool:
+    """Re-verify every org's sealed decision chain; page the founder on a break.
+
+    Returns True when the decision chains are intact OR the check is merely
+    unavailable (our own infra hiccup — never a false page); False ONLY on
+    POSITIVE tamper evidence, in which case the founder has already been paged.
+    NEVER raises: a failure here can neither crash the watchdog nor flip its
+    verdict on the source-evidence trail. The underlying re-verify is read-only
+    (recomputes seals, compares heads — it mutates nothing).
+    """
+    try:
+        from app import decision_records
+
+        result = decision_records.verify_all_org_chains()
+    except Exception:  # noqa: BLE001 — an add-on pass must never break the watchdog
+        logger.warning(
+            "verify-trail-watch: decision-chain re-verify failed — swallowed"
+        )
+        return True
+    broken = result.get("broken") or []
+    if not broken:
+        if not result.get("ok"):
+            logger.warning(
+                "verify-trail-watch: decision-chain re-verify inconclusive (%s) "
+                "— not paging (no positive tamper evidence)",
+                result.get("error"),
+            )
+        return True
+    summary = build_decision_divergence_summary(broken)
+    print(summary, file=sys.stderr)
+    _alert_best_effort(summary)
+    return False
 
 
 def _anchor_decision_heads_best_effort() -> dict | None:
@@ -171,6 +244,16 @@ def run_watch(argv: list[str] | None = None) -> int:
         if not args.json:
             print(summary, file=sys.stderr)
         _alert_best_effort(summary)
+        exit_code = 1
+
+    # Fleet-wide re-verify of the SEALED CUSTOMER DECISION chain, on the SAME
+    # daily timer that guards the source-evidence trail. Positive tamper evidence
+    # (a decision that no longer recomputes, or a diverged head) pages the founder
+    # best-effort and forces a non-zero exit, exactly like an evidence-trail
+    # divergence; an inconclusive check never false-alarms and never flips the
+    # trail verdict. Read-only: it recomputes seals and compares heads, mutating
+    # nothing.
+    if not _verify_decision_chains_best_effort():
         exit_code = 1
 
     # Dormant-by-default RFC 3161 decision-head anchor sweep (additive sidecars

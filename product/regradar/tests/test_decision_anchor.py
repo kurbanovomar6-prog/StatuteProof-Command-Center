@@ -340,6 +340,12 @@ def test_daily_verify_watch_runs_the_sweep(monkeypatch, capsys):
         or {"orgs_seen": 0, "anchor_attempted": 0, "skipped_dormant": True},
     )
     monkeypatch.setattr(vtw.vt, "verify_trail", lambda source_id=None: _StubReport())
+    # Decision-chain re-verify is a SEPARATE concern here; keep it clean so this
+    # test isolates the sweep wiring (verified in tests/test_verify_trail_watch.py).
+    monkeypatch.setattr(
+        decision_records, "verify_all_org_chains",
+        lambda: {"ok": True, "orgs_checked": 0, "broken": [], "error": None},
+    )
 
     rc = vtw.run_watch([])
 
@@ -355,6 +361,10 @@ def test_daily_verify_watch_sweep_failure_never_changes_exit_code(monkeypatch, c
 
     monkeypatch.setattr(decision_anchor, "anchor_decision_heads_now", _boom)
     monkeypatch.setattr(vtw.vt, "verify_trail", lambda source_id=None: _StubReport())
+    monkeypatch.setattr(
+        decision_records, "verify_all_org_chains",
+        lambda: {"ok": True, "orgs_checked": 0, "broken": [], "error": None},
+    )
 
     rc = vtw.run_watch([])  # must not raise
 
@@ -394,6 +404,11 @@ def test_divergence_alert_fires_before_the_sweep(monkeypatch, capsys):
         "anchor_decision_heads_now",
         lambda: order.append("sweep")
         or {"orgs_seen": 0, "anchor_attempted": 0, "skipped_dormant": True},
+    )
+    # Clean decision chain so this test isolates the trail-alert / sweep ordering.
+    monkeypatch.setattr(
+        decision_records, "verify_all_org_chains",
+        lambda: {"ok": True, "orgs_checked": 0, "broken": [], "error": None},
     )
 
     rc = vtw.run_watch([])

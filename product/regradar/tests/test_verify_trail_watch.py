@@ -29,6 +29,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
+import app.db as app_db
+import app.decision_records as decision_records
 import app.ops_alert as ops_alert
 import app.source_runs as sr
 from tools import verify_trail_watch as vtw
@@ -42,6 +44,11 @@ def isolated_trail(tmp_path, monkeypatch):
     monkeypatch.setattr(sr, "_RUN_DIR", tmp_path / "data" / "source_runs")
     monkeypatch.setattr(sr, "_RUN_FILE", tmp_path / "data" / "source_runs" / "source_runs.jsonl")
     monkeypatch.setattr(sr, "_SNAPSHOT_DIR", tmp_path / "data" / "source_snapshots")
+    # run_watch now also re-verifies the sealed DECISION chain; isolate that
+    # store too (DB + head-file base dir) so the watchdog sees an empty, clean
+    # decision store by default and never pages on ambient/leftover state.
+    monkeypatch.setattr(app_db, "DB_PATH", str(tmp_path / "decisions.db"))
+    monkeypatch.setattr(decision_records, "_BASE_DIR", tmp_path)
     sr._CACHE_VALID = False
     sr._RUNS_CACHE = None
     yield tmp_path
@@ -198,4 +205,102 @@ def test_summary_caps_detail_lines(isolated_trail):
     report = vtw.vt.verify_trail()
     summary = vtw.build_divergence_summary(report)
     assert "and 3 more" in summary
+    assert summary.startswith("\U0001F6A8")
+
+
+# ── decision-chain coverage on the same daily timer ──────────────────────────
+#
+# The founder-paging watchdog must re-verify the customer's SEALED DECISION
+# chain too, not only the source-evidence trail. These tests seed a real sealed
+# decision, keep the evidence trail clean, and assert the watchdog pages the
+# founder + exits 1 on a tampered decision — and stays silent when it is intact.
+
+_REVIEWED = {
+    "evidence_record_id": "rec_x",
+    "record_hash": "sha256:" + "a" * 64,
+    "source_id": "AE-one",
+    "alert_id": "draft-x001",
+}
+
+
+def _seal_decision(statement: str, org: int = 1, user: int = 101):
+    return decision_records.seal_decision(
+        user, org,
+        display_name="A. Rahman",
+        reviewed=_REVIEWED,
+        kind="reviewed",
+        statement=statement,
+    )
+
+
+def test_intact_decision_chain_no_alert_exit_zero(isolated_trail, alert_spy):
+    _seed_source_run(source_id="AE-one", run_id="run00001", text=_long_text("A"))
+    assert _seal_decision("I reviewed the diff; no licence impact.") is not None
+    assert _seal_decision("Second review, acknowledged.") is not None
+
+    exit_code = vtw.run_watch([])
+
+    assert exit_code == 0
+    assert alert_spy == [], "an intact decision chain must never page the founder"
+
+
+def test_tampered_decision_chain_pages_founder_exit_one(
+    isolated_trail, alert_spy, capsys
+):
+    # Evidence trail is CLEAN — the ONLY divergence is in the sealed decisions,
+    # proving the watchdog now covers the decision chain independently.
+    _seed_source_run(source_id="AE-one", run_id="run00001", text=_long_text("A"))
+    _seal_decision("First review decision.")
+    _seal_decision("Second review decision.")
+
+    conn = app_db._connect()
+    try:
+        conn.execute("DROP TRIGGER trg_decision_records_no_update")
+        row = conn.execute(
+            "SELECT id, record_json FROM decision_records"
+            " WHERE org_id = 1 AND chain_seq = 1"
+        ).fetchone()
+        tampered = row["record_json"].replace(
+            "First review decision.", "First review decision (edited)."
+        )
+        assert tampered != row["record_json"]
+        conn.execute(
+            "UPDATE decision_records SET record_json = ? WHERE id = ?",
+            (tampered, row["id"]),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    exit_code = vtw.run_watch([])
+
+    assert exit_code == 1
+    assert len(alert_spy) == 1, "exactly one founder alert for the decision break"
+    assert "decision" in alert_spy[0].lower()
+    assert alert_spy[0].startswith("\U0001F6A8")
+
+
+def test_decision_reverify_failure_is_swallowed(isolated_trail, alert_spy, monkeypatch):
+    # An inconclusive re-verify (our own infra hiccup) must NEVER page the
+    # founder nor flip the clean evidence-trail verdict.
+    _seed_source_run(source_id="AE-one", run_id="run00001", text=_long_text("A"))
+
+    def _boom():
+        raise RuntimeError("db unavailable")
+
+    monkeypatch.setattr(decision_records, "verify_all_org_chains", _boom)
+
+    exit_code = vtw.run_watch([])
+    assert exit_code == 0
+    assert alert_spy == []
+
+
+def test_decision_divergence_summary_caps_detail_lines():
+    broken = [
+        {"org_id": i, "chain_ok": False, "broken_at": 1,
+         "chain_reason": "seal_mismatch", "head_status": "match", "head_reason": None}
+        for i in range(vtw._MAX_DETAIL_LINES + 2)
+    ]
+    summary = vtw.build_decision_divergence_summary(broken)
+    assert "and 2 more" in summary
     assert summary.startswith("\U0001F6A8")

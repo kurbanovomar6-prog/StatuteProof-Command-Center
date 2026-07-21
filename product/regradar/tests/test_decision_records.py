@@ -697,3 +697,96 @@ def test_read_org_decision_chain_returns_full_chain_in_order(isolated_env):
     assert len(read_org_decision_chain(ORG_A)) == 3
     assert len(read_org_decision_chain(ORG_B)) == 1
     assert read_org_decision_chain("nope") == []
+
+
+# ── 11. fleet-wide re-verify (the daily watchdog's decision-chain coverage) ──────
+#
+# tools/verify_trail_watch runs a fleet-wide re-verify on the SAME daily timer
+# that guards the source-evidence trail, so the founder-paging watchdog also
+# covers the customer's sealed decision chain. verify_all_org_chains() discovers
+# every org (DB rows + lingering head files) and reports ONLY positive tamper
+# evidence, so the watchdog never false-alarms on a bare infra hiccup.
+
+def test_verify_all_org_chains_all_intact(isolated_env):
+    _seal(org=ORG_A, statement="Org A review one.")
+    _seal(org=ORG_A, statement="Org A review two.")
+    _seal(org=ORG_B, user=USER_B, statement="Org B review one.")
+
+    result = decision_records.verify_all_org_chains()
+    assert result["ok"] is True
+    assert result["orgs_checked"] == 2
+    assert result["broken"] == []
+    assert result["error"] is None
+
+
+def test_verify_all_org_chains_first_decision_no_prior_is_valid(isolated_env):
+    # A single first-ever decision (prev == "") must re-verify clean fleet-wide.
+    sealed = _seal(statement="First and only review decision.")
+    assert sealed is not None and sealed["content"]["prev_decision_hash"] == ""
+    assert decision_records.verify_all_org_chains() == {
+        "ok": True, "orgs_checked": 1, "broken": [], "error": None,
+    }
+
+
+def test_verify_all_org_chains_empty_is_ok(isolated_env):
+    assert decision_records.verify_all_org_chains() == {
+        "ok": True, "orgs_checked": 0, "broken": [], "error": None,
+    }
+
+
+def test_verify_all_org_chains_flags_only_the_tampered_org(isolated_env):
+    # Org A stays clean; a PAST decision in org B is edited after dropping the
+    # append-only trigger. The fleet re-verify must flag org B and only org B.
+    _seal(org=ORG_A, statement="Org A clean review.")
+    _seal(org=ORG_B, user=USER_B, statement="Org B review one.")
+    _seal(org=ORG_B, user=USER_B, statement="Org B review two.")
+
+    conn = _raw_conn()
+    try:
+        conn.execute("DROP TRIGGER trg_decision_records_no_update")
+        row = conn.execute(
+            "SELECT id, record_json FROM decision_records"
+            " WHERE org_id = ? AND chain_seq = 1",
+            (ORG_B,),
+        ).fetchone()
+        tampered = row["record_json"].replace(
+            "Org B review one.", "Org B review one (edited)."
+        )
+        assert tampered != row["record_json"]
+        conn.execute(
+            "UPDATE decision_records SET record_json = ? WHERE id = ?",
+            (tampered, row["id"]),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    result = decision_records.verify_all_org_chains()
+    assert result["ok"] is False
+    assert {b["org_id"] for b in result["broken"]} == {ORG_B}
+    broken = result["broken"][0]
+    assert broken["chain_ok"] is False
+    assert broken["chain_reason"] == "seal_mismatch"
+    assert broken["broken_at"] == 1
+
+
+def test_verify_all_org_chains_flags_head_divergence_after_row_deletion(isolated_env):
+    # Rows deleted (append-only delete trigger dropped) but the head file lingers:
+    # DISTINCT org_id can no longer see the org, yet the head-dir scan does, and
+    # verify_decision_head reports the divergence — the watchdog still catches it.
+    _seal(org=ORG_A, statement="Only review decision.")
+    assert read_decision_head(ORG_A) is not None
+
+    conn = _raw_conn()
+    try:
+        conn.execute("DROP TRIGGER trg_decision_records_no_delete")
+        conn.execute("DELETE FROM decision_records WHERE org_id = ?", (ORG_A,))
+        conn.commit()
+    finally:
+        conn.close()
+
+    result = decision_records.verify_all_org_chains()
+    assert result["ok"] is False
+    broken = result["broken"][0]
+    assert broken["org_id"] == ORG_A
+    assert broken["head_status"] == HEAD_DIVERGED
