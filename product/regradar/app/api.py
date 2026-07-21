@@ -609,8 +609,12 @@ class _Handler(BaseHTTPRequestHandler):
         seat attempting a mutation) is denied with 403.
 
         The allow/deny decision is written to the immutable access log (best-effort
-        — logging never affects the outcome). Fails OPEN on any internal RBAC error
-        so authorization plumbing can never break an already-authenticated request.
+        — logging never affects the outcome). Fails CLOSED on any internal RBAC
+        error: the mutation is denied with a 403 UNLESS the caller still positively
+        resolves to org ``owner`` (so a plumbing glitch never locks out the
+        legitimate owner, and never escalates a lesser seat). ``fail_closed=True``
+        callers deny even the owner. Do not revert this to fail-open — an RBAC
+        evaluation error must not silently grant a mutation.
         """
         try:
             allowed, principal = rbac_runtime.evaluate(user, action)
