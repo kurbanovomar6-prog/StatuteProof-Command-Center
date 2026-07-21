@@ -1165,6 +1165,39 @@ def test_deploy_check_timer_block_matches_script():
     assert _DEPLOY_CHECK_TIMER_BLOCK.strip() in _read(DEPLOY_CHECK_SH)
 
 
+# --- deploy-check: the service-file presence loop covers the CORE units -----
+
+# Every unit DEPLOY.md § 7 ships as CORE must be asserted present by
+# deploy-check.sh — otherwise a missing backup/heartbeat/verify unit slips
+# through silently (the timer block above checks enablement, not file presence).
+_CORE_SERVICE_FILES = [
+    "statuteproof-api.service",
+    "statuteproof-scheduler.service",
+    "statuteproof-telegram-bot.service",
+    "statuteproof-compaction.service",
+    "statuteproof-compaction.timer",
+    "statuteproof-backup.service",
+    "statuteproof-backup.timer",
+    "statuteproof-heartbeat.service",
+    "statuteproof-heartbeat.timer",
+    "statuteproof-verify.service",
+    "statuteproof-verify.timer",
+]
+
+
+def test_deploy_check_service_presence_loop_covers_core_units():
+    script = _read(DEPLOY_CHECK_SH)
+    # Isolate the presence loop (between its header and the next section) so a
+    # unit named elsewhere in the script cannot mask a gap in the loop itself.
+    start = script.index('echo "── service files')
+    loop = script[start : script.index("── scheduled timers", start)]
+    for unit in _CORE_SERVICE_FILES:
+        assert unit in loop, f"{unit} missing from deploy-check service-file loop"
+    # The CBUAE rulebook watcher is opt-in/optional — it must NOT be asserted
+    # as a required CORE file (a missing optional unit is not a deploy failure).
+    assert "statuteproof-cbuae-rulebook-watch" not in loop
+
+
 # --- documentation: an unrestorable encrypted backup is worse than none ----
 
 

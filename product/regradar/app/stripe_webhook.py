@@ -53,6 +53,15 @@ ENTITLEMENT LIFECYCLE (the grant SET — app.db.stripe_customer_grants):
    to the highest-rank plan among their SURVIVING grants (the FREE tier only when
    none remain). Revocation only ever lowers a plan to what the survivors justify —
    never below a genuinely-paying victim's own grant, in any ordering.
+4. PLAN CHANGE — a ``customer.subscription.updated`` event (a mid-subscription
+   upgrade OR downgrade) resolves the affected user(s) from the ledger alone,
+   UPDATES ONLY that customer's own grant to the new plan, and RE-DERIVES the tier to
+   the highest-rank SURVIVING grant. It inherits rule 3's anti-takedown invariant:
+   because only the event customer's own grant is touched and the tier is the MAX
+   over all surviving grants, no update (forged — though Stripe's signature is
+   unforgeable — or genuine) can strip a victim below the victim's OWN grant floor,
+   while a legitimate self-service downgrade is finally applied (the prior code had
+   NO update handler, so a downgrade silently left the user on the higher tier).
 
 CONFIG (owner fills real values — this module invents none):
 * ``STRIPE_WEBHOOK_SECRET``  — the ``whsec_...`` signing secret for THIS endpoint.
@@ -107,12 +116,20 @@ _REVOKING_EVENT_TYPES = frozenset({
     "invoice.payment_failed",
 })
 
+# A mid-subscription plan change (upgrade OR downgrade). Handled separately from the
+# activate/revoke classes: it re-derives the tier from the grant ledger in place, and
+# is the ONLY path that applies a self-service DOWNGRADE.
+_SUBSCRIPTION_UPDATE_EVENT_TYPE = "customer.subscription.updated"
+
 # The free tier a revocation downgrades to (must be a known ``app.plan`` plan).
 FREE_PLAN = "evidence_preview"
 
 # Audit action labels recorded in the immutable access log.
 STRIPE_ACTIVATE = "stripe.activate_plan"
 STRIPE_REVOKE = "stripe.revoke_plan"
+# A mid-subscription plan CHANGE (customer.subscription.updated) re-derived a user's
+# tier from their grant ledger — the only path that applies an in-place DOWNGRADE.
+STRIPE_UPDATE = "stripe.update_plan"
 # An activation blocked because it would LOWER a user's current active plan (the
 # rank guard, rule 2) — recorded so a would-be downgrade attempt is never silent.
 STRIPE_ACTIVATE_BLOCKED = "stripe.activate_blocked"
@@ -382,33 +399,72 @@ def _current_active_plan(user_id: int) -> str:
 
 # ── user + price extraction ──────────────────────────────────────────────────────
 
-def _extract_price_id(obj: dict) -> str | None:
-    """Best-effort price id from a checkout.session / invoice event object.
+def _iter_price_ids(obj: dict) -> list[str]:
+    """Every price id across the event object's line / item collections.
 
-    Checkout sessions do not embed line items by default, so we read the common
-    locations Stripe populates: invoice lines (``lines.data[].price.id``) and, if
-    the integration expands them, checkout ``line_items``. Returns the first price
-    id found, else None (→ handled as an unknown price = no activation).
+    Covers the three shapes Stripe populates a price into:
+    * ``invoice.paid``                 → ``lines.data[].price.id``
+    * ``checkout.session.completed``   → ``line_items.data[].price.id`` (if expanded)
+    * ``customer.subscription.*``      → ``items.data[].price.id``
+
+    On a plan-change PRORATION, ``lines.data`` carries BOTH an unused-time CREDIT for
+    the OLD price (a NEGATIVE ``amount``) and the remaining-time CHARGE for the NEW
+    price (a positive ``amount``). We SKIP the negative credit lines and keep only the
+    charged prices, so this returns the go-forward CHARGED price(s) — the price the
+    customer is now actually paying — regardless of Stripe's line ordering. That makes
+    a DOWNGRADE proration map to the new (lower) plan instead of the old (higher)
+    credit, so a later-delivered invoice.paid can never re-raise a plan the customer
+    just self-service downgraded (and event ordering no longer matters). Subscription
+    ``items.data`` and checkout ``line_items`` carry no negative proration ``amount``,
+    so they are unaffected — every current price is kept.
     """
     if not isinstance(obj, dict):
-        return None
-    # invoice.paid → lines.data[].price.id
-    lines = obj.get("lines")
-    if isinstance(lines, dict):
-        for item in lines.get("data") or []:
-            if isinstance(item, dict):
-                price = item.get("price")
-                if isinstance(price, dict) and price.get("id"):
-                    return str(price["id"])
-    # checkout.session.completed (when line_items are expanded) → line_items.data[].price.id
-    line_items = obj.get("line_items")
-    if isinstance(line_items, dict):
-        for item in line_items.get("data") or []:
-            if isinstance(item, dict):
-                price = item.get("price")
-                if isinstance(price, dict) and price.get("id"):
-                    return str(price["id"])
-    return None
+        return []
+    price_ids: list[str] = []
+    for key in ("lines", "line_items", "items"):
+        container = obj.get(key)
+        if not isinstance(container, dict):
+            continue
+        for item in container.get("data") or []:
+            if not isinstance(item, dict):
+                continue
+            # Skip proration CREDIT lines: an invoice line with a negative amount is
+            # an unused-time refund for the OLD price, not an entitling charge. Only
+            # `lines.data` carries this; subscription items / checkout line_items have
+            # no `amount` field (item.get returns None) so they are never skipped.
+            amount = item.get("amount")
+            if isinstance(amount, (int, float)) and amount < 0:
+                continue
+            price = item.get("price")
+            if isinstance(price, dict) and price.get("id"):
+                price_ids.append(str(price["id"]))
+    return price_ids
+
+
+def _extract_price_id(obj: dict) -> str | None:
+    """The HIGHEST-tier mapped price id among the CHARGED prices on a
+    checkout.session / invoice / subscription.
+
+    Collects every charged price id (see :func:`_iter_price_ids`, which skips
+    proration CREDIT lines), maps each via :func:`plan_for_price`, and returns the
+    price whose plan has the HIGHEST ``_plan_rank``. Because credits are filtered
+    upstream, this returns the go-forward plan the customer is now paying for: an
+    UPGRADE proration maps to the new higher plan, a DOWNGRADE proration maps to the
+    new lower plan, and a multi-item subscription maps to its entitling (top) price —
+    all independent of Stripe's line ordering or event ordering. Returns None when no
+    charged price maps to a known plan (→ handled as an unknown price = no activation).
+    """
+    best_price: str | None = None
+    best_rank = -1
+    for pid in _iter_price_ids(obj):
+        plan = plan_for_price(pid)
+        if plan is None:
+            continue
+        rank = _plan_rank(plan)
+        if rank > best_rank:
+            best_rank = rank
+            best_price = pid
+    return best_price
 
 
 def _extract_customer_id(obj: dict) -> str | None:
@@ -564,6 +620,11 @@ def handle_webhook(payload: bytes, sig_header: str) -> tuple[int, dict[str, Any]
         if not isinstance(obj, dict):
             return 200, {"ok": True, "revoked": False, "reason": "no_object"}
         return _process_revocation(event_id, event_type, obj)
+
+    if event_type == _SUBSCRIPTION_UPDATE_EVENT_TYPE:
+        if not isinstance(obj, dict):
+            return 200, {"ok": True, "updated": False, "reason": "no_object"}
+        return _process_subscription_update(event_id, obj)
 
     # Any other event type is acknowledged and ignored (no ledger entry — we only
     # spend an idempotency slot on events we would act on).
@@ -770,4 +831,101 @@ def _process_revocation(
         "revoked": bool(revoked),
         "user_ids": revoked,
         "reason": None if revoked else outcome,
+    }
+
+
+def _process_subscription_update(
+    event_id: str, obj: dict
+) -> tuple[int, dict[str, Any]]:
+    """Apply a mid-subscription plan change (rule 4) — SAFE BY CONSTRUCTION.
+
+    A ``customer.subscription.updated`` carries the subscription's CURRENT price(s)
+    in ``items.data``. Exactly like :func:`_process_revocation`, the affected user(s)
+    are resolved ONLY through the customer→user grant ledger (never a buyer-typed
+    email), we touch ONLY that customer's OWN grant row (updating it to the new plan),
+    and we RE-DERIVE the tier to the highest-rank plan among the user's SURVIVING
+    grants. Because only the event customer's own grant is mutated and the tier is the
+    MAX over all grants, this INHERITS the anti-takedown invariant: an attacker's
+    update can never strip a victim below the victim's own-grant floor. A legitimate
+    self-service downgrade IS finally applied (there was previously no update handler).
+    NEVER raises.
+    """
+    customer_id = _extract_customer_id(obj)
+    if not customer_id:
+        return 200, {"ok": True, "updated": False, "reason": "no_customer"}
+
+    price_id = _extract_price_id(obj)
+    plan = plan_for_price(price_id) if price_id else None
+    if not plan:
+        # An unmapped price gives us no new tier to record → change nothing (fail-safe:
+        # an unknown price must never strip a user). Ack so Stripe stops retrying.
+        return 200, {"ok": True, "updated": False, "reason": "unknown_price"}
+
+    # Idempotency: claim the id BEFORE mutating any grant so a redelivery/replay no-ops.
+    if not _claim_event(event_id, _SUBSCRIPTION_UPDATE_EVENT_TYPE):
+        return 200, {"ok": True, "duplicate": True}
+
+    user_ids = _users_for_customer(customer_id)
+    if not user_ids:
+        # This customer granted nobody → nothing to update. An attacker's customer
+        # that never recorded a grant (or a signed update for a customer we never
+        # entitled) lands here as a pure no-op.
+        _record_outcome(event_id, "no_grant")
+        logger.info(
+            "stripe webhook %s: subscription.updated for customer with no grant — no-op",
+            event_id,
+        )
+        return 200, {"ok": True, "updated": False, "reason": "no_grant"}
+
+    updated: list[int] = []
+    for user_id in user_ids:
+        # Update ONLY this customer's own grant to the new plan, then RE-DERIVE the
+        # user's tier from ALL surviving grants (the MAX). A foreign customer's update
+        # can therefore only ever move ITS OWN grant — never below the victim's own.
+        _record_grant(user_id, customer_id, plan)
+        target_plan = _entitled_plan_from_grants(user_id)
+        if target_plan is None:
+            # Unreadable ledger → fail SAFE: never change a tier on a read error.
+            logger.warning(
+                "stripe webhook %s: grant ledger unreadable for user %s — no change "
+                "(fail-safe)",
+                event_id, user_id,
+            )
+            continue
+        current_plan = _current_active_plan(user_id)
+        if _plan_rank(target_plan) == _plan_rank(current_plan):
+            # The surviving grants already justify exactly the active tier → no change
+            # (e.g. a downgrade of a lower gift grant while a higher own grant stands).
+            continue
+        try:
+            from app.plan import activate_plan
+
+            activate_plan(user_id, target_plan)
+        except Exception as exc:  # noqa: BLE001 — plan change failed for this user; ack
+            logger.error(
+                "stripe webhook %s: plan change of user %s failed: %s",
+                event_id, user_id, type(exc).__name__,
+            )
+            continue
+        append_access_log(
+            actor_user_id=user_id,
+            org_id=None,
+            action=STRIPE_UPDATE,
+            result="allow",
+            resource_type="plan",
+            resource_id=f"user:{user_id}->{target_plan}@{event_id}",
+        )
+        updated.append(user_id)
+        logger.info(
+            "stripe webhook %s: re-derived user %s to %s (was %s) on subscription.updated",
+            event_id, user_id, target_plan, current_plan,
+        )
+
+    outcome = "updated" if updated else "no_change"
+    _record_outcome(event_id, outcome)
+    return 200, {
+        "ok": True,
+        "updated": bool(updated),
+        "user_ids": updated,
+        "reason": None if updated else outcome,
     }

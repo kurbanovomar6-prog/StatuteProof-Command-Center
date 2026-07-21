@@ -3687,6 +3687,43 @@ class _Handler(_TelegramHandlerMixin, _PlanHandlerMixin, BaseHTTPRequestHandler)
             affected_raw = brief_data.get("affected_entities", [])
             specific_obligation = str(brief_data.get("specific_obligation") or "")
 
+            # Legal-safety guard: exec_summary / action_text are AI- or rule-
+            # generated free text (generate_ai_brief) rendered into both the
+            # persisted brief and the JSON response. This is the one AI-text
+            # render path that skipped the shared forbidden-claims pass. Mirror
+            # alert_content SF-1: scrub any field carrying a banned claim (a
+            # hallucination or a prompt-injected instruction from an adversarial
+            # source) rather than silently passing it through. Replace the whole
+            # field with a labeled redaction so the reader knows content was
+            # withheld and the forbidden text never reaches disk or the client.
+            from app.legal_safety import find_forbidden_claims
+
+            _WITHHELD = "(withheld: content contained a prohibited compliance claim)"
+            if exec_summary and find_forbidden_claims(exec_summary):
+                logger.warning("briefs_generate: forbidden claim scrubbed from executive_summary")
+                exec_summary = _WITHHELD
+            if action_text and find_forbidden_claims(action_text):
+                logger.warning("briefs_generate: forbidden claim scrubbed from business_action_required")
+                action_text = _WITHHELD
+            # specific_obligation and affected_entities are ALSO AI-generated
+            # free text (generate_ai_brief) rendered into brief_markdown, which
+            # is persisted to disk and returned in the JSON response. Screen
+            # them through the same forbidden-claims pass so a hallucinated or
+            # prompt-injected banned claim cannot ride either render surface.
+            if specific_obligation and find_forbidden_claims(specific_obligation):
+                logger.warning("briefs_generate: forbidden claim scrubbed from specific_obligation")
+                specific_obligation = _WITHHELD
+            if isinstance(affected_raw, list) and affected_raw:
+                scrubbed_affected = []
+                for entity in affected_raw:
+                    entity_str = str(entity)
+                    if find_forbidden_claims(entity_str):
+                        logger.warning("briefs_generate: forbidden claim scrubbed from affected_entities item")
+                        scrubbed_affected.append(_WITHHELD)
+                    else:
+                        scrubbed_affected.append(entity_str)
+                affected_raw = scrubbed_affected
+
             # Build brief markdown.
             ts_now = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
             brief_id = f"brief-{source_id}-{ts_now}"

@@ -79,8 +79,24 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
     )
   }
 
-  // Paid / Founding Pilot plan
-  const caps = planState.capabilities || {}
+  // Paid / Founding Pilot plan.
+  // Entitlements shown here MUST reflect what the account has actually been
+  // ACTIVATED to (active_plan_name / active_capabilities), never the plan the
+  // user merely self-selected. A user who picks a paid tier but is still
+  // pending manual activation keeps evidence_preview caps — advertising the
+  // requested tier's limits as current would overstate their access.
+  const activePlanName = planState.active_plan_name
+  const activeDisplayName =
+    activePlanName === 'evidence_preview'
+      ? 'Source Readiness Review'
+      : planState.active_plan_display || activePlanName || displayName
+  const requestedDisplayName =
+    planState.requested_plan_display ||
+    (plan_name === 'evidence_preview' ? 'Source Readiness Review' : plan_display) ||
+    displayName
+  const isActive = status === 'active'
+  const pendingActivation = status === 'pending_manual_activation'
+  const caps = planState.active_capabilities || {}
   const sourceLimit = caps.sourceLimit ?? caps.source_limit
   const users = caps.users
   const retentionDays = caps.retentionDays ?? caps.retention_days
@@ -93,15 +109,21 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-sm font-semibold text-white">{displayName} workspace</span>
+              <span className="text-sm font-semibold text-white">{activeDisplayName} workspace</span>
               <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 text-emerald-300">
-                {status === 'active' ? 'Plan enabled' : 'Pending activation'}
+                {isActive ? 'Plan enabled' : 'Pending activation'}
               </span>
             </div>
             <p className="text-xs text-[var(--text-secondary)]">
               Your source pack is staged for validation. Live monitoring starts after source readiness confirmation.
             </p>
-            {status !== 'active' && (
+            {pendingActivation && (
+              <p className="text-xs text-amber-400 mt-1">
+                {requestedDisplayName} selected — pending manual activation. The limits below reflect your current
+                access, not the requested plan.
+              </p>
+            )}
+            {!isActive && (
               <p className="text-xs text-amber-400 mt-1">
                 Plan state shown for pilot preview. Billing is manually activated — no payment has been processed.
               </p>
@@ -111,7 +133,7 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
       </div>
       <div className="mt-3 pt-3 border-t border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Current plan', value: displayName },
+          { label: 'Current plan', value: activeDisplayName },
           { label: 'Source limit', value: sourceLimit > 100 ? 'Custom' : String(sourceLimit || '—') },
           { label: 'Users', value: users > 100 ? 'Custom' : String(users || 1) },
           { label: 'Evidence retention', value: retentionDays > 500 ? 'Custom' : retentionDays ? `${retentionDays} days` : '—' },

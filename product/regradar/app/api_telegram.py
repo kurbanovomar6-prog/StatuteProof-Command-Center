@@ -17,16 +17,26 @@ from __future__ import annotations
 from app.api import (
     TELEGRAM_ALERTS_BOT_USERNAME,
     _PAIR_GENERATE_LIMITER,
+    _RateLimiter,
     _TELEGRAM_TEST_LIMITER,
     create_pairing_code,
     get_pairing_status,
     get_telegram_link,
     logger,
+    rbac_runtime,
     require_auth,
     send_telegram_message,
     touch_telegram_test_sent,
     unlink_telegram,
 )
+
+# Dedicated fixed-window limiters for the two pairing endpoints that previously
+# had none. Status is a read (generous budget); unlink is a settings mutation
+# that severs alert delivery, so it mirrors pair_generate's tighter budget.
+# Distinct limiter objects (not reused from other endpoints) keep each bucket's
+# count isolated. Defined here so the change stays within this module.
+_PAIR_STATUS_LIMITER = _RateLimiter(60, 3600)
+_PAIR_UNLINK_LIMITER = _RateLimiter(10, 3600)
 
 
 class _TelegramHandlerMixin:
@@ -64,6 +74,9 @@ class _TelegramHandlerMixin:
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_telegram_pair_status(self) -> None:
+        if self._rate_limited(_PAIR_STATUS_LIMITER, "telegram_pair_status"):
+            return
+
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
@@ -76,9 +89,17 @@ class _TelegramHandlerMixin:
             self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
     def _handle_telegram_pair_unlink(self) -> None:
+        if self._rate_limited(_PAIR_UNLINK_LIMITER, "telegram_pair_unlink"):
+            return
+
         user = require_auth(self)
         if not user:
             self._send_json({"ok": False, "message": "Unauthenticated."}, 401)
+            return
+        # Unlink severs alert-delivery configuration — a settings mutation, like
+        # profile_update / plan_set. Gate it on SETTINGS_EDIT so a read-only
+        # auditor seat is denied 403 (owner seats, the only live role, still pass).
+        if not self._rbac_guard(user, rbac_runtime.SETTINGS_EDIT, resource_type="settings"):
             return
         try:
             unlink_telegram(int(user["id"]))

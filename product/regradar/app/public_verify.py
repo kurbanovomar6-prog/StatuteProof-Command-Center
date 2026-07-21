@@ -84,6 +84,13 @@ _HASH_PATHS: dict[str, tuple[tuple[str, ...], ...]] = {
     "diff_hash": (("content", "diff_hash"), ("diff_hash",)),
     "record_hash": (("record_hash",),),
     "prev_record_hash": (("prev_record_hash",),),
+    # content_hash is the coverage certificate's full-document self-seal
+    # (``sha256:`` + canonical_record_hash(cert minus generated_at_utc/content_hash),
+    # stamped by app.coverage_certificate). The source-run trail record ALSO carries
+    # a top-level content_hash with different semantics (stable_content_hash of the
+    # normalized bytes) — that one is only format-checked here; the certificate
+    # recompute below fires ONLY for records the cert detector recognizes.
+    "content_hash": (("content_hash",),),
 }
 
 
@@ -118,6 +125,7 @@ def verify_submission(
             _guard(_check_record_is_object, record),
             _guard(_check_hash_formats, hashes, is_obj),
             _guard(_check_record_hash_self_consistent, record, hashes, is_obj),
+            _guard(_check_certificate_content_hash_self_consistent, record, is_obj),
             _guard(_check_raw_bytes, hashes, raw),
             _guard(_check_normalized_bytes, hashes, normalized),
             _guard(_check_diff_bytes, hashes, diff),
@@ -162,6 +170,8 @@ def _check_record_is_object(record: Any) -> dict[str, str]:
     name = "record_is_object"
     if not isinstance(record, dict):
         return _fail(name, "The submitted record is not a JSON object.")
+    if _is_coverage_certificate(record):
+        return _pass(name, "The submitted record is a coverage certificate of the expected shape.")
     hashes = _extract_hashes(record)
     # The canonical shape always carries at least a normalized/current content
     # hash OR a record_hash. A blob with none of these is not a StatuteProof
@@ -257,6 +267,75 @@ def _check_record_hash_self_consistent(
         name,
         "record_hash does not recompute from the record's fields — "
         "the record was altered.",
+    )
+
+
+def _is_coverage_certificate(record: Any) -> bool:
+    """True for a StatuteProof coverage certificate carrying a content_hash seal.
+
+    A coverage certificate has no current_hash/record_hash — its full-document seal
+    is the top-level ``content_hash``. Keyed on the certificate's own identity
+    signals (``document_type`` or a ``cov-`` id) PLUS a string ``content_hash`` so
+    the certificate recompute never fires on a source-run trail record, which also
+    carries a top-level ``content_hash`` but with different (bytes-hash) semantics.
+    """
+    if not isinstance(record, dict):
+        return False
+    content_hash = record.get("content_hash")
+    if not isinstance(content_hash, str) or not content_hash.strip():
+        return False
+    return (
+        record.get("document_type") == "coverage_certificate"
+        or str(record.get("certificate_id") or "").startswith("cov-")
+    )
+
+
+def _check_certificate_content_hash_self_consistent(record: Any, is_obj: bool) -> dict[str, str]:
+    """Recompute the coverage certificate's full-document ``content_hash`` seal.
+
+    Mirrors :func:`_check_record_hash_self_consistent` for the certificate shape:
+    reproduce ``canonical_record_hash`` over the certificate MINUS ``generated_at_utc``
+    and ``content_hash`` — exactly the subset app.coverage_certificate sealed — and
+    compare. This is what catches an edit to the negative-assurance statement prose or
+    a row's continuity_status/degraded flag that leaves ``certificate_id`` unchanged.
+    Skips for any record that is not a sealed certificate (never a false failure).
+    """
+    name = "certificate_content_hash_self_consistent"
+    if not is_obj:
+        return _skip(name, "No record object to recompute.")
+    if not _is_coverage_certificate(record):
+        return _skip(
+            name,
+            "The record is not a sealed coverage certificate (no content_hash seal); "
+            "nothing to self-check.",
+        )
+    stored_bare = _bare_digest(record.get("content_hash"))
+    if stored_bare is None:
+        return _fail(name, "content_hash is not a valid sha256 digest.")
+    sealed = {
+        key: value
+        for key, value in record.items()
+        if key not in ("generated_at_utc", "content_hash")
+    }
+    try:
+        recomputed = canonical_record_hash(sealed)
+    except (ValueError, TypeError):
+        # A non-finite float (or otherwise non-serializable value) in a submitted,
+        # tampered certificate — the genuine seal never contains one. Fail closed.
+        return _fail(
+            name,
+            "The certificate content could not be canonically re-hashed "
+            "(it contains a value that cannot be sealed).",
+        )
+    if recomputed == stored_bare:
+        return _pass(
+            name,
+            "content_hash recomputes from the full certificate document.",
+        )
+    return _fail(
+        name,
+        "content_hash does not recompute from the certificate document — "
+        "the certificate was altered.",
     )
 
 

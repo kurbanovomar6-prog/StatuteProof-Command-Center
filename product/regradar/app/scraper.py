@@ -330,10 +330,12 @@ SSRF_RESIDUAL_RISK = (
     "this tier — unlike Tier 1 (requests), which pins the vetted IP and is "
     "fully rebind-proof. This is a known, intentional gap: full per-hop IP "
     "pinning is not achievable through Playwright's public "
-    "route-interception API. Also out of scope: any Playwright-driven "
-    "fetch path outside app/scraper.py (e.g. app/source_discovery.py's "
-    "capture_playwright_network_candidates, which creates its own browser "
-    "context) does not install this guard and was not touched by this fix."
+    "route-interception API. The sibling Playwright-driven fetch path in "
+    "app/source_discovery.py (capture_playwright_network_candidates, which "
+    "creates its own browser context) now installs the SAME guard via "
+    "_install_ssrf_guard(context) and additionally re-validates each response "
+    "URL with _validate_fetch_target before echoing any body (SEC-1); it "
+    "carries the same Tier-2 DNS-rebind residual described above."
 )
 
 # Non-network / browser-internal schemes that must never be run through the

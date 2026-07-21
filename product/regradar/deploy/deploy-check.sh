@@ -202,7 +202,10 @@ fi
 echo "── service files ────────────────────────────────────────"
 for unit in statuteproof-api.service statuteproof-scheduler.service \
             statuteproof-telegram-bot.service statuteproof-compaction.service \
-            statuteproof-compaction.timer; do
+            statuteproof-compaction.timer statuteproof-backup.service \
+            statuteproof-backup.timer statuteproof-heartbeat.service \
+            statuteproof-heartbeat.timer statuteproof-verify.service \
+            statuteproof-verify.timer; do
   [ -f "deploy/systemd/$unit" ] && ok "deploy/systemd/$unit present" || bad "deploy/systemd/$unit missing"
 done
 [ -f deploy/Caddyfile ] && ok "deploy/Caddyfile present" || bad "deploy/Caddyfile missing"

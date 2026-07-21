@@ -41,6 +41,7 @@ from typing import Any
 from app.evidence_assessment import LEGAL_DISCLAIMER
 from app.legal_safety import find_forbidden_claims as _find_forbidden_claims
 from app.monthly_assurance_report import _FORBIDDEN_PHRASES
+from app.record_hashing import canonical_record_hash
 from app.source_health_timeline import source_health_customer_message
 
 logger = logging.getLogger(__name__)
@@ -589,6 +590,7 @@ def build_coverage_certificate(
         "disclaimer_short": LEGAL_DISCLAIMER,
     }
     certificate["certificate_id"] = _certificate_id(certificate)
+    certificate["content_hash"] = _content_hash(certificate)
     return certificate
 
 
@@ -680,6 +682,55 @@ def _certificate_id(certificate: dict[str, Any]) -> str:
         )
     seed = "\n".join(seed_parts)
     return "cov-" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:20]
+
+
+def _assert_hashable_types(value: Any, path: str = "certificate") -> None:
+    """Guard: every leaf in the sealed certificate subset must be str/int/bool/None.
+
+    ``canonical_record_hash`` only rejects NON-finite floats (NaN/Infinity); a
+    FINITE float would serialize fine there but its ``repr`` is not guaranteed
+    byte-identical across languages, so an independent auditor (jq/Go/JS) could not
+    reproduce the digest — a silently unverifiable seal. Refuse to seal instead.
+    ``bool`` is a subclass of ``int`` and is allowed; a genuine certificate carries
+    only strings, ints, bools, and null, so this guard holds without coercion.
+    """
+    if value is None or isinstance(value, (str, bool, int)):
+        # bool/int both caught here; a float is NOT an int subclass, so it falls through.
+        return
+    if isinstance(value, dict):
+        for key, sub in value.items():
+            _assert_hashable_types(sub, f"{path}.{key}")
+        return
+    if isinstance(value, list):
+        for index, sub in enumerate(value):
+            _assert_hashable_types(sub, f"{path}[{index}]")
+        return
+    raise TypeError(
+        f"Coverage certificate field {path} has non-sealable type "
+        f"{type(value).__name__!r}; the content_hash seal requires str/int/bool/null only "
+        "(floats are forbidden — their repr is not reproducible across languages)."
+    )
+
+
+def _content_hash(certificate: dict[str, Any]) -> str:
+    """Full-document self-seal over the WHOLE certificate.
+
+    Unlike :func:`_certificate_id` (which hashes only a fixed subset of fields and
+    is kept unchanged for back-compat), this covers every field — the
+    ``negative_assurance_statement`` prose, the disclaimer, and each row's
+    ``continuity_status`` / ``degraded`` / ``last_check_utc`` / ``checks_in_period``
+    — so altering any of them changes the seal. Excludes ``generated_at_utc`` (so an
+    identical re-issue for the same evidence seals identically) and ``content_hash``
+    itself. Reuses the shared ``canonical_record_hash`` so the public verifier
+    (:mod:`app.public_verify`) recomputes the SAME digest.
+    """
+    sealed = {
+        key: value
+        for key, value in certificate.items()
+        if key not in ("generated_at_utc", "content_hash")
+    }
+    _assert_hashable_types(sealed)
+    return "sha256:" + canonical_record_hash(sealed)
 
 
 def _utc_now(now: datetime) -> str:

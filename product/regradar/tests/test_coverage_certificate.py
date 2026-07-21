@@ -469,5 +469,137 @@ class CoverageCertificateTest(unittest.TestCase):
         self.assertIn(_FULL_DISCLAIMER_MARK, out.read_text(encoding="utf-8"))
 
 
+class CoverageCertificateContentHashSealTest(unittest.TestCase):
+    """The full-document content_hash seal and its public-verifier round-trip.
+
+    certificate_id covers only a fixed subset, so it CANNOT detect an edit to the
+    negative-assurance prose or a row's continuity_status/degraded flag. content_hash
+    is the whole-document seal that does, and app.public_verify recomputes it.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.base = Path(self._tmp.name)
+        _standard_scenario(self.base)
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    def _cert(self):
+        return build_coverage_certificate(
+            period_start="2026-06-01",
+            period_end="2026-06-15",
+            client_name="Acme Compliance",
+            base_dir=self.base,
+            now=_NOW,
+        )
+
+    def test_certificate_carries_a_full_document_content_hash(self):
+        cert = self._cert()
+        self.assertIn("content_hash", cert)
+        self.assertTrue(cert["content_hash"].startswith("sha256:"))
+        self.assertEqual(len(cert["content_hash"].removeprefix("sha256:")), 64)
+
+    def test_content_hash_is_deterministic_and_excludes_generated_at(self):
+        # Re-issuing for the same evidence with a different generated_at seals identically.
+        cert_a = self._cert()
+        later = datetime(2026, 6, 17, 9, 30, tzinfo=timezone.utc)
+        cert_b = build_coverage_certificate(
+            period_start="2026-06-01",
+            period_end="2026-06-15",
+            client_name="Acme Compliance",
+            base_dir=self.base,
+            now=later,
+        )
+        self.assertNotEqual(cert_a["generated_at_utc"], cert_b["generated_at_utc"])
+        self.assertEqual(cert_a["content_hash"], cert_b["content_hash"])
+
+    def test_genuine_certificate_verifies_via_public_verify(self):
+        from app.public_verify import verify_submission
+
+        cert = self._cert()
+        result = verify_submission(cert)
+        self.assertTrue(result["verified"], result["checks"])
+        check = _find_check(result, "certificate_content_hash_self_consistent")
+        self.assertEqual(check["status"], "pass")
+
+    def test_altered_negative_assurance_statement_fails_content_hash(self):
+        from app.public_verify import verify_submission
+
+        cert = self._cert()
+        cert["negative_assurance_statement"] += " (edited after sealing)"
+        # certificate_id is unchanged by this edit — only content_hash catches it.
+        result = verify_submission(cert)
+        self.assertFalse(result["verified"])
+        check = _find_check(result, "certificate_content_hash_self_consistent")
+        self.assertEqual(check["status"], "fail")
+        self.assertIn("altered", check["detail"])
+
+    def test_altered_row_continuity_status_fails_content_hash(self):
+        from app.public_verify import verify_submission
+
+        cert = self._cert()
+        row = cert["sources"][0]
+        # Launder the status to a different value than it genuinely holds.
+        row["continuity_status"] = "NO_COVERAGE" if row["continuity_status"] != "NO_COVERAGE" else "CONTINUOUS"
+        result = verify_submission(cert)
+        self.assertFalse(result["verified"])
+        self.assertEqual(
+            _find_check(result, "certificate_content_hash_self_consistent")["status"], "fail"
+        )
+
+    def test_altered_row_degraded_flag_fails_content_hash(self):
+        from app.public_verify import verify_submission
+
+        cert = self._cert()
+        # Flip a degraded row's flag to hide a failed/degraded check.
+        for row in cert["sources"]:
+            if row["degraded"]:
+                row["degraded"] = False
+                break
+        else:
+            self.fail("scenario should include a degraded source")
+        result = verify_submission(cert)
+        self.assertFalse(result["verified"])
+        self.assertEqual(
+            _find_check(result, "certificate_content_hash_self_consistent")["status"], "fail"
+        )
+
+    def test_float_field_is_rejected_before_sealing(self):
+        # The seal guard forbids floats: their repr is not byte-reproducible across
+        # languages, so an auditor could not recompute the digest. Fail loudly.
+        from app.coverage_certificate import _content_hash
+
+        cert = self._cert()
+        cert["summary"]["total_checks"] = 30.0  # an int silently turned float
+        with self.assertRaises(TypeError):
+            _content_hash(cert)
+
+    def test_trail_record_content_hash_is_not_treated_as_certificate(self):
+        # A source-run trail record ALSO carries a top-level content_hash (different
+        # semantics). The certificate recompute must SKIP it, not falsely fail it.
+        from app.public_verify import verify_submission
+
+        trail = {
+            "source_id": "AE-x",
+            "timestamp_utc": "2026-06-10T00:00:00Z",
+            "change_status": "FIRST_SEEN",
+            "content_hash": "a" * 64,
+            "normalized_hash": "b" * 64,
+        }
+        result = verify_submission(trail)
+        self.assertEqual(
+            _find_check(result, "certificate_content_hash_self_consistent")["status"],
+            "skipped",
+        )
+
+
+def _find_check(result: dict, name: str) -> dict:
+    for check in result["checks"]:
+        if check["name"] == name:
+            return check
+    raise AssertionError(f"check {name!r} not in {[c['name'] for c in result['checks']]}")
+
+
 if __name__ == "__main__":
     unittest.main()

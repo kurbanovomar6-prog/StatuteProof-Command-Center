@@ -16,3 +16,8 @@ ProtectSystem=full
 ReadWritePaths=/srv/regradar
 StandardOutput=journal
 StandardError=journal
+# Exit 1 (evidence-trail divergence) is an expected post-page signal, not a
+# service fault — the founder has already been alerted via Telegram inside
+# run.py verify-trail-watch. Treat it as clean so the timer keeps firing
+# instead of the unit going into failed state (mirrors the heartbeat unit).
+SuccessExitStatus=0 1
