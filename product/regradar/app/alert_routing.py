@@ -693,6 +693,200 @@ def _official_alert_blocked_by_plan(user_id: int, source_id: object) -> bool:
         return True
 
 
+# Paid official-source payload withheld from a non-eligible account's preview.
+# Keys are NEVER dropped — only emptied — so a UI can render either state.
+_PLAN_REDACTED_TEXT_FIELDS = ("executive_summary", "business_action")
+# `proof` is deliberately NOT withheld: it is an evidence-record id + self-seal
+# hash, not official-source text, and the UI reads it as "does a sealed record
+# exist for this alert?" — nulling it made the dashboard state that none does,
+# which is false about the evidence trail this product is built on.
+_PLAN_REDACTED_NULL_FIELDS = ("diff_excerpt", "source_url", "url")
+_PLAN_REDACTED_FIELDS = _PLAN_REDACTED_TEXT_FIELDS + _PLAN_REDACTED_NULL_FIELDS
+_PLAN_REDACTED_REASON = "Official-source alert content requires an active plan."
+
+# Per-surface field registry. Every READER of official-source content declares
+# its paid fields HERE and passes its payload through
+# ``redact_official_item_for_plan`` — the single choke point. The escalation
+# that produced this shape: the entitlement decision used to live in ONE
+# handler, so each sibling reader (the effective-dates calendar, the decision
+# seal) silently re-opened the hole with its own copy of the payload.
+#
+#   blank -> "" (the field is a string in that payload's contract)
+#   null  -> None (the field is nullable there)
+#
+# Keys are never DROPPED, only emptied, so a UI can render either state and no
+# response shape changes.
+_PLAN_REDACTED_CALENDAR_BLANK_FIELDS = ("excerpt", "official_url")
+_PLAN_REDACTED_DECISION_BLANK_FIELDS = ("official_url",)
+
+_UNSET = object()
+
+
+def redact_official_item_for_plan(
+    user_id: int,
+    item: dict,
+    *,
+    source_id: object = _UNSET,
+    blank_fields: tuple[str, ...] = (),
+    null_fields: tuple[str, ...] = (),
+    mark: bool = True,
+) -> tuple[dict, bool]:
+    """THE choke point: withhold paid official-source fields from one payload.
+
+    Every read surface that serves official-source content — the delivery
+    preview, the effective-dates calendar, the sealed decision record — passes
+    its item through here rather than re-deciding entitlement locally. Gates on
+    the SAME switch (``telegram_pairing.alerts_require_plan``) and the SAME
+    eligibility helper (``_official_alert_blocked_by_plan``) as delivery: no
+    second flag, no copied predicate.
+
+    ``source_id`` defaults to ``item['source_id']``. A customer's own CUSTOM
+    source is never gated (it is not the official-source deliverable) and an
+    unclassifiable source fails CLOSED — both decided inside the helper.
+
+    ``mark=False`` suppresses the ``plan_redacted``/``redacted_fields`` markers
+    for payloads whose shape is fixed by another contract (the sealed decision
+    record's ``reviewed`` block is shape-validated and key-bounded before it is
+    hashed into the org chain).
+
+    Returns ``(new_item, was_redacted)``; the caller's item is not mutated.
+    """
+    if not isinstance(item, dict):
+        return item, False
+    sid = item.get("source_id") if source_id is _UNSET else source_id
+    if not _official_alert_blocked_by_plan(int(user_id), sid):
+        return ({**item, "plan_redacted": False} if mark else dict(item)), False
+    redacted = {
+        **item,
+        **{field: "" for field in blank_fields},
+        **{field: None for field in null_fields},
+    }
+    if mark:
+        redacted["plan_redacted"] = True
+        redacted["redacted_fields"] = list(blank_fields + null_fields)
+    return redacted, True
+
+
+def _plan_redaction_block(fields: tuple[str, ...], redacted_count: int) -> dict:
+    return {
+        "applied": redacted_count > 0,
+        "code": "plan_required",
+        "redacted_matches": redacted_count,
+        "fields": list(fields),
+        "message": _PLAN_REDACTED_REASON,
+    }
+
+
+def redact_preview_for_plan(user_id: int, preview: dict) -> dict:
+    """Withhold the paid official-source payload from a non-eligible preview.
+
+    The delivery gate (``_official_alert_blocked_by_plan``) refuses to SEND
+    official-source content to a free account, but the read surface
+    (GET /api/delivery/preview) served the same content — executive summary,
+    business action, official URL, verbatim diff excerpt — to any authenticated
+    caller, who could also poll it. This closes that gap on the SAME switch and
+    the SAME eligibility helper as delivery: no second flag, no copied
+    predicate.
+
+    A redacted view is served rather than a blanket 402 so the free tier still
+    shows honestly what monitoring found (counts, source names, risk levels,
+    dates) without handing over the deliverable it has not bought. Per-match,
+    because a customer's own CUSTOM source is not the official-source
+    deliverable and stays fully visible to its owner (the preview builder has
+    already tenancy-filtered custom sources to the caller).
+
+    Returns a NEW dict; the caller's preview is not mutated.
+    """
+    matches = preview.get("matches") if isinstance(preview, dict) else None
+    if not isinstance(matches, list):
+        return preview
+
+    redacted_matches = []
+    redacted_count = 0
+    for match in matches:
+        redacted, was_redacted = redact_official_item_for_plan(
+            int(user_id),
+            match,
+            blank_fields=_PLAN_REDACTED_TEXT_FIELDS,
+            null_fields=_PLAN_REDACTED_NULL_FIELDS,
+        )
+        if was_redacted:
+            redacted_count += 1
+            reasons = [str(item) for item in _safe_list(match.get("not_ready_reasons"))]
+            # Delivery would refuse this alert with 402, so the read surface
+            # must not advertise it as ready to send.
+            redacted["delivery_ready"] = False
+            redacted["not_ready_reasons"] = list(dict.fromkeys(reasons + [_PLAN_REDACTED_REASON]))
+        redacted_matches.append(redacted)
+
+    return {
+        **preview,
+        "matches": redacted_matches,
+        "plan_redaction": _plan_redaction_block(_PLAN_REDACTED_FIELDS, redacted_count),
+    }
+
+
+def redact_effective_dates_for_plan(user_id: int, result: dict) -> dict:
+    """Withhold the paid official-source payload from the effective-dates view.
+
+    GET /api/calendar/effective-dates serves, per detected date, a VERBATIM
+    excerpt of the changed official-source text plus the official URL — the same
+    field class the preview redacts and the redline/diff/brief refuse with 402,
+    and arguably the most sellable slice of it (the changed obligation text and
+    its deadline). It was behind auth + tenancy only, so a free account could
+    ask the calendar instead of the preview.
+
+    Kept for a non-eligible account: the date, its detected type, the source
+    name/regulator and the SEALED verification pointer (record_hash +
+    evidence_record_id) — enough to see honestly that monitoring is running and
+    that a sealed record exists, without handing over the deliverable. Per item,
+    so a free owner's own CUSTOM source stays fully visible.
+
+    Returns a NEW dict; the caller's result is not mutated.
+    """
+    dates = result.get("dates") if isinstance(result, dict) else None
+    if not isinstance(dates, list):
+        return result
+
+    out = []
+    redacted_count = 0
+    for item in dates:
+        redacted, was_redacted = redact_official_item_for_plan(
+            int(user_id), item, blank_fields=_PLAN_REDACTED_CALENDAR_BLANK_FIELDS
+        )
+        redacted_count += 1 if was_redacted else 0
+        out.append(redacted)
+
+    return {
+        **result,
+        "dates": out,
+        "plan_redaction": _plan_redaction_block(
+            _PLAN_REDACTED_CALENDAR_BLANK_FIELDS, redacted_count
+        ),
+    }
+
+
+def redact_decision_reviewed_for_plan(user_id: int, reviewed: dict, source_id: object) -> dict:
+    """Withhold the official URL from a sealed decision's "what they saw" block.
+
+    POST /api/decisions copies ``match['source_url']`` into
+    ``content.reviewed.official_url`` and returns the sealed record, echoing to
+    a non-eligible account one of the very fields the preview withholds. The
+    sealed record's own shape is validated and key-bounded before hashing, so
+    no marker keys are added here — the field is emptied, which is already a
+    legitimate value for it (an alert with no URL seals ``""`` today), and the
+    evidence_record_id + record_hash still identify exactly what was reviewed.
+    """
+    redacted, _ = redact_official_item_for_plan(
+        int(user_id),
+        reviewed,
+        source_id=source_id,
+        blank_fields=_PLAN_REDACTED_DECISION_BLANK_FIELDS,
+        mark=False,
+    )
+    return redacted
+
+
 def send_preview_alert_to_user(user_id: int, alert_id: str) -> dict:
     safe_alert_id = str(alert_id or "").strip()
     preview = build_routing_preview_for_user(int(user_id))

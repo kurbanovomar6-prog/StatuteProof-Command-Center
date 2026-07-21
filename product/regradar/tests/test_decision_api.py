@@ -339,7 +339,14 @@ def test_post_alert_without_proof_is_refused_409(isolated_db, monkeypatch):
 # ── 6. happy path: seal + reviewed binding + amend ───────────────────────────────
 
 def test_happy_path_seals_and_binds_reviewed_from_the_match(isolated_db, monkeypatch):
+    from app.plan import activate_plan
+
     owner = _new_owner("sealer@example.com", full_name="A. Rahman")
+    # The sealed ``reviewed`` block carries the official URL only for a
+    # plan-eligible account — the same entitlement boundary as every other
+    # reader of official-source content (see
+    # tests/test_alert_plan_gating.py::test_free_account_decision_does_not_echo_official_url).
+    activate_plan(owner["id"], "professional")
     org_id = _owned_org_id(owner["id"])
     _auth_as(
         monkeypatch,

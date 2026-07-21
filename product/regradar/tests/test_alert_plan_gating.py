@@ -21,6 +21,7 @@ FILTER on top of ``get_all_linked_chat_ids()``'s return value
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -458,3 +459,826 @@ def test_flag_off_restores_ungated_dashboard_send(isolated_db, monkeypatch):
 
     assert result["ok"] is True
     assert sent_to == ["990006"]
+
+
+# ---------------------------------------------------------------------------
+# Preview-surface entitlement: GET /api/delivery/preview returned the FULL
+# official-source payload (title, executive summary, business action, official
+# URL, verbatim diff excerpt) to any authenticated account, so a free account
+# could read — and poll — exactly what POST /api/delivery/send-preview-alert
+# refuses with 402.
+#
+# Fix under test: the preview surface serves a REDACTED view to accounts that
+# are not plan-eligible (same flag, same eligibility helper as delivery):
+# counts, source names, risk levels and dates stay; the paid official-source
+# content is withheld and marked machine-readably. A free owner's own CUSTOM
+# source stays fully visible — it is not the official-source deliverable.
+# ---------------------------------------------------------------------------
+
+from io import BytesIO  # noqa: E402
+from unittest.mock import MagicMock  # noqa: E402
+
+
+def _full_match(source_id: str = "AE-1", alert_id: str = "prev-1") -> dict:
+    return {
+        "alert_id": alert_id,
+        "source_id": source_id,
+        "source_name": "DFSA",
+        "source_url": "https://dfsa.example.ae/rulebook-change",
+        "url": "https://dfsa.example.ae/rulebook-change",
+        "title": "Rulebook amendment",
+        "risk_level": "HIGH",
+        "change_type": "REGULATORY_UPDATE",
+        "market": "DIFC",
+        "jurisdiction": "DIFC",
+        "topics": ["aml"],
+        "executive_summary": "The monitored page changed in section 5.3.",
+        "business_action": "Review your AML procedures.",
+        "diff_excerpt": "+ firms must ensure and evidence ongoing compliance",
+        "proof": {"evidence_record_id": "rec-1", "record_hash": "abc123"},
+        "score": 80,
+        "matched": True,
+        "delivery_ready": True,
+        "not_ready_reasons": [],
+        "limitations": [],
+        "reviewed_at": "2026-07-10T10:00:00+00:00",
+    }
+
+
+def _preview_fixture(source_id: str = "AE-1") -> dict:
+    return {
+        "ok": True,
+        "days": 14,
+        "alerts_considered": 1,
+        "matches": [_full_match(source_id)],
+        "ranked_by": "profile_fit",
+        "empty_state": None,
+        "profile_ready": True,
+        "not_ready_reasons": [],
+    }
+
+
+def _preview_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
+    """Drive GET /api/delivery/preview for ``user_id`` with a stubbed builder."""
+    import app.api as api
+
+    handler = api._Handler.__new__(api._Handler)
+    handler.command = "GET"
+    handler.path = "/api/delivery/preview?days=14"
+    handler.request = MagicMock()
+    handler.client_address = ("127.0.0.1", 9999)
+    handler.server = MagicMock()
+    handler.rfile = BytesIO(b"")
+    handler.wfile = BytesIO()
+    handler.close_connection = False
+    hdrs = MagicMock()
+    hdrs.get = lambda key, default="": {"Content-Length": "0"}.get(key, default)
+    handler.headers = hdrs
+    sent: list[tuple[dict, int]] = []
+    handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
+
+    monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(
+        api, "build_routing_preview_for_user", lambda uid, days=14: _preview_fixture(source_id)
+    )
+    handler._handle_delivery_preview()
+    return sent[-1]
+
+
+def test_free_account_preview_redacts_official_source_content(isolated_db, monkeypatch):
+    """The leak: a free account read the paid deliverable through the preview."""
+    user_id = _make_paired_user("free-preview@co.com", "810001", alerts_enabled=True)
+
+    body, status = _preview_handler(monkeypatch, user_id)
+
+    assert status == 200
+    assert body["ok"] is True
+    match = body["preview"]["matches"][0]
+    # Withheld paid content — keys stay present so the UI cannot crash.
+    assert match["diff_excerpt"] is None
+    assert match["executive_summary"] == ""
+    assert match["business_action"] == ""
+    assert match["source_url"] is None
+    assert match["url"] is None
+    # `proof` is NOT withheld — see test_redacted_preview_keeps_the_sealed_proof_block.
+    assert match["proof"] == {"evidence_record_id": "rec-1", "record_hash": "abc123"}
+    # Kept: enough to prove monitoring is running and to price the upgrade.
+    assert match["source_name"] == "DFSA"
+    assert match["risk_level"] == "HIGH"
+    assert match["alert_id"] == "prev-1"
+    # Machine-readable marker for the frontend's upgrade state.
+    assert match["plan_redacted"] is True
+    assert match["delivery_ready"] is False
+    redaction = body["preview"]["plan_redaction"]
+    assert redaction["applied"] is True
+    assert redaction["code"] == "plan_required"
+    assert redaction["redacted_matches"] == 1
+
+
+def test_paid_account_preview_keeps_official_source_content(isolated_db, monkeypatch):
+    from app.plan import activate_plan
+
+    user_id = _make_paired_user("paid-preview@co.com", "810002", alerts_enabled=True)
+    activate_plan(user_id, "professional")
+
+    body, status = _preview_handler(monkeypatch, user_id)
+
+    assert status == 200
+    match = body["preview"]["matches"][0]
+    assert match["diff_excerpt"] == "+ firms must ensure and evidence ongoing compliance"
+    assert match["executive_summary"] == "The monitored page changed in section 5.3."
+    assert match["business_action"] == "Review your AML procedures."
+    assert match["source_url"] == "https://dfsa.example.ae/rulebook-change"
+    assert match["proof"] == {"evidence_record_id": "rec-1", "record_hash": "abc123"}
+    assert match["plan_redacted"] is False
+    assert match["delivery_ready"] is True
+    assert body["preview"]["plan_redaction"]["applied"] is False
+
+
+def test_free_owner_custom_source_preview_stays_fully_visible(isolated_db, monkeypatch):
+    """A customer's own PRIVATE custom source is not the paid deliverable."""
+    user_id = _make_paired_user("free-custom-preview@co.com", "810003", alerts_enabled=True)
+
+    body, status = _preview_handler(monkeypatch, user_id, source_id="custom-abcd1234")
+
+    assert status == 200
+    match = body["preview"]["matches"][0]
+    assert match["diff_excerpt"] == "+ firms must ensure and evidence ongoing compliance"
+    assert match["executive_summary"] == "The monitored page changed in section 5.3."
+    assert match["source_url"] == "https://dfsa.example.ae/rulebook-change"
+    assert match["plan_redacted"] is False
+    assert body["preview"]["plan_redaction"]["applied"] is False
+
+
+def test_flag_off_restores_full_preview_for_free_account(isolated_db, monkeypatch):
+    """Same switch as delivery: STATUTEPROOF_ALERTS_REQUIRE_PLAN=0 → today's
+    ungated preview."""
+    monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
+    user_id = _make_paired_user("free-preview-off@co.com", "810004", alerts_enabled=True)
+
+    body, status = _preview_handler(monkeypatch, user_id)
+
+    assert status == 200
+    match = body["preview"]["matches"][0]
+    assert match["diff_excerpt"] == "+ firms must ensure and evidence ongoing compliance"
+    assert match["executive_summary"] == "The monitored page changed in section 5.3."
+    assert match["plan_redacted"] is False
+
+
+def test_exempt_operator_preview_is_not_redacted(isolated_db, monkeypatch):
+    monkeypatch.setenv("STATUTEPROOF_ALERT_PLAN_EXEMPT_EMAILS", "founder@statuteproof.com")
+    user_id = _make_paired_user("founder@statuteproof.com", "810005", alerts_enabled=True)
+
+    body, status = _preview_handler(monkeypatch, user_id)
+
+    assert status == 200
+    assert body["preview"]["matches"][0]["plan_redacted"] is False
+
+
+# ---------------------------------------------------------------------------
+# Sibling read surface: GET /api/alerts/redline renders the SEALED diff for one
+# alert (added/removed text) behind require_auth only. The redacted preview
+# still hands a free account every ``alert_id``, so redacting the preview alone
+# left the paid diff one request away — the same content the delivery gate
+# refuses with 402. Gated here on the SAME flag + eligibility helper.
+# ---------------------------------------------------------------------------
+
+
+def _redline_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
+    """Drive GET /api/alerts/redline for ``user_id`` with a stubbed match."""
+    import app.api as api
+    import app.sealed_redline as sealed_redline
+
+    handler = api._Handler.__new__(api._Handler)
+    handler.command = "GET"
+    handler.path = "/api/alerts/redline?alert_id=prev-1&days=14"
+    handler.request = MagicMock()
+    handler.client_address = ("127.0.0.1", 9999)
+    handler.server = MagicMock()
+    handler.rfile = BytesIO(b"")
+    handler.wfile = BytesIO()
+    handler.close_connection = False
+    hdrs = MagicMock()
+    hdrs.get = lambda key, default="": {"Content-Length": "0"}.get(key, default)
+    handler.headers = hdrs
+    sent: list[tuple[dict, int]] = []
+    handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
+
+    monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(
+        api,
+        "find_routing_match_for_user",
+        lambda uid, alert_id, days=14: _full_match(source_id),
+    )
+    monkeypatch.setattr(
+        sealed_redline,
+        "build_redline_for_match",
+        lambda match, **kw: {
+            "available": True,
+            "blocks": [{"kind": "added", "text": "firms must ensure and evidence compliance"}],
+        },
+    )
+    handler._rate_limited = lambda *a, **kw: False
+    handler._handle_alert_redline_get()
+    return sent[-1]
+
+
+def test_free_account_redline_is_refused(isolated_db, monkeypatch):
+    """The bypass: preview redaction is worthless if the diff is one GET away."""
+    user_id = _make_paired_user("free-redline@co.com", "820001", alerts_enabled=True)
+
+    body, status = _redline_handler(monkeypatch, user_id)
+
+    assert status == 402
+    assert body["ok"] is False
+    assert body["reason"] == "plan_required"
+    assert "redline" not in body
+
+
+def test_paid_account_redline_is_served(isolated_db, monkeypatch):
+    from app.plan import activate_plan
+
+    user_id = _make_paired_user("paid-redline@co.com", "820002", alerts_enabled=True)
+    activate_plan(user_id, "professional")
+
+    body, status = _redline_handler(monkeypatch, user_id)
+
+    assert status == 200
+    assert body["redline"]["blocks"][0]["text"].startswith("firms must ensure")
+
+
+def test_free_owner_custom_source_redline_is_served(isolated_db, monkeypatch):
+    """A customer's own private source is not the official-source deliverable."""
+    user_id = _make_paired_user("free-custom-redline@co.com", "820003", alerts_enabled=True)
+
+    body, status = _redline_handler(monkeypatch, user_id, source_id="custom-abcd1234")
+
+    assert status == 200
+    assert body["redline"]["available"] is True
+
+
+def test_flag_off_restores_ungated_redline(isolated_db, monkeypatch):
+    monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
+    user_id = _make_paired_user("free-redline-off@co.com", "820004", alerts_enabled=True)
+
+    body, status = _redline_handler(monkeypatch, user_id)
+
+    assert status == 200
+    assert body["redline"]["available"] is True
+
+
+# ---------------------------------------------------------------------------
+# Round 2, finding 4: redaction must never DENY that a sealed record exists.
+# The alerts UI branches on `proof` and renders "No sealed record is linked to
+# this alert." when it is null — a FALSE statement about the evidence trail
+# (the record exists; only the official-source content is withheld). The proof
+# block carries no official-source text (record id + self-seal hash), so there
+# is no entitlement reason to withhold it.
+# ---------------------------------------------------------------------------
+
+
+def test_redacted_preview_keeps_the_sealed_proof_block(isolated_db, monkeypatch):
+    user_id = _make_paired_user("free-proof@co.com", "830001", alerts_enabled=True)
+
+    body, status = _preview_handler(monkeypatch, user_id)
+
+    assert status == 200
+    match = body["preview"]["matches"][0]
+    assert match["plan_redacted"] is True
+    # Withheld content stays withheld …
+    assert match["diff_excerpt"] is None
+    # … but the evidence record is still declared to exist.
+    assert match["proof"] == {"evidence_record_id": "rec-1", "record_hash": "abc123"}
+    assert "proof" not in match["redacted_fields"]
+
+
+# ---------------------------------------------------------------------------
+# Round 2, findings 3 + 5: GET /api/evidence/diff returns the VERBATIM diff.md
+# body of any run to any authenticated caller (tenancy check only). run_ids are
+# discoverable through GET /api/evidence, so the same paid payload the preview
+# now withholds and the redline now refuses with 402 was still two GETs away.
+# Same flag, same eligibility helper — own custom sources stay readable.
+# ---------------------------------------------------------------------------
+
+_DIFF_TEXT = "# diff\n+ firms must ensure and evidence ongoing compliance\n"
+
+
+def _evidence_diff_handler(monkeypatch, tmp_path, user_id: int, source_id: str = "AE-1"):
+    import app.api as api
+
+    runs_dir = tmp_path / "data" / "source_runs"
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    (runs_dir / "source_runs.jsonl").write_text(
+        json.dumps({
+            "run_id": "run-1",
+            "source_id": source_id,
+            "diff_md_path": "data/diffs/run-1.md",
+            "change_status": "CHANGED",
+        }) + "\n",
+        encoding="utf-8",
+    )
+    diffs_dir = tmp_path / "data" / "diffs"
+    diffs_dir.mkdir(parents=True, exist_ok=True)
+    (diffs_dir / "run-1.md").write_text(_DIFF_TEXT, encoding="utf-8")
+
+    handler = api._Handler.__new__(api._Handler)
+    handler.command = "GET"
+    handler.path = "/api/evidence/diff?run_id=run-1"
+    handler.request = MagicMock()
+    handler.client_address = ("127.0.0.1", 9999)
+    handler.server = MagicMock()
+    handler.rfile = BytesIO(b"")
+    handler.wfile = BytesIO()
+    handler.close_connection = False
+    hdrs = MagicMock()
+    hdrs.get = lambda key, default="": {"Content-Length": "0"}.get(key, default)
+    handler.headers = hdrs
+    sent: list[tuple[dict, int]] = []
+    handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
+
+    monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(api._Handler, "_source_visible_to", lambda self, user, sid: True)
+    handler._handle_evidence_diff_get()
+    return sent[-1]
+
+
+def test_free_account_evidence_diff_is_refused(isolated_db, monkeypatch, tmp_path):
+    """The remaining bypass: the verbatim official-source diff, one GET away."""
+    user_id = _make_paired_user("free-diff@co.com", "840001", alerts_enabled=True)
+
+    body, status = _evidence_diff_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 402
+    assert body["ok"] is False
+    assert body["reason"] == "plan_required"
+    assert "ensure and evidence" not in json.dumps(body)
+
+
+def test_paid_account_evidence_diff_is_served(isolated_db, monkeypatch, tmp_path):
+    from app.plan import activate_plan
+
+    user_id = _make_paired_user("paid-diff@co.com", "840002", alerts_enabled=True)
+    activate_plan(user_id, "professional")
+
+    body, status = _evidence_diff_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 200
+    assert body["diff_text"] == _DIFF_TEXT
+
+
+def test_free_owner_custom_source_evidence_diff_is_served(isolated_db, monkeypatch, tmp_path):
+    """A customer's own private source is not the official-source deliverable."""
+    user_id = _make_paired_user("free-custom-diff@co.com", "840003", alerts_enabled=True)
+
+    body, status = _evidence_diff_handler(
+        monkeypatch, tmp_path, user_id, source_id="custom-abcd1234"
+    )
+
+    assert status == 200
+    assert body["diff_text"] == _DIFF_TEXT
+
+
+def test_flag_off_restores_ungated_evidence_diff(isolated_db, monkeypatch, tmp_path):
+    monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
+    user_id = _make_paired_user("free-diff-off@co.com", "840004", alerts_enabled=True)
+
+    body, status = _evidence_diff_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 200
+    assert body["diff_text"] == _DIFF_TEXT
+
+
+# ---------------------------------------------------------------------------
+# Security review, round 3: the fourth read surface. POST /api/briefs/generate
+# REBUILDS the paid official-source payload on demand — executive summary,
+# business action and the official URL, from the run's diff artifact — behind
+# require_auth + a tenancy check only, and "Monitoring Briefs" is an ungated
+# page in the customer dashboard. source_ids are enumerable via
+# GET /api/sources/status, so a free account could regenerate exactly the
+# fields the preview now redacts and the redline/diff now refuse with 402.
+# Same flag, same eligibility helper — own custom sources stay generatable.
+# ---------------------------------------------------------------------------
+
+
+def _brief_generate_handler(monkeypatch, tmp_path, user_id: int, source_id: str = "AE-1"):
+    import app.api as api
+
+    runs_dir = tmp_path / "data" / "source_runs"
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    (runs_dir / "source_runs.jsonl").write_text(
+        json.dumps({
+            "run_id": "run-1",
+            "source_id": source_id,
+            "source_name": "DFSA Rulebook",
+            "official_url": "https://dfsa.example.ae/rulebook-change",
+            "change_status": "CHANGED",
+            "timestamp_utc": "2026-07-10T10:00:00+00:00",
+        }) + "\n",
+        encoding="utf-8",
+    )
+
+    handler = api._Handler.__new__(api._Handler)
+    handler.command = "POST"
+    handler.path = "/api/briefs/generate"
+    handler.request = MagicMock()
+    handler.client_address = ("127.0.0.1", 9999)
+    handler.server = MagicMock()
+    handler.rfile = BytesIO(b"")
+    handler.wfile = BytesIO()
+    handler.close_connection = False
+    hdrs = MagicMock()
+    hdrs.get = lambda key, default="": {"Content-Length": "0"}.get(key, default)
+    handler.headers = hdrs
+    sent: list[tuple[dict, int]] = []
+    handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
+
+    monkeypatch.setattr(api, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr("app.config.ENABLE_AI_ANALYSIS", False, raising=False)
+    monkeypatch.setattr(api._Handler, "_source_visible_to", lambda self, user, sid: True)
+    handler._rate_limited = lambda *a, **kw: False
+    handler._read_json_strict = lambda: ({"source_id": source_id, "run_id": "run-1"}, None)
+    handler._handle_briefs_generate()
+    return sent[-1]
+
+
+def test_free_account_brief_generate_is_refused(isolated_db, monkeypatch, tmp_path):
+    """The fourth bypass: the paid payload, regenerated on demand."""
+    user_id = _make_paired_user("free-brief@co.com", "850001", alerts_enabled=True)
+
+    body, status = _brief_generate_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 402
+    assert body["ok"] is False
+    assert body["reason"] == "plan_required"
+    blob = json.dumps(body)
+    assert "dfsa.example.ae" not in blob
+    assert "DFSA Rulebook" not in blob
+
+
+def test_paid_account_brief_generate_is_served(isolated_db, monkeypatch, tmp_path):
+    from app.plan import activate_plan
+
+    user_id = _make_paired_user("paid-brief@co.com", "850002", alerts_enabled=True)
+    activate_plan(user_id, "professional")
+
+    body, status = _brief_generate_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 200
+    assert "DFSA Rulebook" in body["brief_markdown"]
+
+
+def test_free_owner_custom_source_brief_generate_is_served(isolated_db, monkeypatch, tmp_path):
+    """A customer's own private source is not the official-source deliverable."""
+    user_id = _make_paired_user("free-custom-brief@co.com", "850003", alerts_enabled=True)
+
+    body, status = _brief_generate_handler(
+        monkeypatch, tmp_path, user_id, source_id="custom-abcd1234"
+    )
+
+    assert status == 200
+    assert "DFSA Rulebook" in body["brief_markdown"]
+
+
+def test_flag_off_restores_ungated_brief_generate(isolated_db, monkeypatch, tmp_path):
+    monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
+    user_id = _make_paired_user("free-brief-off@co.com", "850004", alerts_enabled=True)
+
+    body, status = _brief_generate_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 200
+    assert "DFSA Rulebook" in body["brief_markdown"]
+
+
+# ---------------------------------------------------------------------------
+# Cycle-2 escalation (HIGH x2): the redaction lived in ONE handler, so every
+# SIBLING reader re-opened the hole.
+#
+#   * GET /api/calendar/effective-dates served the verbatim diff excerpt (the
+#     changed obligation text) + official_url of every OFFICIAL source to a
+#     plan-blocked account — the most sellable slice of the deliverable.
+#   * POST /api/decisions echoed match['source_url'] back as
+#     content.reviewed.official_url to a non-eligible account.
+#
+# Fix under test: ONE choke point in app/alert_routing.py
+# (``redact_official_item_for_plan``) that every reader passes its payload
+# through, plus per-surface adapters. Same flag, same eligibility helper; a
+# free owner's own CUSTOM source stays fully visible everywhere.
+# ---------------------------------------------------------------------------
+
+
+_CAL_EXCERPT = "+ firms must submit the return by 31 March 2027"
+_CAL_URL = "https://dfsa.example.ae/rulebook-change"
+
+
+def _calendar_result(source_id: str = "AE-1") -> dict:
+    return {
+        "dates": [
+            {
+                "date": "2027-03-31",
+                "detected_type": "deadline",
+                "type_label": "Deadline detected in the changed text",
+                "raw_date_text": "31 March 2027",
+                "date_ambiguous": False,
+                "excerpt": _CAL_EXCERPT,
+                "source_id": source_id,
+                "source_name": "DFSA Rulebook",
+                "regulator": "DFSA",
+                "official_url": _CAL_URL,
+                "evidence_record_id": "evr-1",
+                "record_hash": "sha256:" + "a" * 64,
+                "captured_at": "2026-07-10T10:00:00+00:00",
+                "framing": "Detected in the changed text.",
+                "disclaimer": "Not legal advice.",
+                "days_until": 250,
+            }
+        ],
+        "count": 1,
+        "horizon": {"from": "2026-07-21", "to": "2027-07-21", "days": 365},
+        "generated_at": "2026-07-21T00:00:00+00:00",
+        "framing": "View framing.",
+        "disclaimer": "Not legal advice.",
+        "truncated": False,
+    }
+
+
+def _effective_dates_handler(monkeypatch, user_id: int, source_id: str = "AE-1"):
+    """Drive GET /api/calendar/effective-dates with a stubbed builder."""
+    import app.api as api
+    import app.effective_dates as effective_dates
+
+    handler = api._Handler.__new__(api._Handler)
+    handler.command = "GET"
+    handler.path = "/api/calendar/effective-dates?days=365"
+    handler.request = MagicMock()
+    handler.client_address = ("127.0.0.1", 9999)
+    handler.server = MagicMock()
+    handler.rfile = BytesIO(b"")
+    handler.wfile = BytesIO()
+    handler.close_connection = False
+    hdrs = MagicMock()
+    hdrs.get = lambda key, default="": {"Content-Length": "0"}.get(key, default)
+    handler.headers = hdrs
+    sent: list[tuple[dict, int]] = []
+    handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
+
+    monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id)})
+    monkeypatch.setattr(
+        effective_dates, "upcoming_key_dates", lambda **kw: _calendar_result(source_id)
+    )
+    handler._rate_limited = lambda *a, **kw: False
+    handler._denied_custom_source_ids = lambda user: set()
+    handler._rbac_log_export = lambda *a, **kw: None
+    handler._handle_effective_dates_calendar()
+    return sent[-1]
+
+
+def test_free_account_effective_dates_withholds_excerpt_and_official_url(
+    isolated_db, monkeypatch
+):
+    """The bypass: the calendar handed over the changed obligation text."""
+    user_id = _make_paired_user("free-cal@co.com", "860001", alerts_enabled=True)
+
+    body, status = _effective_dates_handler(monkeypatch, user_id)
+
+    assert status == 200
+    item = body["dates"][0]
+    assert item["excerpt"] == ""
+    assert item["official_url"] == ""
+    assert item["plan_redacted"] is True
+    # Kept: the date, its type and the sealed verification pointer — the free
+    # tier still sees honestly THAT monitoring found something.
+    assert item["date"] == "2027-03-31"
+    assert item["source_name"] == "DFSA Rulebook"
+    assert item["record_hash"].startswith("sha256:")
+    assert item["evidence_record_id"] == "evr-1"
+    assert body["plan_redaction"]["applied"] is True
+    assert body["plan_redaction"]["code"] == "plan_required"
+    blob = json.dumps(body)
+    assert _CAL_EXCERPT not in blob
+    assert _CAL_URL not in blob
+
+
+def test_paid_account_effective_dates_keeps_excerpt_and_official_url(
+    isolated_db, monkeypatch
+):
+    from app.plan import activate_plan
+
+    user_id = _make_paired_user("paid-cal@co.com", "860002", alerts_enabled=True)
+    activate_plan(user_id, "professional")
+
+    body, status = _effective_dates_handler(monkeypatch, user_id)
+
+    assert status == 200
+    item = body["dates"][0]
+    assert item["excerpt"] == _CAL_EXCERPT
+    assert item["official_url"] == _CAL_URL
+    assert item["plan_redacted"] is False
+    assert body["plan_redaction"]["applied"] is False
+
+
+def test_free_owner_custom_source_effective_dates_stays_visible(isolated_db, monkeypatch):
+    user_id = _make_paired_user("free-custom-cal@co.com", "860003", alerts_enabled=True)
+
+    body, status = _effective_dates_handler(monkeypatch, user_id, source_id="custom-abcd1234")
+
+    assert status == 200
+    item = body["dates"][0]
+    assert item["excerpt"] == _CAL_EXCERPT
+    assert item["official_url"] == _CAL_URL
+    assert body["plan_redaction"]["applied"] is False
+
+
+def test_flag_off_restores_ungated_effective_dates(isolated_db, monkeypatch):
+    monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
+    user_id = _make_paired_user("free-cal-off@co.com", "860004", alerts_enabled=True)
+
+    body, status = _effective_dates_handler(monkeypatch, user_id)
+
+    assert status == 200
+    assert body["dates"][0]["excerpt"] == _CAL_EXCERPT
+    assert body["dates"][0]["official_url"] == _CAL_URL
+
+
+# ── POST /api/decisions — the echoed field ───────────────────────────────────
+
+
+_DECISION_URL = "https://rulebook.centralbank.ae/en/paid-only-page"
+
+
+def _decision_match(source_id: str = "AE-1") -> dict:
+    return {
+        "alert_id": "draft-cbuae001",
+        "source_id": source_id,
+        "source_name": "CBUAE Rulebook",
+        "source_url": _DECISION_URL,
+        "proof": {
+            "evidence_record_id": "evr_run9",
+            "record_hash": "sha256:" + "a" * 64,
+            "run_id": "run9",
+        },
+    }
+
+
+def _decision_seal_handler(monkeypatch, tmp_path, user_id: int, source_id: str = "AE-1"):
+    """Drive POST /api/decisions for ``user_id`` with a stubbed match."""
+    import app.api as api
+    import app.decision_records as decision_records
+
+    monkeypatch.setattr(decision_records, "_BASE_DIR", tmp_path)
+
+    handler = api._Handler.__new__(api._Handler)
+    handler.command = "POST"
+    handler.path = "/api/decisions"
+    handler.request = MagicMock()
+    handler.client_address = ("127.0.0.1", 9999)
+    handler.server = MagicMock()
+    handler.rfile = BytesIO(b"")
+    handler.wfile = BytesIO()
+    handler.close_connection = False
+    hdrs = MagicMock()
+    hdrs.get = lambda key, default="": {"Content-Length": "0"}.get(key, default)
+    handler.headers = hdrs
+    sent: list[tuple[dict, int]] = []
+    handler._send_json = lambda data, status=200, **kw: sent.append((data, status))
+
+    monkeypatch.setattr(api, "require_auth", lambda h: {"id": int(user_id), "email": "x@co.com"})
+    monkeypatch.setattr(
+        api, "find_routing_match_for_user", lambda uid, alert_id, days=14: _decision_match(source_id)
+    )
+    handler._rate_limited = lambda *a, **kw: False
+    handler._rbac_guard = lambda *a, **kw: True
+    handler._read_json_strict = lambda: (
+        {
+            "alert_id": "draft-cbuae001",
+            "kind": "reviewed",
+            "statement": "I reviewed the diff against our licence scope.",
+        },
+        None,
+    )
+    handler._handle_alert_decisions_post()
+    return sent[-1]
+
+
+def test_free_account_decision_does_not_echo_official_url(isolated_db, monkeypatch, tmp_path):
+    """The leak: the sealed decision echoed a redacted field straight back."""
+    db.backfill_org_memberships()
+    user_id = _make_paired_user("free-decision@co.com", "870001", alerts_enabled=True)
+    db.backfill_org_memberships()
+
+    body, status = _decision_seal_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 201
+    reviewed = body["decision"]["content"]["reviewed"]
+    assert reviewed["official_url"] == ""
+    # Identity + sealed pointer survive — the decision still binds to what was
+    # reviewed, only the withheld field is empty.
+    assert reviewed["alert_id"] == "draft-cbuae001"
+    assert reviewed["evidence_record_id"] == "evr_run9"
+    assert _DECISION_URL not in json.dumps(body)
+
+
+def test_paid_account_decision_keeps_official_url(isolated_db, monkeypatch, tmp_path):
+    from app.plan import activate_plan
+
+    user_id = _make_paired_user("paid-decision@co.com", "870002", alerts_enabled=True)
+    db.backfill_org_memberships()
+    activate_plan(user_id, "professional")
+
+    body, status = _decision_seal_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 201
+    assert body["decision"]["content"]["reviewed"]["official_url"] == _DECISION_URL
+
+
+def test_free_owner_custom_source_decision_keeps_official_url(
+    isolated_db, monkeypatch, tmp_path
+):
+    user_id = _make_paired_user("free-custom-decision@co.com", "870003", alerts_enabled=True)
+    db.backfill_org_memberships()
+
+    body, status = _decision_seal_handler(
+        monkeypatch, tmp_path, user_id, source_id="custom-abcd1234"
+    )
+
+    assert status == 201
+    assert body["decision"]["content"]["reviewed"]["official_url"] == _DECISION_URL
+
+
+def test_flag_off_restores_decision_official_url(isolated_db, monkeypatch, tmp_path):
+    monkeypatch.setenv("STATUTEPROOF_ALERTS_REQUIRE_PLAN", "0")
+    user_id = _make_paired_user("free-decision-off@co.com", "870004", alerts_enabled=True)
+    db.backfill_org_memberships()
+
+    body, status = _decision_seal_handler(monkeypatch, tmp_path, user_id)
+
+    assert status == 201
+    assert body["decision"]["content"]["reviewed"]["official_url"] == _DECISION_URL
+
+
+# ---------------------------------------------------------------------------
+# Architectural guard: the lesson of this escalation is that redaction applied
+# in ONE handler is re-opened by the next sibling reader. This test FAILS when a
+# handler in app/api.py builds or forwards official-source excerpt-class content
+# without routing it through an entitlement gate — so a NEW reader cannot be
+# added without either gating it or consciously allowlisting it here.
+# ---------------------------------------------------------------------------
+
+
+# Tokens that mean "this handler touches official-source excerpt-class content"
+# (verbatim changed text, the generated summary of it, or a builder that emits
+# either).
+_EXCERPT_MARKERS = (
+    "diff_excerpt",
+    "executive_summary",
+    "upcoming_key_dates",
+    "build_redline_for_match",
+    "build_routing_preview_for_user",
+    "find_routing_match_for_user",
+)
+# Any ONE of these in the handler body counts as "entitlement was considered".
+_ENTITLEMENT_GATES = (
+    "_official_alert_blocked_by_plan",
+    "redact_preview_for_plan",
+    "redact_effective_dates_for_plan",
+    "redact_decision_reviewed_for_plan",
+    "redact_official_item_for_plan",
+    "_require_capability",
+)
+# Handlers that legitimately touch a marker without a plan gate, each with the
+# reason. Adding to this set is a deliberate, reviewable act.
+_ENTITLEMENT_EXEMPT_HANDLERS: dict[str, str] = {}
+
+
+def _api_handler_bodies() -> dict[str, str]:
+    import ast
+
+    src = (Path(__file__).resolve().parents[1] / "app" / "api.py").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    lines = src.splitlines()
+    bodies: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("_handle_"):
+            bodies[node.name] = "\n".join(lines[node.lineno - 1 : (node.end_lineno or node.lineno)])
+    return bodies
+
+
+def test_every_api_handler_touching_official_excerpts_is_entitlement_gated():
+    ungated = []
+    for name, body in _api_handler_bodies().items():
+        if name in _ENTITLEMENT_EXEMPT_HANDLERS:
+            continue
+        if not any(marker in body for marker in _EXCERPT_MARKERS):
+            continue
+        if any(gate in body for gate in _ENTITLEMENT_GATES):
+            continue
+        ungated.append(name)
+
+    assert ungated == [], (
+        "These app/api.py handlers serve official-source excerpt-class content "
+        f"with no entitlement gate: {ungated}. Route the payload through "
+        "app.alert_routing.redact_official_item_for_plan (or a per-surface "
+        "adapter built on it), or add an explicit reason to "
+        "_ENTITLEMENT_EXEMPT_HANDLERS."
+    )

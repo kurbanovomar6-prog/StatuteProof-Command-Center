@@ -80,8 +80,12 @@ from app.telegram_pairing import (
 )
 from app.user_delivery import get_user_delivery_logs, send_sample_brief_to_user
 from app.alert_routing import (
+    _official_alert_blocked_by_plan,
     build_routing_preview_for_user,
     find_routing_match_for_user,
+    redact_decision_reviewed_for_plan,
+    redact_effective_dates_for_plan,
+    redact_preview_for_plan,
     send_preview_alert_to_user,
 )
 from app.alert_actions import save_action_log_entry, get_action_log
@@ -2058,6 +2062,13 @@ class _Handler(BaseHTTPRequestHandler):
             except (TypeError, ValueError):
                 days = 14
             preview = build_routing_preview_for_user(int(user["id"]), days=max(1, min(days, 60)))
+            # The preview is a READ of the same official-source payload that
+            # POST /api/delivery/send-preview-alert refuses with 402. Serve a
+            # redacted view (counts, source names, risk levels kept; summary,
+            # business action, official URL, diff excerpt withheld) to accounts
+            # the delivery gate would refuse — same flag, same eligibility
+            # helper. Own custom sources stay fully visible.
+            preview = redact_preview_for_plan(int(user["id"]), preview)
             self._send_json({"ok": True, "preview": preview})
         except Exception as exc:
             logger.error("Delivery preview failed: %s", type(exc).__name__)
@@ -2332,6 +2343,18 @@ class _Handler(BaseHTTPRequestHandler):
             if match is None:
                 self._send_json({"ok": False, "message": "Alert not found."}, 404)
                 return
+            # The redline IS the paid official-source deliverable (the sealed
+            # added/removed text). Redacting the preview alone would be
+            # worthless: the redacted preview still carries every alert_id, so
+            # the diff would be one GET away. Same flag, same eligibility
+            # helper as delivery — own custom sources stay visible.
+            if _official_alert_blocked_by_plan(int(user["id"]), match.get("source_id")):
+                self._send_json({
+                    "ok": False,
+                    "message": "Official-source alert content requires an active plan.",
+                    "reason": "plan_required",
+                }, 402)
+                return
             redline = build_redline_for_match(match)
             self._send_json({"ok": True, "redline": redline})
         except Exception as exc:
@@ -2507,6 +2530,14 @@ class _Handler(BaseHTTPRequestHandler):
             reviewed["source_id"] = str(match.get("source_id") or "")
             reviewed["source_name"] = str(match.get("source_name") or "")
             reviewed["official_url"] = str(match.get("source_url") or "")
+            # Entitlement: the sealed record is returned to the caller, so this
+            # echoed field must obey the SAME boundary as every other reader of
+            # official-source content — one choke point, not a local re-decision.
+            # Empty is already a legitimate value here; the evidence_record_id +
+            # record_hash still identify exactly what was reviewed.
+            reviewed = redact_decision_reviewed_for_plan(
+                int(user["id"]), reviewed, match.get("source_id")
+            )
 
             # Account metadata (not the user's sealed words) — bounded here so an
             # over-long profile name can never block a legitimate seal.
@@ -2654,8 +2685,10 @@ class _Handler(BaseHTTPRequestHandler):
             # authenticated account. Official / shared sources always survive.
             enabled_sources = self._visible_sources_for(user, enabled_sources)
 
-            # latest_runs returns dict keyed by source_id (or url fallback)
-            run_map = latest_runs(market)
+            # latest_runs returns dict keyed by source_id (or url fallback).
+            # Cycles skipped by the circuit breaker fetched nothing, so they
+            # must not be reported as the source's last check.
+            run_map = latest_runs(market, include_skipped=False)
 
             sources_out: list[dict] = []
             last_run_at: str | None = None
@@ -2808,6 +2841,8 @@ class _Handler(BaseHTTPRequestHandler):
             # this user does not own (official sources are never denied).
             denied_source_ids = self._denied_custom_source_ids(user)
 
+            from app.source_runs import is_skipped_cycle
+
             runs_path = BASE_DIR / "data" / "source_runs" / "source_runs.jsonl"
             records: list[dict] = []
             if runs_path.exists():
@@ -2843,6 +2878,14 @@ class _Handler(BaseHTTPRequestHandler):
                                 "timestamp_utc": rec.get("timestamp_utc") or rec.get("run_at"),
                                 "category": rec.get("category"),
                                 "error": rec.get("error"),
+                                # A CIRCUIT_OPEN record documents a cycle the
+                                # monitor SKIPPED — no request was issued. Left
+                                # unlabelled it reads as an ordinary
+                                # failed-extraction evidence row, and the one
+                                # field that explains it (limitations_notes)
+                                # never reached the customer.
+                                "not_fetched_this_cycle": is_skipped_cycle(rec),
+                                "limitations_notes": rec.get("limitations_notes"),
                             })
 
             records.sort(key=lambda r: r.get("timestamp_utc") or "", reverse=True)
@@ -2893,6 +2936,18 @@ class _Handler(BaseHTTPRequestHandler):
             # confirms the run exists for a source the caller cannot see.
             if run_source_id and not self._source_visible_to(user, run_source_id):
                 self._send_json({"ok": False, "message": "No diff available for this run."}, 404)
+                return
+            # Entitlement: the diff body IS the paid official-source deliverable
+            # — the same content the preview redacts and the redline refuses.
+            # run_ids are discoverable through GET /api/evidence, so leaving this
+            # ungated kept the boundary open. Same flag, same eligibility helper;
+            # own custom sources and the listing metadata stay readable.
+            if _official_alert_blocked_by_plan(int(user["id"]), run_source_id):
+                self._send_json({
+                    "ok": False,
+                    "message": "Official-source diff text requires an active plan.",
+                    "reason": "plan_required",
+                }, 402)
                 return
             if not diff_md_path and not diff_json_path:
                 self._send_json({"ok": False, "message": "No diff available for this run."}, 404)
@@ -3393,6 +3448,21 @@ class _Handler(BaseHTTPRequestHandler):
         # / shared sources — and unknown ids — fall through to the normal path.
         if not self._source_visible_to(user, source_id):
             self._send_json({"ok": False, "message": "That source is not in your scope."}, 403)
+            return
+
+        # Entitlement: this endpoint REBUILDS the paid official-source payload on
+        # demand (executive summary, business action, official URL — from the
+        # run's diff artifact), so leaving it ungated re-opened the boundary the
+        # preview redaction and the redline/diff 402 close. source_ids are
+        # enumerable via /api/sources/status and "Monitoring Briefs" is an
+        # ungated dashboard page. Same flag, same eligibility helper as delivery;
+        # own custom sources stay generatable, unclassifiable ids fail CLOSED.
+        if _official_alert_blocked_by_plan(int(user["id"]), source_id):
+            self._send_json({
+                "ok": False,
+                "message": "Official-source briefs require an active plan.",
+                "reason": "plan_required",
+            }, 402)
             return
 
         try:
@@ -4560,6 +4630,14 @@ class _Handler(BaseHTTPRequestHandler):
                 date_from=date_from,
                 date_to=date_to,
             )
+            # Entitlement: each item carries a VERBATIM excerpt of the changed
+            # official-source text plus the official URL — the same paid field
+            # class the preview withholds and the redline/diff/brief refuse with
+            # 402. Routed through the ONE redaction choke point in
+            # app/alert_routing.py (same flag, same eligibility helper); the
+            # date, its type and the sealed pointer stay, and a free owner's own
+            # custom source stays fully visible.
+            result = redact_effective_dates_for_plan(int(user["id"]), result)
             self._send_json({"ok": True, **result})
         except Exception as exc:
             logger.error("effective-dates calendar error: %s", type(exc).__name__)
