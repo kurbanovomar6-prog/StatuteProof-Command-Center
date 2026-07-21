@@ -3,6 +3,8 @@ import { ArrowRight, CheckCircle, Clock } from 'lucide-react'
 
 import { telegramPair, sources as sourcesApi, delivery } from '../../api'
 import PlanBanner from './PlanBanner'
+import SampleAlertEmptyState from './EmptyState'
+import { isUnactivatedFreeAccount } from '../../data/mockData'
 import { getWorkspaceProfile, profileLabel } from '../../data/workspaceProfile'
 import DeadlinesPanel from './DeadlinesPanel'
 import FirstRunBackfillPanel from './FirstRunBackfillPanel'
@@ -348,7 +350,7 @@ function EvidenceChainPanel() {
 // assert "nothing is ready" when alerts exist (that is an active
 // "nothing needs attention" misstatement on the primary screen). Falls back to
 // the honest empty state only when the preview genuinely has zero matches.
-function ReviewQueueSummary({ navigate }) {
+function ReviewQueueSummary({ navigate, planState }) {
   const [count, setCount] = useState(null)   // null = loading, number = matches
   const [failed, setFailed] = useState(false)
 
@@ -390,6 +392,10 @@ function ReviewQueueSummary({ navigate }) {
             View reviewed alerts <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
+      ) : !failed && count === 0 && isUnactivatedFreeAccount(planState) ? (
+        // Genuinely empty AND unactivated: stand in with the clearly-labelled
+        // first-session sample so a free account can see the evidence loop.
+        <SampleAlertEmptyState />
       ) : (
         <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--bg-base)] px-5 py-8 text-center">
           <p className="mb-1 text-sm text-[var(--text-primary)]">
@@ -645,7 +651,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
 
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div className="space-y-5">
-          <ReviewQueueSummary navigate={navigate} />
+          <ReviewQueueSummary navigate={navigate} planState={planState} />
 
           {/* First-run backfill: shows the latest already-sealed changes only
               while the alerts preview is empty; renders nothing otherwise. */}

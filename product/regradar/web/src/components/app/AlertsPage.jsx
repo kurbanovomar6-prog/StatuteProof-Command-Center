@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CheckCircle, ExternalLink, Search, Send, ShieldCheck } from 'lucide-react'
 
-import { delivery } from '../../api'
+import { delivery, plan } from '../../api'
 import ActionLogPanel from './ActionLogPanel'
 import AlertChecklistPanel from './AlertChecklistPanel'
 import AlertDecisionPanel from './AlertDecisionPanel'
 import AlertProofPanel from './AlertProofPanel'
 import { RISK_BAND_LEGEND, riskBand } from './riskBands'
+import { isUnactivatedFreeAccount } from '../../data/mockData'
+import SampleAlertEmptyState from './EmptyState'
 import EmptyState from './ui/EmptyState'
 import ErrorState from './ui/ErrorState'
 
@@ -50,7 +52,7 @@ function AlertsEmpty() {
     </EmptyState>
   )
 }
-export default function AlertsPage({ navigate }) {
+export default function AlertsPage({ navigate, planState: planStateProp = null }) {
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -58,8 +60,23 @@ export default function AlertsPage({ navigate }) {
   const [search, setSearch] = useState('')
   const [licenceFilter, setLicenceFilter] = useState('All')
   const [sendState, setSendState] = useState({})
+  // The shell (AppShell) does not pass the plan into this page, so fetch it here
+  // to decide whether the empty state should carry the first-session sample. A
+  // prop, when provided, wins and skips the fetch (used by tests and any future
+  // caller that already holds the plan).
+  const [fetchedPlan, setFetchedPlan] = useState(null)
+  const planState = planStateProp || fetchedPlan
 
   const [reloadKey, setReloadKey] = useState(0)
+
+  useEffect(() => {
+    if (planStateProp) return undefined
+    let active = true
+    plan.get()
+      .then(data => { if (active && data?.ok && data.plan) setFetchedPlan(data.plan) })
+      .catch(() => { /* Silent: absence of a plan just hides the sample. */ })
+    return () => { active = false }
+  }, [planStateProp])
 
   useEffect(() => {
     let active = true
@@ -131,7 +148,7 @@ export default function AlertsPage({ navigate }) {
           <div>
             <h2 className="text-sm font-semibold text-white">Reviewed alert routing</h2>
             <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
-              Alerts shown here come from approved local alert records matched against your workspace profile. This page does not create sample alerts.
+              Alerts shown here come from approved local alert records matched against your workspace profile. Any card marked &ldquo;Sample&rdquo; is a labelled demonstration built from a real sealed record — never your own monitored data.
             </p>
           </div>
         </div>
@@ -199,7 +216,9 @@ export default function AlertsPage({ navigate }) {
         />
       )}
 
-      {!loading && !error && filtered.length === 0 && <AlertsEmpty />}
+      {!loading && !error && filtered.length === 0 && (
+        isUnactivatedFreeAccount(planState) ? <SampleAlertEmptyState /> : <AlertsEmpty />
+      )}
 
       {!loading && !error && filtered.length > 0 && (
         <div className="grid gap-3 xl:grid-cols-2">

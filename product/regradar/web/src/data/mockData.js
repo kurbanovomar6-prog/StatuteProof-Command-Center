@@ -121,6 +121,50 @@ export const pricingPlans = [
   },
 ]
 
+// A REAL captured evidence record, used ONLY as a clearly-labelled SAMPLE in the
+// first-session empty state so a brand-new free account can see what an
+// evidence-backed alert looks like without waiting for a founder to activate a
+// plan. Every value below is copied verbatim from the sealed record shipped at
+// web/public/sample-record-changed/ (record.json + diff.txt) — the same bytes
+// the public verifier loads at /verify#sample and confirms against their hashes.
+// Nothing here is invented regulatory text, and it is never a customer's own
+// monitored data — the UI must always render it behind a "Sample" label.
+export const sampleAlert = {
+  isSample: true,
+  regulator: 'DIFC',
+  sourceName: 'DIFC Laws and Regulations',
+  sourceUrl: 'https://www.difc.ae/business/laws-regulations/',
+  runStatus: 'CHANGED',
+  capturedAt: '2026-05-30T12:10:44+00:00',
+  recordId: 'evr_AE-difc-laws-and-regulations_AE-20260530T120622Z-21527790',
+  recordHash: 'sha256:39ffa3396f78128abd1c98e07999e3fc35ba8189ac82027be41c5c6cb2d2d491',
+  integrityStatus: 'VERIFIED',
+  // From the sealed diff.txt header: "0 added, 31 removed, 0 changed chunks; 96 unchanged."
+  diffSummary: '0 added, 31 removed, 0 changed chunks; 96 unchanged.',
+  // A real removed chunk from the sealed diff (the first "Removed Chunks" block),
+  // shown as the change excerpt — captured content, not a paraphrase.
+  diffExcerpt: 'Laws and Regulations in Dubai International Financial Centre (DIFC)',
+  // The record's own review framing (record.json review.review_reason).
+  reviewReason: 'Customer-facing brief requires human review.',
+  verifyHref: '/verify#sample',
+}
+
+/**
+ * A free/unactivated account has no activated official-alert capability. A
+ * founder activating a paid plan flips `official_alerts` to true in the plan
+ * state (app/plan.py), which is the only signal the account can receive real,
+ * profile-matched alerts. Until then the first-session SAMPLE demonstration
+ * stands in — clearly labelled, never the customer's own monitored data.
+ *
+ * @param {{ active_capabilities?: Record<string, unknown>, capabilities?: Record<string, unknown> } | null | undefined} planState
+ * @returns {boolean}
+ */
+export function isUnactivatedFreeAccount(planState) {
+  if (!planState) return false
+  const caps = planState.active_capabilities || planState.capabilities || {}
+  return caps.official_alerts !== true
+}
+
 export const steps = [
   { n: '01', title: 'Source readiness assessment', desc: 'Each official source is tested before monitoring begins: is it accessible? What extraction method does it require? What is the quality of extracted content? Readiness-supported, limited, and blocked sources are documented. You see this before agreeing to a pilot.' },
   { n: '02', title: 'Scheduled source monitoring', desc: 'Once monitoring is activated, configured sources are checked on a defined schedule. Each run produces a delta status: FIRST_SEEN, UNCHANGED, CHANGED, FAILED, or QUALITY_DROP.' },
