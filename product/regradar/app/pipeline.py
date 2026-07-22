@@ -1212,6 +1212,470 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     }
 
 
+def _record_unchanged_heartbeat(result: dict, source: dict) -> None:
+    """D6: unchanged runs write a compact heartbeat to the trail.
+
+    Mutates ``result`` in place (sets ``run_record`` on success). Non-fatal:
+    a heartbeat write failure is logged and swallowed.
+    """
+    if result.get("changed") or not result.get("normalized_hash"):
+        return
+    try:
+        from app.source_runs import record_heartbeat
+
+        heartbeat = record_heartbeat(
+            source,
+            normalized_hash=result["normalized_hash"],
+            raw_hash=result.get("raw_hash"),
+            extracted_chars=result.get("extracted_chars", 0),
+            raw_chars=result.get("raw_chars", 0),
+            normalized_chars=result.get("normalized_chars", 0),
+            extraction_quality=result.get("extraction_quality", ""),
+        )
+        result["run_record"] = heartbeat
+        logger.info(
+            "Heartbeat recorded: source=%s run_id=%s hash=%s",
+            source.get("name"), heartbeat.get("run_id"),
+            str(result["normalized_hash"])[:12],
+        )
+    except Exception as _hb_err:
+        logger.warning("Heartbeat write failed (non-fatal): %s", _hb_err)
+
+
+def _build_run_record(result: dict, source: dict) -> dict:
+    """Assemble the full source-run record dict appended to the trail."""
+    import uuid as _uuid2
+    from app.source_runs import make_source_id
+
+    return {
+        "run_id":                   result.get("run_id") or _uuid2.uuid4().hex[:8],
+        "source_id":                make_source_id(source),
+        "source_name":              source.get("name", ""),
+        "official_url":             source.get("url", ""),
+        "url":                      source.get("url", ""),
+        "market":                   source.get("jurisdiction", "AE").upper(),
+        "jurisdiction":             source.get("jurisdiction", "AE"),
+        "category":                 source.get("category", ""),
+        "change_status":            "FIRST_SEEN" if result.get("is_new") else "CHANGED",
+        "risk_level":               result.get("risk_level", "LOW"),
+        "risk_reason":              result.get("risk_reason", ""),
+        "executive_summary":        result.get("executive_summary", ""),
+        "business_action":          result.get("business_action_required", ""),
+        "ai_used":                  result.get("ai_used", False),
+        "confidence":               result.get("confidence", "low"),
+        "urgency":                  result.get("urgency", ""),
+        "deadline":                 result.get("deadline"),
+        "review_required":          result.get("review_required", False),
+        "review_reason":            result.get("review_reason", ""),
+        # A1: the trail is the dedup state — it must record ACTUAL
+        # delivery, never mere intent. On the source path telegram_sent
+        # is still False here (the send is deferred to AFTER this durable
+        # append), so the record is written alert_sent=False and flipped
+        # to True by mark_alert_sent only after a confirmed send below.
+        # A-MEDIUM(2): alert_sent may only be True on a genuinely CHANGED
+        # record — never on a FIRST_SEEN baseline (guarded here) nor on a
+        # run the trail downgrades (append_run re-runs classify_change;
+        # the confirmed-send path below re-checks change_status too).
+        "alert_sent": (
+            bool(result.get("telegram_sent"))
+            and not result.get("is_new")
+        ),
+        "alert_suppressed_reason":  result.get("alert_suppressed_reason", ""),
+        "added_count":              result.get("added_count", 0),
+        "removed_count":            result.get("removed_count", 0),
+        "modified_count":           result.get("modified_count", 0),
+        "chars":                    result.get("chars", 0),
+        "extracted_chars":          result.get("extracted_chars", 0),
+        "extraction_quality":       result.get("extraction_quality", ""),
+        "extraction_method":        result.get("extraction_method", ""),
+        # Hash fields — without these classify_change cannot compare
+        # runs and downgrades real changes to UNCHANGED (defect D1).
+        "normalized_hash":          result.get("normalized_hash"),
+        "content_hash":             result.get("content_hash"),
+        "raw_hash":                 result.get("raw_hash"),
+        "raw_chars":                result.get("raw_chars", 0),
+        "normalized_chars":         result.get("normalized_chars", 0),
+        "normalization_version":    result.get("normalization_version"),
+        "snapshot_raw_path":        result.get("snapshot_raw_path"),
+        "snapshot_normalized_path": result.get("snapshot_normalized_path"),
+        "snapshot_pdf_text_path":   result.get("snapshot_pdf_text_path"),
+        "snapshot_metadata_path":   result.get("snapshot_metadata_path"),
+        "run_at":                   result.get("created_at", datetime.now(timezone.utc).isoformat()),
+        "timestamp_utc":            result.get("created_at", datetime.now(timezone.utc).isoformat()),
+    }
+
+
+def _auto_seal_canonical_evidence(result: dict, source: dict, final_record: dict) -> None:
+    """Auto-seal the canonical evidence record (no operator step).
+
+    final_record carries proof_block_path and the trail-written snapshot
+    paths only after append_run, so this is the earliest point the canonical
+    record CAN be sealed. Sealing runs BEFORE the deferred alert send so alert
+    routing can attach the proof block (alert_proof surfaces only
+    record_status == "complete" records). Non-fatal by design: the run
+    evidence is already durable in the trail, and
+    `run.py create-canonical-evidence` remains the recovery path for a failed
+    seal. UNCHANGED runs are not sealed — one evidence directory per unchanged
+    check is unbounded disk for no value beyond the trail record itself.
+    """
+    if final_record.get("change_status") not in ("CHANGED", "FIRST_SEEN"):
+        return
+    try:
+        from pathlib import Path as _SealPath
+        from app.evidence_records import create_canonical_evidence_record
+        import app.source_runs as _sr_seal
+        # D8 idiom: resolve against the SAME base dir the trail
+        # just wrote to, so the snapshot/proof paths in
+        # final_record resolve where append_run put them.
+        # FIRST_SEEN baselines are sealed but do NOT enter the
+        # human review queue — the queue is for customer-facing
+        # changes, and mass source activation would otherwise
+        # flood it with one pending record per source.
+        _is_baseline = final_record.get("change_status") == "FIRST_SEEN"
+        _seal_kwargs = (
+            {
+                "review_status": "baseline",
+                "human_review_required": False,
+                "review_reason": (
+                    "Baseline capture (FIRST_SEEN) — no "
+                    "customer-facing change to review."
+                ),
+            }
+            if _is_baseline
+            else {}
+        )
+        _sealed_record = create_canonical_evidence_record(
+            final_record,
+            base_dir=_SealPath(_sr_seal._BASE_DIR),
+            **_seal_kwargs,
+        )
+        result["canonical_evidence_sealed"] = True
+        if _sealed_record.get("record_status") != "complete":
+            # A quarantined (integrity_error) record was durably
+            # written — sealed, but alert_proof will decline it.
+            # Surface it so quarantining live captures is visible.
+            result["canonical_evidence_quarantined"] = True
+            logger.warning(
+                "Canonical evidence sealed QUARANTINED (record_status=%s): "
+                "source=%s run_id=%s — capture text failed the "
+                "readability gate; the alert will carry no proof block",
+                _sealed_record.get("record_status"),
+                source.get("name"), final_record.get("run_id"),
+            )
+        else:
+            logger.info(
+                "Canonical evidence sealed: source=%s run_id=%s status=%s",
+                source.get("name"), final_record.get("run_id"),
+                final_record.get("change_status"),
+            )
+    except Exception as seal_err:  # noqa: BLE001
+        # Typed idempotency check via isinstance with a lazy
+        # re-import: a bare `except EvidenceRecordExistsError`
+        # would NameError if the import inside the try was what
+        # failed — and that NameError would escape to the outer
+        # append except and suppress the alert send.
+        try:
+            from app.evidence_records import (
+                EvidenceRecordExistsError as _ExistsErr,
+            )
+            _is_dup = isinstance(seal_err, _ExistsErr)
+        except Exception:  # noqa: BLE001
+            _is_dup = False
+        if _is_dup:
+            # Benign duplicate: the record IS sealed — just not by
+            # this call. INFO, not WARNING — a warning here would
+            # train operators to skim past the one that matters.
+            result["canonical_evidence_sealed"] = True
+            logger.info(
+                "Canonical evidence already sealed (idempotent skip): "
+                "source=%s run_id=%s",
+                source.get("name"), final_record.get("run_id"),
+            )
+        else:
+            result["canonical_evidence_sealed"] = False
+            logger.warning(
+                "Canonical evidence auto-seal failed (non-fatal; "
+                "run.py create-canonical-evidence can recover): "
+                "source=%s run_id=%s err=%s",
+                source.get("name"), final_record.get("run_id"), seal_err,
+            )
+
+
+def _send_deferred_alert(
+    result: dict,
+    source: dict,
+    final_record: dict,
+    deferred_alert,
+    will_alert: bool,
+) -> None:
+    """Send the deferred alert — ONLY now that the evidence is durable.
+
+    Invariant (A-durability, fix 2): "alert sent" can never outrun "evidence
+    recorded". append_run() has fsync'd the CHANGED record to disk; only then
+    is the Telegram send released. If append_run had raised, control jumped to
+    the caller's non-fatal except and this send is never reached — no alert
+    without durable evidence. We also re-confirm the persisted classification
+    is genuinely CHANGED (append_run re-runs classify_change), so a run the
+    trail downgraded never alerts.
+    """
+    if will_alert and final_record.get("change_status") == "CHANGED":
+        from app.telegram import send_telegram_alert
+        from app.source_runs import mark_alert_sent
+        telegram_sent = send_telegram_alert(deferred_alert)
+        result["telegram_sent"] = telegram_sent
+        if telegram_sent:
+            # A-HIGH: confirmed delivery — flip the persisted record's
+            # alert_sent to True so the dedup gate suppresses re-alerting
+            # this hash next sweep. alert_sent is not a chain field, so
+            # this patch leaves the tamper-evident chain intact.
+            mark_alert_sent(
+                final_record.get("source_id"),
+                final_record.get("run_id"),
+                alert_sent=True,
+            )
+            result["run_record"]["alert_sent"] = True
+        else:
+            # Send failed AFTER durable evidence append: the record stays
+            # alert_sent=False, so the next sweep re-attempts the alert
+            # for this same hash instead of suppressing it forever.
+            logger.warning(
+                "Deferred Telegram send returned falsy AFTER durable "
+                "evidence append: source=%s run_id=%s (evidence recorded, "
+                "alert delivery NOT confirmed — record left alert_sent=False "
+                "so the next sweep retries this alert)",
+                source.get("name"), final_record.get("run_id"),
+            )
+    elif will_alert:
+        logger.warning(
+            "Deferred alert NOT sent: trail reclassified run as %s "
+            "(not CHANGED) for source=%s run_id=%s — evidence recorded, "
+            "no alert issued",
+            final_record.get("change_status"), source.get("name"),
+            final_record.get("run_id"),
+        )
+
+
+def _stash_pending_cooldown(result: dict, source: dict, final_record: dict) -> None:
+    """G1: stash a cooldown-suppressed alert AFTER durable evidence.
+
+    Same durability invariant as the deferred send: only after append_run has
+    fsync'd the CHANGED record do we persist the deferred payload, so a stash
+    can never outrun the evidence it refers to.
+    """
+    _pending_cooldown = result.pop("_pending_cooldown_alert", None)
+    if _pending_cooldown is not None and final_record.get("change_status") == "CHANGED":
+        try:
+            from app.pending_alerts import stash as _stash_pending
+            _stash_pending(_pending_cooldown)
+            logger.info(
+                "Deferred cooldown alert stashed for later delivery: "
+                "source=%s run_id=%s", source.get("name"), final_record.get("run_id"),
+            )
+        except Exception as _stash_err:  # noqa: BLE001
+            logger.warning("pending-alert stash failed (non-fatal): %s", _stash_err)
+
+
+def _write_alert_draft(result: dict, source: dict, final_record: dict) -> None:
+    """Wire alert drafts for CHANGED runs (not FIRST_SEEN baseline). Non-fatal."""
+    try:
+        from pathlib import Path as _Path
+        from app.alert_drafts import build_alert_draft, write_alert_artifacts, load_json_artifact
+        import app.source_runs as _sr_mod
+
+        # D8: resolve through the configured base dir (env
+        # STATUTEPROOF_BASE_DIR or repo default) — never a
+        # hardcoded path relative to this file.
+        _base_dir = _Path(_sr_mod._BASE_DIR)
+
+        # Load diff artifact — written by append_run into diff_json_path
+        diff_artifact = load_json_artifact(final_record.get("diff_json_path"), _base_dir)
+        # Fall back to a minimal structure built from pipeline result lists
+        if not diff_artifact:
+            diff_artifact = {
+                "added_chunks":  result.get("added", []),
+                "removed_chunks": result.get("removed", []),
+                "changed_chunks": [],
+                "diff_summary":  (
+                    f"Added: {result.get('added_count', 0)}, "
+                    f"Removed: {result.get('removed_count', 0)}, "
+                    f"Modified: {result.get('modified_count', 0)}"
+                ),
+                "meaningful_change_detected": True,
+                "diff_quality": "PARTIAL",
+                "added_count": result.get("added_count", 0),
+                "removed_count": result.get("removed_count", 0),
+                "changed_count": result.get("modified_count", 0),
+            }
+
+        # Load proof block — written by append_run into proof_block_path
+        proof_block = load_json_artifact(final_record.get("proof_block_path"), _base_dir)
+        if not proof_block:
+            proof_block = {
+                "official_url": source.get("url", ""),
+                "normalized_hash": "",
+                "proof_quality": "INCOMPLETE",
+                "limitations_notes": "Proof block unavailable at alert-draft time.",
+            }
+
+        alert = build_alert_draft(final_record, diff_artifact, proof_block)
+        if alert:
+            # Attach the shared content layer so the draft/email
+            # channel renders the same alert body as Telegram.
+            try:
+                from app.alert_content import build_alert_content, render_markdown
+                alert["alert_content_markdown"] = render_markdown(build_alert_content({
+                    "url": source.get("url", ""),
+                    "source_name": source.get("name", ""),
+                    "jurisdiction": source.get("jurisdiction", ""),
+                    "risk_level": result.get("risk_level", ""),
+                    "risk_reason": result.get("risk_reason", ""),
+                    "risk_details": result.get("risk_details") or {},
+                    "added": result.get("added", []),
+                    "removed": result.get("removed", []),
+                    "executive_summary": result.get("executive_summary", ""),
+                    "business_action_required": result.get("business_action_required", ""),
+                    "deadline": result.get("deadline"),
+                    "detected_facts": result.get("detected_facts", []),
+                    "urgency": result.get("urgency", ""),
+                    "affected_entities": result.get("affected_entities", []),
+                    "checked_at_utc": final_record.get("timestamp_utc", ""),
+                }))
+            except Exception as _sc_err:
+                logger.warning("Shared alert content attach failed (non-fatal): %s", _sc_err)
+            # Resolve the snapshot directory for writing alert artifacts
+            snap_raw = final_record.get("snapshot_raw_path")
+            if snap_raw:
+                snap_dir = (_base_dir / snap_raw).parent
+            else:
+                snap_dir = _base_dir / "data" / "alert_drafts" / final_record.get("source_id", "unknown")
+            snap_dir.mkdir(parents=True, exist_ok=True)
+            artifact_paths = write_alert_artifacts(alert, snap_dir)
+            result["alert_draft_json_path"] = artifact_paths.get("alert_draft_json_path")
+            result["alert_draft_md_path"] = artifact_paths.get("alert_draft_md_path")
+            logger.info(
+                "Alert draft written: source=%s risk=%s path=%s",
+                source.get("name"), alert.get("risk_level"),
+                artifact_paths.get("alert_draft_json_path"),
+            )
+    except Exception as _ad_err:
+        logger.warning("Alert draft failed (non-fatal): %s", _ad_err)
+
+
+def _record_change_deadlines(result: dict, source: dict, final_record: dict) -> None:
+    """Deadline radar: persist any concrete FUTURE date the change carries.
+
+    Keyed by the durable evidence record (run_id). Only dates extracted from
+    the real ADDED diff excerpt are stored (evidence-grounded). Best-effort —
+    never blocks the pipeline.
+    """
+    try:
+        from pathlib import Path as _Path2
+        import app.source_runs as _sr_mod2
+        from app.deadline_radar import record_deadlines_for_change
+
+        # Resolve the register base dir from source_runs so the
+        # deadline register always lives alongside the trail it keys
+        # off (and follows the same isolation in tests/deploys).
+        persisted_deadlines = record_deadlines_for_change(
+            evidence_record_id=final_record.get("run_id", ""),
+            source_id=final_record.get("source_id", ""),
+            regulator=(
+                source.get("regulator")
+                or source.get("family")
+                or source.get("jurisdiction")
+                or ""
+            ),
+            source_name=source.get("name", ""),
+            official_url=source.get("url", ""),
+            added_blocks=result.get("added", []),
+            base_dir=_Path2(_sr_mod2._BASE_DIR),
+        )
+        if persisted_deadlines:
+            logger.info(
+                "Deadline radar: recorded %d deadline(s): source=%s run_id=%s",
+                len(persisted_deadlines), source.get("name"),
+                final_record.get("run_id"),
+            )
+    except Exception as _dl_err:
+        logger.warning("Deadline radar persist failed (non-fatal): %s", _dl_err)
+
+
+def _process_changed_run(result: dict, source: dict) -> None:
+    """Wire source_runs for a CHANGED run: append the record, seal evidence,
+    send the deferred alert, and write diffs/proofs/deadlines.
+
+    The whole body is guarded so a failing evidence append leaves NO durable
+    record AND no alert (durability invariant) while still counting as "ok" in
+    the cycle. Sets ``evidence_append_failed`` so a systemic trail-write
+    failure is visible to the deadmen.
+    """
+    if not (result.get("changed") and result.get("run_id")):
+        return
+    try:
+        from app.source_runs import append_run
+
+        # Durability ordering (A-durability, fix 2): a vetted alert waits in
+        # result["_deferred_alert"] and is sent ONLY after append_run has
+        # durably (fsync) recorded the CHANGED evidence below. The actual
+        # Telegram send happens strictly after the append returns; a failed
+        # append aborts the send.
+        #
+        # A-HIGH: the record is appended with alert_sent=False (delivery not
+        # yet confirmed) and flipped to True by mark_alert_sent ONLY after a
+        # confirmed send. Keying the record on the not-yet-sent intent would
+        # wrongly stamp alert_sent=True even when the send later fails
+        # (Telegram outage), and the next sweep's dedup gate would then
+        # return "hash_already_alerted" and never retry the lost alert. With
+        # alert_sent reflecting actual delivery, a failed send leaves it
+        # False and the next sweep re-attempts the alert for the same hash.
+        _deferred_alert = result.pop("_deferred_alert", None)
+        _will_alert = _deferred_alert is not None
+
+        run_record = _build_run_record(result, source)
+
+        final_record = append_run(run_record)
+        result["run_record"] = final_record
+        logger.info(
+            "source_runs.append_run completed: source=%s run_id=%s status=%s",
+            source.get("name"), final_record.get("run_id"), final_record.get("change_status"),
+        )
+
+        _auto_seal_canonical_evidence(result, source, final_record)
+        _send_deferred_alert(result, source, final_record, _deferred_alert, _will_alert)
+        _stash_pending_cooldown(result, source, final_record)
+
+        # ── Wire alert drafts + deadline radar for CHANGED runs (not baseline) ──
+        if not result.get("is_new") and final_record.get("change_status") == "CHANGED":
+            _write_alert_draft(result, source, final_record)
+            _record_change_deadlines(result, source, final_record)
+
+    except Exception as _sr_err:
+        # The evidence append failing means this source produced NO durable
+        # record AND no alert (durability invariant) — while still counting
+        # as "ok" in the cycle (the fetch succeeded). Without this flag a
+        # systemic trail-write failure (disk full, permissions) is invisible
+        # to every deadman. monitor_all_sources tallies it.
+        result["evidence_append_failed"] = True
+        logger.warning("source_runs.append_run failed (non-fatal): %s", _sr_err)
+
+
+def _flush_due_cooldown_alerts(source: dict) -> None:
+    """G1: deliver any due deferred-cooldown alert.
+
+    Runs on EVERY sweep (changed or unchanged) — the only place a cooldown-
+    suppressed alert can be retried, since an unchanged sweep short-circuits
+    before the alert path. Called AFTER this run's own append so a stash the
+    current change superseded is discarded (not delivered stale). Non-fatal.
+    """
+    if ENABLE_TELEGRAM_ALERTS:
+        try:
+            from app.pending_alerts import flush_due
+            from app.telegram import send_telegram_alert
+            flush_due(source, send_fn=send_telegram_alert)
+        except Exception as _flush_err:  # noqa: BLE001
+            logger.warning("pending-alert flush failed (non-fatal): %s", _flush_err)
+
+
 def run_pipeline_for_source(source: dict) -> dict:
     """
     Run the pipeline for a source dict from sources.json.
@@ -1243,409 +1707,9 @@ def run_pipeline_for_source(source: dict) -> dict:
     # via "status" ("error_page", "quality_drop") — never clobber them.
     result.setdefault("status", "ok")
 
-    # ── D6: unchanged runs write a compact heartbeat to the trail ─────
-    if not result.get("changed") and result.get("normalized_hash"):
-        try:
-            from app.source_runs import record_heartbeat
-
-            heartbeat = record_heartbeat(
-                source,
-                normalized_hash=result["normalized_hash"],
-                raw_hash=result.get("raw_hash"),
-                extracted_chars=result.get("extracted_chars", 0),
-                raw_chars=result.get("raw_chars", 0),
-                normalized_chars=result.get("normalized_chars", 0),
-                extraction_quality=result.get("extraction_quality", ""),
-            )
-            result["run_record"] = heartbeat
-            logger.info(
-                "Heartbeat recorded: source=%s run_id=%s hash=%s",
-                source.get("name"), heartbeat.get("run_id"),
-                str(result["normalized_hash"])[:12],
-            )
-        except Exception as _hb_err:
-            logger.warning("Heartbeat write failed (non-fatal): %s", _hb_err)
-
-    # ── Wire source_runs: append full run record, write diffs/proofs ──
-    if result.get("changed") and result.get("run_id"):
-        try:
-            import uuid as _uuid2
-            from app.source_runs import append_run, make_source_id, mark_alert_sent
-
-            # Durability ordering (A-durability, fix 2): a vetted alert waits in
-            # result["_deferred_alert"] and is sent ONLY after append_run has
-            # durably (fsync) recorded the CHANGED evidence below. The actual
-            # Telegram send happens strictly after the append returns; a failed
-            # append aborts the send.
-            #
-            # A-HIGH: the record is appended with alert_sent=False (delivery not
-            # yet confirmed) and flipped to True by mark_alert_sent ONLY after a
-            # confirmed send. Keying the record on the not-yet-sent intent would
-            # wrongly stamp alert_sent=True even when the send later fails
-            # (Telegram outage), and the next sweep's dedup gate would then
-            # return "hash_already_alerted" and never retry the lost alert. With
-            # alert_sent reflecting actual delivery, a failed send leaves it
-            # False and the next sweep re-attempts the alert for the same hash.
-            _deferred_alert = result.pop("_deferred_alert", None)
-            _will_alert = _deferred_alert is not None
-
-            run_record = {
-                "run_id":                   result.get("run_id") or _uuid2.uuid4().hex[:8],
-                "source_id":                make_source_id(source),
-                "source_name":              source.get("name", ""),
-                "official_url":             source.get("url", ""),
-                "url":                      source.get("url", ""),
-                "market":                   source.get("jurisdiction", "AE").upper(),
-                "jurisdiction":             source.get("jurisdiction", "AE"),
-                "category":                 source.get("category", ""),
-                "change_status":            "FIRST_SEEN" if result.get("is_new") else "CHANGED",
-                "risk_level":               result.get("risk_level", "LOW"),
-                "risk_reason":              result.get("risk_reason", ""),
-                "executive_summary":        result.get("executive_summary", ""),
-                "business_action":          result.get("business_action_required", ""),
-                "ai_used":                  result.get("ai_used", False),
-                "confidence":               result.get("confidence", "low"),
-                "urgency":                  result.get("urgency", ""),
-                "deadline":                 result.get("deadline"),
-                "review_required":          result.get("review_required", False),
-                "review_reason":            result.get("review_reason", ""),
-                # A1: the trail is the dedup state — it must record ACTUAL
-                # delivery, never mere intent. On the source path telegram_sent
-                # is still False here (the send is deferred to AFTER this durable
-                # append), so the record is written alert_sent=False and flipped
-                # to True by mark_alert_sent only after a confirmed send below.
-                # A-MEDIUM(2): alert_sent may only be True on a genuinely CHANGED
-                # record — never on a FIRST_SEEN baseline (guarded here) nor on a
-                # run the trail downgrades (append_run re-runs classify_change;
-                # the confirmed-send path below re-checks change_status too).
-                "alert_sent": (
-                    bool(result.get("telegram_sent"))
-                    and not result.get("is_new")
-                ),
-                "alert_suppressed_reason":  result.get("alert_suppressed_reason", ""),
-                "added_count":              result.get("added_count", 0),
-                "removed_count":            result.get("removed_count", 0),
-                "modified_count":           result.get("modified_count", 0),
-                "chars":                    result.get("chars", 0),
-                "extracted_chars":          result.get("extracted_chars", 0),
-                "extraction_quality":       result.get("extraction_quality", ""),
-                "extraction_method":        result.get("extraction_method", ""),
-                # Hash fields — without these classify_change cannot compare
-                # runs and downgrades real changes to UNCHANGED (defect D1).
-                "normalized_hash":          result.get("normalized_hash"),
-                "content_hash":             result.get("content_hash"),
-                "raw_hash":                 result.get("raw_hash"),
-                "raw_chars":                result.get("raw_chars", 0),
-                "normalized_chars":         result.get("normalized_chars", 0),
-                "normalization_version":    result.get("normalization_version"),
-                "snapshot_raw_path":        result.get("snapshot_raw_path"),
-                "snapshot_normalized_path": result.get("snapshot_normalized_path"),
-                "snapshot_pdf_text_path":   result.get("snapshot_pdf_text_path"),
-                "snapshot_metadata_path":   result.get("snapshot_metadata_path"),
-                "run_at":                   result.get("created_at", datetime.now(timezone.utc).isoformat()),
-                "timestamp_utc":            result.get("created_at", datetime.now(timezone.utc).isoformat()),
-            }
-
-            final_record = append_run(run_record)
-            result["run_record"] = final_record
-            logger.info(
-                "source_runs.append_run completed: source=%s run_id=%s status=%s",
-                source.get("name"), final_record.get("run_id"), final_record.get("change_status"),
-            )
-
-            # ── Auto-seal the canonical evidence record (no operator step) ──
-            # final_record carries proof_block_path and the trail-written
-            # snapshot paths only after append_run, so this is the earliest
-            # point the canonical record CAN be sealed. Sealing runs BEFORE
-            # the deferred alert send so alert routing can attach the proof
-            # block (alert_proof surfaces only record_status == "complete"
-            # records). Non-fatal by design: the run evidence is already
-            # durable in the trail, and `run.py create-canonical-evidence`
-            # remains the recovery path for a failed seal. UNCHANGED runs are
-            # not sealed — one evidence directory per unchanged check is
-            # unbounded disk for no value beyond the trail record itself.
-            if final_record.get("change_status") in ("CHANGED", "FIRST_SEEN"):
-                try:
-                    from pathlib import Path as _SealPath
-                    from app.evidence_records import create_canonical_evidence_record
-                    import app.source_runs as _sr_seal
-                    # D8 idiom: resolve against the SAME base dir the trail
-                    # just wrote to, so the snapshot/proof paths in
-                    # final_record resolve where append_run put them.
-                    # FIRST_SEEN baselines are sealed but do NOT enter the
-                    # human review queue — the queue is for customer-facing
-                    # changes, and mass source activation would otherwise
-                    # flood it with one pending record per source.
-                    _is_baseline = final_record.get("change_status") == "FIRST_SEEN"
-                    _seal_kwargs = (
-                        {
-                            "review_status": "baseline",
-                            "human_review_required": False,
-                            "review_reason": (
-                                "Baseline capture (FIRST_SEEN) — no "
-                                "customer-facing change to review."
-                            ),
-                        }
-                        if _is_baseline
-                        else {}
-                    )
-                    _sealed_record = create_canonical_evidence_record(
-                        final_record,
-                        base_dir=_SealPath(_sr_seal._BASE_DIR),
-                        **_seal_kwargs,
-                    )
-                    result["canonical_evidence_sealed"] = True
-                    if _sealed_record.get("record_status") != "complete":
-                        # A quarantined (integrity_error) record was durably
-                        # written — sealed, but alert_proof will decline it.
-                        # Surface it so quarantining live captures is visible.
-                        result["canonical_evidence_quarantined"] = True
-                        logger.warning(
-                            "Canonical evidence sealed QUARANTINED (record_status=%s): "
-                            "source=%s run_id=%s — capture text failed the "
-                            "readability gate; the alert will carry no proof block",
-                            _sealed_record.get("record_status"),
-                            source.get("name"), final_record.get("run_id"),
-                        )
-                    else:
-                        logger.info(
-                            "Canonical evidence sealed: source=%s run_id=%s status=%s",
-                            source.get("name"), final_record.get("run_id"),
-                            final_record.get("change_status"),
-                        )
-                except Exception as seal_err:  # noqa: BLE001
-                    # Typed idempotency check via isinstance with a lazy
-                    # re-import: a bare `except EvidenceRecordExistsError`
-                    # would NameError if the import inside the try was what
-                    # failed — and that NameError would escape to the outer
-                    # append except and suppress the alert send.
-                    try:
-                        from app.evidence_records import (
-                            EvidenceRecordExistsError as _ExistsErr,
-                        )
-                        _is_dup = isinstance(seal_err, _ExistsErr)
-                    except Exception:  # noqa: BLE001
-                        _is_dup = False
-                    if _is_dup:
-                        # Benign duplicate: the record IS sealed — just not by
-                        # this call. INFO, not WARNING — a warning here would
-                        # train operators to skim past the one that matters.
-                        result["canonical_evidence_sealed"] = True
-                        logger.info(
-                            "Canonical evidence already sealed (idempotent skip): "
-                            "source=%s run_id=%s",
-                            source.get("name"), final_record.get("run_id"),
-                        )
-                    else:
-                        result["canonical_evidence_sealed"] = False
-                        logger.warning(
-                            "Canonical evidence auto-seal failed (non-fatal; "
-                            "run.py create-canonical-evidence can recover): "
-                            "source=%s run_id=%s err=%s",
-                            source.get("name"), final_record.get("run_id"), seal_err,
-                        )
-
-            # ── Send the deferred alert — ONLY now that the evidence is durable ──
-            # Invariant (A-durability, fix 2): "alert sent" can never outrun
-            # "evidence recorded". append_run() above has fsync'd the CHANGED
-            # record to disk; only then do we release the Telegram send. If
-            # append_run had raised, control jumped to the non-fatal except below
-            # and this send is never reached — no alert without durable evidence.
-            # We also re-confirm the persisted classification is genuinely
-            # CHANGED (append_run re-runs classify_change), so a run the trail
-            # downgraded never alerts.
-            if _will_alert and final_record.get("change_status") == "CHANGED":
-                from app.telegram import send_telegram_alert
-                telegram_sent = send_telegram_alert(_deferred_alert)
-                result["telegram_sent"] = telegram_sent
-                if telegram_sent:
-                    # A-HIGH: confirmed delivery — flip the persisted record's
-                    # alert_sent to True so the dedup gate suppresses re-alerting
-                    # this hash next sweep. alert_sent is not a chain field, so
-                    # this patch leaves the tamper-evident chain intact.
-                    mark_alert_sent(
-                        final_record.get("source_id"),
-                        final_record.get("run_id"),
-                        alert_sent=True,
-                    )
-                    result["run_record"]["alert_sent"] = True
-                else:
-                    # Send failed AFTER durable evidence append: the record stays
-                    # alert_sent=False, so the next sweep re-attempts the alert
-                    # for this same hash instead of suppressing it forever.
-                    logger.warning(
-                        "Deferred Telegram send returned falsy AFTER durable "
-                        "evidence append: source=%s run_id=%s (evidence recorded, "
-                        "alert delivery NOT confirmed — record left alert_sent=False "
-                        "so the next sweep retries this alert)",
-                        source.get("name"), final_record.get("run_id"),
-                    )
-            elif _will_alert:
-                logger.warning(
-                    "Deferred alert NOT sent: trail reclassified run as %s "
-                    "(not CHANGED) for source=%s run_id=%s — evidence recorded, "
-                    "no alert issued",
-                    final_record.get("change_status"), source.get("name"),
-                    final_record.get("run_id"),
-                )
-
-            # ── G1: stash a cooldown-suppressed alert AFTER durable evidence ──
-            # Same durability invariant as the deferred send: only after append_run
-            # has fsync'd the CHANGED record do we persist the deferred payload, so
-            # a stash can never outrun the evidence it refers to.
-            _pending_cooldown = result.pop("_pending_cooldown_alert", None)
-            if _pending_cooldown is not None and final_record.get("change_status") == "CHANGED":
-                try:
-                    from app.pending_alerts import stash as _stash_pending
-                    _stash_pending(_pending_cooldown)
-                    logger.info(
-                        "Deferred cooldown alert stashed for later delivery: "
-                        "source=%s run_id=%s", source.get("name"), final_record.get("run_id"),
-                    )
-                except Exception as _stash_err:  # noqa: BLE001
-                    logger.warning("pending-alert stash failed (non-fatal): %s", _stash_err)
-
-            # ── Wire alert drafts for CHANGED runs (not FIRST_SEEN baseline) ──
-            if not result.get("is_new") and final_record.get("change_status") == "CHANGED":
-                try:
-                    from pathlib import Path as _Path
-                    from app.alert_drafts import build_alert_draft, write_alert_artifacts, load_json_artifact
-                    import app.source_runs as _sr_mod
-
-                    # D8: resolve through the configured base dir (env
-                    # STATUTEPROOF_BASE_DIR or repo default) — never a
-                    # hardcoded path relative to this file.
-                    _base_dir = _Path(_sr_mod._BASE_DIR)
-
-                    # Load diff artifact — written by append_run into diff_json_path
-                    diff_artifact = load_json_artifact(final_record.get("diff_json_path"), _base_dir)
-                    # Fall back to a minimal structure built from pipeline result lists
-                    if not diff_artifact:
-                        diff_artifact = {
-                            "added_chunks":  result.get("added", []),
-                            "removed_chunks": result.get("removed", []),
-                            "changed_chunks": [],
-                            "diff_summary":  (
-                                f"Added: {result.get('added_count', 0)}, "
-                                f"Removed: {result.get('removed_count', 0)}, "
-                                f"Modified: {result.get('modified_count', 0)}"
-                            ),
-                            "meaningful_change_detected": True,
-                            "diff_quality": "PARTIAL",
-                            "added_count": result.get("added_count", 0),
-                            "removed_count": result.get("removed_count", 0),
-                            "changed_count": result.get("modified_count", 0),
-                        }
-
-                    # Load proof block — written by append_run into proof_block_path
-                    proof_block = load_json_artifact(final_record.get("proof_block_path"), _base_dir)
-                    if not proof_block:
-                        proof_block = {
-                            "official_url": source.get("url", ""),
-                            "normalized_hash": "",
-                            "proof_quality": "INCOMPLETE",
-                            "limitations_notes": "Proof block unavailable at alert-draft time.",
-                        }
-
-                    alert = build_alert_draft(final_record, diff_artifact, proof_block)
-                    if alert:
-                        # Attach the shared content layer so the draft/email
-                        # channel renders the same alert body as Telegram.
-                        try:
-                            from app.alert_content import build_alert_content, render_markdown
-                            alert["alert_content_markdown"] = render_markdown(build_alert_content({
-                                "url": source.get("url", ""),
-                                "source_name": source.get("name", ""),
-                                "jurisdiction": source.get("jurisdiction", ""),
-                                "risk_level": result.get("risk_level", ""),
-                                "risk_reason": result.get("risk_reason", ""),
-                                "risk_details": result.get("risk_details") or {},
-                                "added": result.get("added", []),
-                                "removed": result.get("removed", []),
-                                "executive_summary": result.get("executive_summary", ""),
-                                "business_action_required": result.get("business_action_required", ""),
-                                "deadline": result.get("deadline"),
-                                "detected_facts": result.get("detected_facts", []),
-                                "urgency": result.get("urgency", ""),
-                                "affected_entities": result.get("affected_entities", []),
-                                "checked_at_utc": final_record.get("timestamp_utc", ""),
-                            }))
-                        except Exception as _sc_err:
-                            logger.warning("Shared alert content attach failed (non-fatal): %s", _sc_err)
-                        # Resolve the snapshot directory for writing alert artifacts
-                        snap_raw = final_record.get("snapshot_raw_path")
-                        if snap_raw:
-                            snap_dir = (_base_dir / snap_raw).parent
-                        else:
-                            snap_dir = _base_dir / "data" / "alert_drafts" / final_record.get("source_id", "unknown")
-                        snap_dir.mkdir(parents=True, exist_ok=True)
-                        artifact_paths = write_alert_artifacts(alert, snap_dir)
-                        result["alert_draft_json_path"] = artifact_paths.get("alert_draft_json_path")
-                        result["alert_draft_md_path"] = artifact_paths.get("alert_draft_md_path")
-                        logger.info(
-                            "Alert draft written: source=%s risk=%s path=%s",
-                            source.get("name"), alert.get("risk_level"),
-                            artifact_paths.get("alert_draft_json_path"),
-                        )
-                except Exception as _ad_err:
-                    logger.warning("Alert draft failed (non-fatal): %s", _ad_err)
-
-                # ── Deadline radar: persist any concrete FUTURE date the change
-                # carries, keyed by the durable evidence record (run_id). Only
-                # dates extracted from the real ADDED diff excerpt are stored
-                # (evidence-grounded). Best-effort — never blocks the pipeline.
-                try:
-                    from pathlib import Path as _Path2
-                    import app.source_runs as _sr_mod2
-                    from app.deadline_radar import record_deadlines_for_change
-
-                    # Resolve the register base dir from source_runs so the
-                    # deadline register always lives alongside the trail it keys
-                    # off (and follows the same isolation in tests/deploys).
-                    persisted_deadlines = record_deadlines_for_change(
-                        evidence_record_id=final_record.get("run_id", ""),
-                        source_id=final_record.get("source_id", ""),
-                        regulator=(
-                            source.get("regulator")
-                            or source.get("family")
-                            or source.get("jurisdiction")
-                            or ""
-                        ),
-                        source_name=source.get("name", ""),
-                        official_url=source.get("url", ""),
-                        added_blocks=result.get("added", []),
-                        base_dir=_Path2(_sr_mod2._BASE_DIR),
-                    )
-                    if persisted_deadlines:
-                        logger.info(
-                            "Deadline radar: recorded %d deadline(s): source=%s run_id=%s",
-                            len(persisted_deadlines), source.get("name"),
-                            final_record.get("run_id"),
-                        )
-                except Exception as _dl_err:
-                    logger.warning("Deadline radar persist failed (non-fatal): %s", _dl_err)
-
-        except Exception as _sr_err:
-            # The evidence append failing means this source produced NO durable
-            # record AND no alert (durability invariant) — while still counting
-            # as "ok" in the cycle (the fetch succeeded). Without this flag a
-            # systemic trail-write failure (disk full, permissions) is invisible
-            # to every deadman. monitor_all_sources tallies it.
-            result["evidence_append_failed"] = True
-            logger.warning("source_runs.append_run failed (non-fatal): %s", _sr_err)
-
-    # ── G1: deliver any due deferred-cooldown alert ──────────────────────────
-    # Runs on EVERY sweep (changed or unchanged) — the only place a cooldown-
-    # suppressed alert can be retried, since an unchanged sweep short-circuits
-    # before the alert path. Placed AFTER this run's own append so a stash the
-    # current change superseded is discarded (not delivered stale). Non-fatal.
-    if ENABLE_TELEGRAM_ALERTS:
-        try:
-            from app.pending_alerts import flush_due
-            from app.telegram import send_telegram_alert
-            flush_due(source, send_fn=send_telegram_alert)
-        except Exception as _flush_err:  # noqa: BLE001
-            logger.warning("pending-alert flush failed (non-fatal): %s", _flush_err)
+    _record_unchanged_heartbeat(result, source)
+    _process_changed_run(result, source)
+    _flush_due_cooldown_alerts(source)
 
     # Internal markers never belong in the returned contract. On the CHANGED
     # path they were already pop'd; on every other path they are None and dropped.

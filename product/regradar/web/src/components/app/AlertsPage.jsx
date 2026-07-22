@@ -39,6 +39,18 @@ function RiskBand({ level }) {
   )
 }
 
+// A monitored change is surfaced as "Enforcement" ONLY when the backend already
+// classified its real diff content as enforcement-related — change_type ===
+// 'ENFORCEMENT', set in app/alert_drafts.classify_change_type from penalty /
+// sanction / enforcement / revocation / suspension wording in the actual diff.
+// This is a monitoring classification of a change on an official enforcement
+// page — never a legal determination, and never a claim to prevent or avoid
+// enforcement. change_type is not plan-redacted, so the signal is honest on
+// redacted cards too (it says a monitored enforcement page changed, not what).
+function isEnforcementAlert(item) {
+  return String(item?.change_type || '').toUpperCase() === 'ENFORCEMENT'
+}
+
 function AlertsEmpty() {
   return (
     <EmptyState
@@ -59,6 +71,7 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
   const [riskFilter, setRiskFilter] = useState('All')
   const [search, setSearch] = useState('')
   const [licenceFilter, setLicenceFilter] = useState('All')
+  const [enforcementOnly, setEnforcementOnly] = useState(false)
   const [sendState, setSendState] = useState({})
   // The shell (AppShell) does not pass the plan into this page, so fetch it here
   // to decide whether the empty state should carry the first-session sample. A
@@ -102,6 +115,7 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
   const filtered = useMemo(() => (preview?.matches || []).filter(item => {
     const risk = String(item.risk_level || 'MEDIUM').toUpperCase()
     if (riskFilter !== 'All' && risk !== riskFilter) return false
+    if (enforcementOnly && !isEnforcementAlert(item)) return false
     if (licenceFilter !== 'All') {
       const types = Array.isArray(item.affected_licence_types) ? item.affected_licence_types : []
       if (!types.some(t => String(t).toLowerCase().includes(licenceFilter.toLowerCase()))) return false
@@ -114,7 +128,7 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
       item.executive_summary,
     ].join(' ').toLowerCase()
     return !search || haystack.includes(search.toLowerCase())
-  }), [preview, riskFilter, search, licenceFilter])
+  }), [preview, riskFilter, search, licenceFilter, enforcementOnly])
 
   async function handleSendPreviewAlert(alertId) {
     setSendState(prev => ({ ...prev, [alertId]: { status: 'sending', message: '' } }))
@@ -181,6 +195,23 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
                 {risk === 'All' ? 'All risk' : risk.charAt(0) + risk.slice(1).toLowerCase() + ' risk'}
               </button>
             ))}
+            {/* Enforcement filter — shows only changes the backend classified as
+                enforcement-related on an official enforcement page. A monitoring
+                filter, not a legal claim; wording never implies preventing or
+                avoiding enforcement. */}
+            <button
+              type="button"
+              aria-pressed={enforcementOnly}
+              onClick={() => setEnforcementOnly(value => !value)}
+              title="Show only monitored changes classified as enforcement-related (penalty, sanction, revocation, or suspension wording on an official enforcement page). A monitoring classification, not a legal determination."
+              className={`rounded-lg border px-2.5 py-1 text-xs transition-colors ${
+                enforcementOnly
+                  ? 'border-rose-400/40 bg-rose-400/10 text-rose-300'
+                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              Enforcement
+            </button>
           </div>
           <div className="flex items-center gap-2">
             <label className="text-[11px] font-semibold text-[var(--text-muted)] whitespace-nowrap">Licence type</label>
@@ -238,6 +269,14 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
                   <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                     {item.review_status || 'Approved'}
                   </span>
+                  {isEnforcementAlert(item) && (
+                    <span
+                      title="Monitored change on an official enforcement page, classified from penalty, sanction, revocation, or suspension wording in the diff. A monitoring classification, not a legal determination."
+                      className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold text-rose-300"
+                    >
+                      Enforcement
+                    </span>
+                  )}
                   <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
                     item.matched
                       ? 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]'
