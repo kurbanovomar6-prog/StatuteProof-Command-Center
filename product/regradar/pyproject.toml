@@ -22,15 +22,14 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-# Measured 2026-07-22 (pytest tests/ --cov=app): 76.49% total, 4207 tests, after
-# further hardening cycles: the critical modules (ai 100%, coverage 100%,
-# tenancy 100%, user_delivery 99%, telegram_pairing 98%, source_readiness 99%,
-# telegram_onboarding 99%, scheduler 98%) plus new fail-closed security/alert
-# branch coverage (tenancy, user_delivery, alert_routing, telegram_pairing). The
-# floor sits ~1.5pt below that measurement so ordinary churn cannot turn the
-# backend job red on arrival. Non-regression ratchet — raise it (never lower it)
-# toward 80%.
-fail_under = 75
+# Measured 2026-07-22 (pytest tests/ --cov=app): 78.84% total, 4496 tests, after
+# the api-handler coverage cycle raised every extracted mixin (api_account 46->89,
+# api_evidence 54->95, api_auth 66->96, api_sources 67->100, api_reports 69->99,
+# api_telegram 62->100) on top of the earlier critical-module + fail-closed
+# hardening. The floor sits ~1pt below that measurement so ordinary churn cannot
+# turn the backend job red on arrival. Non-regression ratchet — raise it (never
+# lower it) toward 80%.
+fail_under = 78
 exclude_also = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
