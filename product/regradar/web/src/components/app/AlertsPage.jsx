@@ -42,11 +42,12 @@ function RiskBand({ level }) {
 // A monitored change is surfaced as "Enforcement" ONLY when the backend already
 // classified its real diff content as enforcement-related — change_type ===
 // 'ENFORCEMENT', set in app/alert_drafts.classify_change_type from penalty /
-// sanction / enforcement / revocation / suspension wording in the actual diff.
-// This is a monitoring classification of a change on an official enforcement
-// page — never a legal determination, and never a claim to prevent or avoid
-// enforcement. change_type is not plan-redacted, so the signal is honest on
-// redacted cards too (it says a monitored enforcement page changed, not what).
+// fine / enforcement / revocation / sanction / suspension wording found IN THE
+// DIFF TEXT (never from the source name or category). This is a monitoring
+// classification of the change wording — never a legal determination, and never
+// a claim to prevent or avoid enforcement. change_type is not plan-redacted, so
+// the signal is honest on redacted cards too (it says an enforcement-worded
+// change was detected, not what the withheld content says).
 function isEnforcementAlert(item) {
   return String(item?.change_type || '').toUpperCase() === 'ENFORCEMENT'
 }
@@ -196,14 +197,15 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
               </button>
             ))}
             {/* Enforcement filter — shows only changes the backend classified as
-                enforcement-related on an official enforcement page. A monitoring
-                filter, not a legal claim; wording never implies preventing or
-                avoiding enforcement. */}
+                enforcement-related from penalty/sanction/revocation/suspension
+                wording detected in the monitored change. A monitoring filter, not
+                a legal claim; wording never implies preventing or avoiding
+                enforcement, and never asserts the source is an enforcement page. */}
             <button
               type="button"
               aria-pressed={enforcementOnly}
               onClick={() => setEnforcementOnly(value => !value)}
-              title="Show only monitored changes classified as enforcement-related (penalty, sanction, revocation, or suspension wording on an official enforcement page). A monitoring classification, not a legal determination."
+              title="Show only monitored changes classified as enforcement-related from penalty, sanction, revocation, or suspension wording detected in the monitored change. A monitoring classification, not a legal determination."
               className={`rounded-lg border px-2.5 py-1 text-xs transition-colors ${
                 enforcementOnly
                   ? 'border-rose-400/40 bg-rose-400/10 text-rose-300'
@@ -271,7 +273,7 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
                   </span>
                   {isEnforcementAlert(item) && (
                     <span
-                      title="Monitored change on an official enforcement page, classified from penalty, sanction, revocation, or suspension wording in the diff. A monitoring classification, not a legal determination."
+                      title="Classified from penalty, fine, enforcement, revocation, or sanction/suspension wording detected in this monitored change. A monitoring classification, not a legal determination."
                       className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold text-rose-300"
                     >
                       Enforcement

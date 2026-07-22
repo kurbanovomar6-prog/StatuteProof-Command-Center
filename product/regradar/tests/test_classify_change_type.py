@@ -284,6 +284,71 @@ def test_classify_change_type_genuine_suspension_with_action_context_is_enforcem
     assert result == "ENFORCEMENT"
 
 
+def test_classify_change_type_defined_term_is_not_enforcement():
+    # Regression (word-boundary): the substring 'fine' inside 'defined' must NOT
+    # light the enforcement badge. A glossary/definitional change is not an
+    # enforcement action. Previously classified ENFORCEMENT via 'fine' in 'defined'.
+    diff = _diff(added=["The term is defined in the GLO module of the rulebook glossary."])
+    result = classify_change_type(_run(), diff)
+    assert result != "ENFORCEMENT"
+
+
+def test_classify_change_type_refine_confine_define_are_not_enforcement():
+    # Regression (word-boundary): 'refine', 'confine', 'define' all contain the
+    # substring 'fine' but none is enforcement wording.
+    diff = _diff(added=["We refine and confine the scope; the process is defined below."])
+    result = classify_change_type(_run(), diff)
+    assert result != "ENFORCEMENT"
+
+
+def test_classify_change_type_plural_penalties_is_enforcement():
+    # Regression (stem): plural 'penalties' must classify as ENFORCEMENT. The
+    # old singular substring 'penalty' is not contained in 'penalties', so
+    # genuine plural penalty text was MISSED (false negative).
+    diff = _diff(added=["Administrative penalties of AED 500,000 were imposed on the firm."])
+    result = classify_change_type(_run(), diff)
+    assert result == "ENFORCEMENT"
+
+
+def test_classify_change_type_singular_penalty_imposed_is_enforcement():
+    # A genuine singular 'penalty imposed' diff still classifies as ENFORCEMENT.
+    diff = _diff(added=["A penalty was imposed on the firm following a supervisory review."])
+    result = classify_change_type(_run(), diff)
+    assert result == "ENFORCEMENT"
+
+
+def test_classify_change_type_enforcement_not_driven_by_source_name():
+    # Regression (honest badge): a BENIGN administrative change on a source
+    # merely NAMED 'DFSA Enforcement' must NOT classify as ENFORCEMENT — the
+    # badge/tooltip attribute the classification to enforcement wording IN THE
+    # DIFF, and this diff has none. Previously the 'enforcement' token in the
+    # source name short-circuited to ENFORCEMENT (a false in-the-diff claim).
+    run = _run(source_name="DFSA Enforcement", source_id="AE-dfsa-enforcement", category="enforcement")
+    diff = _diff(added=["The office address and contact telephone number were updated."])
+    result = classify_change_type(run, diff)
+    assert result != "ENFORCEMENT"
+
+
+def test_classify_change_type_benign_sanctions_screening_on_enforcement_source_not_enforcement():
+    # A benign AML sanctions-screening update on an enforcement-NAMED source must
+    # not light the badge: no punitive action context, benign phrase suppresses,
+    # and the source name no longer drives the classification.
+    run = _run(source_name="DFSA Enforcement", source_id="AE-dfsa-enforcement", category="enforcement")
+    diff = _diff(added=["Updated guidance on sanctions screening obligations for onboarding."])
+    result = classify_change_type(run, diff)
+    assert result != "ENFORCEMENT"
+
+
+def test_classify_change_type_enforcement_wording_on_enforcement_source_is_enforcement():
+    # The honest positive case: enforcement wording genuinely in the diff on an
+    # enforcement-named source correctly classifies ENFORCEMENT — the tooltip's
+    # in-the-diff attribution is TRUE.
+    run = _run(source_name="DFSA Enforcement", source_id="AE-dfsa-enforcement", category="enforcement")
+    diff = _diff(added=["A financial penalty was imposed on Firm X for compliance breaches."])
+    result = classify_change_type(run, diff)
+    assert result == "ENFORCEMENT"
+
+
 def test_classify_change_type_returns_new_publication_when_added_count_positive_no_keywords():
     diff = _diff(added_count=3, meaningful=True)
     result = classify_change_type(_run(), diff)

@@ -144,7 +144,7 @@ systemctl daemon-reload
 systemctl enable --now statuteproof-api statuteproof-scheduler \
     statuteproof-telegram-bot statuteproof-compaction.timer \
     statuteproof-backup.timer statuteproof-heartbeat.timer \
-    statuteproof-verify.timer
+    statuteproof-verify.timer statuteproof-api-health.timer
 systemctl status statuteproof-api --no-pager | head -5   # expect: active (running)
 curl -s http://127.0.0.1:5001/api/health                  # expect: {"ok": true, ...}
 
@@ -392,9 +392,9 @@ self-selected paid `plan_name` is an intent, not proof of payment.
 6. Telegram: send `/start` to @statuteproofalerts_bot → reply arrives
    (NEW token only)
 7. `systemctl restart statuteproof-api` → health returns 200 within 10 s
-8. Reboot the droplet once: all three services + both timers come back
+8. Reboot the droplet once: all three services + the timers come back
    (`systemctl list-timers | grep statuteproof` — expect compaction + backup +
-   heartbeat + verify)
+   heartbeat + verify + api-health)
 9. Email dry-run (if a provider is configured):
    set `STATUTEPROOF_EMAIL_DRY_RUN=true`, restart api, trigger a test brief
    → `data/email_outbox/delivery_status.jsonl` gains a `dry_run` row → set
@@ -484,6 +484,17 @@ systemctl start statuteproof-api statuteproof-scheduler statuteproof-telegram-bo
   bot (best-effort) and the oneshot exits non-zero. Manual run:
   `run.py verify-trail-watch` (silent + exit 0 when clean). Confirm scheduled:
   `systemctl list-timers statuteproof-verify.timer --no-pager`.
+- **API liveness watchdog**: `statuteproof-api-health.timer` runs every 2 min
+  and probes `http://127.0.0.1:5001/api/health`. `statuteproof-api.service` is
+  `Restart=on-failure`, which recovers a CRASH but not an alive-but-wedged API
+  (SQLite writer-lock stall, `TasksMax` thread exhaustion) where
+  `serve_forever()` stays up while every request blocks and Caddy returns 502.
+  On a non-200 / no-response, the watchdog restarts `statuteproof-api.service`
+  and pages the founder via the admin Telegram bot (same channel as the
+  heartbeat/integrity watchdogs). It runs as **root** because restarting the
+  API unit needs privilege. Manual run: `bash deploy/api-health-check.sh`
+  (exit 0 = healthy, exit 1 = restart+page issued). Confirm scheduled:
+  `systemctl list-timers statuteproof-api-health.timer --no-pager`.
 - **Scheduler cadence**: change `--interval` in
   `statuteproof-scheduler.service`, then `systemctl daemon-reload && restart`.
 - **Never** run two schedulers against the same data dir.

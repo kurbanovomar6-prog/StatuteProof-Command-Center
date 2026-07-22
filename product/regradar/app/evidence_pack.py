@@ -562,10 +562,13 @@ python3 verify.py
 
 For every record it re-reads the snapshot files (and, where a change was
 detected, the sealed `diff.txt`), recomputes each SHA-256, and compares the
-result to `manifest.json`. It prints `PASS` when the bytes match the recorded
-hash and `FAIL` when they do not, then exits non-zero if any record fails. If a
-single byte of a snapshot or diff is altered, its hash changes and that record
-reports `FAIL`.
+result to the SEALED hash inside that record's `evidence-record.json` content
+block — the value the record self-seal proves has not been altered (the
+`manifest.json` copy is unsealed and is used only as a fallback for legacy
+records). It prints `PASS` when the bytes match the sealed hash and `FAIL` when
+they do not, then exits non-zero if any record fails. If a single byte of a
+snapshot or diff is altered — or the sealed hash it is checked against is
+edited — that record reports `FAIL`.
 
 ## Verify by hand (no scripts)
 
@@ -575,8 +578,10 @@ You can also confirm any record with your own tools, for example:
 shasum -a 256 snapshots/<record_id>/normalized.txt
 ```
 
-and check the value against `normalized_hash` for that record in
-`manifest.json`. The raw side works the same way against `raw_hash`.
+and check the value against the sealed `content.current_hash` for that record in
+`snapshots/<record_id>/evidence-record.json` (its `manifest.json` copy,
+`normalized_hash`, is identical on a genuine pack). The raw side works the same
+way against the sealed `content.raw_hash`.
 {external_timestamp_section}
 ## What this pack is and is not
 
@@ -600,8 +605,12 @@ _VERIFY_SCRIPT = '''#!/usr/bin/env python3
 """Standalone StatuteProof evidence-pack verifier.
 
 Recompute the SHA-256 of every snapshot in this pack and compare it against the
-hashes recorded in manifest.json. For each record it also recomputes the record
-SELF-SEAL over the bundled evidence-record.json content block, recomputes the
+SEALED hash inside that record's bundled evidence-record.json content block
+(content.raw_hash / content.current_hash / content.diff_hash) — the value whose
+authenticity the record self-seal below proves. The per-record hashes in
+manifest.json are unsealed and are used only as a fallback for legacy records
+that carry no such sealed content hash. For each record it also recomputes the
+record SELF-SEAL over the bundled evidence-record.json content block, recomputes the
 full-record ATTRIBUTION seal (regulator, source name, change summary, line
 counts, run status, review status) where present, and cross-checks the displayed
 capture time / source URL against the sealed copies. Standard library only; no
@@ -655,6 +664,40 @@ def _bare_digest(value):
     if text.lower().startswith("sha256:"):
         text = text[len("sha256:"):]
     return text.lower()
+
+
+def sealed_snapshot_hash(bundled, sealed_paths, manifest_record, manifest_key):
+    """Resolve the AUTHORITATIVE expected hash for a snapshot.
+
+    The bundled evidence-record.json content block is the SEALED authority for
+    the snapshot hashes: check_record_seal proves it recomputes from record_hash,
+    so content.raw_hash / content.current_hash / content.diff_hash cannot be
+    rewritten without failing that seal. Its hash is therefore the source of
+    truth, resolved most-specific-first in the SAME order the online verifier
+    uses (app.public_verify._HASH_PATHS).
+
+    manifest.json is UNSEALED: the per-record raw_hash/normalized_hash/diff_hash
+    pasted there can be edited to match fabricated snapshot bytes, so it is used
+    ONLY as a fallback for a legacy record whose bundled evidence-record.json
+    carries no such content hash. Returns (expected_bare_hex, "sealed" |
+    "manifest" | "").
+    """
+    if isinstance(bundled, dict):
+        for path in sealed_paths:
+            cursor = bundled
+            found = True
+            for key in path:
+                if isinstance(cursor, dict) and key in cursor:
+                    cursor = cursor[key]
+                else:
+                    found = False
+                    break
+            if found and isinstance(cursor, str) and cursor.strip():
+                return _bare_digest(cursor), "sealed"
+    fallback = manifest_record.get(manifest_key)
+    if isinstance(fallback, str) and fallback.strip():
+        return _bare_digest(fallback), "manifest"
+    return "", ""
 
 
 def check_record_seal(record_id, record):
@@ -837,24 +880,48 @@ def check_attribution_seal(record_id, record):
 def main():
     manifest = json.loads((HERE / "manifest.json").read_text(encoding="utf-8"))
     records = manifest.get("records", [])
-    print("Verifying %d evidence record(s) against manifest.json\\n" % len(records))
+    print("Verifying %d evidence record(s) against the SEALED evidence records\\n" % len(records))
     failures = 0
     for record in records:
         record_id = record.get("record_id", "<unknown>")
-        for label, hash_key, file_key in (
-            ("raw", "raw_hash", "raw_snapshot_file"),
-            ("normalized", "normalized_hash", "normalized_snapshot_file"),
+
+        # Load the bundled evidence-record.json FIRST: its content block is the
+        # SEALED authority for every snapshot hash. check_record_seal (below)
+        # proves it recomputes from record_hash, so content.raw_hash /
+        # content.current_hash / content.diff_hash cannot be rewritten without
+        # failing that seal. The per-record hashes in manifest.json are UNSEALED:
+        # comparing snapshot bytes to them would let a holder of a genuine pack
+        # fabricate raw.txt and edit ONLY the manifest hash to match, laundering
+        # forged official-source text through a clean PASS. So the sealed value is
+        # the authority; the manifest hash is a fallback only for legacy records.
+        rec_rel = record.get("evidence_record_file")
+        rec_target = (HERE / rec_rel) if rec_rel else None
+        bundled = None
+        if rec_target is not None and rec_target.exists():
+            try:
+                loaded = json.loads(rec_target.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                loaded = None
+            if isinstance(loaded, dict):
+                bundled = loaded
+
+        for label, sealed_paths, manifest_key, file_key in (
+            ("raw", (("content", "raw_hash"), ("raw_hash",)),
+             "raw_hash", "raw_snapshot_file"),
+            ("normalized",
+             (("content", "current_hash"), ("current_hash",), ("normalized_hash",)),
+             "normalized_hash", "normalized_snapshot_file"),
         ):
             rel = record.get(file_key)
-            expected = str(record.get(hash_key) or "").lower().replace("sha256:", "")
+            expected, origin = sealed_snapshot_hash(bundled, sealed_paths, record, manifest_key)
             target = HERE / rel if rel else None
             if not rel or target is None or not target.exists():
                 print("FAIL  %s [%s] snapshot file missing: %s" % (record_id, label, rel))
                 failures += 1
                 continue
             actual = sha256_file(target)
-            if actual == expected:
-                print("PASS  %s [%s] sha256=%s" % (record_id, label, actual))
+            if expected and actual == expected:
+                print("PASS  %s [%s] sha256=%s (matches %s hash)" % (record_id, label, actual, origin))
             else:
                 print("FAIL  %s [%s] expected=%s actual=%s" % (record_id, label, expected, actual))
                 failures += 1
@@ -863,40 +930,36 @@ def main():
         # nothing to diff against. A single altered byte of diff.txt fails this.
         diff_rel = record.get("diff_file")
         if diff_rel:
-            expected = str(record.get("diff_hash") or "").lower().replace("sha256:", "")
+            expected, origin = sealed_snapshot_hash(
+                bundled, (("content", "diff_hash"), ("diff_hash",)), record, "diff_hash"
+            )
             target = HERE / diff_rel
             if not target.exists():
                 print("FAIL  %s [diff] sealed diff file missing: %s" % (record_id, diff_rel))
                 failures += 1
             else:
                 actual = sha256_file(target)
-                if actual == expected:
-                    print("PASS  %s [diff] sha256=%s" % (record_id, actual))
+                if expected and actual == expected:
+                    print("PASS  %s [diff] sha256=%s (matches %s hash)" % (record_id, actual, origin))
                 else:
                     print("FAIL  %s [diff] expected=%s actual=%s" % (record_id, expected, actual))
                     failures += 1
         # Record self-seal + capture-metadata cross-check over the bundled
         # evidence-record.json. Re-hashing the snapshots proves the bytes are
-        # intact; this proves the RECORD binding them (its content block, and the
-        # capture time / source URL it displays) has not been altered either.
-        rec_rel = record.get("evidence_record_file")
+        # intact; this proves the RECORD binding them (its content block — which
+        # supplies the SEALED snapshot hashes above — and the capture time /
+        # source URL it displays) has not been altered either.
         if rec_rel:
-            rec_target = HERE / rec_rel
-            if not rec_target.exists():
+            if rec_target is None or not rec_target.exists():
                 print("FAIL  %s [record_seal] evidence-record.json missing: %s" % (record_id, rec_rel))
                 failures += 1
+            elif bundled is None:
+                print("FAIL  %s [record_seal] evidence-record.json is not readable JSON" % record_id)
+                failures += 1
             else:
-                try:
-                    bundled = json.loads(rec_target.read_text(encoding="utf-8"))
-                except (OSError, ValueError):
-                    bundled = None
-                if not isinstance(bundled, dict):
-                    print("FAIL  %s [record_seal] evidence-record.json is not readable JSON" % record_id)
-                    failures += 1
-                else:
-                    failures += check_record_seal(record_id, bundled)
-                    failures += check_capture_metadata(record_id, bundled)
-                    failures += check_attribution_seal(record_id, bundled)
+                failures += check_record_seal(record_id, bundled)
+                failures += check_capture_metadata(record_id, bundled)
+                failures += check_attribution_seal(record_id, bundled)
     print()
     if failures:
         print("RESULT: FAIL - %d hash mismatch(es); these bytes do NOT match the recorded manifest." % failures)

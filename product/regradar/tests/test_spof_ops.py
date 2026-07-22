@@ -1056,7 +1056,8 @@ if ! command -v systemctl >/dev/null 2>&1; then
   warn "systemctl unavailable — timer enablement unverified (not a droplet)"
 else
   for unit in statuteproof-compaction.timer statuteproof-backup.timer \\
-              statuteproof-heartbeat.timer statuteproof-verify.timer; do
+              statuteproof-heartbeat.timer statuteproof-verify.timer \\
+              statuteproof-api-health.timer; do
     # Pipe-free on purpose: `... | grep -q` under `set -o pipefail` reports a
     # SIGPIPE failure whenever grep exits on an early match while systemctl is
     # still writing, so installed units intermittently read as "not installed".
@@ -1082,6 +1083,7 @@ _TIMERS = [
     "statuteproof-backup.timer",
     "statuteproof-heartbeat.timer",
     "statuteproof-verify.timer",
+    "statuteproof-api-health.timer",
 ]
 
 

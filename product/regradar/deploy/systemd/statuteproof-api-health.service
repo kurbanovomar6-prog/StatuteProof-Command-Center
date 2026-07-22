@@ -1,0 +1,34 @@
+[Unit]
+Description=StatuteProof API liveness watchdog (restarts a wedged/crashed API + pages founder — the deadman statuteproof-api's Restart=on-failure cannot provide)
+After=network-online.target statuteproof-api.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Runs as root ON PURPOSE — unlike the other oneshots (regradar), this one must
+# `systemctl restart statuteproof-api.service`, which needs privilege. It still
+# executes the app's Python only to page the founder (notify_founder), never to
+# write data.
+User=root
+WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/regradar/deploy/api-health-check.sh
+# Type=oneshot has no start timeout by default; this run makes outbound network
+# calls (loopback health probe + Telegram founder page), so a hung call must be
+# reaped rather than wedging the watchdog indefinitely. Comfortably above the
+# script's own 8s probe cap so a restart+page can complete.
+TimeoutStartSec=120
+# Hardening (mirrors the other oneshots). NoNewPrivileges does not stop root
+# talking to systemd over its private socket, so `systemctl restart` still works.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar
+StandardOutput=journal
+StandardError=journal
+# Exit 1 (API was unhealthy — restart + page already issued inside the script)
+# is an EXPECTED remediation signal, not a service fault. Treat it as clean so
+# the timer keeps firing instead of the unit going into failed state (mirrors
+# the heartbeat + verify oneshots).
+SuccessExitStatus=0 1

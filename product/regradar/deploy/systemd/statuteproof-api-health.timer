@@ -1,0 +1,15 @@
+[Unit]
+Description=Run the StatuteProof API liveness watchdog every 2 min (deadman for an alive-but-wedged API that systemd's Restart=on-failure never catches)
+
+[Timer]
+# Tight cadence: this bounds how long a wedged API leaves customers on 502s
+# before auto-recovery. A missed tick has no value to replay (liveness is
+# point-in-time), so no Persistent= catch-up. Runs independently of the API
+# service so it still fires when the API is hung.
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=15s
+Unit=statuteproof-api-health.service
+
+[Install]
+WantedBy=timers.target

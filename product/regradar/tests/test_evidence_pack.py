@@ -327,6 +327,55 @@ def test_bundled_verify_py_fails_on_tampered_snapshot(tmp_path):
     assert "FAIL" in proc.stdout
 
 
+def test_bundled_verify_py_fails_when_raw_forged_and_manifest_hash_relabeled(tmp_path):
+    """Byte-to-SEAL: fabricating raw.txt AND rewriting only the UNSEALED manifest
+    hash to match it must still FAIL — the sealed content.raw_hash is the authority.
+
+    Regression: verify.py re-hashed each snapshot but compared the result against
+    the per-record hash in manifest.json, which is unsealed. A holder of a genuine
+    pack could replace snapshots/<id>/raw.txt with fabricated regulator text,
+    update ONLY that record's raw_hash in manifest.json, leave evidence-record.json
+    untouched, and print RESULT: PASS over forged official-source bytes — while the
+    online /api/verify (which anchors on content.raw_hash) was never fooled. The
+    verifier now checks each snapshot against the SEALED content.raw_hash inside the
+    bundled evidence-record.json, whose authenticity check_record_seal proves.
+    """
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(
+        ["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path
+    )
+    extracted = _extract(result["pack_path"], tmp_path / "forged")
+
+    # Sanity: the untouched pack verifies clean.
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "RESULT: PASS" in proc.stdout
+
+    # Fabricate the RAW snapshot with forged regulator text.
+    raw_target = next(extracted.glob("snapshots/*/raw.txt"))
+    forged = b"<main>FABRICATED official-source regulatory text</main>"
+    raw_target.write_bytes(forged)
+
+    # Relabel ONLY the unsealed manifest hash so it matches the fabricated bytes.
+    # evidence-record.json (the sealed record) is left completely untouched.
+    manifest_path = extracted / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    forged_hash = hashlib.sha256(forged).hexdigest()
+    manifest["records"][0]["raw_hash"] = forged_hash
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    # The sealed content.raw_hash still commits to the ORIGINAL bytes, so the
+    # fabricated raw.txt no longer matches it — the pack must fail.
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[raw]" in proc.stdout
+    # The record self-seal itself is intact (evidence-record.json was untouched):
+    # the failure is the raw bytes diverging from the SEALED content.raw_hash, not
+    # a broken seal — proving the byte↔seal binding is what caught the forgery.
+    assert "PASS  cbuae-test-run-001 [record_seal]" in proc.stdout or "[record_seal] record_hash recomputes" in proc.stdout
+
+
 # ── sealed-diff parity with the Regulator Binder (CHANGED records) ───────────────
 
 def _changed_pack(tmp_path):

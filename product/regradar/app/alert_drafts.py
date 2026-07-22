@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -111,7 +112,18 @@ def action_orientation(change_type: str) -> dict[str, str]:
 # win would surface a *false enforcement claim*. Unambiguous roots therefore
 # classify on sight; the ambiguous roots only count as enforcement when a
 # punitive-action context co-occurs AND no benign phrase explains the word.
-_ENFORCEMENT_UNAMBIGUOUS = ["fine", "penalty", "enforcement", "revocation", "revoked"]
+# Unambiguous enforcement vocabulary matched with WORD BOUNDARIES (not plain
+# substrings). Substring matching fired 'fine' inside 'define'/'defined'/
+# 'refine'/'confine' — ubiquitous in glossary and rulebook diffs — producing a
+# FALSE enforcement badge on a definitional change; and it MISSED plural
+# 'penalties' because the singular 'penalty' is not a substring of it. The stem
+# 'penalt' (penalty/penalties/penalise/penalize) and 'enforcement(s)' /
+# 'revocation(s)' are anchored on a leading boundary so only genuine enforcement
+# wording lights the badge.
+_ENFORCEMENT_UNAMBIGUOUS_RE = re.compile(
+    r"\b(?:fines?|penalt(?:y|ies|ise|ize|ised|ized)|enforcements?|revocations?|revoked)\b",
+    re.IGNORECASE,
+)
 _ENFORCEMENT_AMBIGUOUS_ROOTS = ["sanction", "suspension", "suspend"]
 _ENFORCEMENT_BENIGN_PHRASES = [
     "sanctions screening",
@@ -133,13 +145,18 @@ _ENFORCEMENT_ACTION_CONTEXT = [
 def _is_enforcement(text: str) -> bool:
     """True only for genuine enforcement-action wording.
 
-    See the module comment above ``_ENFORCEMENT_UNAMBIGUOUS``: unambiguous
-    penalty/fine/enforcement/revocation wording classifies on sight, while the
-    ambiguous "sanction"/"suspension" roots are gated on a punitive-action
-    context and suppressed by benign AML-screening / trading-halt phrasings so
-    the enforcement surface never carries a false enforcement claim.
+    See the module comment above ``_ENFORCEMENT_UNAMBIGUOUS_RE``: unambiguous
+    penalty/fine/enforcement/revocation wording (matched on word boundaries)
+    classifies on sight, while the ambiguous "sanction"/"suspension" roots are
+    gated on a punitive-action context and suppressed by benign AML-screening /
+    trading-halt phrasings so the enforcement surface never carries a false
+    enforcement claim.
+
+    The caller passes the DIFF TEXT only (never the source name/category), so a
+    positive result means the enforcement wording is genuinely present in the
+    change — which is exactly what the customer-facing badge tooltip asserts.
     """
-    if _contains_any(text, _ENFORCEMENT_UNAMBIGUOUS):
+    if _ENFORCEMENT_UNAMBIGUOUS_RE.search(text):
         return True
     if not _contains_any(text, _ENFORCEMENT_AMBIGUOUS_ROOTS):
         return False
@@ -170,7 +187,14 @@ def classify_change_type(source_run: dict[str, Any], diff_artifact: dict[str, An
         return "LICENSING"
     if _contains_any(combined, ["rulebook", "rule book", "custody", "client assets"]):
         return "RULEBOOK_UPDATE"
-    if _is_enforcement(combined):
+    # Enforcement is classified from the DIFF TEXT ONLY — never the source name
+    # or category. A benign administrative change on a source merely NAMED "DFSA
+    # Enforcement" (or category "enforcement") must not light the badge, because
+    # the customer-facing tooltip attributes the classification to enforcement
+    # wording found IN THE CHANGE. Passing ``combined`` here would make that
+    # attribution false. (Other categories above may key off source name/category
+    # because their surfaces make no such in-the-diff wording claim.)
+    if _is_enforcement(text):
         return "ENFORCEMENT"
     if _contains_any(combined, ["circular", "notice", "resolution"]):
         return "CIRCULAR_UPDATE"

@@ -12,6 +12,7 @@ There is no runtime unit for systemd files, so these tests assert:
 
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -358,6 +359,7 @@ _NETWORK_ONESHOT_UNITS = [
     "statuteproof-heartbeat.service",
     "statuteproof-verify.service",
     "statuteproof-cbuae-rulebook-watch.service",
+    "statuteproof-api-health.service",
 ]
 
 
@@ -370,3 +372,92 @@ def test_network_oneshot_units_have_timeout_start_sec(unit):
     assert match, f"{unit} missing TimeoutStartSec (oneshot has no default timeout)"
     # A finite, positive cap — never 0/'infinity' which would disable it again.
     assert int(match.group(1)) > 0, f"{unit} TimeoutStartSec must be a positive cap"
+
+
+# --- 4. API liveness watchdog ----------------------------------------------
+# statuteproof-api.service is Type=simple with Restart=on-failure: it recovers a
+# CRASH but not an alive-but-wedged API (SQLite writer-lock stall / TasksMax
+# thread exhaustion leaves serve_forever() up while every request blocks; Caddy
+# returns 502 and the external probe stays green off the scheduler heartbeat).
+# The watchdog oneshot + timer is that missing deadman for the API.
+
+API_HEALTH_SH = DEPLOY / "api-health-check.sh"
+
+
+@requires_bash
+def test_api_health_check_sh_is_valid_bash():
+    """bash -n parses the watchdog script without a syntax error."""
+    result = subprocess.run(
+        [BASH, "-n", str(API_HEALTH_SH)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+def test_api_health_check_sh_is_executable():
+    assert API_HEALTH_SH.is_file(), "deploy/api-health-check.sh missing"
+    assert os.access(API_HEALTH_SH, os.X_OK), "deploy/api-health-check.sh not executable"
+
+
+def test_api_health_check_probes_and_remediates():
+    """Script probes /api/health, restarts the API unit, and pages the founder."""
+    sh = _read(API_HEALTH_SH)
+    # Probes the API's own health endpoint over loopback.
+    assert "/api/health" in sh
+    assert "127.0.0.1" in sh
+    # Remediation: restart the API unit AND page the founder via the wired channel.
+    assert "systemctl restart" in sh
+    assert "statuteproof-api.service" in sh
+    assert "notify_founder" in sh
+    # The 200 path exits clean; the unhealthy path signals remediation via exit 1.
+    assert "exit 0" in sh
+    assert "exit 1" in sh
+
+
+def test_api_health_units_exist():
+    assert (SYSTEMD / "statuteproof-api-health.service").is_file()
+    assert (SYSTEMD / "statuteproof-api-health.timer").is_file()
+
+
+def test_api_health_service_shape():
+    """Oneshot that runs the watchdog script, hardened, with the remediation
+    exit code whitelisted (exit 1 = restart+page issued, not a fault)."""
+    svc = _read(SYSTEMD / "statuteproof-api-health.service")
+    assert "Type=oneshot" in svc
+    assert "ExecStart=/srv/regradar/deploy/api-health-check.sh" in svc
+    # Must be able to restart a system unit → runs as root (documented deviation
+    # from the regradar user the other oneshots use).
+    assert "User=root" in svc
+    # Shared hardening style.
+    for token in (
+        "NoNewPrivileges=true",
+        "PrivateTmp=true",
+        "ProtectSystem=full",
+        "ReadWritePaths=/srv/regradar",
+        "StandardOutput=journal",
+        "StandardError=journal",
+        "EnvironmentFile=/srv/regradar/.env",
+        "WorkingDirectory=/srv/regradar",
+    ):
+        assert token in svc, f"missing {token!r} in api-health.service"
+    # exit 1 (unhealthy → remediated) must not mark the unit failed.
+    assert re.search(r"^SuccessExitStatus=.*\b1\b", svc, re.MULTILINE), (
+        "api-health.service must whitelist exit 1 (SuccessExitStatus)"
+    )
+
+
+def test_api_health_timer_is_frequent_and_installed():
+    timer = _read(SYSTEMD / "statuteproof-api-health.timer")
+    assert "OnUnitActiveSec=" in timer
+    assert "Unit=statuteproof-api-health.service" in timer
+    assert "WantedBy=timers.target" in timer
+
+
+def test_deploy_check_registers_api_health_units():
+    """The deploy gate must verify the new unit files and timer, else a missing
+    watchdog ships green."""
+    gate = _read(DEPLOY / "deploy-check.sh")
+    assert "statuteproof-api-health.service" in gate
+    assert "statuteproof-api-health.timer" in gate
+    assert "api-health-check.sh" in gate

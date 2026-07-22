@@ -90,6 +90,38 @@ describe('AlertsPage enforcement surfacing', () => {
     expect(screen.getByText('CBUAE consultation opened')).toBeInTheDocument()
   })
 
+  it('the badge tooltip attributes the classification to wording in the change, not to the source being an enforcement page', async () => {
+    // The backend classifies ENFORCEMENT from diff wording only (never the
+    // source name), so the tooltip must not claim the source is an "official
+    // enforcement page" — that would assert something the classifier did not
+    // check. It must credit wording detected in the monitored change.
+    mockPreviewFetch([ENFORCEMENT_MATCH])
+    render(<AlertsPage />)
+
+    const card = (await screen.findByText('DFSA enforcement decision published')).closest('article')
+    const badge = within(card).getByText('Enforcement')
+    const tooltip = badge.getAttribute('title') || ''
+    expect(tooltip).toMatch(/detected in this monitored change/i)
+    expect(tooltip).not.toMatch(/official enforcement page/i)
+    expect(tooltip).toMatch(/not a legal determination/i)
+  })
+
+  it('the filter-button tooltip credits wording in the change, not the source being an enforcement page', async () => {
+    // Same honesty constraint as the badge: the backend classifies ENFORCEMENT
+    // from diff wording only, so the filter control must not tell the MLRO the
+    // items are enforcement wording "on an official enforcement page" — the
+    // classifier never verifies the source is one.
+    mockPreviewFetch([ENFORCEMENT_MATCH])
+    render(<AlertsPage />)
+
+    await screen.findByText('DFSA enforcement decision published')
+    const filterButton = screen.getByRole('button', { name: 'Enforcement' })
+    const tooltip = filterButton.getAttribute('title') || ''
+    expect(tooltip).toMatch(/detected in the monitored change/i)
+    expect(tooltip).not.toMatch(/official enforcement page/i)
+    expect(tooltip).toMatch(/not a legal determination/i)
+  })
+
   it('surfaces the enforcement signal honestly on a plan-redacted card (change_type is not redacted)', async () => {
     // Plan redaction empties the paid text/URLs but leaves change_type intact, so
     // the badge still correctly says a monitored enforcement page changed without

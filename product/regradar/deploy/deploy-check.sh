@@ -205,11 +205,21 @@ for unit in statuteproof-api.service statuteproof-scheduler.service \
             statuteproof-compaction.timer statuteproof-backup.service \
             statuteproof-backup.timer statuteproof-heartbeat.service \
             statuteproof-heartbeat.timer statuteproof-verify.service \
-            statuteproof-verify.timer; do
+            statuteproof-verify.timer statuteproof-api-health.service \
+            statuteproof-api-health.timer; do
   [ -f "deploy/systemd/$unit" ] && ok "deploy/systemd/$unit present" || bad "deploy/systemd/$unit missing"
 done
 [ -f deploy/Caddyfile ] && ok "deploy/Caddyfile present" || bad "deploy/Caddyfile missing"
 [ -f deploy/logrotate.d/statuteproof ] && ok "logrotate config present" || bad "logrotate config missing"
+# The API liveness watchdog unit is inert without its script; a present unit +
+# missing/non-exec script would fail every timer tick silently.
+if [ -x deploy/api-health-check.sh ]; then
+  ok "deploy/api-health-check.sh present and executable"
+elif [ -f deploy/api-health-check.sh ]; then
+  bad "deploy/api-health-check.sh is present but NOT executable — chmod +x it"
+else
+  bad "deploy/api-health-check.sh missing — statuteproof-api-health.service cannot run"
+fi
 
 # A documented control that never executes is worse than a known gap: shipping
 # the timer units is not the same as running them. Re-run this check AFTER
@@ -221,7 +231,8 @@ if ! command -v systemctl >/dev/null 2>&1; then
   warn "systemctl unavailable — timer enablement unverified (not a droplet)"
 else
   for unit in statuteproof-compaction.timer statuteproof-backup.timer \
-              statuteproof-heartbeat.timer statuteproof-verify.timer; do
+              statuteproof-heartbeat.timer statuteproof-verify.timer \
+              statuteproof-api-health.timer; do
     # Pipe-free on purpose: `... | grep -q` under `set -o pipefail` reports a
     # SIGPIPE failure whenever grep exits on an early match while systemctl is
     # still writing, so installed units intermittently read as "not installed".
