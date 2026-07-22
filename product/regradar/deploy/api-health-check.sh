@@ -10,16 +10,23 @@
 # recovery and no founder page. The scheduler has its own deadman
 # (statuteproof-heartbeat); the API did not — this oneshot is it.
 #
-# It probes the API's own /api/health over loopback and, when the API does not
-# answer a healthy 200, restarts statuteproof-api.service AND pages the founder
+# It probes the API's own /api/health over loopback and restarts
+# statuteproof-api.service + pages the founder ONLY when the API gives NO answer
+# (timeout / connection refused = the wedged-or-dead API this exists to recover),
 # through the SAME channel the heartbeat/integrity watchdogs use
-# (app.ops_alert.notify_founder — admin Telegram bot).
+# (app.ops_alert.notify_founder — admin Telegram bot). A SERVED non-200 (e.g. a
+# 503 from /api/health when the monitor/scheduler is stale, or a transient DB
+# blip) means the API is ALIVE and answering: restarting it cannot fix a
+# dependency, that case is already owned by the heartbeat deadman, so a served
+# error is logged and left alone — no restart, no page (avoids a restart storm +
+# alarm fatigue on a healthy API).
 #
 # Exit status (mirrors the heartbeat/verify oneshots):
-#   0  API answered 200 (healthy) — nothing to do.
-#   1  API wedged/unhealthy — restart + page already issued. This is an EXPECTED
-#      signal, not a fault; the .service lists SuccessExitStatus=0 1 so the unit
-#      does not go into failed state and the timer keeps firing.
+#   0  API answered — healthy 200, OR a served non-200 that is a dependency
+#      signal (alive, not this watchdog's job). Nothing restarted.
+#   1  API gave no answer (wedged/dead) — restart + page already issued. This is
+#      an EXPECTED signal, not a fault; the .service lists SuccessExitStatus=0 1
+#      so the unit does not go into failed state and the timer keeps firing.
 set -euo pipefail
 
 APP_DIR="${STATUTEPROOF_APP_DIR:-/srv/regradar}"
@@ -52,7 +59,22 @@ if [ "${http_code}" = "200" ]; then
     exit 0
 fi
 
-log "UNHEALTHY: ${HEALTH_URL} returned '${http_code}' (expected 200) — restarting ${API_UNIT}"
+# A SERVED non-200 (e.g. 503) means the API process is ALIVE and answering — it
+# is reporting a degraded DEPENDENCY (a stale monitor/scheduler, or a transient
+# DB blip), NOT the wedged-but-unresponsive API this watchdog exists to recover.
+# Restarting statuteproof-api.service cannot clear scheduler staleness (a
+# separate unit), and that exact case is already owned by the dedicated
+# statuteproof-heartbeat deadman — so restarting + paging on a served 503 would
+# only drop live requests and false-page the founder on every 2-minute tick for
+# the whole outage. The wedged/dead API this watchdog targets gives NO answer at
+# all -> curl yields the sentinel http_code 000 (timeout / connection refused).
+# So: restart + page ONLY on 000; a served error is logged and left alone.
+if [ "${http_code}" != "000" ]; then
+    log "degraded but ALIVE: ${HEALTH_URL} answered '${http_code}' (not 200) — the API is serving, so NOT restarting or paging from here. A served error is a dependency signal (e.g. a stale monitor, which the heartbeat deadman covers), not a wedged API."
+    exit 0
+fi
+
+log "UNHEALTHY: ${HEALTH_URL} gave no answer (timeout/connection refused) — the API is wedged or dead; restarting ${API_UNIT}"
 
 # Best-effort restart. Managing the system unit needs privilege, which is why
 # this watchdog runs as root (see the .service). NEVER abort the page on a
@@ -69,7 +91,7 @@ fi
 # interpolated into the Python source, so a hostname can't break out of the
 # string. CWD is /srv/regradar (WorkingDirectory=), so the import resolves.
 host="$(hostname -s 2>/dev/null || echo host)"
-export STATUTEPROOF_API_HEALTH_ALERT="StatuteProof API watchdog: /api/health returned '${http_code}' (expected 200) on ${host}. ${restart_status} for ${API_UNIT}. Customers may be seeing 502s — verify the API recovered."
+export STATUTEPROOF_API_HEALTH_ALERT="StatuteProof API watchdog: /api/health gave NO answer (timeout/connection refused — the API is wedged or dead) on ${host}. ${restart_status} for ${API_UNIT}. Customers may be seeing 502s — verify the API recovered."
 if [ -x "${PYTHON_BIN}" ]; then
     "${PYTHON_BIN}" - <<'PY' || true
 import os

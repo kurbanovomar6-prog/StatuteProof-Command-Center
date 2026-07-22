@@ -415,6 +415,59 @@ def test_api_health_check_probes_and_remediates():
     assert "exit 1" in sh
 
 
+def _run_api_health(tmp_path, *, curl_code=None, curl_fails=False):
+    """Run api-health-check.sh with a stubbed curl + systemctl on PATH.
+
+    curl_fails=True -> curl exits non-zero (no answer / http_code 000).
+    curl_code='503' -> curl prints that served status and exits 0.
+    Returns (returncode, stdout, restart_calls:list).
+    """
+    bindir = tmp_path / "bin"
+    bindir.mkdir()
+    if curl_fails:
+        (bindir / "curl").write_text("#!/bin/sh\nexit 7\n")
+    else:
+        (bindir / "curl").write_text(f"#!/bin/sh\nprintf '%s' '{curl_code}'\nexit 0\n")
+    restart_log = tmp_path / "systemctl.calls"
+    (bindir / "systemctl").write_text(
+        f"#!/bin/sh\necho \"$@\" >> '{restart_log}'\nexit 0\n"
+    )
+    (bindir / "hostname").write_text("#!/bin/sh\necho testhost\n")
+    for name in ("curl", "systemctl", "hostname"):
+        os.chmod(bindir / name, 0o755)
+    env = dict(os.environ)
+    env["PATH"] = f"{bindir}:{env.get('PATH', '')}"
+    # Point APP_DIR at a dir with no .venv so the founder-page python step is a
+    # clean no-op (script logs 'python venv missing') — we assert on restart, not paging.
+    env["STATUTEPROOF_APP_DIR"] = str(tmp_path)
+    r = subprocess.run(
+        ["bash", str(API_HEALTH_SH)], env=env, capture_output=True, text=True
+    )
+    calls = restart_log.read_text().splitlines() if restart_log.exists() else []
+    return r.returncode, r.stdout, calls
+
+
+@requires_bash
+def test_api_health_served_503_does_not_restart(tmp_path):
+    """A SERVED 503 (API alive, scheduler stale / DB blip) must NOT restart or page.
+
+    Restarting the API cannot clear a scheduler-staleness 503 (separate unit) and
+    that case is owned by the heartbeat deadman — a restart+page here would storm.
+    """
+    rc, out, calls = _run_api_health(tmp_path, curl_code="503")
+    assert rc == 0, out
+    assert not any("restart" in c for c in calls), f"must not restart on served 503: {calls}"
+    assert "NOT restarting" in out or "degraded but ALIVE" in out
+
+
+@requires_bash
+def test_api_health_no_answer_restarts(tmp_path):
+    """No answer (curl fails -> http_code 000) IS the wedged/dead API — restart + remediate."""
+    rc, out, calls = _run_api_health(tmp_path, curl_fails=True)
+    assert rc == 1, out  # expected remediation signal (SuccessExitStatus=0 1)
+    assert any("restart" in c and "statuteproof-api.service" in c for c in calls), calls
+
+
 def test_api_health_units_exist():
     assert (SYSTEMD / "statuteproof-api-health.service").is_file()
     assert (SYSTEMD / "statuteproof-api-health.timer").is_file()
