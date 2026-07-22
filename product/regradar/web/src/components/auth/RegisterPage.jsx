@@ -299,25 +299,26 @@ export default function RegisterPage({ onRegister, onLogin }) {
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelCls}>First name *</label>
-            <input type="text" placeholder="First" value={form.firstName} onChange={set('firstName')} className={inputCls} required />
+            <label htmlFor="register-first-name" className={labelCls}>First name *</label>
+            <input id="register-first-name" type="text" placeholder="First" value={form.firstName} onChange={set('firstName')} className={inputCls} required />
           </div>
           <div>
-            <label className={labelCls}>Last name</label>
-            <input type="text" placeholder="Last" value={form.lastName} onChange={set('lastName')} className={inputCls} />
+            <label htmlFor="register-last-name" className={labelCls}>Last name</label>
+            <input id="register-last-name" type="text" placeholder="Last" value={form.lastName} onChange={set('lastName')} className={inputCls} />
           </div>
         </div>
 
         <div>
-          <label className={labelCls}>Work email *</label>
-          <input type="email" placeholder="name@company.com" value={form.email} onChange={set('email')} className={inputCls} required autoComplete="email" />
+          <label htmlFor="register-email" className={labelCls}>Work email *</label>
+          <input id="register-email" type="email" placeholder="name@company.com" value={form.email} onChange={set('email')} className={inputCls} required autoComplete="email" />
           <p className="mt-1.5 text-xs text-slate-500">Email uniqueness is checked case-insensitively after trimming spaces.</p>
         </div>
 
         <div>
-          <label className={labelCls}>Password *</label>
+          <label htmlFor="register-password" className={labelCls}>Password *</label>
           <div className="relative">
             <input
+              id="register-password"
               type={showPass ? 'text' : 'password'}
               placeholder="Min. 8 characters"
               value={form.password}
@@ -338,28 +339,28 @@ export default function RegisterPage({ onRegister, onLogin }) {
         </div>
 
         <div>
-          <label className={labelCls}>Company name *</label>
-          <input type="text" placeholder="Your organisation" value={form.company} onChange={set('company')} className={inputCls} required />
+          <label htmlFor="register-company" className={labelCls}>Company name *</label>
+          <input id="register-company" type="text" placeholder="Your organisation" value={form.company} onChange={set('company')} className={inputCls} required />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelCls}>Job title</label>
-            <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
+            <label htmlFor="register-job-title" className={labelCls}>Job title</label>
+            <select id="register-job-title" value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
               {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
           <div>
-            <label className={labelCls}>Company type</label>
-            <select value={form.companyType} onChange={set('companyType')} className={selectCls}>
+            <label htmlFor="register-company-type" className={labelCls}>Company type</label>
+            <select id="register-company-type" value={form.companyType} onChange={set('companyType')} className={selectCls}>
               {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
         </div>
 
         <div>
-          <label className={labelCls}>Primary jurisdiction</label>
-          <select value={form.jurisdiction} onChange={set('jurisdiction')} className={selectCls}>
+          <label htmlFor="register-jurisdiction" className={labelCls}>Primary jurisdiction</label>
+          <select id="register-jurisdiction" value={form.jurisdiction} onChange={set('jurisdiction')} className={selectCls}>
             {JURISDICTIONS.map(j => <option key={j}>{j}</option>)}
           </select>
         </div>

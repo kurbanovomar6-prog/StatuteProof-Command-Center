@@ -391,3 +391,39 @@ def test_deadline_reminders_output_printed_on_full_cycle(tmp_path, monkeypatch, 
 
     out = capsys.readouterr().out
     assert "Deadline reminders sent: 2 stage(s)" in out
+
+
+def test_first_full_cycle_runs_on_fresh_boot(tmp_path, monkeypatch):
+    """Regression: on Linux time.monotonic() is CLOCK_MONOTONIC (epoch = boot),
+    so on a host booted less than the interval ago monotonic() is smaller than
+    interval*60. The FIRST full sweep must still run immediately — it must not
+    be gated behind (now - last_full_run_at) >= interval*60 with a 0.0 anchor,
+    which would silently defer it up to a whole interval on a fresh droplet."""
+    _quiet_loop_env(monkeypatch, tmp_path)
+    monkeypatch.setattr(scheduler, "get_sources_by_priority", lambda _p: [])
+    monkeypatch.setattr(scheduler, "get_sources_with_custom_interval", lambda: [])
+    monkeypatch.setattr(scheduler, "_print_cycle_summary", lambda *_a, **_k: None)
+
+    # Simulate a fresh boot: monotonic() well below interval*60 (60 min = 3600s).
+    # A constant is sufficient — the fix must not depend on the absolute value.
+    monkeypatch.setattr(scheduler.time, "monotonic", lambda: 100.0)
+
+    calls = {"full": 0}
+
+    def _monitor(**_k):
+        calls["full"] += 1
+        # Stop the loop as soon as the first full cycle is entered.
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(scheduler, "monitor_all_sources", _monitor)
+    # If the first cycle were (wrongly) a sub-cycle, the loop would fall through
+    # to time.sleep instead of monitor_all_sources — fail loudly if that path
+    # is taken so the regression can never pass silently.
+    monkeypatch.setattr(
+        scheduler.time, "sleep",
+        lambda *_a, **_k: pytest.fail("first iteration ran a sub-cycle, not a full cycle"),
+    )
+
+    scheduler.run_watch_loop(interval_minutes=60)
+
+    assert calls["full"] == 1, "the first full cycle must run immediately on a fresh boot"

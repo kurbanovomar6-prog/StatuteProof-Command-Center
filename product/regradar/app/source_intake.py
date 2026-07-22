@@ -23,6 +23,7 @@ import hashlib
 import json
 import logging
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -493,43 +494,43 @@ def _check_hash_collision(
 # ── main intake function ──────────────────────────────────────────────────────
 
 
-def run_source_intake(
-    source: dict,
-    all_sources: list[dict] | None = None,
-    write_evidence: bool = False,
-) -> dict:
-    """
-    Run a full intake check on a source entry.
+@dataclass(frozen=True)
+class _IntakeConfig:
+    """Parsed source-entry fields threaded through the intake phase helpers."""
 
-    Parameters
-    ----------
-    source : dict
-        A sources.json entry. Required keys: 'url'. Optional: 'source_id',
-        'expected_min_length', 'wait_for_selector', 'content_selector', 'fetch_method'.
-    all_sources : list[dict] | None
-        All enabled sources (for hash collision check). Pass the full sources.json list.
-    write_evidence : bool
-        If True, write raw/normalized snapshots and proof.json. Requires DB access.
+    url: str
+    source_id: str
+    expected_min: int
+    wait_selector: str | None
+    content_selector: str | None
+    fetch_method: str | None
+    adapter_family: str | None
+    adapter_name: str | None
+    adapter_config: dict
+    is_direct_pdf: bool
 
-    Returns
-    -------
-    dict with fields:
-        source_id, url, status, chars_raw, chars_normalized, pdf_chars,
-        nav_shell_detected, hash_collision, collision_source_id, quality,
-        evidence_written, errors, notes
-    """
+
+def _extract_intake_config(source: dict) -> _IntakeConfig:
+    """Read the intake-relevant fields off a sources.json entry (pure)."""
     url = source.get("url", "")
-    source_id = source.get("source_id", "")
-    expected_min = source.get("expected_min_length", _GLOBAL_MIN_CHARS)
-    wait_selector = source.get("wait_for_selector")
-    content_selector = source.get("content_selector")
-    fetch_method = source.get("fetch_method")
-    adapter_family = source.get("adapter_family")
-    adapter_name = source.get("adapter_name")
     adapter_config = source.get("adapter_config") if isinstance(source.get("adapter_config"), dict) else {}
-    is_direct_pdf = _is_direct_pdf_source(source, url)
+    return _IntakeConfig(
+        url=url,
+        source_id=source.get("source_id", ""),
+        expected_min=source.get("expected_min_length", _GLOBAL_MIN_CHARS),
+        wait_selector=source.get("wait_for_selector"),
+        content_selector=source.get("content_selector"),
+        fetch_method=source.get("fetch_method"),
+        adapter_family=source.get("adapter_family"),
+        adapter_name=source.get("adapter_name"),
+        adapter_config=adapter_config,
+        is_direct_pdf=_is_direct_pdf_source(source, url),
+    )
 
-    result: dict = {
+
+def _build_initial_result(source_id: str, url: str) -> dict:
+    """Return the fully-defaulted intake result dict before any phase runs."""
+    return {
         "source_id": source_id,
         "url": url,
         "status": SourceIntakeStatus.UNSUPPORTED,
@@ -590,168 +591,190 @@ def run_source_intake(
         "notes": "",
     }
 
-    # ── 1. URL safety ─────────────────────────────────────────────────────────
-    safe, reason = validate_public_url(url)
-    if not safe:
-        result["status"] = SourceIntakeStatus.BLOCKED
-        result["failure_reason"] = reason
-        result["remediation_hint"] = "Use a public http(s) URL without credentials, login, private network, or restricted portal access."
-        result["errors"].append(f"URL blocked: {reason}")
-        quality_report = build_quality_score(
-            url="",
-            fetch_success=False,
-            normalized_text="",
-            raw_html="",
-            normalized_hash=None,
-            canonical_url=None,
-        )
-        result["quality_score"] = quality_report["quality_score"]
-        result["quality_breakdown"] = quality_report
-        result["certification"] = build_preview_certification(
-            source_id=source_id,
-            source_url=url,
-            canonical_url=url,
-            intake_result=result,
-            quality_report=quality_report,
-            baseline_runs_required=int(source.get("baseline_runs_required") or 2),
-        )
-        result["certification_status"] = result["certification"].get("certification_status", "")
-        apply_quality_gate_fields(result)
-        result.update(build_source_lab_contract(result))
-        return result
 
-    # ── 2. Fetch ──────────────────────────────────────────────────────────────
-    if is_direct_pdf:
-        try:
-            from app.document_extractor import fetch_document, extract_pdf_text
+def _finalize_intake_failure(
+    result: dict,
+    source: dict,
+    source_id: str,
+    url: str,
+    *,
+    quality_url: str,
+    quality_canonical_url: str | None,
+) -> dict:
+    """
+    Build the quality report, certification, and gate fields for a fetch/URL
+    failure and return the completed result. Shared by the URL-safety and
+    fetch-exception early-return paths.
+    """
+    quality_report = build_quality_score(
+        url=quality_url,
+        fetch_success=False,
+        normalized_text="",
+        raw_html="",
+        normalized_hash=None,
+        canonical_url=quality_canonical_url,
+    )
+    result["quality_score"] = quality_report["quality_score"]
+    result["quality_breakdown"] = quality_report
+    result["certification"] = build_preview_certification(
+        source_id=source_id,
+        source_url=url,
+        canonical_url=url,
+        intake_result=result,
+        quality_report=quality_report,
+        baseline_runs_required=int(source.get("baseline_runs_required") or 2),
+    )
+    result["certification_status"] = result["certification"].get("certification_status", "")
+    apply_quality_gate_fields(result)
+    result.update(build_source_lab_contract(result))
+    return result
 
-            fetch_result = fetch_document(url)
-            result["access_status"] = "public_pdf_fetch_attempted"
-            # Surface at top level (previously only nested under
-            # pdf_extraction on the success branch) so
-            # map_source_health_status's http_status>=400 gate can see it —
-            # set on both the success and failure branches below.
-            result["http_status"] = fetch_result.get("http_status")
-            if fetch_result.get("status") != "ok" or not fetch_result.get("data"):
-                result["status"] = SourceIntakeStatus.BLOCKED
-                result["failure_reason"] = f"PDF fetch failed: {fetch_result.get('error') or fetch_result.get('http_status') or 'unknown'}"
-                result["remediation_hint"] = "Confirm the official PDF URL is public, current, and accessible without private credentials."
-                result["errors"].append(result["failure_reason"])
-                html = ""
-            else:
-                pdf_extract = extract_pdf_text(fetch_result["data"])
-                html = str(pdf_extract.get("text") or "")
-                result["pdf_chars"] = int(pdf_extract.get("chars") or len(html))
-                result["chars_raw"] = int(fetch_result.get("bytes") or len(fetch_result.get("data") or b""))
-                result["pdf_extraction"] = {
-                    "method": pdf_extract.get("method") or "none",
-                    "quality": pdf_extract.get("quality") or "failed",
-                    "chars": result["pdf_chars"],
-                    "content_type": fetch_result.get("content_type") or "",
-                    "http_status": fetch_result.get("http_status"),
-                    "bytes": fetch_result.get("bytes"),
-                    "error": pdf_extract.get("error") or "",
-                }
-                if pdf_extract.get("error"):
-                    result["errors"].append(f"PDF extraction warning: {pdf_extract.get('error')}")
-            result["dom_investigation"] = {
-                "can_no_save_test": bool(result.get("pdf_chars", 0) >= 500),
-                "can_save_evidence": bool(result.get("pdf_chars", 0) >= 500),
-                "content_selector": "",
-                "detected_page_type": "pdf_document",
-                "failure_reason": "" if result.get("pdf_chars", 0) >= 500 else "PDF text is too shallow for reliable monitoring.",
-                "final_url": url,
-                "item_selector": "",
-                "nav_shell_risk": "low",
-                "noise_risk": "low" if result.get("pdf_chars", 0) >= 500 else "high",
-                "page_title": source.get("name") or "",
-                "recommended_adapter_family": "pdf_document",
-                "recommended_adapter_name": "pdf_document",
-                "remediation_hint": "" if result.get("pdf_chars", 0) >= 500 else "Use OCR or hold scanned/shallow PDF under remediation.",
-                "selector_confidence": 90 if result.get("pdf_chars", 0) >= 500 else 0,
-                "selectors_considered": [],
-                "source_health_risk": "medium" if result.get("pdf_chars", 0) >= 500 else "high",
-                "wait_selector": "",
-                "warnings": [],
-                "why_selector_was_chosen": "Direct PDF document extraction path.",
-            }
-        except Exception as exc:
+
+def _fetch_direct_pdf(result: dict, source: dict, url: str) -> str:
+    """
+    Direct-PDF fetch/extract branch. Mutates ``result`` (access_status,
+    http_status, pdf_chars, chars_raw, pdf_extraction, dom_investigation,
+    status/failure on error) and returns the extracted PDF text as ``html``.
+    Never triggers an early return — a failed PDF fetch flows on through the
+    normal extraction/status phases exactly as before.
+    """
+    try:
+        from app.document_extractor import fetch_document, extract_pdf_text
+
+        fetch_result = fetch_document(url)
+        result["access_status"] = "public_pdf_fetch_attempted"
+        # Surface at top level (previously only nested under
+        # pdf_extraction on the success branch) so
+        # map_source_health_status's http_status>=400 gate can see it —
+        # set on both the success and failure branches below.
+        result["http_status"] = fetch_result.get("http_status")
+        if fetch_result.get("status") != "ok" or not fetch_result.get("data"):
             result["status"] = SourceIntakeStatus.BLOCKED
-            result["failure_reason"] = f"PDF fetch failed: {exc}"
-            result["remediation_hint"] = "Confirm the official PDF URL is public and extractable."
-            result["errors"].append(f"PDF fetch failed: {exc}")
+            result["failure_reason"] = f"PDF fetch failed: {fetch_result.get('error') or fetch_result.get('http_status') or 'unknown'}"
+            result["remediation_hint"] = "Confirm the official PDF URL is public, current, and accessible without private credentials."
+            result["errors"].append(result["failure_reason"])
             html = ""
-            result["dom_investigation"] = {
-                "failure_reason": f"PDF investigation failed: {type(exc).__name__}",
-                "remediation_hint": "Run manual PDF extraction review before activation.",
-                "warnings": [str(exc)],
+        else:
+            pdf_extract = extract_pdf_text(fetch_result["data"])
+            html = str(pdf_extract.get("text") or "")
+            result["pdf_chars"] = int(pdf_extract.get("chars") or len(html))
+            result["chars_raw"] = int(fetch_result.get("bytes") or len(fetch_result.get("data") or b""))
+            result["pdf_extraction"] = {
+                "method": pdf_extract.get("method") or "none",
+                "quality": pdf_extract.get("quality") or "failed",
+                "chars": result["pdf_chars"],
+                "content_type": fetch_result.get("content_type") or "",
+                "http_status": fetch_result.get("http_status"),
+                "bytes": fetch_result.get("bytes"),
+                "error": pdf_extract.get("error") or "",
             }
-    else:
-        try:
-            from app.scraper import fetch_page_with_config
-            # status_out is how fetch_page_with_config surfaces the real
-            # HTTP status of whichever tier (requests or Playwright)
-            # produced the returned HTML — see app/scraper.py. A dict
-            # passed here and then read below; existing tests that mock
-            # fetch_page_with_config with return_value=<html string> ignore
-            # this kwarg entirely (MagicMock accepts and discards it), so
-            # status_out stays empty and http_status stays None for them,
-            # exactly matching pre-fix behaviour for those fixtures.
-            status_out: dict = {}
-            html = fetch_page_with_config(
-                url,
-                wait_for_selector=wait_selector,
-                content_selector=content_selector,
-                force_playwright=(fetch_method == "playwright"),
-                prefer_requests_on_low_content=str(adapter_family or adapter_name or "").lower() == "fta_tax_listing",
-                status_out=status_out,
-            )
-            result["http_status"] = status_out.get("http_status")
-        except Exception as exc:
-            if wait_selector or content_selector or fetch_method == "playwright":
-                result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
-                result["remediation_hint"] = "Review the configured wait_for_selector/content_selector before activation."
-            else:
-                result["status"] = SourceIntakeStatus.BLOCKED
-                result["remediation_hint"] = "Confirm the source is public and technically accessible."
-            result["failure_reason"] = f"Fetch failed: {exc}"
-            result["errors"].append(f"Fetch failed: {exc}")
-            quality_report = build_quality_score(
-                url=url,
-                fetch_success=False,
-                normalized_text="",
-                raw_html="",
-                normalized_hash=None,
-                canonical_url=url,
-            )
-            result["quality_score"] = quality_report["quality_score"]
-            result["quality_breakdown"] = quality_report
-            result["certification"] = build_preview_certification(
-                source_id=source_id,
-                source_url=url,
-                canonical_url=url,
-                intake_result=result,
-                quality_report=quality_report,
-                baseline_runs_required=int(source.get("baseline_runs_required") or 2),
-            )
-            result["certification_status"] = result["certification"].get("certification_status", "")
-            apply_quality_gate_fields(result)
-            result.update(build_source_lab_contract(result))
-            return result
+            if pdf_extract.get("error"):
+                result["errors"].append(f"PDF extraction warning: {pdf_extract.get('error')}")
+        result["dom_investigation"] = {
+            "can_no_save_test": bool(result.get("pdf_chars", 0) >= 500),
+            "can_save_evidence": bool(result.get("pdf_chars", 0) >= 500),
+            "content_selector": "",
+            "detected_page_type": "pdf_document",
+            "failure_reason": "" if result.get("pdf_chars", 0) >= 500 else "PDF text is too shallow for reliable monitoring.",
+            "final_url": url,
+            "item_selector": "",
+            "nav_shell_risk": "low",
+            "noise_risk": "low" if result.get("pdf_chars", 0) >= 500 else "high",
+            "page_title": source.get("name") or "",
+            "recommended_adapter_family": "pdf_document",
+            "recommended_adapter_name": "pdf_document",
+            "remediation_hint": "" if result.get("pdf_chars", 0) >= 500 else "Use OCR or hold scanned/shallow PDF under remediation.",
+            "selector_confidence": 90 if result.get("pdf_chars", 0) >= 500 else 0,
+            "selectors_considered": [],
+            "source_health_risk": "medium" if result.get("pdf_chars", 0) >= 500 else "high",
+            "wait_selector": "",
+            "warnings": [],
+            "why_selector_was_chosen": "Direct PDF document extraction path.",
+        }
+    except Exception as exc:
+        result["status"] = SourceIntakeStatus.BLOCKED
+        result["failure_reason"] = f"PDF fetch failed: {exc}"
+        result["remediation_hint"] = "Confirm the official PDF URL is public and extractable."
+        result["errors"].append(f"PDF fetch failed: {exc}")
+        html = ""
+        result["dom_investigation"] = {
+            "failure_reason": f"PDF investigation failed: {type(exc).__name__}",
+            "remediation_hint": "Run manual PDF extraction review before activation.",
+            "warnings": [str(exc)],
+        }
+    return html
 
-        result["chars_raw"] = len(html)
-        try:
-            from app.dom_investigator import investigate_html
-            result["dom_investigation"] = investigate_html(html, url=url)
-        except Exception as exc:
-            result["dom_investigation"] = {
-                "failure_reason": f"DOM investigation failed: {type(exc).__name__}",
-                "remediation_hint": "Run manual browser/DOM review before activation.",
-                "warnings": [str(exc)],
-            }
 
-    # ── 3. Extract text ───────────────────────────────────────────────────────
-    extracted: dict = {}
+def _fetch_rendered_html(
+    result: dict, source: dict, cfg: _IntakeConfig
+) -> tuple[str, dict | None]:
+    """
+    Generic HTML fetch branch (requests/Playwright tiers) plus DOM
+    investigation. Mutates ``result`` and returns ``(html, early_return)``
+    where ``early_return`` is a non-None completed result only when the fetch
+    raised — the caller must return it immediately, matching the original
+    inline early-return semantics.
+    """
+    url = cfg.url
+    try:
+        from app.scraper import fetch_page_with_config
+        # status_out is how fetch_page_with_config surfaces the real
+        # HTTP status of whichever tier (requests or Playwright)
+        # produced the returned HTML — see app/scraper.py. A dict
+        # passed here and then read below; existing tests that mock
+        # fetch_page_with_config with return_value=<html string> ignore
+        # this kwarg entirely (MagicMock accepts and discards it), so
+        # status_out stays empty and http_status stays None for them,
+        # exactly matching pre-fix behaviour for those fixtures.
+        status_out: dict = {}
+        html = fetch_page_with_config(
+            url,
+            wait_for_selector=cfg.wait_selector,
+            content_selector=cfg.content_selector,
+            force_playwright=(cfg.fetch_method == "playwright"),
+            prefer_requests_on_low_content=str(cfg.adapter_family or cfg.adapter_name or "").lower() == "fta_tax_listing",
+            status_out=status_out,
+        )
+        result["http_status"] = status_out.get("http_status")
+    except Exception as exc:
+        if cfg.wait_selector or cfg.content_selector or cfg.fetch_method == "playwright":
+            result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
+            result["remediation_hint"] = "Review the configured wait_for_selector/content_selector before activation."
+        else:
+            result["status"] = SourceIntakeStatus.BLOCKED
+            result["remediation_hint"] = "Confirm the source is public and technically accessible."
+        result["failure_reason"] = f"Fetch failed: {exc}"
+        result["errors"].append(f"Fetch failed: {exc}")
+        early = _finalize_intake_failure(
+            result, source, cfg.source_id, url,
+            quality_url=url, quality_canonical_url=url,
+        )
+        return "", early
+
+    result["chars_raw"] = len(html)
+    try:
+        from app.dom_investigator import investigate_html
+        result["dom_investigation"] = investigate_html(html, url=url)
+    except Exception as exc:
+        result["dom_investigation"] = {
+            "failure_reason": f"DOM investigation failed: {type(exc).__name__}",
+            "remediation_hint": "Run manual browser/DOM review before activation.",
+            "warnings": [str(exc)],
+        }
+    return html, None
+
+
+def _extract_source_text(result: dict, html: str, cfg: _IntakeConfig) -> tuple[str, object]:
+    """
+    Adapter/generic text-extraction phase. Mutates ``result`` (adapter_*,
+    extraction_*, provider_*, chars_normalized, normalized_preview) and
+    returns ``(normalized_text, extracted)``.
+    """
+    url = cfg.url
+    adapter_family = cfg.adapter_family
+    adapter_name = cfg.adapter_name
+    content_selector = cfg.content_selector
+    extracted: object = {}
     adapter_result = None
     try:
         if adapter_family or adapter_name:
@@ -761,7 +784,7 @@ def run_source_intake(
                 url=url,
                 adapter_family=str(adapter_family or ""),
                 adapter_name=str(adapter_name or ""),
-                adapter_config=adapter_config,
+                adapter_config=cfg.adapter_config,
             )
             result["adapter_used"] = bool(adapter_result.text)
             result["adapter_family"] = adapter_result.adapter_family
@@ -817,8 +840,11 @@ def run_source_intake(
     normalized_text = normalize_for_change_hash(text)
     result["chars_normalized"] = len(normalized_text)
     result["normalized_preview"] = normalized_text[:500]
+    return normalized_text, extracted
 
-    # ── 4. Nav-shell detection ────────────────────────────────────────────────
+
+def _detect_nav_shell(result: dict, normalized_text: str, is_direct_pdf: bool) -> bool:
+    """Nav-shell / service-shell detection. Mutates ``result`` and returns nav_shell."""
     dom_nav_shell = (result.get("dom_investigation") or {}).get("nav_shell_risk") == "high"
     structured_adapter_content = _has_structured_adapter_content(result)
     result["structured_adapter_content"] = structured_adapter_content
@@ -828,22 +854,41 @@ def run_source_intake(
         False if (structured_adapter_content or is_direct_pdf) else (is_nav_shell_only(normalized_text) or bool(dom_nav_shell))
     )
     result["nav_shell_detected"] = nav_shell
+    return nav_shell
 
-    # ── 5. Hash collision check ───────────────────────────────────────────────
+
+def _resolve_hash_collision(
+    result: dict,
+    normalized_text: str,
+    cfg: _IntakeConfig,
+    all_sources: list[dict] | None,
+) -> tuple[str, bool, str | None]:
+    """Compute content/normalized hashes and cross-source collision. Mutates ``result``."""
     content_hash = _content_hash(normalized_text)
     result["content_hash"] = content_hash
     result["normalized_hash"] = _sha256_hash(normalized_text) if normalized_text else ""
     collision_id: str | None = None
-    if all_sources and source_id:
+    if all_sources and cfg.source_id:
         collision, collision_id = _check_hash_collision(
-            content_hash, source_id, all_sources, text_len=len(normalized_text)
+            content_hash, cfg.source_id, all_sources, text_len=len(normalized_text)
         )
         result["hash_collision"] = collision
         result["collision_source_id"] = collision_id
     else:
         collision = False
+    return content_hash, collision, collision_id
 
-    # ── 6. PDF chars (best-effort — reuse cached if available) ───────────────
+
+def _score_content_quality(
+    result: dict,
+    source: dict,
+    cfg: _IntakeConfig,
+    html: str,
+    normalized_text: str,
+    extracted: object,
+    nav_shell: bool,
+) -> tuple[dict, int]:
+    """Resolve pdf_chars and build the quality report. Mutates ``result``."""
     pdf_chars = result.get("pdf_chars") or source.get("pdf_chars", 0)
     result["pdf_chars"] = pdf_chars
 
@@ -851,7 +896,7 @@ def run_source_intake(
     if isinstance(extracted, dict):
         provider_confidence = str(extracted.get("confidence") or "")
     quality_report = build_quality_score(
-        url=url,
+        url=cfg.url,
         fetch_success=bool(html),
         normalized_text=normalized_text,
         raw_html=html,
@@ -861,18 +906,31 @@ def run_source_intake(
         pdf_shallow=bool(pdf_chars and pdf_chars < 500),
         proof_path=None,
         normalized_hash=result["normalized_hash"],
-        canonical_url=url,
+        canonical_url=cfg.url,
         provider_confidence=provider_confidence,
-        metadata={"canonical_url": url},
+        metadata={"canonical_url": cfg.url},
     )
     result["quality_score"] = quality_report["quality_score"]
     result["quality_breakdown"] = quality_report
     if quality_report.get("policy_warnings"):
         result["legal_policy_status"] = "POLICY_REVIEW_REQUIRED"
+    return quality_report, pdf_chars
 
-    # ── 7. Status verdict ─────────────────────────────────────────────────────
+
+def _determine_intake_status(
+    result: dict,
+    cfg: _IntakeConfig,
+    quality_report: dict,
+    nav_shell: bool,
+    collision: bool,
+    pdf_chars: int,
+) -> None:
+    """Status verdict if/elif chain plus quality-gate fields. Mutates ``result``."""
     chars = result["chars_normalized"]
-    adapter_family_for_gate = str(result.get("adapter_family") or adapter_family or adapter_name or "").strip()
+    expected_min = cfg.expected_min
+    is_direct_pdf = cfg.is_direct_pdf
+    structured_adapter_content = result.get("structured_adapter_content", False)
+    adapter_family_for_gate = str(result.get("adapter_family") or cfg.adapter_family or cfg.adapter_name or "").strip()
     structured_adapter_fallback = bool(
         result.get("adapter_fallback_used")
         and adapter_family_for_gate not in _ADAPTER_FALLBACK_SAFE_FAMILIES
@@ -921,7 +979,7 @@ def run_source_intake(
         result["status"] = SourceIntakeStatus.QUALITY_DROP
         result["failure_reason"] = f"Normalized text length {chars} is below expected minimum {expected_min}."
         result["remediation_hint"] = "Review selector, rendering, or source structure before activation."
-    elif chars < 1000 and not (wait_selector or content_selector) and not structured_adapter_content:
+    elif chars < 1000 and not (cfg.wait_selector or cfg.content_selector) and not structured_adapter_content:
         result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW
         result["failure_reason"] = "Text is present but too thin without an explicit selector."
         result["remediation_hint"] = "Add wait_for_selector/content_selector and retest."
@@ -930,7 +988,22 @@ def run_source_intake(
 
     apply_quality_gate_fields(result)
 
-    # ── 8. Quality label ──────────────────────────────────────────────────────
+
+def _finalize_quality_notes_cert(
+    result: dict,
+    source: dict,
+    cfg: _IntakeConfig,
+    quality_report: dict,
+    nav_shell: bool,
+    collision: bool,
+    collision_id: str | None,
+    pdf_chars: int,
+) -> None:
+    """Quality label, notes, and certification finalization. Mutates ``result``."""
+    chars = result["chars_normalized"]
+    expected_min = cfg.expected_min
+
+    # ── Quality label ─────────────────────────────────────────────────────────
     total = chars + pdf_chars
     if total >= 5_000 and result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
         result["quality"] = "GOOD"
@@ -941,7 +1014,7 @@ def run_source_intake(
     else:
         result["quality"] = "POOR"
 
-    # ── 9. Notes ──────────────────────────────────────────────────────────────
+    # ── Notes ─────────────────────────────────────────────────────────────────
     notes_parts = []
     if nav_shell:
         notes_parts.append("Nav-shell detected — extracted text is primarily short navigation items.")
@@ -954,9 +1027,9 @@ def run_source_intake(
     result["notes"] = " ".join(notes_parts)
 
     result["certification"] = build_preview_certification(
-        source_id=source_id,
-        source_url=url,
-        canonical_url=url,
+        source_id=cfg.source_id,
+        source_url=cfg.url,
+        canonical_url=cfg.url,
         intake_result=result,
         quality_report=quality_report,
         baseline_runs_required=int(source.get("baseline_runs_required") or 2),
@@ -965,30 +1038,121 @@ def run_source_intake(
     apply_quality_gate_fields(result)
     result.update(build_source_lab_contract(result))
 
+
+def _write_evidence_into_result(
+    result: dict,
+    source: dict,
+    cfg: _IntakeConfig,
+    html: str,
+    normalized_text: str,
+    content_hash: str,
+    quality_report: dict,
+) -> None:
+    """Optional evidence-write phase. Mutates ``result`` (evidence_*, certification)."""
+    try:
+        evidence = _write_intake_evidence(
+            source=source,
+            source_id=cfg.source_id,
+            url=cfg.url,
+            html=html,
+            text=normalized_text,
+            content_hash=content_hash,
+            result=result,
+            quality_report=quality_report,
+        )
+        result["evidence_written"] = True
+        result["proof_path"] = evidence.get("proof_path")
+        result["evidence_paths"] = evidence.get("evidence_paths", {})
+        result["evidence_level"] = evidence.get("evidence_level", EvidenceLevel.BASIC_EVIDENCE)
+        if evidence.get("certification"):
+            result["certification"] = evidence["certification"]
+            result["certification_status"] = result["certification"].get("certification_status", "")
+    except Exception as exc:
+        result["errors"].append(f"Evidence write failed: {exc}")
+    finally:
+        result.update(build_source_lab_contract(result))
+
+
+def run_source_intake(
+    source: dict,
+    all_sources: list[dict] | None = None,
+    write_evidence: bool = False,
+) -> dict:
+    """
+    Run a full intake check on a source entry.
+
+    Thin orchestrator: each numbered phase below is a private helper above;
+    this body calls them in order and enforces the early-return semantics.
+
+    Parameters
+    ----------
+    source : dict
+        A sources.json entry. Required keys: 'url'. Optional: 'source_id',
+        'expected_min_length', 'wait_for_selector', 'content_selector', 'fetch_method'.
+    all_sources : list[dict] | None
+        All enabled sources (for hash collision check). Pass the full sources.json list.
+    write_evidence : bool
+        If True, write raw/normalized snapshots and proof.json. Requires DB access.
+
+    Returns
+    -------
+    dict with fields:
+        source_id, url, status, chars_raw, chars_normalized, pdf_chars,
+        nav_shell_detected, hash_collision, collision_source_id, quality,
+        evidence_written, errors, notes
+    """
+    cfg = _extract_intake_config(source)
+    result = _build_initial_result(cfg.source_id, cfg.url)
+
+    # ── 1. URL safety ─────────────────────────────────────────────────────────
+    safe, reason = validate_public_url(cfg.url)
+    if not safe:
+        result["status"] = SourceIntakeStatus.BLOCKED
+        result["failure_reason"] = reason
+        result["remediation_hint"] = "Use a public http(s) URL without credentials, login, private network, or restricted portal access."
+        result["errors"].append(f"URL blocked: {reason}")
+        return _finalize_intake_failure(
+            result, source, cfg.source_id, cfg.url,
+            quality_url="", quality_canonical_url=None,
+        )
+
+    # ── 2. Fetch ──────────────────────────────────────────────────────────────
+    if cfg.is_direct_pdf:
+        html = _fetch_direct_pdf(result, source, cfg.url)
+    else:
+        html, early = _fetch_rendered_html(result, source, cfg)
+        if early is not None:
+            return early
+
+    # ── 3. Extract text ───────────────────────────────────────────────────────
+    normalized_text, extracted = _extract_source_text(result, html, cfg)
+
+    # ── 4. Nav-shell detection ────────────────────────────────────────────────
+    nav_shell = _detect_nav_shell(result, normalized_text, cfg.is_direct_pdf)
+
+    # ── 5. Hash collision check ───────────────────────────────────────────────
+    content_hash, collision, collision_id = _resolve_hash_collision(
+        result, normalized_text, cfg, all_sources
+    )
+
+    # ── 6-7. PDF chars + quality score ────────────────────────────────────────
+    quality_report, pdf_chars = _score_content_quality(
+        result, source, cfg, html, normalized_text, extracted, nav_shell
+    )
+
+    # ── 8. Status verdict ─────────────────────────────────────────────────────
+    _determine_intake_status(result, cfg, quality_report, nav_shell, collision, pdf_chars)
+
+    # ── 9. Quality label + notes + certification ──────────────────────────────
+    _finalize_quality_notes_cert(
+        result, source, cfg, quality_report, nav_shell, collision, collision_id, pdf_chars
+    )
+
     # ── 10. Evidence write (optional) ────────────────────────────────────────
     if write_evidence and result["status"] == SourceIntakeStatus.CONFIRMED_ACCESSIBLE:
-        try:
-            evidence = _write_intake_evidence(
-                source=source,
-                source_id=source_id,
-                url=url,
-                html=html,
-                text=normalized_text,
-                content_hash=content_hash,
-                result=result,
-                quality_report=quality_report,
-            )
-            result["evidence_written"] = True
-            result["proof_path"] = evidence.get("proof_path")
-            result["evidence_paths"] = evidence.get("evidence_paths", {})
-            result["evidence_level"] = evidence.get("evidence_level", EvidenceLevel.BASIC_EVIDENCE)
-            if evidence.get("certification"):
-                result["certification"] = evidence["certification"]
-                result["certification_status"] = result["certification"].get("certification_status", "")
-        except Exception as exc:
-            result["errors"].append(f"Evidence write failed: {exc}")
-        finally:
-            result.update(build_source_lab_contract(result))
+        _write_evidence_into_result(
+            result, source, cfg, html, normalized_text, content_hash, quality_report
+        )
 
     return result
 

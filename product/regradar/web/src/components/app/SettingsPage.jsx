@@ -220,8 +220,9 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
       <Section title="Workspace">
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-[var(--text-secondary)] mb-1.5">Workspace name</label>
+            <label htmlFor="settings-workspace-name" className="block text-[var(--text-secondary)] mb-1.5">Workspace name</label>
             <input
+              id="settings-workspace-name"
               type="text"
               value={workspace}
               onChange={e => setWorkspace(e.target.value)}
@@ -309,8 +310,9 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
             </span>
           </div>
           <div>
-            <label className="block text-xs text-[var(--text-secondary)] mb-1.5">Brief language</label>
+            <label htmlFor="settings-brief-language" className="block text-xs text-[var(--text-secondary)] mb-1.5">Brief language</label>
             <select
+              id="settings-brief-language"
               value={language}
               onChange={e => setLanguage(e.target.value)}
               className="w-full bg-[var(--bg-raised)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--trust-border)]"

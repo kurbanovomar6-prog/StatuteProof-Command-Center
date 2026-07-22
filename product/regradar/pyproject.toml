@@ -13,7 +13,7 @@ markers = [
 
 [tool.coverage.run]
 source = ["app"]
-branch = false
+branch = true
 omit = [
     "app/__pycache__/*",
     "*/__pycache__/*",
@@ -22,14 +22,19 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-# Measured 2026-07-22 (pytest tests/ --cov=app): 78.84% total, 4496 tests, after
-# the api-handler coverage cycle raised every extracted mixin (api_account 46->89,
-# api_evidence 54->95, api_auth 66->96, api_sources 67->100, api_reports 69->99,
-# api_telegram 62->100) on top of the earlier critical-module + fail-closed
-# hardening. The floor sits ~1pt below that measurement so ordinary churn cannot
-# turn the backend job red on arrival. Non-regression ratchet — raise it (never
-# lower it) toward 80%.
-fail_under = 78
+# Measured 2026-07-22 (pytest tests/ --cov=app): 76.25% total with BRANCH
+# coverage enabled (branch=true above). Turning on branch measurement lowered the
+# reported total from the prior line-only 78.84% because untaken false-branches on
+# gating logic — invisible to line coverage — now count against the ratio; this is
+# the honest, path-inclusive number. This cycle also added
+# tests/test_extraction_providers.py, which lifts the evidence-extraction provider
+# layer (extractors 25->63%, providers.html_extraction 49->74%, and newly
+# exercises providers.pdf_extraction 57% + providers.optional_tools 70%).
+# The floor sits ~1pt below the measured branch-inclusive total so ordinary churn
+# cannot turn the backend job red on arrival, while an untaken-branch regression
+# now DOES fail the build. Non-regression ratchet — raise it (never lower it)
+# toward the 80% target.
+fail_under = 75
 exclude_also = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",

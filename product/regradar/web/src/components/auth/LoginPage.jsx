@@ -160,8 +160,9 @@ export default function LoginPage({ onLogin, onRegister, onForgotPassword }) {
 
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
-          <label className={labelCls}>Work email</label>
+          <label htmlFor="login-email" className={labelCls}>Work email</label>
           <input
+            id="login-email"
             type="email"
             placeholder="name@company.com"
             value={email}
@@ -174,7 +175,7 @@ export default function LoginPage({ onLogin, onRegister, onForgotPassword }) {
 
         <div>
           <div className="flex items-center justify-between gap-3">
-            <label className={labelCls}>Password</label>
+            <label htmlFor="login-password" className={labelCls}>Password</label>
             {onForgotPassword && (
               <button
                 type="button"
@@ -187,6 +188,7 @@ export default function LoginPage({ onLogin, onRegister, onForgotPassword }) {
           </div>
           <div className="relative">
             <input
+              id="login-password"
               type={showPass ? 'text' : 'password'}
               placeholder="Your password"
               value={password}

@@ -126,18 +126,20 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
       onContinue()
       return
     }
-    if (planId === 'consultant') {
-      setConfirmMsg('Plan request noted. Our team will contact you to discuss your requirements and activate your workspace.')
-      setSelected('consultant')
-      clearCarriedIntent()
-      return
-    }
     setSelecting(planId)
     setError('')
     try {
+      // The consultant tier is a real backend plan (app/plan.py PLAN_NAMES),
+      // so it MUST record intent + page the founder exactly like the paid
+      // tiers — otherwise the green confirmation is a claim of an action the
+      // code never performed.
       await selectPlan(planId)
       setSelected(planId)
-      setConfirmMsg('Plan request saved. Our team will contact you to activate your founding pilot. No payment has been processed.')
+      setConfirmMsg(
+        planId === 'consultant'
+          ? 'Plan request saved. Our team will contact you to discuss your requirements and activate your workspace. No payment has been processed.'
+          : 'Plan request saved. Our team will contact you to activate your founding pilot. No payment has been processed.',
+      )
       clearCarriedIntent()
     } catch {
       setError('Could not save plan selection. Please try again or continue with the Source Readiness Review.')

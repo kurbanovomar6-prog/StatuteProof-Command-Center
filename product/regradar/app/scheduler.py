@@ -448,11 +448,16 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
     cycle = 0
     # Track when we last ran the full cycle so we can decide whether to run
     # critical sources only (sub-cycle) or all sources (full cycle).
-    # NOTE: last_full_run_at is intentionally initialised to 0.0 so that a
-    # full cycle runs immediately on startup — this ensures the monitor is
-    # current from the first moment the process is alive (desirable for
-    # reliability, not a bug).
-    last_full_run_at: float = 0.0
+    # last_full_run_at is initialised so the FIRST full cycle is unconditionally
+    # due on startup, regardless of the current monotonic value. A plain 0.0 was
+    # WRONG on Linux, where time.monotonic() is CLOCK_MONOTONIC (epoch = boot):
+    # on a droplet booted less than `interval` minutes ago, monotonic() < the
+    # interval, so (now - 0.0) >= interval*60 was False and the first full sweep
+    # was silently delayed up to a whole interval. Anchoring the initial value
+    # one full interval (plus a second) behind the loop's first monotonic read
+    # makes full_cycle_due True on the first iteration on any host, fresh boot or
+    # not — the monitor is current from the first moment the process is alive.
+    last_full_run_at: float = time.monotonic() - (interval * 60) - 1
     # Deadline reminders run at most once per UTC calendar day, after a full
     # cycle. Empty string forces a pass on the first completed cycle.
     last_deadline_pass_date: str = ""
