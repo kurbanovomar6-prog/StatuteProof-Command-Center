@@ -326,4 +326,55 @@ describe('AlertDecisionPanel', () => {
       expect(text, `forbidden phrase rendered: "${phrase}"`).not.toContain(phrase)
     }
   })
+
+  it('app-authored copy never recommends, suggests, or scores a decision', async () => {
+    // Iron legal guardrail (CLAUDE.md): StatuteProof records the reviewer's OWN
+    // words and NEVER prescribes, suggests, scores, or assesses the decision. The
+    // forbidden-claims sweep above catches banned marketing phrases; this asserts
+    // the panel's own copy carries no PRESCRIPTIVE / advisory framing that would
+    // read as the app steering the decision. Phrases are imperative recommendation
+    // forms only — the disclaimer's negated "does not review, suggest, or assess"
+    // is legitimate and must not trip this, so we never test the bare words
+    // "suggest" / "assess" / "score" in isolation.
+    const RECOMMENDATION_STYLE = [
+      'we recommend',
+      'you should',
+      'we suggest',
+      'we advise',
+      'advise you',
+      'recommended action',
+      'suggested action',
+      'our recommendation',
+      'you must',
+      'best course',
+      'the right decision',
+      'the correct decision',
+    ]
+    mockFetch({
+      decisions: [
+        decisionRecord(),
+        decisionRecord({
+          id: 'dec_1_2_feedfacefeedfacefeed',
+          statement: 'Corrected entry.',
+          supersedes: 'dec_1_1_abcdef1234567890abcd',
+          reason: 'Earlier entry misread the scope.',
+        }),
+      ],
+    })
+    const { container } = render(<AlertDecisionPanel alertId={ALERT} />)
+    openPanel()
+    await screen.findByText('Corrected entry.')
+
+    // Reveal the compose + irreversibility-confirm copy too (both app-authored).
+    fireEvent.change(screen.getByLabelText(FRAMING.statement_label), {
+      target: { value: 'Reviewed; recording my own decision.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: FRAMING.seal_button }))
+    expect(screen.getByText(FRAMING.confirm_title)).toBeInTheDocument()
+
+    const text = container.textContent.toLowerCase()
+    for (const phrase of RECOMMENDATION_STYLE) {
+      expect(text, `recommendation-style copy rendered: "${phrase}"`).not.toContain(phrase)
+    }
+  })
 })

@@ -34,10 +34,14 @@ module exposes ONLY insert + read functions — there is no update or delete
 anywhere. Corrections are NEW sealed records carrying
 ``supersedes_decision_id`` + ``amendment_reason``; the original stays.
 
-INERT IN STAGE 1: no endpoint calls this module yet (wiring, RBAC enforcement
-via ``review.submit``, and live alert-proof binding are Stage 2). Every
-function is fail-soft — bad input returns a benign value, and the access-log
-append is best-effort and never blocks a seal.
+WIRING (Stage 2, LIVE): the store is reached through the alert-review surface —
+``_handle_alert_decisions_post`` / ``_handle_alert_decisions_get`` in
+``app/api_alerts.py`` (POST/GET ``/api/alerts/decisions``) call :func:`seal_decision`
+and :func:`list_decisions` behind the ``review.submit`` RBAC gate, resolving the
+org from the authenticated caller and binding the sealed alert-proof block; the
+``AlertDecisionPanel`` React component is the UI. Every function here is still
+fail-soft — bad input returns a benign value, and the access-log append is
+best-effort and never blocks a seal.
 
 NO AGGREGATE ROW CAP — DELIBERATE: unlike ``app.action_checklist`` (a workflow
 aid with a per-user cap), an accountability log must never refuse to record a
