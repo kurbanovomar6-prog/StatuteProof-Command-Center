@@ -63,6 +63,7 @@ Changed (subsequent run):
 import logging
 import threading
 from datetime import datetime, timezone
+from typing import NamedTuple
 
 from app.adapters.base import is_quality_content
 from app.adapters.registry import get_adapter_for_url
@@ -257,23 +258,56 @@ def _source_may_auto_alert(source: dict | None) -> bool:
     return proxy_unblocked_remediation(source)
 
 
-def run_pipeline(url: str, source: dict | None = None) -> dict:
-    """
-    Execute the full change-detection pipeline for a single URL.
+class _Baseline(NamedTuple):
+    """Resolved canonical baseline for a run (Step 4 output)."""
+    latest: dict | None
+    prev_trail_record: dict | None
+    baseline_hash: str | None
+    baseline_origin: str
+    prev_raw_chars: int | None
+    prev_normalized_chars: int | None
 
-    Parameters
-    ----------
-    url : str
-        The URL to monitor.
-    source : dict | None
-        Optional source entry from sources.json.  When provided, it is
-        passed to the adapter registry so adapters can use metadata
-        (jurisdiction, category, etc.) for dispatch decisions.
 
-    Raises
-    ------
-    TimeoutError  — propagated from scraper on page-load timeout.
-    ValueError    — propagated from scraper on empty HTML.
+class _RiskAssessment(NamedTuple):
+    """Resolved rule/AI risk assessment for a changed run (Steps 6b-8 output)."""
+    detected_facts: list
+    rule_risk: dict
+    ai_used: bool
+    ai_skipped_reason: str
+    final_risk_level: str
+    final_risk_reason: str
+    executive_summary: str
+    business_action: str
+    source_language: str
+    output_language: str
+    affected_entities: list
+    urgency: str
+    deadline: object
+    semantic_findings: dict
+    confidence: str
+    review_required: bool
+    review_reason: str
+
+
+class _AlertOutcome(NamedTuple):
+    """Telegram-alert dispatch outputs for a changed run (Step 10 output)."""
+    telegram_sent: bool
+    alert_suppressed_reason: str
+    deferred_alert: dict | None
+    pending_cooldown_alert: dict | None
+
+
+def _acquire_content(url: str, source: dict | None) -> tuple[str, str, dict]:
+    """Steps 0-2: acquire monitorable text for `url`.
+
+    Tries a source-specific adapter first (Step 0); on quality content that
+    replaces the generic scraper. Otherwise fetches + extracts generically
+    (Steps 1-2). Returns (content, extraction_method, fetch_status). The
+    fetch_status dict is populated by fetch_page and read by the HTTP-error
+    guard even on the adapter path, so it is always returned.
+
+    fetch_page may RAISE (TimeoutError on page-load timeout, ValueError on
+    empty HTML) — this helper lets that propagate unchanged.
     """
     # ── Step 0: Source-specific adapter (optional) ────────────────────
     # Adapters provide richer content for sites the generic scraper cannot
@@ -332,9 +366,25 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     content = content or ""
     logger.info("Content: %d chars for %s (adapter=%s)", len(content), url, adapter_used)
 
-    extracted_chars    = len(content) if content else 0
-    extraction_method  = f"adapter:{adapter_used}" if adapter_used else _generic_method
+    extraction_method = f"adapter:{adapter_used}" if adapter_used else _generic_method
+    return content, extraction_method, _fetch_status
 
+
+def _run_early_guards(
+    url: str,
+    source: dict | None,
+    content: str,
+    extraction_method: str,
+    extracted_chars: int,
+    fetch_status: dict,
+) -> dict | None:
+    """Run the five early content guards in their load-bearing order:
+    HTTP-error → empty → error-page → bot-wall → undecodable.
+
+    Returns the guard's early-return dict when one trips, or None to continue.
+    Each guard writes a durable QUALITY_DROP trail record via _persist_guard_drop
+    with its exact same kwargs, and returns its exact same result shape.
+    """
     # ── Guard (F1c): a rendered HTTP error page is a fetch failure ─────
     # fetch_page RAISES on a hard access block (401/403/451), but a 404/500/503
     # whose body Playwright renders into a large templated page returns
@@ -344,7 +394,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
     # the eventual recovery alert as CHANGED. A >=400 status means the body is
     # an error page, not the regulator document, so drop it. (HTTP-200 soft-404s
     # are out of scope here — this only trusts the transport-level status.)
-    _http_status = _fetch_status.get("http_status")
+    _http_status = fetch_status.get("http_status")
     if isinstance(_http_status, int) and _http_status >= 400:
         logger.warning(
             "HTTP %d for %s — rendered error page, recording as quality_drop, no baseline",
@@ -470,23 +520,18 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "ai_calls_used":      _AI_RUN_BUDGET["count"],
         }
 
-    # Detect source language for AI prompt context and result metadata.
-    # Runs on clean extracted text (not raw HTML) for best accuracy.
-    src_lang = detect_language_hint(content) if AI_DETECT_LANGUAGE else "unknown"
-    logger.info("Detected source language: %s for %s", src_lang, url)
+    return None
 
-    # ── Step 3: Hash (from normalized text to avoid false positives) ──
-    # normalize_for_change_hash strips volatile render-time fragments
-    # (timestamps, visitor counters) before hashing so that only genuine
-    # regulatory text changes produce a new hash.
-    normalized_for_hash = normalize_for_change_hash(content)
-    new_hash = stable_content_hash(normalized_for_hash)
 
-    # ── Step 4: Resolve canonical baseline ────────────────────────────
-    # Owner decision 2: the JSONL evidence-trail normalized hash is the
-    # single source of truth for change classification. SQLite `documents`
-    # is a derived index only — used as a fallback baseline solely when the
-    # trail has no usable hash (legacy records, bare-URL CLI runs).
+def _resolve_baseline(url: str, source: dict | None) -> _Baseline:
+    """Step 4: resolve the canonical baseline hash and previous content sizes.
+
+    Owner decision 2: the JSONL evidence-trail normalized hash is the single
+    source of truth for change classification. SQLite `documents` is a derived
+    index only — a fallback baseline used solely when the trail has no usable
+    hash (legacy records, bare-URL CLI runs). Also resolves previous content
+    sizes for the content-shrink guard. Pure read — no state from later steps.
+    """
     latest = get_latest_document(url)
     prev_trail_record = None
     baseline_hash = None
@@ -526,36 +571,76 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         except (KeyError, TypeError):
             prev_raw_chars = None
 
-    # ── Step 5: Hash comparison against the canonical baseline ────────
-    if baseline_hash and baseline_hash == new_hash:
-        logger.info("No changes: %s (baseline=%s)", url, baseline_origin)
-        # Keep the derived index aligned with the canonical hash. This is a
-        # deliberate, loudly-logged realignment — not a silent auto-heal.
-        if source is not None and (latest is None or latest["content_hash"] != new_hash):
-            logger.warning(
-                "DERIVED INDEX REALIGNED: sqlite documents hash %s != canonical %s "
-                "for %s — inserting aligned row (evidence trail is authoritative)",
-                (latest["content_hash"][:12] if latest is not None else "<missing>"),
-                new_hash[:12], url,
-            )
-            save_document(url=url, content=content, content_hash=new_hash)
-        return {
-            "url":                url,
-            "changed":            False,
-            "extracted_chars":    extracted_chars,
-            "extraction_quality": _extraction_quality(extracted_chars),
-            "extraction_method":  extraction_method,
-            "normalized_hash":    new_hash,
-            "content_hash":       new_hash,
-            "raw_hash":           _sha256_or_none(content),
-            "raw_chars":          len(content or ""),
-            "normalized_chars":   len(normalized_for_hash or ""),
-            "normalization_version": NORMALIZATION_VERSION,
-            "ai_skipped_reason":  "",
-            "ai_calls_used":      _AI_RUN_BUDGET["count"],
-        }
+    return _Baseline(
+        latest=latest,
+        prev_trail_record=prev_trail_record,
+        baseline_hash=baseline_hash,
+        baseline_origin=baseline_origin,
+        prev_raw_chars=prev_raw_chars,
+        prev_normalized_chars=prev_normalized_chars,
+    )
 
-    # ── Step 6: Build diff / baseline diff ───────────────────────────
+
+def _handle_unchanged(
+    url: str,
+    source: dict | None,
+    content: str,
+    extracted_chars: int,
+    extraction_method: str,
+    normalized_for_hash: str,
+    new_hash: str,
+    baseline: _Baseline,
+) -> dict | None:
+    """Step 5: hash comparison against the canonical baseline.
+
+    Returns the unchanged-run result dict when the new hash matches the
+    baseline (realigning the derived SQLite index as a side effect), else None.
+    """
+    baseline_hash = baseline.baseline_hash
+    if not (baseline_hash and baseline_hash == new_hash):
+        return None
+
+    latest = baseline.latest
+    logger.info("No changes: %s (baseline=%s)", url, baseline.baseline_origin)
+    # Keep the derived index aligned with the canonical hash. This is a
+    # deliberate, loudly-logged realignment — not a silent auto-heal.
+    if source is not None and (latest is None or latest["content_hash"] != new_hash):
+        logger.warning(
+            "DERIVED INDEX REALIGNED: sqlite documents hash %s != canonical %s "
+            "for %s — inserting aligned row (evidence trail is authoritative)",
+            (latest["content_hash"][:12] if latest is not None else "<missing>"),
+            new_hash[:12], url,
+        )
+        save_document(url=url, content=content, content_hash=new_hash)
+    return {
+        "url":                url,
+        "changed":            False,
+        "extracted_chars":    extracted_chars,
+        "extraction_quality": _extraction_quality(extracted_chars),
+        "extraction_method":  extraction_method,
+        "normalized_hash":    new_hash,
+        "content_hash":       new_hash,
+        "raw_hash":           _sha256_or_none(content),
+        "raw_chars":          len(content or ""),
+        "normalized_chars":   len(normalized_for_hash or ""),
+        "normalization_version": NORMALIZATION_VERSION,
+        "ai_skipped_reason":  "",
+        "ai_calls_used":      _AI_RUN_BUDGET["count"],
+    }
+
+
+def _build_diff(
+    content: str,
+    baseline_hash: str | None,
+    latest: dict | None,
+    prev_trail_record: dict | None,
+) -> tuple[bool, dict]:
+    """Step 6: build the structured diff (or a baseline "all added" diff).
+
+    Returns (is_new, diff_result). is_new starts as (baseline_hash is None) but
+    is REASSIGNED to True when no old text can be resolved — that reassignment
+    is load-bearing and returned faithfully.
+    """
     is_new = baseline_hash is None
 
     if is_new:
@@ -590,75 +675,97 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             normalized_new = normalize_for_change_hash(content)
             diff_result = get_diff(normalized_old, normalized_new)
 
-    # ── Shrink guard (fix 3): scraper break, not a real "content removed" ──
-    # A large drop in content length between the baseline and this run is
-    # almost always a scraper break (blocked/challenge page, truncated fetch,
-    # layout change) rather than a genuine regulatory removal. Detecting it
-    # here — BEFORE Step 9 (save_document) and Step 10 (alert) — means the
-    # shrunk content NEVER overwrites the baseline (no save_document, no trail
-    # append: the early return omits normalized_hash, so run_pipeline_for_source
-    # skips both its heartbeat and its CHANGED-append blocks) and NEVER fires an
-    # alert. The next healthy sweep therefore still diffs against the true
-    # baseline instead of a poisoned shrunk one.
-    if not is_new:
-        _shrink_reason = _detect_content_shrink(
-            prev_raw_chars=prev_raw_chars,
-            prev_normalized_chars=prev_normalized_chars,
-            new_raw_chars=extracted_chars,
-            new_normalized_chars=len(normalized_for_hash or ""),
-        )
-        if _shrink_reason:
-            logger.warning(
-                "CONTENT SHRINK SUPPRESSED for %s: %s — alert suppressed and "
-                "baseline left intact (likely scraper break, not a real change)",
-                url, _shrink_reason,
-            )
-            # A-MEDIUM(1): write a durable QUALITY_DROP audit record so the
-            # suppression is auditable (an evidence product must not have gaps
-            # that live only in a log line). The record carries NO usable hash,
-            # so it can never become the baseline — the true baseline survives
-            # the scraper break, and no alert is issued. Non-fatal: a failed
-            # write must never break the pipeline.
-            if source is not None:
-                try:
-                    from app.source_runs import record_quality_drop
-                    record_quality_drop(
-                        source,
-                        reason=_shrink_reason,
-                        alert_suppressed_reason="content_shrink",
-                        observed_raw_chars=extracted_chars,
-                        observed_normalized_chars=len(normalized_for_hash or ""),
-                        prev_raw_chars=prev_raw_chars,
-                        prev_normalized_chars=prev_normalized_chars,
-                        extraction_method=extraction_method,
-                    )
-                except Exception as _qd_err:
-                    logger.warning(
-                        "QUALITY_DROP audit record write failed (non-fatal): %s",
-                        _qd_err,
-                    )
-            return {
-                "url":                    url,
-                "changed":                False,
-                "status":                 "quality_drop",
-                "shrink_suppressed":      True,
-                "shrink_reason":          _shrink_reason,
-                "extracted_chars":        extracted_chars,
-                "extraction_quality":     "failed",
-                "extraction_method":      extraction_method,
-                "alert_suppressed_reason": "content_shrink",
-                "ai_skipped_reason":      "quality_drop",
-                "ai_calls_used":          _AI_RUN_BUDGET["count"],
-            }
+    return is_new, diff_result
 
-    # ── Step 3b: Write snapshot files ────────────────────────────────
-    # Runs after diff is confirmed real (past hash-check early-exit).
-    # Non-fatal — a failed write never breaks the pipeline.
+
+def _handle_shrink(
+    url: str,
+    source: dict | None,
+    is_new: bool,
+    extracted_chars: int,
+    extraction_method: str,
+    normalized_for_hash: str,
+    baseline: _Baseline,
+) -> dict | None:
+    """Shrink guard (fix 3): a large content drop is a scraper break, not a
+    real "content removed" change.
+
+    Returns the suppression result dict when a shrink is detected (writing a
+    durable QUALITY_DROP audit record as a side effect), else None. Never trips
+    on a baseline run. Detecting it here — BEFORE save_document and the alert —
+    means the shrunk content never overwrites the baseline and never alerts.
+    """
+    if is_new:
+        return None
+    _shrink_reason = _detect_content_shrink(
+        prev_raw_chars=baseline.prev_raw_chars,
+        prev_normalized_chars=baseline.prev_normalized_chars,
+        new_raw_chars=extracted_chars,
+        new_normalized_chars=len(normalized_for_hash or ""),
+    )
+    if not _shrink_reason:
+        return None
+
+    logger.warning(
+        "CONTENT SHRINK SUPPRESSED for %s: %s — alert suppressed and "
+        "baseline left intact (likely scraper break, not a real change)",
+        url, _shrink_reason,
+    )
+    # A-MEDIUM(1): write a durable QUALITY_DROP audit record so the
+    # suppression is auditable (an evidence product must not have gaps
+    # that live only in a log line). The record carries NO usable hash,
+    # so it can never become the baseline — the true baseline survives
+    # the scraper break, and no alert is issued. Non-fatal: a failed
+    # write must never break the pipeline.
+    if source is not None:
+        try:
+            from app.source_runs import record_quality_drop
+            record_quality_drop(
+                source,
+                reason=_shrink_reason,
+                alert_suppressed_reason="content_shrink",
+                observed_raw_chars=extracted_chars,
+                observed_normalized_chars=len(normalized_for_hash or ""),
+                prev_raw_chars=baseline.prev_raw_chars,
+                prev_normalized_chars=baseline.prev_normalized_chars,
+                extraction_method=extraction_method,
+            )
+        except Exception as _qd_err:
+            logger.warning(
+                "QUALITY_DROP audit record write failed (non-fatal): %s",
+                _qd_err,
+            )
+    return {
+        "url":                    url,
+        "changed":                False,
+        "status":                 "quality_drop",
+        "shrink_suppressed":      True,
+        "shrink_reason":          _shrink_reason,
+        "extracted_chars":        extracted_chars,
+        "extraction_quality":     "failed",
+        "extraction_method":      extraction_method,
+        "alert_suppressed_reason": "content_shrink",
+        "ai_skipped_reason":      "quality_drop",
+        "ai_calls_used":          _AI_RUN_BUDGET["count"],
+    }
+
+
+def _write_run_snapshots(
+    source: dict | None,
+    url: str,
+    content: str,
+    normalized_for_hash: str,
+    extraction_method: str,
+) -> tuple[dict, str, str]:
+    """Step 3b: write snapshot files for a confirmed-real change.
+
+    Returns (snapshot_paths_result, run_id, source_id). Best-effort and
+    source-gated — a failed write (or a bare-URL run with no source) leaves the
+    snapshot dict empty and the ids blank without breaking the pipeline.
+    """
     _snapshot_paths_result: dict = {}
     _run_id = ""
     _source_id = ""
-    _market = ""
-    _ts_utc = ""
     if source is not None:
         try:
             import uuid as _uuid
@@ -686,7 +793,23 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         except Exception as _snap_err:
             logger.warning("Snapshot write failed (non-fatal): %s", _snap_err)
             _snapshot_paths_result = {}
+    return _snapshot_paths_result, _run_id, _source_id
 
+
+def _assess_risk(
+    url: str,
+    diff_result: dict,
+    is_new: bool,
+    src_lang: str,
+) -> _RiskAssessment:
+    """Steps 6b-8: rule-detected facts, rule-based risk, optional AI analysis,
+    and the resolved final risk / review decision.
+
+    Returns a _RiskAssessment carrying every downstream value. AI is only
+    attempted on a changed run above the configured threshold and within the
+    per-run call budget (thread-safe reservation). Falls back to rule-based
+    output whenever AI is skipped or unavailable.
+    """
     # ── Step 6b (F2): rule-detected facts from the added delta ────────
     # Facts (deadlines, effective dates, amounts, law/licence refs) may be
     # stated in an alert ONLY when truly detected; spans prove each claim.
@@ -795,42 +918,48 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             "No immediate review required based on current rule-based signals."
         )
 
-    # ── Step 9: Persist new historical version ────────────────────────
-    created_at = datetime.now(timezone.utc).isoformat()
-    save_document(
-        url             = url,
-        content         = content,
-        risk_level      = final_risk_level,
-        risk_reason     = final_risk_reason,
-        ai_summary      = executive_summary if ai_used else None,
-        business_action = business_action   if ai_used else None,
-        # Decision 2: the derived index stores the same canonical hash the
-        # evidence trail records — never a separately computed one.
-        content_hash    = new_hash,
-    )
-    logger.info(
-        "Saved version: url=%s risk=%s ai=%s added=%d removed=%d",
-        url, final_risk_level, ai_used,
-        len(diff_result["added"]), len(diff_result["removed"]),
+    return _RiskAssessment(
+        detected_facts=detected_facts,
+        rule_risk=rule_risk,
+        ai_used=ai_used,
+        ai_skipped_reason=ai_skipped_reason,
+        final_risk_level=final_risk_level,
+        final_risk_reason=final_risk_reason,
+        executive_summary=executive_summary,
+        business_action=business_action,
+        source_language=source_language,
+        output_language=output_language,
+        affected_entities=affected_entities,
+        urgency=urgency,
+        deadline=deadline,
+        semantic_findings=semantic_findings,
+        confidence=confidence,
+        review_required=review_required,
+        review_reason=review_reason,
     )
 
-    # Canonical evidence sealing happens in run_pipeline_for_source AFTER
-    # append_run returns — proof_block_path and the trail-written snapshot
-    # paths exist only from that point, so sealing here (pre-append) is
-    # structurally impossible. The bare-URL path (run_pipeline called
-    # directly, source=None) never appends a trail record and therefore
-    # never seals — by design.
 
-    # ── Step 10: Telegram alert (MEDIUM/HIGH, never on baseline) ──────
-    # Durability ordering (A-durability, fix 2): the invariant is that an
-    # "alert sent" state can never outrun an "evidence recorded" state. The
-    # evidence-trail append happens in run_pipeline_for_source (append_run),
-    # AFTER this function returns. So when a source context is present we do NOT
-    # send here — we build the vetted payload (dedup gate included) and DEFER it
-    # in the result under "_deferred_alert". run_pipeline_for_source sends it
-    # only after append_run has durably recorded the CHANGED evidence, and a
-    # failed append aborts the send. The bare-URL path (source is None) never
-    # appends a trail record, so it keeps sending inline exactly as before.
+def _dispatch_alert(
+    url: str,
+    source: dict | None,
+    is_new: bool,
+    new_hash: str,
+    created_at: str,
+    run_id: str,
+    source_id: str,
+    diff_result: dict,
+    detected_facts: list,
+    risk: _RiskAssessment,
+) -> _AlertOutcome:
+    """Step 10: Telegram alert dispatch (MEDIUM/HIGH, never on baseline).
+
+    Durability ordering (A-durability, fix 2): an "alert sent" state can never
+    outrun an "evidence recorded" state. When a source context is present the
+    vetted payload is DEFERRED (dedup gate included) rather than sent — the
+    trail append in run_pipeline_for_source releases it. The bare-URL path
+    (source is None) never appends a trail record, so it sends inline. Returns
+    the telegram-sent flag, suppression reason, and any deferred/cooldown payload.
+    """
     telegram_sent = False
     alert_suppressed_reason = ""
     deferred_alert: dict | None = None
@@ -848,7 +977,7 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             source.get("name"), source.get("monitoring_mode"), source.get("alert_eligible"),
         )
 
-    if ENABLE_TELEGRAM_ALERTS and not is_new and final_risk_level in _ALERT_THRESHOLD and source_may_alert:
+    if ENABLE_TELEGRAM_ALERTS and not is_new and risk.final_risk_level in _ALERT_THRESHOLD and source_may_alert:
         # A1 dedup gate: one alert per unique hash transition per source,
         # plus a cooldown between alerts for the same source.
         alert_allowed = True
@@ -869,25 +998,25 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
         # deferred delivery flip the right trail record's alert_sent later.
         alert_payload = {
             "url":                     url,
-            "source_id":               _source_id or (source or {}).get("id") or (source or {}).get("source_id") or "",
-            "run_id":                  _run_id,
+            "source_id":               source_id or (source or {}).get("id") or (source or {}).get("source_id") or "",
+            "run_id":                  run_id,
             "source_name":             (source or {}).get("name", ""),
             "jurisdiction":            (source or {}).get("jurisdiction", ""),
-            "risk_level":              final_risk_level,
-            "risk_reason":             final_risk_reason,
-            "executive_summary":       executive_summary,
-            "business_action_required":business_action,
-            "ai_used":                 ai_used,
+            "risk_level":              risk.final_risk_level,
+            "risk_reason":             risk.final_risk_reason,
+            "executive_summary":       risk.executive_summary,
+            "business_action_required":risk.business_action,
+            "ai_used":                 risk.ai_used,
             # SF-2 human-review gate inputs: send_telegram_alert holds the
             # automated broadcast when the run needs review. These MUST ride
             # on the payload so the gate can see them at send time.
-            "confidence":              confidence,
-            "review_required":         review_required,
+            "confidence":              risk.confidence,
+            "review_required":         risk.review_required,
             "added_count":             len(diff_result["added"]),
             "removed_count":           len(diff_result["removed"]),
             "added":                   diff_result.get("added", []),
             "removed":                 diff_result.get("removed", []),
-            "risk_details":            rule_risk,
+            "risk_details":            risk.rule_risk,
             "detected_facts":          detected_facts,
             "normalized_hash":         new_hash,
             "checked_at_utc":          created_at,
@@ -907,43 +1036,159 @@ def run_pipeline(url: str, source: dict | None = None) -> dict:
             # cooldown elapses and if it is still the source's current state.
             pending_cooldown_alert = alert_payload
 
+    return _AlertOutcome(
+        telegram_sent=telegram_sent,
+        alert_suppressed_reason=alert_suppressed_reason,
+        deferred_alert=deferred_alert,
+        pending_cooldown_alert=pending_cooldown_alert,
+    )
+
+
+def run_pipeline(url: str, source: dict | None = None) -> dict:
+    """
+    Execute the full change-detection pipeline for a single URL.
+
+    Thin orchestrator: each numbered step is a private helper above; this body
+    calls them in order and enforces the early-return semantics.
+
+    Parameters
+    ----------
+    url : str
+        The URL to monitor.
+    source : dict | None
+        Optional source entry from sources.json.  When provided, it is
+        passed to the adapter registry so adapters can use metadata
+        (jurisdiction, category, etc.) for dispatch decisions.
+
+    Raises
+    ------
+    TimeoutError  — propagated from scraper on page-load timeout.
+    ValueError    — propagated from scraper on empty HTML.
+    """
+    # ── Steps 0-2: acquire content (adapter or generic fetch+extract) ──
+    content, extraction_method, _fetch_status = _acquire_content(url, source)
+    extracted_chars = len(content) if content else 0
+
+    # ── Early content guards (HTTP/empty/error-page/bot-wall/undecodable) ──
+    guard_result = _run_early_guards(
+        url, source, content, extraction_method, extracted_chars, _fetch_status,
+    )
+    if guard_result is not None:
+        return guard_result
+
+    # Detect source language for AI prompt context and result metadata.
+    # Runs on clean extracted text (not raw HTML) for best accuracy.
+    src_lang = detect_language_hint(content) if AI_DETECT_LANGUAGE else "unknown"
+    logger.info("Detected source language: %s for %s", src_lang, url)
+
+    # ── Step 3: Hash (from normalized text to avoid false positives) ──
+    # normalize_for_change_hash strips volatile render-time fragments
+    # (timestamps, visitor counters) before hashing so that only genuine
+    # regulatory text changes produce a new hash.
+    normalized_for_hash = normalize_for_change_hash(content)
+    new_hash = stable_content_hash(normalized_for_hash)
+
+    # ── Step 4: Resolve canonical baseline ────────────────────────────
+    baseline = _resolve_baseline(url, source)
+
+    # ── Step 5: Hash comparison — early-exit when unchanged ───────────
+    unchanged_result = _handle_unchanged(
+        url, source, content, extracted_chars, extraction_method,
+        normalized_for_hash, new_hash, baseline,
+    )
+    if unchanged_result is not None:
+        return unchanged_result
+
+    # ── Step 6: Build diff / baseline diff (may reassign is_new) ──────
+    is_new, diff_result = _build_diff(
+        content, baseline.baseline_hash, baseline.latest, baseline.prev_trail_record,
+    )
+
+    # ── Shrink guard (fix 3): scraper break, not a real "content removed" ──
+    shrink_result = _handle_shrink(
+        url, source, is_new, extracted_chars, extraction_method,
+        normalized_for_hash, baseline,
+    )
+    if shrink_result is not None:
+        return shrink_result
+
+    # ── Step 3b: Write snapshot files (best-effort, source-gated) ─────
+    _snapshot_paths_result, _run_id, _source_id = _write_run_snapshots(
+        source, url, content, normalized_for_hash, extraction_method,
+    )
+
+    # ── Steps 6b-8: rule facts, rule risk, AI, resolved risk + review ─
+    risk = _assess_risk(url, diff_result, is_new, src_lang)
+
+    # ── Step 9: Persist new historical version ────────────────────────
+    created_at = datetime.now(timezone.utc).isoformat()
+    save_document(
+        url             = url,
+        content         = content,
+        risk_level      = risk.final_risk_level,
+        risk_reason     = risk.final_risk_reason,
+        ai_summary      = risk.executive_summary if risk.ai_used else None,
+        business_action = risk.business_action   if risk.ai_used else None,
+        # Decision 2: the derived index stores the same canonical hash the
+        # evidence trail records — never a separately computed one.
+        content_hash    = new_hash,
+    )
+    logger.info(
+        "Saved version: url=%s risk=%s ai=%s added=%d removed=%d",
+        url, risk.final_risk_level, risk.ai_used,
+        len(diff_result["added"]), len(diff_result["removed"]),
+    )
+
+    # Canonical evidence sealing happens in run_pipeline_for_source AFTER
+    # append_run returns — proof_block_path and the trail-written snapshot
+    # paths exist only from that point, so sealing here (pre-append) is
+    # structurally impossible. The bare-URL path (run_pipeline called
+    # directly, source=None) never appends a trail record and therefore
+    # never seals — by design.
+
+    # ── Step 10: Telegram alert dispatch (deferred on the source path) ──
+    alert = _dispatch_alert(
+        url, source, is_new, new_hash, created_at, _run_id, _source_id,
+        diff_result, risk.detected_facts, risk,
+    )
+
     # ── Step 11: Return structured result ─────────────────────────────
     return {
         "url":                      url,
         "changed":                  True,
         "is_new":                   is_new,
-        "risk_level":               final_risk_level,
-        "risk_reason":              final_risk_reason,
-        "review_required":          review_required,
-        "review_reason":            review_reason,
-        "ai_used":                  ai_used,
-        "telegram_sent":            telegram_sent,
+        "risk_level":               risk.final_risk_level,
+        "risk_reason":              risk.final_risk_reason,
+        "review_required":          risk.review_required,
+        "review_reason":            risk.review_reason,
+        "ai_used":                  risk.ai_used,
+        "telegram_sent":            alert.telegram_sent,
         # Deferred alert payload (fix 2): non-None only on the source path when
         # an alert is vetted-and-ready but must wait for durable evidence.
         # run_pipeline_for_source consumes and clears this after append_run.
-        "_deferred_alert":          deferred_alert,
+        "_deferred_alert":          alert.deferred_alert,
         # G1 deferred-cooldown payload: non-None only when an alert was suppressed
         # solely by the cooldown. run_pipeline_for_source stashes it after
         # append_run so a later sweep can deliver it once the cooldown elapses.
-        "_pending_cooldown_alert":  pending_cooldown_alert,
-        "alert_suppressed_reason":  alert_suppressed_reason,
-        "risk_details":             rule_risk,
-        "executive_summary":        executive_summary,
-        "business_action_required": business_action,
-        "source_language":          source_language,
-        "output_language":          output_language,
-        "affected_entities":        affected_entities,
-        "urgency":                  urgency,
-        "deadline":                 deadline,
-        "detected_facts":           detected_facts,
-        "semantic_findings":        semantic_findings,
-        "confidence":               confidence,
+        "_pending_cooldown_alert":  alert.pending_cooldown_alert,
+        "alert_suppressed_reason":  alert.alert_suppressed_reason,
+        "risk_details":             risk.rule_risk,
+        "executive_summary":        risk.executive_summary,
+        "business_action_required": risk.business_action,
+        "source_language":          risk.source_language,
+        "output_language":          risk.output_language,
+        "affected_entities":        risk.affected_entities,
+        "urgency":                  risk.urgency,
+        "deadline":                 risk.deadline,
+        "detected_facts":           risk.detected_facts,
+        "semantic_findings":        risk.semantic_findings,
+        "confidence":               risk.confidence,
         "added_count":              len(diff_result["added"]),
         "added":                    diff_result["added"],
         "removed_count":            len(diff_result["removed"]),
         "removed":                  diff_result["removed"],
         "modified_count":           diff_result["modified_count"],
-        "ai_skipped_reason":        ai_skipped_reason,
+        "ai_skipped_reason":        risk.ai_skipped_reason,
         "ai_calls_used":            _AI_RUN_BUDGET["count"],
         "chars":                    extracted_chars,
         "extracted_chars":          extracted_chars,
