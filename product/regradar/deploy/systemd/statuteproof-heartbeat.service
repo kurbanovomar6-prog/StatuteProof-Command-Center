@@ -10,6 +10,10 @@ WorkingDirectory=/srv/regradar
 EnvironmentFile=/srv/regradar/.env
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/srv/regradar/.venv/bin/python run.py heartbeat-check
+# Type=oneshot has no start timeout by default; this run makes outbound network
+# calls (Telegram page + external uptime ping), so a hung call must be reaped
+# rather than wedging the deadman watchdog indefinitely.
+TimeoutStartSec=900
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full

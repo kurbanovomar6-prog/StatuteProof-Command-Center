@@ -204,7 +204,7 @@ if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ] && [ -n "$PUSH_FILE" ]; then
       BACKUP_PAGE_MSG="🚨 StatuteProof off-box backup push FAILED (rclone). The archive exists only on the droplet. Check: journalctl -u statuteproof-backup"
     fi
   else
-    if scp "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
+    if scp -o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
       echo "off-box copy (scp): $PUSH_FILE -> $STATUTEPROOF_BACKUP_REMOTE"
     else
       echo "WARNING: off-box copy (scp) failed; local archive kept, continuing to retention" >&2

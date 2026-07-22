@@ -11,6 +11,10 @@ WorkingDirectory=/srv/regradar
 EnvironmentFile=/srv/regradar/.env
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/srv/regradar/.venv/bin/python scripts/run_cbuae_rulebook_watch.py
+# Type=oneshot has no start timeout by default; this run fetches the CBUAE
+# Rulebook over the network, so a black-holed host must be reaped rather than
+# wedging the unit indefinitely.
+TimeoutStartSec=900
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full

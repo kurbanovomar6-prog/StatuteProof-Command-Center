@@ -10,6 +10,11 @@ WorkingDirectory=/srv/regradar
 EnvironmentFile=/srv/regradar/.env
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/srv/regradar/deploy/backup.sh
+# Type=oneshot disables the systemd start timeout by default, so a black-holed
+# off-box remote (scp/rclone) would wedge this unit indefinitely and stall the
+# founder page. Cap the whole run so systemd reaps a hung backup and the failure
+# surfaces in the journal / to the timer instead of hanging silently for hours.
+TimeoutStartSec=900
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full

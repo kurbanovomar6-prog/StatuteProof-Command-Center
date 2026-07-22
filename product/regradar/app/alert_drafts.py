@@ -102,6 +102,52 @@ def action_orientation(change_type: str) -> dict[str, str]:
     }
 
 
+# Enforcement classification is deliberately split on ambiguity. The roots
+# "sanction" and "suspension" are ALSO ordinary AML-screening and market-
+# operations vocabulary — "sanctions screening", "targeted financial sanctions
+# list", "suspension of trading" — none of which is an enforcement action taken
+# against a firm. The customer-facing AlertsPage enforcement badge/filter gates
+# strictly on ``change_type == "ENFORCEMENT"``, so letting those benign phrases
+# win would surface a *false enforcement claim*. Unambiguous roots therefore
+# classify on sight; the ambiguous roots only count as enforcement when a
+# punitive-action context co-occurs AND no benign phrase explains the word.
+_ENFORCEMENT_UNAMBIGUOUS = ["fine", "penalty", "enforcement", "revocation", "revoked"]
+_ENFORCEMENT_AMBIGUOUS_ROOTS = ["sanction", "suspension", "suspend"]
+_ENFORCEMENT_BENIGN_PHRASES = [
+    "sanctions screening",
+    "sanctions list",
+    "sanctions framework",
+    "targeted financial sanctions",
+    "financial sanctions list",
+    "suspension of trading",
+    "trading suspension",
+    "suspension of dealing",
+]
+_ENFORCEMENT_ACTION_CONTEXT = [
+    "imposed", "impose", "imposes", "disciplinary", "prohibition",
+    "prohibited", "censure", "sanctioned against", "action against",
+    "against the firm", "against firm", "fined", "penalis", "penaliz",
+]
+
+
+def _is_enforcement(text: str) -> bool:
+    """True only for genuine enforcement-action wording.
+
+    See the module comment above ``_ENFORCEMENT_UNAMBIGUOUS``: unambiguous
+    penalty/fine/enforcement/revocation wording classifies on sight, while the
+    ambiguous "sanction"/"suspension" roots are gated on a punitive-action
+    context and suppressed by benign AML-screening / trading-halt phrasings so
+    the enforcement surface never carries a false enforcement claim.
+    """
+    if _contains_any(text, _ENFORCEMENT_UNAMBIGUOUS):
+        return True
+    if not _contains_any(text, _ENFORCEMENT_AMBIGUOUS_ROOTS):
+        return False
+    if _contains_any(text, _ENFORCEMENT_BENIGN_PHRASES):
+        return False
+    return _contains_any(text, _ENFORCEMENT_ACTION_CONTEXT)
+
+
 def classify_change_type(source_run: dict[str, Any], diff_artifact: dict[str, Any]) -> str:
     if _is_legislation_aggregate_change(source_run, diff_artifact):
         return "UNKNOWN"
@@ -124,12 +170,12 @@ def classify_change_type(source_run: dict[str, Any], diff_artifact: dict[str, An
         return "LICENSING"
     if _contains_any(combined, ["rulebook", "rule book", "custody", "client assets"]):
         return "RULEBOOK_UPDATE"
+    if _is_enforcement(combined):
+        return "ENFORCEMENT"
     if _contains_any(combined, ["circular", "notice", "resolution"]):
         return "CIRCULAR_UPDATE"
     if _contains_any(combined, ["guidance", "guideline", "clarification", "framework"]):
         return "GUIDANCE_UPDATE"
-    if _contains_any(combined, ["fine", "penalty", "sanction", "enforcement", "revocation", "suspension"]):
-        return "ENFORCEMENT"
     if int(diff_artifact.get("added_count") or 0) > 0:
         return "NEW_PUBLICATION"
     if diff_artifact.get("meaningful_change_detected"):

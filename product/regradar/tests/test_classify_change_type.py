@@ -228,6 +228,62 @@ def test_classify_change_type_returns_enforcement_for_sanction_text():
     assert result in {"ENFORCEMENT", "LICENSING"}
 
 
+def test_classify_change_type_enforcement_wording_wins_over_notice():
+    # Regression: an enforcement notice containing both "notice" and "penalty"
+    # must classify as ENFORCEMENT, not CIRCULAR_UPDATE — enforcement wording
+    # is a stronger, more specific signal and gates the enforcement surface.
+    diff = _diff(added=["Regulatory Notice: penalty imposed on Firm X."])
+    result = classify_change_type(_run(), diff)
+    assert result == "ENFORCEMENT"
+
+
+def test_classify_change_type_plain_circular_without_enforcement_stays_circular():
+    # A plain circular with no enforcement wording still classifies as CIRCULAR_UPDATE.
+    diff = _diff(added=["Circular 5/2026: reporting template update."])
+    result = classify_change_type(_run(), diff)
+    assert result == "CIRCULAR_UPDATE"
+
+
+def test_classify_change_type_plain_guidance_without_enforcement_stays_guidance():
+    # A guidance note with no enforcement wording still classifies as GUIDANCE_UPDATE.
+    diff = _diff(added=["Guidance note on the risk-based approach to onboarding."])
+    result = classify_change_type(_run(), diff)
+    assert result == "GUIDANCE_UPDATE"
+
+
+def test_classify_change_type_suspension_of_trading_stays_circular():
+    # Regression: a market-operations trading halt is NOT an enforcement action
+    # against a firm. "suspension of trading" must not light the enforcement
+    # badge; the "notice" wording keeps it a CIRCULAR_UPDATE.
+    diff = _diff(added=["Notice: temporary suspension of trading in the affected securities."])
+    result = classify_change_type(_run(), diff)
+    assert result == "CIRCULAR_UPDATE"
+
+
+def test_classify_change_type_sanctions_screening_guidance_stays_circular():
+    # Regression: AML sanctions-screening obligations are compliance guidance,
+    # not an enforcement action. The "circular" wording keeps it CIRCULAR_UPDATE.
+    diff = _diff(added=["This circular provides guidance on sanctions screening obligations."])
+    result = classify_change_type(_run(), diff)
+    assert result == "CIRCULAR_UPDATE"
+
+
+def test_classify_change_type_targeted_financial_sanctions_list_stays_guidance():
+    # Regression: the targeted-financial-sanctions LIST framework is AML/CFT
+    # screening guidance, not enforcement. Must stay GUIDANCE_UPDATE.
+    diff = _diff(added=["Guideline clarifying the targeted financial sanctions list framework."])
+    result = classify_change_type(_run(), diff)
+    assert result == "GUIDANCE_UPDATE"
+
+
+def test_classify_change_type_genuine_suspension_with_action_context_is_enforcement():
+    # A real firm-level suspension imposed as a disciplinary action IS
+    # enforcement — the ambiguous root is rescued by the action context.
+    diff = _diff(added=["Notice: a suspension was imposed on Firm X as a disciplinary measure."])
+    result = classify_change_type(_run(), diff)
+    assert result == "ENFORCEMENT"
+
+
 def test_classify_change_type_returns_new_publication_when_added_count_positive_no_keywords():
     diff = _diff(added_count=3, meaningful=True)
     result = classify_change_type(_run(), diff)

@@ -770,6 +770,113 @@ def test_bundled_verify_py_record_seal_matches_public_verify(tmp_path):
     assert "[record_seal] record_hash recomputes" in proc.stdout
 
 
+# ── bundled verify.py: full-record attribution seal ──────────────────────────────
+
+def test_bundled_verify_py_checks_attribution_seal_on_clean_pack(tmp_path):
+    """The bundled verify.py recomputes the full-record attribution seal
+    (regulator, source name, change summary, line counts, run status, review
+    status) and PASSes it on a clean modern record — never SKIP for a sealed
+    record."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "clean")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "RESULT: PASS" in proc.stdout
+    assert "[attribution_seal] attribution_hash recomputes" in proc.stdout
+    assert "FAIL" not in proc.stdout
+
+
+def test_bundled_verify_py_fails_on_forged_regulator(tmp_path):
+    """Flipping the DISPLAY regulator (CBUAE -> VARA) in the bundled record while
+    leaving the content block, snapshots, and capture metadata byte-identical must
+    make verify.py FAIL on the attribution seal.
+
+    Regression: verify.py previously never recomputed attribution_hash, so a record
+    with a forged regulator passed OFFLINE (RESULT: PASS) while the ONLINE
+    /api/verify correctly failed it — a real gap in the trust-no-one artifact."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "forge-regulator")
+
+    rec_file = next(extracted.glob("snapshots/*/evidence-record.json"))
+    record = json.loads(rec_file.read_text(encoding="utf-8"))
+    assert record["source"]["regulator"] == "CBUAE"
+    record["source"]["regulator"] = "VARA"  # forge the attributed regulator
+    rec_file.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[attribution_seal] attribution_hash does NOT recompute" in proc.stdout
+    # The content self-seal itself still recomputes (content block untouched),
+    # proving it is the attribution seal — not the record seal — that caught this.
+    assert "[record_seal] record_hash recomputes" in proc.stdout
+
+
+def test_bundled_verify_py_fails_on_forged_change_summary(tmp_path):
+    """Rewriting the DISPLAY change summary in the bundled record must FAIL the
+    attribution seal even though the content block is untouched."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "forge-summary")
+
+    rec_file = next(extracted.glob("snapshots/*/evidence-record.json"))
+    record = json.loads(rec_file.read_text(encoding="utf-8"))
+    record.setdefault("change", {})["summary"] = "Fabricated: no material change occurred."
+    rec_file.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[attribution_seal] attribution_hash does NOT recompute" in proc.stdout
+
+
+def test_bundled_verify_py_fails_on_forged_review_status(tmp_path):
+    """Marking a pending record 'approved' in the bundled record must FAIL the
+    attribution seal — the review status is a DISPLAY field the content-only
+    record_hash leaves forgeable, so only the attribution seal catches it."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "forge-review")
+
+    rec_file = next(extracted.glob("snapshots/*/evidence-record.json"))
+    record = json.loads(rec_file.read_text(encoding="utf-8"))
+    assert record["review"]["review_status"] == "pending"
+    record["review"]["review_status"] = "approved"  # forge the human-review verdict
+    rec_file.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "RESULT: FAIL" in proc.stdout
+    assert "[attribution_seal] attribution_hash does NOT recompute" in proc.stdout
+
+
+def test_bundled_verify_py_reports_limited_scope_for_legacy_attribution(tmp_path):
+    """A record stripped of its attribution_hash but still displaying forgeable
+    attribution fields must NOT print an unqualified PASS over them: verify.py
+    reports LIMITED SCOPE (a SKIP naming the unsealed fields), mirroring the online
+    verifier's downgrade — otherwise the offline artifact would over-claim."""
+    _make_record(tmp_path, source_id="cbuae-test", run_id="run-001", timestamp="2026-03-15T10:00:00Z")
+    result = build_evidence_pack(["cbuae-test"], "2026-03-01", "2026-03-31", base_dir=tmp_path)
+    extracted = _extract(result["pack_path"], tmp_path / "legacy-attr")
+
+    rec_file = next(extracted.glob("snapshots/*/evidence-record.json"))
+    record = json.loads(rec_file.read_text(encoding="utf-8"))
+    # Drop only the attribution seal; content seal + display fields remain.
+    record.pop("attribution_hash", None)
+    record.pop("attribution_hash_method", None)
+    rec_file.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    proc = subprocess.run([sys.executable, "verify.py"], cwd=extracted, capture_output=True, text=True)
+    # No FAIL: absence of the seal is honestly reported, not treated as tampering.
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "[attribution_seal] LIMITED SCOPE" in proc.stdout
+    # It must NOT claim an unqualified attribution PASS over the forgeable fields.
+    assert "[attribution_seal] attribution_hash recomputes" not in proc.stdout
+
+
 def test_pack_without_token_has_no_timestamp_section(tmp_path):
     """No token → no timestamp/ entries and no manifest/README mention: the pack
     must never imply an external timestamp the operator has not produced."""

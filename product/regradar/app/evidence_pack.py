@@ -601,9 +601,11 @@ _VERIFY_SCRIPT = '''#!/usr/bin/env python3
 
 Recompute the SHA-256 of every snapshot in this pack and compare it against the
 hashes recorded in manifest.json. For each record it also recomputes the record
-SELF-SEAL over the bundled evidence-record.json content block and cross-checks
-the displayed capture time / source URL against the sealed copies. Standard
-library only; no StatuteProof code is required and no network access is used.
+SELF-SEAL over the bundled evidence-record.json content block, recomputes the
+full-record ATTRIBUTION seal (regulator, source name, change summary, line
+counts, run status, review status) where present, and cross-checks the displayed
+capture time / source URL against the sealed copies. Standard library only; no
+StatuteProof code is required and no network access is used.
 
 Usage:  python3 verify.py        (run from inside the unzipped pack)
 
@@ -618,6 +620,11 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+
+# The full-record attribution seal scheme. Kept byte-identical to
+# app.evidence_records.ATTRIBUTION_HASH_METHOD so this standalone verifier
+# recognizes exactly the records the product sealed.
+ATTRIBUTION_HASH_METHOD = "attribution-sha256-v1"
 
 
 def sha256_file(path):
@@ -710,6 +717,123 @@ def check_capture_metadata(record_id, record):
     return 0
 
 
+def _carries_forgeable_attribution(record):
+    """True if the record displays attribution fields NOT covered by record_hash.
+
+    Mirrors app.public_verify._carries_forgeable_attribution: the regulator,
+    source name, run status, change summary, and review status are DISPLAY fields
+    the content-only record_hash leaves forgeable. When a record shows any of them
+    but carries no attribution seal, a bare PASS would over-claim, so the caller
+    reports limited scope instead of an unqualified PASS.
+    """
+    def _has(block, key):
+        value = record.get(block)
+        return isinstance(value, dict) and bool(str(value.get(key) or "").strip())
+
+    return (
+        _has("source", "regulator")
+        or _has("source", "source_name")
+        or _has("run", "status")
+        or _has("change", "summary")
+        or _has("review", "review_status")
+    )
+
+
+def attribution_seal_payload(record):
+    """Canonical payload sealed by attribution_hash.
+
+    Byte-identical to app.evidence_records.attribution_seal_payload: binds the
+    display/attribution/narrative fields (regulator, source name, run status,
+    change summary + line counts, review status) alongside the already-sealed
+    content block. Scalars are coerced to str/int so canonical_record_hash (which
+    forbids floats) produces a byte-stable, standard-tool-reproducible payload.
+    Inlined here so the standalone verifier needs no StatuteProof code.
+    """
+    def _dict(key):
+        value = record.get(key)
+        return value if isinstance(value, dict) else {}
+
+    content = _dict("content")
+    source = _dict("source")
+    run = _dict("run")
+    change = _dict("change")
+    review = _dict("review")
+
+    def _int(value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
+    return {
+        "content": content,
+        "source_regulator": str(source.get("regulator") or ""),
+        "source_name": str(source.get("source_name") or ""),
+        "run_status": str(run.get("status") or ""),
+        "change_summary": str(change.get("summary") or ""),
+        "change_lines_added": _int(change.get("lines_added")),
+        "change_lines_removed": _int(change.get("lines_removed")),
+        "review_status": str(review.get("review_status") or ""),
+    }
+
+
+def check_attribution_seal(record_id, record):
+    """Recompute the full-record attribution_hash over the bundled record.
+
+    Mirrors app.public_verify._check_attribution_seal_consistent. record_hash
+    covers only the content block, so the regulator, source name, change summary,
+    line counts, run status, and review status a human READS are forgeable by a
+    holder of a genuine record (flip CBUAE->VARA, rewrite the change summary, mark
+    a pending record "approved") with content and capture metadata untouched.
+    Records sealed with attribution_hash bind those fields; recompute through the
+    SAME payload builder the writer used and FAIL on any mismatch.
+
+    A record without the attribution seal is NOT passed: if it displays forgeable
+    attribution fields it is reported as limited scope (an explicit SKIP that names
+    what is unsealed, never an unqualified PASS over forgeable fields); a legacy
+    record with no such fields is a plain SKIP. Returns 1 on FAIL, else 0.
+    """
+    stored = record.get("attribution_hash")
+    # The attribution seal extends the content seal (its payload embeds the content
+    # block), so it is authoritative only while record_hash is present.
+    has_content_seal = isinstance(record.get("record_hash"), str) and bool(record["record_hash"].strip())
+    if not (isinstance(stored, str) and stored.strip() and has_content_seal):
+        if _carries_forgeable_attribution(record):
+            print(
+                "SKIP  %s [attribution_seal] LIMITED SCOPE: no attribution_hash - this "
+                "record's regulator, source name, change summary, line counts, run "
+                "status, and review status are DISPLAY fields NOT covered by its seal; "
+                "only the content bytes and capture metadata are cryptographically bound"
+                % record_id
+            )
+        else:
+            print(
+                "SKIP  %s [attribution_seal] no attribution_hash (legacy record); nothing to self-check"
+                % record_id
+            )
+        return 0
+    if record.get("attribution_hash_method") != ATTRIBUTION_HASH_METHOD:
+        print("FAIL  %s [attribution_seal] unrecognized attribution_hash_method; refusing to trust seal" % record_id)
+        return 1
+    try:
+        recomputed = canonical_record_hash(attribution_seal_payload(record))
+    except (ValueError, TypeError):
+        print("FAIL  %s [attribution_seal] attribution fields could not be canonically re-hashed" % record_id)
+        return 1
+    if recomputed == _bare_digest(stored):
+        print(
+            "PASS  %s [attribution_seal] attribution_hash recomputes from the record's "
+            "regulator, source name, change summary, line counts, run status, and review status"
+            % record_id
+        )
+        return 0
+    print(
+        "FAIL  %s [attribution_seal] attribution_hash does NOT recompute - the regulator, "
+        "change summary, run status, or review status was altered" % record_id
+    )
+    return 1
+
+
 def main():
     manifest = json.loads((HERE / "manifest.json").read_text(encoding="utf-8"))
     records = manifest.get("records", [])
@@ -772,6 +896,7 @@ def main():
                 else:
                     failures += check_record_seal(record_id, bundled)
                     failures += check_capture_metadata(record_id, bundled)
+                    failures += check_attribution_seal(record_id, bundled)
     print()
     if failures:
         print("RESULT: FAIL - %d hash mismatch(es); these bytes do NOT match the recorded manifest." % failures)

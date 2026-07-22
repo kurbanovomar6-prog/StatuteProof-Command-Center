@@ -170,6 +170,11 @@ fi
 # not trip errexit), and any failure logs a warning and continues. The local
 # archive is already safely written above (step 2), so a failed off-box copy
 # never loses data — it only skips the remote copy for this run.
+# scp gets explicit timeouts (ConnectTimeout + ServerAlive keepalive) so a
+# black-holed remote FAILS FAST instead of wedging the oneshot backup unit for
+# hours and delaying the founder page below — the rclone branch already caps
+# itself, only scp was exposed. TCP's default connect timeout is minutes and a
+# mid-transfer stall has no timeout at all without ServerAlive*.
 if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ] && [ -n "$PUSH_FILE" ]; then
   if command -v rclone >/dev/null 2>&1; then
     if rclone copy "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
@@ -179,7 +184,7 @@ if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ] && [ -n "$PUSH_FILE" ]; then
       BACKUP_PAGE_MSG="🚨 StatuteProof off-box backup push FAILED (rclone). The archive exists only on the droplet. Check: journalctl -u statuteproof-backup"
     fi
   else
-    if scp "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
+    if scp -o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
       echo "off-box copy (scp): $PUSH_FILE -> $STATUTEPROOF_BACKUP_REMOTE"
     else
       echo "WARNING: off-box copy (scp) failed; local archive kept, continuing to retention" >&2

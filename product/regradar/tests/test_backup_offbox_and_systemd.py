@@ -12,6 +12,7 @@ There is no runtime unit for systemd files, so these tests assert:
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -60,7 +61,7 @@ if [ -n "${STATUTEPROOF_BACKUP_REMOTE:-}" ] && [ -n "$PUSH_FILE" ]; then
       BACKUP_PAGE_MSG="🚨 StatuteProof off-box backup push FAILED (rclone). The archive exists only on the droplet. Check: journalctl -u statuteproof-backup"
     fi
   else
-    if scp "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
+    if scp -o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$PUSH_FILE" "$STATUTEPROOF_BACKUP_REMOTE"; then
       echo "off-box copy (scp): $PUSH_FILE -> $STATUTEPROOF_BACKUP_REMOTE"
     else
       echo "WARNING: off-box copy (scp) failed; local archive kept, continuing to retention" >&2
@@ -207,6 +208,27 @@ def test_offbox_block_matches_script():
     assert _OFFBOX_BLOCK.strip() in _read(BACKUP_SH)
 
 
+def test_offbox_scp_has_connect_and_keepalive_timeouts():
+    """The scp push must fail fast on a black-holed remote.
+
+    Without ConnectTimeout a dead host holds the TCP connect for minutes, and
+    without ServerAlive* a mid-transfer stall never times out at all — either
+    wedges the oneshot backup unit and delays the founder page. The rclone
+    branch already caps itself (--contimeout/--timeout); only scp was exposed.
+    """
+    body = _read(BACKUP_SH)
+    scp_lines = [
+        line.strip()
+        for line in body.splitlines()
+        if "scp " in line and "$PUSH_FILE" in line
+    ]
+    assert scp_lines, "no scp push command found in backup.sh"
+    for line in scp_lines:
+        assert "-o ConnectTimeout=30" in line, line
+        assert "-o ServerAliveInterval=15" in line, line
+        assert "-o ServerAliveCountMax=4" in line, line
+
+
 # --- 2b. local-only warning when the remote is unset ------------------------
 
 # Off-box push is the encouraged default, so an unset remote must not be silent:
@@ -325,3 +347,26 @@ def test_backup_timer_is_daily_and_persistent():
     assert "Persistent=true" in timer
     assert "Unit=statuteproof-backup.service" in timer
     assert "WantedBy=timers.target" in timer
+
+
+# Type=oneshot disables the systemd start timeout by default, so a unit that
+# performs network I/O (off-box push, Telegram page, external ping, or a remote
+# fetch) can wedge indefinitely on a black-holed peer. Each such unit must set a
+# TimeoutStartSec so systemd reaps a hung run and the failure surfaces.
+_NETWORK_ONESHOT_UNITS = [
+    "statuteproof-backup.service",
+    "statuteproof-heartbeat.service",
+    "statuteproof-verify.service",
+    "statuteproof-cbuae-rulebook-watch.service",
+]
+
+
+@pytest.mark.parametrize("unit", _NETWORK_ONESHOT_UNITS)
+def test_network_oneshot_units_have_timeout_start_sec(unit):
+    """Every network-I/O oneshot unit caps its start time (no default timeout)."""
+    svc = _read(SYSTEMD / unit)
+    assert "Type=oneshot" in svc, f"{unit} is not oneshot"
+    match = re.search(r"^TimeoutStartSec=(\d+)\s*$", svc, re.MULTILINE)
+    assert match, f"{unit} missing TimeoutStartSec (oneshot has no default timeout)"
+    # A finite, positive cap — never 0/'infinity' which would disable it again.
+    assert int(match.group(1)) > 0, f"{unit} TimeoutStartSec must be a positive cap"

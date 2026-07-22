@@ -334,6 +334,9 @@ class _AlertsHandlerMixin:
         ``statement`` / ``amendment_reason`` are passed through VERBATIM — never
         guarded, rewritten, or truncated; oversize input is rejected with an
         honest message so nothing the user did not write is ever sealed.
+
+        This is a thin orchestrator: field validation lives in
+        ``_decision_validate_body``, the evidence-bound seal in ``_decision_seal``.
         """
         if self._rate_limited(_DECISION_LIMITER, "alert_decisions_seal"):
             return
@@ -352,139 +355,161 @@ class _AlertsHandlerMixin:
         if body is None:
             self._send_json({"ok": False, "message": "Request body required."}, 400)
             return
+        params, param_error = self._decision_validate_body(body)
+        if param_error is not None:
+            message, status = param_error
+            self._send_json({"ok": False, "message": message}, status)
+            return
+        try:
+            self._decision_seal(user, body, params)
+        except Exception as exc:
+            logger.error("Alert decision seal failed: %s", type(exc).__name__)
+            self._send_json({"ok": False, "message": "Internal server error."}, 500)
 
+    def _decision_validate_body(self, body):
+        """Validate the decision request body.
+
+        Returns ``(params, None)`` on success, or ``(None, (message, status))``
+        with the exact rejection to surface — no response is sent here. The
+        user's ``statement`` / ``amendment_reason`` are rejected (never
+        truncated) when oversize so nothing they did not write is ever sealed.
+        """
         alert_id = str(body.get("alert_id", "")).strip()
         if not checklist_valid_alert_id(alert_id):
-            self._send_json({"ok": False, "message": "Invalid alert_id."}, 400)
-            return
+            return None, ("Invalid alert_id.", 400)
         kind = str(body.get("kind") or "").strip()
         if kind not in DECISION_KINDS:
-            self._send_json({"ok": False, "message": "Invalid decision kind."}, 400)
-            return
+            return None, ("Invalid decision kind.", 400)
         statement = body.get("statement")
         if not isinstance(statement, str) or not statement.strip():
-            self._send_json({"ok": False, "message": "A decision statement is required."}, 400)
-            return
+            return None, ("A decision statement is required.", 400)
         if len(statement) > DECISION_MAX_STATEMENT_LEN:
             # REJECT, never truncate — these are the user's sealed words.
-            self._send_json(
-                {
-                    "ok": False,
-                    "message": (
-                        f"The statement is longer than the {DECISION_MAX_STATEMENT_LEN}-character "
-                        "limit. It is sealed exactly as written, so nothing was recorded — "
-                        "please shorten it and try again."
-                    ),
-                },
+            return None, (
+                f"The statement is longer than the {DECISION_MAX_STATEMENT_LEN}-character "
+                "limit. It is sealed exactly as written, so nothing was recorded — "
+                "please shorten it and try again.",
                 400,
             )
-            return
         supersedes = str(body.get("supersedes_decision_id") or "").strip()
         amendment_reason = body.get("amendment_reason")
         amendment = "" if amendment_reason is None else amendment_reason
         if not isinstance(amendment, str):
-            self._send_json({"ok": False, "message": "The correction reason must be text."}, 400)
-            return
+            return None, ("The correction reason must be text.", 400)
         if len(amendment) > DECISION_MAX_REASON_LEN:
-            self._send_json(
-                {
-                    "ok": False,
-                    "message": (
-                        f"The correction reason is longer than the {DECISION_MAX_REASON_LEN}-character "
-                        "limit. It is sealed exactly as written, so nothing was recorded — "
-                        "please shorten it and try again."
-                    ),
-                },
+            return None, (
+                f"The correction reason is longer than the {DECISION_MAX_REASON_LEN}-character "
+                "limit. It is sealed exactly as written, so nothing was recorded — "
+                "please shorten it and try again.",
                 400,
             )
-            return
         if bool(supersedes) != bool(amendment.strip()):
-            self._send_json(
-                {
-                    "ok": False,
-                    "message": (
-                        "A correction needs both the earlier decision and your reason "
-                        "for correcting it."
-                    ),
-                },
+            return None, (
+                "A correction needs both the earlier decision and your reason "
+                "for correcting it.",
                 400,
             )
-            return
         try:
             days = int(body.get("days") or 14)
         except (TypeError, ValueError):
             days = 14
+        params = {
+            "alert_id": alert_id,
+            "kind": kind,
+            "statement": statement,
+            "supersedes": supersedes,
+            "amendment": amendment,
+            "days": days,
+        }
+        return params, None
 
-        try:
-            principal = rbac_runtime.resolve_principal(user)
-            if principal.org_id is None:
-                self._send_json(
-                    {"ok": False, "message": "Your workspace could not be resolved. Please retry."},
-                    400,
-                )
-                return
-            match = find_routing_match_for_user(int(user["id"]), alert_id, days=days)
-            if match is None:
-                self._send_json({"ok": False, "message": "Alert not found."}, 404)
-                return
-            proof = match.get("proof")
-            if not isinstance(proof, dict) or not proof:
-                self._send_json(
-                    {
-                        "ok": False,
-                        "message": "This alert has no sealed evidence record to bind a decision to.",
-                    },
-                    409,
-                )
-                return
-            # "What they saw": the alert's proof block verbatim, plus the alert /
-            # source identity fields the design binds into content.reviewed.
-            reviewed = dict(proof)
-            reviewed["alert_id"] = alert_id
-            reviewed["source_id"] = str(match.get("source_id") or "")
-            reviewed["source_name"] = str(match.get("source_name") or "")
-            reviewed["official_url"] = str(match.get("source_url") or "")
-            # Entitlement: the sealed record is returned to the caller, so this
-            # echoed field must obey the SAME boundary as every other reader of
-            # official-source content — one choke point, not a local re-decision.
-            # Empty is already a legitimate value here; the evidence_record_id +
-            # record_hash still identify exactly what was reviewed.
-            reviewed = redact_decision_reviewed_for_plan(
-                int(user["id"]), reviewed, match.get("source_id")
+    def _decision_resolve_reviewed(self, user, alert_id, days):
+        """Resolve "what the user saw" for an owner-scoped alert.
+
+        Returns ``(reviewed, None)`` — the alert's sealed proof block plus its
+        identity fields, plan-redacted — or ``(None, (message, status))`` for a
+        404 (no owner-scoped alert; no cross-org oracle) or 409 (the alert
+        carries no sealed evidence to bind to). Exceptions propagate to the
+        caller's handler so a storage failure still becomes a 500.
+        """
+        match = find_routing_match_for_user(int(user["id"]), alert_id, days=days)
+        if match is None:
+            return None, ("Alert not found.", 404)
+        proof = match.get("proof")
+        if not isinstance(proof, dict) or not proof:
+            return None, (
+                "This alert has no sealed evidence record to bind a decision to.",
+                409,
             )
+        # "What they saw": the alert's proof block verbatim, plus the alert /
+        # source identity fields the design binds into content.reviewed.
+        reviewed = dict(proof)
+        reviewed["alert_id"] = alert_id
+        reviewed["source_id"] = str(match.get("source_id") or "")
+        reviewed["source_name"] = str(match.get("source_name") or "")
+        reviewed["official_url"] = str(match.get("source_url") or "")
+        # Entitlement: the sealed record is returned to the caller, so this
+        # echoed field must obey the SAME boundary as every other reader of
+        # official-source content — one choke point, not a local re-decision.
+        # Empty is already a legitimate value here; the evidence_record_id +
+        # record_hash still identify exactly what was reviewed.
+        reviewed = redact_decision_reviewed_for_plan(
+            int(user["id"]), reviewed, match.get("source_id")
+        )
+        return reviewed, None
 
-            # Account metadata (not the user's sealed words) — bounded here so an
-            # over-long profile name can never block a legitimate seal.
-            display_name = (
-                str(user.get("full_name") or "").strip()
-                or str(user.get("email") or "").strip()
-            )[:DECISION_MAX_NAME_LEN]
+    def _decision_seal(self, user, body, params) -> None:
+        """Bind the validated decision to sealed evidence and seal it.
 
-            record = seal_decision(
-                int(user["id"]),
-                int(principal.org_id),
-                display_name=display_name,
-                reviewed=reviewed,
-                kind=kind,
-                statement=statement,
-                checklist_ref=body.get("checklist_ref"),
-                supersedes_decision_id=supersedes,
-                amendment_reason=amendment,
+        Sends the terminal response for every outcome: 400 (workspace
+        unresolved / fail-soft seal failure), 404/409 (from evidence binding),
+        or 201 with the sealed record. Runs inside the caller's try/except so
+        an unexpected failure still becomes a 500.
+        """
+        principal = rbac_runtime.resolve_principal(user)
+        if principal.org_id is None:
+            self._send_json(
+                {"ok": False, "message": "Your workspace could not be resolved. Please retry."},
+                400,
             )
-            if record is None:
-                # Fail-soft: covers a malformed checklist_ref, an unknown or
-                # foreign supersedes id (same message — no cross-org oracle), or
-                # a storage failure. Nothing was sealed.
-                self._send_json(
-                    {
-                        "ok": False,
-                        "message": "The decision could not be sealed. Nothing was recorded — "
-                        "check the entry and try again.",
-                    },
-                    400,
-                )
-                return
-            self._send_json({"ok": True, "decision": record}, 201)
-        except Exception as exc:
-            logger.error("Alert decision seal failed: %s", type(exc).__name__)
-            self._send_json({"ok": False, "message": "Internal server error."}, 500)
+            return
+        reviewed, reviewed_error = self._decision_resolve_reviewed(
+            user, params["alert_id"], params["days"]
+        )
+        if reviewed_error is not None:
+            message, status = reviewed_error
+            self._send_json({"ok": False, "message": message}, status)
+            return
+
+        # Account metadata (not the user's sealed words) — bounded here so an
+        # over-long profile name can never block a legitimate seal.
+        display_name = (
+            str(user.get("full_name") or "").strip()
+            or str(user.get("email") or "").strip()
+        )[:DECISION_MAX_NAME_LEN]
+
+        record = seal_decision(
+            int(user["id"]),
+            int(principal.org_id),
+            display_name=display_name,
+            reviewed=reviewed,
+            kind=params["kind"],
+            statement=params["statement"],
+            checklist_ref=body.get("checklist_ref"),
+            supersedes_decision_id=params["supersedes"],
+            amendment_reason=params["amendment"],
+        )
+        if record is None:
+            # Fail-soft: covers a malformed checklist_ref, an unknown or
+            # foreign supersedes id (same message — no cross-org oracle), or
+            # a storage failure. Nothing was sealed.
+            self._send_json(
+                {
+                    "ok": False,
+                    "message": "The decision could not be sealed. Nothing was recorded — "
+                    "check the entry and try again.",
+                },
+                400,
+            )
+            return
+        self._send_json({"ok": True, "decision": record}, 201)

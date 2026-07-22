@@ -10,6 +10,10 @@ WorkingDirectory=/srv/regradar
 EnvironmentFile=/srv/regradar/.env
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/srv/regradar/.venv/bin/python run.py verify-trail-watch
+# Type=oneshot has no start timeout by default; this run pages the founder over
+# the network (Telegram), so a hung outbound call must be reaped rather than
+# wedging the unit indefinitely.
+TimeoutStartSec=900
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
