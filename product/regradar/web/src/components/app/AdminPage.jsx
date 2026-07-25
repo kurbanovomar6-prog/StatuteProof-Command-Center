@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ShieldCheck, CheckCircle2, XCircle } from 'lucide-react'
 import { admin } from '../../api'
+import AlertReleasePanel from './AlertReleasePanel'
 
 const PLAN_DISPLAY = {
   evidence_preview: 'Source Readiness Review',
@@ -229,6 +230,8 @@ export default function AdminPage() {
           </tbody>
         </table>
       </div>
+
+      <AlertReleasePanel />
 
       <p className="text-xs text-[var(--text-secondary)] text-center">
         Not legal advice. Activation records a billing tier for internal pilot management only.

@@ -28,6 +28,13 @@ async function authRequest(path, options = {}) {
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
     const err = new Error(data.message || data.error || `HTTP ${response.status}`)
+    // `status` and `payload` are what let a caller distinguish "you are not
+    // permitted" from "the request failed", and read structured detail such as
+    // a 409's safety_issues. They were previously re-derived by hand at five
+    // call sites, so any component that assumed authRequest provided them —
+    // TeamPanel's 403 branch did — silently fell through to a generic error.
+    err.status = response.status
+    err.payload = data
     if (data.requires_verification) {
       err.requiresVerification = true
       err.email = data.email || ''
@@ -483,6 +490,23 @@ export const admin = {
     return authRequest('/api/admin/activate-plan', {
       method: 'POST',
       body: JSON.stringify(body),
+    })
+  },
+
+  // The alert release gate — founder-only, and previously reachable only over
+  // SSH. `reviewer` is deliberately absent from the body: the server records the
+  // authenticated identity and rejects any attempt to supply one, so there is no
+  // way for this client to attribute a decision to somebody else.
+  alertReviewQueue({ all = false } = {}) {
+    return authRequest(`/api/admin/alert-review-queue${all ? '?all=1' : ''}`)
+  },
+
+  // A 409 carries { safety_issues: [...] } — the caller must show them and take
+  // an explicit note before retrying with force.
+  reviewAlert({ alertId, action, note = '', force = false }) {
+    return authRequest('/api/admin/alert-review', {
+      method: 'POST',
+      body: JSON.stringify({ alert_id: alertId, action, note, force }),
     })
   },
 }

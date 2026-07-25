@@ -423,6 +423,7 @@ from app.api_reports import _ReportsHandlerMixin  # noqa: E402
 from app.api_sources import _SourcesHandlerMixin  # noqa: E402
 from app.api_account import _AccountHandlerMixin  # noqa: E402
 from app.api_team import _TeamHandlerMixin  # noqa: E402
+from app.api_alert_review import _AlertReviewHandlerMixin  # noqa: E402
 
 
 class _Handler(
@@ -435,6 +436,7 @@ class _Handler(
     _SourcesHandlerMixin,
     _AccountHandlerMixin,
     _TeamHandlerMixin,
+    _AlertReviewHandlerMixin,
     BaseHTTPRequestHandler,
 ):
 
@@ -1250,6 +1252,8 @@ class _Handler(
             self._handle_account_export()
         elif path == "/api/team/members":
             self._handle_team_members_list()
+        elif path == "/api/admin/alert-review-queue":
+            self._handle_admin_alert_review_queue()
         elif path == "/api/telegram/pair/status":
             self._handle_telegram_pair_status()
         elif path == "/api/delivery/logs":
@@ -1413,6 +1417,8 @@ class _Handler(
             self._handle_team_member_revoke()
         elif path == "/api/team/active-org":
             self._handle_team_active_org()
+        elif path == "/api/admin/alert-review":
+            self._handle_admin_alert_review()
         # NOTE: deliberately NO route of any kind under /api/room/ here — the
         # public room is READ-ONLY by construction; a POST to it falls through
         # to the 404 below (asserted by tests/test_evidence_room.py).

@@ -62,6 +62,42 @@ def find_alert_draft(alert_id: str, base_dir: Path | None = None) -> tuple[dict[
     raise FileNotFoundError(f"Alert draft not found: {alert_id}")
 
 
+"""Actions that make an alert eligible for customer delivery.
+
+BOTH of them do. "Weekly" names a cadence, not a smaller blast radius:
+``alert_routing._get_approved_statuses`` admits APPROVED_FOR_WEEKLY and
+APPROVED_FOR_URGENT alike, and ``digest_cadence._is_instant`` routes on
+``risk_level``/``score`` — never on ``send_decision``. So a HIGH-risk draft
+approved "for weekly" is dispatched INSTANTLY to every matched customer's
+Telegram on the next scheduler cycle (``scheduler.run_digest_dispatch_pass``,
+called every full cycle), and a lower-risk one still enters the digest bundles.
+
+Until this constant existed, the safety-issue block applied ONLY to
+approve_urgent, so the option that reads as the cautious one was the unguarded
+path to mass delivery. Everything else — reject, needs_adapter, needs_legal,
+manual_review — resolves to HOLD or DO_NOT_SEND and sends nothing, so none of
+them are gated.
+"""
+APPROVING_ACTIONS = frozenset({"approve_weekly", "approve_urgent"})
+
+
+class ApprovalBlocked(ValueError):
+    """An approval refused because the draft still has safety issues.
+
+    Subclasses ValueError so every existing caller — the CLI's ``except
+    ValueError`` in particular — keeps behaving exactly as before, while a
+    caller that wants the reasons can read ``safety_issues`` instead of parsing
+    them back out of the message string.
+    """
+
+    def __init__(self, action: str, safety_issues: list[str]) -> None:
+        self.action = action
+        self.safety_issues = list(safety_issues)
+        super().__init__(
+            f"{action} blocked by safety checks: " + "; ".join(safety_issues)
+        )
+
+
 def review_alert(
     *,
     alert_id: str,
@@ -81,8 +117,8 @@ def review_alert(
     safety = approval_safety_issues(alert, base_dir=base_dir)
 
     new_status, new_decision = _target_state(action)
-    if action == "approve_urgent" and safety and not force:
-        raise ValueError("Urgent approval blocked by safety checks: " + "; ".join(safety))
+    if action in APPROVING_ACTIONS and safety and not force:
+        raise ApprovalBlocked(action, safety)
     if force and safety and not note.strip():
         raise ValueError("--force requires a review note")
 
@@ -220,9 +256,19 @@ def _sibling_artifact(draft_path: Path, name: str, base_dir: Path) -> str | None
 
 
 def _load_json(path: Path) -> dict[str, Any]:
+    """Read one draft, treating an unreadable file as absent rather than fatal.
+
+    OSError and UnicodeDecodeError are caught alongside the JSON errors because
+    list_alert_drafts rglobs the WHOLE snapshot tree: an exception here does not
+    skip one draft, it aborts the scan, and every review operation — CLI and HTTP
+    — goes through that scan. A monitoring run killed mid-write leaves a draft
+    truncated inside a multi-byte UTF-8 sequence (the scheduler wedge does
+    exactly this), and before this widening that single file made every OTHER
+    alert unreviewable until someone SSHed in to find it.
+    """
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return {}
 
 
