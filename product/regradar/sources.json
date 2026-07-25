@@ -10539,11 +10539,16 @@
     "expected_min_length": 750,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 43KB); UAE banks and VASPs screen OFAC; crypto-wallet designations hit VARA firms directly; slow host — long timeouts. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: the dated recent-actions listing is server-rendered in .view-content as plain divs (no p/li/td), so is_low_content_html rejected Tier 1 and Playwright's rendered-DOM variant extracted only 441 chars of chrome. Fixed via new opt-in html_listing registry adapter: static requests-tier fetch + adapter_config content_selector .view-content → cleaned listing lines (titles + dates + categories); selector miss falls back loudly to the generic path. Verified locally 2026-07-18: 1,265 chars / 30 lines, identical across 2 consecutive fetches. expected_min_length 8000→750 (~60% of observed 1,265). Requires prod re-baseline before alerting.",
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 43KB); UAE banks and VASPs screen OFAC; crypto-wallet designations hit VARA firms directly; slow host — long timeouts. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: the dated recent-actions listing is server-rendered in .view-content as plain divs (no p/li/td), so is_low_content_html rejected Tier 1 and Playwright's rendered-DOM variant extracted only 441 chars of chrome. Fixed via new opt-in html_listing registry adapter: static requests-tier fetch + adapter_config content_selector .view-content → cleaned listing lines (titles + dates + categories); selector miss falls back loudly to the generic path. Verified locally 2026-07-18: 1,265 chars / 30 lines, identical across 2 consecutive fetches. expected_min_length 8000→750 (~60% of observed 1,265). Requires prod re-baseline before alerting. | 2026-07-25 FIX: the readiness gate could not certify this source because adapter_platform.get_adapter() resolved adapter_name only and 'html_listing' is a FETCHING-registry name the gate does not know — it fell back to the generic extractor and scored NAV_SHELL_ONLY. Added the platform 'listing' family config alongside the registry one (gate now CONFIRMED_ACCESSIBLE / TEST_PASSED, quality 62 ACCEPTABLE, real designations text).",
     "adapter_name": "html_listing",
-    "adapter_family": "html_listing",
+    "adapter_family": "listing",
     "adapter_config": {
-      "content_selector": ".view-content"
+      "content_selector": ".view-content",
+      "container_selector": ".view-content",
+      "item_selector": ".views-row",
+      "title_selector": "a, .field--name-title",
+      "date_selector": "time, .datetime",
+      "min_title_chars": 8
     }
   },
   {
