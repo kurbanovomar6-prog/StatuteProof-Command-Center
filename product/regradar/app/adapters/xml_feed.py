@@ -68,6 +68,17 @@ _ALLOWED_HOSTS = (
     "bis.org",
     "uaefiu.gov.ae",
     "webgate.ec.europa.eu",
+    # Added 2026-07-25, each verified on a live fetch:
+    # sanctionslistservice.ofac.treas.gov — OFAC's own Sanctions List Service.
+    #   /changes/latest is a DELTA document (custom <sanctionsData> schema,
+    #   xmlns treasury.gov/ofac/DeltaFile/1.0) published on every OFAC action
+    #   day, so it names exactly what changed instead of forcing a diff of the
+    #   whole SDN list. The highest-value sanctions shape available.
+    # gov.uk — the OFSI organisation Atom feed (…/office-of-financial-sanctions-
+    #   implementation.atom), a real <feed> document, updated weekly to twice
+    #   weekly. UK financial-sanctions designations bind UAE firms' screening.
+    "sanctionslistservice.ofac.treas.gov",
+    "gov.uk",
 )
 
 # Bounded output: feeds are capped per item count and per field length so a

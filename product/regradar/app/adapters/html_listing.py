@@ -72,6 +72,18 @@ _ALLOWED_HOSTS = (
     "ofac.treasury.gov",
     "menafatf.org",
     "adgm.com",
+    # Added 2026-07-25, each verified on a live fetch to serve its dated rows in
+    # the static HTML:
+    # main.un.org — the 1267/ISIL & Al-Qaida Committee press-release table
+    #   (<table><tr>, 21 rows, "SC/16407 8 July 2026 … Committee Amends One
+    #   Entry"). Committee designations and amendments drive screening duties.
+    # cbben.thomsonreuters.com — the CBB (Bahrain) rulebook "View Updates"
+    #   change-log (.view-content/.views-row, 10 rows over a 30-day window,
+    #   "Amendments to the Customer Due Diligence and Suspicious Transactions
+    #   Reporting Requirements_14 July 2026"). Change-logs are the highest-value
+    #   shape: one page carries every dated amendment.
+    "main.un.org",
+    "cbben.thomsonreuters.com",
 )
 
 # Reject a selected region too thin to be a meaningful listing snapshot

@@ -10914,5 +10914,93 @@
     "baseline_runs_required": 2,
     "tier": "2",
     "notes": "2026-07-25 ADDED as candidate (source-coverage goal). Verified on a live fetch from this machine: status 200, listing fully SERVER-RENDERED inside custom <adgm-table-row> elements (no headless browser needed); the generic extractor sees only the page shell, so html_listing + content_selector 'adgm-table-row' is required. adgm.com added to the html_listing host allowlist in the same change. CANDIDATE until the prod intake gates pass (no-save check, proof, 2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice. Live evidence: 11 dated rows; most recent 26 Jan 2026 fine for false beneficial-ownership information."
+  },
+  {
+    "name": "UK OFSI (GOV.UK) — organisation Atom feed: financial-sanctions notices & penalties",
+    "url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+    "jurisdiction": "INT",
+    "category": "sanctions",
+    "enabled": false,
+    "status": "candidate",
+    "source_id": "INT-ofsi-govuk-atom",
+    "adapter_name": "xml_feed",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 1500,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "Machine-readable Atom feed (rule (e): prefer the feed over the HTML page). xml_feed adapter verified locally: 3935 chars, 20 items captured, most recent items dated 2026-07-24T09:32Z / 2026-07-21T14:07Z, incl. 'UK issues largest penalty for financial sanctions breach'. gov.uk added to the xml_feed host allowlist in the same change. UK financial-sanctions designations bind UAE firms' screening obligations. Verified on a live fetch 2026-07-25 by an independent verifier agent AND re-checked locally. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice."
+  },
+  {
+    "name": "US OFAC — Civil Penalties and Enforcement Information (settlements & penalties)",
+    "url": "https://ofac.treasury.gov/civil-penalties-and-enforcement-information",
+    "jurisdiction": "INT",
+    "category": "sanctions",
+    "enabled": false,
+    "status": "candidate",
+    "source_id": "INT-ofac-civil-penalties",
+    "adapter_name": "html_listing",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 400,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "Enforcement register. Verified locally: real <table>, 7 rows, dated 2026 actions — 06/01/2026 FTI Consulting $1,050,000; 05/18/2026 Adani Enterprises $275,000,000; 03/17/2026 TradeStation $1,110,661. An OFAC settlement is the clearest 'what happens if you get this wrong' signal for the buyer. Verified on a live fetch 2026-07-25 by an independent verifier agent AND re-checked locally. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice.",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": "table",
+      "container_selector": "table",
+      "item_selector": "tr",
+      "title_selector": "td",
+      "min_title_chars": 6
+    }
+  },
+  {
+    "name": "UN Security Council 1267 / ISIL & Al-Qaida Committee — press releases (designations & amendments)",
+    "url": "https://main.un.org/securitycouncil/en/sanctions/1267/press-releases",
+    "jurisdiction": "INT",
+    "category": "sanctions",
+    "enabled": false,
+    "status": "candidate",
+    "source_id": "INT-un-1267-press-releases",
+    "adapter_name": "html_listing",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 800,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "Committee designations/amendments/de-listings — each forces immediate screening. Verified locally: <table> with 21 dated rows, most recent SC/16407 8 July 2026 'Committee Amends One Entry'; SC/16365 21 May 2026. main.un.org added to the html_listing host allowlist in the same change. Verified on a live fetch 2026-07-25 by an independent verifier agent AND re-checked locally. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice.",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": "table",
+      "container_selector": "table",
+      "item_selector": "tr",
+      "title_selector": "td",
+      "min_title_chars": 8
+    }
+  },
+  {
+    "name": "CBB Bahrain — Rulebook 'View Updates' change-log (all volumes, trailing 30 days)",
+    "url": "https://cbben.thomsonreuters.com/view-revision-updates?f_days=on&changed=-30%20day",
+    "jurisdiction": "BH",
+    "category": "rulebook",
+    "enabled": false,
+    "status": "candidate",
+    "source_id": "BH-cbb-rulebook-view-updates",
+    "adapter_name": "html_listing",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 600,
+    "baseline_runs_required": 2,
+    "tier": "2",
+    "notes": "CHANGE-LOG shape — the highest-value shape: one page carries every dated rulebook amendment (54 changes in the trailing 30 days per the verifier). Verified locally: 10 rows, most recent 'Amendments to the Customer Due Diligence and Suspicious Transactions Reporting Requirements_14 July 2026'. Official CBB content via the vendor-hosted Thomson Reuters mirror (flagged as a mirror). GCC-footprint value: binds Bahrain-regulated entities, not a UAE obligation on its own. Verified on a live fetch 2026-07-25 by an independent verifier agent AND re-checked locally. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice.",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": ".view-content",
+      "container_selector": ".view-content",
+      "item_selector": ".views-row",
+      "title_selector": "a",
+      "min_title_chars": 8
+    }
   }
 ]
