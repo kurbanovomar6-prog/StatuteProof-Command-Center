@@ -27,7 +27,7 @@ const SOURCE_READINESS_PREVIEW = {
   },
   VARA: {
     status: 'Selected-source',
-    detail: '4 fresh-alert eligible VARA sources (of 6 enabled), including the full Compliance & Risk Management Rulebook (incl. AML/CFT Part III), enforcement notices, the regulatory-notices index, and selected publications. The 30-day revision-updates view is in remediation pending a production rebaseline. Selected-source depth, not complete VARA coverage.',
+    detail: '3 fresh-alert eligible VARA sources (of 6 enabled), including the full Compliance & Risk Management Rulebook (incl. AML/CFT Part III), enforcement notices, and selected publications. The regulatory-notices index and the 30-day revision-updates view are in remediation pending production baselines. Selected-source depth, not complete VARA coverage.',
     tone: 'cyan',
   },
   DFSA: {

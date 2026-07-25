@@ -31,7 +31,13 @@ export const SOURCE_TRUTH = {
   // 2026-07-21: +1 — VARA Regulatory Notices and Enforcement Index promoted
   // candidate -> fresh_alert on enforcement-monitoring discovery (same host as
   // the MONITOR_OK VARA enforcement table; server-renders dated notices).
-  readinessSupported: 41,
+  // 2026-07-25: −1 — that promotion is REVERSED. The row had no proof_path and
+  // baseline_runs_completed 0, while this page's own published definition is
+  // "at least two confirmed baseline evidence runs with stable content hashes".
+  // Server-rendering dated notices makes a source WORKABLE, not alert-eligible;
+  // only production baselines do that. origin/main never carried the promotion,
+  // so this also removes a drift between the branch and what production serves.
+  readinessSupported: 40,
   // 2026-07-18: the VARA rulebook candidate passed prod gates and was promoted
   // to fresh_alert — candidate 10 → 9. Later the same day, the 21 enabled
   // sources that sat OUTSIDE the monitoring_mode vocabulary (mode missing)
@@ -41,5 +47,7 @@ export const SOURCE_TRUTH = {
   // DFSA SEO letters, DFM regulatory circulars) — candidate 9 → 14.
   // 2026-07-21: −1 — the VARA regulatory-notices index was promoted out of
   // candidate to fresh_alert (see readinessSupported above).
-  candidate: 35,
+  // 2026-07-25: +1 — that row is back in candidate, where it belongs until a
+  // production baseline exists (see readinessSupported above).
+  candidate: 36,
 }

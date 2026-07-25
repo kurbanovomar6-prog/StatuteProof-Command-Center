@@ -74,7 +74,7 @@ describe('per-regulator matrix counts (SourceTransparencyMatrix)', () => {
     // all methods, since 2026-07-11) — all 25 CBUAE sources are remediation.
     // minEnabled guards against a vacuous 0===0 if the prefix stops matching.
     { label: 'CBUAE: "0 fresh-alert eligible — production access blocked"', fresh: 0, minEnabled: 1, prefixes: ['cbuae'] },
-    { label: 'VARA: "4 fresh-alert eligible of 6 enabled"', fresh: 4, enabled: 6, prefixes: ['vara'] },
+    { label: 'VARA: "3 fresh-alert eligible of 6 enabled"', fresh: 3, enabled: 6, prefixes: ['vara'] },
     // 2026-07-18: www.dfsa.ae blocks production egress — 10 DFSA-site sources
     // demoted; depth continues via dfsaen.thomsonreuters.com (rulebook + AML
     // module) which works from production. 20 → 10.

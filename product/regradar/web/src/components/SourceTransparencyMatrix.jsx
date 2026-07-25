@@ -11,7 +11,10 @@ const MATRIX_ROWS = [
   },
   {
     category: 'Virtual assets (VARA)',
-    sourceCount: '4 fresh-alert eligible of 6 enabled',
+    // 2026-07-25: 4 -> 3. The VARA Regulatory Notices and Enforcement Index was
+    // promoted to fresh_alert on 2026-07-21 with no production baseline; that
+    // promotion is reversed, so the honest count drops by one.
+    sourceCount: '3 fresh-alert eligible of 6 enabled',
     statusTone: 'active',
     whatWeMonitor: 'VARA Compliance & Risk Management Rulebook full text (incl. AML/CFT Part III, promoted 18 July 2026 after two stable production runs), news/circulars/regulatory publications, enforcement notices',
     limitation: 'The 30-day rulebook revision-updates view is in remediation pending a production rebaseline (rulebook change coverage continues via the full-rulebook source). The public register is enabled but pending validation. Static rulebook PDFs are evidence snapshots, not change-monitored.',
