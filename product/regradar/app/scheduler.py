@@ -471,7 +471,13 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
                 cycle += 1
                 _print_cycle_header(cycle, interval)
                 try:
-                    results = monitor_all_sources(verbose=True)
+                    # The cap goes HERE, around the live sweep, rather than inside
+                    # monitor_all_sources: every other caller (tests, one-off CLI
+                    # runs, the source lab) keeps its existing behaviour, and the
+                    # long-running loop — the one that went dark for four days —
+                    # is the one that gets protected.
+                    with per_source_timeout():
+                        results = monitor_all_sources(verbose=True)
                     _print_cycle_summary(results)
                     last_full_run_at = time.monotonic()
                     # A full cycle sweeps every enabled source, so it counts
@@ -600,3 +606,208 @@ def run_watch_loop(interval_minutes: int | None = None) -> None:
             f"\n  {_BOLD}StatuteProof watch mode stopped.{_R}  "
             f"({cycle} cycle{'s' if cycle != 1 else ''} completed)\n"
         )
+
+
+# ── per-source timeout and sweep progress ────────────────────────────────────
+#
+# WHY THIS EXISTS. monitor_all_sources iterates sources and calls
+# run_pipeline_for_source with a 2-attempt retry and no wall-clock cap
+# (app/monitor.py). One source that never returns — a Playwright navigation that
+# hangs rather than erroring — therefore stops the ENTIRE sweep, and systemd sees
+# a process that is still alive, so Restart=on-failure never fires. Monitoring was
+# silently dead for four days in exactly this way.
+#
+# Two mechanisms, deliberately separate:
+#   * a per-source wall-clock cap, so one bad source costs one source; and
+#   * a progress marker, so an outside watchdog can tell "working slowly" from
+#     "stopped", which a heartbeat alone cannot.
+
+import json  # noqa: E402
+import os as _os  # noqa: E402
+import threading as _threading  # noqa: E402
+from contextlib import contextmanager  # noqa: E402
+
+from app.config import HTTP_TIMEOUT_S, PAGE_TIMEOUT_MS  # noqa: E402
+
+# Where the sweep records which source it is on. Read by app.ops_alert (and thus
+# by deploy/scheduler-watchdog.sh); never written by anything but the sweep.
+_PROGRESS_FILE = Path(BASE_DIR) / "data" / "scheduler_progress.json"
+
+# A cap below the slowest legitimate fetch would abandon healthy sources, so the
+# floor is derived from the fetch timeouts rather than guessed.
+_SOURCE_TIMEOUT_FLOOR_S = 60
+
+
+def _derived_source_timeout_seconds() -> int:
+    """The smallest cap that cannot cut short a legitimately slow source.
+
+    This is a PER-ATTEMPT cap: one attempt may spend HTTP_TIMEOUT_S on the
+    requests tier and then PAGE_TIMEOUT_MS on the Playwright tier, so the cap
+    must exceed that sum with margin or it becomes a source of false failures —
+    worse than the wedge, because it looks like the regulator's fault.
+
+    monitor.py retries a source once, so a source that hangs on both attempts
+    costs at most 2 * this + _RETRY_DELAY_SECONDS before the sweep moves on.
+    """
+    per_attempt = HTTP_TIMEOUT_S + (PAGE_TIMEOUT_MS / 1000.0)
+    return max(_SOURCE_TIMEOUT_FLOOR_S, int(per_attempt * 1.5))
+
+
+def source_timeout_seconds() -> int:
+    """The active per-source cap. Env override, clamped to the derived floor.
+
+    An override BELOW the derived value is clamped rather than honoured: the most
+    likely reason someone sets a small number is impatience during an incident,
+    and a cap that severs healthy fetches turns one outage into a wave of false
+    FAILED records in the evidence trail.
+    """
+    derived = _derived_source_timeout_seconds()
+    raw = _os.getenv("STATUTEPROOF_SOURCE_TIMEOUT_S", "").strip()
+    if not raw:
+        return derived
+    try:
+        requested = int(float(raw))
+    except ValueError:
+        logger.warning("STATUTEPROOF_SOURCE_TIMEOUT_S=%r is not a number; using %ds", raw, derived)
+        return derived
+    if requested < derived:
+        logger.warning(
+            "STATUTEPROOF_SOURCE_TIMEOUT_S=%ds is below the derived floor %ds; clamping",
+            requested, derived,
+        )
+        return derived
+    return requested
+
+
+def record_progress(index: int, total: int, label: str) -> None:
+    """Note which source the sweep is on. Never raises — progress is observation."""
+    try:
+        _PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _PROGRESS_FILE.write_text(
+            json.dumps({
+                "index": int(index),
+                "total": int(total),
+                "label": str(label),
+                "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            }),
+            encoding="utf-8",
+        )
+    except Exception:  # noqa: BLE001 — a progress write must never break a sweep
+        logger.debug("could not write the sweep progress marker", exc_info=True)
+
+
+def _recover_after_source_timeout(label: str) -> None:
+    """Tear down shared state a hung source may have left wedged.
+
+    The abandoned work is running in a daemon thread we cannot kill, and the
+    thing it is most likely stuck inside is the shared Playwright browser. If it
+    is left open the NEXT source inherits a poisoned handle and hangs too, which
+    turns a one-source problem back into a whole-sweep one.
+    """
+    logger.warning("abandoning %s after the per-source cap; tearing down shared fetch state", label)
+    try:
+        from app import scraper as _scraper
+
+        closer = getattr(_scraper, "close_shared_browser", None) or getattr(
+            _scraper, "_close_browser", None
+        )
+        if callable(closer):
+            closer()
+    except Exception:  # noqa: BLE001 — recovery is best-effort by nature
+        logger.debug("browser teardown after a source timeout failed", exc_info=True)
+
+
+def run_source_with_timeout(runner, source: dict, timeout_s: float | None = None) -> dict:
+    """Run one source, abandoning it if it exceeds the cap.
+
+    On abandonment this RAISES TimeoutError rather than returning a synthetic
+    error record, because monitor.py already has exactly one path that turns a
+    failed source into durable state: the raising path writes a FAILED trail
+    record via _persist_failure_record, counts it as failed, and evaluates the
+    circuit breaker. Returning a dict instead skips all three — the sweep looks
+    like it handled the source while the trail stayed silent and the breaker
+    never learned that this source hangs every single cycle. Silence is the
+    worst outcome: a source that stops being checked must look WORSE than one
+    that fails, never like one that was fine.
+
+    The message begins with "timeout" because monitor._classify_access_status
+    reads str(exc), not the exception type, and that string is what lands in the
+    trail as access_status.
+
+    Raising also puts abandonment under the retry policy every other failure
+    already gets — a hang can be a single bad Playwright navigation, and the
+    second attempt is the same second chance a 403 or a reset connection gets.
+
+    The work runs in a daemon thread. Python cannot kill a thread blocked in a C
+    call, so the cap bounds how long the SWEEP waits, not how long the work runs;
+    the abandoned thread dies with the process. That is the honest limit, and it
+    is why _recover_after_source_timeout tears the browser down.
+    """
+    # float, not int: sub-second caps are how the tests exercise this without
+    # sleeping for minutes, and Thread.join takes a float anyway.
+    cap = float(timeout_s if timeout_s is not None else source_timeout_seconds())
+    label = str(source.get("name") or source.get("source_id") or source.get("url") or "source")
+    box: dict = {}
+
+    def _work() -> None:
+        try:
+            box["result"] = runner(source)
+        except BaseException as exc:  # noqa: BLE001 — carried across the thread boundary
+            box["error"] = exc
+
+    worker = _threading.Thread(target=_work, name=f"source:{label}", daemon=True)
+    worker.start()
+    worker.join(timeout=cap)
+
+    if worker.is_alive():
+        _recover_after_source_timeout(label)
+        raise TimeoutError(
+            f"timeout: abandoned after {cap:g}s — the source did not return"
+        )
+
+    if "error" in box:
+        raise box["error"]
+    return box.get("result") or {}
+
+
+@contextmanager
+def per_source_timeout(timeout_s: float | None = None):
+    """Cap every source a sweep runs inside this block.
+
+    Wraps monitor.run_pipeline_for_source rather than editing monitor.py's loop,
+    so the cap is opt-in at the call site (the watch loop and the CLI sweep) and
+    every existing caller — tests, one-off scripts — keeps its current behaviour.
+    The original is restored on exit even if the body raises.
+    """
+    from app import monitor as _monitor
+
+    original = _monitor.run_pipeline_for_source
+
+    # "index" counts SOURCES, not attempts: monitor.py calls this wrapper again
+    # on retry, and a marker that advanced per attempt would report a sweep of
+    # 140 sources as being on source 200 — a watchdog reading that has no way to
+    # tell real progress from a source failing twice.
+    counter = {"index": 0, "key": None}
+
+    def _capped(source):
+        # Progress is recorded from inside the cap wrapper so it advances for
+        # every source the sweep starts, including one that then hangs — which is
+        # exactly the case a watchdog needs to see. Recording only on completion
+        # would leave the marker frozen on the PREVIOUS source and make a hang
+        # look identical to a stop.
+        key = source.get("url") or source.get("source_id") or source.get("name")
+        if key != counter["key"]:
+            counter["key"] = key
+            counter["index"] += 1
+        label = str(source.get("name") or source.get("source_id") or source.get("url") or "source")
+        # total is unknown here — the wrapper sees one source at a time. Zero
+        # means "unknown" and describe_progress renders it as such rather than
+        # printing a denominator that is not true.
+        record_progress(counter["index"], 0, label)
+        return run_source_with_timeout(original, source, timeout_s)
+
+    _monitor.run_pipeline_for_source = _capped
+    try:
+        yield
+    finally:
+        _monitor.run_pipeline_for_source = original

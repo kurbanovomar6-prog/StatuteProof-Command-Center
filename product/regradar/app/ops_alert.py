@@ -23,6 +23,7 @@ from __future__ import annotations
 import logging
 import os
 import time
+from datetime import datetime
 from pathlib import Path
 
 import requests as _req
@@ -232,3 +233,134 @@ def check_heartbeat(now: float | None = None) -> bool:
     except Exception as exc:  # pragma: no cover - defensive
         logger.warning("heartbeat: check failed: %s", type(exc).__name__)
         return False
+
+
+# ── sweep progress and a side-effect-free heartbeat read ─────────────────────
+#
+# check_heartbeat() answers "is it wedged?" by ALERTING — it notifies the founder
+# and pings the external probe as a side effect. A watchdog that wants to look at
+# the state on every tick, or a human running a status command, needs the same
+# facts without paging anyone. These are those facts.
+#
+# The heartbeat alone cannot tell "working slowly" from "stopped": a sweep over
+# 140 sources can legitimately outlive the stale threshold. The progress marker
+# (written by app.scheduler.record_progress) is what distinguishes them — if the
+# heartbeat is stale but progress moved a minute ago, the sweep is running.
+
+_PROGRESS_FILE = Path(BASE_DIR) / "data" / "scheduler_progress.json"
+
+
+def read_progress() -> dict | None:
+    """The sweep's last progress marker, or None. Never raises."""
+    try:
+        if not _PROGRESS_FILE.exists():
+            return None
+        import json as _json
+
+        loaded = _json.loads(_PROGRESS_FILE.read_text(encoding="utf-8"))
+        return loaded if isinstance(loaded, dict) else None
+    except Exception:  # noqa: BLE001 — an unreadable marker is "no marker"
+        return None
+
+
+def describe_progress() -> str:
+    """One line a human or a shell script can read. Never raises."""
+    progress = read_progress()
+    if not progress:
+        return "no progress marker"
+    index = progress.get("index")
+    total = progress.get("total")
+    label = str(progress.get("label") or "?")
+    at = str(progress.get("at") or "?")
+    # The wrapper that records progress does not know the sweep length, and
+    # printing "2/0" would be a wrong denominator rather than a missing one.
+    position = f"{index}/{total}" if isinstance(total, int) and total > 0 else f"{index}"
+    return f"source {position} ({label}) at {at}"
+
+
+def heartbeat_state(now: float | None = None) -> dict:
+    """The heartbeat and progress facts, with NO side effects.
+
+    Deliberately does not notify and does not ping: it is safe to call on a timer,
+    from a watchdog, or from a status command. check_heartbeat() remains the
+    alerting path — mixing the two is how a status check starts paging someone.
+
+    ``state`` is one of:
+      fresh    — the last full cycle finished inside the stale window
+      missing  — no heartbeat file: the loop has never completed a cycle
+      stale    — older than the window AND progress has not moved recently
+      working  — older than the window BUT the sweep is still advancing
+    """
+    ref = time.time() if now is None else now
+    stale_after = _heartbeat_stale_seconds()
+    progress = read_progress()
+
+    try:
+        exists = _HEARTBEAT_FILE.exists()
+    except Exception:  # noqa: BLE001
+        exists = False
+
+    if not exists:
+        return {
+            "state": "missing", "ok": False, "age_seconds": None,
+            "stale_after_seconds": stale_after, "progress": progress,
+            "detail": f"no heartbeat file at {_HEARTBEAT_FILE.name}",
+        }
+
+    try:
+        age = ref - _HEARTBEAT_FILE.stat().st_mtime
+    except Exception:  # noqa: BLE001
+        return {
+            "state": "missing", "ok": False, "age_seconds": None,
+            "stale_after_seconds": stale_after, "progress": progress,
+            "detail": "heartbeat file could not be read",
+        }
+
+    if age <= stale_after:
+        return {
+            "state": "fresh", "ok": True, "age_seconds": int(age),
+            "stale_after_seconds": stale_after, "progress": progress,
+            "detail": f"last cycle {int(age)}s ago (threshold {stale_after}s)",
+        }
+
+    # Stale heartbeat, but a moving progress marker means a long sweep is still
+    # advancing — restarting it there would abort real work for no reason.
+    progress_age = None
+    if progress:
+        try:
+            stamp = datetime.fromisoformat(str(progress.get("at")).replace("Z", "+00:00"))
+            progress_age = ref - stamp.timestamp()
+        except Exception:  # noqa: BLE001
+            progress_age = None
+    if progress_age is not None and progress_age <= stale_after:
+        return {
+            "state": "working", "ok": True, "age_seconds": int(age),
+            "progress_age_seconds": int(progress_age),
+            "stale_after_seconds": stale_after, "progress": progress,
+            "detail": (
+                f"heartbeat {int(age)}s old but the sweep advanced "
+                f"{int(progress_age)}s ago — a long cycle, not a wedge"
+            ),
+        }
+
+    return {
+        "state": "stale", "ok": False, "age_seconds": int(age),
+        "progress_age_seconds": None if progress_age is None else int(progress_age),
+        "stale_after_seconds": stale_after, "progress": progress,
+        "detail": (
+            f"heartbeat {int(age)}s old (threshold {stale_after}s) and no recent "
+            f"progress — {describe_progress()}"
+        ),
+    }
+
+
+def check_heartbeat_detailed(now: float | None = None) -> dict:
+    """check_heartbeat's verdict plus the facts behind it.
+
+    Returns heartbeat_state() with ``paged`` recording whether an alert was
+    actually attempted, so a caller can report "we noticed AND told someone" or
+    "we noticed and could not tell anyone" rather than conflating them.
+    """
+    state = heartbeat_state(now=now)
+    state["paged"] = bool(check_heartbeat(now=now)) if not state["ok"] else False
+    return state
