@@ -324,3 +324,35 @@ def test_a_missing_heartbeat_reads_as_missing(isolated_sweep, monkeypatch):
 
     assert state["state"] == "missing"
     assert state["ok"] is False
+
+
+# ── the contract the deploy watchdog reads ──────────────────────────────────
+
+
+def test_the_heartbeat_state_is_readable_both_ways(isolated_sweep):
+    """Python callers use state["state"]; the deploy watchdog is a shell heredoc
+    that reads state.reason and state.age_seconds.
+
+    Both contracts were written independently and neither is wrong, but a plain
+    dict satisfies only the first. Because the heredoc runs under 2>/dev/null,
+    the AttributeError was swallowed, the watchdog saw empty output, took its
+    "treating as UNKNOWN, taking no action" branch and exited 0 — it could never
+    have restarted anything, while a check for whether the functions EXIST
+    passed, because they did.
+    """
+    state = ops_alert.heartbeat_state()
+
+    assert state["state"] == state.reason, "the two views disagree"
+    assert state.age_seconds == state["age_seconds"]
+    assert state.progress == state["progress"]
+
+
+def test_describe_progress_accepts_a_marker_or_none(isolated_sweep):
+    """The watchdog passes the marker it already holds, so it cannot describe a
+    different moment than the state it is reporting on."""
+    scheduler.record_progress(4, 0, "Some Source")
+
+    assert "Some Source" in ops_alert.describe_progress()
+    assert ops_alert.describe_progress(ops_alert.read_progress()) == \
+        ops_alert.describe_progress()
+    assert ops_alert.describe_progress({}) == "no progress marker"

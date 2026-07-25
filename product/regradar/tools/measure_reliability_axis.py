@@ -44,6 +44,65 @@ def _fake_source(name: str, url: str) -> dict:
     }
 
 
+def _run_the_watchdogs_own_query(script_text: str) -> dict:
+    """Execute the python heredoc lifted verbatim out of the watchdog script.
+
+    Lifted rather than reimplemented on purpose: a copy would drift, and a
+    reimplementation would be testing this file's idea of the contract instead
+    of the one that actually ships. stderr is captured here — the real script
+    discards it, which is exactly how the breakage stayed invisible.
+    """
+    import re as _re
+    import subprocess as _sp
+
+    # The opener carries redirections ("<<'PY' 2>/dev/null"), so match to
+    # end-of-line rather than straight to the newline.
+    blocks = _re.findall(r"<<'PY'[^\n]*\n(.*?)\nPY\b", script_text, _re.DOTALL)
+
+    # The script contains MORE THAN ONE python block, and the other one pages the
+    # founder. An earlier version of this took the first match and fired a real
+    # "the monitoring loop is wedged" Telegram at the owner. A measurement that
+    # can page a human is not a measurement.
+    #
+    # So: run only the block that reads the heartbeat, and refuse outright if it
+    # can reach a notifier. Both conditions, because matching on the wanted name
+    # alone would still execute a block that had grown a side effect.
+    candidates = [
+        b for b in blocks
+        if "heartbeat_state" in b
+        and not any(bad in b for bad in ("notify_founder", "ping_external_heartbeat"))
+    ]
+    if not candidates:
+        return {
+            "watchdog_query_output": None,
+            "watchdog_can_read_the_heartbeat": None,
+            "watchdog_query_error": (
+                "no side-effect-free heartbeat block found in the script "
+                f"({len(blocks)} python block(s) present)"
+            ),
+        }
+    snippet = candidates[0]
+    try:
+        proc = _sp.run(
+            [sys.executable, "-c", snippet],
+            capture_output=True, text=True, timeout=60, cwd=str(ROOT),
+        )
+    except Exception as exc:  # noqa: BLE001 — the probe reports, never raises
+        return {
+            "watchdog_query_output": None,
+            "watchdog_can_read_the_heartbeat": False,
+            "watchdog_query_error": f"{type(exc).__name__}: {exc}",
+        }
+    out = (proc.stdout or "").strip()
+    return {
+        "watchdog_query_output": out or None,
+        # The script's own emptiness test: `if [ -z "${hb_line}" ]` -> no action.
+        "watchdog_can_read_the_heartbeat": bool(out),
+        "watchdog_query_error": (proc.stderr or "").strip().splitlines()[-1]
+        if proc.returncode != 0 and proc.stderr else None,
+    }
+
+
 def measure() -> dict:
     report: dict = {"cap_seconds": CAP_SECONDS, "hang_seconds": HANG_SECONDS}
 
@@ -68,9 +127,19 @@ def measure() -> dict:
         report["watchdog_callables_all_exist"] = all(
             hasattr(ops_alert, n) for n in needed
         )
+        # Existence is NOT the question, and asking it was the bug in this tool.
+        # Both functions existed while the watchdog's expression raised
+        # AttributeError on every field it read — and because the heredoc runs
+        # under `2>/dev/null`, the script saw empty output, took its
+        # "treating as UNKNOWN, taking no action" branch and exited 0. The
+        # watchdog could not have restarted anything, and this tool reported the
+        # axis as improved. So now the script's OWN expression is executed.
+        report.update(_run_the_watchdogs_own_query(text))
     else:
         report["watchdog_calls"] = []
         report["watchdog_callables_all_exist"] = None
+        report["watchdog_query_output"] = None
+        report["watchdog_can_read_the_heartbeat"] = None
 
     with tempfile.TemporaryDirectory() as raw_tmp:
         tmp = Path(raw_tmp)
@@ -169,6 +238,10 @@ def main() -> int:
     print(f"  watchdog_script_present            {report['watchdog_script_present']}")
     print(f"  watchdog callables all exist       {report['watchdog_callables_all_exist']} "
           f"(calls: {report['watchdog_calls']})")
+    print(f"  watchdog CAN READ the heartbeat     {report.get('watchdog_can_read_the_heartbeat')}")
+    print(f"    its own query returned            {report.get('watchdog_query_output')!r}")
+    if report.get("watchdog_query_error"):
+        print(f"    error                             {report['watchdog_query_error']}")
     print("\nbehaviour with one hung source")
     print(f"  second source reached              {report['second_source_reached']}")
     print(f"  elapsed                            {report['elapsed_seconds']}s "

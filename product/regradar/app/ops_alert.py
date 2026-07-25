@@ -263,9 +263,45 @@ def read_progress() -> dict | None:
         return None
 
 
-def describe_progress() -> str:
-    """One line a human or a shell script can read. Never raises."""
-    progress = read_progress()
+class HeartbeatState(dict):
+    """The heartbeat facts, readable as a dict OR by attribute.
+
+    Both, deliberately. Python callers and tests read ``state["state"]``; the
+    deploy watchdog is a shell heredoc that reads ``state.reason`` and
+    ``state.age_seconds``. Those two contracts were written independently and
+    neither is wrong, but a plain dict satisfies only the first — and because the
+    heredoc runs under ``2>/dev/null``, the AttributeError was swallowed, the
+    watchdog saw empty output, took its "treating as UNKNOWN, taking no action"
+    branch and exited 0. It could never have restarted anything.
+
+    Nothing about that failure was visible: a check for whether the functions
+    EXIST passes, because they do. Only running the watchdog's own expression
+    against the real objects shows it.
+
+    ``reason`` is an alias of ``state`` rather than a second field, so there is
+    no way for the two to drift apart and disagree about what happened.
+    """
+
+    @property
+    def reason(self) -> str:
+        return str(self.get("state") or "unknown")
+
+    def __getattr__(self, name: str):
+        try:
+            return self[name]
+        except KeyError as exc:
+            raise AttributeError(name) from exc
+
+
+def describe_progress(progress: dict | None = None) -> str:
+    """One line a human or a shell script can read. Never raises.
+
+    Takes an optional marker so a caller that already has one (the watchdog reads
+    it off the heartbeat state) does not re-read the file and risk describing a
+    different moment than the state it is reporting on.
+    """
+    if progress is None:
+        progress = read_progress()
     if not progress:
         return "no progress marker"
     index = progress.get("index")
@@ -301,27 +337,27 @@ def heartbeat_state(now: float | None = None) -> dict:
         exists = False
 
     if not exists:
-        return {
+        return HeartbeatState({
             "state": "missing", "ok": False, "age_seconds": None,
             "stale_after_seconds": stale_after, "progress": progress,
             "detail": f"no heartbeat file at {_HEARTBEAT_FILE.name}",
-        }
+        })
 
     try:
         age = ref - _HEARTBEAT_FILE.stat().st_mtime
     except Exception:  # noqa: BLE001
-        return {
+        return HeartbeatState({
             "state": "missing", "ok": False, "age_seconds": None,
             "stale_after_seconds": stale_after, "progress": progress,
             "detail": "heartbeat file could not be read",
-        }
+        })
 
     if age <= stale_after:
-        return {
+        return HeartbeatState({
             "state": "fresh", "ok": True, "age_seconds": int(age),
             "stale_after_seconds": stale_after, "progress": progress,
             "detail": f"last cycle {int(age)}s ago (threshold {stale_after}s)",
-        }
+        })
 
     # Stale heartbeat, but a moving progress marker means a long sweep is still
     # advancing — restarting it there would abort real work for no reason.
@@ -333,7 +369,7 @@ def heartbeat_state(now: float | None = None) -> dict:
         except Exception:  # noqa: BLE001
             progress_age = None
     if progress_age is not None and progress_age <= stale_after:
-        return {
+        return HeartbeatState({
             "state": "working", "ok": True, "age_seconds": int(age),
             "progress_age_seconds": int(progress_age),
             "stale_after_seconds": stale_after, "progress": progress,
@@ -341,9 +377,9 @@ def heartbeat_state(now: float | None = None) -> dict:
                 f"heartbeat {int(age)}s old but the sweep advanced "
                 f"{int(progress_age)}s ago — a long cycle, not a wedge"
             ),
-        }
+        })
 
-    return {
+    return HeartbeatState({
         "state": "stale", "ok": False, "age_seconds": int(age),
         "progress_age_seconds": None if progress_age is None else int(progress_age),
         "stale_after_seconds": stale_after, "progress": progress,
@@ -351,7 +387,7 @@ def heartbeat_state(now: float | None = None) -> dict:
             f"heartbeat {int(age)}s old (threshold {stale_after}s) and no recent "
             f"progress — {describe_progress()}"
         ),
-    }
+    })
 
 
 def check_heartbeat_detailed(now: float | None = None) -> dict:
