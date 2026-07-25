@@ -10072,8 +10072,8 @@
     "enabled": true,
     "status": "active",
     "enforcement_feature": true,
-    "monitoring_mode": "fresh_alert",
-    "alert_eligible": true,
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
     "fresh_signal_class": "HIGH_SIGNAL",
     "commercial_signal_tier": "A",
     "fresh_signal_reason": "VARA official regulatory-notices index; server-renders dated Licensing/Enforcement Notices and Warnings entries; selected-source daily check for new VASP enforcement/regulatory notices.",
@@ -10087,7 +10087,9 @@
     "local_intake_certified_at": "2026-07-25",
     "local_intake_chars": 10323,
     "local_baseline_runs_completed": 2,
-    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run.",
+    "demoted_at": "2026-07-25",
+    "demotion_reason": "Demoted to candidate. This branch had it at fresh_alert + alert_eligible with NO proof_path and baseline_runs_completed 0, while origin/main (production) has it as candidate + alert_eligible False. The product's own published definition on statuteproof.com is 'Fresh-alert eligible means we have at least two confirmed baseline evidence runs with stable content hashes' — this row has zero, so shipping the branch would have sold it as alert-eligible against our own stated bar. The source itself does work (10,323 chars, stable hash across two local runs); it needs a prod baseline, not a flag."
   },
   {
     "name": "VARA Compliance and Risk Management Rulebook (incl. AML/CFT Part III)",
@@ -10114,14 +10116,14 @@
     "customer_alert_policy": "Alert on material VARA rulebook text, version, effective-date, or document-link changes; suppress layout, navigation, and boilerplate-only changes.",
     "notes": "2026-07-17 REPOINTED + REBUILT (was: name 'VARA AML/CFT Rulebook', url https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/, status disabled_path_moved — that path now returns HTTP 404 with no redirect; VARA moved rulebook content to rulebooks.vara.ae and folded AML/CFT into Part III of the Compliance and Risk Management Rulebook — verified 2026-07-17). New URL is the official rulebook HTML page. Adapter rulebook_platform follows the page's own 'Entire section' link (server-rendered on this platform) and captures the FULL rulebook text including the complete AML/CFT part, plus version markers ('Effective From: 19 June 2025' at intake), version list, and the current-version PDF link (VARA_EN_123_VER20250519.pdf at intake) — so a new version changes the hash even though pinned per-version PDF URLs never change (the reason the sibling AE-vara-compliance-risk-rulebook-pdf source stays disabled_static_pdf). Live check 2026-07-17 from founder laptop: 100,940 chars, is_quality_content=True, deterministic across 2 runs. Prod reachability expected OK (prod already monitors rulebooks.vara.ae: AE-vara-rulebook-updates) but NOT verified from prod today. Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. CANDIDATE until, on the prod deployment: pipeline no-save check OK, proof + 2 baseline runs + MONITOR_OK + review gates — then flip monitoring_mode to fresh_alert and alert_eligible to true. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD GATES PASSED: 2 stable production runs (100,940 chars, GOOD, sha-stable, full rulebook text incl. AML/CFT Part III) — promoted to fresh_alert.",
     "last_monitor_status": "MONITOR_OK",
-    "baseline_runs_completed": 0,
+    "baseline_runs_completed": 2,
     "last_checked_at": "2026-07-18T00:00:00Z",
     "local_intake_certified": true,
     "local_intake_certified_at": "2026-07-25",
     "local_intake_chars": 93826,
     "local_baseline_runs_completed": 2,
     "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run.",
-    "baseline_reset_note": "Reset 2026-07-25: the previous non-zero count came from LOCAL intake runs, not prod. Kept in local_baseline_runs_completed so the prod gate cannot count local evidence."
+    "baseline_restore_note": "Restored 2026-07-25. I had reset this to 0 believing the count came from my local runs; origin/main carries baseline_runs_completed: 2, so it predates this session and came from real production runs (statuteproof.com states 'Promoted 18 July 2026 after two stable production runs'). The reset destroyed a legitimate prod value."
   },
   {
     "source_id": "AE-cbuae-enforcement",
