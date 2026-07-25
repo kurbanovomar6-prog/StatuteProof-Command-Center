@@ -42,7 +42,7 @@ const TERMS_SECTIONS = [
   {
     heading: '5. Payment and billing',
     paragraphs: [
-      'Founding Pilot and UAE Monitor plans are billed monthly. Payment is processed via Stripe. By providing payment details you authorise recurring charges at the applicable plan rate until you cancel.',
+      'Founding Pilot and UAE Monitor plans are billed monthly. Billing is arranged and activated manually for pilot accounts — there is no self-serve card checkout in the product today, and we take no payment details through it.',
       'No payment is taken and no card is stored during the Source Readiness Review or prior to manual pilot activation. Billing begins on the date your workspace is formally activated.',
       'Refund requests within 7 days of the first charge may be submitted to ' + CONTACT_EMAIL + ' and will be reviewed on a case-by-case basis. No refunds are available for partial months after the 7-day window.',
       'Plan prices are stated in USD. We reserve the right to adjust prices with 30 days written notice to your registered email.',
@@ -100,7 +100,7 @@ const PRIVACY_SECTIONS = [
     heading: '2. What data we do not collect',
     paragraphs: [
       'Do not submit passwords, private portal credentials, authentication tokens, or confidential internal documents as custom source URLs. StatuteProof is designed for public official sources and publicly accessible regulatory material only. We cannot be responsible for any confidential content submitted via custom source configuration.',
-      'We do not collect payment card numbers or bank details directly. All payment processing is handled by Stripe, which is PCI-DSS Level 1 certified. We receive a Stripe customer reference and subscription status only.',
+      'We do not collect payment card numbers or bank details — the product has no card checkout, and billing for pilot accounts is arranged manually outside it. If card payment is enabled in future it will be handled by Stripe (PCI-DSS Level 1 certified) and we would receive only a customer reference and subscription status.',
       'We do not collect, infer, or store regulatory compliance determinations about your organisation. The service generates monitoring intelligence — compliance decisions remain with your legal and compliance team.',
     ],
   },
@@ -133,9 +133,9 @@ const PRIVACY_SECTIONS = [
   {
     heading: '6. Third-party processors',
     paragraphs: [
-      'Stripe (stripe.com): payment processing. Stripe processes card data under its own Privacy Policy and PCI-DSS certification.',
-      'Railway (railway.app) or equivalent cloud infrastructure: server hosting and database storage. Data is stored in the region selected at deployment (EU or US). We apply access controls and encryption at rest.',
-      'OpenAI (openai.com): if AI-assisted brief generation is enabled, excerpts of extracted regulatory text may be sent to OpenAI\'s API for summarisation. We do not send account data or contact information. OpenAI\'s data use is governed by its API usage policies.',
+      'Stripe (stripe.com): payment processing. The integration is built but not currently live — no card payment can be taken through the product today, so Stripe receives no data from us at present. If and when card payment is enabled, Stripe processes card data under its own Privacy Policy and PCI-DSS certification, and we would receive only a customer reference and subscription status.',
+      'DigitalOcean (digitalocean.com): server hosting and database storage. StatuteProof runs on a single virtual machine in DigitalOcean\'s FRA1 region (Frankfurt, Germany — EU); all stored data resides there. We apply access controls and encryption at rest.',
+      'Anthropic (anthropic.com): when AI-assisted analysis is enabled, excerpts of extracted regulatory text may be sent to Anthropic\'s API for summarisation. We do not send account data or contact information. Anthropic\'s data use is governed by its API terms. AI analysis is off unless enabled for your workspace.',
       'Telegram (telegram.org): if you connect a Telegram account for regulatory alerts, your Telegram chat ID is stored to enable message delivery. We send only monitoring alerts to your Telegram account.',
     ],
   },
