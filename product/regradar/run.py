@@ -2314,6 +2314,7 @@ def main() -> None:
         print("  python run.py activate-plan --list  founder-only: list every user's plan intent vs. activated plan (who needs activation after deploy)", file=sys.stderr)
         print("  python run.py assign-role --owner <id> --user <id> --role <role>  founder-only: seat a teammate/auditor in an owner's workspace", file=sys.stderr)
         print("  python run.py assign-role --list  founder-only: list org memberships (who is in which workspace, with what role)", file=sys.stderr)
+        print("  python run.py bootstrap-operator --user <id>  founder-only: seat the FIRST cross-org operator (GLOBAL scope)", file=sys.stderr)
         sys.exit(2)
 
     cmd = args[0]
@@ -3772,6 +3773,9 @@ def main() -> None:
     elif cmd == "assign-role":
         _cmd_assign_role(args[1:])
 
+    elif cmd == "bootstrap-operator":
+        _cmd_bootstrap_operator(args[1:])
+
     elif cmd.startswith(("http://", "https://")):
         # backward-compatible bare URL
         _run_single_url(cmd)
@@ -3779,10 +3783,69 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config | activate-plan | assign-role",
+            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config | activate-plan | assign-role | bootstrap-operator",
             file=sys.stderr,
         )
         sys.exit(2)
+
+
+def _cmd_bootstrap_operator(extra: list[str]) -> None:
+    """Founder-only: seat the FIRST cross-org operator (GLOBAL scope).
+
+    Why a CLI and not an endpoint. ``assign_org_role`` requires the actor to hold
+    member.manage for the target org, and an owner is confined to their own org —
+    so creating a GLOBAL-scope principal requires already being one, and nothing
+    ever seeds the first. Verified against the working database: zero rows in
+    org_members with org_id = 0, which is why the shared-official-evidence review
+    gate cannot be satisfied by anyone today.
+
+    Granting cross-tenant scope is the most powerful action in this system, so it
+    costs an SSH session by design. The grant is written to the immutable access
+    log.
+
+        python run.py bootstrap-operator --user <id>
+        python run.py bootstrap-operator --list
+    """
+    import app.api  # noqa: F401  (resolves the api <-> mixin import chain first)
+    from app.rbac import GLOBAL_ORG_ID
+    from app.rbac_runtime import bootstrap_operator
+
+    if "--list" in extra:
+        from app.db import _connect
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                "SELECT m.user_id, m.role, u.email FROM org_members m "
+                "LEFT JOIN users u ON u.id = m.user_id WHERE m.org_id = ? ORDER BY m.user_id",
+                (GLOBAL_ORG_ID,),
+            ).fetchall()
+        finally:
+            conn.close()
+        if not rows:
+            print("No operators. Nobody holds GLOBAL scope, so the shared-evidence "
+                  "review gate cannot be satisfied.")
+            return
+        print(f"Operators (GLOBAL org {GLOBAL_ORG_ID}):")
+        for row in rows:
+            print(f"  user {row['user_id']:>4}  {row['role']:<9} {row['email'] or '(unknown email)'}")
+        return
+
+    user_id = None
+    for index, token in enumerate(extra):
+        if token == "--user" and index + 1 < len(extra):
+            user_id = extra[index + 1]
+    if user_id is None:
+        print("Usage: python run.py bootstrap-operator --user <id>\n"
+              "       python run.py bootstrap-operator --list", file=sys.stderr)
+        sys.exit(2)
+
+    result = bootstrap_operator(user_id)
+    if not result.get("ok"):
+        print(f"Refused: {result.get('error')}", file=sys.stderr)
+        sys.exit(1)
+    print(f"User {result['user_id']} now holds {result['role']} in the GLOBAL org "
+          f"({result['org_id']}). This is cross-tenant scope — verify it is the "
+          f"intended account.")
 
 
 def _cmd_activate_plan(extra: list[str]) -> None:

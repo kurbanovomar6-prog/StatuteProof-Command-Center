@@ -36,7 +36,9 @@ from app.api import (
     exchange_google_oauth_code,
     generate_password_reset_token,
     generate_verification_token,
+    clear_failed_logins,
     get_user_by_email,
+    is_account_locked,
     google_oauth_authorization_url,
     google_oauth_available,
     hashlib,
@@ -45,6 +47,7 @@ from app.api import (
     make_public_user,
     mark_email_verified,
     normalize_email,
+    record_failed_login,
     parse_qs,
     parse_session_cookie,
     require_auth,
@@ -141,10 +144,25 @@ class _AuthHandlerMixin:
 
         email = normalize_email(body.get("email", ""))
         password = str(body.get("password", ""))
-        user = get_user_by_email(email) if validate_email(email) else None
-        if not user or not user.get("is_active") or not verify_password(password, user.get("password_hash", "")):
+
+        # Per-ACCOUNT lockout. The limiter above caps one IP; this caps attempts
+        # against one account, which is what an attacker with a pool of addresses
+        # actually attacks. The response is the SAME 401 as a wrong password on
+        # purpose: a distinct "account locked" reply would confirm the address
+        # exists, turning the defence into an enumeration oracle.
+        if is_account_locked(email):
             self._send_json({"ok": False, "message": "Invalid email or password."}, 401)
             return
+
+        user = get_user_by_email(email) if validate_email(email) else None
+        if not user or not user.get("is_active") or not verify_password(password, user.get("password_hash", "")):
+            # Counted for unknown addresses too, so the counter's behaviour does
+            # not differ between a real and an invented account.
+            record_failed_login(email)
+            self._send_json({"ok": False, "message": "Invalid email or password."}, 401)
+            return
+
+        clear_failed_logins(email)
 
         if not user.get("email_verified"):
             self._send_json(

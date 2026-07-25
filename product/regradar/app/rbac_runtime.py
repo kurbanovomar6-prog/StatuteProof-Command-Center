@@ -56,6 +56,7 @@ from app.rbac import (
     Resource,
     ROLE_DENIED,
     ROLE_OWNER,
+    SYSTEM,
     can,
 )
 
@@ -80,6 +81,7 @@ __all__ = [
     "is_permitted",
     "log_sensitive_action",
     "assign_org_role",
+    "bootstrap_operator",
     "read_access_log",
     "ROLE_OWNER",
     # re-exports
@@ -131,10 +133,19 @@ def _resolve_from_db(user_id: int) -> tuple[int | None, str] | None:
             FROM org_members m
             JOIN orgs o ON o.id = m.org_id
             WHERE m.user_id = ?
-            ORDER BY CASE WHEN o.owner_user_id = ? THEN 0 ELSE 1 END, m.id ASC
+            ORDER BY
+                -- GLOBAL scope wins outright. An operator seat is granted only by
+                -- the founder CLI (bootstrap_operator), and its entire purpose is
+                -- to act across orgs — so if a user holds it, it IS their operative
+                -- scope. Without this the seat is inert: the founder also OWNS an
+                -- org-of-one, which the next clause prefers, so resolve_principal
+                -- kept returning that org and _caller_is_operator stayed False.
+                CASE WHEN m.org_id = ? THEN 0 ELSE 1 END,
+                CASE WHEN o.owner_user_id = ? THEN 0 ELSE 1 END,
+                m.id ASC
             LIMIT 1
             """,
-            (user_id, user_id),
+            (user_id, GLOBAL_ORG_ID, user_id),
         ).fetchone()
         if row is not None:
             role = str(row["role"])
@@ -324,3 +335,65 @@ def assign_org_role(
         principal=actor,
     )
     return {"ok": True, "org_id": org_id, "user_id": target_user_id, "role": role}
+
+
+def bootstrap_operator(target_user_id: int, role: str = ROLE_OWNER) -> dict[str, Any]:
+    """Seed the FIRST operator — a principal scoped to the GLOBAL org.
+
+    Why this has to exist. ``assign_org_role`` requires the actor to hold
+    ``member.manage`` for the target org, and :func:`app.rbac.can` confines an
+    owner to their own org. For ``GLOBAL_ORG_ID`` that means you must already BE
+    an operator to create one, and nothing ever seeds the first — ``app/db.py``
+    inserts the GLOBAL *org* row but never a membership in it. Measured
+    2026-07-25 (tools/measure_security_axis.py, and against the working database):
+    0 rows in ``org_members`` with ``org_id = 0``, so ``_caller_is_operator`` is
+    False for every account that can exist and the shared-official-evidence review
+    gate can never be satisfied by anyone.
+
+    This breaks the cycle with the SYSTEM principal, which is cross-org by
+    construction (``app/rbac.py``) — the same identity the pipeline acts under.
+
+    NOT reachable over HTTP, and deliberately so: it is called from the founder
+    CLI (``run.py bootstrap-operator``), which already requires shell access to
+    the production host. Granting cross-tenant scope is the single most powerful
+    action in this system, and it should cost an SSH session. The grant is written
+    to the immutable access log like any other.
+    """
+    role = str(role or "").strip()
+    if role not in ASSIGNABLE_ROLES:
+        return {"ok": False, "error": "invalid_role"}
+    try:
+        target_user_id = int(target_user_id)
+    except (TypeError, ValueError):
+        return {"ok": False, "error": "invalid_target"}
+
+    now = datetime.now(timezone.utc).isoformat()
+    conn = _connect()
+    try:
+        ensure_rbac_tables(conn)
+        exists = conn.execute(
+            "SELECT 1 FROM users WHERE id = ?", (target_user_id,)
+        ).fetchone()
+        if exists is None:
+            return {"ok": False, "error": "invalid_target"}
+        conn.execute(
+            """
+            INSERT INTO org_members (org_id, user_id, role, created_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(org_id, user_id) DO UPDATE SET role = excluded.role
+            """,
+            (GLOBAL_ORG_ID, target_user_id, role, now),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    log_sensitive_action(
+        None,
+        MEMBER_MANAGE,
+        result=RESULT_ALLOW,
+        resource_type="member",
+        resource_id=str(target_user_id),
+        principal=SYSTEM,
+    )
+    return {"ok": True, "org_id": GLOBAL_ORG_ID, "user_id": target_user_id, "role": role}

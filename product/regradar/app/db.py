@@ -155,6 +155,26 @@ _CREATE_EMAIL_VERIFICATION_TOKENS_TABLE = """
     );
     CREATE INDEX IF NOT EXISTS idx_prtokens_user_id ON password_reset_tokens(user_id);
     CREATE INDEX IF NOT EXISTS idx_prtokens_expires ON password_reset_tokens(expires_at);
+
+    -- Failed sign-in attempts, counted per ACCOUNT.
+    --
+    -- The existing limiter (app/api.py:596) keys on client IP, so an attacker
+    -- rotating source addresses presents a fresh key on every request and can
+    -- guess one account's password without limit. Measured 2026-07-25 with
+    -- tools/measure_security_axis.py: 25 consecutive failures against one account
+    -- left the correct password still accepted.
+    --
+    -- Keyed on the NORMALIZED email rather than user_id so an attempt against an
+    -- address that does not exist is counted identically — the row's existence
+    -- must not become an account-existence oracle.
+    CREATE TABLE IF NOT EXISTS login_attempts (
+        email_normalized TEXT PRIMARY KEY,
+        failed_count     INTEGER NOT NULL DEFAULT 0,
+        first_failed_at  TIMESTAMP NOT NULL,
+        last_failed_at   TIMESTAMP NOT NULL,
+        locked_until     TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_login_attempts_locked ON login_attempts(locked_until);
 """
 
 _CREATE_ACTION_LOG_TABLE = """

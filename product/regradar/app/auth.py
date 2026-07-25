@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import logging
 import os
 import re
 import secrets
@@ -20,6 +21,8 @@ from urllib.parse import urlencode
 import requests
 
 from app.db import _connect, ensure_auth_tables
+
+logger = logging.getLogger(__name__)
 
 
 SESSION_COOKIE_NAME = "statuteproof_session"
@@ -98,6 +101,115 @@ def verify_password(password: str, password_hash: str) -> bool:
         return hmac.compare_digest(actual, expected)
     except Exception:
         return False
+
+
+# ── per-account sign-in lockout ───────────────────────────────────────────────
+#
+# The request limiter in app/api.py keys on CLIENT IP, so it caps how fast one
+# address can try — not how many times one ACCOUNT can be guessed at. An attacker
+# with a pool of addresses presents a fresh key on every request. Measured
+# 2026-07-25 (tools/measure_security_axis.py): 25 consecutive failures against a
+# single account left the correct password still accepted.
+#
+# These two limits are deliberately different in kind: the IP limiter protects the
+# service from volume, this protects an ACCOUNT from being ground down. Both stay.
+
+LOGIN_MAX_FAILURES = 8          # failures within the window before a lock
+LOGIN_FAILURE_WINDOW_S = 900    # 15 min — failures older than this stop counting
+LOGIN_LOCKOUT_S = 900           # 15 min lock, then the counter starts fresh
+
+
+def _login_attempt_row(conn, email_norm: str):
+    return conn.execute(
+        "SELECT failed_count, first_failed_at, locked_until FROM login_attempts "
+        "WHERE email_normalized = ?",
+        (email_norm,),
+    ).fetchone()
+
+
+def is_account_locked(email) -> bool:
+    """True while an account is inside its lockout window.
+
+    Called for EVERY sign-in attempt, including for addresses that do not exist —
+    the row is keyed on the submitted email, so a caller cannot tell from timing
+    or behaviour whether the account is real. Never raises: a storage failure
+    returns False (the password check still has to pass), because failing closed
+    here would let a broken table lock every customer out.
+    """
+    email_norm = normalize_email(email)
+    if not email_norm:
+        return False
+    try:
+        conn = _connect()
+        try:
+            ensure_auth_tables(conn)
+            row = _login_attempt_row(conn, email_norm)
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 — storage trouble must not lock people out
+        logger.warning("login lockout check failed; allowing the attempt to proceed")
+        return False
+    if row is None or not row["locked_until"]:
+        return False
+    try:
+        return _parse_iso(row["locked_until"]) > _now()
+    except Exception:  # noqa: BLE001 — an unparseable stamp is not a live lock
+        return False
+
+
+def record_failed_login(email) -> None:
+    """Count one failed attempt and lock the account once it crosses the limit."""
+    email_norm = normalize_email(email)
+    if not email_norm:
+        return
+    now = _now()
+    try:
+        conn = _connect()
+        try:
+            ensure_auth_tables(conn)
+            row = _login_attempt_row(conn, email_norm)
+            # A run of failures older than the window is not evidence of an attack
+            # in progress; start counting again rather than accumulating forever.
+            if row is None or (now - _parse_iso(row["first_failed_at"])).total_seconds() > LOGIN_FAILURE_WINDOW_S:
+                count, first_at = 1, now
+            else:
+                count, first_at = int(row["failed_count"]) + 1, _parse_iso(row["first_failed_at"])
+            locked_until = _iso(now + timedelta(seconds=LOGIN_LOCKOUT_S)) if count >= LOGIN_MAX_FAILURES else None
+            conn.execute(
+                """
+                INSERT INTO login_attempts
+                    (email_normalized, failed_count, first_failed_at, last_failed_at, locked_until)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(email_normalized) DO UPDATE SET
+                    failed_count = excluded.failed_count,
+                    first_failed_at = excluded.first_failed_at,
+                    last_failed_at = excluded.last_failed_at,
+                    locked_until = excluded.locked_until
+                """,
+                (email_norm, count, _iso(first_at), _iso(now), locked_until),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 — never turn a failed login into a 500
+        logger.warning("could not record a failed sign-in attempt")
+
+
+def clear_failed_logins(email) -> None:
+    """Reset the counter after a successful sign-in."""
+    email_norm = normalize_email(email)
+    if not email_norm:
+        return
+    try:
+        conn = _connect()
+        try:
+            ensure_auth_tables(conn)
+            conn.execute("DELETE FROM login_attempts WHERE email_normalized = ?", (email_norm,))
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001
+        logger.warning("could not clear sign-in failure counter")
 
 
 def _row_to_dict(row: sqlite3.Row | None) -> dict[str, Any] | None:
