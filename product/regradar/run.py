@@ -2315,6 +2315,7 @@ def main() -> None:
         print("  python run.py assign-role --owner <id> --user <id> --role <role>  founder-only: seat a teammate/auditor in an owner's workspace", file=sys.stderr)
         print("  python run.py assign-role --list  founder-only: list org memberships (who is in which workspace, with what role)", file=sys.stderr)
         print("  python run.py bootstrap-operator --user <id>  founder-only: seat the FIRST cross-org operator (GLOBAL scope)", file=sys.stderr)
+        print("  python run.py seal-legacy-trail  founder-only: seal the pre-chain trail block so deletion/reorder is detectable", file=sys.stderr)
         sys.exit(2)
 
     cmd = args[0]
@@ -3776,6 +3777,9 @@ def main() -> None:
     elif cmd == "bootstrap-operator":
         _cmd_bootstrap_operator(args[1:])
 
+    elif cmd == "seal-legacy-trail":
+        _cmd_seal_legacy_trail(args[1:])
+
     elif cmd.startswith(("http://", "https://")):
         # backward-compatible bare URL
         _run_single_url(cmd)
@@ -3783,10 +3787,69 @@ def main() -> None:
     else:
         print(
             f"Error: unknown command '{cmd}'. "
-            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config | activate-plan | assign-role | bootstrap-operator",
+            "Use: url | all | watch | sources | coverage | coverage-plan | coverage-certificate | health | demo | test-source | source-lab | investigate-source | source-discovery-lab | mass-source-activate | mass-monitor | test-mapped | add-source | report | ai-test | ai-health | ai-brief-test | telegram-test | telegram-updates | telegram-listen | telegram-clients | telegram-client-set | telegram-client-test | telegram-client-disable | env-check | adapter-research | source-audit | source-readiness | source-history | backfill-artifacts | backfill-alerts | alert-queue | weekly-status | source-diff | alert-draft | relevance-test | alert-review | weekly-brief | adapter-queue | document-test | api | discover-source | generate-brief | rebaseline | verify-trail | verify-trail-watch | generate-secret-key | validate-config | activate-plan | assign-role | bootstrap-operator | seal-legacy-trail",
             file=sys.stderr,
         )
         sys.exit(2)
+
+
+def _cmd_seal_legacy_trail(extra: list[str]) -> None:
+    """Founder-only: seal the pre-chain block of the source-run trail.
+
+    verify_chain covers only records carrying a record_hash. Measured 2026-07-25:
+    1430 records in the trail, 24 chained — the other 1406 could be deleted or
+    reordered with nothing noticing. This writes a manifest over that block so any
+    later deletion, insertion, reorder or identity edit is detected.
+
+    Read the guarantee precisely: it proves nothing changed SINCE sealing. It
+    cannot speak to whether the block was already altered BEFORE — there is no
+    earlier attestation to compare against, and no tool can invent one.
+
+    Re-sealing OVERWRITES, which would erase exactly the evidence a tamper alarm
+    rests on. That is why this is a deliberate CLI act and not something the
+    pipeline does on its own; --force is required to overwrite an existing seal.
+
+        python run.py seal-legacy-trail            # seal (refuses to overwrite)
+        python run.py seal-legacy-trail --force    # re-seal deliberately
+        python run.py seal-legacy-trail --check    # verify without writing
+    """
+    import json as _json
+
+    from app import source_runs as _sr
+    from app.legacy_trail_manifest import legacy_records, load, seal, verify
+
+    records = list(_sr._read_runs())
+    block = legacy_records(records)
+
+    if "--check" in extra:
+        result = verify(records)
+        print(f"Legacy block: {result['record_count']} pre-chain record(s)")
+        print(f"Status: {result['status']} — {result['detail']}")
+        sys.exit(0 if result["ok"] else 1)
+
+    if not block:
+        print("Nothing to seal — every record in the trail is already chained.")
+        return
+
+    existing = load()
+    if existing and "--force" not in extra:
+        print(
+            f"A manifest already exists (sealed {existing.get('sealed_at')}, "
+            f"{existing.get('record_count')} records).\n"
+            "Re-sealing overwrites it and would erase the evidence a tamper alarm "
+            "rests on. Re-run with --force if that is genuinely what you intend.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    payload = seal(records)
+    print(f"Sealed {payload['record_count']} pre-chain record(s) at {payload['sealed_at']}.")
+    print(f"Digest: {payload['digest']}")
+    print(
+        "This proves the block is unchanged FROM NOW ON. It makes no claim about "
+        "its state before this moment."
+    )
+    print(_json.dumps({"method": payload["method"]}, ensure_ascii=False))
 
 
 def _cmd_bootstrap_operator(extra: list[str]) -> None:

@@ -345,6 +345,9 @@ class TrailReport:
 
     records: list[RecordResult] = field(default_factory=list)
     chain: ChainResult = field(default_factory=ChainResult)
+    # The raw trail lines, kept so the legacy-block manifest can be checked
+    # against exactly the records this run verified.
+    raw_records: list[dict] = field(default_factory=list)
 
     @property
     def verified(self) -> list[RecordResult]:
@@ -627,6 +630,9 @@ def verify_trail(source_id: str | None = None) -> TrailReport:
         report.records.append(verify_record(record))
 
     report.chain = verify_chain(all_records)
+    # The legacy-block check reads the FULL trail for the same reason the chain
+    # does: the block it covers is defined by file order, not by source.
+    report.raw_records = all_records
     _annotate_head_anchor(report.chain, all_records)
     return report
 
@@ -666,6 +672,38 @@ def _chain_lines(chain: ChainResult) -> list[str]:
     return out
 
 
+def _legacy_manifest_lines(records: list[dict]) -> list[str]:
+    """Report the block the hash chain does NOT cover.
+
+    verify_chain starts at the first record carrying a record_hash and skips
+    everything before it. Measured 2026-07-25 on the live trail: 1430 records, 24
+    chained — so 1406 sat with no protection against deletion or reordering and
+    nothing in this report said so. Silence there reads as "all clear", which is
+    the worst possible default for an integrity verifier.
+    """
+    from app.legacy_trail_manifest import verify as _verify_legacy
+
+    result = _verify_legacy(records)
+    if result["record_count"] == 0:
+        return ["Legacy block: none (every record is chained)."]
+    if result["status"] == "intact":
+        return [
+            f"Legacy block: sealed — {result['record_count']} pre-chain record(s) "
+            f"unchanged since {result.get('sealed_at')}.",
+            "  (scope: proves no deletion/reorder/edit SINCE sealing; it cannot "
+            "speak to the block's state before that moment)",
+        ]
+    if result["status"] == "unsealed":
+        return [
+            f"Legacy block: UNSEALED — {result['record_count']} pre-chain record(s) "
+            "have no integrity cover at all.",
+            "  fix: run.py seal-legacy-trail",
+        ]
+    return [
+        f"Legacy block: FAILED ({result['status']}) — {result['detail']}",
+    ]
+
+
 def _render_text(report: TrailReport) -> str:
     lines: list[str] = []
     lines.append("StatuteProof — Evidence Trail Integrity Verifier")
@@ -674,6 +712,7 @@ def _render_text(report: TrailReport) -> str:
         lines.append("No source run records found in the evidence trail.")
         lines.append("")
         lines.extend(_chain_lines(report.chain))
+        lines.extend(_legacy_manifest_lines(report.raw_records))
         lines.append("")
         lines.append(f"RESULT: {'PASS' if report.ok else 'FAIL'}")
         return "\n".join(lines)
@@ -706,6 +745,7 @@ def _render_text(report: TrailReport) -> str:
 
     lines.append("")
     lines.extend(_chain_lines(report.chain))
+    lines.extend(_legacy_manifest_lines(report.raw_records))
     lines.append("")
     lines.append(
         f"Totals: {len(report.records)} records — "
@@ -753,6 +793,8 @@ def run_cli(argv: list[str] | None = None) -> int:
             print("StatuteProof — Evidence Trail Hash Chain")
             print("=" * 64)
             for line in _chain_lines(report.chain):
+                print(line)
+            for line in _legacy_manifest_lines(report.raw_records):
                 print(line)
             print("")
             print(f"RESULT: {'PASS' if report.chain.ok else 'FAIL'}")

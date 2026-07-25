@@ -88,9 +88,63 @@ the number quietly lowered. The published sales claim in
 said "41 fresh-alert-eligible"; corrected to 40 in both, along with the VARA family
 row (fresh 4→3, candidate 0→1).
 
+## Second pass — the 99% of the trail the chain did not cover
+
+`verify_chain` starts at the first record carrying a `record_hash` and skips
+everything before it. Of 1430 records the chain covered **24**. The other 1406
+could be deleted, reordered, or have a line lifted from the middle, and the
+verifier printed "Hash chain: intact" and nothing else. Silence there reads as
+all-clear — the worst possible default for a tool whose job is to say whether the
+evidence store is sound.
+
+| | Before | After |
+|---|---|---|
+| Records covered by an integrity mechanism | 24 of 1430 | **1430 of 1430** |
+| What the report says about the uncovered block | nothing | named, counted, and given a fix |
+
+`app/legacy_trail_manifest.py` digests the ordered identities of the pre-chain
+block, using the same canonical serialization the chain hashes
+(`source_runs._chain_payload`) so the two cannot drift about what "the same
+record" means. Order is folded in, so swapping two records changes the digest even
+though the set is identical — tested, because a set-based digest would silently
+pass exactly that attack.
+
+`run.py verify-trail` now reports the block in all three of its render paths.
+Sealed: *"1406 pre-chain record(s) unchanged since 2026-07-25T17:57:48Z"*.
+Unsealed, which is what a fresh install shows: *"UNSEALED — 1406 pre-chain
+record(s) have no integrity cover at all"* with the command to fix it.
+
+### The guarantee, stated exactly
+
+It proves nothing changed **since sealing**. It cannot speak to whether the block
+was already altered **before** — the records predate the chain, so there is no
+earlier attestation to compare against, and no tool can invent one. The scope
+sentence is printed in the report next to the verdict, not buried in a docstring,
+and the sealing date is in the manifest so a reader can see which claim they are
+being offered.
+
+Re-sealing overwrites, which would erase the very evidence a tamper alarm rests
+on. So it refuses without `--force`, and it is a founder CLI rather than something
+the pipeline does on its own.
+
+11 tests: deletion, insertion, reordering with an unchanged count, an identity
+edit, a corrupt manifest failing rather than passing, and that the seal records
+its own date.
+
+### Owner action required — this is not done in production
+
+The manifest is **deliberately not committed**. It attests to the trail it was
+sealed over, and my local trail is not production's; a committed local manifest
+would pin the wrong block and read as a guarantee it cannot give. Production is
+sealed by running there, once:
+
+    python3 run.py seal-legacy-trail
+
+Until that runs, prod's verify-trail will correctly report its legacy block as
+UNSEALED.
+
 ## Still open on this axis
 
-- `record_hash` covers only the 24-record chained tail; the earlier 1406 records can
-  be deleted or reordered without detection. The DoD's "chain covers whole trail" is
-  **not** met.
-- The 557 unsealed artifacts above.
+- The 557 unsealed artifacts described above (proofs written 2026-07-03..05 with
+  no hashes at all). They cannot be made verifiable after the fact; the open
+  question is whether the affected sources need re-capture.
