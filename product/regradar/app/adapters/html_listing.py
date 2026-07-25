@@ -84,6 +84,26 @@ _ALLOWED_HOSTS = (
     #   shape: one page carries every dated amendment.
     "main.un.org",
     "cbben.thomsonreuters.com",
+    # Added 2026-07-25. Both are the SAME Drupal "view_revision_updates" view as
+    # the already-monitored cbben (CBB) / rulebooks.vara.ae / rulebook.centralbank.ae
+    # change-logs — the highest-value page shape there is, because one page carries
+    # every dated amendment instead of forcing a diff of a whole rulebook. Verified
+    # on a live fetch through THIS adapter (.view-content), not from documentation:
+    # dfsaen.thomsonreuters.com — 40 rows / 1,846 chars, e.g. "W1143/2026 — Globus
+    #   Payments Limited (DIFC) | 22 July 2026" (waiver & modification notices) and
+    #   "Consultation Paper No. 174 - Miscellaneous Changes | 09 July 2026".
+    # qfcra-en.thomsonreuters.com — 40 rows / 2,317 chars, e.g. "GENE 8.1.1
+    #   Introduction | 01 May 2026". NOTE: only the BARE URL works on this instance;
+    #   ?f_days=on&changed=-30 day returns 200 with ZERO rows (its date filter
+    #   accepts only the form's own options), so the row must not carry that param.
+    "dfsaen.thomsonreuters.com",
+    "qfcra-en.thomsonreuters.com",
+    # moj.gov.ae (added 2026-07-25): the AML/CFT legislation page is server-rendered
+    # in Bootstrap accordions (.accordion-item), which the generic extractor reads as
+    # collapsed chrome. Verified: 5,254 chars covering Federal Decree-Law 10/2025
+    # (AML), Cabinet Resolution 134/2025 (executive regulations) and Cabinet
+    # Resolution 74/2020 (terrorist lists).
+    "moj.gov.ae",
 )
 
 # Reject a selected region too thin to be a meaningful listing snapshot

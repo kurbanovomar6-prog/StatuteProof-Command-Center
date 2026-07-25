@@ -790,6 +790,50 @@ def _fetch_direct_pdf(result: dict, source: dict, url: str) -> str:
     return html
 
 
+# HTTP statuses that mean "this resource does not exist at this URL". Deliberately
+# NOT every 4xx/5xx: a 403 or a Cloudflare 503 is a gate in front of real content
+# that the Playwright tier or the owner's egress proxy legitimately gets past
+# (that is exactly how the WAF-blocked regulator hosts are monitored), so failing
+# on those would drop working sources. A 404/410 is a verdict about the PATH, and
+# no amount of re-rendering makes the content exist.
+_STALE_URL_STATUSES = frozenset({404, 410})
+
+
+def _reject_stale_url(result: dict, source: dict, cfg: _IntakeConfig, url: str) -> dict | None:
+    """Refuse a source whose URL is gone, instead of monitoring its error page.
+
+    Playwright escalates on a failed requests tier WITHOUT consulting the status,
+    so a 404 was followed by a successful render of the regulator's "page not
+    found" template — 78,130 chars of site chrome offered to the gate as content
+    (observed 2026-07-25 on AE-uaefiu-articles-guidelines-rss, whose RSS path no
+    longer exists). That run only failed because the template happened to
+    normalize to 102 chars and tripped the nav-shell heuristic. A 404 page
+    carrying a paragraph of prose — the common shape — would have cleared both
+    the length floor and the nav-shell check and been certified, after which the
+    monitor would hash the error template and raise a regulatory-change alert
+    every time the regulator edited its own 404 wording. Refusing here keeps a
+    dead URL loudly dead: the failure_reason names the status, which
+    _derive_failure_code maps to URL_STALE.
+    """
+    status = result.get("http_status")
+    if not isinstance(status, int) or status not in _STALE_URL_STATUSES:
+        return None
+    result["status"] = SourceIntakeStatus.BLOCKED
+    result["failure_reason"] = (
+        f"HTTP {status} — the configured URL no longer exists; any body returned "
+        f"for it is an error page, not source content."
+    )
+    result["remediation_hint"] = (
+        "Find the source's current URL (the publisher moved or retired this path) "
+        "and update the registry entry."
+    )
+    result["errors"].append(f"Fetch returned HTTP {status} for {url}")
+    return _finalize_intake_failure(
+        result, source, cfg.source_id, url,
+        quality_url=url, quality_canonical_url=url,
+    )
+
+
 def _fetch_rendered_html(
     result: dict, source: dict, cfg: _IntakeConfig
 ) -> tuple[str, dict | None]:
@@ -821,6 +865,9 @@ def _fetch_rendered_html(
             status_out=status_out,
         )
         result["http_status"] = status_out.get("http_status")
+        stale = _reject_stale_url(result, source, cfg, url)
+        if stale is not None:
+            return "", stale
     except Exception as exc:
         if cfg.wait_selector or cfg.content_selector or cfg.fetch_method == "playwright":
             result["status"] = SourceIntakeStatus.NEEDS_SELECTOR_REVIEW

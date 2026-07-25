@@ -630,7 +630,12 @@
     "last_checked_at": "2026-07-18T00:00:00Z",
     "noise_risk": "low",
     "source_health_risk": "low",
-    "fetch_method": "playwright"
+    "fetch_method": "playwright",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 9601,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "Abu Dhabi Global Market (ADGM)",
@@ -4292,7 +4297,12 @@
       "date_selector": "adgm-table-cell:nth-of-type(1)",
       "min_title_chars": 8
     },
-    "baseline_runs_required": 2
+    "baseline_runs_required": 2,
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 2491,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "source_id": "AE-adgm-data-protection-regulations-2021-pdf",
@@ -10072,7 +10082,12 @@
     "recommended_check_frequency": "daily",
     "expected_update_pattern": "VARA official regulatory-notices index; checked daily for new/changed notice titles, dates, types, and normalized-hash changes.",
     "customer_alert_policy": "Alert on material VARA regulatory-notice title, date, type, link, or normalized-hash changes; suppress layout and boilerplate-only changes.",
-    "notes": "2026-07-21 Promoted candidate -> fresh_alert on enforcement-monitoring discovery: same host (vara.ae) as AE-vara-enforcement which server-renders dated enforcement entries and is MONITOR_OK; this notices index likewise server-renders 29 dated Licensing/Enforcement Notices and Warnings at requests-tier (HTTP 200, ~12.6K visible chars). Prod rebaseline recommended before next sweep. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-21 Promoted candidate -> fresh_alert on enforcement-monitoring discovery: same host (vara.ae) as AE-vara-enforcement which server-renders dated enforcement entries and is MONITOR_OK; this notices index likewise server-renders 29 dated Licensing/Enforcement Notices and Warnings at requests-tier (HTTP 200, ~12.6K visible chars). Prod rebaseline recommended before next sweep. Monitoring intelligence only. Not legal advice.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 10323,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "VARA Compliance and Risk Management Rulebook (incl. AML/CFT Part III)",
@@ -10099,8 +10114,14 @@
     "customer_alert_policy": "Alert on material VARA rulebook text, version, effective-date, or document-link changes; suppress layout, navigation, and boilerplate-only changes.",
     "notes": "2026-07-17 REPOINTED + REBUILT (was: name 'VARA AML/CFT Rulebook', url https://www.vara.ae/en/regulatory-framework/aml-cft-rulebook/, status disabled_path_moved — that path now returns HTTP 404 with no redirect; VARA moved rulebook content to rulebooks.vara.ae and folded AML/CFT into Part III of the Compliance and Risk Management Rulebook — verified 2026-07-17). New URL is the official rulebook HTML page. Adapter rulebook_platform follows the page's own 'Entire section' link (server-rendered on this platform) and captures the FULL rulebook text including the complete AML/CFT part, plus version markers ('Effective From: 19 June 2025' at intake), version list, and the current-version PDF link (VARA_EN_123_VER20250519.pdf at intake) — so a new version changes the hash even though pinned per-version PDF URLs never change (the reason the sibling AE-vara-compliance-risk-rulebook-pdf source stays disabled_static_pdf). Live check 2026-07-17 from founder laptop: 100,940 chars, is_quality_content=True, deterministic across 2 runs. Prod reachability expected OK (prod already monitors rulebooks.vara.ae: AE-vara-rulebook-updates) but NOT verified from prod today. Source Lab intake does not know this registry adapter; validate via the runtime pipeline path. CANDIDATE until, on the prod deployment: pipeline no-save check OK, proof + 2 baseline runs + MONITOR_OK + review gates — then flip monitoring_mode to fresh_alert and alert_eligible to true. Monitoring intelligence only. Not legal advice. | 2026-07-18 PROD GATES PASSED: 2 stable production runs (100,940 chars, GOOD, sha-stable, full rulebook text incl. AML/CFT Part III) — promoted to fresh_alert.",
     "last_monitor_status": "MONITOR_OK",
-    "baseline_runs_completed": 2,
-    "last_checked_at": "2026-07-18T00:00:00Z"
+    "baseline_runs_completed": 0,
+    "last_checked_at": "2026-07-18T00:00:00Z",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 93826,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run.",
+    "baseline_reset_note": "Reset 2026-07-25: the previous non-zero count came from LOCAL intake runs, not prod. Kept in local_baseline_runs_completed so the prod gate cannot count local evidence."
   },
   {
     "source_id": "AE-cbuae-enforcement",
@@ -10509,8 +10530,13 @@
     "adapter_name": "xml_feed",
     "adapter_family": "static_html",
     "check_interval_minutes": 240,
-    "baseline_runs_completed": 2,
-    "local_intake_certified": true
+    "baseline_runs_completed": 0,
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 2720,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run.",
+    "baseline_reset_note": "Reset 2026-07-25: the previous non-zero count came from LOCAL intake runs, not prod. Kept in local_baseline_runs_completed so the prod gate cannot count local evidence."
   },
   {
     "name": "UK OFSI Consolidated Sanctions List",
@@ -10553,7 +10579,12 @@
       "title_selector": "a, .field--name-title",
       "date_selector": "time, .datetime",
       "min_title_chars": 8
-    }
+    },
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1299,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "UAE FIU Articles & Guidelines (RSS)",
@@ -10570,7 +10601,10 @@
     "tier": "2",
     "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 7.8KB text/xml); official FIU RSS sidesteps the Angular front-end AND the droplet block that dark-ened the FIU family — guidance/typologies for reporting entities incl. VASPs. (Press-release RSS returned 522 from prod — retry later.) CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: RSS has no semantic HTML tags → Tier 1 always rejected → Playwright rendered Chromium's XML-viewer chrome, extraction saw 266 chars of viewer UI. Fixed via opt-in xml_feed registry adapter (RSS 2.0 parse, whitespace-padded fields normalized; title | date | link sorted by link). Verified locally 2026-07-18: 1,467 chars / 8 items, identical across 2 consecutive fetches (www→apex 301 followed under SSRF guard). expected_min_length 2000→880 (~60% of observed 1,467). Requires prod re-baseline before alerting.",
     "adapter_name": "xml_feed",
-    "adapter_family": "xml_feed"
+    "adapter_family": "xml_feed",
+    "local_intake_certified": false,
+    "url_stale_note": "HTTP 404 on 2026-07-25: the RSS path no longer exists. Playwright then rendered the site's 404 template (78,130 chars) and offered it as content; the new URL_STALE gate now refuses it. Needs the UAE FIU's current publications URL before it can be monitored.",
+    "url_stale_detected_at": "2026-07-25"
   },
   {
     "name": "DIFC Courts Judgments and Orders",
@@ -10610,11 +10644,16 @@
       "title_selector": "adgm-table-cell:nth-of-type(2)",
       "date_selector": "adgm-table-cell:nth-of-type(1)",
       "min_title_chars": 8
-    }
+    },
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1113,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "MoJ AML/CFT Laws and Legislation",
-    "url": "https://www.moj.gov.ae/en/laws-and-legislation/anti-money-laundering-and-combatting-terrorism-financing.aspx",
+    "url": "https://www.moj.gov.ae/en/laws-and-legislation/anti-money-laundering-and-combatting-terrorism-financing/anti-money-laundering-and-combatting-terrorism-financing.aspx",
     "jurisdiction": "AE",
     "category": "aml",
     "enabled": true,
@@ -10625,7 +10664,23 @@
     "expected_min_length": 300,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 170KB static .aspx); MoJ supervises lawyer/notary DNFBPs — currently only touched via generic news. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy. expected_min_length 20000→300 (~60% of observed 511)."
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 170KB static .aspx); MoJ supervises lawyer/notary DNFBPs — currently only touched via generic news. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy. expected_min_length 20000→300 (~60% of observed 511).",
+    "adapter_name": "html_listing",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": ".accordion-item",
+      "container_selector": ".accordion-item",
+      "item_selector": ".accordion-title",
+      "title_selector": "span",
+      "min_title_chars": 8
+    },
+    "url_corrected_at": "2026-07-25",
+    "url_correction_note": "Previous single-segment URL 302-redirected to https://www.moj.gov.ae/default.aspx (ministry homepage), so this source was diffing the homepage, not AML legislation. Corrected to the doubled-segment path; verified 5,254 chars of accordion content incl. Federal Decree-Law 10/2025, Cabinet Resolution 134/2025 and Cabinet Resolution 74/2020.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 4026,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "DFSA Consultation Papers (current)",
@@ -10645,7 +10700,12 @@
     "adapter_family": "rulebook_platform",
     "adapter_config": {
       "entire_section_min_chars": 1200
-    }
+    },
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1697,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "MENAFATF Publications",
@@ -10665,7 +10725,12 @@
     "adapter_family": "html_listing",
     "adapter_config": {
       "content_selector": "#content"
-    }
+    },
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1133,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "BIS Basel Committee Publications (RSS)",
@@ -10683,8 +10748,13 @@
     "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 32KB RSS); policy-team value for banking-adjacent firms; machine-readable; lowest priority of the batch. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: same Tier-1 RuntimeError (application/rss+xml has no charset → apparent_encoding on a consumed streamed body) = FAILED/0 on prod; RSS also has no semantic HTML tags so the generic tiers cannot score it. Fixed via opt-in xml_feed registry adapter (RSS 1.0 RDF parse; title | date | link per item, sorted by stable link slug, capped at 100 items). Verified locally 2026-07-18: 3,607 chars / 25 items, identical across 2 consecutive fetches. expected_min_length 5000→2100 (~60% of observed 3,607). Requires prod re-baseline before alerting. | 2026-07-25 GATE-FAMILY FIX: the readiness gate could not certify this FEED because adapter_name 'xml_feed' is a FETCHING-registry name the HTML-extract platform does not know ('Adapter failed: Unknown adapter: xml_feed'), so it demanded a selector for an XML document (NEEDS_SELECTOR_REVIEW, baseline_runs_completed stuck at 0). Set adapter_family=static_html so the gate simply hashes the document; the monitoring pipeline still uses the xml_feed registry adapter via adapter_name. After the fix: MONITORING_CERTIFIED, can_activate_monitoring=true. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
     "adapter_name": "xml_feed",
     "adapter_family": "static_html",
-    "baseline_runs_completed": 2,
-    "local_intake_certified": true
+    "baseline_runs_completed": 0,
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 3581,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run.",
+    "baseline_reset_note": "Reset 2026-07-25: the previous non-zero count came from LOCAL intake runs, not prod. Kept in local_baseline_runs_completed so the prod gate cannot count local evidence."
   },
   {
     "name": "UAE Good Delivery / Emirates Bullion Committee Rules",
@@ -10864,7 +10934,12 @@
     "adapter_name": "xml_feed",
     "adapter_family": "xml_feed",
     "check_interval_minutes": 240,
-    "notes": "2026-07-18 ADDED as candidate (source-gap-analysis, adversarially verified: real+official+not-covered). Closes the sanctions 'big-4' — we cover UN/OFSI/OFAC, this is the EU DG FISMA consolidated list an MLRO spots missing in a first demo. Verified reachable FROM PRODUCTION today (200, RSS 3.9KB). RSS lists file-format variants (PDF/CSV/XML) with per-item <title> version (v1.0), <pubDate> (list update date), and <guid> checksum; xml_feed processes <item> only so the channel <lastBuildDate> regeneration noise never fires. The download link carries a static versioned token (base64 'token-2017'), not a per-request session token. CANDIDATE until 2 stable prod baselines + intake gates pass. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED as candidate (source-gap-analysis, adversarially verified: real+official+not-covered). Closes the sanctions 'big-4' — we cover UN/OFSI/OFAC, this is the EU DG FISMA consolidated list an MLRO spots missing in a first demo. Verified reachable FROM PRODUCTION today (200, RSS 3.9KB). RSS lists file-format variants (PDF/CSV/XML) with per-item <title> version (v1.0), <pubDate> (list update date), and <guid> checksum; xml_feed processes <item> only so the channel <lastBuildDate> regeneration noise never fires. The download link carries a static versioned token (base64 'token-2017'), not a per-request session token. CANDIDATE until 2 stable prod baselines + intake gates pass. Monitoring intelligence only. Not legal advice.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 968,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "SAMA Rulebook (Saudi Central Bank)",
@@ -10906,7 +10981,12 @@
     "expected_min_length": 900,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-25 ADDED as candidate (source-coverage goal). Verified on a live fetch from this machine: status 200, listing fully SERVER-RENDERED inside custom <adgm-table-row> elements (no headless browser needed); the generic extractor sees only the page shell, so html_listing + content_selector 'adgm-table-row' is required. adgm.com added to the html_listing host allowlist in the same change. CANDIDATE until the prod intake gates pass (no-save check, proof, 2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice. Live evidence: 11 dated rows; most recent 08 Jan 2026 Wealthface Limited (Enforceable Undertaking), 17 Dec 2025 Payward MENA (Final Notice), 24 Nov 2025 FWS Group."
+    "notes": "2026-07-25 ADDED as candidate (source-coverage goal). Verified on a live fetch from this machine: status 200, listing fully SERVER-RENDERED inside custom <adgm-table-row> elements (no headless browser needed); the generic extractor sees only the page shell, so html_listing + content_selector 'adgm-table-row' is required. adgm.com added to the html_listing host allowlist in the same change. CANDIDATE until the prod intake gates pass (no-save check, proof, 2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice. Live evidence: 11 dated rows; most recent 08 Jan 2026 Wealthface Limited (Enforceable Undertaking), 17 Dec 2025 Payward MENA (Final Notice), 24 Nov 2025 FWS Group.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1140,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "ADGM Registration Authority Regulatory Actions (UBO / filing fines)",
@@ -10931,7 +11011,12 @@
     "expected_min_length": 900,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-25 ADDED as candidate (source-coverage goal). Verified on a live fetch from this machine: status 200, listing fully SERVER-RENDERED inside custom <adgm-table-row> elements (no headless browser needed); the generic extractor sees only the page shell, so html_listing + content_selector 'adgm-table-row' is required. adgm.com added to the html_listing host allowlist in the same change. CANDIDATE until the prod intake gates pass (no-save check, proof, 2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice. Live evidence: 11 dated rows; most recent 26 Jan 2026 fine for false beneficial-ownership information."
+    "notes": "2026-07-25 ADDED as candidate (source-coverage goal). Verified on a live fetch from this machine: status 200, listing fully SERVER-RENDERED inside custom <adgm-table-row> elements (no headless browser needed); the generic extractor sees only the page shell, so html_listing + content_selector 'adgm-table-row' is required. adgm.com added to the html_listing host allowlist in the same change. CANDIDATE until the prod intake gates pass (no-save check, proof, 2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice. Live evidence: 11 dated rows; most recent 26 Jan 2026 fine for false beneficial-ownership information.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1235,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "UK OFSI (GOV.UK) — organisation Atom feed: financial-sanctions notices & penalties",
@@ -10947,7 +11032,12 @@
     "expected_min_length": 1500,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "Machine-readable Atom feed (rule (e): prefer the feed over the HTML page). xml_feed adapter verified locally: 3935 chars, 20 items captured, most recent items dated 2026-07-24T09:32Z / 2026-07-21T14:07Z, incl. 'UK issues largest penalty for financial sanctions breach'. gov.uk added to the xml_feed host allowlist in the same change. UK financial-sanctions designations bind UAE firms' screening obligations. Verified on a live fetch 2026-07-25 by an independent verifier agent AND re-checked locally. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice."
+    "notes": "Machine-readable Atom feed (rule (e): prefer the feed over the HTML page). xml_feed adapter verified locally: 3935 chars, 20 items captured, most recent items dated 2026-07-24T09:32Z / 2026-07-21T14:07Z, incl. 'UK issues largest penalty for financial sanctions breach'. gov.uk added to the xml_feed host allowlist in the same change. UK financial-sanctions designations bind UAE firms' screening obligations. Verified on a live fetch 2026-07-25 by an independent verifier agent AND re-checked locally. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 3933,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "US OFAC — Civil Penalties and Enforcement Information (settlements & penalties)",
@@ -10971,7 +11061,12 @@
       "item_selector": "tr",
       "title_selector": "td",
       "min_title_chars": 6
-    }
+    },
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 577,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "UN Security Council 1267 / ISIL & Al-Qaida Committee — press releases (designations & amendments)",
@@ -10995,7 +11090,12 @@
       "item_selector": "tr",
       "title_selector": "td",
       "min_title_chars": 8
-    }
+    },
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1621,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "CBB Bahrain — Rulebook 'View Updates' change-log (all volumes, trailing 30 days)",
@@ -11019,7 +11119,12 @@
       "item_selector": ".views-row",
       "title_selector": "a",
       "min_title_chars": 8
-    }
+    },
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1689,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   },
   {
     "name": "US OFAC Sanctions List Service — daily delta (what changed: adds / changes / removals)",
@@ -11036,6 +11141,67 @@
     "expected_min_length": 600,
     "baseline_runs_required": 2,
     "tier": "1",
-    "notes": "2026-07-25 ADDED (source-coverage goal) — the highest-value sanctions shape available: OFAC publishes a DELTA document on every action day (root <sanctionsData>, xmlns treasury.gov/ofac/DeltaFile/1.0) naming each affected entity WITH an action (add/change/remove), so the monitor never has to diff a multi-megabyte SDN snapshot and infer what moved. A parser branch for this schema was added to app/adapters/xml_feed.py in the same change (the generic RSS/Atom path returned 0 chars). Verified live: 1531 chars, publication date 2026-07-24, publicationType 'Standard Action', 13 entities all action=add, rendered with programme (IRAN-EO13902), measure (Block) and legal authority (Executive Order 13902). adapter_family=static_html lets the readiness gate certify the document while monitoring uses the xml_feed registry adapter. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-25 ADDED (source-coverage goal) — the highest-value sanctions shape available: OFAC publishes a DELTA document on every action day (root <sanctionsData>, xmlns treasury.gov/ofac/DeltaFile/1.0) naming each affected entity WITH an action (add/change/remove), so the monitor never has to diff a multi-megabyte SDN snapshot and infer what moved. A parser branch for this schema was added to app/adapters/xml_feed.py in the same change (the generic RSS/Atom path returned 0 chars). Verified live: 1531 chars, publication date 2026-07-24, publicationType 'Standard Action', 13 entities all action=add, rendered with programme (IRAN-EO13902), measure (Block) and legal authority (Executive Order 13902). adapter_family=static_html lets the readiness gate certify the document while monitoring uses the xml_feed registry adapter. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 849,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
+  },
+  {
+    "id": "AE-dfsa-rulebook-revision-updates",
+    "name": "DFSA Rulebook — revision updates (dated change-log)",
+    "url": "https://dfsaen.thomsonreuters.com/view-revision-updates",
+    "jurisdiction": "AE",
+    "category": "rulebook",
+    "regulator": "DFSA",
+    "adapter_name": "html_listing",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": ".view-content",
+      "container_selector": ".view-content",
+      "item_selector": ".views-row",
+      "title_selector": "a",
+      "min_title_chars": 8
+    },
+    "enabled": false,
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "baseline_runs_required": 2,
+    "baseline_runs_completed": 0,
+    "discovery_note": "Same Drupal view_revision_updates shape as the proven CBB change-log. One page carries every dated rulebook amendment, waiver/modification notice (W-numbers) and consultation paper, so a monitor sees the change itself instead of diffing a whole module. Verified 2026-07-25 via html_listing: 40 rows / 1,846 chars, incl. the AML Module amended 02 July 2026 and 'W1143/2026 — Globus Payments Limited (DIFC) | 22 July 2026'.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 1324,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
+  },
+  {
+    "id": "GCC-qa-qfcra-legislation-revision-updates",
+    "name": "QFCRA Legislation — revision updates (dated change-log)",
+    "url": "https://qfcra-en.thomsonreuters.com/view-revision-updates",
+    "jurisdiction": "QA",
+    "category": "rulebook",
+    "regulator": "QFCRA",
+    "adapter_name": "html_listing",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": ".view-content",
+      "container_selector": ".view-content",
+      "item_selector": ".views-row",
+      "title_selector": "a",
+      "min_title_chars": 8
+    },
+    "enabled": false,
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "baseline_runs_required": 2,
+    "baseline_runs_completed": 0,
+    "discovery_note": "Same Drupal view_revision_updates shape as the proven CBB change-log. Verified 2026-07-25 via html_listing on the BARE url: 40 rows / 2,317 chars, incl. 'GENE 8.1.1 Introduction | 01 May 2026' (GENE ch.8 governs mandatory controller-change notice to the Regulatory Authority). Do NOT add ?f_days=on&changed=-30 day: that variant returns HTTP 200 with ZERO rows on this instance — verified, not assumed.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 2084,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   }
 ]
