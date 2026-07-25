@@ -296,3 +296,83 @@ def test_fetch_content_returns_none_on_fetch_failure():
 def test_fetch_content_never_raises():
     with patch("app.adapters.xml_feed.fetch_bytes_bounded", side_effect=RuntimeError("boom")):
         assert _ADAPTER.fetch_content(_FIU_URL, {"adapter_name": "xml_feed"}) is None
+
+
+# ── OFAC Sanctions List Service delta (custom <sanctionsData> schema) ────────
+#
+# OFAC publishes a delta on every action day. It is the best sanctions shape
+# available: it names each affected entity WITH an action (add/change/remove),
+# so the monitor never has to diff a multi-megabyte SDN snapshot and guess.
+# Verified against the live document 2026-07-25 (13 entities, all action="add",
+# publicationType "Standard Action").
+
+_OFAC_DELTA = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<sanctionsData xmlns="https://www.treasury.gov/ofac/DeltaFile/1.0">
+  <publicationInfo>
+    <datePublished>2026-07-24T00:00:00-04:00</datePublished>
+    <publicationType>Standard Action</publicationType>
+  </publicationInfo>
+  <entities>
+    <entity id="58174" action="add">
+      <generalInfo><entityType refId="601">Entity</entityType></generalInfo>
+      <sanctionsPrograms><sanctionsProgram id="1">IRAN-EO13902</sanctionsProgram></sanctionsPrograms>
+      <sanctionsTypes><sanctionsType id="2">Block</sanctionsType></sanctionsTypes>
+      <legalAuthorities><legalAuthority id="3">Executive Order 13902 (Iran)</legalAuthority></legalAuthorities>
+      <names><name id="9"><translations><translation>
+        <formattedFullName>ZEDPAY  FINANSAL   SISTEM</formattedFullName>
+      </translation></translations></name></names>
+    </entity>
+    <entity id="58175" action="remove">
+      <generalInfo><entityType refId="602">Individual</entityType></generalInfo>
+      <sanctionsPrograms><sanctionsProgram id="4">SDGT</sanctionsProgram></sanctionsPrograms>
+      <names><name id="10"><translations><translation>
+        <formattedFullName>SOME REMOVED PERSON</formattedFullName>
+      </translation></translations></name></names>
+    </entity>
+  </entities>
+</sanctionsData>"""
+
+
+def test_ofac_delta_is_recognised_and_names_the_actions():
+    text = XmlFeedAdapter.parse_payload(_OFAC_DELTA.encode(), "https://sanctionslistservice.ofac.treas.gov/changes/latest")
+    assert text is not None
+    # The delta's own publication metadata, not a fetch timestamp.
+    assert "Publication date: 2026-07-24T00:00:00-04:00" in text
+    assert "Publication type: Standard Action" in text
+    assert "Entities in this delta: 2" in text
+    # The per-action tally is what makes an alert excerpt immediately readable.
+    assert "Actions: add=1, remove=1" in text
+
+
+def test_ofac_delta_renders_entity_action_name_programme_and_authority():
+    text = XmlFeedAdapter.parse_payload(_OFAC_DELTA.encode(), "u")
+    assert "add | Entity | ZEDPAY FINANSAL SISTEM | IRAN-EO13902 | Block | Executive Order 13902 (Iran)" in text
+    # A removal must be visible as a removal — a de-listing is action-forcing too.
+    assert "remove | Individual | SOME REMOVED PERSON | SDGT" in text
+
+
+def test_ofac_delta_output_is_order_independent():
+    """Regeneration must not reorder the digest, or every poll would diff."""
+    swapped = _OFAC_DELTA.replace('id="58174" action="add"', 'id="ZZZ" action="add"')
+    a = XmlFeedAdapter.parse_payload(_OFAC_DELTA.encode(), "u")
+    b = XmlFeedAdapter.parse_payload(swapped.encode(), "u")
+    # Entity ids are not rendered, so a pure id change leaves the digest identical.
+    assert a == b
+
+
+def test_ofac_delta_without_entities_returns_none():
+    empty = """<?xml version="1.0"?>
+<sanctionsData xmlns="https://www.treasury.gov/ofac/DeltaFile/1.0">
+  <publicationInfo><datePublished>2026-07-24</datePublished></publicationInfo>
+  <entities/>
+</sanctionsData>"""
+    assert XmlFeedAdapter.parse_payload(empty.encode(), "u") is None
+
+
+def test_ofac_delta_payload_with_doctype_is_still_refused():
+    """The entity-expansion guard must apply to the OFAC branch too."""
+    hostile = _OFAC_DELTA.replace(
+        "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>",
+        "<?xml version=\"1.0\"?><!DOCTYPE x [<!ENTITY a \"b\">]>",
+    )
+    assert XmlFeedAdapter.parse_payload(hostile.encode(), "u") is None

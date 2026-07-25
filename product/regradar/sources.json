@@ -11020,5 +11020,22 @@
       "title_selector": "a",
       "min_title_chars": 8
     }
+  },
+  {
+    "name": "US OFAC Sanctions List Service — daily delta (what changed: adds / changes / removals)",
+    "url": "https://sanctionslistservice.ofac.treas.gov/changes/latest",
+    "jurisdiction": "INT",
+    "category": "sanctions",
+    "enabled": false,
+    "status": "candidate",
+    "source_id": "INT-ofac-sls-delta",
+    "adapter_name": "xml_feed",
+    "adapter_family": "static_html",
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "expected_min_length": 600,
+    "baseline_runs_required": 2,
+    "tier": "1",
+    "notes": "2026-07-25 ADDED (source-coverage goal) — the highest-value sanctions shape available: OFAC publishes a DELTA document on every action day (root <sanctionsData>, xmlns treasury.gov/ofac/DeltaFile/1.0) naming each affected entity WITH an action (add/change/remove), so the monitor never has to diff a multi-megabyte SDN snapshot and infer what moved. A parser branch for this schema was added to app/adapters/xml_feed.py in the same change (the generic RSS/Atom path returned 0 chars). Verified live: 1531 chars, publication date 2026-07-24, publicationType 'Standard Action', 13 entities all action=add, rendered with programme (IRAN-EO13902), measure (Block) and legal authority (Executive Order 13902). adapter_family=static_html lets the readiness gate certify the document while monitoring uses the xml_feed registry adapter. CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review). Monitoring intelligence only. Not legal advice."
   }
 ]

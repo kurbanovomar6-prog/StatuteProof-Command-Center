@@ -274,8 +274,93 @@ def classify_failure_code(result: dict) -> str:
     return SourceFailureCode.MANUAL_CHECK_REQUIRED
 
 
+def _fetch_via_registry_adapter(result: dict, source: dict, cfg: _IntakeConfig) -> str | None:
+    """Let an opted-in FETCHING-registry adapter supply the monitor text.
+
+    Returns its text, or None to leave the existing fetch path untouched. The
+    registry adapters are strict opt-in (``source["adapter_name"]`` must name them,
+    and most also require an allowlisted host), so a source that does not ask for
+    one is unaffected. Never raises: any failure falls through to the normal fetch.
+    """
+    # Direct-PDF sources keep their own fetch+extract path: a per-host registry
+    # adapter can match the PDF's host and would otherwise silently replace the
+    # PDF text (caught by test_direct_pdf_source_intake_uses_extracted_pdf_text).
+    if cfg.is_direct_pdf:
+        return None
+    declared = str(source.get("adapter_name") or "").strip()
+    if not declared:
+        return None
+    try:
+        from app.adapters.registry import get_adapter_for_url
+
+        adapter = get_adapter_for_url(cfg.url, source)
+        if adapter is None:
+            return None
+        # STRICT opt-in: delegate only when the source NAMES this registry adapter.
+        # Several registry adapters match on host alone, so without this check a
+        # source configured for a PLATFORM family (pdf_document, listing, …) would
+        # be hijacked by a host adapter and every existing baseline could shift.
+        if getattr(adapter, "name", "") != declared:
+            return None
+        text = adapter.fetch_content(cfg.url, source)
+    except Exception as exc:  # never let a probe break intake
+        logger.warning(
+            "registry adapter probe failed for %s: %s: %s",
+            cfg.url, type(exc).__name__, exc,
+        )
+        return None
+    if not text or not text.strip():
+        return None
+
+    name = getattr(adapter, "name", "") or "registry_adapter"
+    result["registry_adapter_used"] = True
+    result["registry_adapter_name"] = name
+    # The adapter's returned digest IS the payload from the gate's point of view.
+    # Without this the "chars_raw < 200" branch would score the source BLOCKED,
+    # because the normal fetch (which sets chars_raw) was skipped.
+    result["chars_raw"] = len(text)
+    result["access_status"] = result.get("access_status") or "public_fetch_attempted"
+    logger.info(
+        "intake used registry adapter %s for %s (%d chars)", name, cfg.url, len(text)
+    )
+    return text
+
+
+def _mark_registry_adapter_result(result: dict) -> None:
+    """Re-assert the registry-adapter labels after the extraction phase.
+
+    ``_extract_source_text`` runs after the fetch and unconditionally rewrites
+    ``adapter_*`` / ``extraction_strategy`` / ``provider_used`` from the platform
+    adapter it tried, so it would relabel registry-adapter text as
+    ``generic_fallback:bs4``. Restoring the labels here keeps the recorded
+    provenance truthful about what actually produced the monitored bytes.
+    """
+    name = str(result.get("registry_adapter_name") or "registry_adapter")
+    result["adapter_used"] = True
+    result["adapter_name"] = name
+    result["adapter_family"] = name
+    result["extraction_strategy"] = f"registry_adapter:{name}"
+    result["provider_used"] = f"registry_adapter:{name}"
+    result["extraction_method"] = f"registry_adapter:{name}"
+    # The platform adapter was never the source of this text; a stale failure
+    # note from it would otherwise read as if the monitored content had failed.
+    result.pop("adapter_declared_and_failed", None)
+    result.pop("adapter_fallback_used", None)
+    result.pop("adapter_failure_reason", None)
+    result["adapter_warnings"] = []
+
+
 def _has_structured_adapter_content(result: dict) -> bool:
     """Return True when an explicit adapter produced item-level monitorable text."""
+    # A FETCHING-registry adapter (app.adapters.registry: xml_feed, html_listing,
+    # rulebook_platform, the per-host adapters) is opted in per source by name and
+    # returns a purpose-built deterministic digest — "Items captured: 20", one row
+    # per listing entry, or an OFAC delta's action tally. That is structured
+    # monitorable text by construction, so it must not be re-judged by the
+    # HTML-shaped nav-shell heuristic, which reads a table of dates and short
+    # titles as a navigation menu (see _detect_nav_shell).
+    if result.get("registry_adapter_used"):
+        return int(result.get("chars_normalized") or 0) >= 200
     adapter_metadata = result.get("adapter_metadata") or {}
     if not isinstance(adapter_metadata, dict):
         return False
@@ -1117,7 +1202,19 @@ def run_source_intake(
         )
 
     # ── 2. Fetch ──────────────────────────────────────────────────────────────
-    if cfg.is_direct_pdf:
+    # A source may name a FETCHING-registry adapter, which does its own fetch and
+    # returns finished monitor text (an RSS/Atom digest, a listing's dated rows, an
+    # OFAC delta's action tally). Until this delegation existed the readiness gate
+    # could never certify such a source: it fetched the raw document itself, the
+    # generic extractor saw XML or a listing shell, and the source scored
+    # NAV_SHELL_ONLY / NEEDS_SELECTOR_REVIEW while the monitoring pipeline read it
+    # perfectly — so the documented promotion path was closed to the entire class
+    # (verified 2026-07-25 on the OFAC delta, the UN and BIS feeds, DFSA
+    # consultation papers, OFAC recent-actions and MENAFATF).
+    registry_text = _fetch_via_registry_adapter(result, source, cfg)
+    if registry_text is not None:
+        html = registry_text
+    elif cfg.is_direct_pdf:
         html = _fetch_direct_pdf(result, source, cfg.url)
     else:
         html, early = _fetch_rendered_html(result, source, cfg)
@@ -1126,6 +1223,10 @@ def run_source_intake(
 
     # ── 3. Extract text ───────────────────────────────────────────────────────
     normalized_text, extracted = _extract_source_text(result, html, cfg)
+    if registry_text is not None:
+        # Normalization above is shared with the pipeline on purpose (identical
+        # hashing); only the provenance labels need restoring.
+        _mark_registry_adapter_result(result)
 
     # ── 4. Nav-shell detection ────────────────────────────────────────────────
     nav_shell = _detect_nav_shell(result, normalized_text, cfg.is_direct_pdf)

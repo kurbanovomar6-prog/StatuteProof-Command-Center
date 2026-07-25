@@ -191,7 +191,101 @@ class XmlFeedAdapter(SourceAdapter):
 
         if _local(root.tag) == "consolidated_list":
             return XmlFeedAdapter._un_consolidated_text(root, url)
+        if _local(root.tag) == "sanctionsdata":
+            return XmlFeedAdapter._ofac_delta_text(root, url)
         return XmlFeedAdapter._feed_text(root, url)
+
+    # ── OFAC Sanctions List Service delta document ────────────────────────
+    #
+    # OFAC publishes a DELTA on every action day (root <sanctionsData>, xmlns
+    # treasury.gov/ofac/DeltaFile/1.0). It is the best shape a sanctions monitor
+    # can consume: instead of diffing a multi-megabyte SDN snapshot and guessing
+    # what moved, the document states each affected entity WITH AN ACTION —
+    # add / change / remove. The rendered digest therefore changes only when a
+    # real designation action happens, and the alert excerpt already names the
+    # entity, the programme and the legal authority.
+
+    @staticmethod
+    def _ofac_entity_row(entity: ET.Element) -> tuple[str, ...]:
+        """One delta entity → (action, type, primary name, programmes, authorities)."""
+        action = _clean(entity.attrib.get("action")) or "unspecified"
+        etype = ""
+        name = ""
+        programmes: list[str] = []
+        authorities: list[str] = []
+        stypes: list[str] = []
+        for block in entity:
+            tag = _local(block.tag)
+            if tag == "generalinfo":
+                for leaf in block:
+                    if _local(leaf.tag) == "entitytype":
+                        etype = _clean(leaf.text)
+            elif tag == "sanctionsprograms":
+                programmes = [_clean(p.text) for p in block if _clean(p.text)]
+            elif tag == "legalauthorities":
+                authorities = [_clean(a.text) for a in block if _clean(a.text)]
+            elif tag == "sanctionstypes":
+                stypes = [_clean(s.text) for s in block if _clean(s.text)]
+            elif tag == "names" and not name:
+                # Prefer the primary formatted full name; fall back to any value.
+                for leaf in block.iter():
+                    if _local(leaf.tag) in ("formattedfullname", "value") and _clean(leaf.text):
+                        name = _clean(leaf.text)
+                        break
+        return (
+            action,
+            etype or "-",
+            name or f"(entity {_clean(entity.attrib.get('id')) or '?'})",
+            "; ".join(programmes) or "-",
+            "; ".join(stypes) or "-",
+            "; ".join(authorities) or "-",
+        )
+
+    @staticmethod
+    def _ofac_delta_text(root: ET.Element, url: str) -> str | None:
+        published = ""
+        pub_type = ""
+        for block in root:
+            if _local(block.tag) != "publicationinfo":
+                continue
+            for leaf in block:
+                if _local(leaf.tag) == "datepublished":
+                    published = _clean(leaf.text)
+                elif _local(leaf.tag) == "publicationtype":
+                    pub_type = _clean(leaf.text)
+
+        entities = [
+            entity
+            for block in root
+            if _local(block.tag) == "entities"
+            for entity in block
+            if _local(entity.tag) == "entity"
+        ]
+        if not entities:
+            logger.warning("XmlFeedAdapter: OFAC delta carried no entities for %s", url)
+            return None
+
+        rows = [XmlFeedAdapter._ofac_entity_row(e) for e in entities[:_MAX_ITEMS]]
+        counts: dict[str, int] = {}
+        for row in rows:
+            counts[row[0]] = counts.get(row[0], 0) + 1
+        # Sort so regeneration noise can never reorder the digest.
+        rows.sort()
+        lines = [
+            "Official sanctions delta monitor (OFAC Sanctions List Service)",
+            f"Source page: {url}",
+            "",
+            f"Publication date: {published or 'unknown'}",
+            f"Publication type: {pub_type or 'unknown'}",
+            f"Entities in this delta: {len(entities)}",
+            "Actions: " + (", ".join(f"{k}={counts[k]}" for k in sorted(counts)) or "none"),
+            "",
+            "Affected entities (action | type | name | programmes | measures | authorities):",
+        ]
+        lines += [" | ".join(row) for row in rows]
+        if len(entities) > _MAX_ITEMS:
+            lines.append(f"(+{len(entities) - _MAX_ITEMS} further entities not rendered)")
+        return "\n".join(lines)
 
     # ── UN consolidated sanctions list ────────────────────────────────────
 
