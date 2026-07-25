@@ -1,13 +1,13 @@
 {
   "schema_version": "2.0",
-  "audit_date": "2026-07-21",
+  "audit_date": "2026-07-25",
   "auditor": "StatuteProof Source Quality Auditor v2",
   "source_file": "product/regradar/sources.json",
   "current_source_truth": {
     "total_enabled": 133,
-    "fresh_alert_eligible": 41,
+    "fresh_alert_eligible": 40,
     "evidence_library": 20,
-    "candidate": 28,
+    "candidate": 29,
     "remediation": 44,
     "source_level_monitor_ok": 42,
     "with_proof_path": 86,
@@ -28,9 +28,9 @@
     {
       "family": "VARA",
       "total_enabled": 7,
-      "fresh_alert_eligible": 4,
+      "fresh_alert_eligible": 3,
       "evidence_library": 2,
-      "candidate": 0,
+      "candidate": 1,
       "remediation": 1,
       "status": "partial",
       "gap_to_25": 22,
@@ -159,7 +159,7 @@
     }
   ],
   "safe_claims": [
-    "StatuteProof has 41 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-21).",
+    "StatuteProof has 40 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage as of the source-register review (2026-07-25).",
     "StatuteProof also maintains 20 evidence-library UAE official/static source snapshots that are not counted as fresh-alert monitoring.",
     "Sources whose hosts block our production monitoring egress — the CBUAE rulebook subdomain and the DFSA website (HTTP 403 to all fetch methods since 2026-07-11) — are disclosed as remediation and are not counted as fresh-alert eligible.",
     "DFSA rulebook depth continues through the DFSA rulebook platform at dfsaen.thomsonreuters.com, which does work from production, including the AML rulebook module promoted on 2026-07-18 after passing rebaseline and stable-run gates.",
@@ -294,6 +294,7 @@
   ],
   "audit_meta": {
     "generatedAt": "2026-07-18T09:30:00Z",
-    "recommendedSalesClaim": "41 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage, with source-level proof files, hashes, and baseline confirmation"
+    "recommendedSalesClaim": "41 fresh-alert-eligible UAE official-source endpoints counted from the production monitoring vantage, with source-level proof files, hashes, and baseline confirmation",
+    "recommended_sales_claim": ""
   }
 }

@@ -38,13 +38,19 @@ _REAL_SOURCES_JSON = Path(__file__).resolve().parent.parent / "sources.json"
 # Discovery verdicts (see the build task). Source ids as wired in sources.json.
 _WIRE_FRESH_ALERT_IDS = {
     "AE-vara-enforcement",
-    "AE-vara-regulatory-notices-and-enforcement-index",
 }
 _NON_FRESH_ENFORCEMENT_IDS = {
     "AE-dfsa-regulatory-actions-current",       # REMEDIATION_PROXY
     "AE-dfsa-what-we-do-enforcement-1a837c50",  # REMEDIATION_PROXY
     "AE-cbuae-enforcement",                      # REMEDIATION_PROXY (added)
     "AE-adgm-fsra-regulatory-alerts",           # CANDIDATE
+    # CANDIDATE since 2026-07-25. It was promoted to fresh_alert on 2026-07-21 on
+    # the strength of its notices being server-rendered, but carried no proof_path
+    # and baseline_runs_completed 0 — below the bar StatuteProof publishes ("at
+    # least two confirmed baseline evidence runs"). origin/main never carried the
+    # promotion. Server-rendering makes a source workable, not alert-eligible;
+    # this row needs a production baseline, not a flag.
+    "AE-vara-regulatory-notices-and-enforcement-index",
 }
 
 
@@ -62,11 +68,16 @@ def test_wire_fresh_alert_sources_are_alert_eligible_and_counted():
     summary = build_enforcement_summary("AE")
     fresh_ids = set(summary["fresh_alert_source_ids"])
     assert _WIRE_FRESH_ALERT_IDS <= fresh_ids, (
-        "Both verified VARA enforcement sources must be counted as fresh-alert "
+        "Every verified enforcement source must be counted as fresh-alert "
         f"enforcement coverage. Got: {sorted(fresh_ids)}"
     )
     assert summary["fresh_alert_count"] == len(fresh_ids)
-    assert summary["fresh_alert_count"] >= 2
+    # Was >= 2 until 2026-07-25. It is now 1, and that is a real coverage
+    # reduction, not a relaxed test: AE-vara-regulatory-notices-and-enforcement-index
+    # was demoted because it carried no proof_path and zero baseline runs. The
+    # floor is kept at "at least one" so the feature cannot silently reach zero,
+    # and the drop is stated here rather than hidden by lowering the number quietly.
+    assert summary["fresh_alert_count"] >= 1
 
 
 def test_wire_fresh_alert_sources_carry_fresh_alert_mode_in_config():

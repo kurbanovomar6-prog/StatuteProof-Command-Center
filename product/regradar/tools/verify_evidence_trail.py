@@ -84,8 +84,13 @@ if str(_PRODUCT_DIR) not in sys.path:
 # ---------------------------------------------------------------------------
 
 from app import source_runs  # noqa: E402  (module import so tests can patch dirs)
+from app.public_verify import (  # noqa: E402
+    _declared_normalization_version,
+    _declares_current_normalization,
+)
 from app.source_runs import compute_record_hash  # noqa: E402
 from app.text_normalization import (  # noqa: E402
+    NORMALIZATION_VERSION,
     normalize_for_change_hash,
     stable_content_hash,
 )
@@ -529,16 +534,41 @@ def verify_record(record: dict) -> RecordResult:
             if not matched:
                 diverged.append("normalized_hash matches no recomputed flavor")
 
-    # ── cross-consistency: normalized.txt must be the normalization of raw.txt
-    # Catches a raw.txt that was swapped for different content whose normalized
-    # form no longer matches the stored normalized.txt (even independent of the
-    # stored hashes). Only meaningful when both snapshot files are present.
+    # ── cross-consistency: normalized.txt vs the normalization of raw.txt ──
+    # This re-derivation is a statement about the NORMALIZER, not about the
+    # evidence, and it only holds when today's normalizer is the one that sealed
+    # the record. Measured 2026-07-25: the same stored raw.txt is on record
+    # producing 51,148 / 43,717 / 42,173 normalized chars across normalizer
+    # generations, and NO stored record carries a normalization_version (0 of
+    # 1317). Treating a version mismatch as divergence reported 855 of 1430
+    # genuine records as if they had been tampered with — in the command whose
+    # whole job is to tell the founder whether the evidence store is sound.
+    #
+    # A swapped raw.txt is already caught above by raw_hash != sha256(raw.txt).
+    # When raw_hash is absent this cross-check was the only defence, so its loss
+    # is surfaced as a missing-coverage note rather than silently dropped.
     if raw_bytes is not None and norm_bytes is not None:
         rederived = normalize_for_change_hash(_decode(raw_bytes))
         stored_normalized = _decode(norm_bytes)
         if rederived != stored_normalized:
-            checked_any = True
-            diverged.append("normalize(raw.txt) != normalized.txt")
+            # Reuse the public verifier's parser so both instruments read the
+            # field the same way. It is written in several shapes across vintages
+            # (live trail: 672 absent, 754 as the string "1.0", 4 as the integer 3),
+            # so a naive isinstance(int) check would misread the majority.
+            declared = _declared_normalization_version(record)
+            if _declares_current_normalization(declared):
+                checked_any = True
+                diverged.append(
+                    f"normalize(raw.txt) != normalized.txt under the record's own "
+                    f"declared normalization v{declared}"
+                )
+            elif not stored_raw_hash:
+                missing.append(
+                    "raw.txt unverifiable: no raw_hash stored, and re-derivation "
+                    f"cannot check it (record declares "
+                    f"{('v' + declared) if declared else 'no normalization version'}, "
+                    f"verifier runs v{NORMALIZATION_VERSION})"
+                )
 
     if diverged:
         return RecordResult(

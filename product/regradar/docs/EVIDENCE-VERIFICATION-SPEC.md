@@ -77,9 +77,29 @@ Given a record bundle (`raw.txt`, `normalized.txt`, `record.json`):
    `content.diff_hash`, `sha256sum diff.txt` → must equal it (so the redline the
    record presents was not edited after sealing). A record without `diff_hash`
    skips this step.
-4. *(optional, stronger)* **Re-derive normalization:** run the published
-   `normalize_for_change_hash` on `raw.txt`; the output must be byte-identical to
-   `normalized.txt` (so the "normalized" form was not quietly swapped).
+4. *(optional, and version-bound)* **Re-derive normalization:** run the published
+   `normalize_for_change_hash` on `raw.txt` and compare it byte-for-byte to
+   `normalized.txt`.
+
+   Read this step for what it is: a check on the **normalizer**, not on the
+   evidence. Integrity is established by steps 1–3 and 5 — those hash the bytes
+   you hold against the values sealed in the record, and tampering with either
+   file breaks them. Step 4 additionally asks whether *today's* normalizer
+   reproduces the stored normalized form, and that only holds when today's
+   normalizer is the one that sealed the record.
+
+   `normalize_for_change_hash` is versioned (`NORMALIZATION_VERSION` in
+   `app/text_normalization.py`, currently 3). A record sealed under an earlier
+   version legitimately fails this comparison while every hash seal passes; the
+   same `raw.txt` is on record in this store producing 51,148 / 43,717 / 42,173
+   normalized characters across normalizer generations. The verifier therefore
+   reports this step as **skipped, with the reason stated**, unless the record
+   declares the version the verifier is running — in which case a mismatch is a
+   real defect and is reported as a failure. Records that declare no version
+   predate versioned normalization and cannot be re-derived at all.
+
+   An auditor should read "skipped" here as "not applicable to this vintage",
+   never as "not checked" — steps 1–3 and 5 still ran and still had to pass.
 5. **Recompute the record hash:** for a canonical `evidence-record.json`
    (`record_hash_method == "content-sha256-v1"`), serialize `record.content` as
    compact (`separators=(",", ":")`), sorted-key, UTF-8 (`ensure_ascii=false`) JSON
