@@ -49,6 +49,42 @@ def _days_since(latest_run_at: str | None) -> float | None:
         return None
 
 
+FRESHNESS_FRESH = "FRESH"
+FRESHNESS_STALE = "STALE"
+FRESHNESS_NEVER_RUN = "NEVER_RUN"
+FRESHNESS_UNKNOWN = "UNKNOWN"
+
+
+def check_freshness(latest_run_at: str | None, stale_days: int = STALE_AFTER_DAYS) -> dict[str, Any]:
+    """How old is the check behind a source's health, as a first-class verdict.
+
+    `_is_stale` and `_days_since` have existed here since this module was written
+    and nothing outside it ever called them, so "healthy" on a customer surface
+    meant "the registry says MONITOR_OK" — a hand-written field that monitoring
+    runs deliberately do not update (app/mass_monitoring_runner.py sets
+    ``sources_json_changed = False``). Measured 2026-07-25: all 40 alert-eligible
+    rows asserted MONITOR_OK with a median recorded check age of 36 days.
+
+    Returns ``age_days`` (None when unknown) and a ``state`` a caller can render
+    without re-deriving the rule:
+
+      NEVER_RUN — no recorded run at all; the strongest statement available is
+                  that we have never checked this source, and it must never read
+                  as healthy.
+      STALE     — the last recorded run is older than ``stale_days``.
+      FRESH     — checked within the window.
+      UNKNOWN   — a timestamp we cannot parse. Deliberately NOT reported as
+                  fresh: an unreadable date is not evidence of a recent check.
+    """
+    if not latest_run_at:
+        return {"age_days": None, "state": FRESHNESS_NEVER_RUN, "stale_after_days": stale_days}
+    age = _days_since(latest_run_at)
+    if age is None:
+        return {"age_days": None, "state": FRESHNESS_UNKNOWN, "stale_after_days": stale_days}
+    state = FRESHNESS_STALE if age > stale_days else FRESHNESS_FRESH
+    return {"age_days": age, "state": state, "stale_after_days": stale_days}
+
+
 def _parse_run_ts(value: str | None) -> datetime | None:
     if not value:
         return None

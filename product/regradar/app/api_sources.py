@@ -48,7 +48,13 @@ class _SourcesHandlerMixin:
         try:
             from app.source_readiness import load_market_sources
             from app.source_runs import latest_runs
-            from app.source_health_timeline import build_source_timeline
+            from app.source_health_timeline import (
+                FRESHNESS_NEVER_RUN,
+                FRESHNESS_STALE,
+                FRESHNESS_UNKNOWN,
+                build_source_timeline,
+                check_freshness,
+            )
 
             all_sources = load_market_sources(market)
             enabled_sources = [s for s in all_sources if s.get("enabled", False)]
@@ -99,12 +105,31 @@ class _SourcesHandlerMixin:
                 except Exception:
                     timeline_event_count = 0
 
+                # How old is the check behind this row. Derived from the run trail,
+                # never from the registry: sources.json carries hand-written
+                # last_monitor_status values that monitoring runs do not update
+                # (mass_monitoring_runner sets sources_json_changed = False), so
+                # every alert-eligible row said MONITOR_OK at a median recorded age
+                # of 36 days. A caller must be able to see the age, not just a word.
+                freshness = check_freshness(run_at)
+                registry_status = str(src.get("status") or "active")
+                # "active" is a CONFIGURATION state, not a health state. Never let
+                # it read as healthy when no recent check backs it.
+                if freshness["state"] in (FRESHNESS_STALE, FRESHNESS_NEVER_RUN, FRESHNESS_UNKNOWN):
+                    reported_status = freshness["state"]
+                else:
+                    reported_status = registry_status
+
                 sources_out.append({
                     "source_id": source_id,
                     "name": name,
                     "category": str(src.get("category") or ""),
                     "url": str(src.get("url") or ""),
-                    "status": str(src.get("status") or "active"),
+                    "status": reported_status,
+                    "configured_status": registry_status,
+                    "freshness": freshness["state"],
+                    "last_run_age_days": freshness["age_days"],
+                    "stale_after_days": freshness["stale_after_days"],
                     "change_status": change_status,
                     "last_run_at": run_at,
                     "last_evidence_at": last_evidence_at,
@@ -122,11 +147,19 @@ class _SourcesHandlerMixin:
                 cs = s["change_status"]
                 summary[cs] = summary.get(cs, 0) + 1
 
+            # Freshness belongs in the summary too. A per-row field is easy to miss
+            # in a long table; a headline count is not, and "how many of these am I
+            # actually still checking" is the question the table exists to answer.
+            freshness_summary: dict[str, int] = {}
+            for s in sources_out:
+                freshness_summary[s["freshness"]] = freshness_summary.get(s["freshness"], 0) + 1
+
             self._send_json({
                 "ok": True,
                 "market": market,
                 "sources": sources_out,
                 "summary": summary,
+                "freshness_summary": freshness_summary,
                 "total_sources": len(sources_out),
                 "last_run_at": last_run_at,
                 "disclaimer": "Not legal advice. For monitoring information only.",

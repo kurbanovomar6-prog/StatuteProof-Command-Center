@@ -53,7 +53,7 @@ const INTAKE_STATUS_BG = {
 }
 
 // Only statuses this table actually produces — no phantom filter options.
-const FILTERS   = ['All', 'Readiness supported', 'Needs remediation', 'Monitoring not started', 'User source']
+const FILTERS   = ['All', 'Readiness supported', 'Check overdue', 'Needs remediation', 'Monitoring not started', 'User source']
 const MARKETS   = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const CATEGORIES = [
   'Central bank', 'Financial regulator', 'Crypto regulator', 'AML authority',
@@ -73,11 +73,26 @@ const REMEDIATION_SOURCE_IDS = new Set([
   'AE-sca-regulations-listing',
 ])
 
-function statusFromApiSource(row) {
+export function statusFromApiSource(row) {
   if (REMEDIATION_SOURCE_IDS.has(row.source_id) || row.status === 'remediation') return 'Needs remediation'
   if (row.change_status === 'FAILED' || row.change_status === 'QUALITY_DROP') return 'Needs remediation'
-  if (!row.last_run_at || row.change_status === 'NOT_RUN') return 'Monitoring not started'
+  if (!row.last_run_at || row.change_status === 'NOT_RUN' || row.freshness === 'NEVER_RUN') return 'Monitoring not started'
+  // A successful run long ago is not current monitoring. Without this a source
+  // last checked 36 days ago fell through to "Readiness supported", which is the
+  // reassuring word the customer reads before deciding they are covered.
+  if (row.freshness === 'STALE' || row.freshness === 'UNKNOWN') return 'Check overdue'
   return 'Readiness supported'
+}
+
+// Days since the last recorded check, for display next to the status. The label
+// alone cannot say HOW overdue a source is, and "overdue by 2 days" and "overdue
+// by 3 months" are different facts for someone deciding whether to rely on it.
+export function checkAgeLabel(row) {
+  const age = row?.last_run_age_days
+  if (typeof age !== 'number') return null
+  if (age < 1) return 'checked today'
+  const days = Math.round(age)
+  return `checked ${days} day${days === 1 ? '' : 's'} ago`
 }
 
 const CATEGORY_ACRONYMS = { aml: 'AML', cft: 'CFT', fiu: 'FIU', cma: 'CMA' }
@@ -102,6 +117,8 @@ function mapApiSource(row) {
     status: statusFromApiSource(row),
     extraction: row.extraction_quality || 'Unknown',
     lastChecked: row.last_run_at || '',
+    checkAge: checkAgeLabel(row),
+    freshness: row.freshness || 'UNKNOWN',
     accessStatus: row.access_status || 'unknown',
     changeStatus: row.change_status || 'NOT_RUN',
     lastEvidenceAt: row.last_evidence_at || '',
@@ -387,7 +404,7 @@ export default function SourcesPage({ onAddCustomSource }) {
             </p>
           </div>
           <div className="flex flex-wrap content-start gap-2">
-            {['Readiness supported', 'Needs remediation', 'Monitoring not started', 'Under validation'].map(code => (
+            {['Readiness supported', 'Check overdue', 'Needs remediation', 'Monitoring not started', 'Under validation'].map(code => (
               <StatusBadge key={code} code={code} />
             ))}
           </div>
@@ -462,6 +479,13 @@ export default function SourcesPage({ onAddCustomSource }) {
                     {s.userSource
                       ? <span>{s.lastChecked || 'Saved for validation'}</span>
                       : <TimeStamp value={s.lastChecked} fallback="Not run yet" />}
+                    {/* How overdue, in words. A timestamp alone reads as "we have
+                        a date for this", which is not the same as "this is current". */}
+                    {s.checkAge && !s.userSource && (
+                      <div className={`mt-1 text-[10px] ${s.freshness === 'STALE' ? 'text-amber-400' : 'text-[var(--text-muted)]'}`}>
+                        {s.checkAge}
+                      </div>
+                    )}
                   </td>
                   <td className="text-[var(--text-muted)]">
                     <TimeStamp value={s.lastEvidenceAt} fallback="No evidence yet" mode="relative" />
