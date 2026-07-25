@@ -57,9 +57,21 @@ _HEADERS = {
 
 # Hosts allowed to opt in. Extend deliberately — every new host must be
 # verified to serve the listing server-side in the static HTML.
+#
+# adgm.com (added 2026-07-25, verified on a live fetch): the enforcement /
+# alerts / judgments listings are fully server-rendered, but inside CUSTOM
+# ELEMENTS (``<adgm-table-row>`` / ``<adgm-table-cell>``) rather than a
+# ``<table>``, so the generic extractor sees only the page shell and the
+# readiness gate scores the page NAV_SHELL_ONLY. A ``content_selector`` of
+# ``adgm-table-row`` recovers the dated rows verbatim — verified against
+# FSRA Regulatory Actions (11 rows incl. "08 Jan 2026 … Wealthface Limited"),
+# FSRA Regulatory Alerts (40 rows), RA Regulatory Actions (11 rows incl.
+# "26 Jan 2026" UBO fine) and ADGM Courts Judgments (11 rows incl.
+# "20 Jul 2026 ADGMCFI-2020-020 NMC Healthcare"). No headless browser needed.
 _ALLOWED_HOSTS = (
     "ofac.treasury.gov",
     "menafatf.org",
+    "adgm.com",
 )
 
 # Reject a selected region too thin to be a meaningful listing snapshot
