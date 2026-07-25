@@ -322,11 +322,22 @@ class CustomElementAdapter(BaseHtmlAdapter):
             return self._empty("Missing content selector.", "Configure content_selector for the custom element.")
 
         soup = _soup(html, config.get("exclude_selectors"))
-        node = soup.select_one(selector)
-        if not node:
+        # A custom-element LISTING repeats the same tag per row (e.g. ADGM's
+        # <adgm-table-row> × N). select_one() would capture only the FIRST match
+        # — on ADGM's enforcement table that is the header row alone ("Date Title
+        # Person Category", 26 chars), which then scores NAV_SHELL_ONLY and fails
+        # certification even though every dated row is present in the static HTML.
+        # Join ALL matches instead. A single-match selector keeps byte-identical
+        # behaviour (one node in, same structured text out), so existing configs
+        # are unaffected.
+        nodes = soup.select(selector)
+        if not nodes:
             return self._empty("Custom element selector was not found.", "Review wait/content selector with Playwright rendering.")
 
-        text = _focus_text(_structured_node_text(node), config)
+        text = _focus_text(
+            "\n".join(t for t in (_structured_node_text(n) for n in nodes) if t),
+            config,
+        )
         if not text:
             return self._empty("Custom element selector returned empty text.", "Review rendered DOM and selector specificity.")
 
@@ -337,7 +348,12 @@ class CustomElementAdapter(BaseHtmlAdapter):
             extraction_strategy=f"adapter:{self.name}",
             noise_risk="medium" if len(text) < 1000 else "low",
             source_health_risk="medium",
-            metadata={"selector": selector, "url": url, "focus_keywords": config.get("focus_keywords") or config.get("focus_keyword") or []},
+            metadata={
+                "selector": selector,
+                "url": url,
+                "elements_matched": len(nodes),
+                "focus_keywords": config.get("focus_keywords") or config.get("focus_keyword") or [],
+            },
         )
 
 
@@ -1603,8 +1619,28 @@ _ADAPTERS: dict[str, BaseHtmlAdapter] = {
 
 
 def get_adapter(adapter_family: str | None = None, adapter_name: str | None = None) -> BaseHtmlAdapter | None:
-    key = (adapter_name or adapter_family or "").strip()
-    return _ADAPTERS.get(key)
+    """Resolve a Source-Lab (HTML-extract) adapter by name, then by family.
+
+    ``adapter_name`` is preferred, but it must FALL BACK to ``adapter_family``
+    when the name is unknown here. The product runs TWO disjoint adapter stacks
+    and they share no names: the FETCHING registry (``app.adapters.registry`` —
+    html_listing, xml_feed, rulebook_platform, uae_* …) used by the monitoring
+    pipeline, and this HTML-extract platform (listing, custom_element, table,
+    *_listing …) used by the intake/readiness gate. A source that legitimately
+    names a registry adapter in ``adapter_name`` therefore resolved to None here
+    and the gate silently fell back to the generic extractor — which for a
+    listing page yields navigation chrome and scores NAV_SHELL_ONLY /
+    CERTIFICATION_FAILED. That made every registry-served source impossible to
+    certify or promote through the documented path even though monitoring read
+    it perfectly (verified 2026-07-25 on OFAC recent-actions, MENAFATF,
+    DFSA consultation papers and the ADGM enforcement listings).
+    Falling back to the family lets one source row carry both stacks' config.
+    """
+    name_key = (adapter_name or "").strip()
+    if name_key and name_key in _ADAPTERS:
+        return _ADAPTERS[name_key]
+    family_key = (adapter_family or "").strip()
+    return _ADAPTERS.get(family_key)
 
 
 def extract_with_adapter(

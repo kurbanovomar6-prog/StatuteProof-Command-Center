@@ -4277,7 +4277,7 @@
     "status": "active",
     "enforcement_feature": true,
     "tier": "2",
-    "adapter_family": "html_listing",
+    "adapter_family": "listing",
     "adapter_name": "html_listing",
     "fetch_method": "playwright",
     "wait_for_selector": "adgm-page",
@@ -4285,7 +4285,12 @@
     "notes": "Candidate only after 2026-06-18 no-save retest: official ADGM page is public but configured listing adapter isolated no regulatory alert rows and returned NAV_SHELL_ONLY. Requires source-specific selector/listing investigation before activation. Monitoring intelligence only, not legal advice. | 2026-07-25 FIX (source-coverage goal, verified live on this machine): this page scored NAV_SHELL_ONLY because the listing is server-rendered inside CUSTOM <adgm-table-row> elements, which the generic extractor cannot see. Configured html_listing + content_selector 'adgm-table-row' (adgm.com added to the adapter host allowlist in the same change); the dated rows now extract verbatim. Still CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review).",
     "monitoring_mode": "candidate",
     "adapter_config": {
-      "content_selector": "adgm-table-row"
+      "content_selector": "adgm-table-row",
+      "container_selector": "adgm-table",
+      "item_selector": "adgm-table-row",
+      "title_selector": "adgm-table-cell:nth-of-type(2)",
+      "date_selector": "adgm-table-cell:nth-of-type(1)",
+      "min_title_chars": 8
     },
     "baseline_runs_required": 2
   },
@@ -10588,9 +10593,14 @@
     "tier": "2",
     "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 109KB static); completes the ADGM beachhead story; ~monthly cadence. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy. expected_min_length 15000→800 (~60% of observed 1,283). | 2026-07-25 FIX (source-coverage goal, verified live on this machine): this page scored NAV_SHELL_ONLY because the listing is server-rendered inside CUSTOM <adgm-table-row> elements, which the generic extractor cannot see. Configured html_listing + content_selector 'adgm-table-row' (adgm.com added to the adapter host allowlist in the same change); the dated rows now extract verbatim. Still CANDIDATE until the prod intake gates pass (2 baselines, MONITOR_OK, review).",
     "adapter_name": "html_listing",
-    "adapter_family": "html_listing",
+    "adapter_family": "listing",
     "adapter_config": {
-      "content_selector": "adgm-table-row"
+      "content_selector": "adgm-table-row",
+      "container_selector": "adgm-table",
+      "item_selector": "adgm-table-row",
+      "title_selector": "adgm-table-cell:nth-of-type(2)",
+      "date_selector": "adgm-table-cell:nth-of-type(1)",
+      "min_title_chars": 8
     }
   },
   {
@@ -10859,9 +10869,14 @@
     "status": "candidate",
     "source_id": "AE-adgm-fsra-regulatory-actions",
     "adapter_name": "html_listing",
-    "adapter_family": "html_listing",
+    "adapter_family": "listing",
     "adapter_config": {
-      "content_selector": "adgm-table-row"
+      "content_selector": "adgm-table-row",
+      "container_selector": "adgm-table",
+      "item_selector": "adgm-table-row",
+      "title_selector": "adgm-table-cell:nth-of-type(2)",
+      "date_selector": "adgm-table-cell:nth-of-type(1)",
+      "min_title_chars": 8
     },
     "monitoring_mode": "candidate",
     "alert_eligible": false,
@@ -10879,9 +10894,14 @@
     "status": "candidate",
     "source_id": "AE-adgm-ra-regulatory-actions",
     "adapter_name": "html_listing",
-    "adapter_family": "html_listing",
+    "adapter_family": "listing",
     "adapter_config": {
-      "content_selector": "adgm-table-row"
+      "content_selector": "adgm-table-row",
+      "container_selector": "adgm-table",
+      "item_selector": "adgm-table-row",
+      "title_selector": "adgm-table-cell:nth-of-type(2)",
+      "date_selector": "adgm-table-cell:nth-of-type(1)",
+      "min_title_chars": 8
     },
     "monitoring_mode": "candidate",
     "alert_eligible": false,
