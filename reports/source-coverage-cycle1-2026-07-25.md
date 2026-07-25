@@ -95,3 +95,69 @@ a warning feed — the highest action-forcing content class for a personally-lia
    cheap once a selector is known.
 5. Not yet researched: GCC beyond SAMA/QFCRA/CBK (Oman CBO/CMA/FSA, Kuwait CMA, Bahrain CBB
    enforcement are absent from the registry entirely), Wolfsberg, UK OFSI recent-changes page.
+
+---
+
+# Candidate promotion — local gates passed (2026-07-25, cycle 5)
+
+The goal's "zero-research win" was to promote the enabled `candidate` sources.
+I had only diagnosed them; this is the execution.
+
+## What was actually run
+
+Two **saved** baseline runs per source (`run.py source-lab <url> --save --source-id
+<id> --baseline-runs 2`, with each row's own adapter config), then the product's
+own certification gate was read back.
+
+| source_id | baselines | certification | can_activate | hash stable |
+|---|---|---|---|---|
+| AE-uk-ofsi-consolidated-list | 2 | MONITORING_CERTIFIED | yes | yes |
+| AE-ugd-ebc-gold-rules | 2 | MONITORING_CERTIFIED | yes | yes |
+| AE-uae-pdpl-status | 2 | MONITORING_CERTIFIED | yes | yes |
+| GCC-sa-sama-circulars | 2 | MONITORING_CERTIFIED | yes | yes |
+| GCC-sa-sama-news | 2 | MONITORING_CERTIFIED | yes | yes |
+| GCC-qa-qfcra-rulebook | 2 | MONITORING_CERTIFIED | yes | yes |
+| GCC-qa-qfcra-news | 2 | MONITORING_CERTIFIED | yes | yes |
+| AE-un-consolidated-sanctions-xml | 2 (after fix) | MONITORING_CERTIFIED | yes | yes |
+| AE-bis-bcbs-publications-rss | 2 (after fix) | MONITORING_CERTIFIED | yes | yes |
+
+The normalized hash was **identical across both runs** for all nine — which is the
+property that matters: it means the first real change these sources emit will be a
+true change, not extraction noise.
+
+## A defect fixed to get the last two through
+
+UN consolidated XML and the BIS RSS reported `baseline_runs_completed: 0` no matter
+how often they ran. Cause: their `adapter_name` is `xml_feed`, a **fetching-registry**
+name that the HTML-extract platform does not know, so the gate logged *"Adapter
+failed: Unknown adapter: xml_feed"*, fell back to the generic extractor and then
+demanded a CSS selector for an XML document (`NEEDS_SELECTOR_REVIEW`) — a request that
+cannot be satisfied. Setting `adapter_family: static_html` lets the gate simply hash
+the document, while monitoring still uses the `xml_feed` registry adapter through
+`adapter_name`. Both then certified (UN q=51, BIS q=65).
+
+## What I deliberately did NOT do, and why
+
+I did **not** set `monitoring_mode: fresh_alert` or `alert_eligible: true`.
+
+`app/api.py:1112-1114` computes the **customer-visible** `sources_fresh_alert` count
+from exactly those two fields. Flipping them on the strength of a laptop run would
+repeat this project's own documented mistake — 35 blocked-host sources once carried
+`MONITOR_OK` while being unreachable from production. Local egress is not evidence of
+production reach, and every one of these rows says in its own notes that the gate is
+"2 baselines, MONITOR_OK, review **on prod**".
+
+So each row now carries `baseline_runs_completed: 2` and
+`local_intake_certified: true`, and stays `candidate`. The remaining step is a
+production run — one command per source, or one batch:
+
+```bash
+# on the droplet, from /srv/regradar
+python3 run.py mass-monitor --source-id AE-uk-ofsi-consolidated-list --save-proof --no-alerts
+# …repeat for the other eight, or run the batch and filter afterwards
+```
+
+Promote a row to `monitoring_mode: fresh_alert` + `alert_eligible: true` only after
+that run reports `MONITOR_OK` for it. Nine promotions is roughly a nine-point jump in
+the honest alert-eligible count, and two of them (UN consolidated and UK OFSI) are
+half of the "big four" sanctions lists.

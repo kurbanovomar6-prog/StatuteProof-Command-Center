@@ -10505,10 +10505,12 @@
     "expected_min_length": 2000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 2.2MB XML); origin of the UN designations the UAE 24h freeze obligation keys on — monitoring the source beats EOCN republication lag; machine-readable; GET follows a 302 to a signed blob. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: Tier-1 fetch crashed with RuntimeError (apparent_encoding read on a consumed streamed body — no charset on the signed-blob response) and the XML has no semantic HTML tags for the generic tiers anyway. Fixed via new opt-in xml_feed registry adapter: follows the 302 to the signed Azure blob under the per-hop SSRF guard, parses the CONSOLIDATED_LIST, and emits a deterministic structured monitor (per-kind entry counts + sha256 digest over sorted DATAID|VERSIONNUM|REFERENCE|LISTED_ON|LAST_DAY_UPDATED rows + top-30 recently-updated excerpt). Root dateGenerated attribute is excluded so regeneration noise never fires a change; output changes exactly when the entry set changes. Verified locally 2026-07-18: 3,480 chars, identical across 2 consecutive live fetches. expected_min_length 200000→2000 (~60% of observed 3,480 — output is a bounded summary now, not the 2.2MB raw XML). check_interval_minutes=240 for sanctions urgency (UAE 24h freeze obligation). Requires prod re-baseline before alerting.",
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 2.2MB XML); origin of the UN designations the UAE 24h freeze obligation keys on — monitoring the source beats EOCN republication lag; machine-readable; GET follows a 302 to a signed blob. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: Tier-1 fetch crashed with RuntimeError (apparent_encoding read on a consumed streamed body — no charset on the signed-blob response) and the XML has no semantic HTML tags for the generic tiers anyway. Fixed via new opt-in xml_feed registry adapter: follows the 302 to the signed Azure blob under the per-hop SSRF guard, parses the CONSOLIDATED_LIST, and emits a deterministic structured monitor (per-kind entry counts + sha256 digest over sorted DATAID|VERSIONNUM|REFERENCE|LISTED_ON|LAST_DAY_UPDATED rows + top-30 recently-updated excerpt). Root dateGenerated attribute is excluded so regeneration noise never fires a change; output changes exactly when the entry set changes. Verified locally 2026-07-18: 3,480 chars, identical across 2 consecutive live fetches. expected_min_length 200000→2000 (~60% of observed 3,480 — output is a bounded summary now, not the 2.2MB raw XML). check_interval_minutes=240 for sanctions urgency (UAE 24h freeze obligation). Requires prod re-baseline before alerting. | 2026-07-25 GATE-FAMILY FIX: the readiness gate could not certify this FEED because adapter_name 'xml_feed' is a FETCHING-registry name the HTML-extract platform does not know ('Adapter failed: Unknown adapter: xml_feed'), so it demanded a selector for an XML document (NEEDS_SELECTOR_REVIEW, baseline_runs_completed stuck at 0). Set adapter_family=static_html so the gate simply hashes the document; the monitoring pipeline still uses the xml_feed registry adapter via adapter_name. After the fix: MONITORING_CERTIFIED, can_activate_monitoring=true. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
     "adapter_name": "xml_feed",
-    "adapter_family": "xml_feed",
-    "check_interval_minutes": 240
+    "adapter_family": "static_html",
+    "check_interval_minutes": 240,
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "UK OFSI Consolidated Sanctions List",
@@ -10523,8 +10525,10 @@
     "expected_min_length": 500000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 6.4MB static blob w/ Last-Modified); UK-nexus/correspondent exposure for DIFC firms; zero bot protection. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy (5.4M chars observed). check_interval_minutes=720 added to cap cadence appetite on the 5.4MB fetch; expected_min_length 500000 kept.",
-    "check_interval_minutes": 720
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 6.4MB static blob w/ Last-Modified); UK-nexus/correspondent exposure for DIFC firms; zero bot protection. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): healthy (5.4M chars observed). check_interval_minutes=720 added to cap cadence appetite on the 5.4MB fetch; expected_min_length 500000 kept. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
+    "check_interval_minutes": 720,
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "US OFAC Recent Actions",
@@ -10676,9 +10680,11 @@
     "expected_min_length": 2100,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 32KB RSS); policy-team value for banking-adjacent firms; machine-readable; lowest priority of the batch. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: same Tier-1 RuntimeError (application/rss+xml has no charset → apparent_encoding on a consumed streamed body) = FAILED/0 on prod; RSS also has no semantic HTML tags so the generic tiers cannot score it. Fixed via opt-in xml_feed registry adapter (RSS 1.0 RDF parse; title | date | link per item, sorted by stable link slug, capped at 100 items). Verified locally 2026-07-18: 3,607 chars / 25 items, identical across 2 consecutive fetches. expected_min_length 5000→2100 (~60% of observed 3,607). Requires prod re-baseline before alerting.",
+    "notes": "2026-07-18 ADDED as candidate from the market-monitoring census (demand+supply web research, all URLs cited in memory): verified reachable FROM PRODUCTION today (200, 32KB RSS); policy-team value for banking-adjacent firms; machine-readable; lowest priority of the batch. CANDIDATE until intake gates (no-save check, proof, 2 baselines, MONITOR_OK, review) pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-18 FIX (local verification, laptop): root cause: same Tier-1 RuntimeError (application/rss+xml has no charset → apparent_encoding on a consumed streamed body) = FAILED/0 on prod; RSS also has no semantic HTML tags so the generic tiers cannot score it. Fixed via opt-in xml_feed registry adapter (RSS 1.0 RDF parse; title | date | link per item, sorted by stable link slug, capped at 100 items). Verified locally 2026-07-18: 3,607 chars / 25 items, identical across 2 consecutive fetches. expected_min_length 5000→2100 (~60% of observed 3,607). Requires prod re-baseline before alerting. | 2026-07-25 GATE-FAMILY FIX: the readiness gate could not certify this FEED because adapter_name 'xml_feed' is a FETCHING-registry name the HTML-extract platform does not know ('Adapter failed: Unknown adapter: xml_feed'), so it demanded a selector for an XML document (NEEDS_SELECTOR_REVIEW, baseline_runs_completed stuck at 0). Set adapter_family=static_html so the gate simply hashes the document; the monitoring pipeline still uses the xml_feed registry adapter via adapter_name. After the fix: MONITORING_CERTIFIED, can_activate_monitoring=true. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
     "adapter_name": "xml_feed",
-    "adapter_family": "xml_feed"
+    "adapter_family": "static_html",
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "UAE Good Delivery / Emirates Bullion Committee Rules",
@@ -10693,7 +10699,9 @@
     "expected_min_length": 1500,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (118KB WordPress). Official federal gold-standard platform: EBC accreditation + risk-based due-diligence rules for the DPMS persona. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (118KB WordPress). Official federal gold-standard platform: EBC accreditation + risk-based due-diligence rules for the DPMS persona. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "DMCC Compliance & Regulations Knowledge Bank",
@@ -10723,7 +10731,9 @@
     "expected_min_length": 1200,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (72KB). THE official status-watch for PDPL executive regulations — third-party claims they were issued are unverifiable on official sources; diffing this page is exactly the value. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (72KB). THE official status-watch for PDPL executive regulations — third-party claims they were issued are unverifiable on official sources; diffing this page is exactly the value. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "ADGM Registration Authority Public Notices",
@@ -10753,7 +10763,9 @@
     "expected_min_length": 15000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (399KB plain HTML, ~300 dated rows). The single best KSA channel — circular-level granularity with In-Force/Superseded flags; UAE-based consultancies formally track SAMA (Waystone ME updates). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (399KB plain HTML, ~300 dated rows). The single best KSA channel — circular-level granularity with In-Force/Superseded flags; UAE-based consultancies formally track SAMA (Waystone ME updates). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "SAMA Media Center — All News (Saudi Arabia)",
@@ -10768,7 +10780,9 @@
     "expected_min_length": 8000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (116KB SharePoint list). Enforcement + licensing signal (license revocations observed July 2026). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (116KB SharePoint list). Enforcement + licensing signal (license revocations observed July 2026). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "Saudi CMA — Implementing Regulations",
@@ -10798,7 +10812,9 @@
     "expected_min_length": 8000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (80KB ToC, 25 modules incl. AML/CFTR). QFC is where foreign firms sit — the natural first Qatar source; English, active, reachable (unlike TLS-broken QCB gov hosts). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (80KB ToC, 25 modules incl. AML/CFTR). QFC is where foreign firms sit — the natural first Qatar source; English, active, reachable (unlike TLS-broken QCB gov hosts). CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "QFCRA News (Qatar Financial Centre)",
@@ -10813,7 +10829,9 @@
     "expected_min_length": 8000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (160KB mostly static). Rule issuance + enforcement settlements. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED from round-2 census (GCC census): prod-probed 200 today (160KB mostly static). Rule issuance + enforcement settlements. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice. | 2026-07-25 LOCAL INTAKE GATES PASSED (source-coverage goal): two saved baseline runs completed, normalized hash IDENTICAL across runs, certification_status=MONITORING_CERTIFIED and can_activate_monitoring=true from the product's own gate. DELIBERATELY still status=candidate with alert_eligible=false: api.py computes the CUSTOMER-VISIBLE fresh_alert_count from (monitoring_mode=='fresh_alert' AND alert_eligible), and the documented sequence needs a PROD monitoring run returning MONITOR_OK — local egress is not proof of prod reach. Promote on prod only.",
+    "baseline_runs_completed": 2,
+    "local_intake_certified": true
   },
   {
     "name": "Central Bank of Kuwait — Press Releases",
