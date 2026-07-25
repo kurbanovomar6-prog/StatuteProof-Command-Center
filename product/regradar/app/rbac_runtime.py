@@ -119,16 +119,33 @@ def _safe_user_id(user: Any) -> int | None:
 def _resolve_from_db(user_id: int) -> tuple[int | None, str] | None:
     """Return ``(org_id, role)`` for ``user_id`` from ``org_members``, or ``None``.
 
-    Prefers the org the user OWNS (their backfilled org-of-one) so a solo user
-    resolves to ``owner`` of the org that actually holds their resources, even if
-    they were later added as a lesser role in some other org. A single connection
-    provisions the tables (idempotent) and runs the lookup.
+    Prefers, in order: the GLOBAL operator seat, the org the user has explicitly
+    switched into, then the org they OWN (their backfilled org-of-one) so a solo
+    user resolves to ``owner`` of the org that actually holds their resources. A
+    single connection provisions the tables (idempotent) and runs the lookup.
     """
     conn = _connect()
     try:
         ensure_rbac_tables(conn)
+        # Old databases predate users.active_org_id; referencing it there would
+        # raise inside the request hot path. Checked rather than assumed, because
+        # the auth migration that adds it runs on a different entrypoint.
+        has_active_col = "active_org_id" in {
+            r[1] for r in conn.execute("PRAGMA table_info(users)")
+        }
+        active_clause = (
+            "CASE WHEN m.org_id = (SELECT active_org_id FROM users WHERE id = ?) "
+            "THEN 0 ELSE 1 END,"
+            if has_active_col
+            else ""
+        )
+        params: tuple = (
+            (user_id, GLOBAL_ORG_ID, user_id, user_id)
+            if has_active_col
+            else (user_id, GLOBAL_ORG_ID, user_id)
+        )
         row = conn.execute(
-            """
+            f"""
             SELECT m.org_id AS org_id, m.role AS role
             FROM org_members m
             JOIN orgs o ON o.id = m.org_id
@@ -141,11 +158,17 @@ def _resolve_from_db(user_id: int) -> tuple[int | None, str] | None:
                 -- org-of-one, which the next clause prefers, so resolve_principal
                 -- kept returning that org and _caller_is_operator stayed False.
                 CASE WHEN m.org_id = ? THEN 0 ELSE 1 END,
+                -- An explicit choice beats the implicit owned-org preference, but
+                -- only through this JOIN — the WHERE already restricts to orgs the
+                -- user is a member of, so a stale or hostile active_org_id pointing
+                -- at someone else's org selects nothing and falls through. NULL
+                -- (every solo user) never matches, leaving old behaviour exact.
+                {active_clause}
                 CASE WHEN o.owner_user_id = ? THEN 0 ELSE 1 END,
                 m.id ASC
             LIMIT 1
             """,
-            (user_id, GLOBAL_ORG_ID, user_id),
+            params,
         ).fetchone()
         if row is not None:
             role = str(row["role"])
@@ -326,6 +349,16 @@ def assign_org_role(
     finally:
         conn.close()
 
+    # Land the seat somewhere the teammate can actually reach. Without this the
+    # row exists and changes nothing: they still own their backfilled org-of-one,
+    # which _resolve_from_db prefers, so they sign in to their own empty workspace
+    # while the owner's UI happily lists them as a member.
+    #
+    # Only when they have made NO choice yet. Overriding an explicit switch would
+    # let any org owner yank a person out of the org they are currently working
+    # in, which is a cross-tenant nuisance at best.
+    _set_active_org_if_unset(target_user_id, org_id)
+
     log_sensitive_action(
         actor_user,
         MEMBER_MANAGE,
@@ -335,6 +368,165 @@ def assign_org_role(
         principal=actor,
     )
     return {"ok": True, "org_id": org_id, "user_id": target_user_id, "role": role}
+
+
+def _set_active_org_if_unset(user_id: int, org_id: int) -> None:
+    """Point a user at ``org_id`` only if they have not chosen one. Never raises."""
+    try:
+        conn = _connect()
+        try:
+            conn.execute(
+                "UPDATE users SET active_org_id = ? WHERE id = ? AND active_org_id IS NULL",
+                (int(org_id), int(user_id)),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 — the seat itself already succeeded
+        logger.warning("could not set active_org_id for user %s", user_id, exc_info=True)
+
+
+def set_active_org(user: Any, org_id: int) -> dict[str, Any]:
+    """Switch ``user`` into ``org_id``. Membership-gated, self-service.
+
+    This is not privileged — it only ever selects among orgs the caller has
+    ALREADY been seated in, so the check is membership, not a role. Anything
+    stronger would mean an owner had to approve a colleague viewing the org that
+    same owner just added them to.
+
+    Returns ``{"ok": True, "org_id"}`` or ``{"ok": False, "error": "not_a_member"}``.
+    """
+    user_id = _safe_user_id(user)
+    if user_id is None:
+        return {"ok": False, "error": "not_a_member"}
+    try:
+        org_id = int(org_id)
+    except (TypeError, ValueError):
+        return {"ok": False, "error": "not_a_member"}
+
+    conn = _connect()
+    try:
+        ensure_rbac_tables(conn)
+        member = conn.execute(
+            "SELECT 1 FROM org_members WHERE user_id = ? AND org_id = ?",
+            (user_id, org_id),
+        ).fetchone()
+        if member is None:
+            return {"ok": False, "error": "not_a_member"}
+        conn.execute(
+            "UPDATE users SET active_org_id = ? WHERE id = ?", (org_id, user_id)
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True, "org_id": org_id}
+
+
+def list_org_members(user: Any) -> dict[str, Any]:
+    """The caller's own org roster. Owner-gated via ``member.manage``.
+
+    Returns ``{"ok": True, "org_id", "members": [...]}`` or
+    ``{"ok": False, "error": "forbidden"}``. Emails are included because the
+    roster is the owner's own org — but the query is bounded to
+    ``principal.org_id``, never a caller-supplied one, so there is no way to ask
+    for someone else's roster.
+    """
+    actor = resolve_principal(user)
+    org_id = int(actor.org_id or 0)
+    resource = Resource(resource_type="member", resource_id="*", org_id=org_id)
+    if not can(actor, MEMBER_MANAGE, resource):
+        log_sensitive_action(
+            user, MEMBER_MANAGE, result=RESULT_DENY,
+            resource_type="member", resource_id="*", principal=actor,
+        )
+        return {"ok": False, "error": "forbidden"}
+
+    conn = _connect()
+    try:
+        ensure_rbac_tables(conn)
+        rows = conn.execute(
+            """
+            SELECT u.id AS user_id, u.email AS email, m.role AS role,
+                   m.created_at AS seated_at
+            FROM org_members m
+            JOIN users u ON u.id = m.user_id
+            WHERE m.org_id = ?
+            ORDER BY m.id ASC
+            """,
+            (org_id,),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    return {
+        "ok": True,
+        "org_id": org_id,
+        "members": [
+            {
+                "user_id": int(r["user_id"]),
+                "email": r["email"],
+                "role": str(r["role"]),
+                "seated_at": r["seated_at"],
+            }
+            for r in rows
+        ],
+    }
+
+
+def revoke_org_member(actor_user: Any, target_user_id: int) -> dict[str, Any]:
+    """Remove ``target_user_id`` from the actor's org. Owner-gated.
+
+    Refuses to remove the org's owner: an org with no owner cannot seat anyone
+    ever again, and the only recovery is a shell — which is the state this whole
+    axis exists to leave.
+    """
+    try:
+        target_user_id = int(target_user_id)
+    except (TypeError, ValueError):
+        return {"ok": False, "error": "invalid_target"}
+
+    actor = resolve_principal(actor_user)
+    org_id = int(actor.org_id or 0)
+    resource = Resource(
+        resource_type="member", resource_id=str(target_user_id), org_id=org_id
+    )
+    if not can(actor, MEMBER_MANAGE, resource):
+        log_sensitive_action(
+            actor_user, MEMBER_MANAGE, result=RESULT_DENY,
+            resource_type="member", resource_id=str(target_user_id), principal=actor,
+        )
+        return {"ok": False, "error": "forbidden"}
+
+    conn = _connect()
+    try:
+        ensure_rbac_tables(conn)
+        owner_row = conn.execute(
+            "SELECT owner_user_id FROM orgs WHERE id = ?", (org_id,)
+        ).fetchone()
+        if owner_row is not None and owner_row["owner_user_id"] == target_user_id:
+            return {"ok": False, "error": "cannot_revoke_owner"}
+        cur = conn.execute(
+            "DELETE FROM org_members WHERE org_id = ? AND user_id = ?",
+            (org_id, target_user_id),
+        )
+        # Leaving active_org_id pointing at an org they are no longer in would
+        # not grant access — _resolve_from_db only ranks orgs the WHERE already
+        # confirmed membership in — but it would make the next switch confusing.
+        conn.execute(
+            "UPDATE users SET active_org_id = NULL "
+            "WHERE id = ? AND active_org_id = ?",
+            (target_user_id, org_id),
+        )
+        conn.commit()
+        removed = cur.rowcount > 0
+    finally:
+        conn.close()
+
+    log_sensitive_action(
+        actor_user, MEMBER_MANAGE, result=RESULT_ALLOW,
+        resource_type="member", resource_id=str(target_user_id), principal=actor,
+    )
+    return {"ok": True, "removed": removed, "org_id": org_id}
 
 
 def bootstrap_operator(target_user_id: int, role: str = ROLE_OWNER) -> dict[str, Any]:

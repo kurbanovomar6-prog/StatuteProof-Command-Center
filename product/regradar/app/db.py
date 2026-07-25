@@ -749,6 +749,19 @@ def ensure_auth_tables(conn: sqlite3.Connection | None = None) -> None:
         if "trial_started_at" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN trial_started_at TIMESTAMP")
             logger.info("DB: added users.trial_started_at column")
+        # The org this user is currently working in, when they hold more than one
+        # membership. NULL — the value for every existing row and every new signup
+        # — means "no explicit choice", and resolve_principal falls back to its
+        # owned-org preference exactly as before, so this column is inert until
+        # someone is actually seated in a second org.
+        #
+        # It exists because seating a colleague is otherwise invisible: every user
+        # owns a backfilled org-of-one, resolve_principal prefers the org you OWN,
+        # so an auditor seat in the customer's org lost to the colleague's own
+        # empty workspace. The seat was real in the table and did nothing.
+        if "active_org_id" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN active_org_id INTEGER")
+            logger.info("DB: added users.active_org_id column")
         if "plan_intent_at" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN plan_intent_at TIMESTAMP")
             logger.info("DB: added users.plan_intent_at column")

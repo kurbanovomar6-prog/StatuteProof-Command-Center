@@ -422,6 +422,7 @@ from app.api_evidence import _EvidenceHandlerMixin  # noqa: E402
 from app.api_reports import _ReportsHandlerMixin  # noqa: E402
 from app.api_sources import _SourcesHandlerMixin  # noqa: E402
 from app.api_account import _AccountHandlerMixin  # noqa: E402
+from app.api_team import _TeamHandlerMixin  # noqa: E402
 
 
 class _Handler(
@@ -433,6 +434,7 @@ class _Handler(
     _ReportsHandlerMixin,
     _SourcesHandlerMixin,
     _AccountHandlerMixin,
+    _TeamHandlerMixin,
     BaseHTTPRequestHandler,
 ):
 
@@ -1246,6 +1248,8 @@ class _Handler(
             self._handle_profile_get()
         elif path == "/api/account/export":
             self._handle_account_export()
+        elif path == "/api/team/members":
+            self._handle_team_members_list()
         elif path == "/api/telegram/pair/status":
             self._handle_telegram_pair_status()
         elif path == "/api/delivery/logs":
@@ -1403,6 +1407,12 @@ class _Handler(
             self._handle_evidence_room_share_create()
         elif path == "/api/evidence-room/shares/revoke":
             self._handle_evidence_room_share_revoke()
+        elif path == "/api/team/members":
+            self._handle_team_member_add()
+        elif path == "/api/team/members/revoke":
+            self._handle_team_member_revoke()
+        elif path == "/api/team/active-org":
+            self._handle_team_active_org()
         # NOTE: deliberately NO route of any kind under /api/room/ here — the
         # public room is READ-ONLY by construction; a POST to it falls through
         # to the 404 below (asserted by tests/test_evidence_room.py).

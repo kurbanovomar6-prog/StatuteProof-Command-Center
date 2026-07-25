@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ShieldCheck, AlertTriangle, Download, Loader2 } from 'lucide-react'
 import { account as accountApi, profile as profileApi } from '../../api'
+import TeamPanel from './TeamPanel'
 
 const MARKETS    = ['UAE', 'DIFC', 'ADGM', 'Other UAE source']
 const INDUSTRIES = ['Fintech', 'Payments', 'Crypto / VASP', 'Banking', 'Legal & Compliance', 'Tax / Reporting', 'Consulting', 'Other']
@@ -437,6 +438,10 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
       </div>
 
       {/* Reset workspace */}
+      <div className="mt-4">
+        <TeamPanel />
+      </div>
+
       <div className="bg-[var(--bg-elevated)] border border-rose-500/20 rounded-xl p-5 mt-4">
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />

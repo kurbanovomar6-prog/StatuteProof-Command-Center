@@ -134,6 +134,31 @@ export const profile = {
   },
 }
 
+// Team seating. Owner-only on the server (member.manage is owner-exclusive under
+// the role matrix); the UI hides the panel for non-owners as a courtesy, never as
+// the control. `add` targets an existing account — there is no email-invite flow
+// yet, so the 404 body carries error: 'no_such_account' and the caller must say
+// so rather than leaving the owner waiting for a colleague who was never added.
+export const team = {
+  members() {
+    return authRequest('/api/team/members')
+  },
+
+  add(email, role = 'auditor') {
+    return authRequest('/api/team/members', {
+      method: 'POST',
+      body: JSON.stringify({ email, role }),
+    })
+  },
+
+  revoke(email) {
+    return authRequest('/api/team/members/revoke', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    })
+  },
+}
+
 // Self-service account data export (exit portability). GET streams everything
 // the signed-in user owns — account profile, workspace profile, notification
 // preferences, checklist items, the org's sealed decision records + chain head,
