@@ -33,6 +33,7 @@ const SourceReadinessReviewPage = lazy(() => import('./components/SourceReadines
 const PricingPage           = lazy(() => import('./components/PricingPage'))
 const LegalPage             = lazy(() => import('./components/LegalPage'))
 const VerifyPage            = lazy(() => import('./components/VerifyPage'))
+const VerifyEmailPage       = lazy(() => import('./components/auth/VerifyEmailPage'))
 const RoomPage              = lazy(() => import('./components/RoomPage'))
 
 function GlobalLoader() {
@@ -170,7 +171,7 @@ export default function App() {
         updatePath('/login', true)
         return
       }
-      if (['landing', 'login', 'register', 'pricing', 'source-readiness-review', 'verify', 'room', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
+      if (['landing', 'login', 'register', 'pricing', 'source-readiness-review', 'verify', 'verify-email', 'room', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
         setView(route.view)
         return
       }
@@ -222,7 +223,7 @@ export default function App() {
           updatePath('/app/dashboard', true)
           return
         }
-        if (['landing', 'pricing', 'source-readiness-review', 'verify', 'room', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
+        if (['landing', 'pricing', 'source-readiness-review', 'verify', 'verify-email', 'room', 'terms', 'privacy', 'disclaimer'].includes(route.view)) {
           setView(route.view)
           return
         }
@@ -388,6 +389,17 @@ export default function App() {
     return (
       <Suspense fallback={<GlobalLoader />}>
         <SourceReadinessReviewPage onBack={() => navigatePublic('landing')} />
+      </Suspense>
+    )
+  }
+
+  if (view === 'verify-email') {
+    return (
+      <Suspense fallback={<GlobalLoader />}>
+        <VerifyEmailPage
+          onSignIn={() => navigatePublic('login')}
+          onBack={() => navigatePublic('landing')}
+        />
       </Suspense>
     )
   }

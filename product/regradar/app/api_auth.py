@@ -103,7 +103,7 @@ class _AuthHandlerMixin:
             )
             # Generate verification token and send email (non-blocking)
             token = generate_verification_token(int(user["id"]))
-            verification_url = f"{self._public_base_url()}/api/auth/verify-email?token={token}"
+            verification_url = f"{self._public_base_url()}/verify-email?token={token}"
             import threading as _threading
             _threading.Thread(
                 target=_send_verification_email,
@@ -239,7 +239,7 @@ class _AuthHandlerMixin:
         token = generate_verification_token(int(user["id"]))
         # SEC-5: build the emailed link from the CONFIGURED public base, never the
         # attacker-controllable Host header (parity with register/reset, 3789ab4).
-        verification_url = f"{self._public_base_url()}/api/auth/verify-email?token={token}"
+        verification_url = f"{self._public_base_url()}/verify-email?token={token}"
         import threading as _threading
         _threading.Thread(
             target=_send_verification_email,

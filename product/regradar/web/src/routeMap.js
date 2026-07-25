@@ -7,6 +7,7 @@ const PUBLIC_VIEW_PATHS = {
   pricing: '/pricing',
   'source-readiness-review': '/source-readiness-review',
   verify: '/verify',
+  'verify-email': '/verify-email',
   terms: '/terms',
   privacy: '/privacy',
   disclaimer: '/disclaimer',
