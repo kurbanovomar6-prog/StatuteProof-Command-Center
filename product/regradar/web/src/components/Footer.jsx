@@ -18,7 +18,7 @@ export default function Footer() {
           {/* Logo + description */}
           <div className="max-w-xs">
             <div className="flex items-center gap-2.5 mb-4">
-              <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-8 w-auto flex-shrink-0" />
+              <img src="/brand/regradar-logo-navbar.png" alt="" aria-hidden="true" className="h-8 w-auto flex-shrink-0" />
               <span className="sp-display text-base font-extrabold text-white tracking-tight">
                 Statute<span className="text-[var(--accent)]">Proof</span>
               </span>

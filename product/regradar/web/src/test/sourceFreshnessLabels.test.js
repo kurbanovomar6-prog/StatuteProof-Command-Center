@@ -10,7 +10,7 @@
 // reads as supported, and the age is stated rather than implied.
 
 import { describe, it, expect } from 'vitest'
-import { statusFromApiSource, checkAgeLabel } from '../components/app/SourcesPage'
+import { statusFromApiSource, checkAgeLabel } from '../components/app/sourceStatus'
 
 const RECENT = '2026-07-25T09:00:00Z'
 

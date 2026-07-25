@@ -37,7 +37,7 @@ export default function Header({ onSignIn, onCreateWorkspace, onSourceReview, on
         >
           <img
             src="/brand/regradar-logo-navbar.png"
-            alt="StatuteProof"
+            alt="" aria-hidden="true"
             className="h-8 w-8 flex-shrink-0 object-contain transition-transform duration-300 group-hover:scale-105"
           />
           <span className="sp-display text-lg font-extrabold tracking-tight text-white">

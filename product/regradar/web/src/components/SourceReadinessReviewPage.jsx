@@ -154,7 +154,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
             Back
           </button>
           <div className="flex items-center gap-2">
-            <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-8 w-auto" />
+            <img src="/brand/regradar-logo-navbar.png" alt="" aria-hidden="true" className="h-8 w-auto" />
             <span className="text-base font-bold text-white">
               Statute<span className="text-[#16D9F5]">Proof</span>
             </span>

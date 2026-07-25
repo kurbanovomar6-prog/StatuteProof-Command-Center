@@ -14,7 +14,7 @@ function AuthLayout({ children }) {
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.92fr_0.78fr]">
         <aside className="hidden lg:block">
           <a href="/" className="mb-10 flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src="/brand/regradar-logo-navbar.png" alt="StatuteProof" className="h-10 w-auto" />
+            <img src="/brand/regradar-logo-navbar.png" alt="" aria-hidden="true" className="h-10 w-auto" />
             <span className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
               Statute<span className="text-[var(--accent)]">Proof</span>
             </span>

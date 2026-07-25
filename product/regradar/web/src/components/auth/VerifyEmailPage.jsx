@@ -84,7 +84,7 @@ export default function VerifyEmailPage({ onSignIn, onBack }) {
             <button
               type="button"
               onClick={onSignIn}
-              className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-[var(--accent-contrast,#04121c)]"
+              className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-[var(--accent-contrast)]"
             >
               Sign in
             </button>

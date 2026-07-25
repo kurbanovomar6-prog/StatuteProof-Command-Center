@@ -87,7 +87,6 @@
   --bg-elevated:   #0C1826; /* L2 card     */
   --bg-raised:     #12202F; /* L3 raised   */
   --bg-tooltip:    #16283A; /* L4 overlay  */
-  --paper:         #EAF3F3;
   --paper-strong:  #F7FBFB;
   --ink:           #07111F;
   --border:        #22314A;
@@ -100,7 +99,9 @@
                                #8A99AD computes 6.2:1 on --bg-elevated, 5.2:1 on --bg-tooltip. */
   --accent:        #16D9F5; /* single accent — matches component usage; was #19D3F3 (duplicate cyan) */
   --accent-hover:  #67E8F9;
-  --accent-deep:   #0891B2;
+  /* Text colour for a filled --accent button. The accent is a bright cyan, so
+     white-on-accent fails contrast; this is the dark ink that passes. */
+  --accent-contrast: #04121C;
   --success:       #37D399;
   --warning:       #F4B84A;
   --danger:        #F87171;
@@ -108,45 +109,23 @@
   --risk-medium:   #FBBF24;
   --risk-low:      #34D399;
   --status-changed:#60A5FA;
-  --status-unchanged:#94A3B8;
-  --status-failed: #F87171;
-  --status-quality-drop:#FBBF24;
   /* One restrained elevation. Real shadow (<=8px blur) only under floating overlays. */
   --shadow-soft:   0 1px 0 var(--hairline) inset;
-  --shadow-cyan:   0 1px 0 var(--hairline) inset;
-  --shadow-overlay:0 8px 24px rgba(1, 6, 14, 0.55);
   --shadow-paper:  0 8px 24px rgba(1, 8, 20, 0.28);
 
   /* ── Typography tokens ── */
   --font-display:  'Geist Sans', 'Geist', system-ui, sans-serif;
-  --font-body:     'Geist Sans', 'Geist', 'Inter', system-ui, sans-serif;
   --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
 
   /* ── Spacing scale (4pt grid) ── */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
 
   /* ── Animation tokens ── */
-  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1); /* no overshoot — ease-out */
-  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
-  --dur-fast:    120ms;
-  --dur-base:    180ms;
-  --dur-slow:    240ms;
 
   --radius-card: 0.625rem; /* 10px — one card radius everywhere */
 
   /* ── Trust & Authority color additions ── */
   --trust-badge:    rgba(22, 217, 245, 0.08);
   --trust-border:   rgba(22, 217, 245, 0.20);
-  --surface-glass:  var(--bg-elevated); /* was translucent; now opaque */
-  --shadow-glow:    0 1px 0 var(--hairline) inset;
 }
 
 /* ─── Utility Classes ─── */
