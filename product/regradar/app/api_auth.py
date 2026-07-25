@@ -60,6 +60,15 @@ from app.api import (
 )
 
 
+# How long registration waits for the verification mail before answering. Every
+# provider path in app/email_delivery.py allows timeout=15, which is far too long
+# to hold a signup request on; this bounds the wait while still capturing the
+# result in the ordinary case, where a send succeeds or fails in well under a
+# second. Past this the answer is an honest "still sending", never a fabricated
+# success.
+_VERIFICATION_SEND_WAIT_S = 6.0
+
+
 class _AuthHandlerMixin:
     """Authentication + account request handlers for ``_Handler``."""
 
@@ -104,15 +113,46 @@ class _AuthHandlerMixin:
                 company_type=company_type,
                 jurisdiction=jurisdiction,
             )
-            # Generate verification token and send email (non-blocking)
             token = generate_verification_token(int(user["id"]))
             verification_url = f"{self._public_base_url()}/verify-email?token={token}"
             import threading as _threading
-            _threading.Thread(
-                target=_send_verification_email,
-                args=(user["email"], verification_url),
-                daemon=True,
-            ).start()
+
+            # The verification mail used to be fired into a daemon thread whose
+            # result was thrown away, so registration answered "check your inbox"
+            # whether or not anything was sent. A customer whose mail silently
+            # failed — misconfigured provider, sending disabled, a bounce — was
+            # left staring at a success screen and could not sign in, because
+            # login refuses an unverified account.
+            #
+            # It is still off the request thread (every provider path allows
+            # timeout=15, too long to hold a signup on), but the result is WAITED
+            # for, briefly, and reported. Three honest outcomes, never conflated:
+            #   True  — the provider accepted it
+            #   False — it failed, and the customer is told to use Resend
+            #   None  — still in flight past the wait; we do not know, and say so
+            email_outcome: bool | None = None
+            send_result: dict = {}
+
+            def _send_and_capture() -> None:
+                nonlocal send_result
+                try:
+                    send_result = _send_verification_email(user["email"], verification_url) or {}
+                except Exception as exc:  # noqa: BLE001 — a send failure is not a 500
+                    logger.warning("verification email failed: %s", type(exc).__name__)
+                    send_result = {"ok": False}
+
+            sender = _threading.Thread(target=_send_and_capture, daemon=True)
+            sender.start()
+            sender.join(timeout=_VERIFICATION_SEND_WAIT_S)
+            if not sender.is_alive():
+                email_outcome = bool(send_result.get("ok"))
+                if not email_outcome:
+                    logger.warning(
+                        "verification email not delivered for a new registration "
+                        "(status=%s); the account exists and can use Resend",
+                        send_result.get("status") or "unknown",
+                    )
+
             # Founder heads-up via the admin bot — best-effort, never blocks
             # or fails the registration (see _notify_founder_registration).
             _threading.Thread(
@@ -120,8 +160,29 @@ class _AuthHandlerMixin:
                 args=(user["email"], str(full_name or ""), company_name),
                 daemon=True,
             ).start()
+
+            if email_outcome is False:
+                message = (
+                    "Your account was created, but we could not send the "
+                    "verification email. Use Resend below, or contact support if it "
+                    "keeps failing."
+                )
+            elif email_outcome is None:
+                message = (
+                    "Your account was created. The verification email is still "
+                    "sending — if it has not arrived shortly, use Resend below."
+                )
+            else:
+                message = "Account created. Check your inbox for the verification link."
+
             self._send_json(
-                {"ok": True, "requires_verification": True, "email": user["email"]},
+                {
+                    "ok": True,
+                    "requires_verification": True,
+                    "email": user["email"],
+                    "verification_email_sent": email_outcome,
+                    "message": message,
+                },
                 201,
             )
         except DuplicateEmailError:

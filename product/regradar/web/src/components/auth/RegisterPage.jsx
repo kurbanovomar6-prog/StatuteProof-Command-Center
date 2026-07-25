@@ -103,6 +103,9 @@ export default function RegisterPage({ onRegister, onLogin }) {
   const [planIntent] = useState(capturePlanIntentFromUrl)
   const [showPass, setShowPass] = useState(false)
   const [verificationSent, setVerificationSent] = useState(false)
+  // null = the server was still sending when it answered; true/false = it knows.
+  const [emailDelivered, setEmailDelivered] = useState(null)
+  const [registerNotice, setRegisterNotice] = useState('')
   const [verifiedEmail, setVerifiedEmail] = useState('')
   const [resendLoading, setResendLoading] = useState(false)
   const [resendMessage, setResendMessage] = useState('')
@@ -165,6 +168,13 @@ export default function RegisterPage({ onRegister, onLogin }) {
       })
       if (data.requires_verification) {
         setVerifiedEmail(data.email || form.email)
+        // The server now reports whether the mail actually went out. Showing
+        // "Check your email" regardless is how a customer ends up waiting for a
+        // message that was never sent — and they cannot sign in until it arrives.
+        setEmailDelivered(
+          data.verification_email_sent === undefined ? true : data.verification_email_sent,
+        )
+        setRegisterNotice(data.message || '')
         setVerificationSent(true)
         return
       }
@@ -206,13 +216,32 @@ export default function RegisterPage({ onRegister, onLogin }) {
             <Mail className="h-8 w-8 text-cyan-300" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-slate-950">Check your email</h1>
+            <h1 className="text-2xl font-semibold text-slate-950">
+              {emailDelivered === false ? 'Account created — email not sent' : 'Check your email'}
+            </h1>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              We sent a verification link to{' '}
-              <span className="font-semibold text-slate-900">{verifiedEmail}</span>.
-              Click the link in that email to activate your account.
+              {emailDelivered === false ? (
+                <>
+                  Your account for{' '}
+                  <span className="font-semibold text-slate-900">{verifiedEmail}</span>{' '}
+                  exists, but we could not send the verification link. Use Resend below.
+                </>
+              ) : (
+                <>
+                  We sent a verification link to{' '}
+                  <span className="font-semibold text-slate-900">{verifiedEmail}</span>.
+                  Click the link in that email to activate your account.
+                </>
+              )}
             </p>
-            <p className="mt-2 text-xs text-slate-500">The link expires after 24 hours.</p>
+            {/* Only meaningful when a link actually went out — telling someone
+                their unsent link expires in 24 hours is nonsense. */}
+            {emailDelivered !== false && (
+              <p className="mt-2 text-xs text-slate-500">The link expires after 24 hours.</p>
+            )}
+            {registerNotice && emailDelivered !== true && (
+              <p className="mt-3 text-xs text-amber-700">{registerNotice}</p>
+            )}
           </div>
 
           {resendMessage && (
