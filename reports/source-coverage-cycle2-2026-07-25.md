@@ -131,15 +131,28 @@ structural change it is built to catch. Content is stable across two runs (ident
 1,803 chars). Row flagged `rebaseline_required` and explicitly **not** marked certified;
 it needs `run.py rebaseline` for this source id at deploy time.
 
-### EOCN un-page — verified working, but signal-diluted
+### EOCN un-page — I was wrong, and testing it properly is the finding
 
-The UAE local terrorist list delta page (already in the registry) does carry the dated
-designation notices — "Adding 16", "Resolution No 63", "Removal of" all confirmed present
-in the fetched HTML. But a `.view-content` extract is 71,140 chars dominated by the static
-legal-framework preamble about Cabinet Decision 74/2020, so a real designation notice is a
-small delta inside a large static blob. Not a defect, and not something I changed: this is
-the most binding channel for our ICP, and a tighter selector on the notices list would
-raise its signal materially. Queued rather than guessed at.
+**Correction to my own earlier conclusion in this same cycle.** I first measured this page
+with `html_listing` and got 71,140 chars dominated by the static Cabinet-Decision-74/2020
+preamble, concluded the source was signal-diluted, found the tight notices container
+(`ul.unpagelinks`, 14,084 chars, every notice retained) and was ready to propose it as an
+improvement to `AE-eocn-tfs` — a **customer-visible** row (`fresh_alert`,
+`alert_eligible: true`, real prod proof).
+
+That row does not run `html_listing`. It runs `fiu_eocn_document_listing`. My evidence did
+not transfer, so I re-measured with the row's actual adapter. Two things came out:
+
+1. With `container_selector: body` — its current config — the real adapter **already drops
+   the static preamble**. The noise I diagnosed was an artefact of the adapter I tested
+   with, not a property of this source.
+2. Narrowing to `ul.unpagelinks` **loses signal**: "Cabinet Resolution" occurrences fall
+   from 9 to 6. Those are UAE Cabinet Resolutions — the most binding items on the page.
+
+So the "improvement" would have been a regression on the single most binding channel for
+our ICP. **The row is left exactly as it is.** The general lesson is worth more than the
+non-change: a selector verified against one adapter proves nothing about a row served by
+another, and the registry has two disjoint adapter stacks that share no names.
 
 **A verified negative worth keeping:** the QFCRA instance's date filter is broken.
 `?f_days=on&changed=-30 day` returns HTTP 200 with **zero rows**, so only the bare URL
