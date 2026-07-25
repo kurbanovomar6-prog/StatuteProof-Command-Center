@@ -10818,7 +10818,22 @@
     "expected_min_length": 20000,
     "baseline_runs_required": 2,
     "tier": "2",
-    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (870KB server-rendered list). Strike-offs and involuntary actions — corporate service provider / registered agent signal, distinct from monitored RA circulars. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice."
+    "notes": "2026-07-18 ADDED from round-2 census (UAE tail): prod-probed 200 today (870KB server-rendered list). Strike-offs and involuntary actions — corporate service provider / registered agent signal, distinct from monitored RA circulars. CANDIDATE until intake gates pass on prod. Monitoring intelligence only. Not legal advice.",
+    "adapter_name": "html_listing",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": "div.aadgmra-search-content",
+      "container_selector": "#publicnoticetable",
+      "item_selector": "div.aadgmra-search-content",
+      "title_selector": ".aadgmra-content--block",
+      "date_selector": ".aadgmra-content--td",
+      "min_title_chars": 8
+    },
+    "config_added_at": "2026-07-25",
+    "config_note": "Row was enabled with NO adapter config, so it ran the generic path, which sees only the page shell: the notices are server-rendered inside adgm custom elements. Verified selector returns 5,063 chars / 112 lines, newest 22-24 Jul 2026. Head cells only on purpose — notice bodies carry Word-export XML islands (thousands of <w:*> tags). Proposed-deregistration notices open a fixed s867A objection window, so late = forfeited.",
+    "local_intake_certified": false,
+    "rebaseline_required": true,
+    "rebaseline_reason": "Adding the verified adapter config deliberately changed the monitored region (page shell -> the 112 dated notice lines), so intake correctly reports SOURCE_STRUCTURE_CHANGED against the old baseline. Content itself is stable across two runs (identical hash, 1,803 chars). Needs `run.py rebaseline` for this source id at deploy time; until then the row must not be treated as certified."
   },
   {
     "name": "SAMA Rulebook — Circulars (Saudi Arabia)",
@@ -11203,5 +11218,62 @@
     "local_intake_chars": 2084,
     "local_baseline_runs_completed": 2,
     "local_intake_note": "Two consecutive local intake runs on the real registry row: CERTIFICATION_STATUS=TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
+  },
+  {
+    "id": "GCC-kw-cbk-penalties",
+    "name": "Central Bank of Kuwait — penalties register",
+    "url": "https://www.cbk.gov.kw/en/supervision/penalties",
+    "jurisdiction": "KW",
+    "category": "enforcement",
+    "regulator": "CBK",
+    "adapter_name": "html_listing",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": ".article-content",
+      "container_selector": ".article-content",
+      "item_selector": "a",
+      "title_selector": "a",
+      "min_title_chars": 8
+    },
+    "enabled": false,
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "baseline_runs_required": 2,
+    "baseline_runs_completed": 0,
+    "discovery_note": "A dedicated supervisory penalties register — the 'your peer category was just fined' signal for clients with Kuwait remittance/PSP operations. Verified 2026-07-25 through html_listing: 2,269 chars with real dated rows, e.g. '18.11.25 | CBK Imposes a Penalty on an Exchange Company Under its Supervision'; 28 items in 2025, disclosed in batches. Entity names are withheld by CBK but the entity TYPE is the actionable part. Deeper pagination is JS-driven; page 1 is server-rendered.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 760,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
+  },
+  {
+    "id": "GCC-sa-cma-announcements",
+    "name": "Saudi CMA — announcements (enforcement, fines, licensing)",
+    "url": "https://cma.gov.sa/en/MediaCenter/NEWS/Pages/default.aspx",
+    "jurisdiction": "SA",
+    "category": "enforcement",
+    "regulator": "CMA Saudi Arabia",
+    "adapter_name": "html_listing",
+    "adapter_family": "listing",
+    "adapter_config": {
+      "content_selector": "div.iconed-card .info-wrapper, div.iconed-card h3",
+      "container_selector": "div.iconed-card",
+      "item_selector": "div.iconed-card",
+      "title_selector": "h3",
+      "date_selector": "span.date",
+      "min_title_chars": 8
+    },
+    "enabled": false,
+    "monitoring_mode": "candidate",
+    "alert_eligible": false,
+    "baseline_runs_required": 2,
+    "baseline_runs_completed": 0,
+    "discovery_note": "Saudi CMA enforcement flows through this announcements list, not a separate enforcement page: a fine on a listed company for Offer-of-Securities rule violations (28-June-2026) and a compensation action for >20,000 investors (29-June-2026). Verified 2026-07-25 through html_listing: 4,614 chars, 30 dated rows, newest 23-July-2026. The selector takes ONLY date+headline: card bodies contain escaped HTML that surfaces as literal text (25% of lines were '<p style=...>'), so including them would alert on a styling change. Host/path both moved — cma.org.sa 301s to cma.gov.sa and /en/Market/NEWS/ became /en/MediaCenter/NEWS/Pages/default.aspx.",
+    "local_intake_certified": true,
+    "local_intake_certified_at": "2026-07-25",
+    "local_intake_chars": 4512,
+    "local_baseline_runs_completed": 2,
+    "local_intake_note": "Two consecutive local intake runs on the real registry row: TEST_PASSED with an identical normalized hash. NOT a production baseline — promotion still requires a saved proof from a prod mass-monitor run."
   }
 ]

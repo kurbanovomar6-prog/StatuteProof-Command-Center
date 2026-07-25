@@ -104,6 +104,21 @@ _ALLOWED_HOSTS = (
     # (AML), Cabinet Resolution 134/2025 (executive regulations) and Cabinet
     # Resolution 74/2020 (terrorist lists).
     "moj.gov.ae",
+    # Enforcement channels added 2026-07-25, each verified through THIS adapter:
+    # cbk.gov.kw — the Kuwait penalties register (.article-content) returns the dated
+    #   rows, e.g. "18.11.25 | CBK Imposes a Penalty on an Exchange Company Under its
+    #   Supervision" (28 items in 2025). NOTE the sibling path
+    #   /en/supervision/cbk-regulations-and-instructions is a 404; the instruction
+    #   libraries live under /en/legislation-and-regulation/…/<sector>.
+    # cma.gov.sa — Saudi CMA announcements, where its enforcement actually appears
+    #   (a fine for Offer-of-Securities violations, an investor-compensation action).
+    #   The selector deliberately takes only the date + headline
+    #   (".info-wrapper, h3"): the card BODIES contain escaped HTML that surfaces as
+    #   literal text (25% of lines carried "<p style=…>"), so monitoring them would
+    #   raise an alert on a styling tweak. Header-only = 0 markup lines, 30 dated rows.
+    #   Also note cma.org.sa 301s here and /en/Market/NEWS/ moved to /en/MediaCenter/NEWS/.
+    "cbk.gov.kw",
+    "cma.gov.sa",
 )
 
 # Reject a selected region too thin to be a meaningful listing snapshot

@@ -104,6 +104,43 @@ chars, stable hashes): the gap is bookkeeping, not capability. They need a prod 
 Both are the same Drupal `view_revision_updates` shape as the already-proven CBB
 change-log — the highest-value page shape found so far.
 
+### Second batch — enforcement channels (added after verification)
+
+| Source | Verified output | Why it matters |
+|---|---|---|
+| `GCC-sa-cma-announcements` | 4,512 chars normalized, 30 dated rows, stable | Saudi CMA enforcement flows through announcements, not a separate enforcement page: a fine for Offer-of-Securities violations (28-June-2026) and a >20,000-investor compensation action (29-June-2026). |
+| `GCC-kw-cbk-penalties` | 760 chars normalized, stable | A dedicated supervisory penalties register — "your peer category was just fined". Verified rows e.g. "18.11.25 CBK Imposes a Penalty on an Exchange Company"; 28 items in 2025. |
+
+Both selectors were chosen for **signal**, not size. The Saudi CMA card bodies contain
+escaped HTML that surfaces as literal text — 25% of extracted lines were `<p style=…>` —
+so monitoring them would raise a regulatory alert on a styling tweak. Restricting the
+selector to date + headline gives 0 markup lines and all 30 dates.
+
+### A dedup catch worth recording
+
+`AE-adgm-ra-public-notices` was **already in the registry, enabled, with no adapter config
+at all** — so it ran the generic path, which sees only the page shell (the notices are
+server-rendered inside ADGM custom elements). The value here was configuration, not
+addition. With the verified selector it returns 5,063 chars / 112 dated lines (newest
+22–24 Jul 2026). Proposed-deregistration notices open a fixed s867A objection window, so
+learning late forfeits the right to object — this is among the most concrete harms found.
+
+Intake now reports `SOURCE_STRUCTURE_CHANGED` for it, which is the gate behaving
+**correctly**: changing the monitored region from page shell to notice rows is exactly the
+structural change it is built to catch. Content is stable across two runs (identical hash,
+1,803 chars). Row flagged `rebaseline_required` and explicitly **not** marked certified;
+it needs `run.py rebaseline` for this source id at deploy time.
+
+### EOCN un-page — verified working, but signal-diluted
+
+The UAE local terrorist list delta page (already in the registry) does carry the dated
+designation notices — "Adding 16", "Resolution No 63", "Removal of" all confirmed present
+in the fetched HTML. But a `.view-content` extract is 71,140 chars dominated by the static
+legal-framework preamble about Cabinet Decision 74/2020, so a real designation notice is a
+small delta inside a large static blob. Not a defect, and not something I changed: this is
+the most binding channel for our ICP, and a tighter selector on the notices list would
+raise its signal materially. Queued rather than guessed at.
+
 **A verified negative worth keeping:** the QFCRA instance's date filter is broken.
 `?f_days=on&changed=-30 day` returns HTTP 200 with **zero rows**, so only the bare URL
 works. Our own fetch confirmed the agent's caveat. The registry row records this so a
