@@ -1,0 +1,35 @@
+[Unit]
+Description=StatuteProof scheduler liveness watchdog (RESTARTS a wedged watch loop + pages founder — the action statuteproof-heartbeat only ever notified about)
+After=network-online.target statuteproof-scheduler.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Runs as root ON PURPOSE — unlike the heartbeat oneshot (regradar), this one
+# must `systemctl restart statuteproof-scheduler.service`, which needs
+# privilege. It executes the app's Python only to READ the heartbeat and to
+# page the founder (notify_founder), never to write monitoring data.
+User=root
+WorkingDirectory=/srv/regradar
+EnvironmentFile=/srv/regradar/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/regradar/deploy/scheduler-watchdog.sh
+# Type=oneshot has no start timeout by default; this run makes an outbound
+# Telegram call and a systemctl restart, so a hung call must be reaped rather
+# than wedging the watchdog that exists to un-wedge things.
+TimeoutStartSec=300
+# Restart bookkeeping (backoff budget) lives here and must survive a reboot.
+StateDirectory=statuteproof
+# Hardening (mirrors the other oneshots). NoNewPrivileges does not stop root
+# talking to systemd over its private socket, so `systemctl restart` still works.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/regradar /var/lib/statuteproof
+StandardOutput=journal
+StandardError=journal
+# Exit 1 (loop wedged — restart + page already issued inside the script, or the
+# restart budget is exhausted) is an EXPECTED remediation signal, not a service
+# fault. Treat it as clean so the timer keeps firing instead of the unit going
+# into failed state (mirrors the heartbeat + api-health oneshots).
+SuccessExitStatus=0 1

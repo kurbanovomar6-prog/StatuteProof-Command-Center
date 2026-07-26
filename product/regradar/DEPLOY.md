@@ -144,7 +144,8 @@ systemctl daemon-reload
 systemctl enable --now statuteproof-api statuteproof-scheduler \
     statuteproof-telegram-bot statuteproof-compaction.timer \
     statuteproof-backup.timer statuteproof-heartbeat.timer \
-    statuteproof-verify.timer statuteproof-api-health.timer
+    statuteproof-verify.timer statuteproof-api-health.timer \
+    statuteproof-scheduler-watchdog.timer
 systemctl status statuteproof-api --no-pager | head -5   # expect: active (running)
 curl -s http://127.0.0.1:5001/api/health                  # expect: {"ok": true, ...}
 
@@ -309,6 +310,36 @@ Expect `DEPLOY-CHECK PASSED`, then an `encrypted for off-box push (age|gpg): …
 line followed by `off-box copy (rclone|scp): …`. Anything else — `REFUSED`, a
 founder page, a push warning — is a live backup fault; fix it before you treat
 this deploy as done.
+
+## Scheduler watchdog — the one control that RESTARTS
+
+`statuteproof-heartbeat.timer` only ever *notified*: it pages the founder about a
+wedged loop and then does nothing. Monitoring was silently dead for four days in
+exactly that state — the process was alive, so `Restart=on-failure` never fired,
+and the page arrived to a founder who was asleep.
+
+`statuteproof-scheduler-watchdog.timer` (every 10 min) is the control that acts.
+It asks the app for the heartbeat state, and when the loop is provably wedged —
+stale heartbeat AND a progress marker that has stopped moving — it restarts
+`statuteproof-scheduler.service` within a backoff budget, then pages.
+
+It runs as root because restarting a unit needs privilege; it touches the app's
+Python only to READ state and to send the page, never to write monitoring data.
+Exit 1 means "wedge found, remediation issued" and is treated as success so the
+timer keeps ticking.
+
+Verify after step 7:
+
+```bash
+systemctl list-timers statuteproof-scheduler-watchdog.timer --no-pager
+systemctl start statuteproof-scheduler-watchdog.service   # safe: no-ops when healthy
+journalctl -u statuteproof-scheduler-watchdog --no-pager -n 20
+```
+
+A run on a healthy box logs the heartbeat state and exits 0 without restarting
+anything. If it logs `heartbeat query produced no output`, the app and the script
+disagree about the sensor contract and the watchdog is inert — that exact failure
+is covered by `tools/measure_reliability_axis.py`.
 
 ## External uptime probe (2-minute step, free tier)
 

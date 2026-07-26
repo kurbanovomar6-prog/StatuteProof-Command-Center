@@ -1057,7 +1057,8 @@ if ! command -v systemctl >/dev/null 2>&1; then
 else
   for unit in statuteproof-compaction.timer statuteproof-backup.timer \\
               statuteproof-heartbeat.timer statuteproof-verify.timer \\
-              statuteproof-api-health.timer; do
+              statuteproof-api-health.timer \\
+              statuteproof-scheduler-watchdog.timer; do
     # Pipe-free on purpose: `... | grep -q` under `set -o pipefail` reports a
     # SIGPIPE failure whenever grep exits on an early match while systemctl is
     # still writing, so installed units intermittently read as "not installed".
@@ -1084,6 +1085,9 @@ _TIMERS = [
     "statuteproof-heartbeat.timer",
     "statuteproof-verify.timer",
     "statuteproof-api-health.timer",
+    # The one control that RESTARTS rather than only notifying. Monitoring was
+    # dead for four days with every other timer green, because none of them act.
+    "statuteproof-scheduler-watchdog.timer",
 ]
 
 

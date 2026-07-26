@@ -1,0 +1,17 @@
+[Unit]
+Description=Run the StatuteProof scheduler liveness watchdog every 10 min (auto-restarts an alive-but-wedged watch loop that systemd's Restart=on-failure never catches)
+
+[Timer]
+# Detection latency is set by the heartbeat threshold (2x the watch interval),
+# not by this cadence — a 10-minute tick just bounds how long recovery waits
+# once the loop is already provably wedged. Runs independently of the scheduler
+# service so it still fires while that service is hung.
+OnBootSec=15min
+OnUnitActiveSec=10min
+AccuracySec=1min
+# No Persistent=: liveness is point-in-time, so a tick missed while the box was
+# off has nothing useful to replay.
+Unit=statuteproof-scheduler-watchdog.service
+
+[Install]
+WantedBy=timers.target

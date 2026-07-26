@@ -206,7 +206,9 @@ for unit in statuteproof-api.service statuteproof-scheduler.service \
             statuteproof-backup.timer statuteproof-heartbeat.service \
             statuteproof-heartbeat.timer statuteproof-verify.service \
             statuteproof-verify.timer statuteproof-api-health.service \
-            statuteproof-api-health.timer; do
+            statuteproof-api-health.timer \
+            statuteproof-scheduler-watchdog.service \
+            statuteproof-scheduler-watchdog.timer; do
   [ -f "deploy/systemd/$unit" ] && ok "deploy/systemd/$unit present" || bad "deploy/systemd/$unit missing"
 done
 [ -f deploy/Caddyfile ] && ok "deploy/Caddyfile present" || bad "deploy/Caddyfile missing"
@@ -232,7 +234,8 @@ if ! command -v systemctl >/dev/null 2>&1; then
 else
   for unit in statuteproof-compaction.timer statuteproof-backup.timer \
               statuteproof-heartbeat.timer statuteproof-verify.timer \
-              statuteproof-api-health.timer; do
+              statuteproof-api-health.timer \
+              statuteproof-scheduler-watchdog.timer; do
     # Pipe-free on purpose: `... | grep -q` under `set -o pipefail` reports a
     # SIGPIPE failure whenever grep exits on an early match while systemctl is
     # still writing, so installed units intermittently read as "not installed".
