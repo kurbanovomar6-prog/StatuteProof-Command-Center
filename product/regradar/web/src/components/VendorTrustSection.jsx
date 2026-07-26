@@ -75,7 +75,7 @@ export default function VendorTrustSection() {
               </span>
             </p>
           </div>
-          <p className="mt-4 text-[11px] text-slate-500 leading-relaxed border-t border-slate-800 pt-4">
+          <p className="mt-4 text-[11px] text-slate-400 leading-relaxed border-t border-slate-800 pt-4">
             StatuteProof reports are generated from monitored official-source records and are provided for information
             and compliance review support only. StatuteProof does not constitute legal advice, regulatory advice,
             or compliance certification. Not a substitute for qualified legal or compliance professionals.

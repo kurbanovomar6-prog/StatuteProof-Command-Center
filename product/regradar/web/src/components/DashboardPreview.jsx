@@ -25,7 +25,7 @@ const columns = [
   }),
   col.accessor('jurisdiction', {
     header: 'Market',
-    cell: i => <span className="text-xs text-slate-500 font-mono">{i.getValue()}</span>,
+    cell: i => <span className="text-xs text-slate-400 font-mono">{i.getValue()}</span>,
   }),
   col.accessor('access', {
     header: 'Access',
@@ -94,7 +94,7 @@ function SourceTable() {
           {table.getHeaderGroups().map(hg => (
             <tr key={hg.id}>
               {hg.headers.map(h => (
-                <th key={h.id} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                <th key={h.id} className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide">
                   {flexRender(h.column.columnDef.header, h.getContext())}
                 </th>
               ))}
@@ -170,7 +170,7 @@ export default function DashboardPreview() {
                 <Clock className="w-4 h-4" />
                 Monitored sources: AE
               </div>
-              <div className="text-slate-500 text-xs mt-1">Changes queued for human review</div>
+              <div className="text-slate-400 text-xs mt-1">Changes queued for human review</div>
               <div className="text-emerald-400 text-xs mt-1 font-medium">Source proof attached</div>
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function DashboardPreview() {
                   <Icon className="w-5 h-5 text-cyan-200" />
                 </div>
                 <h3 className="font-semibold text-white text-sm mb-2">{card.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{card.desc}</p>
+                <p className="text-xs text-slate-400 leading-relaxed">{card.desc}</p>
               </div>
             )
           })}

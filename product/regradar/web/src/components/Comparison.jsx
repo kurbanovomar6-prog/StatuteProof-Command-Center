@@ -96,7 +96,7 @@ export default function Comparison() {
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-slate-800">
-                <th className="w-40 px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500" />
+                <th className="w-40 px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400" />
                 {COLUMNS.map((col) => (
                   <th
                     key={col.name}
@@ -116,7 +116,7 @@ export default function Comparison() {
                         href={col.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 transition-colors hover:text-cyan-300"
+                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 transition-colors hover:text-cyan-300"
                       >
                         {col.example}
                         <ExternalLink className="h-3 w-3" />
@@ -154,7 +154,7 @@ export default function Comparison() {
           </table>
         </div>
 
-        <p className="mt-5 max-w-3xl text-xs leading-relaxed text-slate-500">
+        <p className="mt-5 max-w-3xl text-xs leading-relaxed text-slate-400">
           Competitor facts are drawn from each provider’s own public pages
           (linked above) and may change — verify at the source. StatuteProof is
           selected-source UAE monitoring, not complete coverage. Monitoring

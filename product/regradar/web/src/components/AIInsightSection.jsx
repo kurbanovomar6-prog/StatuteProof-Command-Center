@@ -53,14 +53,14 @@ function DiffPanel() {
             CBUAE · AML/CFT Guidelines · Rev 2025-01
           </span>
         </div>
-        <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded">
+        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-500/40 px-2 py-0.5 rounded">
           SAMPLE / FAKE
         </span>
       </div>
 
       {/* File path bar */}
       <div className="px-4 py-1.5 bg-slate-950/70 border-b border-slate-800/60 flex-shrink-0">
-        <span className="text-[10px] font-mono text-slate-500">
+        <span className="text-[10px] font-mono text-slate-400">
           AML_CFT_Guidelines_v4.pdf · Article 7 · lines 142–158
         </span>
       </div>
@@ -119,16 +119,16 @@ function AnalysisPanel() {
             <span className="inline-block h-2 w-2 rounded-full bg-red-400" />
             HIGH RISK
           </span>
-          <span className="text-[10px] text-slate-500 font-mono">AML · DNFBP · Threshold change</span>
+          <span className="text-[10px] text-slate-400 font-mono">AML · DNFBP · Threshold change</span>
         </div>
-        <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded uppercase tracking-wide">
+        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-500/40 px-2 py-0.5 rounded uppercase tracking-wide">
           Sample — for illustration
         </span>
       </div>
 
       {/* Section 1: What changed */}
       <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 px-4 py-3">
-        <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+        <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
           What changed
         </p>
         <p className="text-sm font-medium leading-snug text-slate-100">
@@ -156,7 +156,7 @@ function AnalysisPanel() {
       <div className="rounded-xl border border-slate-700/50 bg-slate-900/40 px-4 py-3">
         <div className="mb-2.5 flex items-center gap-2">
           <ListChecks className="h-3.5 w-3.5 text-slate-400" />
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             What to do
           </p>
         </div>
@@ -183,13 +183,13 @@ function AnalysisPanel() {
       {/* Cryptographic evidence strip */}
       <div className="flex flex-col gap-1 rounded-xl border border-slate-800/80 bg-slate-950/60 px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <LockKeyhole className="h-3 w-3 flex-shrink-0 text-slate-500" />
-          <span className="font-mono text-[10px] text-slate-500 break-all">
+          <LockKeyhole className="h-3 w-3 flex-shrink-0 text-slate-400" />
+          <span className="font-mono text-[10px] text-slate-400 break-all">
             SHA-256: a3f8b2c4d1e9f07a…  · Captured: 2024-12-08 09:14:22 UTC
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] text-slate-600 pl-5">
+          <span className="font-mono text-[10px] text-slate-400 pl-5">
             Source: CBUAE Official Portal · Run ID: ae-cbuae-aml-20241208-0914
           </span>
         </div>
@@ -240,7 +240,7 @@ export default function AIInsightSection() {
           >
             {/* Column label */}
             <div className="flex items-center gap-2 border-b border-slate-800/50 bg-slate-900/40 px-4 py-2 flex-shrink-0">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
                 Source diff — what the official text shows
               </span>
             </div>
@@ -280,7 +280,7 @@ export default function AIInsightSection() {
             >
               <p className="sp-mono text-xs font-bold text-cyan-400">{num}</p>
               <p className="mt-2 text-sm font-semibold text-white">{title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">{detail}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-400">{detail}</p>
             </div>
           ))}
         </div>

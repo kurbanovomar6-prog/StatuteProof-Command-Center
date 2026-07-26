@@ -45,10 +45,13 @@ const RUN_LOG = [
   },
 ]
 
+// Rendered inside the white document below, not on the dark page. The
+// dark-theme chip colours (amber-300, cyan-300) over a 10% tint on white
+// measure around 2:1 — these are the light-surface equivalents.
 const STATUS_STYLES = {
-  CHANGED: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
-  UNCHANGED: 'border-slate-600/40 bg-slate-800/40 text-slate-400',
-  FIRST_SEEN: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300',
+  CHANGED: 'border-amber-500/40 bg-amber-50 text-amber-800',
+  UNCHANGED: 'border-slate-300 bg-slate-100 text-slate-700',
+  FIRST_SEEN: 'border-cyan-600/40 bg-cyan-50 text-cyan-800',
 }
 
 const DIFF_LINES = [
@@ -106,7 +109,7 @@ export default function AuditBinderSample() {
               <div className="border-b border-slate-200 px-8 py-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">
                       StatuteProof Evidence Binder
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 leading-tight">
@@ -116,7 +119,7 @@ export default function AuditBinderSample() {
                       Period: 01 January 2026 – 31 March 2026
                     </div>
                   </div>
-                  <div className="text-right text-xs text-slate-400 shrink-0">
+                  <div className="text-right text-xs text-slate-600 shrink-0">
                     <div className="font-mono">Exported: 2026-04-01</div>
                     <div className="mt-1">Run records: 91 days</div>
                     <div className="mt-1 font-bold text-amber-600 border border-amber-300 bg-amber-50 px-2 py-0.5 rounded">
@@ -185,18 +188,18 @@ export default function AuditBinderSample() {
                 <div className="grid sm:grid-cols-2 gap-4 mb-4">
                   <div className="space-y-3">
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Source URL</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 mb-0.5">Source URL</div>
                       <div className="font-mono text-xs text-blue-700 flex items-center gap-1">
                         https://www.vara.ae/en/rulebook/compliance-risk-management
-                        <ExternalLink className="h-3 w-3 text-slate-400 shrink-0" />
+                        <ExternalLink className="h-3 w-3 text-slate-600 shrink-0" />
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Change Detected</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 mb-0.5">Change Detected</div>
                       <div className="font-mono text-xs text-slate-700">2026-01-15 07:23:41 UTC</div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Chain Status</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 mb-0.5">Chain Status</div>
                       <div className="flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-emerald-500" />
                         <span className="text-xs font-bold text-emerald-700">INTACT</span>
@@ -205,11 +208,11 @@ export default function AuditBinderSample() {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">SHA-256 (before)</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 mb-0.5">SHA-256 (before)</div>
                       <div className="font-mono text-xs text-slate-500 break-all">a3f5b2c1d4e6f789…</div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">SHA-256 (after)</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 mb-0.5">SHA-256 (after)</div>
                       <div className="font-mono text-xs text-slate-800 break-all font-semibold">d8e9f4a2b1c3d5e7…</div>
                     </div>
                   </div>
@@ -219,7 +222,7 @@ export default function AuditBinderSample() {
                 <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
                   <div className="border-b border-slate-200 bg-slate-100 px-4 py-2 flex items-center justify-between">
                     <span className="font-mono text-[10px] text-slate-500">vara-compliance-rulebook.txt — diff excerpt</span>
-                    <span className="text-[10px] text-slate-400">SAMPLE — illustrative diff</span>
+                    <span className="text-[10px] text-slate-600">SAMPLE — illustrative diff</span>
                   </div>
                   <pre className="p-4 text-[11px] leading-6 overflow-x-auto">
                     {DIFF_LINES.map((line, i) => (
@@ -260,7 +263,7 @@ export default function AuditBinderSample() {
                         ['Status', 'CLOSED'],
                       ].map(([label, value]) => (
                         <tr key={label} className="border-b border-slate-100">
-                          <td className="py-2.5 px-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400 bg-slate-50 w-40 shrink-0">
+                          <td className="py-2.5 px-4 text-[10px] font-semibold uppercase tracking-wide text-slate-600 bg-slate-50 w-40 shrink-0">
                             {label}
                           </td>
                           <td className={`py-2.5 px-4 ${label === 'Status' ? 'font-bold text-emerald-700' : 'text-slate-700'}`}>
@@ -272,7 +275,7 @@ export default function AuditBinderSample() {
                   </table>
                 </div>
 
-                <p className="mt-3 text-[10px] text-slate-400 leading-relaxed">
+                <p className="mt-3 text-[10px] text-slate-600 leading-relaxed">
                   The MLRO response log records who reviewed the brief, when they reviewed it, what decision was made,
                   and any internal action reference. This log is included in the binder export and is not editable after submission.
                 </p>
@@ -280,7 +283,7 @@ export default function AuditBinderSample() {
 
               {/* Document footer */}
               <div className="px-8 py-5 bg-slate-50 flex items-start gap-2.5">
-                <Lock className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
+                <Lock className="h-3.5 w-3.5 text-slate-600 shrink-0 mt-0.5" />
                 <p className="text-[10px] leading-relaxed text-slate-500">
                   <span className="font-semibold text-slate-600">SAMPLE / FAKE — illustrative content only.</span>
                   {' '}StatuteProof monitoring intelligence only. Not legal advice. Hash verification available on request.

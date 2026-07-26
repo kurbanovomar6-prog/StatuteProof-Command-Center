@@ -220,7 +220,7 @@ export default function LegalPage({ type = 'disclaimer', onBack }) {
           {page.kicker}
         </div>
         <h1 className="text-4xl font-semibold text-white mb-2">{page.title}</h1>
-        <p className="text-sm text-slate-500 mb-10">Last updated: June 2026</p>
+        <p className="text-sm text-slate-400 mb-10">Last updated: June 2026</p>
 
         <div className="space-y-10">
           {page.sections.map((section) => (

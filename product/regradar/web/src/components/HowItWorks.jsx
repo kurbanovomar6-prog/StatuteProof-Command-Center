@@ -77,7 +77,7 @@ export default function HowItWorks() {
         </div>
 
         <div className="mt-10 text-center">
-          <p className="text-[11px] text-slate-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[11px] text-slate-400 max-w-2xl mx-auto leading-relaxed">
             StatuteProof monitoring briefs require human review before any
             compliance or regulatory action. Not legal advice.
           </p>

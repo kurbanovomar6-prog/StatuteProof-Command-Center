@@ -103,7 +103,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
               >
                 {plan.cta}
               </button>
-              <p className="text-xs text-slate-500 mt-3">No automatic charges · Cancel anytime · Human review included</p>
+              <p className="text-xs text-slate-400 mt-3">No automatic charges · Cancel anytime · Human review included</p>
             </div>
           ))}
         </div>
@@ -114,7 +114,7 @@ export default function Pricing({ onCreateWorkspace, onSourceReview, onSelectPla
           <span className="sp-badge-trust">Human review gate</span>
         </div>
 
-        <p className="text-center text-xs text-slate-500 mt-6 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-center text-xs text-slate-400 mt-6 max-w-3xl mx-auto leading-relaxed">
           Monitoring scope is limited to selected official UAE regulatory sources across VARA, DFSA, ADGM/FSRA, DIFC and related public authorities.
           Features marked for activation or roadmap are not live by default. Source access, extraction quality, and any limitations are disclosed before pilot begins.
         </p>

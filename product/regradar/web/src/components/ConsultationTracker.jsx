@@ -76,7 +76,7 @@ export default function ConsultationTracker() {
 
           {/* SAMPLE badge bar */}
           <div className="flex items-center justify-between border-b border-slate-700 bg-slate-950 px-5 py-3">
-            <div className="flex items-center gap-2 text-xs text-slate-500">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
               <CalendarDays className="h-3.5 w-3.5" />
               <span>Consultation papers — Q2/Q3 2026</span>
             </div>
@@ -91,7 +91,7 @@ export default function ConsultationTracker() {
               <thead>
                 <tr className="border-b border-slate-700 bg-slate-900/50">
                   {['Regulator', 'Paper', 'Published', 'Closes', 'Status'].map(h => (
-                    <th key={h} className="py-3 px-4 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                    <th key={h} className="py-3 px-4 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       {h}
                     </th>
                   ))}
@@ -109,13 +109,13 @@ export default function ConsultationTracker() {
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
                           isOpen
                             ? 'text-white bg-slate-700 border border-slate-600'
-                            : 'text-slate-500 bg-slate-800 border border-slate-700'
+                            : 'text-slate-400 bg-slate-800 border border-slate-700'
                         }`}>
                           {row.regulator}
                         </span>
                       </td>
                       <td className={`py-3.5 px-4 text-xs leading-snug max-w-[240px] ${
-                        isOpen ? 'text-slate-200 font-medium' : 'text-slate-500 line-through decoration-slate-600'
+                        isOpen ? 'text-slate-200 font-medium' : 'text-slate-400 line-through decoration-slate-600'
                       }`}>
                         {row.paper}
                       </td>
@@ -136,7 +136,7 @@ export default function ConsultationTracker() {
                         ) : (
                           <div className="flex items-center gap-1.5">
                             <span className="h-2 w-2 rounded-full bg-slate-600 shrink-0" />
-                            <span className="text-xs text-slate-500">Closed</span>
+                            <span className="text-xs text-slate-400">Closed</span>
                           </div>
                         )}
                       </td>
@@ -150,7 +150,7 @@ export default function ConsultationTracker() {
           {/* Footer */}
           <div className="flex items-start gap-2.5 border-t border-slate-700 bg-slate-950/50 px-5 py-4">
             <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs leading-relaxed text-slate-500">
+            <p className="text-xs leading-relaxed text-slate-400">
               <span className="font-semibold text-slate-400">SAMPLE / FAKE — illustrative content only.</span>
               {' '}Consultation deadline tracking is on the StatuteProof product roadmap for Q3 2026.
               Monitoring intelligence only. Not legal advice.

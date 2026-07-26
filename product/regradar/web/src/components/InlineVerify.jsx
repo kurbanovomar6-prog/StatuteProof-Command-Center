@@ -169,7 +169,7 @@ export default function InlineVerify({ onOpenFull }) {
           </ul>
 
           {result.disclaimer ? (
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">{result.disclaimer}</p>
+            <p className="mt-3 text-xs leading-relaxed text-slate-400">{result.disclaimer}</p>
           ) : null}
 
           {onOpenFull ? (

@@ -100,7 +100,7 @@ function Column({ tone, items }) {
                 >
                   {item.headline}
                 </p>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
                   {item.detail}
                 </p>
               </div>

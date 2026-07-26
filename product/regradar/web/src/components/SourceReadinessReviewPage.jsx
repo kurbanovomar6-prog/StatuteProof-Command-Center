@@ -126,7 +126,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
             Your source readiness review request has been submitted. We will review your profile
             and source requirements and be in touch.
           </p>
-          <p className="mb-6 text-xs leading-relaxed text-slate-500">
+          <p className="mb-6 text-xs leading-relaxed text-slate-400">
             This is not legal advice and does not determine regulatory obligations.
           </p>
           <button
@@ -178,7 +178,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
                 We check whether each requested official source is public, technically accessible,
                 fresh-alert eligible, evidence-library only, blocked, or still requiring remediation.
               </p>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-slate-400">
                 Monitoring intelligence only. This is not legal advice and does not determine regulatory obligations.
               </p>
             </div>
@@ -193,10 +193,10 @@ export default function SourceReadinessReviewPage({ onBack }) {
                 <div key={label} className="rounded-3xl border border-slate-800 bg-slate-950/45 p-4">
                   <p className="sp-mono text-3xl font-bold text-white">{value}</p>
                   <p className="mt-1 text-sm font-semibold text-slate-200">{label}</p>
-                  <p className="mt-1 text-xs text-slate-500">{note}</p>
+                  <p className="mt-1 text-xs text-slate-400">{note}</p>
                 </div>
               ))}
-              <p className="text-xs text-slate-500 sm:col-span-4">
+              <p className="text-xs text-slate-400 sm:col-span-4">
                 Source registry snapshot as of {sourceTruthAsOf}. Counts are transparency data, not a coverage promise.
               </p>
             </div>
@@ -297,7 +297,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
                     <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
                       {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
                     </select>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
                       MLRO = Money Laundering Reporting Officer. CCO = Chief Compliance Officer.
                     </p>
                   </div>
@@ -317,7 +317,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
                   <span className="sp-mono flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">3</span>
                   <h3 className="text-sm font-bold text-slate-950">Which official-source areas matter?</h3>
                 </div>
-                <p className="mb-3 text-xs leading-relaxed text-slate-500">
+                <p className="mb-3 text-xs leading-relaxed text-slate-400">
                   Select the areas your team checks today. We will return readiness status, not a full regulator map.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-1">
@@ -388,7 +388,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
               </button>
 
               {/* Disclaimer */}
-              <p className="text-center text-xs leading-relaxed text-slate-500">
+              <p className="text-center text-xs leading-relaxed text-slate-400">
                 This is not legal advice and does not determine regulatory obligations.
                 StatuteProof provides monitoring intelligence only and does not provide legal advice or
                 determine compliance outcomes.

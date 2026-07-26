@@ -25,7 +25,7 @@ export default function DiffViewer({ diffText, sourceId, detectedAt }) {
           ))}
         </pre>
       </div>
-      <div className="px-4 py-2 bg-slate-950/45 text-xs text-slate-500 border-t border-slate-800">
+      <div className="px-4 py-2 bg-slate-950/45 text-xs text-slate-400 border-t border-slate-800">
         SHA-256 hash recorded · Human review required before any compliance action
       </div>
     </div>

@@ -379,7 +379,7 @@ export default function PricingPage({
                       className={`py-2.5 px-2 text-center ${p.highlight ? "bg-[#16D9F5]/3" : ""}`}
                     >
                       {row.special === "legal_advice" ? (
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-[10px] text-slate-400">
                           No — monitoring only
                         </span>
                       ) : (
@@ -419,7 +419,7 @@ export default function PricingPage({
                 >
                   {faq.q}
                   <HelpCircle
-                    className={`w-4 h-4 flex-shrink-0 ml-2 transition-colors ${openFaq === i ? "text-[var(--accent)]" : "text-slate-500"}`}
+                    className={`w-4 h-4 flex-shrink-0 ml-2 transition-colors ${openFaq === i ? "text-[var(--accent)]" : "text-slate-400"}`}
                   />
                 </button>
                 {openFaq === i && (

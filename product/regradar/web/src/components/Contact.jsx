@@ -32,12 +32,12 @@ export default function Contact({ onCreateWorkspace, onSignIn }) {
                   </div>
                 ))}
               </div>
-              <p className="mt-5 text-xs leading-relaxed text-slate-500">
+              <p className="mt-5 text-xs leading-relaxed text-slate-400">
                 StatuteProof is not legal advice. Source activation depends on technical validation.
               </p>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-950/45 p-5">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Start in two minutes
               </p>
               <div className="flex flex-col gap-3">

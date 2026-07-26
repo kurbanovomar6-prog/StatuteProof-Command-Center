@@ -206,7 +206,7 @@ function ChainStrip() {
         >
           <p className="sp-mono text-xs font-bold text-cyan-300">{num}</p>
           <p className="mt-2 text-sm font-semibold text-white">{title}</p>
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+          <p className="mt-1 text-xs leading-relaxed text-slate-400">
             {detail}
           </p>
         </div>
@@ -291,7 +291,7 @@ export default function Hero({ onCreateWorkspace, onViewSample, onVerify }) {
 
             {/* Regulator strip */}
             <div className="sp-animate-fade-up sp-delay-2 mt-6 flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-medium text-slate-500 mr-1">
+              <span className="text-[11px] font-medium text-slate-400 mr-1">
                 Selected sources in scope include:
               </span>
               {REGULATOR_STRIP.map((name) => (
