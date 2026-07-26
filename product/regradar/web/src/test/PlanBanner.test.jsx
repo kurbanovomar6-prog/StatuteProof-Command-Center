@@ -57,11 +57,11 @@ describe('PlanBanner — pending manual activation', () => {
 
     // Source limit / Users / retention must reflect the free active tier,
     // never the requested UAE Monitor caps (Custom / 2 / 180 days).
-    expect(metric('Source limit')).toBe('—')
+    expect(metric('Source limit')).toBe('Set on activation')
     expect(metric('Source limit')).not.toBe('Custom')
     expect(metric('Users')).toBe('1')
     expect(metric('Users')).not.toBe('2')
-    expect(metric('Evidence retention')).toBe('—')
+    expect(metric('Evidence retention')).toBe('Set on activation')
     expect(metric('Evidence retention')).not.toBe('180 days')
 
     // "Current plan" reflects the active (granted) tier, not the requested one.

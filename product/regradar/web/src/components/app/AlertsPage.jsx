@@ -216,8 +216,9 @@ export default function AlertsPage({ navigate, planState: planStateProp = null }
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-[11px] font-semibold text-[var(--text-muted)] whitespace-nowrap">Licence type</label>
+            <label htmlFor="alerts-licence-filter" className="text-[11px] font-semibold text-[var(--text-muted)] whitespace-nowrap">Licence type</label>
             <select
+              id="alerts-licence-filter"
               value={licenceFilter}
               onChange={e => setLicenceFilter(e.target.value)}
               className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] py-1.5 pl-2.5 pr-8 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none"

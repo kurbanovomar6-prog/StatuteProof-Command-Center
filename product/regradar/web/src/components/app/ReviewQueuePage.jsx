@@ -352,13 +352,13 @@ export default function ReviewQueuePage() {
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] py-2 pl-9 pr-3 text-xs text-white placeholder:text-[var(--text-muted)] focus:border-[var(--trust-border)] focus:outline-none"
             />
           </div>
-          <select value={status} onChange={event => setStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
+          <select aria-label="Filter by review status" value={status} onChange={event => setStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
             {STATUS_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
-          <select value={sourceHealthStatus} onChange={event => setSourceHealthStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
+          <select aria-label="Filter by source health" value={sourceHealthStatus} onChange={event => setSourceHealthStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
             {HEALTH_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
-          <select value={changeStatus} onChange={event => setChangeStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
+          <select aria-label="Filter by change status" value={changeStatus} onChange={event => setChangeStatus(event.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--trust-border)] focus:outline-none">
             {CHANGE_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </div>

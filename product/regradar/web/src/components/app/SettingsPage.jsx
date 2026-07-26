@@ -20,11 +20,21 @@ const SOURCE_LAYERS = [
   'Other',
 ]
 
-function Toggle({ checked, onChange }) {
+// A switch, announced as one. This was a bare <button> whose only child was an
+// empty <span>: no name, no state, no type. Five of them on this page, and axe
+// rates each one critical — someone using a screen reader had five unlabelled
+// buttons and no way to know what any of them controlled or whether it was on.
+// The jsdom suite could not see it; the browser run did.
+function Toggle({ checked, onChange, label, disabled = false }) {
   return (
     <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative w-9 h-5 rounded-full transition-colors ${checked ? 'bg-[var(--accent)]' : 'bg-[var(--bg-tooltip)]'}`}
+      className={`relative w-9 h-5 rounded-full transition-colors disabled:opacity-70 ${checked ? 'bg-[var(--accent)]' : 'bg-[var(--bg-tooltip)]'}`}
     >
       <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
     </button>
@@ -285,7 +295,7 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
                 <p className="text-sm text-[var(--text-primary)]">{label}</p>
                 <p className="text-xs text-[var(--text-muted)]">{sub}</p>
               </div>
-              <Toggle checked={checked} onChange={set} />
+              <Toggle checked={checked} onChange={set} label={label} />
             </div>
           ))}
         </div>
@@ -299,7 +309,7 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
               <p className="text-sm text-[var(--text-primary)]">AI briefs enabled</p>
               <p className="text-xs text-[var(--text-muted)]">Prepare structured brief previews for reviewed pilot outputs</p>
             </div>
-            <Toggle checked={aiEnabled} onChange={setAiEnabled} />
+            <Toggle checked={aiEnabled} onChange={setAiEnabled} label="AI-assisted brief drafting" />
           </div>
           <div className="flex items-center justify-between">
             <div>
@@ -336,14 +346,18 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
               <p className="text-sm text-[var(--text-primary)]">Telegram alerts</p>
               <p className="text-xs text-[var(--text-muted)]">Telegram delivery requires connection in Integrations.</p>
             </div>
-            <Toggle checked={tgEnabled} onChange={setTgEnabled} />
+            <Toggle checked={tgEnabled} onChange={setTgEnabled} label="Telegram alerts" />
           </div>
-          <div className="flex items-center justify-between opacity-40 cursor-not-allowed" title="Email digest is not yet available in this pilot">
+          <div
+            aria-disabled="true"
+            className="flex items-center justify-between opacity-70 cursor-not-allowed"
+            title="Email digest is not yet available in this pilot"
+          >
             <div>
               <p className="text-sm text-[var(--text-primary)]">Email digest</p>
               <p className="text-xs text-[var(--text-muted)]">Not available in pilot — Telegram delivery is active</p>
             </div>
-            <Toggle checked={false} onChange={() => {}} disabled />
+            <Toggle checked={false} onChange={() => {}} disabled label="Email alerts (not yet available)" />
           </div>
         </div>
       </Section>
@@ -389,7 +403,7 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
             saved
               ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
               : 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)]'
-          } disabled:opacity-60`}
+          } disabled:opacity-70`}
         >
           {saving ? 'Saving…' : saved ? 'Saved' : 'Save settings'}
         </button>
@@ -422,7 +436,7 @@ export default function SettingsPage({ onResetWorkspace, planState }) {
               type="button"
               onClick={handleExportData}
               disabled={exporting}
-              className="inline-flex items-center gap-2 text-xs font-medium text-[var(--accent)] border border-[var(--trust-border)] hover:border-[var(--trust-border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+              className="inline-flex items-center gap-2 text-xs font-medium text-[var(--accent)] border border-[var(--trust-border)] hover:border-[var(--trust-border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-70"
             >
               {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
               {exporting ? 'Preparing export…' : 'Download my data (JSON)'}

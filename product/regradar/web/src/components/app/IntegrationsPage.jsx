@@ -351,7 +351,7 @@ export default function IntegrationsPage() {
                 type="button"
                 onClick={handleGenerate}
                 disabled={generating}
-                className="inline-flex items-center gap-2 text-xs font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] px-4 py-2.5 rounded-lg transition-colors disabled:opacity-60"
+                className="inline-flex items-center gap-2 text-xs font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--ink)] px-4 py-2.5 rounded-lg transition-colors disabled:opacity-70"
               >
                 {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
                 Generate code
@@ -422,7 +422,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={refreshStatus}
                   disabled={statusLoading}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-70"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   Refresh status
@@ -431,7 +431,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-70"
                 >
                   {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
                   New code
@@ -479,7 +479,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={handleTest}
                   disabled={testing}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-70"
                 >
                   {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                   Send test message
@@ -488,7 +488,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={handleSampleBrief}
                   disabled={briefStatus === 'sending'}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-70"
                 >
                   {briefStatus === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                   Send sample brief
@@ -497,7 +497,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={refreshStatus}
                   disabled={statusLoading}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border)] px-3 py-2 rounded-lg transition-colors disabled:opacity-70"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   Refresh status
@@ -506,7 +506,7 @@ export default function IntegrationsPage() {
                   type="button"
                   onClick={handleUnlink}
                   disabled={unlinking}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-rose-300 border border-rose-500/30 hover:border-rose-500/60 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 text-xs font-medium text-rose-300 border border-rose-500/30 hover:border-rose-500/60 px-3 py-2 rounded-lg transition-colors disabled:opacity-70"
                 >
                   {unlinking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                   Unlink Telegram
@@ -602,7 +602,7 @@ export default function IntegrationsPage() {
                     type="button"
                     onClick={handleEmailConfigCheck}
                     disabled={emailConfigChecking}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {emailConfigChecking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                     Check provider config
@@ -642,7 +642,10 @@ export default function IntegrationsPage() {
             )}
           </div>
 
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5 flex flex-col opacity-60">
+          {/* opacity-60 on a whole card dropped its body text below 4.5:1. The
+              "coming later" read now comes from the copy and aria-disabled,
+              not from making the words hard to see. */}
+          <div aria-disabled="true" className="bg-[var(--bg-elevated)] border border-[var(--border-muted)] rounded-xl p-5 flex flex-col opacity-80">
             <div className="flex items-start justify-between mb-4">
               <div className="w-10 h-10 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] flex items-center justify-center">
                 <Webhook className="w-5 h-5 text-[var(--text-muted)]" />

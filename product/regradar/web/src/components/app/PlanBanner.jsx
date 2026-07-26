@@ -109,7 +109,11 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-sm font-semibold text-white">{activeDisplayName} workspace</span>
+              <span className="text-sm font-semibold text-white">
+                {/* Falls back to a real name: an empty activeDisplayName used to
+                    render this as a lowercase " workspace", which reads as a bug. */}
+                {activeDisplayName ? `${activeDisplayName} workspace` : 'Your workspace'}
+              </span>
               <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 text-emerald-300">
                 {isActive ? 'Plan enabled' : 'Pending activation'}
               </span>
@@ -133,10 +137,14 @@ export default function PlanBanner({ planState, onChoosePlan, onComparePlans }) 
       </div>
       <div className="mt-3 pt-3 border-t border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Current plan', value: activeDisplayName },
-          { label: 'Source limit', value: sourceLimit > 100 ? 'Custom' : String(sourceLimit || '—') },
+          // 'Set on activation' rather than an em-dash: a dash where a number
+          // belongs reads as missing data, and three of them in a row on the
+          // first screen after login reads as a broken product. These are not
+          // unknown — they are genuinely not set until the founder activates.
+          { label: 'Current plan', value: activeDisplayName || 'Pilot' },
+          { label: 'Source limit', value: sourceLimit > 100 ? 'Custom' : (sourceLimit ? String(sourceLimit) : 'Set on activation') },
           { label: 'Users', value: users > 100 ? 'Custom' : String(users || 1) },
-          { label: 'Evidence retention', value: retentionDays > 500 ? 'Custom' : retentionDays ? `${retentionDays} days` : '—' },
+          { label: 'Evidence retention', value: retentionDays > 500 ? 'Custom' : retentionDays ? `${retentionDays} days` : 'Set on activation' },
         ].map(({ label, value }) => (
           <div key={label}>
             <p className="text-[10px] font-medium text-[var(--text-secondary)] mb-0.5">{label}</p>

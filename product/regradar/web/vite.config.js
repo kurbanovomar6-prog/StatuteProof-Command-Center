@@ -15,6 +15,9 @@ export default defineConfig({
     },
   },
   test: {
+    // Playwright specs live in e2e/ and are driven by `npm run e2e`. vitest
+    // cannot execute them and would report the whole file as a failure.
+    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.js'],

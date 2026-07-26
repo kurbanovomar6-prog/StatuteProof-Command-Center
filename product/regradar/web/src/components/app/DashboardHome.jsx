@@ -288,23 +288,6 @@ function readinessCode(source) {
   return 'Monitoring not started'
 }
 
-function CommandMetric({ label, value, tone = 'slate', detail }) {
-  const toneClass = {
-    cyan: 'border-[var(--trust-border)] bg-[var(--trust-badge)] text-[var(--accent)]',
-    emerald: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100',
-    amber: 'border-amber-400/25 bg-amber-400/10 text-amber-100',
-    slate: 'border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)]',
-  }[tone] || 'border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)]'
-
-  return (
-    <div className={`rounded-2xl border p-4 ${toneClass}`}>
-      <p className="text-[11px] font-semibold opacity-70">{label}</p>
-      <p className="sp-mono mt-2 text-3xl font-bold">{value}</p>
-      {detail && <p className="mt-1 text-xs leading-relaxed opacity-70">{detail}</p>}
-    </div>
-  )
-}
-
 function EvidenceChainPanel() {
   const steps = [
     ['Source run', 'official source checked', 'done'],
@@ -461,31 +444,37 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
   const widgets = buildWidgets(sourcesData, sourceSummary)
   const attentionItems = [
     {
-      label: 'Source-health flags',
+      label: 'Sources with a problem',
       value: sourcesLoading ? '—' : widgets?.failedSources ?? 0,
-      detail: 'Failed or quality-drop runs that need operator review.',
+      detail: 'Runs that failed or returned too little to trust.',
       tone: (widgets?.failedSources ?? 0) > 0 ? 'amber' : 'emerald',
+      // "OK" beside a big 0 leaves the reader deciding whether zero is good
+      // news or a broken widget. Say which.
+      pill: (widgets?.failedSources ?? 0) > 0 ? 'Needs a look' : 'All healthy',
       action: 'sources',
     },
     {
-      label: 'Changes needing review',
+      label: 'Changes waiting for you',
       value: sourcesLoading ? '—' : widgets?.reviewRequired ?? 0,
-      detail: 'Changed or first-seen sources before customer conclusions.',
+      detail: 'Detected changes not yet reviewed by anyone at your firm.',
       tone: (widgets?.reviewRequired ?? 0) > 0 ? 'amber' : 'emerald',
+      pill: (widgets?.reviewRequired ?? 0) > 0 ? 'Review now' : 'Nothing waiting',
       action: 'review-queue',
     },
     {
-      label: 'Coverage limits',
+      label: 'Out of scope',
       value: sourceSummary ? `${(sourceSummary.candidate_count ?? 0) + (sourceSummary.remediation_count ?? 0)}` : '—',
-      detail: 'Sources still in validation are excluded from your alert coverage — disclosed, not hidden.',
+      detail: 'Sources we watch but do not yet alert on. Disclosed, never hidden.',
       tone: ((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) > 0 ? 'amber' : 'emerald',
+      pill: ((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) > 0 ? 'Disclosed' : 'Full coverage',
       action: 'sources',
     },
     {
-      label: 'Brief delivery',
-      value: 'Not yet enabled',
-      detail: 'Switched on by our team after your source readiness review — nothing you need to fix.',
+      label: 'Weekly brief',
+      value: 'Not yet on',
+      detail: 'We switch this on after your source readiness review. Nothing for you to fix.',
       tone: 'slate',
+      pill: 'With us',
       action: 'briefs',
     },
   ]
@@ -560,12 +549,16 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
         <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
           <div>
             <div className="flex flex-wrap items-center gap-3">
+              {/* A headline states what this screen is; it is not a metric slot.
+                  It used to read "0 sources eligible for fresh alerts · 0 scope
+                  limitations disclosed" — the largest text on the page
+                  announcing two zeros to a customer on their first login. The
+                  counts still matter, so they moved one level down where a
+                  number reading zero is information rather than a verdict. */}
               <h1 className="sp-heading max-w-4xl text-2xl font-semibold leading-tight text-white md:text-3xl">
                 {sourcesError
-                  ? 'Source readiness summary is unavailable right now.'
-                  : sourcesLoading
-                  ? 'Loading UAE source readiness summary…'
-                  : `${sourceSummary?.fresh_alert_count ?? sourceSummary?.readiness_supported_count ?? 0} sources eligible for fresh alerts · ${((sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0)) || 0} scope limitations disclosed`}
+                  ? 'Source coverage is unavailable right now.'
+                  : 'What changed, and what needs you'}
               </h1>
               {!sourcesLoading && !sourcesError && (
                 <MonitoringFreshness lastRunAt={sourceSummary?.last_run_at} />
@@ -575,6 +568,49 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
               Review what changed and what needs a decision before relying on any alert,
               brief draft, or source claim. Monitoring intelligence only — not legal advice.
             </p>
+
+            {/* Coverage as one readable sentence rather than a grid of tiles.
+                Four tiles saying "Enabled —", "Fresh-alert eligible —" read as a
+                broken panel; a sentence that omits what it does not know reads
+                as a sentence. */}
+            {!sourcesError && (
+              <p className="mt-3 text-sm text-[var(--text-muted)]">
+                {sourcesLoading ? (
+                  <span className="inline-block h-4 w-72 animate-pulse rounded bg-[var(--bg-elevated)]" />
+                ) : (
+                  <>
+                    {(sourceSummary?.fresh_alert_count
+                      ?? sourceSummary?.readiness_supported_count ?? 0) === 0 ? (
+                      // "Monitoring 0 official sources for your firm" is a true
+                      // sentence that reads as a dead product. Before activation
+                      // it is not a count worth leading with — it is a state.
+                      <>Your sources are being validated. Alerts start once that finishes</>
+                    ) : (
+                      <>
+                        Monitoring{' '}
+                        <span className="sp-mono font-semibold text-white">
+                          {sourceSummary?.fresh_alert_count
+                            ?? sourceSummary?.readiness_supported_count}
+                        </span>{' '}
+                        official sources for your firm
+                      </>
+                    )}
+                    {((sourceSummary?.candidate_count ?? 0)
+                      + (sourceSummary?.remediation_count ?? 0)) > 0 && (
+                      <>
+                        {'. '}
+                        <span className="sp-mono font-semibold text-amber-300">
+                          {(sourceSummary?.candidate_count ?? 0)
+                            + (sourceSummary?.remediation_count ?? 0)}
+                        </span>{' '}
+                        more are disclosed as out of scope, not hidden
+                      </>
+                    )}
+                    .
+                  </>
+                )}
+              </p>
+            )}
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {attentionItems.map(item => (
@@ -586,7 +622,7 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <p className="text-[11px] font-bold text-[var(--text-muted)]">{item.label}</p>
-                    <StatusPill tone={item.tone}>{item.tone === 'emerald' ? 'OK' : item.tone === 'amber' ? 'Review' : 'Pending'}</StatusPill>
+                    <StatusPill tone={item.tone}>{item.pill}</StatusPill>
                   </div>
                   <p className={typeof item.value === 'number' ? 'sp-mono text-3xl font-semibold text-white' : `font-semibold text-white ${String(item.value).length > 10 ? 'text-lg leading-snug' : 'text-3xl'}`}>{item.value}</p>
                   <p className="mt-2 min-h-[2.4rem] text-xs leading-relaxed text-[var(--text-muted)]">{item.detail}</p>
@@ -613,12 +649,16 @@ export default function DashboardHome({ navigate, currentUser, planState, onChoo
             >
               Open the review queue <ArrowRight className="h-4 w-4" />
             </button>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <CommandMetric label="Enabled" value={sourceSummary?.enabled_count ?? '—'} detail="source records" />
-              <CommandMetric label="Fresh-alert eligible" value={sourceSummary?.readiness_supported_count ?? '—'} tone="emerald" detail="validated for alerts" />
-              <CommandMetric label="Limited scope" value={(sourceSummary?.candidate_count ?? 0) + (sourceSummary?.remediation_count ?? 0) || '—'} tone="amber" detail="excluded from claims" />
-              <CommandMetric label="Evidence records" value={widgets?.evidenceRecords ?? '—'} detail="runs with proof data" />
-            </div>
+            {/* The four CommandMetric tiles that lived here restated the four
+                cards on the left in different words, and were the home of four
+                of the six em-dashes on this page. A panel whose job is to carry
+                ONE next action does that better with nothing competing beside
+                the button. The counts they carried now read as a sentence under
+                the headline. */}
+            <p className="mt-4 text-xs leading-relaxed text-[var(--text-muted)]">
+              Every record carries its own hash, timestamp and diff, so anything
+              you act on can be checked independently.
+            </p>
           </div>
         </div>
       </div>

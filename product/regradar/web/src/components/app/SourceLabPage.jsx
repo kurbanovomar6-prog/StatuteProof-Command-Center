@@ -302,8 +302,9 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
 
           <div className="space-y-4">
             <div>
-              <label className="sp-label">Source URL *</label>
+              <label htmlFor="sourcelab-url" className="sp-label">Source URL *</label>
               <input
+                id="sourcelab-url"
                 value={form.url}
                 onChange={e => set('url', e.target.value)}
                 placeholder="https://regulator.gov/publications"
@@ -326,13 +327,13 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="sp-label">Jurisdiction *</label>
-                <select value={form.jurisdiction} onChange={e => set('jurisdiction', e.target.value)} className={fieldClass(touched && requiredErrors.jurisdiction)}>
+                <select aria-label="Jurisdiction" value={form.jurisdiction} onChange={e => set('jurisdiction', e.target.value)} className={fieldClass(touched && requiredErrors.jurisdiction)}>
                   {JURISDICTIONS.map(item => <option key={item}>{item}</option>)}
                 </select>
               </div>
               <div>
                 <label className="sp-label">Source type *</label>
-                <select value={form.sourceType} onChange={e => set('sourceType', e.target.value)} className={fieldClass(touched && requiredErrors.sourceType)}>
+                <select aria-label="Source type" value={form.sourceType} onChange={e => set('sourceType', e.target.value)} className={fieldClass(touched && requiredErrors.sourceType)}>
                   {SOURCE_TYPES.map(item => <option key={item}>{item}</option>)}
                 </select>
               </div>

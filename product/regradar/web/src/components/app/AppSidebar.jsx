@@ -1,18 +1,51 @@
 import { LayoutDashboard, Globe, Bell, FileText, BarChart3, Plug, Settings, ChevronLeft, ChevronRight, LogOut, ShieldCheck, CreditCard, FlaskConical, ClipboardCheck, Activity } from 'lucide-react'
 
-const NAV = [
-  { id: 'dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
-  { id: 'sources',      label: 'Sources',         icon: Globe },
-  { id: 'source-lab',   label: 'Source Lab',      icon: FlaskConical },
-  { id: 'monitoring-health', label: 'Monitoring health', icon: Activity },
-  { id: 'evidence',     label: 'Evidence',        icon: ShieldCheck },
-  { id: 'review-queue', label: 'Review Queue',    icon: ClipboardCheck },
-  { id: 'alerts',       label: 'Reviewed Alerts', icon: Bell },
-  { id: 'briefs',       label: 'Monitoring Briefs', icon: FileText },
-  { id: 'reports',      label: 'Audit Reports',   icon: BarChart3 },
-  { id: 'integrations', label: 'Integrations',    icon: Plug },
-  { id: 'billing',      label: 'Billing',         icon: CreditCard },
-  { id: 'settings',     label: 'Settings',        icon: Settings },
+// Twelve destinations in one flat list, in three different capitalisation
+// styles ("Monitoring health" beside "Review Queue"), several named after the
+// machinery rather than the job ("Source Lab", "Monitoring Briefs"). An MLRO
+// opening this for the first time cannot tell which of the twelve answers their
+// question.
+//
+// Grouped by what the person is trying to DO, sentence case throughout, and
+// named for the outcome. The ids are untouched — they are the routes.
+const NAV_GROUPS = [
+  {
+    heading: null,
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    heading: 'Watch',
+    items: [
+      { id: 'sources',           label: 'Sources',        icon: Globe },
+      { id: 'source-lab',        label: 'Add a source',   icon: FlaskConical },
+      { id: 'monitoring-health', label: 'Source health',  icon: Activity },
+    ],
+  },
+  {
+    heading: 'Decide',
+    items: [
+      { id: 'review-queue', label: 'Review queue', icon: ClipboardCheck },
+      { id: 'alerts',       label: 'Alerts',       icon: Bell },
+      { id: 'evidence',     label: 'Evidence',     icon: ShieldCheck },
+    ],
+  },
+  {
+    heading: 'Report',
+    items: [
+      { id: 'briefs',  label: 'Briefs',  icon: FileText },
+      { id: 'reports', label: 'Reports', icon: BarChart3 },
+    ],
+  },
+  {
+    heading: 'Account',
+    items: [
+      { id: 'integrations', label: 'Integrations', icon: Plug },
+      { id: 'billing',      label: 'Billing',      icon: CreditCard },
+      { id: 'settings',     label: 'Settings',     icon: Settings },
+    ],
+  },
 ]
 
 function getWorkspace(currentUser) {
@@ -93,25 +126,37 @@ export default function AppSidebar({ page, navigate, collapsed, onToggle, curren
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
-        {NAV.map(({ id, label, icon: Icon }) => {
-          const active = page === id
-          return (
-            <button
-              key={id}
-              onClick={() => navigate(id)}
-              aria-current={active ? 'page' : undefined}
-              title={collapsed ? label : undefined}
-              className={`relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
-                active
-                  ? 'bg-[var(--trust-badge)] text-[var(--accent)] border-r-2 border-[var(--accent)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-raised)] border-r-2 border-transparent'
-              } ${collapsed ? 'justify-center' : ''}`}
-            >
-              <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-[var(--accent)]' : ''}`} />
-              {!collapsed && <span className="truncate">{label}</span>}
-            </button>
-          )
-        })}
+        {NAV_GROUPS.map((group, groupIndex) => (
+          <div key={group.heading || 'primary'} className={groupIndex > 0 ? 'mt-5' : ''}>
+            {/* Headings are hidden when the rail is collapsed: a truncated
+                three-letter label is noise, and the icons still group visually
+                through the spacing. */}
+            {group.heading && !collapsed && (
+              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                {group.heading}
+              </p>
+            )}
+            {group.items.map(({ id, label, icon: Icon }) => {
+              const active = page === id
+              return (
+                <button
+                  key={id}
+                  onClick={() => navigate(id)}
+                  aria-current={active ? 'page' : undefined}
+                  title={collapsed ? label : undefined}
+                  className={`relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                    active
+                      ? 'bg-[var(--trust-badge)] text-[var(--accent)] border-r-2 border-[var(--accent)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-raised)] border-r-2 border-transparent'
+                  } ${collapsed ? 'justify-center' : ''}`}
+                >
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-[var(--accent)]' : ''}`} />
+                  {!collapsed && <span className="truncate">{label}</span>}
+                </button>
+              )
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Footer — user + sign out */}
