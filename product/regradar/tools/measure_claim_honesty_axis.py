@@ -157,6 +157,42 @@ def _forbidden_hits() -> list[dict]:
     return hits
 
 
+def _retention_promise_is_implemented() -> dict:
+    """Does the published deletion promise correspond to code that deletes?
+
+    LegalPage tells customers that evidence artefacts are "permanently deleted
+    from active storage" once their plan's retention window expires. app/plan.py
+    defines retention_days per plan — and nothing reads it. A published promise
+    with no implementation is the exact failure this axis exists to catch, and
+    the tool did not look for it: grep -c retention over this file was 0.
+    """
+    legal = ""
+    for name in ("LegalPage.jsx", "PrivacyPage.jsx", "TermsPage.jsx"):
+        for path in WEB.rglob(name):
+            legal += _read(path)
+    promises_deletion = bool(
+        re.search(r"retention window", legal, re.I)
+        and re.search(r"permanently deleted|deleted from active storage", legal, re.I)
+    )
+
+    # A reader of retention_days that is not its own definition.
+    readers = []
+    for path in list((ROOT / "app").glob("*.py")) + [ROOT / "run.py"]:
+        if path.name == "plan.py":
+            continue
+        if "retention_days" in _read(path):
+            readers.append(path.name)
+
+    return {
+        "promises_deletion": promises_deletion,
+        "plan_retention_days_readers": sorted(readers),
+        "implemented": bool(readers),
+        # Only a mismatch is a finding: a product that promises nothing needs no
+        # purge, and a product that purges may promise it.
+        "promise_without_implementation": promises_deletion and not readers,
+    }
+
+
 def measure() -> dict:
     real = _recompute_from_registry()
     published = _published_numbers()
@@ -173,7 +209,9 @@ def measure() -> dict:
 
     forbidden = _forbidden_hits()
     infra = _infra_claims()
+    retention = _retention_promise_is_implemented()
     return {
+        "retention": retention,
         "recomputed_from_registry": real,
         "published": published,
         "drift": drift,
@@ -214,6 +252,12 @@ def main() -> int:
     else:
         for hit in report["forbidden_claim_hits"]:
             print(f"  - {hit['file']}:{hit['line']}  \"{hit['phrase']}\"")
+
+    r = report["retention"]
+    print("\ndata-retention promise")
+    print(f"  legal pages promise deletion       {r['promises_deletion']}")
+    print(f"  code that reads plan retention_days {r['plan_retention_days_readers'] or 'NONE'}")
+    print(f"  >> PROMISE WITHOUT IMPLEMENTATION  {r['promise_without_implementation']}")
 
     print(f"\n>> ALL PUBLISHED NUMBERS MATCH THE REGISTRY: {report['all_numbers_match']}")
     print(f">> NO FORBIDDEN CLAIMS SHIPPED:              {report['forbidden_claims_clean']}")

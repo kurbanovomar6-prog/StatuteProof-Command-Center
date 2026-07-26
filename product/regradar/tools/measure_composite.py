@@ -416,9 +416,23 @@ def score_claim_honesty(data: dict) -> tuple[float, list]:
          f"real={infra.get('names_the_real_host')} stale={infra.get('names_a_stale_host')}"),
         # A UAE-market regulatory product whose privacy text knows only GDPR is
         # making an implicit claim about the law it operates under.
+        # KNOWN WEAKNESS, stated rather than hidden: this is a substring, so the
+        # four letters anywhere — including "PDPL does not apply" — satisfy it.
+        # Strengthening it means judging whether a SENTENCE is true, which needs
+        # the lawyer who writes that sentence, not a scanner.
         ("UAE PDPL is addressed, not only GDPR",
          infra.get("mentions_pdpl") is True,
          f"pdpl={infra.get('mentions_pdpl')} gdpr={infra.get('mentions_gdpr')}"),
+        # A published promise with no implementation behind it is the exact
+        # failure this axis names, and nothing looked for it: the legal pages
+        # tell customers artefacts are "permanently deleted" once their plan's
+        # retention window expires, app/plan.py defines retention_days per plan,
+        # and no code reads it.
+        ("the published data-retention promise is implemented",
+         (data.get("retention") or {}).get("promise_without_implementation") is False,
+         "implemented by " + ", ".join((data.get("retention") or {}).get("plan_retention_days_readers") or [])
+         if (data.get("retention") or {}).get("plan_retention_days_readers")
+         else "promised in the legal pages, implemented nowhere"),
     ]
     return _pct(sum(1 for _, ok, _ in checks if ok), len(checks)), checks
 
