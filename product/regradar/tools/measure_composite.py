@@ -396,6 +396,14 @@ def score_ux(data: dict) -> tuple[float, list]:
         ("visual regression renders at every required width",
          vis.get("takes_screenshots") is True and not vis.get("missing_widths"),
          f"missing {vis.get('missing_widths')}"),
+        # The check that makes this axis unable to lie: the suites must PASS,
+        # not merely exist. Without it the axis scored on test COUNT while 19
+        # contrast nodes failed and the landing page overflowed a phone.
+        ("the browser a11y + overflow suites actually pass",
+         (data.get("browser_suites") or {}).get("all_green") is True,
+         f"{(data.get('browser_suites') or {}).get('failed', '?')} failing"
+         + (f" ({', '.join((data.get('browser_suites') or {}).get('failing_screens', [])[:4])})"
+            if (data.get("browser_suites") or {}).get("failing_screens") else "")),
         ("no dead design tokens, guard in place",
          not tok.get("defined_never_used") and not tok.get("used_never_defined")
          and tok.get("guard_test_present") is True,
@@ -411,7 +419,7 @@ def score_ux(data: dict) -> tuple[float, list]:
 # ones touch the live artifacts, so it is minutes, not seconds — giving it the
 # default budget made it time out and report "tool failed to run", which the
 # composite then correctly refused to average over.
-TIMEOUTS = {"code_tests": 5400}
+TIMEOUTS = {"code_tests": 5400, "ux": 2400}
 
 AXES = [
     ("evidence",      "EVIDENCE",       ["measure_evidence_axis.py"]),

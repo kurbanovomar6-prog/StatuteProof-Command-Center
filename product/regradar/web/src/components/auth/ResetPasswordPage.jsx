@@ -37,7 +37,8 @@ export default function ResetPasswordPage({ onDone }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-12">
+    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-12">
+      <div className="relative z-10 mx-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
       <h1 className="text-3xl font-semibold text-slate-950">Set a new password</h1>
       {!token ? (
         <p className="mt-4 text-sm text-rose-600">
@@ -85,7 +86,8 @@ export default function ResetPasswordPage({ onDone }) {
           </button>
         </form>
       )}
-      <p className="mt-8 text-xs text-slate-400">Monitoring intelligence only. Not legal advice.</p>
+      <p className="mt-8 text-xs text-slate-600">Monitoring intelligence only. Not legal advice.</p>
+    </div>
     </div>
   )
 }

@@ -142,7 +142,7 @@ export default function SourceTransparencyMatrix({ onCreateWorkspace }) {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-[var(--border-muted)] bg-[var(--bg-navy)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+        <div className="min-w-0 overflow-x-auto rounded-xl border border-[var(--border-muted)] bg-[var(--bg-navy)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
           <table className="w-full min-w-[900px] text-sm">
             <thead className="border-b border-[var(--border-muted)] bg-[var(--bg-base)]">
               <tr>

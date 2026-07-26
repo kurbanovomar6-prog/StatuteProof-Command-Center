@@ -120,6 +120,16 @@ export const API_FIXTURES = {
   '/api/alerts': { ok: true, alerts: ALERTS },
   '/api/digest/assurance-preview': { ok: true, preview: null },
   '/api/evidence-room/shares': { ok: true, shares: [] },
+  '/api/room/': {
+    ok: true,
+    room: {
+      token: 'sample-share-token',
+      firm: 'Example Bank PJSC',
+      expires_at: '2026-12-31T00:00:00Z',
+      records: [],
+      disclaimer: 'For monitoring information only. Not legal advice and not a guarantee of compliance.',
+    },
+  },
 }
 
 export function bodyFor(pathname) {

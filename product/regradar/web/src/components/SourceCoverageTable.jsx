@@ -168,7 +168,8 @@ export default function SourceCoverageTable() {
         </div>
       </div>
 
-      <div className="overflow-y-auto max-h-80">
+      <div className="overflow-y-auto max-h-80" tabIndex={0} role="region"
+           aria-label="Source coverage list">
         <table className="w-full text-xs">
           <thead className="sticky top-0">
             <tr className="bg-[var(--bg-base)] text-[var(--text-muted)]">

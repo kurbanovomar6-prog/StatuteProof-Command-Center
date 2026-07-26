@@ -112,7 +112,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
     }
   }
 
-  const inputCls = 'min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 shadow-sm transition-all focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
+  const inputCls = 'min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-600 shadow-sm transition-all focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
   const selectCls = 'min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 shadow-sm transition-all focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/10'
   const labelCls = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600'
 
@@ -122,7 +122,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
         <div className="sp-paper-panel w-full max-w-md p-8 text-center">
           <CheckCircle className="mx-auto mb-4 h-16 w-16 text-emerald-600" />
           <h2 className="mb-3 text-2xl font-semibold text-slate-950">Request received</h2>
-          <p className="mb-6 leading-relaxed text-slate-600">
+          <p className="mb-6 leading-relaxed text-slate-400">
             Your source readiness review request has been submitted. We will review your profile
             and source requirements and be in touch.
           </p>
@@ -294,17 +294,17 @@ export default function SourceReadinessReviewPage({ onBack }) {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className={labelCls}>Job title</label>
-                    <select value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
+                    <select aria-label="Your role" value={form.jobTitle} onChange={set('jobTitle')} className={selectCls}>
                       {JOB_TITLES.map(t => <option key={t}>{t}</option>)}
                     </select>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                    <p className="mt-1 text-xs leading-relaxed text-slate-600">
                       MLRO = Money Laundering Reporting Officer. CCO = Chief Compliance Officer.
                     </p>
                   </div>
 
                   <div>
                     <label className={labelCls}>Company type</label>
-                    <select value={form.companyType} onChange={set('companyType')} className={selectCls}>
+                    <select aria-label="Type of firm" value={form.companyType} onChange={set('companyType')} className={selectCls}>
                       {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
                     </select>
                   </div>
@@ -317,7 +317,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
                   <span className="sp-mono flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">3</span>
                   <h3 className="text-sm font-bold text-slate-950">Which official-source areas matter?</h3>
                 </div>
-                <p className="mb-3 text-xs leading-relaxed text-slate-400">
+                <p className="mb-3 text-xs leading-relaxed text-slate-600">
                   Select the areas your team checks today. We will return readiness status, not a full regulator map.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-1">
@@ -388,7 +388,7 @@ export default function SourceReadinessReviewPage({ onBack }) {
               </button>
 
               {/* Disclaimer */}
-              <p className="text-center text-xs leading-relaxed text-slate-400">
+              <p className="text-center text-xs leading-relaxed text-slate-600">
                 This is not legal advice and does not determine regulatory obligations.
                 StatuteProof provides monitoring intelligence only and does not provide legal advice or
                 determine compliance outcomes.

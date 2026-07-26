@@ -230,7 +230,7 @@ const FAQS = [
 function FeatureVal({ val }) {
   if (val === true)
     return <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" />;
-  if (val === false) return <X className="w-4 h-4 text-slate-600 mx-auto" />;
+  if (val === false) return <X className="w-4 h-4 text-slate-400 mx-auto" />;
   return <span className="text-xs text-slate-300">{val}</span>;
 }
 
@@ -463,7 +463,7 @@ export default function PricingPage({
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-600 mt-8">
+        <p className="text-center text-xs text-slate-400 mt-8">
           Monitoring intelligence only. Not legal advice. StatuteProof does not
           determine compliance outcomes, prevent fines, or determine regulatory
           coverage. Source readiness validation required before activation.

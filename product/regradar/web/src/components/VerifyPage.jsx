@@ -380,7 +380,7 @@ export default function VerifyPage({ onBack }) {
                 . Nothing in them is invented. Check the math yourself.
               </p>
             </div>
-            <div className="flex shrink-0 flex-col items-stretch gap-2">
+            <div className="flex min-w-0 flex-col items-stretch gap-2 sm:shrink-0">
               <button
                 type="button"
                 onClick={() => handleLoadSample('changed')}

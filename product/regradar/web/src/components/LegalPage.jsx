@@ -242,7 +242,7 @@ export default function LegalPage({ type = 'disclaimer', onBack }) {
             For questions about this document, contact{' '}
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="text-[#16D9F5] hover:underline"
+              className="text-[#16D9F5] underline"
             >
               {CONTACT_EMAIL}
             </a>

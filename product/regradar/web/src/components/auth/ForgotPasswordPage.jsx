@@ -24,7 +24,8 @@ export default function ForgotPasswordPage({ onBack }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-12">
+    <div className="sp-page-orbit flex min-h-dvh items-center px-4 py-12">
+      <div className="relative z-10 mx-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
       <h1 className="text-3xl font-semibold text-slate-950">Reset your password</h1>
       {sent ? (
         <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
@@ -63,7 +64,8 @@ export default function ForgotPasswordPage({ onBack }) {
       <button onClick={onBack} className="mt-6 text-sm text-slate-500 hover:text-slate-900">
         ← Back to sign in
       </button>
-      <p className="mt-8 text-xs text-slate-400">Monitoring intelligence only. Not legal advice.</p>
+      <p className="mt-8 text-xs text-slate-600">Monitoring intelligence only. Not legal advice.</p>
+    </div>
     </div>
   )
 }

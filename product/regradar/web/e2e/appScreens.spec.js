@@ -29,6 +29,8 @@ const APP_SCREENS = [
   ['billing', '/app/billing'],
   ['settings', '/app/settings'],
   ['source-lab', '/app/source-lab'],
+  ['admin', '/app/admin'],
+  ['choose-plan', '/app/choose-plan'],
 ]
 
 async function stubApi(page) {

@@ -22,11 +22,16 @@ const PUBLIC_SCREENS = [
   ['login', '/login'],
   ['register', '/register'],
   ['forgot-password', '/forgot-password'],
+  // Both were uncovered. reset-password especially: it renders the surface this
+  // work rebuilt, and an untested page is where the next regression lands.
+  ['reset-password', '/reset-password'],
+  ['verify-email', '/verify-email'],
   ['source-readiness-review', '/source-readiness-review'],
   ['verify', '/verify'],
   ['terms', '/terms'],
   ['privacy', '/privacy'],
   ['disclaimer', '/disclaimer'],
+  ['room', '/room/sample-share-token'],
 ]
 
 async function stubSignedOut(page) {

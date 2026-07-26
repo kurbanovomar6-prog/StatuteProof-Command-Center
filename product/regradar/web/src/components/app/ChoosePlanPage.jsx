@@ -267,7 +267,7 @@ export default function ChoosePlanPage({ onContinue, selectPlan }) {
                   </li>
                 ))}
                 {p.locked.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-xs opacity-50">
+                  <li key={f} className="flex items-start gap-2 text-xs">
                     <Lock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-[var(--text-muted)]" />
                     <span className="text-[var(--text-muted)]">{f}</span>
                   </li>

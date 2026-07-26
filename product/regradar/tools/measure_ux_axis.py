@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -83,14 +84,25 @@ def _axe_covered() -> set[str]:
             text = _read(path)
             if "AxeBuilder" not in text:
                 continue
-            routes |= set(re.findall(r"\['([\w-]+)',\s*'/app/[\w-]+'\]", text))
+            # Any ['name', '/path'] pair, not only /app/ — the public suite drives
+            # '/', '/pricing', '/terms' and an /app-only pattern counted none of
+            # them, so the axis read 4/10 while 10 public screens were covered.
+            routes |= set(re.findall(r"\['([\w-]+)',\s*'/[\w/-]*'\]", text))
+        # terms / privacy / disclaimer are three routes rendered by one component.
+        aliases = {"terms": "LegalPage", "privacy": "LegalPage",
+                   "disclaimer": "LegalPage", "landing": "Hero",
+                   "briefs": "AIBriefPage", "room": "RoomPage"}
         for view in routes:
-            # 'review-queue' -> ReviewQueuePage, 'dashboard' -> DashboardHome
+            if view in aliases:
+                covered.add(aliases[view])
+                continue
             pascal = "".join(part.capitalize() for part in view.split("-"))
-            for candidate in (f"{pascal}Page", pascal, f"{pascal}Home"):
-                if (WEB / "components" / "app" / f"{candidate}.jsx").exists():
-                    covered.add(candidate)
-                    break
+            for folder in ("app", "auth", ""):
+                base = WEB / "components" / folder if folder else WEB / "components"
+                for candidate in (f"{pascal}Page", pascal, f"{pascal}Home"):
+                    if (base / f"{candidate}.jsx").exists():
+                        covered.add(candidate)
+                        break
     return covered
 
 
@@ -144,6 +156,53 @@ def _browser_axe_present() -> bool:
     return any("AxeBuilder" in _read(p) for p in e2e.glob("*.spec.js"))
 
 
+def _run_browser_suites() -> dict:
+    """Actually RUN the browser suites and report whether they pass.
+
+    This is the difference between a score and a claim. Every earlier version of
+    this axis counted whether tests EXISTED — which is how a suite with 19
+    failing contrast nodes and a landing page that overflows a 320px viewport
+    could have scored 100. A check that cannot fail is not a check.
+
+    Slow on purpose (~2 min). The composite refuses to average over an axis it
+    could not measure, so a timeout here shows up as unmeasured rather than as a
+    pass.
+    """
+    web = ROOT / "web"
+    if not (web / "playwright.config.js").exists():
+        return {"ran": False, "reason": "no playwright config"}
+    try:
+        proc = subprocess.run(
+            ["npx", "playwright", "test", "--grep",
+             "accessibility|fits its viewport", "--reporter=line"],
+            capture_output=True, text=True, timeout=1800, cwd=str(web),
+        )
+    except Exception as exc:  # noqa: BLE001 — the probe reports, never raises
+        return {"ran": False, "reason": f"{type(exc).__name__}: {exc}"}
+    out = (proc.stdout or "") + (proc.stderr or "")
+    passed = _count(out, r"(\d+) passed")
+    failed = _count(out, r"(\d+) failed")
+    return {
+        "ran": True,
+        "passed": passed,
+        "failed": failed,
+        "all_green": failed == 0 and passed > 0,
+        # Only the numbered failure lines from the summary. Matching every
+        # "› <name> has no ..." line also catches the PASSING ones, so the first
+        # version of this listed healthy screens as failures — a detail that
+        # misleads is worse than no detail.
+        "failing_screens": sorted({
+            m.group(1) for m in re.finditer(r"^\s*\d+\)\s+\S+\s+›[^›]*›\s+([\w-]+) ",
+                                           out, re.MULTILINE)
+        }) if failed else [],
+    }
+
+
+def _count(text: str, pattern: str) -> int:
+    found = re.findall(pattern, text)
+    return int(found[-1]) if found else 0
+
+
 def measure() -> dict:
     public, app = _screens()
     covered = _axe_covered()
@@ -173,6 +232,7 @@ def measure() -> dict:
         },
         "visual_regression": visual,
         "design_tokens": tokens,
+        "browser_suites": _run_browser_suites(),
     }
 
 
@@ -204,6 +264,15 @@ def main() -> int:
     print(f"  defined but never used             {len(t['defined_never_used'])}")
     print(f"  used but never defined             {len(t['used_never_defined'])}")
     print(f"  drift guard test present           {t['guard_test_present']}")
+    b = report["browser_suites"]
+    print("\nbrowser suites — do they actually PASS")
+    if not b.get("ran"):
+        print(f"  not run                            {b.get('reason')}")
+    else:
+        print(f"  passed / failed                    {b['passed']} / {b['failed']}")
+        print(f"  all green                          {b['all_green']}")
+        if b.get("failing_screens"):
+            print(f"  failing                            {', '.join(b['failing_screens'][:8])}")
     return 0
 
 

@@ -468,7 +468,7 @@ export default function App() {
                   only; not legal advice.
                 </p>
               </div>
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid md:grid-cols-2 gap-6 mb-8 [&>*]:min-w-0">
                 <EvidenceCard record={REAL_RECORD} />
                 <SourceCoverageTable />
               </div>

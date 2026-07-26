@@ -384,8 +384,9 @@ export default function SourceLabPage({ planState, onChoosePlan }) {
                   <input value={form.waitSelector} onChange={e => set('waitSelector', e.target.value)} placeholder=".publication-list" className="sp-input" />
                 </div>
                 <div>
-                  <label className="sp-label">Expected minimum text length</label>
+                  <label htmlFor="sourcelab-min-length" className="sp-label">Expected minimum text length</label>
                   <input
+                    id="sourcelab-min-length"
                     type="number"
                     min="500"
                     step="500"

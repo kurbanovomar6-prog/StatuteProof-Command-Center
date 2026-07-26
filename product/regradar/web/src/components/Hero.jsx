@@ -125,7 +125,7 @@ function EvidenceDossier() {
 
         {/* What changed */}
         <div className="mb-4 rounded-xl border border-slate-200 bg-white/80 px-4 py-3">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
             What changed
           </p>
           <p className="text-sm font-medium leading-snug text-slate-900">
@@ -140,7 +140,7 @@ function EvidenceDossier() {
           }`}
         >
           <div className="mb-1 flex items-center gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
               Risk level
             </p>
             <span
@@ -158,7 +158,7 @@ function EvidenceDossier() {
 
         {/* What to consider */}
         <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
             What you should consider
           </p>
           <p className="text-xs leading-relaxed text-slate-700">
@@ -168,7 +168,7 @@ function EvidenceDossier() {
 
         {/* Dot navigation + footnote */}
         <div className="flex items-center justify-between">
-          <p className="text-[10px] leading-relaxed text-slate-400">
+          <p className="text-[10px] leading-relaxed text-slate-600">
             Monitoring intelligence only. Not legal advice.
           </p>
           <div className="flex gap-1.5">
@@ -183,6 +183,8 @@ function EvidenceDossier() {
                     setFading(false);
                   }, 200);
                 }}
+                aria-label={`Show example ${i + 1}`}
+                aria-current={i === idx}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   i === idx ? "w-4 bg-cyan-500" : "w-1.5 bg-slate-300"
                 }`}

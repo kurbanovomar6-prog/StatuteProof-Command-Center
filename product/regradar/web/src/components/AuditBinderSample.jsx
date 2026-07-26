@@ -94,7 +94,7 @@ export default function AuditBinderSample() {
                 <span className="h-3 w-3 rounded-full bg-amber-500/70" />
                 <span className="h-3 w-3 rounded-full bg-emerald-500/70" />
               </div>
-              <span className="font-mono text-xs text-slate-500">evidence-binder-Q1-2026.pdf</span>
+              <span className="font-mono text-xs text-slate-400">evidence-binder-Q1-2026.pdf</span>
               <div className="flex items-center gap-1.5">
                 <span className="rounded border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-300 uppercase tracking-wide">
                   SAMPLE / FAKE
@@ -122,7 +122,7 @@ export default function AuditBinderSample() {
                   <div className="text-right text-xs text-slate-600 shrink-0">
                     <div className="font-mono">Exported: 2026-04-01</div>
                     <div className="mt-1">Run records: 91 days</div>
-                    <div className="mt-1 font-bold text-amber-600 border border-amber-300 bg-amber-50 px-2 py-0.5 rounded">
+                    <div className="mt-1 font-bold text-amber-800 border border-amber-400 bg-amber-50 px-2 py-0.5 rounded">
                       SAMPLE / FAKE
                     </div>
                   </div>
@@ -209,7 +209,7 @@ export default function AuditBinderSample() {
                   <div className="space-y-3">
                     <div>
                       <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 mb-0.5">SHA-256 (before)</div>
-                      <div className="font-mono text-xs text-slate-500 break-all">a3f5b2c1d4e6f789…</div>
+                      <div className="font-mono text-xs text-slate-600 break-all">a3f5b2c1d4e6f789…</div>
                     </div>
                     <div>
                       <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 mb-0.5">SHA-256 (after)</div>
@@ -221,7 +221,7 @@ export default function AuditBinderSample() {
                 {/* Diff excerpt */}
                 <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
                   <div className="border-b border-slate-200 bg-slate-100 px-4 py-2 flex items-center justify-between">
-                    <span className="font-mono text-[10px] text-slate-500">vara-compliance-rulebook.txt — diff excerpt</span>
+                    <span className="font-mono text-[10px] text-slate-600">vara-compliance-rulebook.txt — diff excerpt</span>
                     <span className="text-[10px] text-slate-600">SAMPLE — illustrative diff</span>
                   </div>
                   <pre className="p-4 text-[11px] leading-6 overflow-x-auto">
@@ -297,7 +297,7 @@ export default function AuditBinderSample() {
           </div>
         </div>
 
-        <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-relaxed text-slate-600">
+        <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-relaxed text-slate-400">
           Audit binder exports are available on all paid plans. The binder is generated from your actual evidence records —
           not from a template. Content above is SAMPLE / FAKE and does not represent real regulatory data.
           StatuteProof monitoring intelligence only. Not legal advice.
