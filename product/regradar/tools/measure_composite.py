@@ -448,11 +448,24 @@ def score_claim_honesty(data: dict) -> tuple[float, list]:
         # and no code reads it.
         ("the published data-retention promise is implemented",
          (data.get("retention") or {}).get("promise_without_implementation") is False,
-         "implemented by " + ", ".join((data.get("retention") or {}).get("plan_retention_days_readers") or [])
-         if (data.get("retention") or {}).get("plan_retention_days_readers")
-         else "promised in the legal pages, implemented nowhere"),
+         _retention_detail(data.get("retention") or {})),
     ]
     return _pct(sum(1 for _, ok, _ in checks if ok), len(checks)), checks
+
+
+def _retention_detail(retention: dict) -> str:
+    """Say which of the three states this is, so a pass is never read as a gap.
+
+    An earlier detail printed "implemented nowhere" beside a PASSING check,
+    because it only knew how to describe readers-or-none and not the third case:
+    nothing is promised, so nothing needs implementing.
+    """
+    readers = retention.get("plan_retention_days_readers") or []
+    if readers:
+        return "implemented by " + ", ".join(readers)
+    if retention.get("promises_deletion"):
+        return "promised in the legal pages, implemented nowhere"
+    return "no automatic purge promised, none implemented"
 
 
 def score_ux(data: dict) -> tuple[float, list]:
