@@ -92,6 +92,74 @@ def _last_run_stamps() -> dict[str, datetime]:
     return newest
 
 
+def _surface_lies_about_staleness() -> int:
+    """Rows the /api/sources/status route would present as healthy while its own
+    freshness field says otherwise.
+
+    Exercises the handler, not a formula about it. Any row whose presented
+    status reads healthy while freshness is STALE / NEVER_RUN / UNKNOWN is a
+    row a customer would read as live coverage without a recent check behind it.
+    """
+    from io import BytesIO
+    from unittest.mock import MagicMock
+
+    try:
+        import app.api as api
+        from app.api import _Handler
+    except Exception:  # noqa: BLE001 — probe reports, never raises
+        return -1
+
+    handler = _Handler.__new__(_Handler)
+    handler.command = "GET"
+    handler.path = "/api/sources/status"
+    handler.request = MagicMock()
+    handler.client_address = ("127.0.0.1", 9999)
+    handler.server = MagicMock()
+    handler.rfile = BytesIO(b"")
+    handler.wfile = BytesIO()
+    handler.close_connection = False
+    headers = MagicMock()
+    headers.get = lambda key, default="": {"Content-Length": "0"}.get(key, default)
+    handler.headers = headers
+    sent: list = []
+    handler._send_json = lambda data, status=200, **kw: sent.append(data)
+
+    # api_sources binds require_auth at import time, so patching app.api alone
+    # leaves the handler using the original and the probe silently gets a 401 —
+    # zero rows, which then reads as "nothing lies". Patch both names.
+    import app.api_sources as api_sources
+
+    originals = (api.require_auth, api_sources.require_auth)
+    stub = lambda _h: {"id": 1, "email": "probe@example.com"}  # noqa: E731
+    api.require_auth = stub
+    api_sources.require_auth = stub
+    try:
+        handler.do_GET()
+    except Exception:  # noqa: BLE001
+        return -1
+    finally:
+        api.require_auth, api_sources.require_auth = originals
+
+    if not sent:
+        return -1
+    rows = (sent[-1] or {}).get("sources") or []
+    # No rows means the probe learned nothing. Returning 0 there would be the
+    # same fake green this rewrite exists to remove.
+    if not rows:
+        return -1
+    # Not a vocabulary of "healthy" words — the registry uses its own strings
+    # and a new one would slip past a fixed list. The rule is simply that a row
+    # whose freshness cannot back it must SAY so in the status a customer reads.
+    stale_states = {"STALE", "NEVER_RUN", "UNKNOWN"}
+    lying = 0
+    for row in rows:
+        freshness = str(row.get("freshness") or "").upper()
+        presented = str(row.get("status") or "").upper()
+        if freshness in stale_states and presented not in stale_states:
+            lying += 1
+    return lying
+
+
 def measure() -> dict:
     now = _now()
     payload = json.loads(SOURCES.read_text(encoding="utf-8"))
@@ -141,16 +209,12 @@ def measure() -> dict:
     # Measuring the registry alone would therefore show no improvement even after
     # the surface stopped lying, which is exactly the kind of number that flatters
     # or slanders a change without describing it.
-    from app.source_health_timeline import FRESHNESS_FRESH, check_freshness
-
-    surface_healthy_without_recent_check = 0
-    for row in alerting:
-        sid = str(row.get("id") or row.get("source_id") or "")
-        stamp = trail_stamps.get(sid)
-        verdict = check_freshness(stamp.isoformat() if stamp else None)
-        age = trail_ages.get(sid)
-        if verdict["state"] == FRESHNESS_FRESH and (age is None or age > FRESH_DAYS):
-            surface_healthy_without_recent_check += 1
+    # DRIVE THE REAL ROUTE. The previous version compared check_freshness(stamp)
+    # against an age derived from that same stamp with the same parser, so the
+    # condition was unsatisfiable by construction and printed 0 no matter what
+    # any endpoint did. Reverting the freshness override in app/api_sources.py —
+    # the exact regression this axis exists to catch — would not have moved it.
+    surface_healthy_without_recent_check = _surface_lies_about_staleness()
 
     return {
         "measured_at": now.isoformat(),

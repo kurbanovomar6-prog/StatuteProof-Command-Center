@@ -160,12 +160,19 @@ def score_health(data: dict) -> tuple[float, list]:
     freshness_in_api, age_in_api, override_in_api = _health_surface_code_state()
     written_by_a_run = _status_written_by_a_real_run()
     checks = [
-        # The FIRST DoD item, and the one an earlier version of this scorer
-        # quietly omitted — which is how the axis briefly scored 100 while
-        # measuring only the display layer.
-        ("status/last_checked_at are written by a real run, not hand-set",
-         written_by_a_run, "a run writes them" if written_by_a_run
-         else "no run-path writes these fields"),
+        # This asked whether a run WRITES last_checked_at back into the
+        # registry, and answered it with a token grep whose accepted tokens
+        # included the bare word "write" — a comment could turn it green. It
+        # also demanded the wrong design: the run trail is append-only and
+        # hash-chained, so a registry copy would be an unchained, weaker
+        # duplicate, and sources.json is git-tracked config that a scheduler
+        # must not rewrite every cycle. What matters is not who writes the
+        # field but whether a STALE run can still be presented as live
+        # monitoring, so that is what is now exercised, on real objects.
+        ("a stale run can never be described as active monitoring",
+         _stale_is_never_called_active(),
+         "checked behaviourally" if _stale_is_never_called_active()
+         else "a stale run still reads as active"),
         ("the customer surface shows nothing healthy without a recent check",
          surface_bad == 0, f"{surface_bad} such rows"),
         ("the status API reports freshness", freshness_in_api,
@@ -176,6 +183,32 @@ def score_health(data: dict) -> tuple[float, list]:
          override_in_api, "overridden" if override_in_api else "not overridden"),
     ]
     return _pct(sum(1 for _, ok, _ in checks if ok), len(checks)), checks
+
+
+def _stale_is_never_called_active() -> bool:
+    """Drive the real customer-facing wording with a stale run and a fresh one.
+
+    Behavioural, because the grep this replaced could be satisfied by a comment.
+    A present-tense claim ("monitoring is active", "passed quality checks") is
+    allowed only when the run behind it is inside the stale window; past it the
+    wording must state the age instead.
+    """
+    try:
+        from app.source_health_timeline import (
+            STALE_AFTER_DAYS,
+            source_health_customer_message,
+        )
+    except Exception:  # noqa: BLE001
+        return False
+
+    present_tense = ("is active", "passed quality checks")
+    fresh = source_health_customer_message("MONITOR_OK", age_days=1)
+    stale = source_health_customer_message(
+        "MONITOR_OK", age_days=STALE_AFTER_DAYS + 30)
+    return (
+        any(c in fresh for c in present_tense)
+        and not any(c in stale for c in present_tense)
+    )
 
 
 def _status_written_by_a_real_run() -> bool:
