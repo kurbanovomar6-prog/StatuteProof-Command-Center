@@ -143,9 +143,31 @@ def source_change_frequency(
 _BASE_DIR = Path(__file__).parent.parent
 
 
-def source_health_customer_message(status: str) -> str:
-    """Return calibrated customer-facing wording for source-health states."""
+def source_health_customer_message(
+    status: str, *, age_days: float | None = None,
+    stale_after_days: int = STALE_AFTER_DAYS,
+) -> str:
+    """Customer-facing wording for a source-health state.
+
+    Takes the AGE of the run the status came from, because the status alone
+    cannot support a present-tense claim. "Monitoring is active and the latest
+    extraction passed quality checks" was returned for a MONITOR_OK run that
+    happened 30 days ago — true about that run, false about now, and shown on a
+    surface a customer relies on to decide whether their coverage is live.
+
+    A stale run is reported as what it is: the last check passed, and it was a
+    while ago. No new claim is made about the source's current state, because
+    nothing in the system knows it.
+    """
     normalized = str(status or "").upper()
+    healthy = {"MONITOR_OK", "SOURCE_HEALTH_OK"}
+    if (normalized in healthy and age_days is not None
+            and age_days > stale_after_days):
+        days = int(age_days)
+        return (
+            f"The last successful check was {days} days ago. Monitoring has not "
+            "confirmed this source since then."
+        )
     return {
         "MONITOR_OK": "Monitoring is active and the latest extraction passed quality checks.",
         "SOURCE_HEALTH_OK": "Monitoring is active and the latest extraction passed quality checks.",
@@ -206,13 +228,19 @@ def build_source_timeline(
 
     latest_run = runs[-1] if runs else None
     status = _timeline_status(source, latest_run, events)
+    # The message is only allowed a present-tense claim when the run behind the
+    # status is recent, so the age travels with it.
+    freshness = check_freshness((latest_run or {}).get("checked_at"))
     return {
         "ok": True,
         "source_id": sid,
+        "freshness": freshness.get("freshness"),
+        "last_run_age_days": freshness.get("age_days"),
         "source_name": (source or {}).get("name") or (latest_run or {}).get("source_name") or sid,
         "source_url": (source or {}).get("url") or (latest_run or {}).get("official_url") or "",
         "source_health_status": status,
-        "message": source_health_customer_message(status),
+        "message": source_health_customer_message(
+            status, age_days=freshness.get("age_days")),
         "events": events,
         "total_events": len(events),
         "has_real_history": bool(runs or assessments),

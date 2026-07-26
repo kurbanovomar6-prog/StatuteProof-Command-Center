@@ -139,13 +139,22 @@ class _AuthHandlerMixin:
                     send_result = _send_verification_email(user["email"], verification_url) or {}
                 except Exception as exc:  # noqa: BLE001 — a send failure is not a 500
                     logger.warning("verification email failed: %s", type(exc).__name__)
-                    send_result = {"ok": False}
+                    send_result = {"status": "error"}
 
             sender = _threading.Thread(target=_send_and_capture, daemon=True)
             sender.start()
             sender.join(timeout=_VERIFICATION_SEND_WAIT_S)
             if not sender.is_alive():
-                email_outcome = bool(send_result.get("ok"))
+                # app.email_delivery returns {"status": "sent"|"error"|"dry_run"}.
+                # There is no "ok" key and there never was, so reading one made
+                # email_outcome False on EVERY successful registration — the
+                # customer was told the email had failed while it was being
+                # delivered. The pinning test hid it by monkeypatching a fake
+                # that returned {"ok": True}, a shape production never produces.
+                #
+                # dry_run is deliberately NOT success: it means the local outbox
+                # took the message and no customer received anything.
+                email_outcome = str(send_result.get("status") or "") == "sent"
                 if not email_outcome:
                     logger.warning(
                         "verification email not delivered for a new registration "

@@ -51,7 +51,7 @@ def _register(monkeypatch, sender) -> dict:
 
 
 def test_a_successful_send_is_reported_as_sent(monkeypatch):
-    data = _register(monkeypatch, lambda *a, **k: {"ok": True, "status": "sent"})
+    data = _register(monkeypatch, lambda *a, **k: {"status": "sent", "provider": "postmark"})
 
     assert data["verification_email_sent"] is True
     assert "check your inbox" in data["message"].lower()
@@ -84,7 +84,7 @@ def test_a_slow_send_is_reported_as_unknown_rather_than_invented(monkeypatch):
 
     def _slow(*_args, **_kwargs):
         time.sleep(0.5)
-        return {"ok": True}
+        return {"status": "sent"}
 
     data = _register(monkeypatch, _slow)
 
@@ -98,7 +98,7 @@ def test_registration_does_not_block_for_the_full_provider_timeout(monkeypatch):
 
     def _slow(*_args, **_kwargs):
         time.sleep(3)
-        return {"ok": True}
+        return {"status": "sent"}
 
     started = time.monotonic()
     _register(monkeypatch, _slow)
@@ -113,9 +113,41 @@ def test_the_verification_link_points_at_the_page_not_the_api(monkeypatch):
 
     def _capture(recipient, url, *a, **k):
         seen["url"] = url
-        return {"ok": True}
+        return {"status": "sent"}
 
     _register(monkeypatch, _capture)
 
     assert seen["url"].startswith("https://statuteproof.com/verify-email?token=")
     assert "/api/auth/verify-email" not in seen["url"]
+
+
+def test_the_stubs_here_match_what_production_actually_returns():
+    """The guard against this whole file lying again.
+
+    app.email_delivery returns {"status": "sent" | "queued_local" | "dry_run" |
+    "error"}. There is NO "ok" key and there never was. An earlier version of
+    these tests stubbed a sender returning {"ok": True} — a shape production
+    never produces — so every test passed while the handler, reading
+    send_result.get("ok"), reported FAILURE on every successful registration.
+    The customer was told their verification email had not been sent while it
+    was being delivered.
+
+    A stub can only ever agree with whoever wrote it, so this asserts the
+    contract against the real module instead.
+    """
+    import inspect
+    import re
+
+    import app.email_delivery as email_delivery
+
+    src = inspect.getsource(email_delivery.deliver_brief_email)
+    produced = set(re.findall(r'"status":\s*"(\w+)"', src))
+
+    assert produced, "could not read the delivery statuses - update this test"
+    assert "sent" in produced
+    # The handler treats ONLY "sent" as delivered; queued_local and dry_run mean
+    # nothing reached a customer. Any NEW status must be considered explicitly
+    # rather than defaulting into one bucket or the other.
+    assert produced <= {"sent", "queued_local", "dry_run", "error"}, (
+        f"app.email_delivery grew a status this test does not model: {produced}"
+    )
