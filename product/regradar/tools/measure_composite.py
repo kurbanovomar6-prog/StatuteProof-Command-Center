@@ -358,27 +358,45 @@ def _tracked_test_failures() -> int | None:
     fail; counting those as this project's health would be attributing someone
     else's unfinished work to the axis.
     """
-    try:
-        proc = subprocess.run(
-            [sys.executable, "-m", "pytest", "tests/", "-q", "--tb=no",
-             "-p", "no:cacheprovider", "--continue-on-collection-errors"],
-            capture_output=True, text=True, timeout=3600, cwd=str(ROOT),
-        )
-    except Exception:  # noqa: BLE001
-        return None
+    # junit XML rather than scraped stdout. With --continue-on-collection-errors
+    # pytest emits no "N failed, M passed" line to either stream, so a guard
+    # looking for one rejected every valid run — the mirror of the bug it was
+    # added to fix, and just as wrong. The XML always carries the totals.
+    import tempfile
+    import xml.etree.ElementTree as ET
 
-    # A gate that only counts FAILED lines passes when pytest never ran: a usage
-    # error exits 4 and prints no summary, so zero lines parsed read as zero
-    # failures. Demonstrated, not theorised. Exit codes: 0 all passed, 1 tests
-    # failed, 2 interrupted, 3 internal error, 4 usage error, 5 nothing
-    # collected. Only 0 and 1 mean pytest actually ran the suite, and 5 means it
-    # found nothing to run — which must never read as success.
-    if proc.returncode not in (0, 1):
-        _TRACKED_FAILING.append(f"pytest did not run (exit {proc.returncode})")
-        return None
-    if not re.search(r"\d+ (passed|failed)", proc.stdout or ""):
-        _TRACKED_FAILING.append("pytest produced no result summary")
-        return None
+    with tempfile.TemporaryDirectory() as tmp:
+        report = Path(tmp) / "junit.xml"
+        try:
+            proc = subprocess.run(
+                [sys.executable, "-m", "pytest", "tests/", "-q", "--tb=no",
+                 "-p", "no:cacheprovider", "--continue-on-collection-errors",
+                 f"--junitxml={report}"],
+                capture_output=True, text=True, timeout=3600, cwd=str(ROOT),
+            )
+        except Exception:  # noqa: BLE001
+            return None
+
+        # 0 = all passed, 1 = tests failed. Anything else (2 interrupted,
+        # 3 internal, 4 usage, 5 nothing collected) means the suite did not
+        # actually run and must never read as "no failures".
+        if proc.returncode not in (0, 1):
+            _TRACKED_FAILING.append(f"pytest did not run (exit {proc.returncode})")
+            return None
+        if not report.exists():
+            _TRACKED_FAILING.append("pytest produced no junit report")
+            return None
+        try:
+            root = ET.parse(report).getroot()
+        except Exception:  # noqa: BLE001
+            _TRACKED_FAILING.append("junit report unreadable")
+            return None
+        suite = root.find("testsuite") if root.tag == "testsuites" else root
+        collected = int((suite.get("tests") if suite is not None else 0) or 0)
+        if collected <= 0:
+            _TRACKED_FAILING.append("pytest collected no tests")
+            return None
+
     failures = [
         ln.split("::")[0].replace("FAILED ", "").replace("ERROR ", "").strip()
         for ln in proc.stdout.splitlines()
