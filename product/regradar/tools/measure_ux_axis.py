@@ -57,18 +57,40 @@ def _screens() -> tuple[list[str], list[str]]:
 
 
 def _axe_covered() -> set[str]:
-    """Component names rendered inside a test that asserts no axe violations."""
+    """Screens under an axe assertion, from BOTH suites.
+
+    Two of them, and counting only the jsdom one undercounts real coverage: the
+    Playwright suite drives every authenticated screen by ROUTE in a real
+    browser, so it never imports the component and an import-scan sees nothing.
+    """
     covered: set[str] = set()
+
     test_dir = WEB / "test"
-    if not test_dir.exists():
-        return covered
-    for path in test_dir.glob("*.jsx"):
-        text = _read(path)
-        if "axe(" not in text:
-            continue
-        # The imports of a file that calls axe() are the screens it covers.
-        for match in re.finditer(r"import\s+(\w+)\s+from\s+'[^']*/([\w.]+)'", text):
-            covered.add(match.group(1))
+    if test_dir.exists():
+        for path in test_dir.glob("*.jsx"):
+            text = _read(path)
+            if "axe(" not in text:
+                continue
+            for match in re.finditer(r"import\s+(\w+)\s+from\s+'[^']*/([\w.]+)'", text):
+                covered.add(match.group(1))
+
+    # Route-driven browser coverage: ['dashboard', '/app/dashboard'] -> the
+    # screen file the route map sends that view to.
+    e2e = ROOT / "web" / "e2e"
+    if e2e.exists():
+        routes: set[str] = set()
+        for path in e2e.glob("*.spec.js"):
+            text = _read(path)
+            if "AxeBuilder" not in text:
+                continue
+            routes |= set(re.findall(r"\['([\w-]+)',\s*'/app/[\w-]+'\]", text))
+        for view in routes:
+            # 'review-queue' -> ReviewQueuePage, 'dashboard' -> DashboardHome
+            pascal = "".join(part.capitalize() for part in view.split("-"))
+            for candidate in (f"{pascal}Page", pascal, f"{pascal}Home"):
+                if (WEB / "components" / "app" / f"{candidate}.jsx").exists():
+                    covered.add(candidate)
+                    break
     return covered
 
 
@@ -115,6 +137,13 @@ def _dead_tokens() -> dict:
     }
 
 
+def _browser_axe_present() -> bool:
+    e2e = ROOT / "web" / "e2e"
+    if not e2e.exists():
+        return False
+    return any("AxeBuilder" in _read(p) for p in e2e.glob("*.spec.js"))
+
+
 def measure() -> dict:
     public, app = _screens()
     covered = _axe_covered()
@@ -138,9 +167,9 @@ def measure() -> dict:
             "coverage_pct": round(100.0 * total_covered / total, 1) if total else 0.0,
             # jsdom cannot compute colour contrast, so a green axe run here is
             # silent about it. Reported, never counted as covered.
-            "contrast_actually_checked": "jsdom" not in a11y_setup.lower()
-            and bool(a11y_setup)
-            and "browser" in a11y_setup.lower(),
+            # Contrast needs layout and canvas, so only a real browser can
+            # evaluate it. True when an axe run happens under Playwright.
+            "contrast_actually_checked": _browser_axe_present(),
         },
         "visual_regression": visual,
         "design_tokens": tokens,
