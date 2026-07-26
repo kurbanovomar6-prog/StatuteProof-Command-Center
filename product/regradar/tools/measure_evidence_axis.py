@@ -34,30 +34,46 @@ SAMPLE_CAP = 200  # deterministic sample; the axis DoD asks for >=100
 
 
 def _trail_totals() -> dict:
-    """Parse the `Totals:` line out of run.py verify-trail."""
+    """Read verify-trail's MACHINE-READABLE output.
+
+    This used to regex prose: a "Totals: N records — ..." line, plus a substring
+    match for "intact" and a "(\\d+) chained" capture. Every one of those drifts
+    the moment the wording changes, and the scorer downstream had no way to tell
+    a reworded sentence from a broken chain. verify-trail emits the same facts as
+    JSON, so the wording is free to change without moving the number.
+    """
     try:
         proc = subprocess.run(
-            [sys.executable, "run.py", "verify-trail"],
+            [sys.executable, "tools/verify_evidence_trail.py", "--json"],
             cwd=ROOT, capture_output=True, text=True, timeout=900,
         )
     except subprocess.TimeoutExpired:
         return {"error": "verify-trail timed out after 900s"}
-    out = (proc.stdout or "") + (proc.stderr or "")
-    m = re.search(
-        r"Totals:\s*(\d+)\s*records\s*[—-]\s*(\d+)\s*verified,\s*(\d+)\s*divergent,\s*(\d+)\s*unverifiable",
-        out,
-    )
-    if not m:
-        return {"error": "could not parse the Totals line", "tail": out[-400:]}
-    total, verified, divergent, unverifiable = (int(g) for g in m.groups())
-    chain = re.search(r"Hash chain:\s*(.+)", out)
+    try:
+        data = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return {"error": "verify-trail did not emit JSON",
+                "tail": (proc.stdout or proc.stderr or "")[-400:]}
+
+    totals = data.get("totals") or {}
+    chain = data.get("chain") or {}
+    coverage = data.get("coverage") or {}
+    legacy = data.get("legacy_block") or {}
+    records = int(totals.get("records") or 0)
+    verified = int(totals.get("verified") or 0)
     return {
-        "records": total,
+        "records": records,
         "verified": verified,
-        "divergent": divergent,
-        "unverifiable": unverifiable,
-        "verified_pct": round(100.0 * verified / total, 1) if total else 0.0,
-        "chain": chain.group(1).strip() if chain else "",
+        "divergent": int(totals.get("divergent") or 0),
+        "unverifiable": int(totals.get("unverifiable") or 0),
+        "verified_pct": round(100.0 * verified / records, 1) if records else 0.0,
+        "chain_status": chain.get("status"),
+        # Unscored until now, which is precisely what made relink-gaming
+        # invisible: rewriting the chain over a pruned trail keeps every in-file
+        # invariant and only the head anchor notices.
+        "anchor_status": chain.get("anchor_status"),
+        "legacy_status": legacy.get("status"),
+        "coverage": coverage,
     }
 
 

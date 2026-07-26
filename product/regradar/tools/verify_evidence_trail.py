@@ -392,8 +392,49 @@ class TrailReport:
                 STATUS_UNVERIFIABLE: len(self.unverifiable),
             },
             "chain": self.chain.as_dict(),
+            # The legacy block and the coverage arithmetic, so a consumer never
+            # has to parse them back out of prose. The scorer used to regex
+            # "(\d+) chained" out of a sentence and substring-match "intact",
+            # both of which drift the moment the wording changes.
+            "legacy_block": self._legacy_block(),
+            "coverage": self._coverage(),
             "per_source": self.per_source(),
             "records": [r.as_dict() for r in self.records],
+        }
+
+    def _legacy_block(self) -> dict:
+        """Manifest verdict over the pre-chain records this run actually read."""
+        try:
+            from app import legacy_trail_manifest
+
+            return legacy_trail_manifest.verify(self.raw_records)
+        except Exception as exc:  # noqa: BLE001 — reporting must not raise
+            return {"status": "unreadable", "detail": f"{type(exc).__name__}: {exc}"}
+
+    def _coverage(self) -> dict:
+        """Is EVERY trail record tamper-evident, by one route or the other?
+
+        A record is covered either by the hash chain or by the sealed legacy
+        block. Reporting the arithmetic (chained + sealed == total) is what makes
+        an uncovered remainder visible instead of implied.
+        """
+        legacy = self._legacy_block()
+        total = len(self.raw_records)
+        chained = int(self.chain.checked or 0)
+        # legacy_trail_manifest.verify() names it record_count; guessing the
+        # key is how a scorer silently reads 0 and calls it uncovered.
+        sealed = int(legacy.get("record_count") or legacy.get("count") or 0)
+        return {
+            "total": total,
+            "chained": chained,
+            "sealed": sealed,
+            "uncovered": max(0, total - chained - sealed),
+            "fully_covered": bool(
+                total > 0
+                and self.chain.status == CHAIN_OK
+                and legacy.get("status") == "intact"
+                and chained + sealed == total
+            ),
         }
 
 

@@ -79,27 +79,33 @@ def score_evidence(data: dict) -> tuple[float, list]:
     vt = data.get("verify_trail") or {}
     real = int(pv.get("real_evidence_records") or 0)
     pct_real = float(pv.get("verified_pct_of_real") or 0)
-    # verify_trail reports the chain as prose ("intact — 24 chained record(s)
-    # verified."), so the covered count is parsed out of it rather than assumed.
-    # That number is the whole point of the DoD item: a chain that is "intact"
-    # over 24 of 1430 records is intact over 1.7% of the evidence trail.
-    chain_raw = vt.get("chain")
-    if isinstance(chain_raw, dict):
-        chain = str(chain_raw.get("status") or "")
-        covered = int(chain_raw.get("records") or 0)
-    else:
-        chain_text = str(chain_raw or "")
-        chain = "intact" if "intact" in chain_text.lower() else (chain_text or "unknown")
-        match = re.search(r"(\d+)\s+chained", chain_text)
-        covered = int(match.group(1)) if match else 0
-    total = int(vt.get("records") or 0)
+    coverage = vt.get("coverage") or {}
 
     checks = [
         (">=95% verified over real records", pct_real >= 95, f"{pct_real}% of {real}"),
         (">=100 real records sampled", real >= 100, f"{real} real records"),
-        ("hash chain intact", chain == "intact", chain or "unknown"),
-        ("chain covers the WHOLE trail", total > 0 and covered >= total,
-         f"{covered}/{total} records chained"),
+        # The anchor was previously unscored, and that omission is what let the
+        # one attack the in-file chain cannot see pass unnoticed: an actor who
+        # deletes records and RELINKS the survivors produces a chain satisfying
+        # every internal invariant. Only the head anchor disagrees.
+        ("hash chain intact AND the head anchor matches",
+         vt.get("chain_status") == "ok" and vt.get("anchor_status") == "match",
+         f"chain={vt.get('chain_status')} anchor={vt.get('anchor_status')}"),
+        # This replaces "chain covers the WHOLE trail", which asked for
+        # chained >= total and was therefore satisfiable by running relink_chain
+        # over everything — retro-stamping the very records it claimed to
+        # protect. The question that actually matters is whether every record is
+        # tamper-evident by SOME route, and the sealed legacy block is the other
+        # route. Strictly stronger: it still requires the chain, adds the anchor,
+        # and requires the manifest digest to RECOMPUTE over the ordered
+        # identities rather than merely exist.
+        ("every trail record is tamper-evident",
+         coverage.get("fully_covered") is True
+         and vt.get("legacy_status") == "intact",
+         f"{coverage.get('chained', '?')} chained + {coverage.get('sealed', '?')} "
+         f"sealed = {int(coverage.get('chained') or 0) + int(coverage.get('sealed') or 0)}"
+         f"/{coverage.get('total', '?')}"
+         + (f", {coverage.get('uncovered')} uncovered" if coverage.get("uncovered") else "")),
     ]
     return _pct(sum(1 for _, ok, _ in checks if ok), len(checks)), checks
 
