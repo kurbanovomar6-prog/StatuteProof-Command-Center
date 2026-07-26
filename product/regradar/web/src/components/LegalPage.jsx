@@ -125,9 +125,10 @@ const PRIVACY_SECTIONS = [
   {
     heading: '5. Data retention',
     paragraphs: [
-      'Evidence records and monitoring artefacts are retained for the period defined by your plan (30 days for Founding Pilot, 180 days for UAE Monitor). After the retention window expires, artefacts are permanently deleted from active storage.',
+      'Evidence records and monitoring artefacts are retained for at least the period defined by your plan (30 days for Founding Pilot, 180 days for UAE Monitor). This is the minimum period during which your records remain available to you.',
+      'StatuteProof does not currently run an automatic purge, so artefacts may remain in active storage after that period has passed. To have your evidence records and monitoring artefacts deleted, contact ' + CONTACT_EMAIL + '; deletion is carried out manually.',
       'Account data is retained for the duration of your subscription and for up to 12 months after account closure to support any billing dispute or legal obligation.',
-      'Server access logs are retained for up to 90 days.',
+      'Application logs are rotated daily, with the last 14 days retained. Web-server access logs are rotated by file size and the ten most recent files are kept, so the period they cover varies with traffic volume rather than being fixed in days.',
     ],
   },
   {

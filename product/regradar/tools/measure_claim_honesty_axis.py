@@ -170,10 +170,24 @@ def _retention_promise_is_implemented() -> dict:
     for name in ("LegalPage.jsx", "PrivacyPage.jsx", "TermsPage.jsx"):
         for path in WEB.rglob(name):
             legal += _read(path)
-    promises_deletion = bool(
-        re.search(r"retention window", legal, re.I)
-        and re.search(r"permanently deleted|deleted from active storage", legal, re.I)
+    # Catch the CLAIM, not one phrasing of it. The original wording was
+    # "after the retention window expires, artefacts are permanently deleted";
+    # matching only that would let "artefacts are automatically removed after 30
+    # days" through, and rewording would look like a fix. What makes this a
+    # promise is that deletion happens BY ITSELF — so that is what is matched,
+    # and an explicit statement that no automatic purge runs clears it.
+    automatic = re.search(
+        r"(automatic\w*|expir\w+|after (the )?retention|once .{0,40}retention)"
+        r".{0,160}(delet\w+|purg\w+|remov\w+|eras\w+)"
+        r"|(delet\w+|purg\w+|eras\w+).{0,160}(automatic\w*|when .{0,40}expir\w+)",
+        legal, re.I | re.S,
     )
+    disclaims = re.search(
+        r"(does not|do not|no)\s+(currently\s+)?(run|perform|carry out)?\s*"
+        r"(an?\s+)?automatic\s+(purge|deletion)",
+        legal, re.I,
+    )
+    promises_deletion = bool(automatic and not disclaims)
 
     # A reader of retention_days that is not its own definition.
     readers = []
