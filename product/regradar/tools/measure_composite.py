@@ -277,20 +277,26 @@ def score_security(sec: dict, team: dict) -> tuple[float, list]:
 
 
 def score_code_tests(data: dict) -> tuple[float, list]:
-    leaked = data.get("modules_that_touched_live_artifacts")
-    if leaked is None:
-        leaked = data.get("leaking_modules")
+    # The key name is read from the tool's actual output, not guessed: an
+    # earlier version looked for a name that does not exist, got None, and
+    # scored a PASSING check as a failure.
+    leaked = data.get("modules_mutating_live_artifacts")
     fixture = _autouse_fixture_present()
     tracked_failures = _tracked_test_failures()
+    count = len(leaked) if isinstance(leaked, list) else leaked
     checks = [
         ("no test module touches the live working artifacts",
-         (isinstance(leaked, (list, int)) and (len(leaked) if isinstance(leaked, list) else leaked) == 0),
-         f"{leaked}"),
-        ("an autouse temp-BASE_DIR fixture exists", fixture, str(fixture)),
+         isinstance(count, int) and count == 0,
+         f"{count} of {data.get('modules_checked', '?')} modules mutate them"
+         if count is not None else "tool reported nothing"),
+        ("an autouse temp-BASE_DIR fixture exists", fixture,
+         "present" if fixture else "absent"),
         ("no TRACKED test fails",
          tracked_failures == 0,
-         f"{tracked_failures} tracked failures"
-         if tracked_failures is not None else "not run (--skip)"),
+         # Named, not counted: a bare number is undiagnosable, and this tree is
+         # shared with another session whose untracked tests fail.
+         ", ".join(_TRACKED_FAILING) if _TRACKED_FAILING
+         else ("none" if tracked_failures == 0 else "not run")),
     ]
     return _pct(sum(1 for _, ok, _ in checks if ok), len(checks)), checks
 
@@ -301,6 +307,9 @@ def _autouse_fixture_present() -> bool:
         return False
     text = conftest.read_text(encoding="utf-8", errors="replace")
     return "autouse=True" in text and "tmp_path" in text
+
+
+_TRACKED_FAILING: list[str] = []
 
 
 def _tracked_test_failures() -> int | None:
@@ -334,6 +343,8 @@ def _tracked_test_failures() -> int | None:
             seen[rel] = check.returncode == 0
         if seen[rel]:
             tracked += 1
+            if rel not in _TRACKED_FAILING:
+                _TRACKED_FAILING.append(rel)
     return tracked
 
 
@@ -396,6 +407,12 @@ def score_ux(data: dict) -> tuple[float, list]:
 
 # ── axis table ───────────────────────────────────────────────────────────────
 
+# Per-axis wall-clock budget. code_tests runs pytest once per module to see which
+# ones touch the live artifacts, so it is minutes, not seconds — giving it the
+# default budget made it time out and report "tool failed to run", which the
+# composite then correctly refused to average over.
+TIMEOUTS = {"code_tests": 5400}
+
 AXES = [
     ("evidence",      "EVIDENCE",       ["measure_evidence_axis.py"]),
     ("reliability",   "RELIABILITY",    ["measure_reliability_axis.py"]),
@@ -421,7 +438,8 @@ def measure(skip: set[str]) -> dict:
                 "reason": f"NO MEASUREMENT TOOL: {', '.join(missing)}",
             }
             continue
-        data = [_run_tool(t) for t in tools]
+        budget = TIMEOUTS.get(key, 900)
+        data = [_run_tool(t, timeout=budget) for t in tools]
         if any(d is None for d in data):
             results[key] = {"title": title, "score": None, "reason": "tool failed to run"}
             continue
